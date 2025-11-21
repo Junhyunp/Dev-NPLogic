@@ -1,0 +1,18 @@
+{
+  "Supabase": {
+    "Url": "https://your-project-id.supabase.co",
+    "Key": "your-anon-key-here"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning"
+    }
+  },
+  "Python": {
+    "ExecutablePath": "python",
+    "OcrScriptPath": "python/ocr_processor.py"
+  }
+}
+
+

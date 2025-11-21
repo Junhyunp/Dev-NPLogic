@@ -1,0 +1,26 @@
+<UserControl x:Class="NPLogic.UI.Controls.NPBadge"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="24" d:DesignWidth="80">
+    
+    <Border x:Name="BadgeBorder"
+            Background="{StaticResource InfoBgBrush}"
+            CornerRadius="12"
+            Padding="12,4"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center">
+        <TextBlock x:Name="BadgeText"
+                   Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Foreground="{StaticResource InfoTextBrush}"
+                   FontFamily="{StaticResource FontPrimary}"
+                   FontSize="{StaticResource FontSizeSmall}"
+                   FontWeight="{StaticResource FontWeightMedium}"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"/>
+    </Border>
+    
+</UserControl>
+

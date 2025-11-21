@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\NPLogic.Core\NPLogic.Core.csproj" />
+    <ProjectReference Include="..\NPLogic.Data\NPLogic.Data.csproj" />
+    <ProjectReference Include="..\NPLogic.UI\NPLogic.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <NoWarn>$(NoWarn);NU1902</NoWarn>
+  </PropertyGroup>
+
+  <!-- Assets 폴더의 이미지를 리소스로 포함 -->
+  <ItemGroup>
+    <Resource Include="Assets\**\*.png" />
+    <Resource Include="Assets\**\*.jpg" />
+    <Resource Include="Assets\**\*.jpeg" />
+    <Resource Include="Assets\**\*.ico" />
+    <Resource Include="Assets\**\*.svg" />
+  </ItemGroup>
+
+</Project>

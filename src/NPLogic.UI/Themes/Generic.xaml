@@ -1,0 +1,8 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:NPLogic.UI">
+    
+    <!-- 공통 UI 컴포넌트 스타일은 여기에 추가됩니다 -->
+    
+</ResourceDictionary>

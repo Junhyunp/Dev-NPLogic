@@ -1,0 +1,23 @@
+<UserControl x:Class="NPLogic.UI.Controls.NPButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d">
+    
+    <Button x:Name="InnerButton"
+            Content="{Binding ButtonContent, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Command="{Binding Command, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            CommandParameter="{Binding CommandParameter, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Style="{Binding ButtonStyle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Width="{Binding Width, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Height="{Binding Height, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Margin="{Binding Margin, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Padding="{Binding Padding, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            HorizontalAlignment="{Binding HorizontalAlignment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            VerticalAlignment="{Binding VerticalAlignment, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Click="InnerButton_Click"/>
+    
+</UserControl>
+

@@ -1,0 +1,83 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Deep Navy (딥네이비 - 베이스) -->
+    <Color x:Key="Primary">#1A2332</Color>
+    <Color x:Key="PrimaryLight">#2A3442</Color>
+    <Color x:Key="PrimaryDark">#0A1322</Color>
+    <Color x:Key="DeepNavy700">#1A2332</Color>
+    
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLight}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
+    <SolidColorBrush x:Key="DeepNavy700Brush" Color="{StaticResource DeepNavy700}"/>
+
+    <!-- Blue Gray (블루그레이 - 표) -->
+    <Color x:Key="BlueGray50">#ECEFF4</Color>
+    <Color x:Key="BlueGray100">#D8DEE9</Color>
+    <Color x:Key="BlueGray200">#C4CCD8</Color>
+    <Color x:Key="TableHeader">#B0C4DE</Color>
+    <Color x:Key="TableHover">#C8D6E8</Color>
+    <Color x:Key="TableSelected">#98B2D1</Color>
+    <Color x:Key="TableBorder">#8FA8C5</Color>
+    
+    <SolidColorBrush x:Key="BlueGray50Brush" Color="{StaticResource BlueGray50}"/>
+    <SolidColorBrush x:Key="BlueGray100Brush" Color="{StaticResource BlueGray100}"/>
+    <SolidColorBrush x:Key="BlueGray200Brush" Color="{StaticResource BlueGray200}"/>
+    <SolidColorBrush x:Key="TableHeaderBrush" Color="{StaticResource TableHeader}"/>
+    <SolidColorBrush x:Key="TableHoverBrush" Color="{StaticResource TableHover}"/>
+    <SolidColorBrush x:Key="TableSelectedBrush" Color="{StaticResource TableSelected}"/>
+    <SolidColorBrush x:Key="TableBorderBrush" Color="{StaticResource TableBorder}"/>
+
+    <!-- Neutral Colors (중립 색상) -->
+    <Color x:Key="Background">#F5F7FA</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="Border">#E1E4E8</Color>
+    <Color x:Key="Divider">#D0D5DD</Color>
+    
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource Background}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Divider}"/>
+
+    <!-- Text Colors -->
+    <Color x:Key="TextPrimary">#1A1D23</Color>
+    <Color x:Key="TextSecondary">#6B7280</Color>
+    <Color x:Key="TextDisabled">#9CA3AF</Color>
+    
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
+    <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabled}"/>
+
+    <!-- Semantic Colors (상태 표시) -->
+    <Color x:Key="Success">#10B981</Color>
+    <Color x:Key="Warning">#F59E0B</Color>
+    <Color x:Key="Error">#EF4444</Color>
+    <Color x:Key="Info">#3B82F6</Color>
+    
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource Error}"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource Info}"/>
+
+    <!-- Badge Colors -->
+    <Color x:Key="SuccessBg">#D1FAE5</Color>
+    <Color x:Key="SuccessText">#065F46</Color>
+    <Color x:Key="WarningBg">#FEF3C7</Color>
+    <Color x:Key="WarningText">#92400E</Color>
+    <Color x:Key="ErrorBg">#FEE2E2</Color>
+    <Color x:Key="ErrorText">#991B1B</Color>
+    <Color x:Key="InfoBg">#DBEAFE</Color>
+    <Color x:Key="InfoText">#1E40AF</Color>
+    
+    <SolidColorBrush x:Key="SuccessBgBrush" Color="{StaticResource SuccessBg}"/>
+    <SolidColorBrush x:Key="SuccessTextBrush" Color="{StaticResource SuccessText}"/>
+    <SolidColorBrush x:Key="WarningBgBrush" Color="{StaticResource WarningBg}"/>
+    <SolidColorBrush x:Key="WarningTextBrush" Color="{StaticResource WarningText}"/>
+    <SolidColorBrush x:Key="ErrorBgBrush" Color="{StaticResource ErrorBg}"/>
+    <SolidColorBrush x:Key="ErrorTextBrush" Color="{StaticResource ErrorText}"/>
+    <SolidColorBrush x:Key="InfoBgBrush" Color="{StaticResource InfoBg}"/>
+    <SolidColorBrush x:Key="InfoTextBrush" Color="{StaticResource InfoText}"/>
+
+</ResourceDictionary>
+

@@ -1,0 +1,17 @@
+﻿공시지가
+https://www.vworld.kr/dtmk/dtmk_ntads_s002.do?datIde=&dsId=17&pageSize=10&pageUnit=10&dataSetSeq=17&svcCde=NA&pageIndex=1&datPageIndex=4&datPageSize=10&startDate=2024-09-22&endDate=2025-09-22&sidoCd=&dsNm=&formatSelect=
+>> 공시지가는 3개년도 레이어
+""
+""
+도시지역
+https://www.vworld.kr/dtmk/dtmk_ntads_s002.do?searchKeyword=&searchSvcCde=&searchOrganization=&searchBrmCode=&searchTagList=&searchFrm=&pageIndex=1&gidmCd=&gidsCd=&sortType=00&svcCde=MK&dsId=30300&listPageIndex=4
+>> 당해세 계산시 도시지역 반영
+""
+""
+건축물대장
+https://www.data.go.kr/tcs/dss/selectDataSetList.do?dType=FILE&keyword=%EA%B5%AD%ED%86%A0%EA%B5%90%ED%86%B5%EB%B6%80_%EA%B1%B4%EC%B6%95%EB%AC%BC%EB%8C%80%EC%9E%A5&operator=AND&detailKeyword=&publicDataPk=&recmSe=N&detailText=&relatedKeyword=&commaNotInData=&commaAndData=&commaOrData=&must_not=&tabId=&dataSetCoreTf=&coreDataNm=&sort=&relRadio=&orgFullName=&orgFilter=&org=&orgSearch=&currentPage=1&perPage=10&brm=&instt=&svcType=&kwrdArray=&extsn=&coreDataNmArray=&pblonsipScopeCode=PBDE07
+""
+"표제부, 총괄표제부, 전유부, 층별개요, 기본개요, 전유공용면적"
+""
+토지이용계획정보
+https://www.data.go.kr/data/15045900/fileData.do

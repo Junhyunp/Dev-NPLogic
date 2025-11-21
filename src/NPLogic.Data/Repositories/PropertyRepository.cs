@@ -1,0 +1,561 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using NPLogic.Core.Models;
+
+namespace NPLogic.Data.Repositories
+{
+    /// <summary>
+    /// 물건 Repository
+    /// </summary>
+    public class PropertyRepository
+    {
+        private readonly Services.SupabaseService _supabaseService;
+
+        public PropertyRepository(Services.SupabaseService supabaseService)
+        {
+            _supabaseService = supabaseService ?? throw new ArgumentNullException(nameof(supabaseService));
+        }
+
+        /// <summary>
+        /// 모든 물건 조회
+        /// </summary>
+        public async Task<List<Property>> GetAllAsync()
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 목록 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// ID로 물건 조회
+        /// </summary>
+        public async Task<Property?> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == id)
+                    .Single();
+
+                return response == null ? null : MapToProperty(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 프로젝트 ID로 물건 목록 조회
+        /// </summary>
+        public async Task<List<Property>> GetByProjectIdAsync(string projectId)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.ProjectId == projectId)
+                    .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"프로젝트별 물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 담당자로 물건 목록 조회
+        /// </summary>
+        public async Task<List<Property>> GetByAssignedUserAsync(Guid userId)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.AssignedTo == userId)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"담당자별 물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 상태별 물건 목록 조회
+        /// </summary>
+        public async Task<List<Property>> GetByStatusAsync(string status)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Status == status)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"상태별 물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 유형별 조회
+        /// </summary>
+        public async Task<List<Property>> GetByTypeAsync(string propertyType)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.PropertyType == propertyType)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"유형별 물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 검색 (주소, 물건번호)
+        /// </summary>
+        public async Task<List<Property>> SearchAsync(string searchText)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                
+                // Supabase의 텍스트 검색 사용
+                var response = await client
+                    .From<PropertyTable>()
+                    .Get();
+
+                // 클라이언트 측 필터링 (Supabase C# 클라이언트의 한계)
+                var filtered = response.Models.Where(x =>
+                    (!string.IsNullOrEmpty(x.PropertyNumber) && x.PropertyNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(x.AddressFull) && x.AddressFull.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(x.AddressRoad) && x.AddressRoad.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(x.AddressJibun) && x.AddressJibun.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+
+                return filtered.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 검색 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 복합 필터 조회
+        /// </summary>
+        public async Task<List<Property>> GetFilteredAsync(
+            string? projectId = null,
+            string? propertyType = null,
+            string? status = null,
+            Guid? assignedTo = null,
+            string? searchText = null)
+        {
+            try
+            {
+                // 모든 속성을 가져와서 클라이언트 측에서 필터링
+                var allProperties = await GetAllAsync();
+
+                // 필터 적용
+                if (!string.IsNullOrWhiteSpace(projectId))
+                    allProperties = allProperties.Where(p => p.ProjectId == projectId).ToList();
+
+                if (!string.IsNullOrWhiteSpace(propertyType))
+                    allProperties = allProperties.Where(p => p.PropertyType == propertyType).ToList();
+
+                if (!string.IsNullOrWhiteSpace(status))
+                    allProperties = allProperties.Where(p => p.Status == status).ToList();
+
+                if (assignedTo.HasValue)
+                    allProperties = allProperties.Where(p => p.AssignedTo == assignedTo.Value).ToList();
+
+                // 텍스트 검색
+                if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    allProperties = allProperties.Where(p =>
+                        (!string.IsNullOrEmpty(p.PropertyNumber) && p.PropertyNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(p.AddressFull) && p.AddressFull.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(p.AddressRoad) && p.AddressRoad.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(p.AddressJibun) && p.AddressJibun.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    ).ToList();
+                }
+
+                return allProperties;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 필터 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 페이지네이션된 물건 목록 조회
+        /// </summary>
+        public async Task<(List<Property> Items, int TotalCount)> GetPagedAsync(
+            int page = 1,
+            int pageSize = 50,
+            string? projectId = null,
+            string? propertyType = null,
+            string? status = null,
+            Guid? assignedTo = null,
+            string? searchText = null)
+        {
+            try
+            {
+                var allItems = await GetFilteredAsync(projectId, propertyType, status, assignedTo, searchText);
+                var totalCount = allItems.Count;
+
+                var pagedItems = allItems
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return (pagedItems, totalCount);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"페이지네이션 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 생성
+        /// </summary>
+        public async Task<Property> CreateAsync(Property property)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var propertyTable = MapToPropertyTable(property);
+                propertyTable.CreatedAt = DateTime.UtcNow;
+                propertyTable.UpdatedAt = DateTime.UtcNow;
+
+                var response = await client
+                    .From<PropertyTable>()
+                    .Insert(propertyTable);
+
+                var created = response.Models.FirstOrDefault();
+                if (created == null)
+                    throw new Exception("물건 생성 후 데이터 조회 실패");
+
+                return MapToProperty(created);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 생성 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 수정
+        /// </summary>
+        public async Task<Property> UpdateAsync(Property property)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var propertyTable = MapToPropertyTable(property);
+                propertyTable.UpdatedAt = DateTime.UtcNow;
+
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == property.Id)
+                    .Update(propertyTable);
+
+                var updated = response.Models.FirstOrDefault();
+                if (updated == null)
+                    throw new Exception("물건 수정 후 데이터 조회 실패");
+
+                return MapToProperty(updated);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 수정 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 삭제
+        /// </summary>
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == id)
+                    .Delete();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 삭제 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 담당자 할당
+        /// </summary>
+        public async Task<bool> AssignToUserAsync(Guid propertyId, Guid userId)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var update = new PropertyTable
+                {
+                    AssignedTo = userId,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == propertyId)
+                    .Update(update);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"담당자 할당 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 상태 변경
+        /// </summary>
+        public async Task<bool> UpdateStatusAsync(Guid propertyId, string status)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var update = new PropertyTable
+                {
+                    Status = status,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == propertyId)
+                    .Update(update);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"상태 변경 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 통계 - 전체/상태별 개수
+        /// </summary>
+        public async Task<PropertyStatistics> GetStatisticsAsync(string? projectId = null, Guid? assignedTo = null)
+        {
+            try
+            {
+                var properties = await GetFilteredAsync(projectId: projectId, assignedTo: assignedTo);
+
+                return new PropertyStatistics
+                {
+                    TotalCount = properties.Count,
+                    PendingCount = properties.Count(x => x.Status == "pending"),
+                    ProcessingCount = properties.Count(x => x.Status == "processing"),
+                    CompletedCount = properties.Count(x => x.Status == "completed")
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"통계 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// PropertyTable -> Property 매핑
+        /// </summary>
+        private Property MapToProperty(PropertyTable table)
+        {
+            return new Property
+            {
+                Id = table.Id,
+                ProjectId = table.ProjectId,
+                PropertyNumber = table.PropertyNumber,
+                PropertyType = table.PropertyType,
+                AddressFull = table.AddressFull,
+                AddressRoad = table.AddressRoad,
+                AddressJibun = table.AddressJibun,
+                AddressDetail = table.AddressDetail,
+                LandArea = table.LandArea,
+                BuildingArea = table.BuildingArea,
+                Floors = table.Floors,
+                CompletionDate = table.CompletionDate,
+                AppraisalValue = table.AppraisalValue,
+                MinimumBid = table.MinimumBid,
+                SalePrice = table.SalePrice,
+                Latitude = table.Latitude,
+                Longitude = table.Longitude,
+                Status = table.Status ?? "pending",
+                AssignedTo = table.AssignedTo,
+                CreatedBy = table.CreatedBy,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        /// <summary>
+        /// Property -> PropertyTable 매핑
+        /// </summary>
+        private PropertyTable MapToPropertyTable(Property property)
+        {
+            return new PropertyTable
+            {
+                Id = property.Id,
+                ProjectId = property.ProjectId,
+                PropertyNumber = property.PropertyNumber,
+                PropertyType = property.PropertyType,
+                AddressFull = property.AddressFull,
+                AddressRoad = property.AddressRoad,
+                AddressJibun = property.AddressJibun,
+                AddressDetail = property.AddressDetail,
+                LandArea = property.LandArea,
+                BuildingArea = property.BuildingArea,
+                Floors = property.Floors,
+                CompletionDate = property.CompletionDate,
+                AppraisalValue = property.AppraisalValue,
+                MinimumBid = property.MinimumBid,
+                SalePrice = property.SalePrice,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude,
+                Status = property.Status,
+                AssignedTo = property.AssignedTo,
+                CreatedBy = property.CreatedBy,
+                CreatedAt = property.CreatedAt,
+                UpdatedAt = property.UpdatedAt
+            };
+        }
+    }
+
+    /// <summary>
+    /// 물건 통계
+    /// </summary>
+    public class PropertyStatistics
+    {
+        public int TotalCount { get; set; }
+        public int PendingCount { get; set; }
+        public int ProcessingCount { get; set; }
+        public int CompletedCount { get; set; }
+    }
+
+    /// <summary>
+    /// Supabase properties 테이블 매핑
+    /// </summary>
+    [Postgrest.Attributes.Table("properties")]
+    internal class PropertyTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("project_id")]
+        public string? ProjectId { get; set; }
+
+        [Postgrest.Attributes.Column("property_number")]
+        public string? PropertyNumber { get; set; }
+
+        [Postgrest.Attributes.Column("property_type")]
+        public string? PropertyType { get; set; }
+
+        [Postgrest.Attributes.Column("address_full")]
+        public string? AddressFull { get; set; }
+
+        [Postgrest.Attributes.Column("address_road")]
+        public string? AddressRoad { get; set; }
+
+        [Postgrest.Attributes.Column("address_jibun")]
+        public string? AddressJibun { get; set; }
+
+        [Postgrest.Attributes.Column("address_detail")]
+        public string? AddressDetail { get; set; }
+
+        [Postgrest.Attributes.Column("land_area")]
+        public decimal? LandArea { get; set; }
+
+        [Postgrest.Attributes.Column("building_area")]
+        public decimal? BuildingArea { get; set; }
+
+        [Postgrest.Attributes.Column("floors")]
+        public string? Floors { get; set; }
+
+        [Postgrest.Attributes.Column("completion_date")]
+        public DateTime? CompletionDate { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_value")]
+        public decimal? AppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("minimum_bid")]
+        public decimal? MinimumBid { get; set; }
+
+        [Postgrest.Attributes.Column("sale_price")]
+        public decimal? SalePrice { get; set; }
+
+        [Postgrest.Attributes.Column("latitude")]
+        public decimal? Latitude { get; set; }
+
+        [Postgrest.Attributes.Column("longitude")]
+        public decimal? Longitude { get; set; }
+
+        [Postgrest.Attributes.Column("status")]
+        public string? Status { get; set; }
+
+        [Postgrest.Attributes.Column("assigned_to")]
+        public Guid? AssignedTo { get; set; }
+
+        [Postgrest.Attributes.Column("created_by")]
+        public Guid? CreatedBy { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+}
+
