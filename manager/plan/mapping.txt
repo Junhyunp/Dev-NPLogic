@@ -1,0 +1,21 @@
+# NPLogic 프로젝트 매핑 정보
+
+## 배포 URL
+- 개발 환경: 로컬 (Windows App)
+- 프로덕션: TBD
+
+## Supabase
+- Project URL: TBD
+- Anon Key: TBD
+
+## 노션
+- WBS Database ID: TBD
+- 프로젝트 페이지: TBD
+
+## Git Repository
+- Remote: https://github.com/[username]/nplogic (TBD)
+- Branch: main
+
+## 업데이트 이력
+- 2025-11-24: 초기 생성
+
