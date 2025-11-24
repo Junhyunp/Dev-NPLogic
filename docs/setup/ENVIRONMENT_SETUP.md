@@ -387,3 +387,4 @@ var key = Environment.GetEnvironmentVariable("NPLOGIC_SUPABASE_KEY");
 **마지막 업데이트**: 2025-11-20
 
 
+

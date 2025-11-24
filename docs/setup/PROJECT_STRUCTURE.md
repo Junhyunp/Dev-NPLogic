@@ -234,3 +234,4 @@ dotnet run --project src/NPLogic.App/NPLogic.App.csproj
 **마지막 업데이트**: 2025-11-20
 
 
+
