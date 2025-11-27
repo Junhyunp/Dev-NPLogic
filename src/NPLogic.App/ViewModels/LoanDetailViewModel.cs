@@ -1,0 +1,354 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NPLogic.Core.Models;
+using NPLogic.Data.Repositories;
+using NPLogic.Services;
+
+namespace NPLogic.ViewModels
+{
+    /// <summary>
+    /// Loan 상세 ViewModel
+    /// </summary>
+    public partial class LoanDetailViewModel : ObservableObject
+    {
+        private readonly LoanRepository _loanRepository;
+        private readonly BorrowerRepository _borrowerRepository;
+        private readonly AuthService _authService;
+
+        [ObservableProperty]
+        private ObservableCollection<Borrower> _borrowers = new();
+
+        [ObservableProperty]
+        private Borrower? _selectedBorrower;
+
+        [ObservableProperty]
+        private ObservableCollection<Loan> _loans = new();
+
+        [ObservableProperty]
+        private Loan? _selectedLoan;
+
+        [ObservableProperty]
+        private string _searchText = "";
+
+        [ObservableProperty]
+        private bool _isLoading;
+
+        [ObservableProperty]
+        private string? _errorMessage;
+
+        // 통계
+        [ObservableProperty]
+        private LoanStatistics? _statistics;
+
+        // Loan Cap 계산용 날짜
+        [ObservableProperty]
+        private DateTime _scenario1Date = DateTime.Today.AddMonths(6);
+
+        [ObservableProperty]
+        private DateTime _scenario2Date = DateTime.Today.AddMonths(12);
+
+        public LoanDetailViewModel(
+            LoanRepository loanRepository,
+            BorrowerRepository borrowerRepository,
+            AuthService authService)
+        {
+            _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
+            _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
+            _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        }
+
+        /// <summary>
+        /// 초기화
+        /// </summary>
+        public async Task InitializeAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                await LoadBorrowersAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"초기화 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 차주 목록 로드
+        /// </summary>
+        private async Task LoadBorrowersAsync()
+        {
+            try
+            {
+                var borrowers = await _borrowerRepository.GetAllAsync();
+
+                Borrowers.Clear();
+                foreach (var borrower in borrowers)
+                {
+                    Borrowers.Add(borrower);
+                }
+
+                if (Borrowers.Count > 0 && SelectedBorrower == null)
+                {
+                    SelectedBorrower = Borrowers[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 대출 목록 로드
+        /// </summary>
+        private async Task LoadLoansAsync()
+        {
+            if (SelectedBorrower == null)
+            {
+                Loans.Clear();
+                Statistics = null;
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+
+                var searchText = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
+
+                var loans = await _loanRepository.GetFilteredAsync(
+                    borrowerId: SelectedBorrower.Id,
+                    searchText: searchText
+                );
+
+                Loans.Clear();
+                foreach (var loan in loans)
+                {
+                    Loans.Add(loan);
+                }
+
+                // 통계 로드
+                Statistics = await _loanRepository.GetStatisticsByBorrowerIdAsync(SelectedBorrower.Id);
+
+                // 첫 번째 대출 선택
+                if (Loans.Count > 0 && SelectedLoan == null)
+                {
+                    SelectedLoan = Loans[0];
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"대출 목록 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 선택된 차주 변경 시
+        /// </summary>
+        partial void OnSelectedBorrowerChanged(Borrower? value)
+        {
+            SelectedLoan = null;
+            _ = LoadLoansAsync();
+        }
+
+        /// <summary>
+        /// 검색
+        /// </summary>
+        [RelayCommand]
+        private async Task SearchAsync()
+        {
+            await LoadLoansAsync();
+        }
+
+        /// <summary>
+        /// Loan Cap 재계산
+        /// </summary>
+        [RelayCommand]
+        private async Task RecalculateLoanCapAsync()
+        {
+            if (SelectedLoan == null) return;
+
+            try
+            {
+                IsLoading = true;
+
+                // 시나리오 1 계산
+                SelectedLoan.ExpectedDividendDate1 = Scenario1Date;
+                SelectedLoan.CalculateScenario1();
+
+                // 시나리오 2 계산
+                SelectedLoan.ExpectedDividendDate2 = Scenario2Date;
+                SelectedLoan.CalculateScenario2();
+
+                // DB 업데이트
+                await _loanRepository.UpdateAsync(SelectedLoan);
+
+                // UI 갱신
+                OnPropertyChanged(nameof(SelectedLoan));
+                await LoadLoansAsync();
+
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("Loan Cap이 재계산되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Loan Cap 재계산 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 전체 대출 Loan Cap 일괄 계산
+        /// </summary>
+        [RelayCommand]
+        private async Task RecalculateAllLoanCapsAsync()
+        {
+            if (SelectedBorrower == null) return;
+
+            try
+            {
+                IsLoading = true;
+
+                foreach (var loan in Loans)
+                {
+                    loan.ExpectedDividendDate1 = Scenario1Date;
+                    loan.CalculateScenario1();
+                    loan.ExpectedDividendDate2 = Scenario2Date;
+                    loan.CalculateScenario2();
+                    await _loanRepository.UpdateAsync(loan);
+                }
+
+                await LoadLoansAsync();
+
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess($"{Loans.Count}건의 Loan Cap이 재계산되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"일괄 계산 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 대출 추가
+        /// </summary>
+        [RelayCommand]
+        private async Task AddLoanAsync()
+        {
+            if (SelectedBorrower == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("먼저 차주를 선택해주세요.");
+                return;
+            }
+
+            try
+            {
+                var newLoan = new Loan
+                {
+                    Id = Guid.NewGuid(),
+                    BorrowerId = SelectedBorrower.Id,
+                    AccountSerial = $"L-{DateTime.Now:yyyyMMddHHmmss}",
+                    LoanType = "일반",
+                    ExpectedDividendDate1 = Scenario1Date,
+                    ExpectedDividendDate2 = Scenario2Date
+                };
+
+                await _loanRepository.CreateAsync(newLoan);
+                await LoadLoansAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"대출 추가 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 대출 삭제
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteLoanAsync(Loan loan)
+        {
+            if (loan == null) return;
+
+            try
+            {
+                await _loanRepository.DeleteAsync(loan.Id);
+                await LoadLoansAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"대출 삭제 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 대출 저장
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveLoanAsync()
+        {
+            if (SelectedLoan == null) return;
+
+            try
+            {
+                IsLoading = true;
+
+                // 채권액 합계 계산
+                SelectedLoan.TotalClaimAmount = SelectedLoan.CalculateTotalClaim();
+
+                await _loanRepository.UpdateAsync(SelectedLoan);
+                await LoadLoansAsync();
+
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"저장 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 새로고침
+        /// </summary>
+        [RelayCommand]
+        private async Task RefreshAsync()
+        {
+            await LoadBorrowersAsync();
+            await LoadLoansAsync();
+        }
+
+        /// <summary>
+        /// Excel 내보내기
+        /// </summary>
+        [RelayCommand]
+        private void ExportToExcel()
+        {
+            NPLogic.UI.Services.ToastService.Instance.ShowInfo("Excel 내보내기는 준비 중입니다.");
+        }
+    }
+}
+

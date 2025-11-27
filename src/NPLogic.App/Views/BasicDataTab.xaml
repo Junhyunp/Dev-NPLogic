@@ -3,292 +3,625 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
-             d:DesignHeight="800" d:DesignWidth="1200">
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Loaded="BasicDataTab_Loaded">
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
-        <StackPanel MaxWidth="1000">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
-            <!-- 에러/성공 메시지 -->
-            <Border Background="{StaticResource ErrorBrush}"
-                    CornerRadius="4"
-                    Padding="12"
-                    Margin="0,0,0,16"
-                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
-                <TextBlock Text="{Binding ErrorMessage}" 
-                          Foreground="White"
-                          TextWrapping="Wrap"/>
-            </Border>
-
-            <Border Background="{StaticResource SuccessBrush}"
-                    CornerRadius="4"
-                    Padding="12"
-                    Margin="0,0,0,16"
-                    Visibility="{Binding SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
-                <TextBlock Text="{Binding SuccessMessage}" 
-                          Foreground="White"
-                          TextWrapping="Wrap"/>
-            </Border>
-
-            <!-- ========== 기본 정보 섹션 ========== -->
-            <Border Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="24"
-                    Margin="0,0,0,24">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
+            <!-- ========== 좌측: 지도 & 문서 영역 ========== -->
+            <StackPanel Grid.Column="0">
                 
-                <StackPanel>
-                    <TextBlock Text="기본 정보" 
-                               Style="{StaticResource H3TextStyle}"
-                               Margin="0,0,0,20"/>
+                <!-- 에러/성공 메시지 -->
+                <Border Background="{StaticResource ErrorBrush}"
+                        CornerRadius="4"
+                        Padding="12"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                              Foreground="White"
+                              TextWrapping="Wrap"/>
+                </Border>
 
-                    <!-- 프로젝트 ID & 물건번호 -->
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="프로젝트 ID" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.ProjectId, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="물건번호" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.PropertyNumber, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- 물건 유형 & 상태 -->
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="물건 유형" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <ComboBox SelectedItem="{Binding Property.PropertyType}"
-                                      Padding="12,10">
-                                <ComboBoxItem Content="아파트"/>
-                                <ComboBoxItem Content="상가"/>
-                                <ComboBoxItem Content="토지"/>
-                                <ComboBoxItem Content="빌라"/>
-                                <ComboBoxItem Content="오피스텔"/>
-                                <ComboBoxItem Content="단독주택"/>
-                                <ComboBoxItem Content="다가구주택"/>
-                                <ComboBoxItem Content="공장"/>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="상태" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <ComboBox SelectedValue="{Binding Property.Status}"
-                                      SelectedValuePath="Tag"
-                                      Padding="12,10">
-                                <ComboBoxItem Content="대기" Tag="pending"/>
-                                <ComboBoxItem Content="진행중" Tag="processing"/>
-                                <ComboBoxItem Content="완료" Tag="completed"/>
-                            </ComboBox>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- ========== 주소 정보 섹션 ========== -->
-            <Border Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="24"
-                    Margin="0,0,0,24">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
+                <Border Background="{StaticResource SuccessBrush}"
+                        CornerRadius="4"
+                        Padding="12"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding SuccessMessage}" 
+                              Foreground="White"
+                              TextWrapping="Wrap"/>
+                </Border>
                 
-                <StackPanel>
-                    <TextBlock Text="주소 정보" 
-                               Style="{StaticResource H3TextStyle}"
-                               Margin="0,0,0,20"/>
-
-                    <!-- 전체 주소 -->
-                    <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="전체 주소" 
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,8"/>
-                        <TextBox Text="{Binding Property.AddressFull, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,10"/>
-                    </StackPanel>
-
-                    <!-- 도로명 주소 & 지번 주소 -->
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="도로명 주소" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.AddressRoad, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="지번 주소" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.AddressJibun, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
+                <!-- 지도 영역 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Margin="0,0,0,16"
+                        Height="300">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Border Grid.Row="0" Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="지적도 &amp; 위치도" 
+                                           Style="{StaticResource H4TextStyle}"/>
+                                <Button Grid.Column="1" 
+                                        Content="로드뷰" 
+                                        Command="{Binding OpenRoadViewCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="12,4"
+                                        FontSize="12"/>
+                            </Grid>
+                        </Border>
+                        
+                        <Grid Grid.Row="1">
+                            <!-- 지도 WebView -->
+                            <wv2:WebView2 x:Name="MapWebView"
+                                          DefaultBackgroundColor="Transparent"/>
+                            
+                            <!-- 로딩/에러 오버레이 -->
+                            <Border x:Name="MapLoadingOverlay"
+                                    Background="#F0F5F9"
+                                    Visibility="Visible">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="지도 로딩 중..."
+                                               FontSize="14"
+                                               Foreground="#64748B"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="주소가 입력되면 표시됩니다"
+                                               FontSize="12"
+                                               Foreground="#94A3B8"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
-
-                    <!-- 상세 주소 -->
+                </Border>
+                
+                <!-- KB시세 (아파트인 경우) -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16"
+                        Visibility="{Binding IsApartment, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
                     <StackPanel>
-                        <TextBlock Text="상세 주소" 
-                                   Style="{StaticResource BodyTextStyle}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,8"/>
-                        <TextBox Text="{Binding Property.AddressDetail, UpdateSourceTrigger=PropertyChanged}"
-                                 Padding="12,10"/>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="KB시세 정보" 
+                                       Style="{StaticResource H4TextStyle}"/>
+                            <Button Grid.Column="1" 
+                                    Content="시세 조회" 
+                                    Command="{Binding FetchKBPriceCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="12,4"
+                                    FontSize="12"/>
+                        </Grid>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="KB시세:" Style="{StaticResource CaptionTextStyle}" Margin="0,4"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding KbPrice, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}" FontWeight="Bold" Margin="0,4"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="전세가:" Style="{StaticResource CaptionTextStyle}" Margin="0,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding KbJeonsePrice, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}" Margin="0,4"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="평당시세:" Style="{StaticResource CaptionTextStyle}" Margin="0,4"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding KbPricePerPyeong, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}" Margin="0,4"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="조회일자:" Style="{StaticResource CaptionTextStyle}" Margin="0,4"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding KbPriceDate, StringFormat=yyyy-MM-dd}" 
+                                       Style="{StaticResource CaptionTextStyle}" Foreground="#64748B" Margin="0,4"/>
+                        </Grid>
+                        
+                        <Button Content="KB시세 직접 조회 (외부 링크)"
+                                Command="{Binding OpenKBSiteCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Margin="0,12,0,0"
+                                Padding="8,6"
+                                FontSize="11"/>
                     </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <!-- ========== 면적 정보 섹션 ========== -->
-            <Border Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="24"
-                    Margin="0,0,0,24">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
+                </Border>
                 
-                <StackPanel>
-                    <TextBlock Text="면적 정보" 
-                               Style="{StaticResource H3TextStyle}"
-                               Margin="0,0,0,20"/>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- 토지 면적 -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="토지 면적 (㎡)" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.LandArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-
-                        <!-- 건물 면적 -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="건물 면적 (㎡)" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.BuildingArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-
-                        <!-- 층수 -->
-                        <StackPanel Grid.Column="4">
-                            <TextBlock Text="층수" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.Floors, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
-
-            <!-- ========== 가격 정보 섹션 ========== -->
-            <Border Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="24">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
+                <!-- 첨부 문서 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="첨부 문서" 
+                                       Style="{StaticResource H4TextStyle}"/>
+                            <Button Grid.Column="1" 
+                                    Content="파일 업로드" 
+                                    Command="{Binding UploadFileCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="12,4"
+                                    FontSize="12"/>
+                        </Grid>
+                        
+                        <!-- 첨부파일 목록 -->
+                        <ItemsControl ItemsSource="{Binding Attachments}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource BlueGray50Brush}"
+                                            CornerRadius="4"
+                                            Padding="8"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding FileName}" 
+                                                           Style="{StaticResource BodyTextStyle}"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding FileSizeFormatted}" 
+                                                           Style="{StaticResource CaptionTextStyle}"
+                                                           Foreground="#64748B"/>
+                                            </StackPanel>
+                                            
+                                            <Button Grid.Column="1" 
+                                                    Content="보기"
+                                                    Command="{Binding DataContext.ViewFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,2"
+                                                    FontSize="11"
+                                                    Margin="8,0"/>
+                                            
+                                            <Button Grid.Column="2" 
+                                                    Content="삭제"
+                                                    Command="{Binding DataContext.DeleteFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource DangerButton}"
+                                                    Padding="8,2"
+                                                    FontSize="11"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- 빈 상태 -->
+                        <TextBlock Text="첨부된 파일이 없습니다"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="#94A3B8"
+                                   HorizontalAlignment="Center"
+                                   Visibility="{Binding HasNoAttachments, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            
+            <!-- ========== 우측: 상세 정보 ========== -->
+            <StackPanel Grid.Column="2">
                 
-                <StackPanel>
-                    <TextBlock Text="가격 정보" 
-                               Style="{StaticResource H3TextStyle}"
-                               Margin="0,0,0,20"/>
+                <!-- 기본 정보 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <TextBlock Text="기본 정보" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Margin="0,0,0,16"/>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- 감정가 -->
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="감정가 (원)" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="프로젝트 ID" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.ProjectId, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="물건번호" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.PropertyNumber, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="물건 유형" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <ComboBox SelectedItem="{Binding Property.PropertyType}" Padding="8,6">
+                                    <ComboBoxItem Content="아파트"/>
+                                    <ComboBoxItem Content="상가"/>
+                                    <ComboBoxItem Content="토지"/>
+                                    <ComboBoxItem Content="빌라"/>
+                                    <ComboBoxItem Content="오피스텔"/>
+                                    <ComboBoxItem Content="단독주택"/>
+                                    <ComboBoxItem Content="다가구주택"/>
+                                    <ComboBoxItem Content="공장"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="6">
+                                <TextBlock Text="상태" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <ComboBox SelectedValue="{Binding Property.Status}" SelectedValuePath="Tag" Padding="8,6">
+                                    <ComboBoxItem Content="대기" Tag="pending"/>
+                                    <ComboBoxItem Content="진행중" Tag="processing"/>
+                                    <ComboBoxItem Content="완료" Tag="completed"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 주소 정보 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <TextBlock Text="주소 정보" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Margin="0,0,0,16"/>
+
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="전체 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding Property.AddressFull, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
                         </StackPanel>
 
-                        <!-- 최저입찰가 -->
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="최저입찰가 (원)" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.MinimumBid, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- 매각가 -->
-                        <StackPanel Grid.Column="4">
-                            <TextBlock Text="매각가 (원)" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,0,8"/>
-                            <TextBox Text="{Binding Property.SalePrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                     Padding="12,10"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="도로명 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AddressRoad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
 
-        </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="지번 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AddressJibun, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel>
+                            <TextBlock Text="상세 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding Property.AddressDetail, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- 면적 정보 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <TextBlock Text="면적 정보" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="토지 면적 (㎡)" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.LandArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="건물 면적 (㎡)" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.BuildingArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="층수" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.Floors, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 감정평가 정보 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <TextBlock Text="감정평가 정보" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="감정평가구분" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <ComboBox SelectedItem="{Binding AppraisalType}" Padding="8,6">
+                                    <ComboBoxItem Content="일반감정"/>
+                                    <ComboBoxItem Content="재감정"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="감정평가기관" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding AppraisalOrganization, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="감정평가일자" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <DatePicker SelectedDate="{Binding AppraisalDate}" Padding="8,6"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="토지 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding LandAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="건물 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding BuildingAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="기계 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding MachineAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="6">
+                                <TextBlock Text="감정평가액 합계" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="8,6" 
+                                         Background="{StaticResource BlueGray50Brush}"
+                                         FontWeight="Bold"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- 가격 정보 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <TextBlock Text="경매/매각 정보" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Margin="0,0,0,16"/>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="감정가 (원)" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="최저입찰가 (원)" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.MinimumBid, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="매각가 (원)" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.SalePrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- QA 관리 섹션 -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="QA 관리" 
+                                           Style="{StaticResource H3TextStyle}"/>
+                                <!-- QA 미회신 뱃지 -->
+                                <Border Background="{StaticResource ErrorBrush}"
+                                        CornerRadius="10"
+                                        Padding="8,2"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding Property.QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}">
+                                    <TextBlock Foreground="White" FontSize="11" FontWeight="Bold">
+                                        <Run Text="미회신"/>
+                                        <Run Text="{Binding Property.QaUnansweredCount}"/>
+                                        <Run Text="건"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                            
+                            <Button Grid.Column="1" 
+                                    Content="QA 작성" 
+                                    Command="{Binding AddQACommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="16,6"/>
+                        </Grid>
+
+                        <!-- QA 목록 -->
+                        <ItemsControl ItemsSource="{Binding QaList}" MaxHeight="200">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource BlueGray50Brush}"
+                                            CornerRadius="4"
+                                            Padding="12"
+                                            Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                                       Text="{Binding Question}" 
+                                                       Style="{StaticResource BodyTextStyle}"
+                                                       TextWrapping="Wrap"/>
+                                            
+                                            <Border Grid.Row="0" Grid.Column="1"
+                                                    CornerRadius="4"
+                                                    Padding="6,2"
+                                                    VerticalAlignment="Top">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Foreground="White" FontSize="10">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="대기"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                    <Setter Property="Text" Value="답변완료"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                            
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                       Text="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" 
+                                                       Style="{StaticResource CaptionTextStyle}"
+                                                       Foreground="#64748B"
+                                                       Margin="0,4,0,0"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- 빈 상태 -->
+                        <TextBlock Text="등록된 QA가 없습니다"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="#94A3B8"
+                                   HorizontalAlignment="Center"
+                                   Visibility="{Binding HasNoQA, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
     </ScrollViewer>
 </UserControl>
-

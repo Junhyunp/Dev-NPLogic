@@ -90,15 +90,33 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.UserRepository>();
             services.AddSingleton<Data.Repositories.PropertyRepository>();
             services.AddSingleton<Data.Repositories.StatisticsRepository>();
+            services.AddSingleton<Data.Repositories.RegistryRepository>();
+            services.AddSingleton<Data.Repositories.BorrowerRepository>();
+            services.AddSingleton<Data.Repositories.LoanRepository>();
+            services.AddSingleton<Data.Repositories.ReferenceDataRepository>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ViewModels.DashboardViewModel>();
             services.AddTransient<ViewModels.PropertyListViewModel>();
             services.AddTransient<ViewModels.PropertyFormViewModel>();
-            services.AddTransient<ViewModels.PropertyDetailViewModel>();
+            services.AddTransient<ViewModels.PropertyDetailViewModel>(sp =>
+            {
+                return new ViewModels.PropertyDetailViewModel(
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<StorageService>(),
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>()
+                );
+            });
             services.AddTransient<ViewModels.DataUploadViewModel>();
             services.AddTransient<ViewModels.StatisticsViewModel>();
+            services.AddTransient<ViewModels.BorrowerOverviewViewModel>();
+            services.AddTransient<ViewModels.CollateralSummaryViewModel>();
+            services.AddTransient<ViewModels.LoanDetailViewModel>();
+            services.AddTransient<ViewModels.ToolBoxViewModel>();
+            services.AddTransient<ViewModels.CashFlowSummaryViewModel>();
+            services.AddTransient<ViewModels.XnpvComparisonViewModel>();
+            services.AddTransient<ViewModels.RestructuringOverviewViewModel>();
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
@@ -133,6 +151,55 @@ namespace NPLogic
             {
                 var view = new Views.StatisticsView();
                 view.DataContext = sp.GetRequiredService<ViewModels.StatisticsViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.BorrowerOverviewView>(sp =>
+            {
+                var view = new Views.BorrowerOverviewView();
+                view.DataContext = sp.GetRequiredService<ViewModels.BorrowerOverviewViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.CollateralSummaryView>(sp =>
+            {
+                var view = new Views.CollateralSummaryView();
+                view.DataContext = sp.GetRequiredService<ViewModels.CollateralSummaryViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.LoanDetailView>(sp =>
+            {
+                var view = new Views.LoanDetailView();
+                view.DataContext = sp.GetRequiredService<ViewModels.LoanDetailViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.ToolBoxView>(sp =>
+            {
+                var view = new Views.ToolBoxView();
+                view.DataContext = sp.GetRequiredService<ViewModels.ToolBoxViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.CashFlowSummaryView>(sp =>
+            {
+                var view = new Views.CashFlowSummaryView();
+                view.DataContext = sp.GetRequiredService<ViewModels.CashFlowSummaryViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.XnpvComparisonView>(sp =>
+            {
+                var view = new Views.XnpvComparisonView();
+                view.DataContext = sp.GetRequiredService<ViewModels.XnpvComparisonViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.RestructuringOverviewView>(sp =>
+            {
+                var view = new Views.RestructuringOverviewView();
+                view.DataContext = sp.GetRequiredService<ViewModels.RestructuringOverviewViewModel>();
                 return view;
             });
 

@@ -3,7 +3,14 @@
     "Url": "https://your-project-id.supabase.co",
     "Key": "your-anon-key-here"
   },
-  "KakaoMapApiKey": "YOUR_KAKAO_MAP_API_KEY",
+  "KakaoMap": {
+    "ApiKey": "YOUR_KAKAO_MAP_API_KEY",
+    "Comment": "카카오 개발자 센터에서 발급: https://developers.kakao.com/"
+  },
+  "RealEstateAPI": {
+    "DataGoKrKey": "YOUR_DATA_GO_KR_API_KEY",
+    "Comment": "국토교통부 실거래가 API: https://www.data.go.kr/data/15057511/openapi.do"
+  },
   "Logging": {
     "LogLevel": {
       "Default": "Information",
@@ -15,8 +22,3 @@
     "OcrScriptPath": "python/ocr_processor.py"
   }
 }
-
-
-
-
-

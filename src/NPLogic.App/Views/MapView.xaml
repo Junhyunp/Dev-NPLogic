@@ -10,56 +10,208 @@
              Unloaded="MapView_Unloaded">
     
     <Grid>
-        <!-- WebView2 지도 컨트롤 -->
-        <wv2:WebView2 x:Name="MapWebView"
-                      DefaultBackgroundColor="Transparent"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
         
-        <!-- 로딩 오버레이 -->
-        <Border x:Name="LoadingOverlay"
-                Background="#F0F5F9"
-                Visibility="Visible">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <ProgressBar IsIndeterminate="True"
-                             Width="200"
-                             Height="4"
-                             Margin="0,0,0,16"/>
-                <TextBlock Text="지도 로딩 중..."
-                           FontSize="14"
-                           Foreground="#64748B"
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
+        <!-- 상단 레이어 컨트롤 패널 -->
+        <Border Grid.Row="0"
+                Background="{StaticResource BackgroundBrush}"
+                BorderBrush="{StaticResource BlueGray200Brush}"
+                BorderThickness="0,0,0,1"
+                Padding="16,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 레이어 선택 체크박스 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="레이어:" 
+                               VerticalAlignment="Center"
+                               Foreground="#64748B"
+                               FontWeight="SemiBold"
+                               Margin="0,0,16,0"/>
+                    
+                    <CheckBox x:Name="ChkBaseMap"
+                              Content="기본지도"
+                              IsChecked="True"
+                              VerticalAlignment="Center"
+                              Margin="0,0,16,0"
+                              Checked="LayerCheckbox_Changed"
+                              Unchecked="LayerCheckbox_Changed"/>
+                    
+                    <CheckBox x:Name="ChkSatellite"
+                              Content="위성지도"
+                              IsChecked="False"
+                              VerticalAlignment="Center"
+                              Margin="0,0,16,0"
+                              Checked="LayerCheckbox_Changed"
+                              Unchecked="LayerCheckbox_Changed"/>
+                    
+                    <CheckBox x:Name="ChkCadastral"
+                              Content="지적도"
+                              IsChecked="False"
+                              VerticalAlignment="Center"
+                              Margin="0,0,16,0"
+                              Checked="LayerCheckbox_Changed"
+                              Unchecked="LayerCheckbox_Changed"/>
+                    
+                    <CheckBox x:Name="ChkLandUse"
+                              Content="토지이용계획"
+                              IsChecked="False"
+                              VerticalAlignment="Center"
+                              Margin="0,0,16,0"
+                              Checked="LayerCheckbox_Changed"
+                              Unchecked="LayerCheckbox_Changed"
+                              ToolTip="국토이용정보서비스 연동 필요"/>
+                    
+                    <Border Background="{StaticResource BlueGray200Brush}" 
+                            Width="1" 
+                            Margin="8,4,16,4"/>
+                    
+                    <CheckBox x:Name="ChkRoadView"
+                              Content="로드뷰"
+                              IsChecked="False"
+                              VerticalAlignment="Center"
+                              Margin="0,0,0,0"
+                              Checked="RoadViewCheckbox_Changed"
+                              Unchecked="RoadViewCheckbox_Changed"/>
+                </StackPanel>
+                
+                <!-- 우측 버튼들 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="BtnZoomIn"
+                            Content="+"
+                            Width="32" Height="32"
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Click="ZoomIn_Click"
+                            Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,4,0"/>
+                    
+                    <Button x:Name="BtnZoomOut"
+                            Content="-"
+                            Width="32" Height="32"
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Click="ZoomOut_Click"
+                            Style="{StaticResource SecondaryButton}"
+                            Margin="0,0,16,0"/>
+                    
+                    <Button x:Name="BtnRefreshMap"
+                            Content="새로고침"
+                            Click="RefreshMap_Click"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="12,6"
+                            Margin="0,0,8,0"/>
+                    
+                    <Button x:Name="BtnOpenExternal"
+                            Content="외부에서 열기"
+                            Click="OpenExternal_Click"
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="12,6"/>
+                </StackPanel>
+            </Grid>
         </Border>
         
-        <!-- 에러 메시지 -->
-        <Border x:Name="ErrorOverlay"
-                Background="#1A2744"
-                Visibility="Collapsed">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="🗺️"
-                           FontSize="48"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,16"/>
-                <TextBlock x:Name="ErrorMessage"
-                           Text="지도를 불러올 수 없습니다."
-                           FontSize="16"
-                           Foreground="White"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,8"/>
-                <TextBlock x:Name="ErrorDetail"
-                           Text=""
-                           FontSize="12"
-                           Foreground="#94A3B8"
-                           HorizontalAlignment="Center"
-                           TextWrapping="Wrap"
-                           MaxWidth="300"/>
-                <Button x:Name="RetryButton"
-                        Content="다시 시도"
-                        Margin="0,24,0,0"
-                        Padding="24,10"
-                        Click="RetryButton_Click"
-                        Style="{StaticResource SecondaryButton}"/>
-            </StackPanel>
-        </Border>
+        <!-- 지도 영역 -->
+        <Grid Grid.Row="1">
+            <!-- WebView2 지도 컨트롤 -->
+            <wv2:WebView2 x:Name="MapWebView"
+                          DefaultBackgroundColor="Transparent"/>
+            
+            <!-- 로딩 오버레이 -->
+            <Border x:Name="LoadingOverlay"
+                    Background="#F0F5F9"
+                    Visibility="Visible">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True"
+                                 Width="200"
+                                 Height="4"
+                                 Margin="0,0,0,16"/>
+                    <TextBlock Text="지도 로딩 중..."
+                               FontSize="14"
+                               Foreground="#64748B"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- 로드뷰 컨테이너 (상단에 오버레이) -->
+            <Border x:Name="RoadViewContainer"
+                    Background="Transparent"
+                    Visibility="Collapsed"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Margin="16"
+                    Width="320"
+                    Height="240">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="10" ShadowDepth="3"/>
+                </Border.Effect>
+                
+                <Grid>
+                    <wv2:WebView2 x:Name="RoadViewWebView"/>
+                    
+                    <!-- 로드뷰 닫기 버튼 -->
+                    <Button Content="✕"
+                            Width="24" Height="24"
+                            FontSize="12"
+                            Background="#EF4444"
+                            Foreground="White"
+                            BorderThickness="0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            Margin="4"
+                            Click="CloseRoadView_Click"/>
+                </Grid>
+            </Border>
+            
+            <!-- 에러 메시지 -->
+            <Border x:Name="ErrorOverlay"
+                    Background="#1A2744"
+                    Visibility="Collapsed">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="🗺️"
+                               FontSize="48"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,16"/>
+                    <TextBlock x:Name="ErrorMessage"
+                               Text="지도를 불러올 수 없습니다."
+                               FontSize="16"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,8"/>
+                    <TextBlock x:Name="ErrorDetail"
+                               Text=""
+                               FontSize="12"
+                               Foreground="#94A3B8"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap"
+                               MaxWidth="300"/>
+                    <Button x:Name="RetryButton"
+                            Content="다시 시도"
+                            Margin="0,24,0,0"
+                            Padding="24,10"
+                            Click="RetryButton_Click"
+                            Style="{StaticResource SecondaryButton}"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- 좌표 정보 표시 (좌하단) -->
+            <Border Background="#E0FFFFFF"
+                    CornerRadius="4"
+                    Padding="8,4"
+                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Left"
+                    Margin="16">
+                <TextBlock x:Name="CoordinateInfo"
+                           Text="좌표: -"
+                           FontSize="11"
+                           Foreground="#475569"/>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
-

@@ -1,0 +1,421 @@
+<UserControl x:Class="NPLogic.Views.RegistryTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1400"
+             Loaded="RegistryTab_Loaded">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- ========== 메시지 영역 ========== -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                <!-- 에러 메시지 -->
+                <Border Background="{StaticResource ErrorBrush}"
+                        CornerRadius="4"
+                        Padding="12"
+                        Margin="0,0,0,8"
+                        Visibility="{Binding RegistryViewModel.ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding RegistryViewModel.ErrorMessage}" 
+                              Foreground="White"
+                              TextWrapping="Wrap"/>
+                </Border>
+
+                <!-- 성공 메시지 -->
+                <Border Background="{StaticResource SuccessBrush}"
+                        CornerRadius="4"
+                        Padding="12"
+                        Visibility="{Binding RegistryViewModel.SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                    <TextBlock Text="{Binding RegistryViewModel.SuccessMessage}" 
+                              Foreground="White"
+                              TextWrapping="Wrap"/>
+                </Border>
+            </StackPanel>
+            
+            <!-- ========== 1. 기본 정보 섹션 ========== -->
+            <Border Grid.Row="1" 
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,0,16">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <StackPanel>
+                    <TextBlock Text="물건 기본 정보" 
+                               Style="{StaticResource H4TextStyle}"
+                               Margin="0,0,0,16"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <!-- 물건번호 -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,16,12">
+                            <TextBlock Text="물건번호 (지번일련번호)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding RegistryViewModel.PropertyNumber, Mode=TwoWay}"
+                                     Style="{StaticResource NPTextBoxStyle}"
+                                     IsReadOnly="True"/>
+                        </StackPanel>
+                        
+                        <!-- 담보물 형태 -->
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,16,12">
+                            <TextBlock Text="담보물 형태" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding RegistryViewModel.CollateralType, Mode=TwoWay}"
+                                     Style="{StaticResource NPTextBoxStyle}"
+                                     IsReadOnly="True"/>
+                        </StackPanel>
+                        
+                        <!-- 주소 일치 여부 -->
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,12">
+                            <TextBlock Text="주소 일치 여부" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                            <Border Background="{Binding RegistryViewModel.IsAddressMatch, Converter={StaticResource BoolToColorConverter}}"
+                                    CornerRadius="4"
+                                    Padding="12,8">
+                                <TextBlock Text="{Binding RegistryViewModel.IsAddressMatch, Converter={StaticResource BoolToYesNoConverter}}"
+                                           Foreground="White"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                        
+                        <!-- 물건지 (등기부) -->
+                        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,16,12">
+                            <TextBlock Text="물건지 (등기부)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding RegistryViewModel.RegistryAddress, Mode=TwoWay}"
+                                     Style="{StaticResource NPTextBoxStyle}"/>
+                        </StackPanel>
+                        
+                        <!-- 면적 정보 -->
+                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="대지면적 (평)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding RegistryViewModel.LandAreaPyeong, StringFormat={}{0:N2}}"
+                                             Style="{StaticResource NPTextBoxStyle}"
+                                             IsReadOnly="True"/>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="건물면적 (평)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding RegistryViewModel.BuildingAreaPyeong, StringFormat={}{0:N2}}"
+                                             Style="{StaticResource NPTextBoxStyle}"
+                                             IsReadOnly="True"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                        
+                        <!-- 물건지 (DD) -->
+                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,16,0">
+                            <TextBlock Text="물건지 (DD 데이터)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding RegistryViewModel.DdAddress, Mode=TwoWay}"
+                                     Style="{StaticResource NPTextBoxStyle}"
+                                     IsReadOnly="True"
+                                     Opacity="0.7"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 2. 소유자 정보 섹션 ========== -->
+            <Border Grid.Row="2" 
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,0,16">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Text="소유자 정보" 
+                                   Style="{StaticResource H4TextStyle}"/>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="+ 추가"
+                                    Command="{Binding RegistryViewModel.AddOwnerCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="12,6"
+                                    FontSize="12"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="삭제"
+                                    Command="{Binding RegistryViewModel.DeleteOwnerCommand}"
+                                    Style="{StaticResource DangerButton}"
+                                    Padding="12,6"
+                                    FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 소유자 그리드 -->
+                    <DataGrid ItemsSource="{Binding RegistryViewModel.Owners}"
+                              SelectedItem="{Binding RegistryViewModel.SelectedOwner}"
+                              Style="{StaticResource NPDataGridStyle}"
+                              AutoGenerateColumns="False"
+                              MinHeight="120"
+                              MaxHeight="200"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="소유자명" Binding="{Binding OwnerName}" Width="150"/>
+                            <DataGridTextColumn Header="등록번호" Binding="{Binding OwnerRegNo}" Width="150"/>
+                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="100"/>
+                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat={}{0:yyyy-MM-dd}}" Width="120"/>
+                            <DataGridTextColumn Header="등기원인" Binding="{Binding RegistrationCause}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <!-- 빈 데이터 메시지 -->
+                    <Border Visibility="{Binding RegistryViewModel.HasNoOwners, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Background="{StaticResource BlueGray50Brush}"
+                            CornerRadius="4"
+                            Padding="16"
+                            Margin="0,8,0,0">
+                        <TextBlock Text="등록된 소유자 정보가 없습니다. '+ 추가' 버튼을 클릭하여 추가하세요."
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   Opacity="0.7"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 3. 갑구 (소유권에 관한 사항) 섹션 ========== -->
+            <Border Grid.Row="3" 
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,0,16">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="갑구 (소유권에 관한 사항)" 
+                                       Style="{StaticResource H4TextStyle}"/>
+                            <Border Background="{StaticResource BlueGray100Brush}"
+                                    CornerRadius="4"
+                                    Padding="8,4"
+                                    Margin="12,0,0,0">
+                                <TextBlock>
+                                    <Run Text="합계:"/>
+                                    <Run Text="{Binding RegistryViewModel.GapguTotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
+                                    <Run Text="원"/>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button Content="+ 추가"
+                                    Command="{Binding RegistryViewModel.AddGapguRightCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="12,6"
+                                    FontSize="12"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="삭제"
+                                    Command="{Binding RegistryViewModel.DeleteGapguRightCommand}"
+                                    Style="{StaticResource DangerButton}"
+                                    Padding="12,6"
+                                    FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 갑구 그리드 -->
+                    <DataGrid ItemsSource="{Binding RegistryViewModel.GapguRights}"
+                              SelectedItem="{Binding RegistryViewModel.SelectedGapguRight}"
+                              Style="{StaticResource NPDataGridStyle}"
+                              AutoGenerateColumns="False"
+                              MinHeight="150"
+                              MaxHeight="250"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="60"/>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="120"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationDate, StringFormat={}{0:yyyy-MM-dd}}" Width="120"/>
+                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
+                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat={}{0:N0}}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="Margin" Value="0,0,8,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                            <DataGridTextColumn Header="상태" Binding="{Binding Status}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <!-- 빈 데이터 메시지 -->
+                    <Border Visibility="{Binding RegistryViewModel.HasNoGapguRights, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Background="{StaticResource BlueGray50Brush}"
+                            CornerRadius="4"
+                            Padding="16"
+                            Margin="0,8,0,0">
+                        <TextBlock Text="등록된 갑구 권리 정보가 없습니다. '+ 추가' 버튼을 클릭하여 추가하세요."
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   Opacity="0.7"/>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 4. 을구 (근저당권 및 전세권) 섹션 ========== -->
+            <Border Grid.Row="4" 
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,0,16">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="을구 (근저당권 및 전세권)" 
+                                       Style="{StaticResource H4TextStyle}"/>
+                            <Border Background="{StaticResource WarningBrush}"
+                                    CornerRadius="4"
+                                    Padding="8,4"
+                                    Margin="12,0,0,0">
+                                <TextBlock Foreground="White">
+                                    <Run Text="합계:"/>
+                                    <Run Text="{Binding RegistryViewModel.EulguTotalAmount, StringFormat={}{0:N0}}" FontWeight="Bold"/>
+                                    <Run Text="원"/>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" Orientation="Horizontal">
+                            <Button Content="+ 추가"
+                                    Command="{Binding RegistryViewModel.AddEulguRightCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="12,6"
+                                    FontSize="12"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="삭제"
+                                    Command="{Binding RegistryViewModel.DeleteEulguRightCommand}"
+                                    Style="{StaticResource DangerButton}"
+                                    Padding="12,6"
+                                    FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- 을구 그리드 -->
+                    <DataGrid ItemsSource="{Binding RegistryViewModel.EulguRights}"
+                              SelectedItem="{Binding RegistryViewModel.SelectedEulguRight}"
+                              Style="{StaticResource NPDataGridStyle}"
+                              AutoGenerateColumns="False"
+                              MinHeight="150"
+                              MaxHeight="250"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="60"/>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="120"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationDate, StringFormat={}{0:yyyy-MM-dd}}" Width="120"/>
+                            <DataGridTextColumn Header="근저당권자" Binding="{Binding RightHolder}" Width="150"/>
+                            <DataGridTextColumn Header="채권최고액" Binding="{Binding ClaimAmount, StringFormat={}{0:N0}}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="Margin" Value="0,0,8,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="채무자" Binding="{Binding Debtor}" Width="120"/>
+                            <DataGridTextColumn Header="담보종류" Binding="{Binding CollateralType}" Width="100"/>
+                            <DataGridTextColumn Header="상태" Binding="{Binding Status}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <!-- 빈 데이터 메시지 -->
+                    <Border Visibility="{Binding RegistryViewModel.HasNoEulguRights, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Background="{StaticResource BlueGray50Brush}"
+                            CornerRadius="4"
+                            Padding="16"
+                            Margin="0,8,0,0">
+                        <TextBlock Text="등록된 을구 권리 정보가 없습니다. '+ 추가' 버튼을 클릭하여 추가하세요."
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   HorizontalAlignment="Center"
+                                   Opacity="0.7"/>
+                    </Border>
+                    
+                    <!-- 저장 버튼 -->
+                    <Border Margin="0,16,0,0" HorizontalAlignment="Right">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="새로고침"
+                                    Command="{Binding RegistryViewModel.RefreshCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="24,10"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="등기부 정보 저장"
+                                    Command="{Binding RegistryViewModel.SaveAllRightsCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="24,10"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- 로딩 오버레이 -->
+            <Border Grid.Row="0" Grid.RowSpan="5"
+                    Background="#80FFFFFF"
+                    Visibility="{Binding RegistryViewModel.IsLoading, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                    <TextBlock Text="로딩 중..." 
+                               Margin="0,12,0,0"
+                               Style="{StaticResource BodyTextStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
+

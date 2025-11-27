@@ -435,6 +435,20 @@ namespace NPLogic.Data.Repositories
                 Longitude = table.Longitude,
                 Status = table.Status ?? "pending",
                 AssignedTo = table.AssignedTo,
+                // 대시보드 진행 관리 필드
+                DebtorName = table.DebtorName,
+                CollateralNumber = table.CollateralNumber,
+                AgreementDoc = table.AgreementDoc,
+                GuaranteeDoc = table.GuaranteeDoc,
+                AuctionStart1 = table.AuctionStart1,
+                AuctionStart2 = table.AuctionStart2,
+                AuctionDocs = table.AuctionDocs,
+                TenantDocs = table.TenantDocs,
+                SeniorRightsReview = table.SeniorRightsReview,
+                AppraisalConfirmed = table.AppraisalConfirmed,
+                AuctionScheduleDate = table.AuctionScheduleDate,
+                QaUnansweredCount = table.QaUnansweredCount,
+                RightsAnalysisStatus = table.RightsAnalysisStatus ?? "pending",
                 CreatedBy = table.CreatedBy,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
@@ -467,10 +481,80 @@ namespace NPLogic.Data.Repositories
                 Longitude = property.Longitude,
                 Status = property.Status,
                 AssignedTo = property.AssignedTo,
+                // 대시보드 진행 관리 필드
+                DebtorName = property.DebtorName,
+                CollateralNumber = property.CollateralNumber,
+                AgreementDoc = property.AgreementDoc,
+                GuaranteeDoc = property.GuaranteeDoc,
+                AuctionStart1 = property.AuctionStart1,
+                AuctionStart2 = property.AuctionStart2,
+                AuctionDocs = property.AuctionDocs,
+                TenantDocs = property.TenantDocs,
+                SeniorRightsReview = property.SeniorRightsReview,
+                AppraisalConfirmed = property.AppraisalConfirmed,
+                AuctionScheduleDate = property.AuctionScheduleDate,
+                QaUnansweredCount = property.QaUnansweredCount,
+                RightsAnalysisStatus = property.RightsAnalysisStatus,
                 CreatedBy = property.CreatedBy,
                 CreatedAt = property.CreatedAt,
                 UpdatedAt = property.UpdatedAt
             };
+        }
+
+        /// <summary>
+        /// 진행 체크박스 필드 업데이트 (개별 필드)
+        /// </summary>
+        public async Task<bool> UpdateProgressFieldAsync(Guid propertyId, string fieldName, object value)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                
+                // Supabase RPC를 사용하여 동적 필드 업데이트
+                var property = await GetByIdAsync(propertyId);
+                if (property == null) return false;
+
+                // 필드별 업데이트
+                switch (fieldName.ToLower())
+                {
+                    case "agreement_doc":
+                        property.AgreementDoc = Convert.ToBoolean(value);
+                        break;
+                    case "guarantee_doc":
+                        property.GuaranteeDoc = Convert.ToBoolean(value);
+                        break;
+                    case "auction_start_1":
+                        property.AuctionStart1 = value?.ToString();
+                        break;
+                    case "auction_start_2":
+                        property.AuctionStart2 = value?.ToString();
+                        break;
+                    case "auction_docs":
+                        property.AuctionDocs = Convert.ToBoolean(value);
+                        break;
+                    case "tenant_docs":
+                        property.TenantDocs = Convert.ToBoolean(value);
+                        break;
+                    case "senior_rights_review":
+                        property.SeniorRightsReview = Convert.ToBoolean(value);
+                        break;
+                    case "appraisal_confirmed":
+                        property.AppraisalConfirmed = Convert.ToBoolean(value);
+                        break;
+                    case "rights_analysis_status":
+                        property.RightsAnalysisStatus = value?.ToString() ?? "pending";
+                        break;
+                    default:
+                        return false;
+                }
+
+                await UpdateAsync(property);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"진행 필드 업데이트 실패: {ex.Message}", ex);
+            }
         }
     }
 
@@ -547,6 +631,47 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("assigned_to")]
         public Guid? AssignedTo { get; set; }
+
+        // ========== 대시보드 진행 관리 필드 ==========
+
+        [Postgrest.Attributes.Column("debtor_name")]
+        public string? DebtorName { get; set; }
+
+        [Postgrest.Attributes.Column("collateral_number")]
+        public string? CollateralNumber { get; set; }
+
+        [Postgrest.Attributes.Column("agreement_doc")]
+        public bool AgreementDoc { get; set; }
+
+        [Postgrest.Attributes.Column("guarantee_doc")]
+        public bool GuaranteeDoc { get; set; }
+
+        [Postgrest.Attributes.Column("auction_start_1")]
+        public string? AuctionStart1 { get; set; }
+
+        [Postgrest.Attributes.Column("auction_start_2")]
+        public string? AuctionStart2 { get; set; }
+
+        [Postgrest.Attributes.Column("auction_docs")]
+        public bool AuctionDocs { get; set; }
+
+        [Postgrest.Attributes.Column("tenant_docs")]
+        public bool TenantDocs { get; set; }
+
+        [Postgrest.Attributes.Column("senior_rights_review")]
+        public bool SeniorRightsReview { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_confirmed")]
+        public bool AppraisalConfirmed { get; set; }
+
+        [Postgrest.Attributes.Column("auction_schedule_date")]
+        public DateTime? AuctionScheduleDate { get; set; }
+
+        [Postgrest.Attributes.Column("qa_unanswered_count")]
+        public int QaUnansweredCount { get; set; }
+
+        [Postgrest.Attributes.Column("rights_analysis_status")]
+        public string? RightsAnalysisStatus { get; set; }
 
         [Postgrest.Attributes.Column("created_by")]
         public Guid? CreatedBy { get; set; }

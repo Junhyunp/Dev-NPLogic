@@ -116,11 +116,7 @@
 
             <!-- 3. 등기부 탭 -->
             <TabItem Header="등기부">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="등기부 탭 (추후 구현)" 
-                               Style="{StaticResource BodyTextStyle}"
-                               Margin="24"/>
-                </ScrollViewer>
+                <local:RegistryTab DataContext="{Binding}"/>
             </TabItem>
 
             <!-- 4. 선순위 탭 -->

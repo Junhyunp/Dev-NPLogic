@@ -6,59 +6,81 @@
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000"
+             d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}"
              Loaded="DashboardView_Loaded">
     
-    <Grid Margin="32">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- 헤더 영역 -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
+        <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="대시보드" 
-                           Style="{StaticResource H2TextStyle}"
-                           Margin="0,0,0,8"/>
-                <TextBlock Text="프로젝트 진행 현황을 확인하세요" 
-                           Style="{StaticResource BodyTextStyle}"
-                           Opacity="0.7"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="프로그램별 진행사항" 
+                               Style="{StaticResource H2TextStyle}"
+                               Margin="0,0,16,0"/>
+                    <!-- 역할 뱃지 -->
+                    <Border Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="4"
+                            Padding="8,4"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Text="{Binding RoleBadgeText}" 
+                                   Foreground="White"
+                                   FontSize="12"
+                                   FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+                <TextBlock Style="{StaticResource BodyTextStyle}"
+                           Opacity="0.7"
+                           Margin="0,4,0,0">
+                    <Run Text="담당자:"/>
+                    <Run Text="{Binding CurrentUser.Name, FallbackValue='로그인 필요'}" FontWeight="SemiBold"/>
+                </TextBlock>
             </StackPanel>
 
-            <!-- 프로그램 선택 및 새로고침 -->
+            <!-- 프로그램 선택, 새로고침, Excel -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="프로그램:" 
                            VerticalAlignment="Center" 
-                           Margin="0,0,12,0"
+                           Margin="0,0,8,0"
                            Style="{StaticResource BodyTextStyle}"/>
                 <ComboBox ItemsSource="{Binding Projects}"
                           SelectedItem="{Binding SelectedProjectId}"
-                          MinWidth="200"
-                          Margin="0,0,16,0"/>
+                          MinWidth="180"
+                          Margin="0,0,12,0"/>
                 <Button Content="새로고침" 
                         Command="{Binding RefreshDataCommand}"
                         Style="{StaticResource SecondaryButton}"
-                        Padding="16,8"/>
+                        Padding="12,8"
+                        Margin="0,0,8,0"/>
+                <Button Content="Excel 내보내기" 
+                        Command="{Binding ExportToExcelCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="12,8"/>
             </StackPanel>
         </Grid>
 
         <!-- 통계 카드 -->
-        <Grid Grid.Row="1" Margin="0,0,0,32">
+        <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="12"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -66,17 +88,20 @@
             <Border Grid.Column="0" 
                     Background="{StaticResource BackgroundBrush}"
                     CornerRadius="8"
-                    Padding="24">
+                    Padding="20"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="StatCard_Click"
+                    Tag="all">
                 <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="8" ShadowDepth="2"/>
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="전체" 
-                               Style="{StaticResource BodyTextStyle}"
+                               Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"
-                               Margin="0,0,0,8"/>
+                               Margin="0,0,0,4"/>
                     <TextBlock Text="{Binding TotalCount}" 
-                               FontSize="36"
+                               FontSize="32"
                                FontWeight="Bold"
                                Foreground="{StaticResource PrimaryBrush}"/>
                 </StackPanel>
@@ -86,17 +111,20 @@
             <Border Grid.Column="2" 
                     Background="{StaticResource BackgroundBrush}"
                     CornerRadius="8"
-                    Padding="24">
+                    Padding="20"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="StatCard_Click"
+                    Tag="pending">
                 <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="8" ShadowDepth="2"/>
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="대기" 
-                               Style="{StaticResource BodyTextStyle}"
+                               Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"
-                               Margin="0,0,0,8"/>
+                               Margin="0,0,0,4"/>
                     <TextBlock Text="{Binding PendingCount}" 
-                               FontSize="36"
+                               FontSize="32"
                                FontWeight="Bold"
                                Foreground="{StaticResource WarningBrush}"/>
                 </StackPanel>
@@ -106,17 +134,20 @@
             <Border Grid.Column="4" 
                     Background="{StaticResource BackgroundBrush}"
                     CornerRadius="8"
-                    Padding="24">
+                    Padding="20"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="StatCard_Click"
+                    Tag="processing">
                 <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="8" ShadowDepth="2"/>
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="진행중" 
-                               Style="{StaticResource BodyTextStyle}"
+                               Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"
-                               Margin="0,0,0,8"/>
+                               Margin="0,0,0,4"/>
                     <TextBlock Text="{Binding ProcessingCount}" 
-                               FontSize="36"
+                               FontSize="32"
                                FontWeight="Bold"
                                Foreground="{StaticResource InfoBrush}"/>
                 </StackPanel>
@@ -126,159 +157,405 @@
             <Border Grid.Column="6" 
                     Background="{StaticResource BackgroundBrush}"
                     CornerRadius="8"
-                    Padding="24">
+                    Padding="20"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="StatCard_Click"
+                    Tag="completed">
                 <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="8" ShadowDepth="2"/>
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="완료" 
-                               Style="{StaticResource BodyTextStyle}"
+                               Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"
-                               Margin="0,0,0,8"/>
+                               Margin="0,0,0,4"/>
                     <TextBlock Text="{Binding CompletedCount}" 
-                               FontSize="36"
+                               FontSize="32"
                                FontWeight="Bold"
                                Foreground="{StaticResource SuccessBrush}"/>
                 </StackPanel>
             </Border>
         </Grid>
 
-        <!-- 최근 물건 목록 -->
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- 헤더 -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
+        <!-- 평가자 전용: 진행률 표시 -->
+        <Border Grid.Row="2" 
+                Background="{StaticResource BackgroundBrush}"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,16"
+                Visibility="{Binding IsEvaluatorView, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0"
-                           Text="최근 물건 목록" 
-                           Style="{StaticResource H3TextStyle}"/>
-
-                <Button Grid.Column="1"
-                        Content="전체 보기" 
-                        Command="{Binding GoToPropertyListCommand}"
-                        Style="{StaticResource SecondaryButton}"
-                        Padding="16,8"/>
+                
+                <TextBlock Text="나의 진행 상황:" 
+                           VerticalAlignment="Center"
+                           Style="{StaticResource BodyTextStyle}"
+                           FontWeight="SemiBold"
+                           Margin="0,0,16,0"/>
+                
+                <ProgressBar Grid.Column="1" 
+                             Value="{Binding OverallProgressPercent}" 
+                             Maximum="100"
+                             Height="20"
+                             Foreground="{StaticResource SuccessBrush}"/>
+                
+                <TextBlock Grid.Column="2" 
+                           VerticalAlignment="Center"
+                           Style="{StaticResource BodyTextStyle}"
+                           FontWeight="Bold"
+                           Margin="16,0,0,0">
+                    <Run Text="{Binding OverallProgressPercent, StringFormat={}{0}%}"/>
+                    <Run Text=" 완료"/>
+                    <Run Text="("/>
+                    <Run Text="{Binding CompletedCount}"/>
+                    <Run Text="/"/>
+                    <Run Text="{Binding TotalCount}"/>
+                    <Run Text="건)"/>
+                </TextBlock>
             </Grid>
+        </Border>
 
-            <!-- 데이터 그리드 -->
-            <Border Grid.Row="1"
-                    Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="0">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
+        <!-- 15컬럼 진행 관리 그리드 -->
+        <Border Grid.Row="3"
+                Background="{StaticResource BackgroundBrush}"
+                CornerRadius="8">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="8" ShadowDepth="2"/>
+            </Border.Effect>
 
-                <Grid>
-                    <!-- 로딩 표시 -->
-                    <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <ProgressBar IsIndeterminate="True" 
-                                        Width="200" 
-                                        Height="4"
-                                        Margin="0,0,0,16"/>
-                            <TextBlock Text="데이터 로드 중..." 
-                                      Style="{StaticResource BodyTextStyle}"
-                                      HorizontalAlignment="Center"
-                                      Opacity="0.7"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- 에러 메시지 -->
-                    <Grid Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"
-                          Background="#80000000">
-                        <Border Background="{StaticResource ErrorBrush}"
-                                CornerRadius="8"
-                                Padding="32"
-                                MaxWidth="800"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Center">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="600">
-                                <TextBlock Text="{Binding ErrorMessage}" 
-                                          Foreground="White"
-                                          TextWrapping="Wrap"
-                                          FontSize="16"
-                                          LineHeight="24"/>
-                            </ScrollViewer>
-                        </Border>
-                    </Grid>
-
-                    <!-- 데이터 그리드 -->
-                    <DataGrid ItemsSource="{Binding RecentProperties}"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              IsReadOnly="True"
-                              SelectionMode="Single"
-                              GridLinesVisibility="None"
-                              HeadersVisibility="Column"
-                              Background="Transparent"
-                              BorderThickness="0"
-                              Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="물건번호" 
-                                              Binding="{Binding PropertyNumber}" 
-                                              Width="120"/>
-                            <DataGridTextColumn Header="주소" 
-                                              Binding="{Binding AddressFull}" 
-                                              Width="*"/>
-                            <DataGridTextColumn Header="유형" 
-                                              Binding="{Binding PropertyType}" 
-                                              Width="100"/>
-                            <DataGridTextColumn Header="상태" 
-                                              Binding="{Binding Status}" 
-                                              Width="100"/>
-                            <DataGridTextColumn Header="감정가" 
-                                              Binding="{Binding AppraisalValue, StringFormat=N0}" 
-                                              Width="120"/>
-                            <DataGridTemplateColumn Header="작업" Width="100">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="상세" 
-                                               Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                               CommandParameter="{Binding}"
-                                               Style="{StaticResource PrimaryButton}"
-                                               Padding="12,4"
-                                               FontSize="12"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource TableHoverBrush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
-
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{StaticResource TableHeaderBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="Padding" Value="16,12"/>
-                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                    </DataGrid>
+            <Grid>
+                <!-- 로딩 표시 -->
+                <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                      Panel.ZIndex="10">
+                    <Border Background="#80FFFFFF"/>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True" 
+                                    Width="200" 
+                                    Height="4"
+                                    Margin="0,0,0,16"/>
+                        <TextBlock Text="데이터 로드 중..." 
+                                  Style="{StaticResource BodyTextStyle}"
+                                  HorizontalAlignment="Center"
+                                  Opacity="0.7"/>
+                    </StackPanel>
                 </Grid>
-            </Border>
-        </Grid>
+
+                <!-- 에러 메시지 -->
+                <Grid Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"
+                      Background="#80000000"
+                      Panel.ZIndex="10">
+                    <Border Background="{StaticResource ErrorBrush}"
+                            CornerRadius="8"
+                            Padding="24"
+                            MaxWidth="600"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="400">
+                            <TextBlock Text="{Binding ErrorMessage}" 
+                                      Foreground="White"
+                                      TextWrapping="Wrap"
+                                      FontSize="14"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+
+                <!-- 데이터 그리드 -->
+                <DataGrid x:Name="ProgressDataGrid"
+                          ItemsSource="{Binding DashboardProperties}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    
+                    <DataGrid.Columns>
+                        <!-- 차주번호 -->
+                        <DataGridTextColumn Header="차주번호" 
+                                          Binding="{Binding PropertyNumber}" 
+                                          Width="100"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- 차주명 -->
+                        <DataGridTextColumn Header="차주명" 
+                                          Binding="{Binding DebtorName}" 
+                                          Width="100"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- Assign (PM만) -->
+                        <DataGridTemplateColumn Header="Assign" 
+                                               Width="120"
+                                               Visibility="{Binding DataContext.IsPMView, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding DataContext.Evaluators, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id"
+                                              SelectedValue="{Binding AssignedTo, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectionChanged="AssignComboBox_SelectionChanged"
+                                              Padding="4"
+                                              BorderThickness="0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 담보번호 -->
+                        <DataGridTextColumn Header="담보번호" 
+                                          Binding="{Binding CollateralNumber}" 
+                                          Width="100"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- 물건종류 -->
+                        <DataGridTextColumn Header="물건종류" 
+                                          Binding="{Binding PropertyType}" 
+                                          Width="80"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- 약정서 (체크박스) -->
+                        <DataGridTemplateColumn Header="약정서" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding AgreementDoc, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="agreement_doc"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 보증서 (체크박스) -->
+                        <DataGridTemplateColumn Header="보증서" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding GuaranteeDoc, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="guarantee_doc"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 경개개시여부 1 -->
+                        <DataGridTemplateColumn Header="경개1" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox SelectedItem="{Binding AuctionStart1, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectionChanged="AuctionStartComboBox_SelectionChanged"
+                                              Tag="auction_start_1"
+                                              Padding="2"
+                                              BorderThickness="0">
+                                        <ComboBoxItem Content=""/>
+                                        <ComboBoxItem Content="개시"/>
+                                        <ComboBoxItem Content="미개시"/>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 경개개시여부 2 -->
+                        <DataGridTemplateColumn Header="경개2" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox SelectedItem="{Binding AuctionStart2, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectionChanged="AuctionStartComboBox_SelectionChanged"
+                                              Tag="auction_start_2"
+                                              Padding="2"
+                                              BorderThickness="0">
+                                        <ComboBoxItem Content=""/>
+                                        <ComboBoxItem Content="개시"/>
+                                        <ComboBoxItem Content="미개시"/>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 경매열람자료 (체크박스) -->
+                        <DataGridTemplateColumn Header="경매열람" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding AuctionDocs, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="auction_docs"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 전입/상가임대차 열람 (체크박스) -->
+                        <DataGridTemplateColumn Header="전입열람" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding TenantDocs, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="tenant_docs"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 선순위검토 (체크박스) -->
+                        <DataGridTemplateColumn Header="선순위" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding SeniorRightsReview, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="senior_rights_review"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 평가액확정 (체크박스) -->
+                        <DataGridTemplateColumn Header="평가확정" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding AppraisalConfirmed, UpdateSourceTrigger=PropertyChanged}"
+                                              HorizontalAlignment="Center"
+                                              Click="ProgressCheckBox_Click"
+                                              Tag="appraisal_confirmed"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 경(공)매일정 -->
+                        <DataGridTemplateColumn Header="경매일정" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding AuctionScheduleDate, StringFormat=yyyy-MM-dd}"
+                                               VerticalAlignment="Center"
+                                               Padding="4,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- QA 미회신 (뱃지) -->
+                        <DataGridTemplateColumn Header="QA" Width="50">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource ErrorBrush}"
+                                            CornerRadius="10"
+                                            Padding="6,2"
+                                            HorizontalAlignment="Center"
+                                            Visibility="{Binding QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}">
+                                        <TextBlock Text="{Binding QaUnansweredCount}"
+                                                   Foreground="White"
+                                                   FontSize="11"
+                                                   FontWeight="Bold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 권리분석 상태 -->
+                        <DataGridTemplateColumn Header="권리분석" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4"
+                                            Padding="6,2"
+                                            HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RightsAnalysisStatus}" Value="completed">
+                                                        <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RightsAnalysisStatus}" Value="processing">
+                                                        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11" HorizontalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="대기"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RightsAnalysisStatus}" Value="completed">
+                                                            <Setter Property="Text" Value="완료"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RightsAnalysisStatus}" Value="processing">
+                                                            <Setter Property="Text" Value="진행중"/>
+                                                            <Setter Property="Foreground" Value="White"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 상세 보기 버튼 -->
+                        <DataGridTemplateColumn Header="작업" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="상세" 
+                                           Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                           CommandParameter="{Binding}"
+                                           Style="{StaticResource PrimaryButton}"
+                                           Padding="8,2"
+                                           FontSize="11"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Padding" Value="8,10"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource BlueGray100Brush}"/>
+                            <Setter Property="Padding" Value="4"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                </DataGrid>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
-

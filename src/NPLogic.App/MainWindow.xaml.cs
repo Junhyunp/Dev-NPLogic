@@ -92,6 +92,97 @@ namespace NPLogic
         }
 
         /// <summary>
+        /// 차주 개요로 이동
+        /// </summary>
+        public void NavigateToBorrowerOverview()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var borrowerOverviewView = serviceProvider.GetRequiredService<Views.BorrowerOverviewView>();
+                MainContentControl.Content = borrowerOverviewView;
+            }
+        }
+
+        /// <summary>
+        /// 담보 총괄로 이동
+        /// </summary>
+        public void NavigateToCollateralSummary()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var collateralSummaryView = serviceProvider.GetRequiredService<Views.CollateralSummaryView>();
+                MainContentControl.Content = collateralSummaryView;
+            }
+        }
+
+        /// <summary>
+        /// Loan 상세로 이동
+        /// </summary>
+        public void NavigateToLoanDetail()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var loanDetailView = serviceProvider.GetRequiredService<Views.LoanDetailView>();
+                MainContentControl.Content = loanDetailView;
+            }
+        }
+
+        /// <summary>
+        /// Tool Box로 이동
+        /// </summary>
+        public void NavigateToToolBox()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var toolBoxView = serviceProvider.GetRequiredService<Views.ToolBoxView>();
+                MainContentControl.Content = toolBoxView;
+            }
+        }
+
+        /// <summary>
+        /// 현금흐름 집계로 이동
+        /// </summary>
+        public void NavigateToCashFlowSummary()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var cashFlowSummaryView = serviceProvider.GetRequiredService<Views.CashFlowSummaryView>();
+                MainContentControl.Content = cashFlowSummaryView;
+            }
+        }
+
+        /// <summary>
+        /// XNPV 비교로 이동
+        /// </summary>
+        public void NavigateToXnpvComparison()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var xnpvComparisonView = serviceProvider.GetRequiredService<Views.XnpvComparisonView>();
+                MainContentControl.Content = xnpvComparisonView;
+            }
+        }
+
+        /// <summary>
+        /// 회생 개요로 이동
+        /// </summary>
+        public void NavigateToRestructuringOverview()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var restructuringOverviewView = serviceProvider.GetRequiredService<Views.RestructuringOverviewView>();
+                MainContentControl.Content = restructuringOverviewView;
+            }
+        }
+
+        /// <summary>
         /// 물건 상세로 이동
         /// </summary>
         public void NavigateToPropertyDetail(Property property)
@@ -141,6 +232,62 @@ namespace NPLogic
         private void StatisticsButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToStatistics();
+        }
+
+        /// <summary>
+        /// 차주 개요 버튼 클릭
+        /// </summary>
+        private void BorrowerOverviewButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToBorrowerOverview();
+        }
+
+        /// <summary>
+        /// 담보 총괄 버튼 클릭
+        /// </summary>
+        private void CollateralSummaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToCollateralSummary();
+        }
+
+        /// <summary>
+        /// Loan 상세 버튼 클릭
+        /// </summary>
+        private void LoanDetailButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToLoanDetail();
+        }
+
+        /// <summary>
+        /// Tool Box 버튼 클릭
+        /// </summary>
+        private void ToolBoxButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToToolBox();
+        }
+
+        /// <summary>
+        /// 현금흐름 집계 버튼 클릭
+        /// </summary>
+        private void CashFlowSummaryButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToCashFlowSummary();
+        }
+
+        /// <summary>
+        /// XNPV 비교 버튼 클릭
+        /// </summary>
+        private void XnpvComparisonButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToXnpvComparison();
+        }
+
+        /// <summary>
+        /// 회생 개요 버튼 클릭
+        /// </summary>
+        private void RestructuringOverviewButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToRestructuringOverview();
         }
 
         /// <summary>

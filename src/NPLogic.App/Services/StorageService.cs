@@ -18,7 +18,7 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// 파일 업로드
+        /// 파일 업로드 (로컬 파일 경로)
         /// </summary>
         /// <param name="filePath">로컬 파일 경로</param>
         /// <param name="bucketName">버킷 이름</param>
@@ -61,6 +61,57 @@ namespace NPLogic.Services
             catch (Exception ex)
             {
                 throw new Exception($"파일 업로드 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 파일 업로드 (바이트 배열)
+        /// </summary>
+        /// <param name="bucketName">버킷 이름</param>
+        /// <param name="storagePath">저장 경로</param>
+        /// <param name="fileBytes">파일 바이트 배열</param>
+        public async Task<string> UploadFileAsync(
+            string bucketName,
+            string storagePath,
+            byte[] fileBytes)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                
+                await client.Storage
+                    .From(bucketName)
+                    .Upload(fileBytes, storagePath);
+
+                // 공개 URL 반환
+                var publicUrl = client.Storage
+                    .From(bucketName)
+                    .GetPublicUrl(storagePath);
+
+                return publicUrl;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"파일 업로드 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 공개 URL 가져오기
+        /// </summary>
+        public Task<string> GetPublicUrlAsync(string bucketName, string storagePath)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var publicUrl = client.Storage
+                    .From(bucketName)
+                    .GetPublicUrl(storagePath);
+                return Task.FromResult(publicUrl);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"URL 조회 실패: {ex.Message}", ex);
             }
         }
 

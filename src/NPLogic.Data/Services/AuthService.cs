@@ -144,6 +144,29 @@ namespace NPLogic.Services
         }
 
         /// <summary>
+        /// 비밀번호 재설정 이메일 전송
+        /// </summary>
+        public async Task<bool> SendPasswordResetEmailAsync(string email)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                await client.Auth.ResetPasswordForEmail(email);
+                return true;
+            }
+            catch (GotrueException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"비밀번호 재설정 이메일 전송 실패: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"비밀번호 재설정 이메일 전송 오류: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 저장된 세션으로 자동 로그인 시도
         /// </summary>
         public async Task<bool> TryAutoSignInAsync()

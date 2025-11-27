@@ -144,8 +144,8 @@ namespace NPLogic.Data.Repositories
 
                 // 월별 그룹화
                 var grouped = response.Models
-                    .Where(p => p.CreatedAt.HasValue)
-                    .GroupBy(p => new { Year = p.CreatedAt!.Value.Year, Month = p.CreatedAt!.Value.Month })
+                    .Where(p => p.CreatedAt != default)
+                    .GroupBy(p => new { Year = p.CreatedAt.Year, Month = p.CreatedAt.Month })
                     .Select(g => new MonthlyTrend
                     {
                         Year = g.Key.Year,

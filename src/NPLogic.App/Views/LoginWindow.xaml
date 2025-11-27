@@ -110,134 +110,328 @@
                 Background="White"
                 Padding="60,40,60,40">
             
-            <StackPanel VerticalAlignment="Top"
-                        Margin="0,20,0,0">
-                
-                <!-- 제목 -->
-                <TextBlock Text="로그인"
-                          FontSize="32"
-                          FontWeight="Bold"
-                          Foreground="{DynamicResource PrimaryBrush}"
-                          Margin="0,0,0,8"/>
-                
-                <TextBlock Text="서비스를 이용하려면 로그인하세요"
-                          FontSize="14"
-                          Foreground="#666"
-                          Margin="0,0,0,25"/>
-
-                <!-- 에러 메시지 -->
-                <Border Background="#FFEBEE"
-                        BorderBrush="#EF5350"
-                        BorderThickness="1"
-                        CornerRadius="4"
-                        Padding="12"
-                        Margin="0,0,0,20"
-                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="AlertCircle"
-                                                Foreground="#EF5350"
-                                                Width="20"
-                                                Height="20"
-                                                VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding ErrorMessage}"
-                                  Foreground="#C62828"
-                                  FontSize="14"
-                                  Margin="10,0,0,0"
-                                  VerticalAlignment="Center"
-                                  TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- 이메일 입력 -->
-                <TextBox materialDesign:HintAssist.Hint="이메일"
-                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
-                         Margin="0,0,0,15"
-                         FontSize="16"
-                         Height="60"
-                         Padding="12,8"
-                         VerticalContentAlignment="Center">
-                    <TextBox.InputBindings>
-                        <KeyBinding Key="Return" Command="{Binding SignInWithEmailCommand}"/>
-                    </TextBox.InputBindings>
-                </TextBox>
-
-                <!-- 비밀번호 입력 -->
-                <PasswordBox x:Name="PasswordBox"
-                            materialDesign:HintAssist.Hint="비밀번호"
-                            Margin="0,0,0,15"
-                            FontSize="16"
-                            Height="60"
-                            Padding="12,8"
-                            VerticalContentAlignment="Center"
-                            PasswordChanged="PasswordBox_PasswordChanged">
-                    <PasswordBox.InputBindings>
-                        <KeyBinding Key="Return" Command="{Binding SignInWithEmailCommand}"/>
-                    </PasswordBox.InputBindings>
-                </PasswordBox>
-
-                <!-- 자동 로그인 -->
-                <CheckBox Content="자동 로그인"
-                         IsChecked="{Binding RememberMe}"
-                         Margin="0,0,0,20"/>
-
-                <!-- 로그인 버튼 -->
-                <Button Command="{Binding SignInWithEmailCommand}"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                        Height="50"
-                        Margin="0,0,0,15"
-                        Style="{StaticResource PrimaryButton}">
-                    <TextBlock Text="로그인"
-                              FontSize="16"
-                              FontWeight="SemiBold"/>
-                </Button>
-
-                <!-- 회원가입 버튼 -->
-                <Button Command="{Binding SignUpCommand}"
-                        IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                        Height="50"
-                        Margin="0,0,0,15"
-                        Style="{StaticResource SecondaryButton}">
-                    <TextBlock Text="회원가입"
-                              FontSize="16"
-                              FontWeight="SemiBold"/>
-                </Button>
-
-                <!-- 로딩 표시 -->
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center"
+            <Grid>
+                <!-- 로그인 폼 -->
+                <StackPanel x:Name="LoginPanel"
+                            VerticalAlignment="Top"
                             Margin="0,20,0,0"
-                            Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ProgressBar Value="0"
-                                IsIndeterminate="True"
-                                Width="24"
-                                Height="24"
-                                Margin="0,0,10,0"/>
-                    <TextBlock Text="로그인 중..."
+                            Visibility="{Binding IsPasswordResetMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    
+                    <!-- 제목 -->
+                    <TextBlock Text="로그인"
+                              FontSize="32"
+                              FontWeight="Bold"
+                              Foreground="{DynamicResource PrimaryBrush}"
+                              Margin="0,0,0,8"/>
+                    
+                    <TextBlock Text="서비스를 이용하려면 로그인하세요"
                               FontSize="14"
                               Foreground="#666"
-                              VerticalAlignment="Center"/>
+                              Margin="0,0,0,25"/>
+
+                    <!-- 에러 메시지 -->
+                    <Border Background="#FFEBEE"
+                            BorderBrush="#EF5350"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AlertCircle"
+                                                    Foreground="#EF5350"
+                                                    Width="20"
+                                                    Height="20"
+                                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ErrorMessage}"
+                                      Foreground="#C62828"
+                                      FontSize="14"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"
+                                      TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 성공 메시지 -->
+                    <Border Background="#E8F5E9"
+                            BorderBrush="#66BB6A"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CheckCircle"
+                                                    Foreground="#66BB6A"
+                                                    Width="20"
+                                                    Height="20"
+                                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SuccessMessage}"
+                                      Foreground="#2E7D32"
+                                      FontSize="14"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"
+                                      TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 이메일 입력 -->
+                    <TextBox materialDesign:HintAssist.Hint="이메일"
+                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,15"
+                             FontSize="16"
+                             Height="60"
+                             Padding="12,8"
+                             VerticalContentAlignment="Center">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SignInWithEmailCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <!-- 비밀번호 입력 -->
+                    <PasswordBox x:Name="PasswordBox"
+                                materialDesign:HintAssist.Hint="비밀번호"
+                                Margin="0,0,0,10"
+                                FontSize="16"
+                                Height="60"
+                                Padding="12,8"
+                                VerticalContentAlignment="Center"
+                                PasswordChanged="PasswordBox_PasswordChanged">
+                        <PasswordBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SignInWithEmailCommand}"/>
+                        </PasswordBox.InputBindings>
+                    </PasswordBox>
+
+                    <!-- 비밀번호 찾기 링크 -->
+                    <Button Content="비밀번호를 잊으셨나요?"
+                            Command="{Binding ShowPasswordResetCommand}"
+                            HorizontalAlignment="Right"
+                            Margin="0,0,0,15"
+                            Padding="0"
+                            FontSize="13"
+                            Foreground="{DynamicResource PrimaryBrush}"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <TextBlock Text="{TemplateBinding Content}" 
+                                                       TextDecorations="Underline"
+                                                       Foreground="{TemplateBinding Foreground}"/>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Foreground" Value="#1565C0"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- 자동 로그인 -->
+                    <CheckBox Content="자동 로그인"
+                             IsChecked="{Binding RememberMe}"
+                             Margin="0,0,0,20"/>
+
+                    <!-- 로그인 버튼 -->
+                    <Button Command="{Binding SignInWithEmailCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                            Height="50"
+                            Margin="0,0,0,15"
+                            Style="{StaticResource PrimaryButton}">
+                        <TextBlock Text="로그인"
+                                  FontSize="16"
+                                  FontWeight="SemiBold"/>
+                    </Button>
+
+                    <!-- 회원가입 버튼 -->
+                    <Button Command="{Binding SignUpCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                            Height="50"
+                            Margin="0,0,0,15"
+                            Style="{StaticResource SecondaryButton}">
+                        <TextBlock Text="회원가입"
+                                  FontSize="16"
+                                  FontWeight="SemiBold"/>
+                    </Button>
+
+                    <!-- 로딩 표시 -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,20,0,0"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressBar Value="0"
+                                    IsIndeterminate="True"
+                                    Width="24"
+                                    Height="24"
+                                    Margin="0,0,10,0"/>
+                        <TextBlock Text="로그인 중..."
+                                  FontSize="14"
+                                  Foreground="#666"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 구분선 -->
+                    <Separator Margin="0,30,0,20"/>
+
+                    <!-- 푸터 -->
+                    <TextBlock Text="© 2025 NPLogic. All rights reserved."
+                              FontSize="12"
+                              Foreground="#999"
+                              HorizontalAlignment="Center"
+                              Margin="0,40,0,0"/>
                 </StackPanel>
 
-                <!-- 구분선 -->
-                <Separator Margin="0,30,0,20"/>
+                <!-- 비밀번호 재설정 폼 -->
+                <StackPanel x:Name="PasswordResetPanel"
+                            VerticalAlignment="Top"
+                            Margin="0,20,0,0"
+                            Visibility="{Binding IsPasswordResetMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    
+                    <!-- 뒤로가기 버튼 -->
+                    <Button Command="{Binding HidePasswordResetCommand}"
+                            HorizontalAlignment="Left"
+                            Margin="0,0,0,20"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ArrowLeft"
+                                                    Width="20"
+                                                    Height="20"
+                                                    Foreground="#666"
+                                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="로그인으로 돌아가기"
+                                      FontSize="14"
+                                      Foreground="#666"
+                                      Margin="8,0,0,0"
+                                      VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <!-- 제목 -->
+                    <TextBlock Text="비밀번호 재설정"
+                              FontSize="32"
+                              FontWeight="Bold"
+                              Foreground="{DynamicResource PrimaryBrush}"
+                              Margin="0,0,0,8"/>
+                    
+                    <TextBlock Text="가입한 이메일 주소를 입력하시면&#x0a;비밀번호 재설정 링크를 보내드립니다."
+                              FontSize="14"
+                              Foreground="#666"
+                              Margin="0,0,0,25"
+                              LineHeight="22"/>
 
-                <!-- 테스트 로그인 (개발용) - 현재 비활성화 -->
-                <!--
-                <Button Command="{Binding TestLoginCommand}"
-                        Content="테스트 로그인 (개발용)"
-                        Height="40"
-                        Style="{StaticResource MaterialDesignFlatButton}"
-                        Foreground="#666"/>
-                -->
+                    <!-- 에러 메시지 -->
+                    <Border Background="#FFEBEE"
+                            BorderBrush="#EF5350"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding PasswordResetErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AlertCircle"
+                                                    Foreground="#EF5350"
+                                                    Width="20"
+                                                    Height="20"
+                                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding PasswordResetErrorMessage}"
+                                      Foreground="#C62828"
+                                      FontSize="14"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"
+                                      TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
 
-                <!-- 푸터 -->
-                <TextBlock Text="© 2025 NPLogic. All rights reserved."
-                          FontSize="12"
-                          Foreground="#999"
-                          HorizontalAlignment="Center"
-                          Margin="0,40,0,0"/>
-            </StackPanel>
+                    <!-- 성공 메시지 -->
+                    <Border Background="#E8F5E9"
+                            BorderBrush="#66BB6A"
+                            BorderThickness="1"
+                            CornerRadius="4"
+                            Padding="12"
+                            Margin="0,0,0,20"
+                            Visibility="{Binding PasswordResetSuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CheckCircle"
+                                                    Foreground="#66BB6A"
+                                                    Width="20"
+                                                    Height="20"
+                                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding PasswordResetSuccessMessage}"
+                                      Foreground="#2E7D32"
+                                      FontSize="14"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"
+                                      TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 이메일 입력 -->
+                    <TextBox materialDesign:HintAssist.Hint="이메일"
+                             Text="{Binding PasswordResetEmail, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,20"
+                             FontSize="16"
+                             Height="60"
+                             Padding="12,8"
+                             VerticalContentAlignment="Center">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SendPasswordResetEmailCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <!-- 비밀번호 재설정 링크 전송 버튼 -->
+                    <Button Command="{Binding SendPasswordResetEmailCommand}"
+                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                            Height="50"
+                            Style="{StaticResource PrimaryButton}">
+                        <TextBlock Text="재설정 링크 보내기"
+                                  FontSize="16"
+                                  FontWeight="SemiBold"/>
+                    </Button>
+
+                    <!-- 로딩 표시 -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                Margin="0,20,0,0"
+                                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ProgressBar Value="0"
+                                    IsIndeterminate="True"
+                                    Width="24"
+                                    Height="24"
+                                    Margin="0,0,10,0"/>
+                        <TextBlock Text="전송 중..."
+                                  FontSize="14"
+                                  Foreground="#666"
+                                  VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- 안내 문구 -->
+                    <Border Background="#E3F2FD"
+                            CornerRadius="4"
+                            Padding="16"
+                            Margin="0,30,0,0">
+                        <StackPanel>
+                            <TextBlock Text="📧 이메일을 받지 못하셨나요?"
+                                      FontSize="14"
+                                      FontWeight="SemiBold"
+                                      Foreground="#1565C0"
+                                      Margin="0,0,0,8"/>
+                            <TextBlock Text="• 스팸 폴더를 확인해주세요&#x0a;• 이메일 주소가 정확한지 확인해주세요&#x0a;• 몇 분 후 다시 시도해주세요"
+                                      FontSize="13"
+                                      Foreground="#1976D2"
+                                      LineHeight="20"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>
-

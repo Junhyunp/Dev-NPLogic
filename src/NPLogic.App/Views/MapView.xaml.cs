@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -10,13 +11,24 @@ using Microsoft.Web.WebView2.Core;
 namespace NPLogic.Views
 {
     /// <summary>
-    /// 카카오맵 WebView2 컨트롤
+    /// 카카오맵 WebView2 컨트롤 (레이어 토글 지원)
     /// </summary>
     public partial class MapView : UserControl
     {
         private bool _isInitialized = false;
         private bool _isMapReady = false;
+        private bool _isRoadViewInitialized = false;
         private string? _kakaoMapApiKey;
+
+        // 현재 레이어 상태
+        private bool _showBaseMap = true;
+        private bool _showSatellite = false;
+        private bool _showCadastral = false;
+        private bool _showLandUse = false;
+
+        // 현재 위치 (로드뷰용)
+        private double _currentLat = 37.5665;
+        private double _currentLng = 126.9780;
 
         // 보류 중인 마커 설정 (지도 초기화 전에 호출된 경우)
         private (double lat, double lng, string? address, string? propertyNumber, string? propertyType)? _pendingMarker;
@@ -59,7 +71,8 @@ namespace NPLogic.Views
                         .AddJsonFile("appsettings.json", optional: true)
                         .Build();
 
-                    _kakaoMapApiKey = config["KakaoMapApiKey"];
+                    // KakaoMap:ApiKey 또는 KakaoMapApiKey 둘 다 지원
+                    _kakaoMapApiKey = config["KakaoMap:ApiKey"] ?? config["KakaoMapApiKey"];
                 }
 
                 // 환경 변수에서도 확인
@@ -95,6 +108,10 @@ namespace NPLogic.Views
             if (MapWebView.CoreWebView2 != null)
             {
                 MapWebView.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+            }
+            if (RoadViewWebView.CoreWebView2 != null)
+            {
+                RoadViewWebView.CoreWebView2.WebMessageReceived -= RoadViewWebView_WebMessageReceived;
             }
         }
 
@@ -206,9 +223,23 @@ namespace NPLogic.Views
                         var lat = json.RootElement.GetProperty("lat").GetDouble();
                         var lng = json.RootElement.GetProperty("lng").GetDouble();
                         var address = json.RootElement.GetProperty("address").GetString() ?? "";
+                        _currentLat = lat;
+                        _currentLng = lng;
                         Dispatcher.Invoke(() =>
                         {
+                            CoordinateInfo.Text = $"좌표: {lat:F6}, {lng:F6}";
                             GeocodeCompleted?.Invoke(this, (lat, lng, address));
+                        });
+                        break;
+
+                    case "centerChanged":
+                        var centerLat = json.RootElement.GetProperty("lat").GetDouble();
+                        var centerLng = json.RootElement.GetProperty("lng").GetDouble();
+                        _currentLat = centerLat;
+                        _currentLng = centerLng;
+                        Dispatcher.Invoke(() =>
+                        {
+                            CoordinateInfo.Text = $"좌표: {centerLat:F6}, {centerLng:F6}";
                         });
                         break;
 
@@ -224,11 +255,231 @@ namespace NPLogic.Views
             }
         }
 
+        #region 레이어 토글
+
+        /// <summary>
+        /// 레이어 체크박스 변경 이벤트
+        /// </summary>
+        private async void LayerCheckbox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!_isMapReady) return;
+
+            _showBaseMap = ChkBaseMap.IsChecked == true;
+            _showSatellite = ChkSatellite.IsChecked == true;
+            _showCadastral = ChkCadastral.IsChecked == true;
+            _showLandUse = ChkLandUse.IsChecked == true;
+
+            await UpdateLayersAsync();
+        }
+
+        /// <summary>
+        /// 레이어 상태 업데이트
+        /// </summary>
+        private async Task UpdateLayersAsync()
+        {
+            try
+            {
+                // 지도 타입 변경
+                string mapType = "ROADMAP";
+                if (_showSatellite && !_showBaseMap) mapType = "SKYVIEW";
+                else if (_showSatellite && _showBaseMap) mapType = "HYBRID";
+
+                await MapWebView.CoreWebView2.ExecuteScriptAsync($"setMapType('{mapType}');");
+
+                // 지적도 레이어 토글
+                await MapWebView.CoreWebView2.ExecuteScriptAsync($"toggleCadastralLayer({_showCadastral.ToString().ToLower()});");
+
+                // 토지이용계획 레이어 (API 연동 필요 - 현재는 알림만)
+                if (_showLandUse)
+                {
+                    MessageBox.Show(
+                        "토지이용계획 레이어는 국토이용정보서비스(LURIS) API 연동이 필요합니다.\n\n" +
+                        "API 신청: https://www.eum.go.kr/",
+                        "안내",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    ChkLandUse.IsChecked = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"레이어 변경 실패: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region 로드뷰
+
+        /// <summary>
+        /// 로드뷰 체크박스 변경
+        /// </summary>
+        private async void RoadViewCheckbox_Changed(object sender, RoutedEventArgs e)
+        {
+            if (ChkRoadView.IsChecked == true)
+            {
+                await ShowRoadViewAsync();
+            }
+            else
+            {
+                HideRoadView();
+            }
+        }
+
+        /// <summary>
+        /// 로드뷰 표시
+        /// </summary>
+        private async Task ShowRoadViewAsync()
+        {
+            try
+            {
+                RoadViewContainer.Visibility = Visibility.Visible;
+
+                if (!_isRoadViewInitialized)
+                {
+                    var env = await CoreWebView2Environment.CreateAsync();
+                    await RoadViewWebView.EnsureCoreWebView2Async(env);
+                    RoadViewWebView.CoreWebView2.WebMessageReceived += RoadViewWebView_WebMessageReceived;
+                    _isRoadViewInitialized = true;
+                }
+
+                // 로드뷰 HTML 로드
+                var roadViewHtml = GenerateRoadViewHtml(_currentLat, _currentLng);
+                RoadViewWebView.NavigateToString(roadViewHtml);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"로드뷰 초기화 실패: {ex.Message}");
+            }
+        }
+
+        private void RoadViewWebView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            // 로드뷰 메시지 처리 (필요시 확장)
+        }
+
+        /// <summary>
+        /// 로드뷰 숨기기
+        /// </summary>
+        private void HideRoadView()
+        {
+            RoadViewContainer.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// 로드뷰 닫기 버튼
+        /// </summary>
+        private void CloseRoadView_Click(object sender, RoutedEventArgs e)
+        {
+            ChkRoadView.IsChecked = false;
+            HideRoadView();
+        }
+
+        /// <summary>
+        /// 로드뷰 HTML 생성
+        /// </summary>
+        private string GenerateRoadViewHtml(double lat, double lng)
+        {
+            var apiKey = _kakaoMapApiKey ?? "";
+            
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                return @"<!DOCTYPE html>
+<html><body style='background:#1A2744;color:#94A3B8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;'>
+<p>API 키가 필요합니다</p>
+</body></html>";
+            }
+
+            return string.Format(@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>body{{margin:0;padding:0;}}#roadview{{width:100%;height:100vh;}}</style>
+    <script src='https://dapi.kakao.com/v2/maps/sdk.js?appkey={0}'></script>
+</head>
+<body>
+    <div id='roadview'></div>
+    <script>
+        var roadviewContainer = document.getElementById('roadview');
+        var roadview = new kakao.maps.Roadview(roadviewContainer);
+        var roadviewClient = new kakao.maps.RoadviewClient();
+        var position = new kakao.maps.LatLng({1}, {2});
+        
+        roadviewClient.getNearestPanoId(position, 50, function(panoId) {{
+            if (panoId) {{
+                roadview.setPanoId(panoId, position);
+            }} else {{
+                document.body.innerHTML = '<div style=""background:#1A2744;color:#94A3B8;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;""><p>이 위치에 로드뷰가 없습니다</p></div>';
+            }}
+        }});
+    </script>
+</body>
+</html>", apiKey, lat, lng);
+        }
+
+        #endregion
+
+        #region 줌 컨트롤
+
+        private async void ZoomIn_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isMapReady) return;
+            try
+            {
+                await MapWebView.CoreWebView2.ExecuteScriptAsync("zoomIn();");
+            }
+            catch { }
+        }
+
+        private async void ZoomOut_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isMapReady) return;
+            try
+            {
+                await MapWebView.CoreWebView2.ExecuteScriptAsync("zoomOut();");
+            }
+            catch { }
+        }
+
+        #endregion
+
+        #region 기타 버튼
+
+        private async void RefreshMap_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isMapReady) return;
+            try
+            {
+                await MapWebView.CoreWebView2.ExecuteScriptAsync("refreshMap();");
+            }
+            catch { }
+        }
+
+        private void OpenExternal_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var url = $"https://map.kakao.com/?map_type=TYPE_MAP&sX={_currentLng}&sY={_currentLat}&sLevel=3";
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"브라우저를 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #endregion
+
+        #region 공개 API
+
         /// <summary>
         /// 단일 위치 마커 설정
         /// </summary>
         public async Task SetLocationAsync(double latitude, double longitude, string? address = null, string? propertyNumber = null, string? propertyType = null)
         {
+            _currentLat = latitude;
+            _currentLng = longitude;
+
             if (!_isMapReady)
             {
                 // 지도가 준비되지 않았으면 보류
@@ -240,6 +491,7 @@ namespace NPLogic.Views
             {
                 var script = $"setMarker({latitude}, {longitude}, '{EscapeJsString(address ?? "")}', '{EscapeJsString(propertyNumber ?? "")}', '{EscapeJsString(propertyType ?? "")}');";
                 await MapWebView.CoreWebView2.ExecuteScriptAsync(script);
+                CoordinateInfo.Text = $"좌표: {latitude:F6}, {longitude:F6}";
             }
             catch (Exception ex)
             {
@@ -289,6 +541,8 @@ namespace NPLogic.Views
         public async Task PanToAsync(double latitude, double longitude)
         {
             if (!_isMapReady) return;
+            _currentLat = latitude;
+            _currentLng = longitude;
 
             try
             {
@@ -333,6 +587,8 @@ namespace NPLogic.Views
                 System.Diagnostics.Debug.WriteLine($"주소 검색 실패: {ex.Message}");
             }
         }
+
+        #endregion
 
         /// <summary>
         /// 에러 표시
@@ -386,4 +642,3 @@ namespace NPLogic.Views
         }
     }
 }
-

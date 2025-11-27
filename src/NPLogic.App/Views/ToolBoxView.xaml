@@ -1,0 +1,288 @@
+<UserControl x:Class="NPLogic.Views.ToolBoxView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NPLogic.Views"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:ToolBoxViewModel}"
+             Loaded="ToolBoxView_Loaded">
+    
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 영역 -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Tool Box" 
+                           Style="{StaticResource H2TextStyle}"
+                           Margin="0,0,0,8"/>
+                <TextBlock Text="참조 데이터 및 공통 코드 관리" 
+                           Style="{StaticResource BodyTextStyle}"
+                           Opacity="0.7"/>
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Content="새로고침" 
+                    Command="{Binding RefreshCommand}"
+                    Style="{StaticResource PrimaryButton}"
+                    Padding="20,10"/>
+        </Grid>
+
+        <!-- 탭 컨텐츠 -->
+        <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
+            <!-- 법원 탭 -->
+            <TabItem Header="법원 정보">
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="350"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 법원 목록 -->
+                    <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="법원 목록" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                            <ListBox Grid.Row="1" ItemsSource="{Binding Courts}" SelectedItem="{Binding SelectedCourt}"
+                                     Background="Transparent" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Padding="8,6">
+                                            <TextBlock Text="{Binding CourtName}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding CourtCode}" FontSize="11" Opacity="0.7"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Button Grid.Row="2" Content="+ 법원 추가" Command="{Binding AddCourtCommand}"
+                                    Style="{StaticResource SecondaryButton}" Margin="0,12,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 법원 상세 -->
+                    <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="20">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedCourt}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <TextBlock Text="법원 상세 정보" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,20"/>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="법원 코드" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.CourtCode, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="법원명" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.CourtName, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="지역" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.Region, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="전화번호" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.Phone, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="4" Grid.ColumnSpan="3">
+                                        <TextBlock Text="주소" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.Address, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="저감율 설정" FontWeight="SemiBold" Margin="0,24,0,12"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="1회차" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.DiscountRate1, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,8,0">
+                                        <TextBlock Text="2회차" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.DiscountRate2, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="8,0,8,0">
+                                        <TextBlock Text="3회차" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.DiscountRate3, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3" Margin="8,0,0,0">
+                                        <TextBlock Text="4회차" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedCourt.DiscountRate4, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                                    <Button Content="삭제" Command="{Binding DeleteCourtCommand}" CommandParameter="{Binding SelectedCourt}"
+                                            Style="{StaticResource SecondaryButton}" Padding="20,10" Margin="0,0,8,0"/>
+                                    <Button Content="저장" Command="{Binding SaveCourtCommand}"
+                                            Style="{StaticResource PrimaryButton}" Padding="32,10"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- 금융기관 탭 -->
+            <TabItem Header="금융기관">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Content="+ 금융기관 추가" Command="{Binding AddFinancialInstitutionCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Padding="16,8" Margin="0,0,0,16"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding FinancialInstitutions}" SelectedItem="{Binding SelectedFinancialInstitution}"
+                              AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="기관코드" Binding="{Binding InstitutionCode}" Width="100"/>
+                            <DataGridTextColumn Header="기관명" Binding="{Binding InstitutionName}" Width="200"/>
+                            <DataGridTextColumn Header="기관유형" Binding="{Binding InstitutionType}" Width="100"/>
+                            <DataGridTextColumn Header="전화번호" Binding="{Binding Phone}" Width="120"/>
+                            <DataGridTextColumn Header="주소" Binding="{Binding Address}" Width="*"/>
+                            <DataGridTemplateColumn Header="삭제" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="X" Command="{Binding DataContext.DeleteFinancialInstitutionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" Style="{StaticResource SecondaryButton}" Padding="8,4"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- 감정평가기관 탭 -->
+            <TabItem Header="감정평가기관">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Button Grid.Row="0" Content="+ 감정평가기관 추가" Command="{Binding AddAppraisalFirmCommand}"
+                            Style="{StaticResource SecondaryButton}" HorizontalAlignment="Left" Padding="16,8" Margin="0,0,0,16"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding AppraisalFirms}" SelectedItem="{Binding SelectedAppraisalFirm}"
+                              AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="기관코드" Binding="{Binding FirmCode}" Width="100"/>
+                            <DataGridTextColumn Header="기관명" Binding="{Binding FirmName}" Width="200"/>
+                            <DataGridTextColumn Header="대표자" Binding="{Binding Representative}" Width="100"/>
+                            <DataGridTextColumn Header="전화번호" Binding="{Binding Phone}" Width="120"/>
+                            <DataGridTextColumn Header="이메일" Binding="{Binding Email}" Width="180"/>
+                            <DataGridTemplateColumn Header="삭제" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="X" Command="{Binding DataContext.DeleteAppraisalFirmCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" Style="{StaticResource SecondaryButton}" Padding="8,4"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- 공통 코드 탭 -->
+            <TabItem Header="공통 코드">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <ComboBox ItemsSource="{Binding CodeGroups}" SelectedItem="{Binding SelectedCodeGroup}"
+                                  Width="200" Padding="12,10" Margin="0,0,16,0"/>
+                        <Button Content="+ 코드 추가" Command="{Binding AddCommonCodeCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="16,8"/>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding CommonCodes}"
+                              AutoGenerateColumns="False" IsReadOnly="True" Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="코드그룹" Binding="{Binding CodeGroup}" Width="150"/>
+                            <DataGridTextColumn Header="코드값" Binding="{Binding CodeValue}" Width="120"/>
+                            <DataGridTextColumn Header="코드명" Binding="{Binding CodeName}" Width="200"/>
+                            <DataGridTextColumn Header="정렬순서" Binding="{Binding SortOrder}" Width="80"/>
+                            <DataGridTextColumn Header="설명" Binding="{Binding Description}" Width="*"/>
+                            <DataGridTemplateColumn Header="삭제" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="X" Command="{Binding DataContext.DeleteCommonCodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" Style="{StaticResource SecondaryButton}" Padding="8,4"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- 로딩 오버레이 -->
+        <Border Grid.RowSpan="2" Background="#80000000" CornerRadius="8"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200"/>
+                <TextBlock Text="로딩 중..." Foreground="White" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

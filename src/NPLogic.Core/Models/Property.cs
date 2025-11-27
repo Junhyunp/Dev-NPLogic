@@ -51,12 +51,89 @@ namespace NPLogic.Core.Models
         // 담당자
         public Guid? AssignedTo { get; set; }
 
+        // ========== 대시보드 진행 관리 필드 ==========
+        
+        /// <summary>차주명</summary>
+        public string? DebtorName { get; set; }
+
+        /// <summary>담보번호</summary>
+        public string? CollateralNumber { get; set; }
+
+        /// <summary>약정서 제출 여부</summary>
+        public bool AgreementDoc { get; set; }
+
+        /// <summary>보증서 제출 여부</summary>
+        public bool GuaranteeDoc { get; set; }
+
+        /// <summary>경개개시여부 1</summary>
+        public string? AuctionStart1 { get; set; }
+
+        /// <summary>경개개시여부 2</summary>
+        public string? AuctionStart2 { get; set; }
+
+        /// <summary>경매열람자료 확보 여부</summary>
+        public bool AuctionDocs { get; set; }
+
+        /// <summary>전입/상가임대차 열람 완료 여부</summary>
+        public bool TenantDocs { get; set; }
+
+        /// <summary>선순위검토 완료 여부</summary>
+        public bool SeniorRightsReview { get; set; }
+
+        /// <summary>평가액확정 여부</summary>
+        public bool AppraisalConfirmed { get; set; }
+
+        /// <summary>경(공)매일정</summary>
+        public DateTime? AuctionScheduleDate { get; set; }
+
+        /// <summary>QA 미회신 개수</summary>
+        public int QaUnansweredCount { get; set; }
+
+        /// <summary>권리분석 상태 (pending/processing/completed)</summary>
+        public string RightsAnalysisStatus { get; set; } = "pending";
+
         // 메타데이터
         public Guid? CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
+        // ========== 진행률 계산 메서드 ==========
+
+        /// <summary>
+        /// 전체 진행률 계산 (체크박스 기준)
+        /// </summary>
+        public int GetProgressPercent()
+        {
+            int completed = 0;
+            int total = 8; // 체크박스 총 개수
+
+            if (AgreementDoc) completed++;
+            if (GuaranteeDoc) completed++;
+            if (AuctionDocs) completed++;
+            if (TenantDocs) completed++;
+            if (SeniorRightsReview) completed++;
+            if (AppraisalConfirmed) completed++;
+            if (!string.IsNullOrEmpty(AuctionStart1)) completed++;
+            if (RightsAnalysisStatus == "completed") completed++;
+
+            return (int)Math.Round((double)completed / total * 100);
+        }
+
+        /// <summary>
+        /// 권리분석 상태 열거형
+        /// </summary>
+        public RightsAnalysisStatusEnum GetRightsAnalysisStatus()
+        {
+            return RightsAnalysisStatus?.ToLower() switch
+            {
+                "pending" => RightsAnalysisStatusEnum.Pending,
+                "processing" => RightsAnalysisStatusEnum.Processing,
+                "completed" => RightsAnalysisStatusEnum.Completed,
+                _ => RightsAnalysisStatusEnum.Pending
+            };
+        }
 
         /// <summary>
         /// 물건 상태 열거형
@@ -164,6 +241,16 @@ namespace NPLogic.Core.Models
         MultiFamily,  // 다가구주택
         Factory,      // 공장
         Other         // 기타
+    }
+
+    /// <summary>
+    /// 권리분석 상태
+    /// </summary>
+    public enum RightsAnalysisStatusEnum
+    {
+        Pending,      // 대기
+        Processing,   // 진행중
+        Completed     // 완료
     }
 }
 

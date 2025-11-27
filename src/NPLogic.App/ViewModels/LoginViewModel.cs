@@ -30,10 +30,26 @@ namespace NPLogic.ViewModels
         private string? _errorMessage;
 
         [ObservableProperty]
+        private string? _successMessage;
+
+        [ObservableProperty]
         private bool _rememberMe;
 
         [ObservableProperty]
         private string _confirmPassword = string.Empty;
+
+        // 비밀번호 재설정 관련
+        [ObservableProperty]
+        private bool _isPasswordResetMode;
+
+        [ObservableProperty]
+        private string _passwordResetEmail = string.Empty;
+
+        [ObservableProperty]
+        private string? _passwordResetErrorMessage;
+
+        [ObservableProperty]
+        private string? _passwordResetSuccessMessage;
 
         public LoginViewModel(AuthService authService, SupabaseService supabaseService)
         {
@@ -138,6 +154,7 @@ namespace NPLogic.ViewModels
 
                 IsLoading = true;
                 ErrorMessage = null;
+                SuccessMessage = null;
 
                 // 로그인 시도
                 var (success, errorMessage, user) = await _authService.SignInWithEmailAsync(Email, Password, RememberMe);
@@ -161,6 +178,80 @@ namespace NPLogic.ViewModels
                 IsLoading = false;
             }
         }
+
+        #region 비밀번호 재설정
+
+        /// <summary>
+        /// 비밀번호 재설정 모드 표시
+        /// </summary>
+        [RelayCommand]
+        private void ShowPasswordReset()
+        {
+            IsPasswordResetMode = true;
+            PasswordResetEmail = Email; // 로그인 폼의 이메일을 미리 채움
+            PasswordResetErrorMessage = null;
+            PasswordResetSuccessMessage = null;
+        }
+
+        /// <summary>
+        /// 비밀번호 재설정 모드 숨기기
+        /// </summary>
+        [RelayCommand]
+        private void HidePasswordReset()
+        {
+            IsPasswordResetMode = false;
+            PasswordResetErrorMessage = null;
+            PasswordResetSuccessMessage = null;
+        }
+
+        /// <summary>
+        /// 비밀번호 재설정 이메일 전송
+        /// </summary>
+        [RelayCommand]
+        private async Task SendPasswordResetEmailAsync()
+        {
+            try
+            {
+                // 입력 검증
+                if (string.IsNullOrWhiteSpace(PasswordResetEmail))
+                {
+                    PasswordResetErrorMessage = "이메일을 입력해주세요.";
+                    return;
+                }
+
+                if (!IsValidEmail(PasswordResetEmail))
+                {
+                    PasswordResetErrorMessage = "올바른 이메일 형식이 아닙니다.";
+                    return;
+                }
+
+                IsLoading = true;
+                PasswordResetErrorMessage = null;
+                PasswordResetSuccessMessage = null;
+
+                // Supabase 비밀번호 재설정 이메일 전송
+                var success = await _authService.SendPasswordResetEmailAsync(PasswordResetEmail);
+
+                if (success)
+                {
+                    PasswordResetSuccessMessage = $"비밀번호 재설정 링크가 {PasswordResetEmail}로 전송되었습니다.\n이메일을 확인해주세요.";
+                }
+                else
+                {
+                    PasswordResetErrorMessage = "비밀번호 재설정 이메일 전송에 실패했습니다.\n이메일 주소를 다시 확인해주세요.";
+                }
+            }
+            catch (Exception ex)
+            {
+                PasswordResetErrorMessage = $"오류가 발생했습니다: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 이메일 형식 검증
@@ -231,4 +322,3 @@ namespace NPLogic.ViewModels
         }
     }
 }
-
