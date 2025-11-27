@@ -89,6 +89,7 @@ namespace NPLogic
             // Repositories (Singleton)
             services.AddSingleton<Data.Repositories.UserRepository>();
             services.AddSingleton<Data.Repositories.PropertyRepository>();
+            services.AddSingleton<Data.Repositories.StatisticsRepository>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
@@ -97,6 +98,7 @@ namespace NPLogic
             services.AddTransient<ViewModels.PropertyFormViewModel>();
             services.AddTransient<ViewModels.PropertyDetailViewModel>();
             services.AddTransient<ViewModels.DataUploadViewModel>();
+            services.AddTransient<ViewModels.StatisticsViewModel>();
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
@@ -124,6 +126,13 @@ namespace NPLogic
             {
                 var view = new Views.PropertyDetailView();
                 view.DataContext = sp.GetRequiredService<ViewModels.PropertyDetailViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.StatisticsView>(sp =>
+            {
+                var view = new Views.StatisticsView();
+                view.DataContext = sp.GetRequiredService<ViewModels.StatisticsViewModel>();
                 return view;
             });
 

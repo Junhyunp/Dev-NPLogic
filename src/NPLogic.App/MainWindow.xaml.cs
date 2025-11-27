@@ -79,6 +79,19 @@ namespace NPLogic
         }
 
         /// <summary>
+        /// 통계 분석으로 이동
+        /// </summary>
+        private void NavigateToStatistics()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var statisticsView = serviceProvider.GetRequiredService<Views.StatisticsView>();
+                MainContentControl.Content = statisticsView;
+            }
+        }
+
+        /// <summary>
         /// 물건 상세로 이동
         /// </summary>
         public void NavigateToPropertyDetail(Property property)
@@ -127,7 +140,7 @@ namespace NPLogic
         /// </summary>
         private void StatisticsButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigateToUnderDevelopment();
+            NavigateToStatistics();
         }
 
         /// <summary>

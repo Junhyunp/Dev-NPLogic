@@ -363,19 +363,21 @@
 
 ---
 
-## 📈 Phase 10: 통계 및 유사 물건 추천 (6주차)
+## 📈 Phase 10: 통계 및 유사 물건 추천 (6주차) 🔄 진행 중
 
-### 통계 화면
-- [ ] `Views/StatisticsView.xaml` 생성
-- [ ] `ViewModels/StatisticsViewModel.cs` 생성
-- [ ] 필터 패널 (기간, 지역, 유형)
-- [ ] 통계 카드
-- [ ] LiveCharts 또는 OxyPlot 설치
-- [ ] 차트 구현
-  - [ ] 막대 차트
-  - [ ] 선 차트
-  - [ ] 파이 차트
-- [ ] 통계 Excel 출력
+### 통계 화면 ✅ 완료
+- [x] `Views/StatisticsView.xaml` 생성
+- [x] `ViewModels/StatisticsViewModel.cs` 생성
+- [x] 필터 패널 (프로젝트 선택)
+- [x] 통계 카드 (총 물건 수, 평균 감정가, 평균 회수율, 완료율)
+- [x] LiveCharts2 설치 (LiveChartsCore.SkiaSharpView.WPF)
+- [x] 차트 구현
+  - [x] 막대 차트 (상태별, 지역별)
+  - [x] 선 차트 (월별 등록 추이)
+  - [x] 파이 차트 (물건 유형별 분포)
+- [x] StatisticsRepository 생성 (통계 쿼리 메서드)
+- [x] MainWindow 네비게이션 연결
+- [ ] 통계 Excel 출력 (추후 구현)
 
 ### 유사 물건 추천
 - [ ] 추천 알고리즘 통합
@@ -607,6 +609,13 @@
   - ✅ 마커 표시 및 인포윈도우
   - ✅ C# ↔ JavaScript 통신
   - ⏳ 레이어 선택/토글 기능 (추후)
+- ✅ **Phase 10: 통계 대시보드 (완료)**
+  - ✅ LiveCharts2 설치 및 차트 구현 (파이, 막대, 선)
+  - ✅ StatisticsView, StatisticsViewModel 구현
+  - ✅ StatisticsRepository 구현 (유형별/상태별/지역별/월별 통계)
+  - ✅ 통계 카드 (총 물건 수, 평균 감정가, 회수율, 완료율)
+  - ✅ Supabase 테스트 데이터 30건 삽입
+  - ⏳ Excel 출력 (추후)
 - 🔄 Phase 6: OCR 통합 (보류)
   - Python OCR 프로세서 설정
   - C# OCR 서비스 구현
@@ -614,9 +623,9 @@
   - PDF → 텍스트 추출
 
 **다음 작업**:
-1. 통계 대시보드 (Phase 10) - 차트 구현
-2. 경매/공매 일정 (Phase 12) - 달력 UI
-3. 권리 분석 탭 (Phase 7) - 선순위 관리
+1. 경매/공매 일정 (Phase 12) - 달력 UI
+2. 권리 분석 탭 (Phase 7) - 선순위 관리
+3. 유사 물건 추천 (Phase 10) - 추천 알고리즘
 4. OCR 통합 - 등기부 탭 (Phase 6)
 
 **예상 완료일**: 7주 후 (요구사항 문서 기준)
