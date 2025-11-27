@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Services;
+using NPLogic.ViewModels;
 
 namespace NPLogic.ViewModels
 {
@@ -56,6 +57,7 @@ namespace NPLogic.ViewModels
         private readonly StorageService? _storageService;
         private readonly RegistryRepository? _registryRepository;
         private readonly RightAnalysisRepository? _rightAnalysisRepository;
+        private readonly EvaluationRepository? _evaluationRepository;
 
         [ObservableProperty]
         private Property _property = new();
@@ -74,6 +76,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private RightsAnalysisTabViewModel? _rightsAnalysisViewModel;
+
+        /// <summary>
+        /// 평가 탭 ViewModel
+        /// </summary>
+        [ObservableProperty]
+        private EvaluationTabViewModel? _evaluationViewModel;
 
         [ObservableProperty]
         private int _selectedTabIndex = 0;
@@ -143,12 +151,13 @@ namespace NPLogic.ViewModels
         private Guid? _propertyId;
         private Action? _goBackAction;
 
-        public PropertyDetailViewModel(PropertyRepository propertyRepository, StorageService? storageService = null, RegistryRepository? registryRepository = null, RightAnalysisRepository? rightAnalysisRepository = null)
+        public PropertyDetailViewModel(PropertyRepository propertyRepository, StorageService? storageService = null, RegistryRepository? registryRepository = null, RightAnalysisRepository? rightAnalysisRepository = null, EvaluationRepository? evaluationRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
             _registryRepository = registryRepository;
             _rightAnalysisRepository = rightAnalysisRepository;
+            _evaluationRepository = evaluationRepository;
 
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
@@ -160,6 +169,12 @@ namespace NPLogic.ViewModels
             if (_rightAnalysisRepository != null)
             {
                 RightsAnalysisViewModel = new RightsAnalysisTabViewModel(_rightAnalysisRepository);
+            }
+
+            // 평가 탭 ViewModel 초기화
+            if (_evaluationRepository != null)
+            {
+                EvaluationViewModel = new EvaluationTabViewModel(_evaluationRepository);
             }
         }
 
@@ -176,6 +191,9 @@ namespace NPLogic.ViewModels
 
             // 권리분석 탭 ViewModel에 물건 ID 설정
             RightsAnalysisViewModel?.SetPropertyId(propertyId);
+
+            // 평가 탭 ViewModel에 물건 ID 설정
+            EvaluationViewModel?.SetPropertyId(propertyId);
         }
 
         /// <summary>
@@ -208,6 +226,13 @@ namespace NPLogic.ViewModels
             {
                 RightsAnalysisViewModel.SetPropertyId(property.Id);
                 RightsAnalysisViewModel.SetProperty(property);
+            }
+
+            // 평가 탭 ViewModel에 물건 정보 설정
+            if (EvaluationViewModel != null)
+            {
+                EvaluationViewModel.SetPropertyId(property.Id);
+                EvaluationViewModel.SetProperty(property);
             }
 
             HasUnsavedChanges = false;

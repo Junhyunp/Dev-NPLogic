@@ -167,6 +167,19 @@ namespace NPLogic.Services
         }
 
         /// <summary>
+        /// 새 사용자 생성 (관리자용)
+        /// </summary>
+        public async Task<Supabase.Gotrue.User?> CreateUserAsync(string email, string password)
+        {
+            var result = await SignUpWithEmailAsync(email, password);
+            if (result.Success && result.User != null)
+            {
+                return result.User;
+            }
+            throw new Exception(result.ErrorMessage ?? "사용자 생성에 실패했습니다.");
+        }
+
+        /// <summary>
         /// 저장된 세션으로 자동 로그인 시도
         /// </summary>
         public async Task<bool> TryAutoSignInAsync()

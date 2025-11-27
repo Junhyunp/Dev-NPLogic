@@ -102,10 +102,10 @@
                                             <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold"/>
                                         </StackPanel>
                                         <TextBlock Grid.Row="1" Text="{Binding BorrowerNumber}" FontSize="12" Opacity="0.7" Margin="16,4,0,0"/>
-                                        <TextBlock Grid.Row="2" FontSize="12" Margin="16,4,0,0">
-                                            <Run Text="OPB: " Opacity="0.7"/>
-                                            <Run Text="{Binding Opb, StringFormat=N0}"/>
-                                        </TextBlock>
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="16,4,0,0">
+                                            <TextBlock Text="OPB: " FontSize="12" Opacity="0.7"/>
+                                            <TextBlock Text="{Binding Opb, StringFormat=N0}" FontSize="12"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

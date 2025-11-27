@@ -1,0 +1,360 @@
+<UserControl x:Class="NPLogic.Views.SeniorRightsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NPLogic.Views"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:SeniorRightsViewModel}"
+             Loaded="SeniorRightsView_Loaded">
+    
+    <Grid Margin="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 영역 -->
+        <Grid Grid.Row="0" Margin="0,0,0,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="선순위 관리" 
+                           Style="{StaticResource H2TextStyle}"
+                           Margin="0,0,0,8"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
+                        <Run Text="총"/>
+                        <Run Text="{Binding TotalCount, FallbackValue=0}"/>
+                        <Run Text="건"/>
+                    </TextBlock>
+                    <TextBlock Text=" | " Opacity="0.5"/>
+                    <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
+                        <Run Text="합계:"/>
+                        <Run Text="{Binding TotalClaimAmount, StringFormat=N0}"/>
+                        <Run Text="원"/>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="+ 새 권리 추가" 
+                        Command="{Binding NewRightCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Padding="16,10"
+                        Margin="0,0,8,0"/>
+                <Button Content="새로고침" 
+                        Command="{Binding RefreshCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="20,10"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- 필터 영역 -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 물건 선택 -->
+                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                    <TextBlock Text="물건" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding Properties}" 
+                              SelectedItem="{Binding SelectedProperty}"
+                              DisplayMemberPath="AddressFull"
+                              Width="300" Padding="10,8"/>
+                </StackPanel>
+
+                <!-- 권리 유형 -->
+                <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                    <TextBlock Text="권리 유형" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding RightTypes}" 
+                              SelectedItem="{Binding SelectedRightType}"
+                              Width="100" Padding="10,8"/>
+                </StackPanel>
+
+                <!-- 상태 -->
+                <StackPanel Grid.Column="2" Margin="0,0,16,0">
+                    <TextBlock Text="상태" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding Statuses}" 
+                              SelectedItem="{Binding SelectedStatus}"
+                              Width="100" Padding="10,8"/>
+                </StackPanel>
+
+                <!-- 검색 -->
+                <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                    <TextBlock Text="검색" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}" 
+                             Padding="10,8"/>
+                </StackPanel>
+
+                <!-- 검색 버튼 -->
+                <Button Grid.Column="4" 
+                        Content="검색" 
+                        Command="{Binding SearchCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="16,8"
+                        VerticalAlignment="Bottom"/>
+            </Grid>
+        </Border>
+
+        <!-- 메인 컨텐츠 -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 권리 목록 -->
+            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16">
+                <DataGrid ItemsSource="{Binding Rights}" 
+                          SelectedItem="{Binding SelectedRight}"
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True"
+                          Background="Transparent"
+                          CanUserAddRows="False"
+                          GridLinesVisibility="Horizontal"
+                          SelectionMode="Single"
+                          RowHeight="44">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="50"/>
+                        <DataGridTemplateColumn Header="유형" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E3F2FD"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RightType}" Value="gap">
+                                                        <Setter Property="Background" Value="#FFF3E0"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RightType}" Value="eul">
+                                                        <Setter Property="Background" Value="#E8F5E9"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="기타"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RightType}" Value="gap">
+                                                            <Setter Property="Text" Value="갑구"/>
+                                                            <Setter Property="Foreground" Value="#F57C00"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RightType}" Value="eul">
+                                                            <Setter Property="Text" Value="을구"/>
+                                                            <Setter Property="Foreground" Value="#388E3C"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
+                        <DataGridTextColumn Header="등기원인" Binding="{Binding RegistrationCause}" Width="120"/>
+                        <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120"/>
+                        <DataGridTextColumn Header="등기일" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                        <DataGridTextColumn Header="접수번호" Binding="{Binding RegistrationNumber}" Width="100"/>
+                        <DataGridTemplateColumn Header="상태" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                        <Setter Property="Background" Value="#FFEBEE"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="유효"/>
+                                                    <Setter Property="Foreground" Value="#388E3C"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                            <Setter Property="Text" Value="말소"/>
+                                                            <Setter Property="Foreground" Value="#D32F2F"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <!-- 편집 패널 -->
+            <Border Grid.Column="1" 
+                    Background="{StaticResource SurfaceColor}" 
+                    CornerRadius="8" 
+                    Padding="20"
+                    Width="380"
+                    Margin="16,0,0,0"
+                    Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Grid Margin="0,0,0,20">
+                            <TextBlock FontWeight="SemiBold" FontSize="16" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="권리 수정"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsNewRecord}" Value="True">
+                                                <Setter Property="Text" Value="새 권리 추가"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Button Content="✕" 
+                                    Command="{Binding CancelEditCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    HorizontalAlignment="Right"
+                                    Padding="8,4"/>
+                        </Grid>
+
+                        <!-- 권리 유형 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="권리 유형 *" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <ComboBox SelectedValue="{Binding EditRightType}" Padding="10,8">
+                                <ComboBoxItem Content="갑구 (소유권)" Tag="gap"/>
+                                <ComboBoxItem Content="을구 (근저당/전세)" Tag="eul"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- 순위번호 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="순위번호" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditRightOrder, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                        </StackPanel>
+
+                        <!-- 권리자/채권자 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="권리자/채권자 *" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditRightHolder, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                        </StackPanel>
+
+                        <!-- 등기원인 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="등기원인" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <ComboBox IsEditable="True" 
+                                      Text="{Binding EditRegistrationCause, UpdateSourceTrigger=PropertyChanged}" 
+                                      Padding="10,8">
+                                <ComboBoxItem Content="근저당권설정"/>
+                                <ComboBoxItem Content="전세권설정"/>
+                                <ComboBoxItem Content="가압류"/>
+                                <ComboBoxItem Content="압류"/>
+                                <ComboBoxItem Content="경매개시결정"/>
+                                <ComboBoxItem Content="지상권설정"/>
+                                <ComboBoxItem Content="임차권등기"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- 청구금액 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="청구금액/채권최고액" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditClaimAmount, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="10,8"/>
+                        </StackPanel>
+
+                        <!-- 등기일 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="등기일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <DatePicker SelectedDate="{Binding EditRegistrationDate}"/>
+                        </StackPanel>
+
+                        <!-- 접수번호 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="접수번호" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditRegistrationNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                        </StackPanel>
+
+                        <!-- 상태 -->
+                        <StackPanel Margin="0,0,0,12">
+                            <TextBlock Text="상태" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <ComboBox SelectedValue="{Binding EditStatus}" Padding="10,8">
+                                <ComboBoxItem Content="유효 (active)" Tag="active"/>
+                                <ComboBoxItem Content="말소 (cancelled)" Tag="cancelled"/>
+                            </ComboBox>
+                        </StackPanel>
+
+                        <!-- 비고 -->
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="비고" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditNotes, UpdateSourceTrigger=PropertyChanged}" 
+                                     Padding="10,8"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     Height="80"/>
+                        </StackPanel>
+
+                        <!-- 버튼 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="삭제" 
+                                    Command="{Binding DeleteCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="16,10"
+                                    Margin="0,0,8,0"
+                                    Visibility="{Binding IsNewRecord, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                            <Button Content="취소" 
+                                    Command="{Binding CancelEditCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="16,10"
+                                    Margin="0,0,8,0"/>
+                            <Button Content="저장" 
+                                    Command="{Binding SaveCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="24,10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- 로딩 오버레이 -->
+        <Border Grid.RowSpan="3" Background="#80000000" CornerRadius="8"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200"/>
+                <TextBlock Text="로딩 중..." Foreground="White" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 에러 메시지 -->
+        <Border Grid.Row="1" 
+                Background="#FFEBEE" 
+                CornerRadius="8" 
+                Padding="16" 
+                VerticalAlignment="Top"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#C62828"/>
+        </Border>
+    </Grid>
+</UserControl>
+

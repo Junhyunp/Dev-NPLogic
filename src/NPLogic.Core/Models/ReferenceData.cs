@@ -101,5 +101,34 @@ namespace NPLogic.Core.Models
             }
         }
     }
+
+    /// <summary>
+    /// 계산 수식 설정
+    /// </summary>
+    public class CalculationFormula
+    {
+        public Guid Id { get; set; }
+        public string FormulaName { get; set; } = "";
+        public string FormulaExpression { get; set; } = "";
+        public string? FormulaDescription { get; set; }
+        public string? AppliesTo { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// 데이터 매핑 설정
+    /// </summary>
+    public class DataMapping
+    {
+        public Guid Id { get; set; }
+        public string SettingKey { get; set; } = "";
+        public string? SettingValue { get; set; }
+        public string? SettingType { get; set; }
+        public string? Description { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }
 

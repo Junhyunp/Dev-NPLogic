@@ -126,11 +126,7 @@
 
             <!-- 5. 평가 탭 -->
             <TabItem Header="평가">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="평가 탭 (추후 구현)" 
-                               Style="{StaticResource BodyTextStyle}"
-                               Margin="24"/>
-                </ScrollViewer>
+                <local:EvaluationTab x:Name="EvaluationTabView"/>
             </TabItem>
 
             <!-- 6. 지도 탭 -->

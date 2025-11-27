@@ -159,10 +159,12 @@
                                  BorderThickness="0">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Padding="8,6">
-                                        <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold" FontSize="13"/>
-                                        <TextBlock Text="{Binding BorrowerNumber}" FontSize="11" Opacity="0.7"/>
-                                    </StackPanel>
+                                    <Border Padding="8,6">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold" FontSize="13"/>
+                                            <TextBlock Text="{Binding BorrowerNumber}" FontSize="11" Opacity="0.7"/>
+                                        </StackPanel>
+                                    </Border>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -200,10 +202,10 @@
                                             </Grid.RowDefinitions>
                                             <TextBlock Grid.Row="0" Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="13"/>
                                             <TextBlock Grid.Row="1" Text="{Binding LoanType}" FontSize="11" Opacity="0.7"/>
-                                            <TextBlock Grid.Row="2" FontSize="11" Margin="0,2,0,0">
-                                                <Run Text="잔액: " Opacity="0.7"/>
-                                                <Run Text="{Binding LoanPrincipalBalance, StringFormat=N0}"/>
-                                            </TextBlock>
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,2,0,0">
+                                                <TextBlock Text="잔액: " FontSize="11" Opacity="0.7"/>
+                                                <TextBlock Text="{Binding LoanPrincipalBalance, StringFormat=N0}" FontSize="11"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

@@ -702,6 +702,182 @@
                                               FontSize="14"/>
                                 </StackPanel>
                             </Button>
+
+                            <!-- Audit Logs -->
+                            <Button Background="Transparent"
+                                   BorderThickness="0"
+                                   Height="48"
+                                   HorizontalContentAlignment="Stretch"
+                                   Margin="0,4"
+                                   Padding="12,0"
+                                   Cursor="Hand"
+                                   Click="AuditLogsButton_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Left" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#2A3442"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="History" 
+                                                           Width="20" Height="20"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                    <TextBlock Text="작업 이력" 
+                                              Foreground="White"
+                                              Margin="12,0,0,0"
+                                              VerticalAlignment="Center"
+                                              FontSize="14"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Senior Rights -->
+                            <Button Background="Transparent"
+                                   BorderThickness="0"
+                                   Height="48"
+                                   HorizontalContentAlignment="Stretch"
+                                   Margin="0,4"
+                                   Padding="12,0"
+                                   Cursor="Hand"
+                                   Click="SeniorRightsButton_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Left" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#2A3442"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ListStatus" 
+                                                           Width="20" Height="20"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                    <TextBlock Text="선순위 관리" 
+                                              Foreground="White"
+                                              Margin="12,0,0,0"
+                                              VerticalAlignment="Center"
+                                              FontSize="14"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Auction Schedule -->
+                            <Button Background="Transparent"
+                                   BorderThickness="0"
+                                   Height="48"
+                                   HorizontalContentAlignment="Stretch"
+                                   Margin="0,4"
+                                   Padding="12,0"
+                                   Cursor="Hand"
+                                   Click="AuctionScheduleButton_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Left" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#2A3442"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CalendarClock" 
+                                                           Width="20" Height="20"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                    <TextBlock Text="경매 일정" 
+                                              Foreground="White"
+                                              Margin="12,0,0,0"
+                                              VerticalAlignment="Center"
+                                              FontSize="14"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Public Sale Schedule -->
+                            <Button Background="Transparent"
+                                   BorderThickness="0"
+                                   Height="48"
+                                   HorizontalContentAlignment="Stretch"
+                                   Margin="0,4"
+                                   Padding="12,0"
+                                   Cursor="Hand"
+                                   Click="PublicSaleScheduleButton_Click">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Left" 
+                                                                        VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Background" Value="#2A3442"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </Button.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="CalendarCheck" 
+                                                           Width="20" Height="20"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Center"/>
+                                    <TextBlock Text="공매 일정" 
+                                              Foreground="White"
+                                              Margin="12,0,0,0"
+                                              VerticalAlignment="Center"
+                                              FontSize="14"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </ScrollViewer>
 

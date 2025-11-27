@@ -291,11 +291,37 @@ namespace NPLogic
         }
 
         /// <summary>
+        /// 사용자 관리로 이동
+        /// </summary>
+        public void NavigateToUserManagement()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var userManagementView = serviceProvider.GetRequiredService<Views.UserManagementView>();
+                MainContentControl.Content = userManagementView;
+            }
+        }
+
+        /// <summary>
         /// 사용자 관리 버튼 클릭
         /// </summary>
         private void UserManagementButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigateToUnderDevelopment();
+            NavigateToUserManagement();
+        }
+
+        /// <summary>
+        /// 설정 관리로 이동
+        /// </summary>
+        public void NavigateToSettings()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var settingsView = serviceProvider.GetRequiredService<Views.SettingsView>();
+                MainContentControl.Content = settingsView;
+            }
         }
 
         /// <summary>
@@ -303,7 +329,7 @@ namespace NPLogic
         /// </summary>
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigateToUnderDevelopment();
+            NavigateToSettings();
         }
 
         /// <summary>
@@ -319,7 +345,91 @@ namespace NPLogic
         /// </summary>
         private void HeaderSettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigateToUnderDevelopment();
+            NavigateToSettings();
+        }
+
+        /// <summary>
+        /// 작업 이력으로 이동
+        /// </summary>
+        public void NavigateToAuditLogs()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var auditLogsView = serviceProvider.GetRequiredService<Views.AuditLogsView>();
+                MainContentControl.Content = auditLogsView;
+            }
+        }
+
+        /// <summary>
+        /// 작업 이력 버튼 클릭
+        /// </summary>
+        private void AuditLogsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToAuditLogs();
+        }
+
+        /// <summary>
+        /// 선순위 관리로 이동
+        /// </summary>
+        public void NavigateToSeniorRights()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var seniorRightsView = serviceProvider.GetRequiredService<Views.SeniorRightsView>();
+                MainContentControl.Content = seniorRightsView;
+            }
+        }
+
+        /// <summary>
+        /// 선순위 관리 버튼 클릭
+        /// </summary>
+        private void SeniorRightsButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToSeniorRights();
+        }
+
+        /// <summary>
+        /// 경매 일정으로 이동
+        /// </summary>
+        public void NavigateToAuctionSchedule()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var auctionScheduleView = serviceProvider.GetRequiredService<Views.AuctionScheduleView>();
+                MainContentControl.Content = auctionScheduleView;
+            }
+        }
+
+        /// <summary>
+        /// 경매 일정 버튼 클릭
+        /// </summary>
+        private void AuctionScheduleButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToAuctionSchedule();
+        }
+
+        /// <summary>
+        /// 공매 일정으로 이동
+        /// </summary>
+        public void NavigateToPublicSaleSchedule()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var publicSaleScheduleView = serviceProvider.GetRequiredService<Views.PublicSaleScheduleView>();
+                MainContentControl.Content = publicSaleScheduleView;
+            }
+        }
+
+        /// <summary>
+        /// 공매 일정 버튼 클릭
+        /// </summary>
+        private void PublicSaleScheduleButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToPublicSaleSchedule();
         }
 
         /// <summary>

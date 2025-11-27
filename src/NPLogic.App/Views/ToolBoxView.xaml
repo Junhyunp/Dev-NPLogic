@@ -65,10 +65,12 @@
                                      Background="Transparent" BorderThickness="0">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <StackPanel Padding="8,6">
-                                            <TextBlock Text="{Binding CourtName}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding CourtCode}" FontSize="11" Opacity="0.7"/>
-                                        </StackPanel>
+                                        <Border Padding="8,6">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding CourtName}" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding CourtCode}" FontSize="11" Opacity="0.7"/>
+                                            </StackPanel>
+                                        </Border>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
                             </ListBox>

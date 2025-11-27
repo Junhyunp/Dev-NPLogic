@@ -25,6 +25,13 @@ namespace NPLogic.Views
                     await UpdateMapLocationAsync(viewModel);
                 };
 
+                // 평가 탭 DataContext 설정
+                if (viewModel.EvaluationViewModel != null)
+                {
+                    EvaluationTabView.DataContext = viewModel.EvaluationViewModel;
+                    await viewModel.EvaluationViewModel.LoadAsync();
+                }
+
                 // ViewModel의 Property 변경 감지
                 viewModel.PropertyChanged += async (s, args) =>
                 {

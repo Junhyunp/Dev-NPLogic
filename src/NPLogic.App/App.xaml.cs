@@ -95,6 +95,11 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.BorrowerRepository>();
             services.AddSingleton<Data.Repositories.LoanRepository>();
             services.AddSingleton<Data.Repositories.ReferenceDataRepository>();
+            services.AddSingleton<Data.Repositories.EvaluationRepository>();
+            services.AddSingleton<Data.Repositories.SettingsRepository>();
+            services.AddSingleton<Data.Repositories.AuditLogRepository>();
+            services.AddSingleton<Data.Repositories.AuctionScheduleRepository>();
+            services.AddSingleton<Data.Repositories.PublicSaleScheduleRepository>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
@@ -107,7 +112,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
                     sp.GetRequiredService<StorageService>(),
                     sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
-                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>()
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
+                    sp.GetRequiredService<Data.Repositories.EvaluationRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -119,6 +125,12 @@ namespace NPLogic
             services.AddTransient<ViewModels.CashFlowSummaryViewModel>();
             services.AddTransient<ViewModels.XnpvComparisonViewModel>();
             services.AddTransient<ViewModels.RestructuringOverviewViewModel>();
+            services.AddTransient<ViewModels.UserManagementViewModel>();
+            services.AddTransient<ViewModels.SettingsViewModel>();
+            services.AddTransient<ViewModels.AuditLogsViewModel>();
+            services.AddTransient<ViewModels.SeniorRightsViewModel>();
+            services.AddTransient<ViewModels.AuctionScheduleViewModel>();
+            services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
@@ -202,6 +214,48 @@ namespace NPLogic
             {
                 var view = new Views.RestructuringOverviewView();
                 view.DataContext = sp.GetRequiredService<ViewModels.RestructuringOverviewViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.UserManagementView>(sp =>
+            {
+                var view = new Views.UserManagementView();
+                view.DataContext = sp.GetRequiredService<ViewModels.UserManagementViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.SettingsView>(sp =>
+            {
+                var view = new Views.SettingsView();
+                view.DataContext = sp.GetRequiredService<ViewModels.SettingsViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.AuditLogsView>(sp =>
+            {
+                var view = new Views.AuditLogsView();
+                view.DataContext = sp.GetRequiredService<ViewModels.AuditLogsViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.SeniorRightsView>(sp =>
+            {
+                var view = new Views.SeniorRightsView();
+                view.DataContext = sp.GetRequiredService<ViewModels.SeniorRightsViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.AuctionScheduleView>(sp =>
+            {
+                var view = new Views.AuctionScheduleView();
+                view.DataContext = sp.GetRequiredService<ViewModels.AuctionScheduleViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.PublicSaleScheduleView>(sp =>
+            {
+                var view = new Views.PublicSaleScheduleView();
+                view.DataContext = sp.GetRequiredService<ViewModels.PublicSaleScheduleViewModel>();
                 return view;
             });
 

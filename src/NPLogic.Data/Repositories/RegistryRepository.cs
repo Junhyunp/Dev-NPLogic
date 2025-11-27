@@ -226,6 +226,28 @@ namespace NPLogic.Data.Repositories
         #region RegistryRight (권리 정보 - 갑구/을구)
 
         /// <summary>
+        /// 전체 권리 정보 조회
+        /// </summary>
+        public async Task<List<RegistryRight>> GetAllRightsAsync(int limit = 500)
+        {
+            try
+            {
+                var client = _supabaseService.GetClient();
+                var response = await client
+                    .From<RegistryRightTable>()
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Limit(limit)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryRight).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"권리 정보 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// 물건별 권리 정보 조회 (갑구/을구 전체)
         /// </summary>
         public async Task<List<RegistryRight>> GetRightsByPropertyIdAsync(Guid propertyId)

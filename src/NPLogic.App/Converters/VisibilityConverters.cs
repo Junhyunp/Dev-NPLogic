@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace NPLogic.Converters
 {
@@ -110,6 +111,72 @@ namespace NPLogic.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 문자열의 첫 글자를 반환 (아바타 표시용)
+    /// </summary>
+    public class FirstCharConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string str && !string.IsNullOrEmpty(str))
+            {
+                return str[0].ToString().ToUpper();
+            }
+            return "?";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// bool을 색상으로 변환 (true = Green, false = Red)
+    /// </summary>
+    public class BoolToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool boolValue)
+            {
+                return boolValue 
+                    ? new SolidColorBrush(Color.FromRgb(76, 175, 80))  // Green
+                    : new SolidColorBrush(Color.FromRgb(244, 67, 54)); // Red
+            }
+            return new SolidColorBrush(Color.FromRgb(158, 158, 158)); // Gray
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// bool을 텍스트로 변환 (true = "활성", false = "비활성")
+    /// </summary>
+    public class BoolToTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool boolValue)
+            {
+                return boolValue ? "활성" : "비활성";
+            }
+            return "알 수 없음";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string str)
+            {
+                return str == "활성";
+            }
+            return false;
         }
     }
 }
