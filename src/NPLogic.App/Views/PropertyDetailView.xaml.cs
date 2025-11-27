@@ -18,6 +18,48 @@ namespace NPLogic.Views
             if (DataContext is PropertyDetailViewModel viewModel)
             {
                 await viewModel.InitializeAsync();
+
+                // 지도 준비 완료 이벤트 구독
+                PropertyMapView.MapReady += async (s, args) =>
+                {
+                    await UpdateMapLocationAsync(viewModel);
+                };
+
+                // ViewModel의 Property 변경 감지
+                viewModel.PropertyChanged += async (s, args) =>
+                {
+                    if (args.PropertyName == nameof(PropertyDetailViewModel.Property))
+                    {
+                        await UpdateMapLocationAsync(viewModel);
+                    }
+                };
+            }
+        }
+
+        /// <summary>
+        /// 지도에 물건 위치 업데이트
+        /// </summary>
+        private async System.Threading.Tasks.Task UpdateMapLocationAsync(PropertyDetailViewModel viewModel)
+        {
+            var property = viewModel.Property;
+            if (property == null) return;
+
+            // 위도/경도가 있는 경우
+            if (property.Latitude.HasValue && property.Longitude.HasValue)
+            {
+                await PropertyMapView.SetLocationAsync(
+                    (double)property.Latitude.Value,
+                    (double)property.Longitude.Value,
+                    property.AddressFull ?? property.AddressRoad ?? property.AddressJibun,
+                    property.PropertyNumber,
+                    property.PropertyType
+                );
+            }
+            // 위도/경도가 없고 주소가 있는 경우, 주소로 검색
+            else if (!string.IsNullOrEmpty(property.AddressFull) || !string.IsNullOrEmpty(property.AddressRoad))
+            {
+                var address = property.AddressFull ?? property.AddressRoad ?? "";
+                await PropertyMapView.SearchAddressAsync(address);
             }
         }
     }

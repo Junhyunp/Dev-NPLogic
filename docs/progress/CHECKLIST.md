@@ -346,20 +346,20 @@
 
 ---
 
-## 🗺️ Phase 9: 지도 연동 (5-6주차)
+## 🗺️ Phase 9: 지도 연동 (5-6주차) 🔄 진행 중
 
 ### 지도 통합
-- [ ] CefSharp 또는 WebView2 설치
-- [ ] HTML 지도 코드 준비
-- [ ] 지도 탭 레이아웃
-- [ ] WebView 컨트롤 추가
-- [ ] C# ↔ JavaScript 통신
-- [ ] 물건 데이터 전달
-- [ ] 마커 표시
+- [x] CefSharp 또는 WebView2 설치
+- [x] HTML 지도 코드 준비 (카카오맵)
+- [x] 지도 탭 레이아웃
+- [x] WebView 컨트롤 추가 (MapView UserControl)
+- [x] C# ↔ JavaScript 통신
+- [x] 물건 데이터 전달
+- [x] 마커 표시
 - [ ] 레이어 선택 UI
 - [ ] 레이어 토글 기능
-- [ ] 마커 클릭 이벤트
-- [ ] 정보 팝업 표시
+- [x] 마커 클릭 이벤트
+- [x] 정보 팝업 표시
 
 ---
 
@@ -600,20 +600,24 @@
   - ✅ PDF 업로드 (다중 파일, 프로그레스 추적)
 
 **진행 중**:
-- 🔄 Phase 6: OCR 통합 (다음 작업)
+- 🔄 **Phase 9: 지도 연동 (부분 완료)**
+  - ✅ WebView2 + 카카오맵 연동
+  - ✅ MapView UserControl 생성 (`Views/MapView.xaml`)
+  - ✅ 물건 상세 지도 탭 구현
+  - ✅ 마커 표시 및 인포윈도우
+  - ✅ C# ↔ JavaScript 통신
+  - ⏳ 레이어 선택/토글 기능 (추후)
+- 🔄 Phase 6: OCR 통합 (보류)
   - Python OCR 프로세서 설정
   - C# OCR 서비스 구현
   - 등기부 탭 구현
   - PDF → 텍스트 추출
 
 **다음 작업**:
-1. OCR 통합 - 등기부 탭 (Phase 6)
-   - Python OCR 프로세서 작성
-   - C# OCR 서비스
-   - 등기부 탭 UI
-   - 추출 데이터 표시 및 수정
-2. 권리 분석 및 평가 (Phase 7)
-3. Excel 출력 (Phase 8)
+1. 통계 대시보드 (Phase 10) - 차트 구현
+2. 경매/공매 일정 (Phase 12) - 달력 UI
+3. 권리 분석 탭 (Phase 7) - 선순위 관리
+4. OCR 통합 - 등기부 탭 (Phase 6)
 
 **예상 완료일**: 7주 후 (요구사항 문서 기준)
 

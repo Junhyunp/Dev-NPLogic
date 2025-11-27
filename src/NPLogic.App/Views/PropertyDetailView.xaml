@@ -143,11 +143,7 @@
 
             <!-- 6. 지도 탭 -->
             <TabItem Header="지도">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="지도 탭 (추후 구현)" 
-                               Style="{StaticResource BodyTextStyle}"
-                               Margin="24"/>
-                </ScrollViewer>
+                <local:MapView x:Name="PropertyMapView"/>
             </TabItem>
         </TabControl>
     </Grid>

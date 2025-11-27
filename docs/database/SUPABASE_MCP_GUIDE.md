@@ -137,3 +137,5 @@ AI가 mcp_supabase_apply_migration 실행:
 
 
 
+
+

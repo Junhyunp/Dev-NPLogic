@@ -1,0 +1,65 @@
+<UserControl x:Class="NPLogic.Views.MapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800"
+             Loaded="MapView_Loaded"
+             Unloaded="MapView_Unloaded">
+    
+    <Grid>
+        <!-- WebView2 지도 컨트롤 -->
+        <wv2:WebView2 x:Name="MapWebView"
+                      DefaultBackgroundColor="Transparent"/>
+        
+        <!-- 로딩 오버레이 -->
+        <Border x:Name="LoadingOverlay"
+                Background="#F0F5F9"
+                Visibility="Visible">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True"
+                             Width="200"
+                             Height="4"
+                             Margin="0,0,0,16"/>
+                <TextBlock Text="지도 로딩 중..."
+                           FontSize="14"
+                           Foreground="#64748B"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+        
+        <!-- 에러 메시지 -->
+        <Border x:Name="ErrorOverlay"
+                Background="#1A2744"
+                Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="🗺️"
+                           FontSize="48"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,16"/>
+                <TextBlock x:Name="ErrorMessage"
+                           Text="지도를 불러올 수 없습니다."
+                           FontSize="16"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,8"/>
+                <TextBlock x:Name="ErrorDetail"
+                           Text=""
+                           FontSize="12"
+                           Foreground="#94A3B8"
+                           HorizontalAlignment="Center"
+                           TextWrapping="Wrap"
+                           MaxWidth="300"/>
+                <Button x:Name="RetryButton"
+                        Content="다시 시도"
+                        Margin="0,24,0,0"
+                        Padding="24,10"
+                        Click="RetryButton_Click"
+                        Style="{StaticResource SecondaryButton}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

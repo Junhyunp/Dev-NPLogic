@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPLogic 지도</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* API 키 없을 때 표시할 메시지 */
+        #no-api-key {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2744 0%, #2d3a52 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        #no-api-key.show {
+            display: flex;
+        }
+        
+        #no-api-key h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #90cdf4;
+        }
+        
+        #no-api-key p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.8;
+            max-width: 400px;
+        }
+        
+        #no-api-key .icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            opacity: 0.6;
+        }
+        
+        /* 커스텀 인포윈도우 스타일 */
+        .custom-infowindow {
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        .custom-infowindow .title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a2744;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        
+        .custom-infowindow .address {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        
+        .custom-infowindow .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+        
+        .custom-infowindow .info-label {
+            color: #94a3b8;
+        }
+        
+        .custom-infowindow .info-value {
+            color: #1a2744;
+            font-weight: 500;
+        }
+        
+        /* 로딩 인디케이터 */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #64748b;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="no-api-key">
+        <div class="icon">🗺️</div>
+        <h2>카카오맵 API 키 필요</h2>
+        <p>
+            지도를 표시하려면 카카오맵 API 키가 필요합니다.<br><br>
+            1. <a href="https://developers.kakao.com" target="_blank" style="color: #90cdf4;">카카오 개발자 사이트</a> 접속<br>
+            2. 애플리케이션 등록<br>
+            3. JavaScript 키 발급<br>
+            4. appsettings.json에 키 설정
+        </p>
+    </div>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>지도 로딩 중...</div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let map = null;
+        let markers = [];
+        let infowindows = [];
+        let currentInfowindow = null;
+        let isMapReady = false;
+        let apiKey = null;
+
+        // C#에서 호출할 함수: API 키 설정 및 지도 초기화
+        function initializeMap(key) {
+            apiKey = key;
+            
+            if (!key || key === '' || key === 'YOUR_KAKAO_MAP_API_KEY') {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('no-api-key').classList.add('show');
+                return;
+            }
+
+            // 카카오맵 스크립트 동적 로드
+            const script = document.createElement('script');
+            script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services`;
+            script.onload = function() {
+                kakao.maps.load(function() {
+                    createMap();
+                });
+            };
+            script.onerror = function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('no-api-key').classList.add('show');
+                console.error('카카오맵 스크립트 로드 실패');
+            };
+            document.head.appendChild(script);
+        }
+
+        // 지도 생성
+        function createMap() {
+            const container = document.getElementById('map');
+            const options = {
+                center: new kakao.maps.LatLng(37.5665, 126.9780), // 서울 시청 기본값
+                level: 5
+            };
+            
+            map = new kakao.maps.Map(container, options);
+            isMapReady = true;
+            
+            document.getElementById('loading').style.display = 'none';
+            
+            // 지도 컨트롤 추가
+            const zoomControl = new kakao.maps.ZoomControl();
+            map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+            
+            const mapTypeControl = new kakao.maps.MapTypeControl();
+            map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
+            
+            // C#에 준비 완료 알림
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({ type: 'mapReady' }));
+            }
+        }
+
+        // 단일 마커 설정 (물건 상세용)
+        function setMarker(lat, lng, address, propertyNumber, propertyType) {
+            if (!isMapReady || !map) {
+                console.warn('지도가 준비되지 않았습니다.');
+                return;
+            }
+
+            clearMarkers();
+
+            const position = new kakao.maps.LatLng(lat, lng);
+            
+            // 마커 생성
+            const marker = new kakao.maps.Marker({
+                position: position,
+                map: map
+            });
+            
+            markers.push(marker);
+
+            // 인포윈도우 내용
+            const content = `
+                <div class="custom-infowindow">
+                    <div class="title">${propertyNumber || '물건'}</div>
+                    <div class="address">${address || '주소 정보 없음'}</div>
+                    ${propertyType ? `
+                    <div class="info-row">
+                        <span class="info-label">유형</span>
+                        <span class="info-value">${propertyType}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            const infowindow = new kakao.maps.InfoWindow({
+                content: content,
+                removable: true
+            });
+
+            // 마커 클릭 시 인포윈도우 표시
+            kakao.maps.event.addListener(marker, 'click', function() {
+                if (currentInfowindow) {
+                    currentInfowindow.close();
+                }
+                infowindow.open(map, marker);
+                currentInfowindow = infowindow;
+            });
+
+            infowindows.push(infowindow);
+
+            // 지도 중심 이동
+            map.setCenter(position);
+            map.setLevel(3);
+
+            // 기본적으로 인포윈도우 열기
+            infowindow.open(map, marker);
+            currentInfowindow = infowindow;
+        }
+
+        // 여러 마커 설정 (목록용)
+        function setMarkers(propertiesJson) {
+            if (!isMapReady || !map) {
+                console.warn('지도가 준비되지 않았습니다.');
+                return;
+            }
+
+            clearMarkers();
+
+            const properties = JSON.parse(propertiesJson);
+            
+            if (!properties || properties.length === 0) {
+                return;
+            }
+
+            const bounds = new kakao.maps.LatLngBounds();
+
+            properties.forEach(function(prop, index) {
+                if (!prop.lat || !prop.lng) return;
+
+                const position = new kakao.maps.LatLng(prop.lat, prop.lng);
+                bounds.extend(position);
+
+                const marker = new kakao.maps.Marker({
+                    position: position,
+                    map: map
+                });
+
+                markers.push(marker);
+
+                const content = `
+                    <div class="custom-infowindow">
+                        <div class="title">${prop.propertyNumber || '물건 ' + (index + 1)}</div>
+                        <div class="address">${prop.address || '주소 정보 없음'}</div>
+                        ${prop.propertyType ? `
+                        <div class="info-row">
+                            <span class="info-label">유형</span>
+                            <span class="info-value">${prop.propertyType}</span>
+                        </div>
+                        ` : ''}
+                        ${prop.appraisalValue ? `
+                        <div class="info-row">
+                            <span class="info-label">감정가</span>
+                            <span class="info-value">${formatCurrency(prop.appraisalValue)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: content,
+                    removable: true
+                });
+
+                kakao.maps.event.addListener(marker, 'click', function() {
+                    if (currentInfowindow) {
+                        currentInfowindow.close();
+                    }
+                    infowindow.open(map, marker);
+                    currentInfowindow = infowindow;
+                    
+                    // C#에 마커 클릭 알림
+                    if (window.chrome && window.chrome.webview) {
+                        window.chrome.webview.postMessage(JSON.stringify({ 
+                            type: 'markerClick', 
+                            propertyId: prop.id 
+                        }));
+                    }
+                });
+
+                infowindows.push(infowindow);
+            });
+
+            // 모든 마커가 보이도록 지도 범위 조정
+            if (markers.length > 0) {
+                map.setBounds(bounds);
+            }
+        }
+
+        // 마커 모두 제거
+        function clearMarkers() {
+            markers.forEach(function(marker) {
+                marker.setMap(null);
+            });
+            markers = [];
+            
+            infowindows.forEach(function(infowindow) {
+                infowindow.close();
+            });
+            infowindows = [];
+            currentInfowindow = null;
+        }
+
+        // 지도 중심 이동
+        function panTo(lat, lng) {
+            if (!isMapReady || !map) return;
+            
+            const position = new kakao.maps.LatLng(lat, lng);
+            map.panTo(position);
+        }
+
+        // 지도 레벨 설정
+        function setLevel(level) {
+            if (!isMapReady || !map) return;
+            map.setLevel(level);
+        }
+
+        // 금액 포맷팅
+        function formatCurrency(value) {
+            if (!value) return '-';
+            
+            const num = parseFloat(value);
+            if (num >= 100000000) {
+                return (num / 100000000).toFixed(1) + '억원';
+            } else if (num >= 10000) {
+                return (num / 10000).toFixed(0) + '만원';
+            }
+            return num.toLocaleString() + '원';
+        }
+
+        // 주소로 좌표 검색
+        function searchAddress(address) {
+            if (!isMapReady || !apiKey) {
+                console.warn('지도가 준비되지 않았습니다.');
+                return;
+            }
+
+            const geocoder = new kakao.maps.services.Geocoder();
+            
+            geocoder.addressSearch(address, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    
+                    // C#에 결과 전송
+                    if (window.chrome && window.chrome.webview) {
+                        window.chrome.webview.postMessage(JSON.stringify({ 
+                            type: 'geocodeResult',
+                            lat: result[0].y,
+                            lng: result[0].x,
+                            address: address
+                        }));
+                    }
+                    
+                    map.setCenter(coords);
+                    map.setLevel(3);
+                } else {
+                    if (window.chrome && window.chrome.webview) {
+                        window.chrome.webview.postMessage(JSON.stringify({ 
+                            type: 'geocodeError',
+                            address: address,
+                            error: '주소를 찾을 수 없습니다.'
+                        }));
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
