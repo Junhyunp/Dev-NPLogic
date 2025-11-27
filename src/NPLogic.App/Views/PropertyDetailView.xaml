@@ -121,11 +121,7 @@
 
             <!-- 4. 선순위 탭 -->
             <TabItem Header="선순위 (권리분석)">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="선순위 탭 (추후 구현)" 
-                               Style="{StaticResource BodyTextStyle}"
-                               Margin="24"/>
-                </ScrollViewer>
+                <local:RightsAnalysisTab x:Name="RightsAnalysisTabView"/>
             </TabItem>
 
             <!-- 5. 평가 탭 -->

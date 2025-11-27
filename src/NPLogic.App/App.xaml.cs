@@ -91,6 +91,7 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.PropertyRepository>();
             services.AddSingleton<Data.Repositories.StatisticsRepository>();
             services.AddSingleton<Data.Repositories.RegistryRepository>();
+            services.AddSingleton<Data.Repositories.RightAnalysisRepository>();
             services.AddSingleton<Data.Repositories.BorrowerRepository>();
             services.AddSingleton<Data.Repositories.LoanRepository>();
             services.AddSingleton<Data.Repositories.ReferenceDataRepository>();
@@ -105,7 +106,8 @@ namespace NPLogic
                 return new ViewModels.PropertyDetailViewModel(
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
                     sp.GetRequiredService<StorageService>(),
-                    sp.GetRequiredService<Data.Repositories.RegistryRepository>()
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
