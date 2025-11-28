@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuctionScheduleTable>()
                     .Order(x => x.AuctionDate, Postgrest.Constants.Ordering.Descending)
@@ -46,7 +46,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuctionScheduleTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -68,7 +68,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuctionScheduleTable>()
                     .Where(x => x.Status == status)
@@ -90,7 +90,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuctionScheduleTable>()
                     .Where(x => x.AuctionDate >= startDate)
@@ -113,7 +113,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToAuctionScheduleTable(schedule);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -134,7 +134,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToAuctionScheduleTable(schedule);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -156,7 +156,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<AuctionScheduleTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)

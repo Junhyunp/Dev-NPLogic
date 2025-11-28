@@ -22,7 +22,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PublicSaleScheduleTable>()
                     .Order(x => x.SaleDate, Postgrest.Constants.Ordering.Descending)
@@ -40,7 +40,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToPublicSaleScheduleTable(schedule);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -58,7 +58,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToPublicSaleScheduleTable(schedule);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -77,7 +77,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<PublicSaleScheduleTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)

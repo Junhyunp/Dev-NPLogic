@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuditLogTable>()
                     .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
@@ -53,7 +53,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 // 먼저 전체 데이터를 가져온 후 필터링 (최근 1000건 제한)
                 var response = await client
@@ -105,7 +105,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuditLogTable>()
                     .Where(x => x.RecordId == recordId)
@@ -127,7 +127,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuditLogTable>()
                     .Where(x => x.UserId == userId)
@@ -150,7 +150,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToAuditLogTable(log);
                 table.CreatedAt = DateTime.UtcNow;
 
@@ -170,7 +170,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AuditLogTable>()
                     .Select("table_name")

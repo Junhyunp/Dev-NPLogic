@@ -50,6 +50,7 @@
     
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource TextSecondary}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabled}"/>
 
     <!-- Semantic Colors (상태 표시) -->
@@ -74,6 +75,7 @@
     <Color x:Key="InfoText">#1E40AF</Color>
     
     <SolidColorBrush x:Key="SuccessBgBrush" Color="{StaticResource SuccessBg}"/>
+    <SolidColorBrush x:Key="SuccessLightBrush" Color="{StaticResource SuccessBg}"/>
     <SolidColorBrush x:Key="SuccessTextBrush" Color="{StaticResource SuccessText}"/>
     <SolidColorBrush x:Key="WarningBgBrush" Color="{StaticResource WarningBg}"/>
     <SolidColorBrush x:Key="WarningTextBrush" Color="{StaticResource WarningText}"/>

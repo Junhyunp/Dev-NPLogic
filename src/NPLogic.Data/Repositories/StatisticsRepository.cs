@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var query = client.From<PropertyTable>().Select("*");
 
                 if (!string.IsNullOrWhiteSpace(projectId))
@@ -59,7 +59,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var query = client.From<PropertyTable>().Select("*");
 
                 if (!string.IsNullOrWhiteSpace(projectId))
@@ -93,7 +93,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var query = client.From<PropertyTable>().Select("*");
 
                 if (!string.IsNullOrWhiteSpace(projectId))
@@ -128,7 +128,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var startDate = DateTime.Now.AddMonths(-months);
                 
                 var query = client.From<PropertyTable>()
@@ -188,7 +188,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var query = client.From<PropertyTable>().Select("*");
 
                 if (!string.IsNullOrWhiteSpace(projectId))
@@ -241,7 +241,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client.From<PropertyTable>().Select("project_id").Get();
 
                 return response.Models

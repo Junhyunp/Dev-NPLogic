@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Services;
 using NPLogic.ViewModels;
 using NPLogic.Views;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using SkiaSharp;
 
 namespace NPLogic
 {
@@ -21,6 +24,10 @@ namespace NPLogic
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // LiveCharts 한글 폰트 설정 (SkiaSharp 렌더링에 필요)
+            LiveCharts.Configure(config => 
+                config.HasGlobalSKTypeface(SKFontManager.Default.MatchFamily("Malgun Gothic")));
 
             // 전역 예외 핸들러 추가
             this.DispatcherUnhandledException += (s, ex) =>

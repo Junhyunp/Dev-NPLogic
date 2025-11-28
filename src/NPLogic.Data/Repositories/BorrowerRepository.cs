@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
@@ -46,7 +46,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.Id == id)
@@ -67,7 +67,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.BorrowerNumber == borrowerNumber)
@@ -88,7 +88,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.ProgramId == programId)
@@ -110,7 +110,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.IsRestructuring == true)
@@ -132,7 +132,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<BorrowerTable>()
                     .Get();
@@ -225,7 +225,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var borrowerTable = MapToBorrowerTable(borrower);
                 borrowerTable.CreatedAt = DateTime.UtcNow;
                 borrowerTable.UpdatedAt = DateTime.UtcNow;
@@ -253,7 +253,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var borrowerTable = MapToBorrowerTable(borrower);
                 borrowerTable.UpdatedAt = DateTime.UtcNow;
 
@@ -281,7 +281,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<BorrowerTable>()
                     .Where(x => x.Id == id)
@@ -328,7 +328,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var update = new BorrowerTable
                 {
                     PropertyCount = propertyCount,

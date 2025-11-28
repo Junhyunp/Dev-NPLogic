@@ -24,7 +24,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<CalculationFormulaTable>()
                     .Order(x => x.FormulaName, Postgrest.Constants.Ordering.Ascending)
@@ -42,7 +42,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<CalculationFormulaTable>()
                     .Where(x => x.AppliesTo == appliesTo)
@@ -61,7 +61,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToFormulaTable(formula);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -79,7 +79,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToFormulaTable(formula);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -98,7 +98,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<CalculationFormulaTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<SettingsTable>()
                     .Where(x => x.SettingType == "mapping")
@@ -132,7 +132,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToSettingsTable(mapping);
                 table.SettingType = "mapping";
                 table.CreatedAt = DateTime.UtcNow;
@@ -151,7 +151,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToSettingsTable(mapping);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -170,7 +170,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<SettingsTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)
@@ -185,7 +185,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<SystemSettingsTable>()
                     .Order(x => x.SettingKey, Postgrest.Constants.Ordering.Ascending)
@@ -203,7 +203,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<SystemSettingsTable>()
                     .Where(x => x.SettingKey == key)
@@ -221,7 +221,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToSystemSettingsTable(setting);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -239,7 +239,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToSystemSettingsTable(setting);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -258,7 +258,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<SystemSettingsTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)

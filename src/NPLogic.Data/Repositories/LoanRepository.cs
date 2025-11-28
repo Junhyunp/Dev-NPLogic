@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<LoanTable>()
                     .Order(x => x.AccountSerial, Postgrest.Constants.Ordering.Ascending)
@@ -46,7 +46,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.Id == id)
@@ -67,7 +67,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.BorrowerId == borrowerId)
@@ -89,7 +89,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.AccountSerial == accountSerial)
@@ -110,7 +110,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.HasMciGuarantee == true)
@@ -170,7 +170,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var loanTable = MapToLoanTable(loan);
                 loanTable.CreatedAt = DateTime.UtcNow;
                 loanTable.UpdatedAt = DateTime.UtcNow;
@@ -198,7 +198,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var loanTable = MapToLoanTable(loan);
                 loanTable.UpdatedAt = DateTime.UtcNow;
 
@@ -226,7 +226,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<LoanTable>()
                     .Where(x => x.Id == id)

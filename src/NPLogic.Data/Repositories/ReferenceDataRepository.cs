@@ -24,7 +24,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<CourtTable>()
                     .Order(x => x.CourtName, Postgrest.Constants.Ordering.Ascending)
@@ -42,7 +42,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToCourtTable(court);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -60,7 +60,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToCourtTable(court);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -79,7 +79,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<CourtTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)
@@ -94,7 +94,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<FinancialInstitutionTable>()
                     .Order(x => x.InstitutionName, Postgrest.Constants.Ordering.Ascending)
@@ -112,7 +112,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToFinancialInstitutionTable(fi);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -130,7 +130,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<FinancialInstitutionTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)
@@ -145,7 +145,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<AppraisalFirmTable>()
                     .Order(x => x.FirmName, Postgrest.Constants.Ordering.Ascending)
@@ -163,7 +163,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToAppraisalFirmTable(firm);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -181,7 +181,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<AppraisalFirmTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)
@@ -196,7 +196,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<CommonCodeTable>()
                     .Order(x => x.CodeGroup, Postgrest.Constants.Ordering.Ascending)
@@ -214,7 +214,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<CommonCodeTable>()
                     .Where(x => x.CodeGroup == codeGroup)
@@ -233,7 +233,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToCommonCodeTable(code);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -251,7 +251,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client.From<CommonCodeTable>().Where(x => x.Id == id).Delete();
             }
             catch (Exception ex)

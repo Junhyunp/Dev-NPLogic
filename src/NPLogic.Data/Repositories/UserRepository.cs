@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Get();
@@ -45,7 +45,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Id == id)
@@ -66,7 +66,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.AuthUserId == authUserId)
@@ -87,7 +87,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Email == email)
@@ -108,7 +108,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Role == role)
@@ -129,7 +129,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var userTable = MapToUserTable(user);
                 userTable.CreatedAt = DateTime.UtcNow;
                 userTable.UpdatedAt = DateTime.UtcNow;
@@ -157,7 +157,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var userTable = MapToUserTable(user);
                 userTable.UpdatedAt = DateTime.UtcNow;
 
@@ -185,7 +185,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<UserTable>()
                     .Where(x => x.Id == id)
@@ -206,7 +206,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var update = new UserTable { Status = status, UpdatedAt = DateTime.UtcNow };
                 
                 await client
@@ -253,7 +253,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Status == "active")

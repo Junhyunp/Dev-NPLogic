@@ -27,7 +27,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<EvaluationFullTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -52,7 +52,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var dto = EvaluationFullTable.FromModel(evaluation);
                 dto.Id = Guid.NewGuid();
                 dto.CreatedAt = DateTime.UtcNow;
@@ -78,7 +78,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var dto = EvaluationFullTable.FromModel(evaluation);
                 dto.UpdatedAt = DateTime.UtcNow;
 
@@ -118,7 +118,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<EvaluationFullTable>()
                     .Where(x => x.Id == id)
@@ -140,7 +140,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<EvaluationFullTable>()
                     .Where(x => x.PropertyId == propertyId)

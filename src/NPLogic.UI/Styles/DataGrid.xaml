@@ -25,6 +25,9 @@
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
     </Style>
+    
+    <!-- NPDataGridStyle 별칭 -->
+    <Style x:Key="NPDataGridStyle" TargetType="DataGrid" BasedOn="{StaticResource NPDataGrid}"/>
 
     <!-- DataGrid Column Header Style -->
     <Style x:Key="NPDataGridColumnHeader" TargetType="DataGridColumnHeader">

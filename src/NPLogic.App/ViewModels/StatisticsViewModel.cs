@@ -170,7 +170,7 @@ namespace NPLogic.ViewModels
                 DataLabelsPaint = new SolidColorPaint(SKColors.White),
                 DataLabelsSize = 12,
                 DataLabelsPosition = LiveChartsCore.Measure.PolarLabelsPosition.Middle,
-                DataLabelsFormatter = point => $"{item.PropertyType}\n{item.Count}건"
+                DataLabelsFormatter = point => $"{item.PropertyType} {item.Count}건"
             } as ISeries).ToArray();
         }
 

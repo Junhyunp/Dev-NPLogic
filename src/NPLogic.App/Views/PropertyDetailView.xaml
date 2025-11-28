@@ -29,7 +29,8 @@
                     Content="← 목록으로"
                     Command="{Binding GoBackCommand}"
                     Style="{StaticResource SecondaryButton}"
-                    Padding="16,10"
+                    Padding="12,6"
+                    FontSize="13"
                     Margin="0,0,16,0"/>
 
             <!-- 제목 -->
@@ -64,7 +65,8 @@
         <TabControl Grid.Row="1"
                     SelectedIndex="{Binding SelectedTabIndex}"
                     Background="Transparent"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    ClipToBounds="True">
             
             <!-- 탭 스타일 -->
             <TabControl.Resources>

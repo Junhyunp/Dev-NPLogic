@@ -28,7 +28,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryDocumentTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -50,7 +50,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryDocumentTable(document);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -78,7 +78,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryDocumentTable(document);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -106,7 +106,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<RegistryDocumentTable>()
                     .Where(x => x.Id == id)
@@ -131,7 +131,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryOwnerTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -153,7 +153,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryOwnerTable(owner);
                 table.CreatedAt = DateTime.UtcNow;
 
@@ -180,7 +180,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryOwnerTable(owner);
 
                 var response = await client
@@ -207,7 +207,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<RegistryOwnerTable>()
                     .Where(x => x.Id == id)
@@ -232,7 +232,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryRightTable>()
                     .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
@@ -254,7 +254,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryRightTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -276,7 +276,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryRightTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -299,7 +299,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RegistryRightTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -322,7 +322,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryRightTable(right);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -350,7 +350,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRegistryRightTable(right);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -378,7 +378,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<RegistryRightTable>()
                     .Where(x => x.Id == id)

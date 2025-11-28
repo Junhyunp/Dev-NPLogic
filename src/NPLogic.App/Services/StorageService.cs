@@ -35,7 +35,7 @@ namespace NPLogic.Services
                 if (!File.Exists(filePath))
                     throw new FileNotFoundException("파일을 찾을 수 없습니다.", filePath);
 
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 // 파일 읽기
                 var fileBytes = await File.ReadAllBytesAsync(filePath);
@@ -77,7 +77,7 @@ namespace NPLogic.Services
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 await client.Storage
                     .From(bucketName)
@@ -99,15 +99,15 @@ namespace NPLogic.Services
         /// <summary>
         /// 공개 URL 가져오기
         /// </summary>
-        public Task<string> GetPublicUrlAsync(string bucketName, string storagePath)
+        public async Task<string> GetPublicUrlAsync(string bucketName, string storagePath)
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var publicUrl = client.Storage
                     .From(bucketName)
                     .GetPublicUrl(storagePath);
-                return Task.FromResult(publicUrl);
+                return publicUrl;
             }
             catch (Exception ex)
             {
@@ -122,7 +122,7 @@ namespace NPLogic.Services
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 var fileBytes = await client.Storage
                     .From(bucketName)
@@ -143,7 +143,7 @@ namespace NPLogic.Services
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 var pathList = new System.Collections.Generic.List<string> { filePath };
                 await client.Storage
@@ -165,7 +165,7 @@ namespace NPLogic.Services
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var buckets = await client.Storage.ListBuckets();
                 return buckets;
             }
@@ -184,7 +184,7 @@ namespace NPLogic.Services
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var files = await client.Storage
                     .From(bucketName)
                     .List(path ?? string.Empty);

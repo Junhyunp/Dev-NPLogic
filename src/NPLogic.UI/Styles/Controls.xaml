@@ -43,6 +43,9 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
+    <!-- NPTextBoxStyle 별칭 (NPTextBox와 동일) -->
+    <Style x:Key="NPTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource NPTextBox}"/>
 
     <!-- ComboBox Style -->
     <Style x:Key="NPComboBox" TargetType="ComboBox">

@@ -198,7 +198,7 @@
                     </Border>
                 </Grid>
 
-                <!-- 데이터 그리드 -->
+                <!-- 데이터 그리드 (가로 스크롤 지원) -->
                 <DataGrid ItemsSource="{Binding Properties}"
                           SelectedItem="{Binding SelectedProperty}"
                           AutoGenerateColumns="False"
@@ -209,54 +209,86 @@
                           HeadersVisibility="Column"
                           Background="Transparent"
                           BorderThickness="0"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          ScrollViewer.CanContentScroll="True"
                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                     
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="물건번호" 
-                                          Binding="{Binding PropertyNumber}" 
-                                          Width="120"/>
+                        <!-- 물건번호 클릭 시 상세 페이지로 이동 -->
+                        <DataGridTemplateColumn Header="물건번호" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Hyperlink Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                   CommandParameter="{Binding}"
+                                                   TextDecorations="None">
+                                            <Run Text="{Binding PropertyNumber}" 
+                                                 Foreground="{StaticResource PrimaryBrush}"/>
+                                        </Hyperlink>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="프로젝트" 
                                           Binding="{Binding ProjectId}" 
-                                          Width="120"/>
+                                          Width="110"/>
                         <DataGridTextColumn Header="주소" 
                                           Binding="{Binding AddressFull}" 
-                                          Width="*"/>
+                                          Width="350"/>
                         <DataGridTextColumn Header="유형" 
                                           Binding="{Binding PropertyType}" 
-                                          Width="100"/>
+                                          Width="90"/>
                         <DataGridTextColumn Header="상태" 
                                           Binding="{Binding Status}" 
-                                          Width="100"/>
+                                          Width="90"/>
                         <DataGridTextColumn Header="감정가" 
                                           Binding="{Binding AppraisalValue, StringFormat=N0}" 
-                                          Width="120"/>
+                                          Width="110"/>
                         <DataGridTextColumn Header="최저입찰가" 
                                           Binding="{Binding MinimumBid, StringFormat=N0}" 
-                                          Width="120"/>
-                        <DataGridTemplateColumn Header="작업" Width="180">
+                                          Width="110"/>
+                        <DataGridTemplateColumn Header="작업" Width="100">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="상세" 
-                                               Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        <Button Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                CommandParameter="{Binding}"
-                                               Style="{StaticResource PrimaryButton}"
-                                               Padding="12,4"
-                                               FontSize="12"
-                                               Margin="0,0,4,0"/>
-                                        <Button Content="수정" 
-                                               Command="{Binding DataContext.EditPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Background="Transparent"
+                                               BorderThickness="0"
+                                               Padding="4"
+                                               Cursor="Hand"
+                                               ToolTip="상세 보기"
+                                               Margin="0,0,4,0">
+                                            <TextBlock Text="&#xE8A5;" 
+                                                       FontFamily="Segoe MDL2 Assets" 
+                                                       FontSize="14"
+                                                       Foreground="{StaticResource PrimaryBrush}"/>
+                                        </Button>
+                                        <Button Command="{Binding DataContext.EditPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                CommandParameter="{Binding}"
-                                               Style="{StaticResource SecondaryButton}"
-                                               Padding="12,4"
-                                               FontSize="12"
-                                               Margin="0,0,4,0"/>
-                                        <Button Content="삭제" 
-                                               Command="{Binding DataContext.DeletePropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                               Background="Transparent"
+                                               BorderThickness="0"
+                                               Padding="4"
+                                               Cursor="Hand"
+                                               ToolTip="수정"
+                                               Margin="0,0,4,0">
+                                            <TextBlock Text="&#xE70F;" 
+                                                       FontFamily="Segoe MDL2 Assets" 
+                                                       FontSize="14"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </Button>
+                                        <Button Command="{Binding DataContext.DeletePropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                CommandParameter="{Binding}"
-                                               Style="{StaticResource DangerButton}"
-                                               Padding="12,4"
-                                               FontSize="12"/>
+                                               Background="Transparent"
+                                               BorderThickness="0"
+                                               Padding="4"
+                                               Cursor="Hand"
+                                               ToolTip="삭제">
+                                            <TextBlock Text="&#xE74D;" 
+                                                       FontFamily="Segoe MDL2 Assets" 
+                                                       FontSize="14"
+                                                       Foreground="{StaticResource ErrorBrush}"/>
+                                        </Button>
                                     </StackPanel>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

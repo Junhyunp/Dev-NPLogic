@@ -26,7 +26,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.PropertyId == propertyId)
@@ -47,7 +47,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.Id == id)
@@ -68,7 +68,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRightAnalysisTable(analysis);
                 table.CreatedAt = DateTime.UtcNow;
                 table.UpdatedAt = DateTime.UtcNow;
@@ -96,7 +96,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var table = MapToRightAnalysisTable(analysis);
                 table.UpdatedAt = DateTime.UtcNow;
 
@@ -124,7 +124,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.Id == id)
@@ -159,7 +159,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.IsCompleted == false)
@@ -181,7 +181,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.RiskLevel == riskLevel)

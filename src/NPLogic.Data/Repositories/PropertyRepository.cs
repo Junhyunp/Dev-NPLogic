@@ -25,7 +25,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
@@ -46,7 +46,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.Id == id)
@@ -67,7 +67,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.ProjectId == projectId)
@@ -89,7 +89,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.AssignedTo == userId)
@@ -111,7 +111,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.Status == status)
@@ -133,7 +133,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.PropertyType == propertyType)
@@ -155,7 +155,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 // Supabase의 텍스트 검색 사용
                 var response = await client
@@ -262,7 +262,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var propertyTable = MapToPropertyTable(property);
                 propertyTable.CreatedAt = DateTime.UtcNow;
                 propertyTable.UpdatedAt = DateTime.UtcNow;
@@ -290,7 +290,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var propertyTable = MapToPropertyTable(property);
                 propertyTable.UpdatedAt = DateTime.UtcNow;
 
@@ -318,7 +318,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 await client
                     .From<PropertyTable>()
                     .Where(x => x.Id == id)
@@ -339,7 +339,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var update = new PropertyTable
                 {
                     AssignedTo = userId,
@@ -366,7 +366,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 var update = new PropertyTable
                 {
                     Status = status,
@@ -508,7 +508,7 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
-                var client = _supabaseService.GetClient();
+                var client = await _supabaseService.GetClientAsync();
                 
                 // Supabase RPC를 사용하여 동적 필드 업데이트
                 var property = await GetByIdAsync(propertyId);
