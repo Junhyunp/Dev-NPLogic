@@ -182,7 +182,7 @@
 
                         <TextBlock Grid.Row="0" FontWeight="SemiBold" FontSize="13" Margin="4,0,0,8">
                             <Run Text="대출 목록 ("/>
-                            <Run Text="{Binding Loans.Count, FallbackValue=0}"/>
+                            <Run Text="{Binding Loans.Count, Mode=OneWay, FallbackValue=0}"/>
                             <Run Text="건)"/>
                         </TextBlock>
 

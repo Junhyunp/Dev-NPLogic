@@ -179,5 +179,37 @@ namespace NPLogic.Converters
             return false;
         }
     }
+
+    /// <summary>
+    /// 숫자가 0보다 작으면 true 반환 (음수 표시용)
+    /// </summary>
+    public class LessThanZeroConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is decimal decimalValue)
+            {
+                return decimalValue < 0;
+            }
+            if (value is double doubleValue)
+            {
+                return doubleValue < 0;
+            }
+            if (value is int intValue)
+            {
+                return intValue < 0;
+            }
+            if (value is long longValue)
+            {
+                return longValue < 0;
+            }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 

@@ -36,8 +36,11 @@
     <Color x:Key="Divider">#D0D5DD</Color>
     
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource Background}"/>
+    <SolidColorBrush x:Key="BackgroundColor" Color="{StaticResource Background}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}"/>
+    <SolidColorBrush x:Key="SurfaceColor" Color="{StaticResource Surface}"/>
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}"/>
+    <SolidColorBrush x:Key="BorderColor" Color="{StaticResource Border}"/>
     <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Divider}"/>
 
     <!-- Text Colors -->

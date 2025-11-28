@@ -50,6 +50,8 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _selectedCodeGroup;
 
+        private bool _isLoadingCodes;
+
         [ObservableProperty]
         private bool _isLoading;
 
@@ -278,6 +280,9 @@ namespace NPLogic.ViewModels
 
         private async Task LoadCommonCodesAsync()
         {
+            if (_isLoadingCodes) return;
+            _isLoadingCodes = true;
+
             try
             {
                 var codes = await _referenceDataRepository.GetCommonCodesAsync();
@@ -301,10 +306,15 @@ namespace NPLogic.ViewModels
             {
                 ErrorMessage = $"공통 코드 목록 로드 실패: {ex.Message}";
             }
+            finally
+            {
+                _isLoadingCodes = false;
+            }
         }
 
         partial void OnSelectedCodeGroupChanged(string? value)
         {
+            if (_isLoadingCodes) return;
             _ = FilterCommonCodesAsync();
         }
 

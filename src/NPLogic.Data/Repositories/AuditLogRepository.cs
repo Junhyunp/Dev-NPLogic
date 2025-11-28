@@ -54,39 +54,43 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = _supabaseService.GetClient();
-                Postgrest.Table<AuditLogTable> query = (Postgrest.Table<AuditLogTable>)client.From<AuditLogTable>();
+                
+                // 먼저 전체 데이터를 가져온 후 필터링 (최근 1000건 제한)
+                var response = await client
+                    .From<AuditLogTable>()
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Limit(1000)
+                    .Get();
 
+                var results = response.Models.AsEnumerable();
+
+                // LINQ로 필터링
                 if (!string.IsNullOrEmpty(tableName) && tableName != "전체")
                 {
-                    query = query.Where(x => x.TableName == tableName);
+                    results = results.Where(x => x.TableName == tableName);
                 }
 
                 if (!string.IsNullOrEmpty(action) && action != "전체")
                 {
-                    query = query.Where(x => x.Action == action);
+                    results = results.Where(x => x.Action == action);
                 }
 
                 if (userId.HasValue)
                 {
-                    query = query.Where(x => x.UserId == userId.Value);
+                    results = results.Where(x => x.UserId == userId.Value);
                 }
 
                 if (startDate.HasValue)
                 {
-                    query = query.Where(x => x.CreatedAt >= startDate.Value);
+                    results = results.Where(x => x.CreatedAt >= startDate.Value);
                 }
 
                 if (endDate.HasValue)
                 {
-                    query = query.Where(x => x.CreatedAt <= endDate.Value.AddDays(1));
+                    results = results.Where(x => x.CreatedAt <= endDate.Value.AddDays(1));
                 }
 
-                var response = await query
-                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
-                    .Limit(limit)
-                    .Get();
-
-                return response.Models.Select(MapToAuditLog).ToList();
+                return results.Take(limit).Select(MapToAuditLog).ToList();
             }
             catch (Exception ex)
             {

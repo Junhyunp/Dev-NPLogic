@@ -31,6 +31,7 @@
             <converters:FirstCharConverter x:Key="FirstCharConverter"/>
             <converters:BoolToColorConverter x:Key="BooleanToColorConverter"/>
             <converters:BoolToTextConverter x:Key="BooleanToTextConverter"/>
+            <converters:LessThanZeroConverter x:Key="LessThanZeroConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
