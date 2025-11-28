@@ -108,6 +108,7 @@
 
                     <!-- 수식 편집 폼 -->
                     <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="20">
+                        <Grid>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <StackPanel.Style>
@@ -223,6 +224,7 @@
                                    VerticalAlignment="Center"
                                    Opacity="0.5"
                                    Visibility="{Binding IsFormulaEditing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabItem>
@@ -332,6 +334,7 @@
 
                     <!-- 설정 상세 -->
                     <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="20">
+                        <Grid>
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel>
                                 <StackPanel.Style>
@@ -429,6 +432,7 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+                        </Grid>
                     </Border>
                 </Grid>
             </TabItem>

@@ -54,7 +54,7 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = _supabaseService.GetClient();
-                var query = client.From<AuditLogTable>();
+                Postgrest.Table<AuditLogTable> query = (Postgrest.Table<AuditLogTable>)client.From<AuditLogTable>();
 
                 if (!string.IsNullOrEmpty(tableName) && tableName != "전체")
                 {

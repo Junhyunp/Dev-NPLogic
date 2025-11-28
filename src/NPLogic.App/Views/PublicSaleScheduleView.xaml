@@ -144,7 +144,7 @@
                         <DataGridTextColumn Header="물건 주소" Binding="{Binding Property.AddressFull}" Width="*"/>
                         <DataGridTextColumn Header="최저매각가" Binding="{Binding MinimumBid, StringFormat=N0}" Width="120"/>
                         <DataGridTextColumn Header="낙찰가" Binding="{Binding SalePrice, StringFormat=N0}" Width="120"/>
-                        <DataGridTextColumn Header="낙찰률" Binding="{Binding BidRate, StringFormat=F1}%" Width="80"/>
+                        <DataGridTextColumn Header="낙찰률" Binding="{Binding BidRate, StringFormat={}{0:F1}%}" Width="80"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
