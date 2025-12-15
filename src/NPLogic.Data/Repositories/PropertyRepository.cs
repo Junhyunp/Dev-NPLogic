@@ -83,6 +83,28 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 프로그램 ID로 물건 목록 조회
+        /// </summary>
+        public async Task<List<Property>> GetByProgramIdAsync(Guid programId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.ProgramId == programId)
+                    .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToProperty).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"프로그램별 물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// 담당자로 물건 목록 조회
         /// </summary>
         public async Task<List<Property>> GetByAssignedUserAsync(Guid userId)
@@ -418,6 +440,8 @@ namespace NPLogic.Data.Repositories
             {
                 Id = table.Id,
                 ProjectId = table.ProjectId,
+                ProgramId = table.ProgramId,
+                BorrowerId = table.BorrowerId,
                 PropertyNumber = table.PropertyNumber,
                 PropertyType = table.PropertyType,
                 AddressFull = table.AddressFull,
@@ -464,6 +488,8 @@ namespace NPLogic.Data.Repositories
             {
                 Id = property.Id,
                 ProjectId = property.ProjectId,
+                ProgramId = property.ProgramId,
+                BorrowerId = property.BorrowerId,
                 PropertyNumber = property.PropertyNumber,
                 PropertyType = property.PropertyType,
                 AddressFull = property.AddressFull,
@@ -580,6 +606,12 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("project_id")]
         public string? ProjectId { get; set; }
+
+        [Postgrest.Attributes.Column("program_id")]
+        public Guid? ProgramId { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_id")]
+        public Guid? BorrowerId { get; set; }
 
         [Postgrest.Attributes.Column("property_number")]
         public string? PropertyNumber { get; set; }

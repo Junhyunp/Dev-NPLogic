@@ -205,6 +205,9 @@ namespace NPLogic.ViewModels
                     Name = value.Name,
                     Role = value.Role,
                     Status = value.Status,
+                    Team = value.Team,
+                    Position = value.Position,
+                    AccountingFirm = value.AccountingFirm,
                     CreatedAt = value.CreatedAt,
                     UpdatedAt = value.UpdatedAt
                 };

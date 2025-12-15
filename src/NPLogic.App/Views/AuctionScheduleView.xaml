@@ -129,7 +129,9 @@
                           IsReadOnly="True"
                           Background="Transparent"
                           CanUserAddRows="False"
-                          GridLinesVisibility="Horizontal"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                           SelectionMode="Single"
                           RowHeight="50">
                     <DataGrid.Columns>

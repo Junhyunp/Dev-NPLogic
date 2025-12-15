@@ -1,10 +1,13 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Threading.Tasks;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Services;
 using NPLogic.Core.Models;
+using NPLogic.Data.Repositories;
 
 namespace NPLogic
 {
@@ -13,7 +16,13 @@ namespace NPLogic
     /// </summary>
     public partial class MainWindow : Window
     {
-        private bool _isSidebarCollapsed = false;
+        private Button? _selectedMenuButton = null;
+        private User? _currentUser;
+        
+        // 선택된 메뉴 배경색 및 accent 색상 (적당한 밝기)
+        private static readonly SolidColorBrush SelectedMenuBrush = new SolidColorBrush(Color.FromRgb(0xC8, 0xE0, 0xF4)); // 적당한 스카이 블루
+        private static readonly SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
+        private static readonly SolidColorBrush AccentBrush = new SolidColorBrush(Color.FromRgb(0x4A, 0x90, 0xE2)); // 밝은 블루 accent
 
         public static MainWindow? Instance { get; private set; }
 
@@ -26,8 +35,129 @@ namespace NPLogic
             // Initialize Toast Service
             NPLogic.UI.Services.ToastService.Instance.Initialize(ToastContainer);
 
-            // 기본 화면으로 대시보드 표시
-            NavigateToDashboard();
+            // 역할에 따른 홈 화면으로 이동
+            _ = NavigateToRoleBasedHomeAsync();
+        }
+
+        /// <summary>
+        /// 역할에 따른 홈 화면으로 이동
+        /// </summary>
+        private async Task NavigateToRoleBasedHomeAsync()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider == null) return;
+
+            try
+            {
+                // 현재 사용자 정보 가져오기
+                var authService = serviceProvider.GetRequiredService<AuthService>();
+                var userRepository = serviceProvider.GetRequiredService<UserRepository>();
+                
+                var authUser = authService.GetSession()?.User;
+                if (authUser != null && !string.IsNullOrEmpty(authUser.Id))
+                {
+                    _currentUser = await userRepository.GetByAuthUserIdAsync(System.Guid.Parse(authUser.Id));
+                }
+
+                // 역할에 따라 다른 홈 화면으로 이동
+                if (_currentUser?.IsAdmin == true)
+                {
+                    NavigateToAdminHome();
+                }
+                else if (_currentUser?.IsPM == true)
+                {
+                    NavigateToPMHome();
+                }
+                else if (_currentUser?.IsEvaluator == true)
+                {
+                    NavigateToEvaluatorHome();
+                }
+                else
+                {
+                    // 기본적으로 대시보드로
+                    NavigateToDashboard();
+                }
+            }
+            catch
+            {
+                // 오류 시 기본 대시보드로
+                NavigateToDashboard();
+            }
+        }
+
+        /// <summary>
+        /// 관리자 홈 화면으로 이동
+        /// </summary>
+        public void NavigateToAdminHome()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var adminHomeView = serviceProvider.GetRequiredService<Views.AdminHomeView>();
+                MainContentControl.Content = adminHomeView;
+                UpdateSelectedMenu(DashboardButton);
+            }
+        }
+
+        /// <summary>
+        /// PM 홈 화면으로 이동
+        /// </summary>
+        public void NavigateToPMHome()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var pmHomeView = serviceProvider.GetRequiredService<Views.PMHomeView>();
+                MainContentControl.Content = pmHomeView;
+                UpdateSelectedMenu(DashboardButton);
+            }
+        }
+
+        /// <summary>
+        /// 평가자 홈 화면으로 이동
+        /// </summary>
+        public void NavigateToEvaluatorHome()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var evaluatorHomeView = serviceProvider.GetRequiredService<Views.EvaluatorHomeView>();
+                MainContentControl.Content = evaluatorHomeView;
+                UpdateSelectedMenu(DashboardButton);
+            }
+        }
+
+        /// <summary>
+        /// 프로그램 관리 화면으로 이동
+        /// </summary>
+        public void NavigateToProgramManagement()
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var programManagementView = serviceProvider.GetRequiredService<Views.ProgramManagementView>();
+                MainContentControl.Content = programManagementView;
+            }
+        }
+        
+        /// <summary>
+        /// 사이드바 메뉴 선택 상태 업데이트
+        /// </summary>
+        private void UpdateSelectedMenu(Button selectedButton)
+        {
+            // 이전 선택된 버튼의 스타일 초기화
+            if (_selectedMenuButton != null)
+            {
+                _selectedMenuButton.Background = TransparentBrush;
+                _selectedMenuButton.BorderBrush = TransparentBrush;
+                _selectedMenuButton.BorderThickness = new Thickness(0);
+            }
+            
+            // 새로 선택된 버튼의 스타일 설정 (배경색 + 왼쪽 accent 바)
+            selectedButton.Background = SelectedMenuBrush;
+            selectedButton.BorderBrush = AccentBrush;
+            selectedButton.BorderThickness = new Thickness(3, 0, 0, 0);
+            _selectedMenuButton = selectedButton;
         }
 
         /// <summary>
@@ -40,6 +170,7 @@ namespace NPLogic
             {
                 var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
                 MainContentControl.Content = dashboardView;
+                UpdateSelectedMenu(DashboardButton);
             }
         }
 
@@ -53,6 +184,7 @@ namespace NPLogic
             {
                 var propertyListView = serviceProvider.GetRequiredService<Views.PropertyListView>();
                 MainContentControl.Content = propertyListView;
+                UpdateSelectedMenu(PropertyListButton);
             }
         }
 
@@ -66,6 +198,7 @@ namespace NPLogic
             {
                 var dataUploadView = serviceProvider.GetRequiredService<Views.DataUploadView>();
                 MainContentControl.Content = dataUploadView;
+                UpdateSelectedMenu(DataUploadButton);
             }
         }
 
@@ -88,6 +221,7 @@ namespace NPLogic
             {
                 var statisticsView = serviceProvider.GetRequiredService<Views.StatisticsView>();
                 MainContentControl.Content = statisticsView;
+                UpdateSelectedMenu(StatisticsButton);
             }
         }
 
@@ -101,6 +235,7 @@ namespace NPLogic
             {
                 var borrowerOverviewView = serviceProvider.GetRequiredService<Views.BorrowerOverviewView>();
                 MainContentControl.Content = borrowerOverviewView;
+                UpdateSelectedMenu(BorrowerOverviewButton);
             }
         }
 
@@ -114,6 +249,7 @@ namespace NPLogic
             {
                 var collateralSummaryView = serviceProvider.GetRequiredService<Views.CollateralSummaryView>();
                 MainContentControl.Content = collateralSummaryView;
+                UpdateSelectedMenu(CollateralSummaryButton);
             }
         }
 
@@ -127,6 +263,7 @@ namespace NPLogic
             {
                 var loanDetailView = serviceProvider.GetRequiredService<Views.LoanDetailView>();
                 MainContentControl.Content = loanDetailView;
+                UpdateSelectedMenu(LoanDetailButton);
             }
         }
 
@@ -140,6 +277,7 @@ namespace NPLogic
             {
                 var toolBoxView = serviceProvider.GetRequiredService<Views.ToolBoxView>();
                 MainContentControl.Content = toolBoxView;
+                UpdateSelectedMenu(ToolBoxButton);
             }
         }
 
@@ -153,6 +291,7 @@ namespace NPLogic
             {
                 var cashFlowSummaryView = serviceProvider.GetRequiredService<Views.CashFlowSummaryView>();
                 MainContentControl.Content = cashFlowSummaryView;
+                UpdateSelectedMenu(CashFlowSummaryButton);
             }
         }
 
@@ -166,6 +305,7 @@ namespace NPLogic
             {
                 var xnpvComparisonView = serviceProvider.GetRequiredService<Views.XnpvComparisonView>();
                 MainContentControl.Content = xnpvComparisonView;
+                UpdateSelectedMenu(XnpvComparisonButton);
             }
         }
 
@@ -179,6 +319,7 @@ namespace NPLogic
             {
                 var restructuringOverviewView = serviceProvider.GetRequiredService<Views.RestructuringOverviewView>();
                 MainContentControl.Content = restructuringOverviewView;
+                UpdateSelectedMenu(RestructuringOverviewButton);
             }
         }
 
@@ -300,6 +441,7 @@ namespace NPLogic
             {
                 var userManagementView = serviceProvider.GetRequiredService<Views.UserManagementView>();
                 MainContentControl.Content = userManagementView;
+                UpdateSelectedMenu(UserManagementButton);
             }
         }
 
@@ -321,6 +463,7 @@ namespace NPLogic
             {
                 var settingsView = serviceProvider.GetRequiredService<Views.SettingsView>();
                 MainContentControl.Content = settingsView;
+                UpdateSelectedMenu(SettingsButton);
             }
         }
 
@@ -358,6 +501,7 @@ namespace NPLogic
             {
                 var auditLogsView = serviceProvider.GetRequiredService<Views.AuditLogsView>();
                 MainContentControl.Content = auditLogsView;
+                UpdateSelectedMenu(AuditLogsButton);
             }
         }
 
@@ -379,6 +523,7 @@ namespace NPLogic
             {
                 var seniorRightsView = serviceProvider.GetRequiredService<Views.SeniorRightsView>();
                 MainContentControl.Content = seniorRightsView;
+                UpdateSelectedMenu(SeniorRightsButton);
             }
         }
 
@@ -400,6 +545,7 @@ namespace NPLogic
             {
                 var auctionScheduleView = serviceProvider.GetRequiredService<Views.AuctionScheduleView>();
                 MainContentControl.Content = auctionScheduleView;
+                UpdateSelectedMenu(AuctionScheduleButton);
             }
         }
 
@@ -421,6 +567,7 @@ namespace NPLogic
             {
                 var publicSaleScheduleView = serviceProvider.GetRequiredService<Views.PublicSaleScheduleView>();
                 MainContentControl.Content = publicSaleScheduleView;
+                UpdateSelectedMenu(PublicSaleScheduleButton);
             }
         }
 
@@ -438,52 +585,6 @@ namespace NPLogic
         private void UserInfoButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToUnderDevelopment();
-        }
-
-        private void ToggleSidebarButton_Click(object sender, RoutedEventArgs e)
-        {
-            _isSidebarCollapsed = !_isSidebarCollapsed;
-
-            if (_isSidebarCollapsed)
-            {
-                CollapseSidebar();
-            }
-            else
-            {
-                ExpandSidebar();
-            }
-        }
-
-        private void CollapseSidebar()
-        {
-            // Animate sidebar width
-            var widthAnimation = new GridLengthAnimation
-            {
-                From = new GridLength(SidebarColumn.ActualWidth),
-                To = new GridLength(60),
-                Duration = TimeSpan.FromMilliseconds(300)
-            };
-
-            SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, widthAnimation);
-
-            // Change icon
-            ToggleIcon.Kind = PackIconKind.ChevronRight;
-        }
-
-        private void ExpandSidebar()
-        {
-            // Animate sidebar width
-            var widthAnimation = new GridLengthAnimation
-            {
-                From = new GridLength(SidebarColumn.ActualWidth),
-                To = new GridLength(260),
-                Duration = TimeSpan.FromMilliseconds(300)
-            };
-
-            SidebarColumn.BeginAnimation(ColumnDefinition.WidthProperty, widthAnimation);
-
-            // Change icon
-            ToggleIcon.Kind = PackIconKind.ChevronLeft;
         }
 
         /// <summary>

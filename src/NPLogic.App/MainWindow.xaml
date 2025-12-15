@@ -13,15 +13,16 @@
     
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>      <!-- Header -->
+            <RowDefinition Height="50"/>      <!-- Header -->
+            <RowDefinition Height="Auto"/>    <!-- Menu Bar -->
             <RowDefinition Height="*"/>       <!-- Content -->
             <RowDefinition Height="30"/>      <!-- Status Bar -->
         </Grid.RowDefinitions>
 
         <!-- Header -->
         <Border Grid.Row="0" 
-                Background="{StaticResource PrimaryBrush}"
-                BorderBrush="{StaticResource PrimaryDarkBrush}"
+                Background="White"
+                BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,0,1">
             <Grid Margin="16,0">
                 <Grid.ColumnDefinitions>
@@ -30,17 +31,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Logo & Title -->
+                <!-- Logo -->
                 <StackPanel Grid.Column="0" 
-                           Orientation="Horizontal" 
+                           Orientation="Horizontal"
                            VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="FileDocument" 
-                                           Width="32" Height="32"
-                                           Foreground="White"
-                                           Margin="0,0,12,0"/>
                     <TextBlock Text="NPLogic" 
-                              Style="{StaticResource H3TextStyle}"
-                              Foreground="White"
+                              FontSize="20" 
+                              FontWeight="SemiBold"
+                              Foreground="{StaticResource PrimaryBrush}"
                               VerticalAlignment="Center"/>
                 </StackPanel>
 
@@ -54,7 +52,7 @@
                             Click="NotificationButton_Click">
                         <materialDesign:PackIcon Kind="Bell" 
                                                Width="20" Height="20"
-                                               Foreground="White"/>
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
                     </Button>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="설정"
@@ -62,11 +60,11 @@
                             Click="HeaderSettingsButton_Click">
                         <materialDesign:PackIcon Kind="Cog" 
                                                Width="20" Height="20"
-                                               Foreground="White"/>
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
                     </Button>
                     <Separator Width="1" 
                               Height="24" 
-                              Background="#FFFFFF40"
+                              Background="{StaticResource DividerBrush}"
                               Margin="8,0"/>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="사용자 정보"
@@ -74,7 +72,7 @@
                             Click="UserInfoButton_Click">
                         <materialDesign:PackIcon Kind="Account" 
                                                Width="20" Height="20"
-                                               Foreground="White"/>
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
                     </Button>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="로그아웃"
@@ -82,865 +80,207 @@
                             Click="LogoutButton_Click">
                         <materialDesign:PackIcon Kind="Logout" 
                                                Width="20" Height="20"
-                                               Foreground="White"/>
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Main Content Area with Sidebar -->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="SidebarColumn" Width="260"/>   <!-- Sidebar -->
-                <ColumnDefinition Width="*"/>     <!-- Content -->
-            </Grid.ColumnDefinitions>
-
-            <!-- Sidebar Navigation -->
-            <Border x:Name="SidebarBorder"
-                    Grid.Column="0" 
-                    Background="{StaticResource PrimaryBrush}"
-                    BorderBrush="{StaticResource PrimaryDarkBrush}"
-                    BorderThickness="0,0,1,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Navigation Menu -->
-                    <ScrollViewer Grid.Row="0" 
-                                 VerticalScrollBarVisibility="Auto"
-                                 Padding="8">
-                        <StackPanel>
-                            <!-- Dashboard -->
-                            <Button x:Name="DashboardButton"
-                                   Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="DashboardButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ViewDashboard" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="대시보드" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Property List -->
-                            <Button x:Name="PropertyListButton"
-                                   Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="PropertyListButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ViewList" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="물건 목록" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Data Upload -->
-                            <Button x:Name="DataUploadButton"
-                                   Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="DataUploadButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Upload" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="데이터 업로드" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Statistics -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="StatisticsButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ChartBar" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="통계 분석" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <Separator Background="#FFFFFF20" Margin="8,16"/>
-
-                            <!-- 차주/대출 관리 섹션 -->
-                            <TextBlock Text="차주/대출" 
-                                      Foreground="#FFFFFF80"
-                                      Margin="12,8"
-                                      FontSize="12"/>
-
-                            <!-- Borrower Overview -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="BorrowerOverviewButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="AccountGroup" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="차주 개요" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Collateral Summary -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="CollateralSummaryButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Home" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="담보 총괄" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Loan Detail -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="LoanDetailButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CreditCard" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="Loan 상세" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Cash Flow Summary -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="CashFlowSummaryButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CashMultiple" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="현금흐름/XNPV" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- XNPV Comparison -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="XnpvComparisonButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Compare" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="XNPV 비교" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Restructuring Overview -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="RestructuringOverviewButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Gavel" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="회생 개요" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <Separator Background="#FFFFFF20" Margin="8,16"/>
-
-                            <!-- Admin Section -->
-                            <TextBlock Text="관리" 
-                                      Foreground="#FFFFFF80"
-                                      Margin="12,8"
-                                      FontSize="12"/>
-
-                            <!-- Tool Box -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="ToolBoxButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Toolbox" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="Tool Box" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- User Management -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="UserManagementButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="AccountMultiple" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="사용자 관리" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Settings -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="SettingsButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Cog" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="설정" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Audit Logs -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="AuditLogsButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="History" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="작업 이력" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Senior Rights -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="SeniorRightsButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ListStatus" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="선순위 관리" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Auction Schedule -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="AuctionScheduleButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CalendarClock" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="경매 일정" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
-
-                            <!-- Public Sale Schedule -->
-                            <Button Background="Transparent"
-                                   BorderThickness="0"
-                                   Height="48"
-                                   HorizontalContentAlignment="Stretch"
-                                   Margin="0,4"
-                                   Padding="12,0"
-                                   Cursor="Hand"
-                                   Click="PublicSaleScheduleButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="Transparent"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}"
-                                                            CornerRadius="4"
-                                                            Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Left" 
-                                                                        VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter Property="Background" Value="#2A3442"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </Button.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="CalendarCheck" 
-                                                           Width="20" Height="20"
-                                                           Foreground="White"
-                                                           VerticalAlignment="Center"/>
-                                    <TextBlock Text="공매 일정" 
-                                              Foreground="White"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"
-                                              FontSize="14"/>
-                                </StackPanel>
-                            </Button>
+        <!-- Top Menu Bar (엑셀 스타일 - 밝은 버전) -->
+        <Border Grid.Row="1" 
+                Background="{StaticResource BlueGray50Brush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,4">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
+                          VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Dashboard -->
+                    <Button x:Name="DashboardButton"
+                            Click="DashboardButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ViewDashboard" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="대시보드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Toggle Sidebar Button -->
-                    <Button Grid.Row="1"
-                           x:Name="ToggleSidebarButton"
-                           Background="Transparent"
-                           BorderThickness="0"
-                           Height="48"
-                           HorizontalContentAlignment="Center"
-                           Margin="8"
-                           Cursor="Hand"
-                           Click="ToggleSidebarButton_Click">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    CornerRadius="4">
-                                                <ContentPresenter HorizontalAlignment="Center" 
-                                                                VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#2A3442"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
-                        <materialDesign:PackIcon x:Name="ToggleIcon"
-                                               Kind="ChevronLeft" 
-                                               Width="24" Height="24"
-                                               Foreground="White"/>
                     </Button>
-                </Grid>
-            </Border>
 
-            <!-- Main Content -->
-            <Border Grid.Column="1" 
-                    Background="{StaticResource BackgroundBrush}">
-                <Grid>
-                    <!-- Toast Container -->
-                    <Canvas x:Name="ToastContainer"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            IsHitTestVisible="False"
-                            Panel.ZIndex="999"/>
+                    <!-- Property List -->
+                    <Button x:Name="PropertyListButton"
+                            Click="PropertyListButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ViewList" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="물건 목록" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
 
-                    <!-- Content Frame (Views will be loaded here) -->
-                    <ContentControl x:Name="MainContentControl"/>
-                </Grid>
-            </Border>
-        </Grid>
+                    <!-- Data Upload -->
+                    <Button x:Name="DataUploadButton"
+                            Click="DataUploadButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Statistics -->
+                    <Button x:Name="StatisticsButton"
+                            Click="StatisticsButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ChartBar" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="통계" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator Width="1" Height="24" Background="{StaticResource DividerBrush}" Margin="8,0"/>
+
+                    <!-- 차주/대출 메뉴 -->
+                    <Button x:Name="BorrowerOverviewButton"
+                            Click="BorrowerOverviewButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AccountGroup" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="차주 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="CollateralSummaryButton"
+                            Click="CollateralSummaryButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Home" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="담보 총괄" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="LoanDetailButton"
+                            Click="LoanDetailButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CreditCard" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Loan 상세" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="CashFlowSummaryButton"
+                            Click="CashFlowSummaryButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="XnpvComparisonButton"
+                            Click="XnpvComparisonButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Compare" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="XNPV" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="RestructuringOverviewButton"
+                            Click="RestructuringOverviewButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Gavel" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="회생 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Separator Width="1" Height="24" Background="{StaticResource DividerBrush}" Margin="8,0"/>
+
+                    <!-- 관리 메뉴 -->
+                    <Button x:Name="ToolBoxButton"
+                            Click="ToolBoxButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Toolbox" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="Tool Box" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="UserManagementButton"
+                            Click="UserManagementButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AccountMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="사용자" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="SettingsButton"
+                            Click="SettingsButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Cog" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="설정" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="AuditLogsButton"
+                            Click="AuditLogsButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="History" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="이력" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="SeniorRightsButton"
+                            Click="SeniorRightsButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ListStatus" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="선순위" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="AuctionScheduleButton"
+                            Click="AuctionScheduleButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CalendarClock" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="경매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="PublicSaleScheduleButton"
+                            Click="PublicSaleScheduleButton_Click"
+                            Style="{StaticResource TopMenuButton}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CalendarCheck" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="공매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Border Grid.Row="2" 
+                Background="{StaticResource BackgroundBrush}">
+            <Grid>
+                <!-- Toast Container -->
+                <Canvas x:Name="ToastContainer"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        IsHitTestVisible="False"
+                        Panel.ZIndex="999"/>
+
+                <!-- Content Frame (Views will be loaded here) -->
+                <ContentControl x:Name="MainContentControl"/>
+            </Grid>
+        </Border>
 
         <!-- Status Bar -->
-        <Border Grid.Row="2" 
-                Background="{StaticResource BorderBrush}"
-                BorderBrush="{StaticResource DividerBrush}"
+        <Border Grid.Row="3" 
+                Background="{StaticResource BlueGray50Brush}"
+                BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,1,0,0"
                 Padding="16,4">
             <Grid>

@@ -280,6 +280,9 @@ namespace NPLogic.Data.Repositories
                 Name = table.Name ?? string.Empty,
                 Role = table.Role ?? string.Empty,
                 Status = table.Status ?? "active",
+                Team = table.Team,
+                Position = table.Position,
+                AccountingFirm = table.AccountingFirm,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             };
@@ -298,6 +301,9 @@ namespace NPLogic.Data.Repositories
                 Name = user.Name,
                 Role = user.Role,
                 Status = user.Status,
+                Team = user.Team,
+                Position = user.Position,
+                AccountingFirm = user.AccountingFirm,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
             };
@@ -327,6 +333,15 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("status")]
         public string? Status { get; set; }
+
+        [Postgrest.Attributes.Column("team")]
+        public string? Team { get; set; }
+
+        [Postgrest.Attributes.Column("position")]
+        public string? Position { get; set; }
+
+        [Postgrest.Attributes.Column("accounting_firm")]
+        public string? AccountingFirm { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

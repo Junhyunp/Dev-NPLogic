@@ -19,7 +19,11 @@ namespace NPLogic.Views
             // DataContext가 PropertyDetailViewModel인 경우 등기부 데이터 로드
             if (DataContext is PropertyDetailViewModel viewModel && viewModel.RegistryViewModel != null)
             {
+                // 등기부 데이터 로드
                 await viewModel.RegistryViewModel.LoadDataAsync();
+                
+                // OCR 서버 상태 확인 (백그라운드에서)
+                _ = viewModel.RegistryViewModel.CheckOcrServerStatusAsync();
             }
         }
     }

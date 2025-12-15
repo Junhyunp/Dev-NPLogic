@@ -203,7 +203,9 @@
                         </TextBlock>
                         <DataGrid ItemsSource="{Binding BorrowerLoans}"
                                   AutoGenerateColumns="False" IsReadOnly="True"
-                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column" GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                   BorderThickness="1" BorderBrush="{StaticResource BorderColor}"
                                   Background="Transparent" MaxHeight="250">
                             <DataGrid.Columns>

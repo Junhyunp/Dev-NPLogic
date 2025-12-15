@@ -1,11 +1,13 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -42,18 +44,59 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 유사물건 추천 결과 아이템
+    /// </summary>
+    public class RecommendCaseItem : ObservableObject
+    {
+        public string? CaseNo { get; set; }
+        public string? Address { get; set; }
+        public string? Usage { get; set; }
+        public DateTime? AuctionDate { get; set; }
+        public decimal? AppraisalPrice { get; set; }
+        public decimal? WinningPrice { get; set; }
+        public double? BuildingArea { get; set; }
+        public double? LandArea { get; set; }
+        public string? RuleName { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        
+        /// <summary>
+        /// 낙찰가율 (%)
+        /// </summary>
+        public decimal? WinningRate => AppraisalPrice > 0 ? (WinningPrice / AppraisalPrice) * 100 : null;
+        
+        /// <summary>
+        /// 낙찰가율 표시 문자열
+        /// </summary>
+        public string WinningRateDisplay => WinningRate.HasValue ? $"{WinningRate:N1}%" : "-";
+        
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
+        }
+    }
+
+    /// <summary>
     /// 평가 탭 ViewModel
     /// </summary>
     public partial class EvaluationTabViewModel : ObservableObject
     {
         private readonly EvaluationRepository _evaluationRepository;
+        private readonly RecommendService _recommendService;
         private Guid _propertyId;
         private Property? _property;
         private Evaluation? _evaluation;
 
+        // Supabase 설정 (App.xaml.cs에서 설정)
+        public string? SupabaseUrl { get; set; }
+        public string? SupabaseKey { get; set; }
+
         public EvaluationTabViewModel(EvaluationRepository evaluationRepository)
         {
             _evaluationRepository = evaluationRepository ?? throw new ArgumentNullException(nameof(evaluationRepository));
+            _recommendService = new RecommendService();
             
             // 초기 데이터 설정
             InitializeCaseItems();
@@ -162,6 +205,25 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _scenario2_Reason = "실거래가 적용";
+
+        // === 유사물건 추천 ===
+        [ObservableProperty]
+        private ObservableCollection<RecommendCaseItem> _recommendedCases = new();
+
+        [ObservableProperty]
+        private bool _isRecommendLoading;
+
+        [ObservableProperty]
+        private string? _recommendStatusMessage;
+
+        [ObservableProperty]
+        private int _selectedRuleIndex = 1;
+
+        [ObservableProperty]
+        private string _selectedRegionScope = "big";
+
+        [ObservableProperty]
+        private RecommendCaseItem? _selectedRecommendCase;
 
         #endregion
 
@@ -464,6 +526,149 @@ namespace NPLogic.ViewModels
             {
                 ErrorMessage = $"사이트 열기 실패: {ex.Message}";
             }
+        }
+
+        /// <summary>
+        /// 유사물건 추천
+        /// </summary>
+        [RelayCommand]
+        private async Task RecommendSimilarCasesAsync()
+        {
+            if (_property == null)
+            {
+                ErrorMessage = "물건 정보가 없습니다.";
+                return;
+            }
+
+            try
+            {
+                IsRecommendLoading = true;
+                RecommendStatusMessage = "유사물건을 검색 중입니다...";
+                ErrorMessage = null;
+
+                // 대상 물건 정보 구성
+                var subject = new RecommendSubject
+                {
+                    PropertyId = _propertyId.ToString(),
+                    Address = _property.AddressFull ?? _property.AddressJibun,
+                    Usage = GetUsageFromEvaluationType(),
+                    RegionBig = RegionName1,
+                    RegionMid = RegionName2,
+                    Latitude = _property.Latitude.HasValue ? (double?)Convert.ToDouble(_property.Latitude.Value) : null,
+                    Longitude = _property.Longitude.HasValue ? (double?)Convert.ToDouble(_property.Longitude.Value) : null,
+                    BuildingArea = _property.BuildingArea.HasValue ? (double?)Convert.ToDouble(_property.BuildingArea.Value) : null,
+                    LandArea = _property.LandArea.HasValue ? (double?)Convert.ToDouble(_property.LandArea.Value) : null,
+                    BuildingAppraisalPrice = _property.AppraisalValue
+                };
+
+                // 추천 옵션
+                var options = new RecommendOptions
+                {
+                    RuleIndex = SelectedRuleIndex,
+                    RegionScope = SelectedRegionScope,
+                    TopK = 10,
+                    SupabaseUrl = SupabaseUrl,
+                    SupabaseKey = SupabaseKey
+                };
+
+                // 추천 실행
+                var result = await _recommendService.RecommendAsync(subject, options);
+
+                if (result.Success)
+                {
+                    RecommendedCases.Clear();
+                    
+                    // 결과 변환
+                    if (result.RuleResults != null)
+                    {
+                        foreach (var ruleResult in result.RuleResults)
+                        {
+                            foreach (var caseItem in ruleResult.Value)
+                            {
+                                RecommendedCases.Add(new RecommendCaseItem
+                                {
+                                    CaseNo = caseItem.CaseNo,
+                                    Address = caseItem.Address,
+                                    Usage = caseItem.Usage,
+                                    AuctionDate = DateTime.TryParse(caseItem.AuctionDate, out var date) ? date : null,
+                                    AppraisalPrice = caseItem.AppraisalPrice,
+                                    WinningPrice = caseItem.WinningPrice,
+                                    BuildingArea = caseItem.BuildingArea,
+                                    LandArea = caseItem.LandArea,
+                                    Latitude = caseItem.Latitude,
+                                    Longitude = caseItem.Longitude,
+                                    RuleName = caseItem.RuleName
+                                });
+                            }
+                        }
+                    }
+
+                    RecommendStatusMessage = $"추천 결과: {RecommendedCases.Count}건";
+                    if (RecommendedCases.Count == 0)
+                    {
+                        RecommendStatusMessage = "조건에 맞는 유사물건이 없습니다.";
+                    }
+                }
+                else
+                {
+                    ErrorMessage = result.Error ?? "추천 실패";
+                    RecommendStatusMessage = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"추천 실패: {ex.Message}";
+                RecommendStatusMessage = null;
+            }
+            finally
+            {
+                IsRecommendLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 선택된 추천 사례를 사례평가에 적용
+        /// </summary>
+        [RelayCommand]
+        private void ApplyRecommendedCase()
+        {
+            if (SelectedRecommendCase == null)
+            {
+                ErrorMessage = "적용할 사례를 선택하세요.";
+                return;
+            }
+
+            try
+            {
+                // 선택된 사례의 낙찰가율을 적용
+                if (SelectedRecommendCase.WinningRate.HasValue)
+                {
+                    AppliedBidRate = SelectedRecommendCase.WinningRate.Value / 100; // % → 비율 변환
+                    AppliedBidRateDescription = $"유사물건 사례 적용 ({SelectedRecommendCase.CaseNo})";
+                    
+                    // 시나리오 1 재계산
+                    CalculateScenario1();
+                    
+                    SuccessMessage = $"사례 {SelectedRecommendCase.CaseNo}의 낙찰가율이 적용되었습니다.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"사례 적용 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 평가 유형에서 용도 문자열 반환
+        /// </summary>
+        private string GetUsageFromEvaluationType()
+        {
+            if (IsApartmentType) return "아파트";
+            if (IsMultiFamilyType) return "다세대";
+            if (IsFactoryType) return "공장";
+            if (IsCommercialType) return "근린상가";
+            if (IsHouseLandType) return "주택";
+            return "아파트";
         }
 
         /// <summary>

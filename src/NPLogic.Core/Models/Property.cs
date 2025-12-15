@@ -11,6 +11,16 @@ namespace NPLogic.Core.Models
 
         public string? ProjectId { get; set; }
 
+        /// <summary>
+        /// 프로그램 ID (programs 테이블 FK)
+        /// </summary>
+        public Guid? ProgramId { get; set; }
+
+        /// <summary>
+        /// 차주 ID (borrowers 테이블 FK)
+        /// </summary>
+        public Guid? BorrowerId { get; set; }
+
         public string? PropertyNumber { get; set; }
 
         public string? PropertyType { get; set; }

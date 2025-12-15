@@ -38,6 +38,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _confirmPassword = string.Empty;
 
+        // 회원가입 시 역할 선택
+        [ObservableProperty]
+        private string _selectedRole = "evaluator";
+
+        [ObservableProperty]
+        private string _signUpName = string.Empty;
+
         // 비밀번호 재설정 관련
         [ObservableProperty]
         private bool _isPasswordResetMode;
@@ -93,8 +100,9 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                // 회원가입 시도
-                var (success, errorMessage, user) = await _authService.SignUpWithEmailAsync(Email, Password);
+                // 회원가입 시도 (이름, 역할 포함)
+                var name = string.IsNullOrWhiteSpace(SignUpName) ? null : SignUpName;
+                var (success, errorMessage, user) = await _authService.SignUpWithEmailAsync(Email, Password, name, SelectedRole);
 
                 if (success && user != null)
                 {

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:BorrowerOverviewViewModel}"
@@ -208,7 +209,9 @@
                               IsReadOnly="True"
                               SelectionMode="Single"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="Horizontal"
+                              GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                               BorderThickness="0"
                               Background="Transparent"
                               RowBackground="Transparent"
@@ -308,9 +311,8 @@
                             </StackPanel.Style>
 
                             <!-- 기본 정보 섹션 -->
-                            <TextBlock Text="기본 정보" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,16"/>
-                            
-                            <Grid Margin="0,0,0,24">
+                            <controls:NPExpandableSection Header="기본 정보" IsExpanded="True">
+                                <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="16"/>
@@ -368,24 +370,26 @@
                                     <TextBox Text="{Binding SelectedBorrower.Phone, UpdateSourceTrigger=PropertyChanged}" 
                                              Padding="12,10"/>
                                 </StackPanel>
-                            </Grid>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 상태 체크박스 -->
-                            <TextBlock Text="상태" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
-                                <CheckBox Content="회생 (S 차주)" 
-                                          IsChecked="{Binding SelectedBorrower.IsRestructuring}"
-                                          Margin="0,0,24,0"/>
-                                <CheckBox Content="개회" 
-                                          IsChecked="{Binding SelectedBorrower.IsOpened}"
-                                          Margin="0,0,24,0"/>
-                                <CheckBox Content="차주사망" 
-                                          IsChecked="{Binding SelectedBorrower.IsDeceased}"/>
-                            </StackPanel>
+                            <controls:NPExpandableSection Header="상태" IsExpanded="True">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox Content="회생 (S 차주)" 
+                                              IsChecked="{Binding SelectedBorrower.IsRestructuring}"
+                                              Margin="0,0,24,0"/>
+                                    <CheckBox Content="개회" 
+                                              IsChecked="{Binding SelectedBorrower.IsOpened}"
+                                              Margin="0,0,24,0"/>
+                                    <CheckBox Content="차주사망" 
+                                              IsChecked="{Binding SelectedBorrower.IsDeceased}"/>
+                                </StackPanel>
+                            </controls:NPExpandableSection>
 
                             <!-- XNPV 결과 -->
-                            <TextBlock Text="XNPV 결과" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12"/>
-                            <Grid Margin="0,0,0,24">
+                            <controls:NPExpandableSection Header="XNPV 결과" IsExpanded="True">
+                                <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="16"/>
@@ -443,28 +447,20 @@
                                         </Grid>
                                     </StackPanel>
                                 </Border>
-                            </Grid>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 담보 물건 목록 -->
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*" MinHeight="150"/>
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12">
-                                    <Run Text="담보 물건 목록 ("/>
-                                    <Run Text="{Binding BorrowerProperties.Count, Mode=OneWay, FallbackValue=0}"/>
-                                    <Run Text="건)"/>
-                                </TextBlock>
-
-                                <DataGrid Grid.Row="1"
+                            <controls:NPExpandableSection Header="담보 물건 목록" IsExpanded="True">
+                                <DataGrid
                                           ItemsSource="{Binding BorrowerProperties}"
                                           AutoGenerateColumns="False"
                                           IsReadOnly="True"
                                           SelectionMode="Single"
                                           HeadersVisibility="Column"
-                                          GridLinesVisibility="Horizontal"
+                                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                           BorderThickness="1"
                                           BorderBrush="{StaticResource BorderColor}"
                                           Background="Transparent"
@@ -494,7 +490,7 @@
                                         </DataGridTemplateColumn>
                                     </DataGrid.Columns>
                                 </DataGrid>
-                            </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 저장 버튼 -->
                             <Button Content="저장" 

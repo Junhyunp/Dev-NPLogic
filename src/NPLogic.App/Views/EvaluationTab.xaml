@@ -171,6 +171,91 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 유사물건 추천 영역 -->
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🎯 유사물건 추천" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                                    <!-- 로딩 표시 -->
+                                    <ProgressBar IsIndeterminate="True" 
+                                                 Width="80" Height="4" 
+                                                 Margin="12,0,0,0"
+                                                 VerticalAlignment="Center"
+                                                 Visibility="{Binding IsRecommendLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <!-- 규칙 순위 선택 -->
+                                    <TextBlock Text="규칙:" Style="{StaticResource LabelStyle}" Margin="0,0,4,0"/>
+                                    <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
+                                              Width="70" FontSize="12" Padding="4,2" Margin="0,0,8,0">
+                                        <ComboBoxItem Content="1순위" Tag="1"/>
+                                        <ComboBoxItem Content="2순위" Tag="2"/>
+                                        <ComboBoxItem Content="3순위" Tag="3"/>
+                                        <ComboBoxItem Content="전체"/>
+                                    </ComboBox>
+                                    <!-- 지역 범위 선택 -->
+                                    <TextBlock Text="범위:" Style="{StaticResource LabelStyle}" Margin="0,0,4,0"/>
+                                    <ComboBox Width="70" FontSize="12" Padding="4,2" Margin="0,0,8,0"
+                                              SelectedValue="{Binding SelectedRegionScope, Mode=TwoWay}"
+                                              SelectedValuePath="Tag">
+                                        <ComboBoxItem Content="시/도" Tag="big"/>
+                                        <ComboBoxItem Content="시/군/구" Tag="mid"/>
+                                    </ComboBox>
+                                    <Button Content="추천 검색" 
+                                            Command="{Binding RecommendSimilarCasesCommand}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"
+                                            Margin="0,0,8,0"/>
+                                    <Button Content="사례 적용" 
+                                            Command="{Binding ApplyRecommendedCaseCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <!-- 상태 메시지 -->
+                            <TextBlock Text="{Binding RecommendStatusMessage}" 
+                                       Style="{StaticResource LabelStyle}"
+                                       Margin="0,0,0,8"
+                                       Visibility="{Binding RecommendStatusMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            
+                            <!-- 추천 결과 테이블 -->
+                            <DataGrid ItemsSource="{Binding RecommendedCases}"
+                                      SelectedItem="{Binding SelectedRecommendCase, Mode=TwoWay}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="All"
+                                      BorderThickness="1"
+                                      BorderBrush="{StaticResource BlueGray200Brush}"
+                                      MaxHeight="200"
+                                      FontSize="11"
+                                      SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="사건번호" Binding="{Binding CaseNo}" Width="110" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="낙찰일" Binding="{Binding AuctionDate, StringFormat=yyyy-MM-dd}" Width="85" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="용도" Binding="{Binding Usage}" Width="70" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="감정가" Binding="{Binding AppraisalPrice, StringFormat=N0}" Width="100" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="낙찰가" Binding="{Binding WinningPrice, StringFormat=N0}" Width="100" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="낙찰율" Binding="{Binding WinningRateDisplay}" Width="60" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat=N1}" Width="70" IsReadOnly="True"/>
+                                    <DataGridTextColumn Header="규칙" Binding="{Binding RuleName}" Width="55" IsReadOnly="True"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 사례평가 그리드 -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
@@ -193,7 +278,7 @@
                                       GridLinesVisibility="All"
                                       BorderThickness="1"
                                       BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="400"
+                                      MaxHeight="300"
                                       FontSize="12">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="100" IsReadOnly="True">

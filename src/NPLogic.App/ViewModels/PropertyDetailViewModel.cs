@@ -58,6 +58,7 @@ namespace NPLogic.ViewModels
         private readonly RegistryRepository? _registryRepository;
         private readonly RightAnalysisRepository? _rightAnalysisRepository;
         private readonly EvaluationRepository? _evaluationRepository;
+        private readonly RegistryOcrService? _registryOcrService;
 
         [ObservableProperty]
         private Property _property = new();
@@ -151,18 +152,19 @@ namespace NPLogic.ViewModels
         private Guid? _propertyId;
         private Action? _goBackAction;
 
-        public PropertyDetailViewModel(PropertyRepository propertyRepository, StorageService? storageService = null, RegistryRepository? registryRepository = null, RightAnalysisRepository? rightAnalysisRepository = null, EvaluationRepository? evaluationRepository = null)
+        public PropertyDetailViewModel(PropertyRepository propertyRepository, StorageService? storageService = null, RegistryRepository? registryRepository = null, RightAnalysisRepository? rightAnalysisRepository = null, EvaluationRepository? evaluationRepository = null, RegistryOcrService? registryOcrService = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
             _registryRepository = registryRepository;
             _rightAnalysisRepository = rightAnalysisRepository;
             _evaluationRepository = evaluationRepository;
+            _registryOcrService = registryOcrService;
 
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
             {
-                RegistryViewModel = new RegistryTabViewModel(_registryRepository);
+                RegistryViewModel = new RegistryTabViewModel(_registryRepository, _registryOcrService);
             }
 
             // 권리분석 탭 ViewModel 초기화

@@ -1,0 +1,372 @@
+# 유사물건 추천 규칙 설정
+# 
+# 각 카테고리별로 순위에 따른 필터링 규칙 정의
+# - time_window_days: 낙찰일 기준 몇 일 이내
+# - radius_m: 거리 반경 (미터), 0이면 거리 무시
+# - require_same_apartment: 동일 아파트 단지 필수 여부
+# - require_same_building: 동일 건물 필수 여부
+# - filters: 추가 필터 조건 (pct 값은 허용 오차 비율)
+#   - building_area_pct: 건물 면적 ±%
+#   - building_unit_price_pct: 건물 평당 단가 ±%
+#   - total_appraisal_price_pct: 총 감정가 ±%
+#   - land_area_pct: 토지 면적 ±%
+
+rules:
+  APT_OFFICETEL:
+    - name: "1순위"
+      time_window_days: 365
+      radius_m: 0
+      require_same_apartment: true
+      filters:
+        building_area_pct: 0.20
+
+    - name: "2순위"
+      time_window_days: 365
+      radius_m: 0
+      require_same_apartment: true
+
+    - name: "3순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_area_pct: 0.20
+        building_unit_price_pct: 0.20
+
+    - name: "4순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_unit_price_pct: 0.20
+
+    - name: "5순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_area_pct: 0.20
+
+    - name: "6순위"
+      time_window_days: 730
+      radius_m: 500
+
+    - name: "7순위"
+      time_window_days: 365
+      radius_m: 1000
+      filters:
+        building_area_pct: 0.20
+        building_unit_price_pct: 0.20
+
+    - name: "8순위"
+      time_window_days: 365
+      radius_m: 1000
+      filters:
+        building_unit_price_pct: 0.20
+
+    - name: "9순위"
+      time_window_days: 365
+      radius_m: 1000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "10순위"
+      time_window_days: 365
+      radius_m: 1000
+
+  ROWHOUSE_MULTI:
+    - name: "1순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_area_pct: 0.20
+        building_unit_price_pct: 0.20
+
+    - name: "2순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_unit_price_pct: 0.20
+        
+    - name: "3순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_area_pct: 0.20
+
+    - name: "4순위"
+      time_window_days: 730
+      radius_m: 500
+
+    - name: "5순위"
+      time_window_days: 730
+      radius_m: 1000
+      filters:
+        building_area_pct: 0.20
+        building_unit_price_pct: 0.20
+
+    - name: "6순위"
+      time_window_days: 730
+      radius_m: 1000
+      filters:
+        building_unit_price_pct: 0.20
+
+    - name: "7순위"
+      time_window_days: 730
+      radius_m: 1000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "8순위"
+      time_window_days: 730
+      radius_m: 1000
+
+    - name: "9순위"
+      time_window_days: 730
+      radius_m: 2000
+      filters:
+        building_area_pct: 0.20
+        building_unit_price_pct: 0.20
+
+    - name: "10순위"
+      time_window_days: 730
+      radius_m: 2000
+      filters:
+        building_unit_price_pct: 0.20
+
+    - name: "11순위"
+      time_window_days: 730
+      radius_m: 2000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "12순위"
+      time_window_days: 730
+      radius_m: 2000
+
+  RETAIL_OFFICE_APT_FACTORY:
+    - name: "1순위"
+      time_window_days: 730
+      radius_m: 0
+      require_same_building: true
+
+    - name: "2순위"
+      time_window_days: 730
+      radius_m: 500
+      filters:
+        building_area_pct: 0.20
+
+    - name: "3순위"
+      time_window_days: 730
+      radius_m: 500
+
+    - name: "4순위"
+      time_window_days: 730
+      radius_m: 1000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "5순위"
+      time_window_days: 730
+      radius_m: 1000
+
+    - name: "6순위"
+      time_window_days: 730
+      radius_m: 3000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "7순위"
+      time_window_days: 730
+      radius_m: 3000
+
+    - name: "8순위"
+      time_window_days: 1095
+      radius_m: 3000
+      filters:
+        building_area_pct: 0.20
+
+    - name: "9순위"
+      time_window_days: 1095
+      radius_m: 3000
+
+  PLANT_WAREHOUSE_ETC:
+    default:
+      - name: "1순위"
+        time_window_days: 1095
+        radius_m: 2000
+
+      - name: "2순위"
+        time_window_days: 730
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "3순위"
+        time_window_days: 730
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "4순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "5순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "6순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "7순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "8순위"
+        time_window_days: 1095
+        radius_m: 20000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "9순위"
+        time_window_days: 1095
+        radius_m: 30000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+    land_like:
+      - name: "1순위"
+        time_window_days: 1095
+        radius_m: 2000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "2순위"
+        time_window_days: 730
+        radius_m: 5000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "3순위"
+        time_window_days: 730
+        radius_m: 10000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "4순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "5순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "6순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "7순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "8순위"
+        time_window_days: 1095
+        radius_m: 20000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "9순위"
+        time_window_days: 1095
+        radius_m: 30000
+        filters: { land_area_pct: 0.60 }
+
+  OTHER_BIG:
+    default:
+      - name: "1순위"
+        time_window_days: 1095
+        radius_m: 2000
+
+      - name: "2순위"
+        time_window_days: 730
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "3순위"
+        time_window_days: 730
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "4순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "5순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.30 }
+
+      - name: "6순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "7순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "8순위"
+        time_window_days: 1095
+        radius_m: 20000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+      - name: "9순위"
+        time_window_days: 1095
+        radius_m: 30000
+        filters: { total_appraisal_price_pct: 0.60 }
+
+    land_like:
+      - name: "1순위"
+        time_window_days: 1095
+        radius_m: 2000
+
+      - name: "2순위"
+        time_window_days: 730
+        radius_m: 5000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "3순위"
+        time_window_days: 730
+        radius_m: 10000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "4순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "5순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { land_area_pct: 0.30 }
+
+      - name: "6순위"
+        time_window_days: 1095
+        radius_m: 5000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "7순위"
+        time_window_days: 1095
+        radius_m: 10000
+        filters: { land_area_pct: 0.60 }
+
+      - name: "8순위"
+        time_window_days: 1095
+        radius_m: 20000
+        filters: { land_area_pct: 0.60 }
+        
+      - name: "9순위"
+        time_window_days: 1095
+        radius_m: 30000
+        filters: { land_area_pct: 0.60 }
+

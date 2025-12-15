@@ -122,9 +122,13 @@
                           SelectedItem="{Binding SelectedRight}"
                           AutoGenerateColumns="False" 
                           IsReadOnly="True"
-                          Background="Transparent"
+                          Background="{StaticResource SurfaceBrush}"
+                          BorderBrush="{StaticResource TableBorderBrush}"
+                          BorderThickness="1"
                           CanUserAddRows="False"
-                          GridLinesVisibility="Horizontal"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                           SelectionMode="Single"
                           RowHeight="44">
                     <DataGrid.Columns>

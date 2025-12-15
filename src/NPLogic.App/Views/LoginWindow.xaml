@@ -28,80 +28,12 @@
                         HorizontalAlignment="Center"
                         Margin="40">
                 
-                <!-- 로고 (풀네임 버전) -->
-                <Image Source="/Assets/img/black_full_logo.png"
+                <!-- 로고 -->
+                <Image Source="/Assets/img/white-logo.png"
                        MaxHeight="400"
                        MaxWidth="500"
                        Stretch="Uniform"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,30">
-                    <!-- 어두운 배경에서 보이도록 색상 반전 효과 -->
-                    <Image.Effect>
-                        <DropShadowEffect Color="White" 
-                                         BlurRadius="0" 
-                                         ShadowDepth="0" 
-                                         Opacity="1"/>
-                    </Image.Effect>
-                    <Image.OpacityMask>
-                        <SolidColorBrush Color="White"/>
-                    </Image.OpacityMask>
-                    <Image.Style>
-                        <Style TargetType="Image">
-                            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                        </Style>
-                    </Image.Style>
-                </Image>
-                
-                <!-- 설명 -->
-                <TextBlock Text="등기부등본 자동화 시스템"
-                          FontSize="18"
-                          Foreground="White"
-                          Opacity="0.8"
-                          HorizontalAlignment="Center"
-                          TextAlignment="Center"
-                          Margin="0,0,0,40"/>
-
-                <!-- 기능 설명 -->
-                <StackPanel Margin="0,20,0,0">
-                    <StackPanel Orientation="Horizontal" Margin="0,10">
-                        <materialDesign:PackIcon Kind="CheckCircle"
-                                                Foreground="White"
-                                                Width="24"
-                                                Height="24"
-                                                VerticalAlignment="Center"/>
-                        <TextBlock Text="자동 OCR 처리"
-                                  Foreground="White"
-                                  FontSize="16"
-                                  Margin="15,0,0,0"
-                                  VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,10">
-                        <materialDesign:PackIcon Kind="CheckCircle"
-                                                Foreground="White"
-                                                Width="24"
-                                                Height="24"
-                                                VerticalAlignment="Center"/>
-                        <TextBlock Text="권리 분석 자동화"
-                                  Foreground="White"
-                                  FontSize="16"
-                                  Margin="15,0,0,0"
-                                  VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,10">
-                        <materialDesign:PackIcon Kind="CheckCircle"
-                                                Foreground="White"
-                                                Width="24"
-                                                Height="24"
-                                                VerticalAlignment="Center"/>
-                        <TextBlock Text="Excel 일괄 처리"
-                                  Foreground="White"
-                                  FontSize="16"
-                                  Margin="15,0,0,0"
-                                  VerticalAlignment="Center"/>
-                    </StackPanel>
-                </StackPanel>
+                       HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
 
@@ -249,16 +181,43 @@
                                   FontWeight="SemiBold"/>
                     </Button>
 
-                    <!-- 회원가입 버튼 -->
-                    <Button Command="{Binding SignUpCommand}"
-                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
-                            Height="50"
-                            Margin="0,0,0,15"
-                            Style="{StaticResource SecondaryButton}">
-                        <TextBlock Text="회원가입"
-                                  FontSize="16"
-                                  FontWeight="SemiBold"/>
-                    </Button>
+                    <!-- 회원가입 추가 정보 -->
+                    <Expander Header="회원가입 (신규 사용자)" Margin="0,0,0,15">
+                        <StackPanel Margin="0,10,0,0">
+                            <!-- 이름 -->
+                            <TextBlock Text="이름" FontSize="13" Margin="0,0,0,5" Foreground="#666"/>
+                            <TextBox Text="{Binding SignUpName, UpdateSourceTrigger=PropertyChanged}"
+                                     Height="45"
+                                     Padding="15,0"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     Margin="0,0,0,10"/>
+                            
+                            <!-- 역할 선택 -->
+                            <TextBlock Text="역할" FontSize="13" Margin="0,0,0,5" Foreground="#666"/>
+                            <ComboBox SelectedValue="{Binding SelectedRole}"
+                                      SelectedValuePath="Tag"
+                                      Height="45"
+                                      Padding="15,0"
+                                      FontSize="14"
+                                      VerticalContentAlignment="Center"
+                                      Margin="0,0,0,15">
+                                <ComboBoxItem Content="평가자" Tag="evaluator"/>
+                                <ComboBoxItem Content="PM" Tag="pm"/>
+                                <ComboBoxItem Content="관리자" Tag="admin"/>
+                            </ComboBox>
+                            
+                            <!-- 회원가입 버튼 -->
+                            <Button Command="{Binding SignUpCommand}"
+                                    IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}"
+                                    Height="45"
+                                    Style="{StaticResource PrimaryButton}">
+                                <TextBlock Text="회원가입"
+                                          FontSize="14"
+                                          FontWeight="SemiBold"/>
+                            </Button>
+                        </StackPanel>
+                    </Expander>
 
                     <!-- 로딩 표시 -->
                     <StackPanel Orientation="Horizontal"

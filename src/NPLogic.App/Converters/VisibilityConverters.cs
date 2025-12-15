@@ -95,6 +95,38 @@ namespace NPLogic.Converters
     }
 
     /// <summary>
+    /// null을 Visibility로 변환 (null = Visible, not null = Collapsed) - 역변환
+    /// </summary>
+    public class NullToInverseVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// null을 bool로 변환 (null = true, not null = false)
+    /// </summary>
+    public class NullToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value == null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
     /// int를 Visibility로 변환 (0 = Collapsed, > 0 = Visible)
     /// </summary>
     public class IntToVisibilityConverter : IValueConverter
@@ -106,6 +138,26 @@ namespace NPLogic.Converters
                 return intValue > 0 ? Visibility.Visible : Visibility.Collapsed;
             }
             return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// int가 0이면 Visible, 0보다 크면 Collapsed (빈 목록 표시용)
+    /// </summary>
+    public class ZeroToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int intValue)
+            {
+                return intValue == 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

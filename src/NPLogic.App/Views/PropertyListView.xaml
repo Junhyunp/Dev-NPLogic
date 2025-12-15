@@ -205,10 +205,13 @@
                           CanUserAddRows="False"
                           IsReadOnly="True"
                           SelectionMode="Single"
-                          GridLinesVisibility="None"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                           HeadersVisibility="Column"
-                          Background="Transparent"
-                          BorderThickness="0"
+                          Background="{StaticResource SurfaceBrush}"
+                          BorderBrush="{StaticResource TableBorderBrush}"
+                          BorderThickness="1"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.CanContentScroll="True"
                           Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibilityConverter}}">
@@ -297,14 +300,14 @@
 
                     <DataGrid.RowStyle>
                         <Style TargetType="DataGridRow">
-                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
                             <Setter Property="BorderThickness" Value="0"/>
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                    <Setter Property="Background" Value="{StaticResource TableHoverBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                    <Setter Property="Background" Value="{StaticResource TableSelectedBrush}"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -312,12 +315,12 @@
 
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                            <Setter Property="Background" Value="{StaticResource TableHeaderBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Padding" Value="16,12"/>
-                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-                            <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
                         </Style>
                     </DataGrid.ColumnHeaderStyle>

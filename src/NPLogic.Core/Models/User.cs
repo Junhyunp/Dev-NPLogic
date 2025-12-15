@@ -19,9 +19,45 @@ namespace NPLogic.Core.Models
 
         public string Status { get; set; } = "active";
 
+        /// <summary>
+        /// 소속 팀 (관리자용)
+        /// </summary>
+        public string? Team { get; set; }
+
+        /// <summary>
+        /// 직책/직급
+        /// </summary>
+        public string? Position { get; set; }
+
+        /// <summary>
+        /// 소속 회계법인 (PM/평가자용)
+        /// </summary>
+        public string? AccountingFirm { get; set; }
+
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+
+        /// <summary>
+        /// 표시 이름 (역할에 따라 다르게 표시)
+        /// </summary>
+        public string DisplayName
+        {
+            get
+            {
+                if (IsAdmin && !string.IsNullOrEmpty(Team))
+                {
+                    return !string.IsNullOrEmpty(Position) 
+                        ? $"{Team}, {Name} {Position}" 
+                        : $"{Team}, {Name}";
+                }
+                else if ((IsPM || IsEvaluator) && !string.IsNullOrEmpty(AccountingFirm))
+                {
+                    return $"{AccountingFirm}, {Name}";
+                }
+                return Name;
+            }
+        }
 
         /// <summary>
         /// 역할 열거형

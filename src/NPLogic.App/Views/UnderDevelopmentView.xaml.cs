@@ -3,7 +3,7 @@ using System.Windows.Controls;
 namespace NPLogic.Views
 {
     /// <summary>
-    /// UnderDevelopmentView.xaml에 대한 상호 작용 논리
+    /// 개발 중 안내 화면
     /// </summary>
     public partial class UnderDevelopmentView : UserControl
     {
@@ -13,4 +13,3 @@ namespace NPLogic.Views
         }
     }
 }
-

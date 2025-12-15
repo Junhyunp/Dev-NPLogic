@@ -16,6 +16,7 @@ namespace NPLogic
     public partial class App : Application
     {
         private ServiceProvider? _serviceProvider;
+        private RegistryOcrService? _registryOcrService;
 
         // Supabase 설정 (환경 변수 또는 설정 파일에서 로드하는 것이 좋습니다)
         private const string SupabaseUrl = "https://vuepmhwrizaabswlgiiy.supabase.co";
@@ -46,6 +47,9 @@ namespace NPLogic
                 var services = new ServiceCollection();
                 ConfigureServices(services);
                 _serviceProvider = services.BuildServiceProvider();
+
+                // OCR 서비스 참조 저장 (종료 시 서버 종료용)
+                _registryOcrService = _serviceProvider.GetService<RegistryOcrService>();
 
                 // Supabase 초기화
                 var supabaseService = _serviceProvider.GetRequiredService<SupabaseService>();
@@ -92,10 +96,13 @@ namespace NPLogic
             services.AddSingleton<AuthService>();
             services.AddSingleton<ExcelService>();
             services.AddSingleton<StorageService>();
+            services.AddSingleton<RegistryOcrService>();
 
             // Repositories (Singleton)
             services.AddSingleton<Data.Repositories.UserRepository>();
             services.AddSingleton<Data.Repositories.PropertyRepository>();
+            services.AddSingleton<Data.Repositories.ProgramRepository>();
+            services.AddSingleton<Data.Repositories.ProgramUserRepository>();
             services.AddSingleton<Data.Repositories.StatisticsRepository>();
             services.AddSingleton<Data.Repositories.RegistryRepository>();
             services.AddSingleton<Data.Repositories.RightAnalysisRepository>();
@@ -111,6 +118,9 @@ namespace NPLogic
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ViewModels.DashboardViewModel>();
+            services.AddTransient<ViewModels.AdminHomeViewModel>();
+            services.AddTransient<ViewModels.PMHomeViewModel>();
+            services.AddTransient<ViewModels.EvaluatorHomeViewModel>();
             services.AddTransient<ViewModels.PropertyListViewModel>();
             services.AddTransient<ViewModels.PropertyFormViewModel>();
             services.AddTransient<ViewModels.PropertyDetailViewModel>(sp =>
@@ -120,7 +130,8 @@ namespace NPLogic
                     sp.GetRequiredService<StorageService>(),
                     sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
-                    sp.GetRequiredService<Data.Repositories.EvaluationRepository>()
+                    sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
+                    sp.GetRequiredService<RegistryOcrService>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -138,12 +149,34 @@ namespace NPLogic
             services.AddTransient<ViewModels.SeniorRightsViewModel>();
             services.AddTransient<ViewModels.AuctionScheduleViewModel>();
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
+            services.AddTransient<ViewModels.ProgramManagementViewModel>();
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
             {
                 var view = new Views.DashboardView();
                 view.DataContext = sp.GetRequiredService<ViewModels.DashboardViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.AdminHomeView>(sp =>
+            {
+                var view = new Views.AdminHomeView();
+                view.DataContext = sp.GetRequiredService<ViewModels.AdminHomeViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.PMHomeView>(sp =>
+            {
+                var view = new Views.PMHomeView();
+                view.DataContext = sp.GetRequiredService<ViewModels.PMHomeViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.EvaluatorHomeView>(sp =>
+            {
+                var view = new Views.EvaluatorHomeView();
+                view.DataContext = sp.GetRequiredService<ViewModels.EvaluatorHomeViewModel>();
                 return view;
             });
 
@@ -266,6 +299,13 @@ namespace NPLogic
                 return view;
             });
 
+            services.AddTransient<Views.ProgramManagementView>(sp =>
+            {
+                var view = new Views.ProgramManagementView();
+                view.DataContext = sp.GetRequiredService<ViewModels.ProgramManagementViewModel>();
+                return view;
+            });
+
             // Windows (Transient)
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginWindow>(sp =>
@@ -279,6 +319,17 @@ namespace NPLogic
 
         protected override void OnExit(ExitEventArgs e)
         {
+            // OCR 서버 종료
+            try
+            {
+                _registryOcrService?.StopServer();
+                _registryOcrService?.Dispose();
+            }
+            catch
+            {
+                // 종료 시 예외 무시
+            }
+
             _serviceProvider?.Dispose();
             base.OnExit(e);
         }

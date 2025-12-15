@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              mc:Ignorable="d" 
              d:DesignHeight="900" d:DesignWidth="1400"
              Loaded="BasicDataTab_Loaded">
@@ -255,11 +256,7 @@
                         <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
                     </Border.Effect>
                     
-                    <StackPanel>
-                        <TextBlock Text="기본 정보" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Margin="0,0,0,16"/>
-
+                    <controls:NPExpandableSection Header="기본 정보" IsExpanded="True">
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -304,7 +301,7 @@
                                 </ComboBox>
                             </StackPanel>
                         </Grid>
-                    </StackPanel>
+                    </controls:NPExpandableSection>
                 </Border>
 
                 <!-- 주소 정보 섹션 -->
@@ -316,39 +313,37 @@
                         <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
                     </Border.Effect>
                     
-                    <StackPanel>
-                        <TextBlock Text="주소 정보" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Margin="0,0,0,16"/>
-
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="전체 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding Property.AddressFull, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                        </StackPanel>
-
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="도로명 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding Property.AddressRoad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="지번 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding Property.AddressJibun, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
-                        </Grid>
-
+                    <controls:NPExpandableSection Header="주소 정보" IsExpanded="True">
                         <StackPanel>
-                            <TextBlock Text="상세 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding Property.AddressDetail, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock Text="전체 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AddressFull, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="도로명 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding Property.AddressRoad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="지번 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding Property.AddressJibun, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel>
+                                <TextBlock Text="상세 주소" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding Property.AddressDetail, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </controls:NPExpandableSection>
                 </Border>
 
                 <!-- 면적 정보 섹션 -->
@@ -360,11 +355,7 @@
                         <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
                     </Border.Effect>
                     
-                    <StackPanel>
-                        <TextBlock Text="면적 정보" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Margin="0,0,0,16"/>
-
+                    <controls:NPExpandableSection Header="면적 정보" IsExpanded="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -389,7 +380,7 @@
                                 <TextBox Text="{Binding Property.Floors, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
                             </StackPanel>
                         </Grid>
-                    </StackPanel>
+                    </controls:NPExpandableSection>
                 </Border>
 
                 <!-- 감정평가 정보 섹션 -->
@@ -401,74 +392,72 @@
                         <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
                     </Border.Effect>
                     
-                    <StackPanel>
-                        <TextBlock Text="감정평가 정보" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Margin="0,0,0,16"/>
+                    <controls:NPExpandableSection Header="감정평가 정보" IsExpanded="True">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="감정평가구분" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <ComboBox SelectedItem="{Binding AppraisalType}" Padding="8,6">
+                                        <ComboBoxItem Content="일반감정"/>
+                                        <ComboBoxItem Content="재감정"/>
+                                    </ComboBox>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="감정평가구분" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <ComboBox SelectedItem="{Binding AppraisalType}" Padding="8,6">
-                                    <ComboBoxItem Content="일반감정"/>
-                                    <ComboBoxItem Content="재감정"/>
-                                </ComboBox>
-                            </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="감정평가기관" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding AppraisalOrganization, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="감정평가기관" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding AppraisalOrganization, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="감정평가일자" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <DatePicker SelectedDate="{Binding AppraisalDate}" Padding="8,6"/>
+                                </StackPanel>
+                            </Grid>
 
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="감정평가일자" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <DatePicker SelectedDate="{Binding AppraisalDate}" Padding="8,6"/>
-                            </StackPanel>
-                        </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="토지 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding LandAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="토지 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding LandAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="건물 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding BuildingAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="건물 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding BuildingAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <TextBlock Text="기계 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding MachineAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
+                                </StackPanel>
 
-                            <StackPanel Grid.Column="4">
-                                <TextBlock Text="기계 감정평가액" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding MachineAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="6">
-                                <TextBlock Text="감정평가액 합계" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBox Text="{Binding Property.AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
-                                         Padding="8,6" 
-                                         Background="{StaticResource BlueGray50Brush}"
-                                         FontWeight="Bold"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
+                                <StackPanel Grid.Column="6">
+                                    <TextBlock Text="감정평가액 합계" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBox Text="{Binding Property.AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
+                                             Padding="8,6" 
+                                             Background="{StaticResource BlueGray50Brush}"
+                                             FontWeight="Bold"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </controls:NPExpandableSection>
                 </Border>
 
                 <!-- 가격 정보 섹션 -->
@@ -480,11 +469,7 @@
                         <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
                     </Border.Effect>
                     
-                    <StackPanel>
-                        <TextBlock Text="경매/매각 정보" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Margin="0,0,0,16"/>
-
+                    <controls:NPExpandableSection Header="경매/매각 정보" IsExpanded="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -509,7 +494,7 @@
                                 <TextBox Text="{Binding Property.SalePrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="8,6"/>
                             </StackPanel>
                         </Grid>
-                    </StackPanel>
+                    </controls:NPExpandableSection>
                 </Border>
 
                 <!-- QA 관리 섹션 -->

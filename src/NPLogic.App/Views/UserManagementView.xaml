@@ -107,8 +107,9 @@
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
                               HeadersVisibility="Column"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="{StaticResource DividerBrush}"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                               SelectionMode="Single"
                               SelectionUnit="FullRow">
                         <DataGrid.Columns>
@@ -358,6 +359,28 @@
                                 <ComboBoxItem Content="활성" Tag="active"/>
                                 <ComboBoxItem Content="비활성" Tag="inactive"/>
                             </ComboBox>
+                        </StackPanel>
+
+                        <!-- 추가 정보 -->
+                        <Separator Margin="0,8,0,16"/>
+                        <TextBlock Text="추가 정보" FontWeight="SemiBold" Margin="0,0,0,16"/>
+
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="소속 팀 (관리자용)" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditingUser.Team, UpdateSourceTrigger=PropertyChanged}" 
+                                     Padding="12,10"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="직책/직급" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditingUser.Position, UpdateSourceTrigger=PropertyChanged}" 
+                                     Padding="12,10"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,16">
+                            <TextBlock Text="소속 회계법인 (PM/평가자용)" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBox Text="{Binding EditingUser.AccountingFirm, UpdateSourceTrigger=PropertyChanged}" 
+                                     Padding="12,10"/>
                         </StackPanel>
 
                         <!-- 새 사용자 추가 시 비밀번호 -->

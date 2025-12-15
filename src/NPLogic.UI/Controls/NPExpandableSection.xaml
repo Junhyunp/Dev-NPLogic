@@ -1,0 +1,91 @@
+<UserControl x:Class="NPLogic.Controls.NPExpandableSection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignWidth="800">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 (클릭 가능) -->
+        <Border Grid.Row="0" 
+                x:Name="HeaderBorder"
+                Background="Transparent"
+                Cursor="Hand"
+                Padding="0,8,0,12"
+                MouseLeftButtonUp="HeaderBorder_MouseLeftButtonUp">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 토글 아이콘 -->
+                <TextBlock Grid.Column="0" 
+                           x:Name="ToggleIcon"
+                           Text="▼"
+                           FontSize="10"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+
+                <!-- 섹션 제목 -->
+                <TextBlock Grid.Column="1" 
+                           x:Name="HeaderText"
+                           Text="{Binding Header, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontWeight="SemiBold" 
+                           FontSize="16"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           VerticalAlignment="Center"/>
+
+                <!-- 접기/펼치기 힌트 텍스트 -->
+                <TextBlock Grid.Column="2"
+                           x:Name="HintText"
+                           Text="접기"
+                           FontSize="11"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           Opacity="0"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- 컨텐츠 영역 -->
+        <ContentPresenter Grid.Row="1" 
+                          x:Name="ContentArea"
+                          Content="{Binding Content, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          Margin="0,0,0,24"/>
+    </Grid>
+
+    <UserControl.Triggers>
+        <!-- 마우스 오버 시 힌트 표시 -->
+        <EventTrigger RoutedEvent="MouseEnter" SourceName="HeaderBorder">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="HintText" 
+                                     Storyboard.TargetProperty="Opacity" 
+                                     To="0.7" Duration="0:0:0.1"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave" SourceName="HeaderBorder">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="HintText" 
+                                     Storyboard.TargetProperty="Opacity" 
+                                     To="0" Duration="0:0:0.1"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+</UserControl>
+
+
+
+
+

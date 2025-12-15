@@ -1,38 +1,40 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Deep Navy (딥네이비 - 베이스) -->
-    <Color x:Key="Primary">#1A2332</Color>
-    <Color x:Key="PrimaryLight">#2A3442</Color>
-    <Color x:Key="PrimaryDark">#0A1322</Color>
-    <Color x:Key="DeepNavy700">#1A2332</Color>
+    <!-- Bright Blue (밝은 블루 - 베이스) -->
+    <Color x:Key="Primary">#4A90E2</Color>
+    <Color x:Key="PrimaryLight">#6BA4E8</Color>
+    <Color x:Key="PrimaryDark">#3A7BC8</Color>
+    <Color x:Key="DeepNavy700">#4A90E2</Color>
     
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLight}"/>
     <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
     <SolidColorBrush x:Key="DeepNavy700Brush" Color="{StaticResource DeepNavy700}"/>
 
-    <!-- Blue Gray (블루그레이 - 표) -->
-    <Color x:Key="BlueGray50">#ECEFF4</Color>
-    <Color x:Key="BlueGray100">#D8DEE9</Color>
-    <Color x:Key="BlueGray200">#C4CCD8</Color>
-    <Color x:Key="TableHeader">#B0C4DE</Color>
-    <Color x:Key="TableHover">#C8D6E8</Color>
-    <Color x:Key="TableSelected">#98B2D1</Color>
-    <Color x:Key="TableBorder">#8FA8C5</Color>
+    <!-- Light Blue Gray (밝은 블루그레이 - 표) -->
+    <Color x:Key="BlueGray50">#F8FBFD</Color>
+    <Color x:Key="BlueGray100">#EDF4F9</Color>
+    <Color x:Key="BlueGray200">#DDE8F2</Color>
+    <Color x:Key="BlueGray300">#CBD5E1</Color>
+    <Color x:Key="TableHeader">#E8F1F8</Color>
+    <Color x:Key="TableHover">#F0F8FF</Color>
+    <Color x:Key="TableSelected">#C8E0F4</Color>
+    <Color x:Key="TableBorder">#D0D5DD</Color>
     
     <SolidColorBrush x:Key="BlueGray50Brush" Color="{StaticResource BlueGray50}"/>
     <SolidColorBrush x:Key="BlueGray100Brush" Color="{StaticResource BlueGray100}"/>
     <SolidColorBrush x:Key="BlueGray200Brush" Color="{StaticResource BlueGray200}"/>
+    <SolidColorBrush x:Key="BlueGray300Brush" Color="{StaticResource BlueGray300}"/>
     <SolidColorBrush x:Key="TableHeaderBrush" Color="{StaticResource TableHeader}"/>
     <SolidColorBrush x:Key="TableHoverBrush" Color="{StaticResource TableHover}"/>
     <SolidColorBrush x:Key="TableSelectedBrush" Color="{StaticResource TableSelected}"/>
     <SolidColorBrush x:Key="TableBorderBrush" Color="{StaticResource TableBorder}"/>
 
     <!-- Neutral Colors (중립 색상) -->
-    <Color x:Key="Background">#F5F7FA</Color>
+    <Color x:Key="Background">#FAFBFC</Color>
     <Color x:Key="Surface">#FFFFFF</Color>
-    <Color x:Key="Border">#E1E4E8</Color>
+    <Color x:Key="Border">#E5E7EB</Color>
     <Color x:Key="Divider">#D0D5DD</Color>
     
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource Background}"/>
@@ -44,7 +46,7 @@
     <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Divider}"/>
 
     <!-- Text Colors -->
-    <Color x:Key="TextPrimary">#1A1D23</Color>
+    <Color x:Key="TextPrimary">#1F2937</Color>
     <Color x:Key="TextSecondary">#6B7280</Color>
     <Color x:Key="TextDisabled">#9CA3AF</Color>
     
@@ -53,26 +55,27 @@
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource TextSecondary}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabled}"/>
 
-    <!-- Semantic Colors (상태 표시) -->
-    <Color x:Key="Success">#10B981</Color>
+
+    <!-- Semantic Colors (상태 표시) - Brighter versions -->
+    <Color x:Key="Success">#22C55E</Color>
     <Color x:Key="Warning">#F59E0B</Color>
     <Color x:Key="Error">#EF4444</Color>
-    <Color x:Key="Info">#3B82F6</Color>
+    <Color x:Key="Info">#4A90E2</Color>
     
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>
     <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource Error}"/>
     <SolidColorBrush x:Key="InfoBrush" Color="{StaticResource Info}"/>
 
-    <!-- Badge Colors -->
-    <Color x:Key="SuccessBg">#D1FAE5</Color>
-    <Color x:Key="SuccessText">#065F46</Color>
+    <!-- Badge Colors - Lighter backgrounds -->
+    <Color x:Key="SuccessBg">#DCFCE7</Color>
+    <Color x:Key="SuccessText">#166534</Color>
     <Color x:Key="WarningBg">#FEF3C7</Color>
     <Color x:Key="WarningText">#92400E</Color>
     <Color x:Key="ErrorBg">#FEE2E2</Color>
     <Color x:Key="ErrorText">#991B1B</Color>
-    <Color x:Key="InfoBg">#DBEAFE</Color>
-    <Color x:Key="InfoText">#1E40AF</Color>
+    <Color x:Key="InfoBg">#E0F2FE</Color>
+    <Color x:Key="InfoText">#075985</Color>
     
     <SolidColorBrush x:Key="SuccessBgBrush" Color="{StaticResource SuccessBg}"/>
     <SolidColorBrush x:Key="SuccessLightBrush" Color="{StaticResource SuccessBg}"/>

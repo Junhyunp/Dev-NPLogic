@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              mc:Ignorable="d" 
              d:DesignHeight="1200" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:RightsAnalysisTabViewModel}"
@@ -413,7 +414,9 @@
                                   CanUserAddRows="False"
                                   CanUserDeleteRows="False"
                                   HeadersVisibility="Column"
-                                  GridLinesVisibility="Horizontal"
+                                  GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}">
                             <DataGrid.Columns>

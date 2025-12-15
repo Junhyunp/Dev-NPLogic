@@ -22,12 +22,27 @@ namespace NPLogic.Services
         /// <summary>
         /// 이메일/비밀번호로 회원가입
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage, Supabase.Gotrue.User? User)> SignUpWithEmailAsync(string email, string password)
+        public async Task<(bool Success, string? ErrorMessage, Supabase.Gotrue.User? User)> SignUpWithEmailAsync(
+            string email, 
+            string password, 
+            string? name = null, 
+            string? role = null)
         {
             try
             {
                 var client = _supabaseService.GetClient();
-                var session = await client.Auth.SignUp(email, password);
+                
+                // 메타데이터 설정 (트리거에서 사용)
+                var options = new Supabase.Gotrue.SignUpOptions
+                {
+                    Data = new System.Collections.Generic.Dictionary<string, object>
+                    {
+                        { "name", name ?? email.Split('@')[0] },
+                        { "role", role ?? "evaluator" }
+                    }
+                };
+                
+                var session = await client.Auth.SignUp(email, password, options);
 
                 if (session?.User == null)
                     return (false, "회원가입에 실패했습니다.", null);

@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:LoanDetailViewModel}"
@@ -256,225 +257,230 @@
                             </StackPanel.Style>
 
                             <!-- 채권정보 섹션 -->
-                            <TextBlock Text="채권정보" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
-                            <Grid Margin="0,0,0,24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="12"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                            <controls:NPExpandableSection Header="채권정보" IsExpanded="True">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="12"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0">
-                                    <TextBlock Text="계좌일련번호 (A)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.AccountSerial, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="계좌일련번호 (A)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.AccountSerial, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="2">
-                                    <TextBlock Text="대출과목 (B)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.LoanType, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="대출과목 (B)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.LoanType, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="4">
-                                    <TextBlock Text="대출종류 (C)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.LoanCategory, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="4">
+                                        <TextBlock Text="대출종류 (C)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.LoanCategory, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="6">
-                                    <TextBlock Text="계좌번호 (D)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.AccountNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="6">
+                                        <TextBlock Text="계좌번호 (D)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.AccountNumber, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="0">
-                                    <TextBlock Text="최초대출일 (E)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <DatePicker SelectedDate="{Binding SelectedLoan.InitialLoanDate}" Padding="10,6"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="최초대출일 (E)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <DatePicker SelectedDate="{Binding SelectedLoan.InitialLoanDate}" Padding="10,6"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="2">
-                                    <TextBlock Text="최종이수일 (K)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <DatePicker SelectedDate="{Binding SelectedLoan.LastInterestDate}" Padding="10,6"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="최종이수일 (K)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <DatePicker SelectedDate="{Binding SelectedLoan.LastInterestDate}" Padding="10,6"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="4">
-                                    <TextBlock Text="정상이자율 (L)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.NormalInterestRate, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Row="2" Grid.Column="4">
+                                        <TextBlock Text="정상이자율 (L)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.NormalInterestRate, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="6">
-                                    <TextBlock Text="연체이자율 (M)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.OverdueInterestRate, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
-                            </Grid>
+                                    <StackPanel Grid.Row="2" Grid.Column="6">
+                                        <TextBlock Text="연체이자율 (M)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.OverdueInterestRate, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 금액 정보 섹션 -->
-                            <TextBlock Text="금액 정보" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
-                            <Grid Margin="0,0,0,24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <controls:NPExpandableSection Header="금액 정보" IsExpanded="True">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="대출원금잔액 (G)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.LoanPrincipalBalance, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="대출원금잔액 (G)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.LoanPrincipalBalance, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="가지급금 (H)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.AdvancePayment, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="가지급금 (H)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.AdvancePayment, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="4">
-                                    <TextBlock Text="미수이자 (I)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.AccruedInterest, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Text="미수이자 (I)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.AccruedInterest, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="6">
-                                    <TextBlock Text="채권액 합계 (J)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.TotalClaimAmount, StringFormat=N0}" Padding="10,8" IsReadOnly="True" Background="{StaticResource BackgroundColor}"/>
-                                </StackPanel>
-                            </Grid>
+                                    <StackPanel Grid.Column="6">
+                                        <TextBlock Text="채권액 합계 (J)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.TotalClaimAmount, StringFormat=N0}" Padding="10,8" IsReadOnly="True" Background="{StaticResource BackgroundColor}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 체크박스 섹션 -->
-                            <TextBlock Text="상태 확인" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
-                            <WrapPanel Margin="0,0,0,24">
-                                <CheckBox Content="약정서 확인" IsChecked="{Binding SelectedLoan.HasAgreementDoc}" Margin="0,0,24,8"/>
-                                <CheckBox Content="유효보증서 (O)" IsChecked="{Binding SelectedLoan.HasValidGuarantee}" Margin="0,0,24,8"/>
-                                <CheckBox Content="기 대위변제 (P)" IsChecked="{Binding SelectedLoan.HasPriorSubrogation}" Margin="0,0,24,8"/>
-                                <CheckBox Content="해지부보증 (Q)" IsChecked="{Binding SelectedLoan.IsTerminatedGuarantee}" Margin="0,0,24,8"/>
-                                <CheckBox Content="MCI보증" IsChecked="{Binding SelectedLoan.HasMciGuarantee}" Margin="0,0,24,8"/>
-                            </WrapPanel>
+                            <controls:NPExpandableSection Header="상태 확인" IsExpanded="True">
+                                <WrapPanel>
+                                    <CheckBox Content="약정서 확인" IsChecked="{Binding SelectedLoan.HasAgreementDoc}" Margin="0,0,24,8"/>
+                                    <CheckBox Content="유효보증서 (O)" IsChecked="{Binding SelectedLoan.HasValidGuarantee}" Margin="0,0,24,8"/>
+                                    <CheckBox Content="기 대위변제 (P)" IsChecked="{Binding SelectedLoan.HasPriorSubrogation}" Margin="0,0,24,8"/>
+                                    <CheckBox Content="해지부보증 (Q)" IsChecked="{Binding SelectedLoan.IsTerminatedGuarantee}" Margin="0,0,24,8"/>
+                                    <CheckBox Content="MCI보증" IsChecked="{Binding SelectedLoan.HasMciGuarantee}" Margin="0,0,24,8"/>
+                                </WrapPanel>
+                            </controls:NPExpandableSection>
 
                             <!-- Interim 정보 -->
-                            <TextBlock Text="Interim 정보" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
-                            <Grid Margin="0,0,0,24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <controls:NPExpandableSection Header="Interim 정보" IsExpanded="True">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="원금상계 (R)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.PrincipalOffset, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="원금상계 (R)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.PrincipalOffset, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="원금회수 (S)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.PrincipalRecovery, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="원금회수 (S)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.PrincipalRecovery, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="4">
-                                    <TextBlock Text="이자상계 (T)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.InterestOffset, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Text="이자상계 (T)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.InterestOffset, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
 
-                                <StackPanel Grid.Column="6">
-                                    <TextBlock Text="이자회수 (U)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedLoan.InterestRecovery, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
-                                </StackPanel>
-                            </Grid>
+                                    <StackPanel Grid.Column="6">
+                                        <TextBlock Text="이자회수 (U)" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding SelectedLoan.InterestRecovery, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Padding="10,8"/>
+                                    </StackPanel>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- Loan Cap 계산 섹션 -->
-                            <TextBlock Text="Loan Cap 계산" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
-                            <Grid Margin="0,0,0,24">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <controls:NPExpandableSection Header="Loan Cap 계산" IsExpanded="True">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <!-- 시나리오 1 -->
-                                <Border Grid.Column="0" Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="16">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                                    <!-- 시나리오 1 -->
+                                    <Border Grid.Column="0" Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="16">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Text="시나리오 1안" FontWeight="SemiBold" FontSize="14"/>
+                                            <TextBlock Grid.Row="0" Text="시나리오 1안" FontWeight="SemiBold" FontSize="14"/>
 
-                                        <StackPanel Grid.Row="2">
-                                            <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                            <DatePicker SelectedDate="{Binding Scenario1Date}" Padding="8,4"/>
-                                        </StackPanel>
-
-                                        <Grid Grid.Row="4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="연체이자" FontSize="11" Opacity="0.6"/>
-                                                <TextBlock Text="{Binding SelectedLoan.OverdueInterest1, StringFormat=N0, FallbackValue=-}" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                            <StackPanel Grid.Row="2">
+                                                <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                                <DatePicker SelectedDate="{Binding Scenario1Date}" Padding="8,4"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Loan Cap" FontSize="11" Opacity="0.6"/>
-                                                <TextBlock Text="{Binding SelectedLoan.LoanCap1, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="#64B5F6" Margin="0,4,0,0"/>
-                                            </StackPanel>
+
+                                            <Grid Grid.Row="4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="연체이자" FontSize="11" Opacity="0.6"/>
+                                                    <TextBlock Text="{Binding SelectedLoan.OverdueInterest1, StringFormat=N0, FallbackValue=-}" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Loan Cap" FontSize="11" Opacity="0.6"/>
+                                                    <TextBlock Text="{Binding SelectedLoan.LoanCap1, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="#64B5F6" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Border>
+                                    </Border>
 
-                                <!-- 시나리오 2 -->
-                                <Border Grid.Column="2" Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="16">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="12"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                                    <!-- 시나리오 2 -->
+                                    <Border Grid.Column="2" Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="16">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="12"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0" Text="시나리오 2안" FontWeight="SemiBold" FontSize="14"/>
+                                            <TextBlock Grid.Row="0" Text="시나리오 2안" FontWeight="SemiBold" FontSize="14"/>
 
-                                        <StackPanel Grid.Row="2">
-                                            <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                                            <DatePicker SelectedDate="{Binding Scenario2Date}" Padding="8,4"/>
-                                        </StackPanel>
-
-                                        <Grid Grid.Row="4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0">
-                                                <TextBlock Text="연체이자" FontSize="11" Opacity="0.6"/>
-                                                <TextBlock Text="{Binding SelectedLoan.OverdueInterest2, StringFormat=N0, FallbackValue=-}" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                            <StackPanel Grid.Row="2">
+                                                <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                                <DatePicker SelectedDate="{Binding Scenario2Date}" Padding="8,4"/>
                                             </StackPanel>
-                                            <StackPanel Grid.Column="1">
-                                                <TextBlock Text="Loan Cap" FontSize="11" Opacity="0.6"/>
-                                                <TextBlock Text="{Binding SelectedLoan.LoanCap2, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="#81C784" Margin="0,4,0,0"/>
-                                            </StackPanel>
+
+                                            <Grid Grid.Row="4">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="연체이자" FontSize="11" Opacity="0.6"/>
+                                                    <TextBlock Text="{Binding SelectedLoan.OverdueInterest2, StringFormat=N0, FallbackValue=-}" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Loan Cap" FontSize="11" Opacity="0.6"/>
+                                                    <TextBlock Text="{Binding SelectedLoan.LoanCap2, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="#81C784" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                </Border>
-                            </Grid>
+                                    </Border>
+                                </Grid>
+                            </controls:NPExpandableSection>
 
                             <!-- 버튼 영역 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
