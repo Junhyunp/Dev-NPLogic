@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 using NPLogic.ViewModels;
 using NPLogic.Views;
@@ -117,7 +118,15 @@ namespace NPLogic
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
-            services.AddTransient<ViewModels.DashboardViewModel>();
+            services.AddTransient<ViewModels.DashboardViewModel>(sp =>
+            {
+                return new ViewModels.DashboardViewModel(
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.UserRepository>(),
+                    sp.GetRequiredService<AuthService>(),
+                    sp.GetRequiredService<Data.Repositories.ProgramUserRepository>()
+                );
+            });
             services.AddTransient<ViewModels.AdminHomeViewModel>();
             services.AddTransient<ViewModels.PMHomeViewModel>();
             services.AddTransient<ViewModels.EvaluatorHomeViewModel>();
@@ -150,6 +159,13 @@ namespace NPLogic
             services.AddTransient<ViewModels.AuctionScheduleViewModel>();
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.ProgramManagementViewModel>();
+            services.AddTransient<ViewModels.NonCoreViewModel>(sp =>
+            {
+                return new ViewModels.NonCoreViewModel(
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
+                );
+            });
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
@@ -303,6 +319,13 @@ namespace NPLogic
             {
                 var view = new Views.ProgramManagementView();
                 view.DataContext = sp.GetRequiredService<ViewModels.ProgramManagementViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.NonCoreView>(sp =>
+            {
+                var view = new Views.NonCoreView();
+                view.DataContext = sp.GetRequiredService<ViewModels.NonCoreViewModel>();
                 return view;
             });
 

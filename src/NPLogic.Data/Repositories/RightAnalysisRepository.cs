@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NPLogic.Core.Models;
-using NPLogic.Services;
+using NPLogic.Data.Services;
 
 namespace NPLogic.Data.Repositories
 {

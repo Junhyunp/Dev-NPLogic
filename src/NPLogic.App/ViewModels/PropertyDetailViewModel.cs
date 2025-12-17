@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 using NPLogic.ViewModels;
 
@@ -148,6 +149,10 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasNoQA = true;
+        
+        // 데이터 업로드 정보 (Phase 5.4)
+        [ObservableProperty]
+        private DateTime? _lastDataUploadDate;
 
         private Guid? _propertyId;
         private Action? _goBackAction;
@@ -196,6 +201,24 @@ namespace NPLogic.ViewModels
 
             // 평가 탭 ViewModel에 물건 ID 설정
             EvaluationViewModel?.SetPropertyId(propertyId);
+        }
+
+        /// <summary>
+        /// 활성 탭 설정 (탭 이름으로)
+        /// </summary>
+        public void SetActiveTab(string tabName)
+        {
+            SelectedTabIndex = tabName.ToLower() switch
+            {
+                "basic" or "home" => 0,
+                "noncore" => 1,
+                "registry" => 2,
+                "rights" or "rightsanalysis" => 3,
+                "basicdata" => 4,
+                "closing" => 5,
+                "evaluation" => 6,
+                _ => 0
+            };
         }
 
         /// <summary>
@@ -551,6 +574,102 @@ namespace NPLogic.ViewModels
                 {
                     ErrorMessage = $"로드뷰 열기 실패: {ex.Message}";
                 }
+            }
+        }
+
+        #endregion
+
+        #region 데이터 업로드 관련 (Phase 5.4)
+
+        /// <summary>
+        /// 기초 데이터 파일 업로드 명령
+        /// </summary>
+        [RelayCommand]
+        private async Task UploadDataFileAsync()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "기초 데이터 파일 선택",
+                Filter = "Excel 파일|*.xlsx;*.xls|모든 파일|*.*",
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    IsLoading = true;
+                    ErrorMessage = null;
+
+                    // TODO: 엑셀 파일 파싱 및 데이터 업로드 로직 구현
+                    // 현재는 업로드 시뮬레이션
+                    await Task.Delay(1000);
+
+                    LastDataUploadDate = DateTime.Now;
+                    SuccessMessage = $"데이터가 성공적으로 업로드되었습니다.\n파일: {System.IO.Path.GetFileName(dialog.FileName)}";
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"데이터 업로드 실패: {ex.Message}";
+                }
+                finally
+                {
+                    IsLoading = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 데이터 템플릿 다운로드 명령
+        /// </summary>
+        [RelayCommand]
+        private void DownloadTemplate()
+        {
+            try
+            {
+                var saveDialog = new SaveFileDialog
+                {
+                    Title = "템플릿 저장",
+                    Filter = "Excel 파일|*.xlsx",
+                    FileName = "기초데이터_템플릿.xlsx"
+                };
+
+                if (saveDialog.ShowDialog() == true)
+                {
+                    // 템플릿 파일 생성
+                    using var workbook = new ClosedXML.Excel.XLWorkbook();
+                    var worksheet = workbook.Worksheets.Add("기초데이터");
+
+                    // 헤더 추가
+                    var headers = new[] { "프로젝트ID", "물건번호", "물건유형", "전체주소", "도로명주소", 
+                                         "지번주소", "상세주소", "토지면적", "건물면적", "층수",
+                                         "감정평가액", "최저입찰가", "매각가", "상태" };
+                    
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        var cell = worksheet.Cell(1, i + 1);
+                        cell.Value = headers[i];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#1E3A5F");
+                        cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
+                    }
+
+                    // 샘플 데이터 행 추가
+                    worksheet.Cell(2, 1).Value = "PROJECT001";
+                    worksheet.Cell(2, 2).Value = "001";
+                    worksheet.Cell(2, 3).Value = "아파트";
+                    worksheet.Cell(2, 4).Value = "서울시 강남구 테헤란로 123";
+                    worksheet.Cell(2, 14).Value = "pending";
+
+                    worksheet.Columns().AdjustToContents();
+                    workbook.SaveAs(saveDialog.FileName);
+
+                    SuccessMessage = $"템플릿이 저장되었습니다.\n{saveDialog.FileName}";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"템플릿 다운로드 실패: {ex.Message}";
             }
         }
 

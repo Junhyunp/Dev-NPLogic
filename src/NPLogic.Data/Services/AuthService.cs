@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Supabase.Gotrue;
 using Supabase.Gotrue.Exceptions;
 
-namespace NPLogic.Services
+namespace NPLogic.Data.Services
 {
     /// <summary>
     /// 인증 서비스

@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
-using NPLogic.Services;
+using NPLogic.Data.Services;
 
 namespace NPLogic.ViewModels
 {

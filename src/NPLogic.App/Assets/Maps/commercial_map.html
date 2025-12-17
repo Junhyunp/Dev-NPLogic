@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상권 분석 지도</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* API 키 없을 때 표시할 메시지 */
+        #no-api-key {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2744 0%, #2d3a52 100%);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        #no-api-key.show {
+            display: flex;
+        }
+        
+        #no-api-key h2 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #90cdf4;
+        }
+        
+        #no-api-key p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.8;
+            max-width: 400px;
+        }
+        
+        /* 커스텀 인포윈도우 - 물건 */
+        .property-infowindow {
+            padding: 12px 16px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            max-width: 280px;
+            border-left: 4px solid #1E3A5F;
+        }
+        
+        .property-infowindow .title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1E3A5F;
+            margin-bottom: 6px;
+        }
+        
+        .property-infowindow .address {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        
+        .property-infowindow .badge {
+            display: inline-block;
+            background: #1E3A5F;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        
+        /* 커스텀 인포윈도우 - 점포 */
+        .store-infowindow {
+            padding: 10px 14px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            min-width: 150px;
+            max-width: 220px;
+        }
+        
+        .store-infowindow .store-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
+        .store-infowindow .industry {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        .store-infowindow .industry-badge {
+            display: inline-block;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+        
+        /* 범례 */
+        #legend {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            font-size: 12px;
+        }
+        
+        #legend .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        #legend .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+        }
+        
+        #legend .legend-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        #legend .property-marker {
+            background: #1E3A5F;
+            border: 2px solid white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        #legend .store-marker {
+            background: #F59E0B;
+            border: 2px solid white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        /* 로딩 인디케이터 */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #64748b;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="no-api-key">
+        <div style="font-size: 64px; margin-bottom: 24px; opacity: 0.6;">🗺️</div>
+        <h2>카카오맵 API 키 필요</h2>
+        <p>
+            지도를 표시하려면 카카오맵 API 키가 필요합니다.<br><br>
+            appsettings.json에 KakaoMapApiKey를 설정해주세요.
+        </p>
+    </div>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>지도 로딩 중...</div>
+    </div>
+    <div id="legend" style="display: none;">
+        <div class="legend-title">범례</div>
+        <div class="legend-item">
+            <div class="legend-marker property-marker"></div>
+            <span>분석 대상 물건</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-marker store-marker"></div>
+            <span>주변 점포</span>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let map = null;
+        let propertyMarker = null;
+        let storeMarkers = [];
+        let radiusCircle = null;
+        let currentInfowindow = null;
+        let isMapReady = false;
+        let apiKey = null;
+        let clusterer = null;
+
+        // C#에서 호출: API 키 설정 및 지도 초기화
+        function initializeMap(key) {
+            apiKey = key;
+            
+            if (!key || key === '' || key === 'YOUR_KAKAO_MAP_API_KEY') {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('no-api-key').classList.add('show');
+                return;
+            }
+
+            // 카카오맵 스크립트 동적 로드 (clusterer 라이브러리 포함)
+            const script = document.createElement('script');
+            script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&autoload=false&libraries=services,clusterer`;
+            script.onload = function() {
+                kakao.maps.load(function() {
+                    createMap();
+                });
+            };
+            script.onerror = function() {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('no-api-key').classList.add('show');
+            };
+            document.head.appendChild(script);
+        }
+
+        // 지도 생성
+        function createMap() {
+            const container = document.getElementById('map');
+            const options = {
+                center: new kakao.maps.LatLng(37.5665, 126.9780),
+                level: 4
+            };
+            
+            map = new kakao.maps.Map(container, options);
+            isMapReady = true;
+            
+            // 클러스터러 초기화
+            clusterer = new kakao.maps.MarkerClusterer({
+                map: map,
+                averageCenter: true,
+                minLevel: 5,
+                disableClickZoom: true,
+                styles: [{
+                    width: '40px',
+                    height: '40px',
+                    background: 'rgba(245, 158, 11, 0.9)',
+                    borderRadius: '20px',
+                    color: '#fff',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    lineHeight: '40px',
+                    fontSize: '14px'
+                }]
+            });
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('legend').style.display = 'block';
+            
+            // 지도 컨트롤 추가
+            const zoomControl = new kakao.maps.ZoomControl();
+            map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+            
+            // C#에 준비 완료 알림
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage(JSON.stringify({ type: 'mapReady' }));
+            }
+        }
+
+        // 물건 위치에 마커 표시
+        function setPropertyMarker(lat, lng, address, propertyNumber) {
+            if (!isMapReady || !map) return;
+
+            // 기존 마커 제거
+            if (propertyMarker) {
+                propertyMarker.setMap(null);
+            }
+
+            const position = new kakao.maps.LatLng(lat, lng);
+            
+            // 커스텀 마커 이미지 (물건용 - 남색)
+            const markerImage = new kakao.maps.MarkerImage(
+                'data:image/svg+xml;base64,' + btoa(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="48" viewBox="0 0 36 48">
+                        <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 30 18 30s18-16.5 18-30C36 8.06 27.94 0 18 0z" fill="#1E3A5F"/>
+                        <circle cx="18" cy="18" r="8" fill="white"/>
+                        <circle cx="18" cy="18" r="4" fill="#1E3A5F"/>
+                    </svg>
+                `),
+                new kakao.maps.Size(36, 48),
+                { offset: new kakao.maps.Point(18, 48) }
+            );
+
+            propertyMarker = new kakao.maps.Marker({
+                position: position,
+                map: map,
+                image: markerImage,
+                zIndex: 100
+            });
+
+            // 인포윈도우
+            const content = `
+                <div class="property-infowindow">
+                    <div class="title">${propertyNumber || '분석 대상 물건'}</div>
+                    <div class="address">${address || '주소 정보 없음'}</div>
+                    <div class="badge">분석 대상</div>
+                </div>
+            `;
+
+            const infowindow = new kakao.maps.InfoWindow({
+                content: content,
+                removable: true
+            });
+
+            kakao.maps.event.addListener(propertyMarker, 'click', function() {
+                if (currentInfowindow) currentInfowindow.close();
+                infowindow.open(map, propertyMarker);
+                currentInfowindow = infowindow;
+            });
+
+            // 지도 중심 이동
+            map.setCenter(position);
+            
+            // 기본으로 인포윈도우 열기
+            infowindow.open(map, propertyMarker);
+            currentInfowindow = infowindow;
+        }
+
+        // 반경 원 표시
+        function setRadius(radius) {
+            if (!isMapReady || !map || !propertyMarker) return;
+
+            // 기존 원 제거
+            if (radiusCircle) {
+                radiusCircle.setMap(null);
+            }
+
+            radiusCircle = new kakao.maps.Circle({
+                center: propertyMarker.getPosition(),
+                radius: radius,
+                strokeWeight: 2,
+                strokeColor: '#1E3A5F',
+                strokeOpacity: 0.8,
+                strokeStyle: 'dashed',
+                fillColor: '#1E3A5F',
+                fillOpacity: 0.1
+            });
+
+            radiusCircle.setMap(map);
+
+            // 줌 레벨 조정
+            const level = radius <= 200 ? 3 : radius <= 500 ? 4 : radius <= 1000 ? 5 : 6;
+            map.setLevel(level);
+        }
+
+        // 주변 점포 마커 표시
+        function displayStores(storesJson) {
+            if (!isMapReady || !map) return;
+
+            // 기존 마커 제거
+            clearStoreMarkers();
+
+            const stores = typeof storesJson === 'string' ? JSON.parse(storesJson) : storesJson;
+            
+            if (!stores || stores.length === 0) return;
+
+            // 점포 마커 이미지 (주황색)
+            const markerImage = new kakao.maps.MarkerImage(
+                'data:image/svg+xml;base64,' + btoa(`
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="#F59E0B" stroke="white" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="4" fill="white"/>
+                    </svg>
+                `),
+                new kakao.maps.Size(24, 24),
+                { offset: new kakao.maps.Point(12, 12) }
+            );
+
+            stores.forEach(function(store, index) {
+                if (!store.lat || !store.lng) return;
+
+                const position = new kakao.maps.LatLng(store.lat, store.lng);
+                
+                const marker = new kakao.maps.Marker({
+                    position: position,
+                    image: markerImage,
+                    zIndex: 10
+                });
+
+                const content = `
+                    <div class="store-infowindow">
+                        <div class="store-name">${store.name || '점포'}</div>
+                        <div class="industry">${store.industry || '-'}</div>
+                    </div>
+                `;
+
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: content,
+                    removable: true
+                });
+
+                kakao.maps.event.addListener(marker, 'click', function() {
+                    if (currentInfowindow) currentInfowindow.close();
+                    infowindow.open(map, marker);
+                    currentInfowindow = infowindow;
+                    
+                    // C#에 점포 클릭 알림
+                    if (window.chrome && window.chrome.webview) {
+                        window.chrome.webview.postMessage(JSON.stringify({ 
+                            type: 'storeClick', 
+                            storeName: store.name,
+                            industry: store.industry
+                        }));
+                    }
+                });
+
+                storeMarkers.push(marker);
+            });
+
+            // 클러스터러에 마커 추가
+            clusterer.addMarkers(storeMarkers);
+        }
+
+        // 점포 마커 제거
+        function clearStoreMarkers() {
+            if (clusterer) {
+                clusterer.clear();
+            }
+            
+            storeMarkers.forEach(function(marker) {
+                marker.setMap(null);
+            });
+            storeMarkers = [];
+        }
+
+        // 줌 인
+        function zoomIn() {
+            if (!isMapReady || !map) return;
+            const level = map.getLevel();
+            if (level > 1) map.setLevel(level - 1);
+        }
+
+        // 줌 아웃
+        function zoomOut() {
+            if (!isMapReady || !map) return;
+            const level = map.getLevel();
+            if (level < 14) map.setLevel(level + 1);
+        }
+    </script>
+</body>
+</html>

@@ -11,6 +11,10 @@
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
     
+    <!-- 피드백 반영: 엑셀 스타일 남색 테두리 -->
+    <Border BorderBrush="{StaticResource PrimaryBrush}" 
+            BorderThickness="3"
+            Background="{StaticResource BackgroundBrush}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>      <!-- Header -->
@@ -19,10 +23,10 @@
             <RowDefinition Height="30"/>      <!-- Status Bar -->
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+        <!-- Header - 피드백 반영: 남색 배경 + 흰색 아이콘 -->
         <Border Grid.Row="0" 
-                Background="White"
-                BorderBrush="{StaticResource BorderBrush}"
+                Background="{StaticResource HeaderNavyBrush}"
+                BorderBrush="{StaticResource PrimaryDarkBrush}"
                 BorderThickness="0,0,0,1">
             <Grid Margin="16,0">
                 <Grid.ColumnDefinitions>
@@ -31,18 +35,17 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Logo -->
+                <!-- Logo - 엠필로지 로고 사용 -->
                 <StackPanel Grid.Column="0" 
                            Orientation="Horizontal"
                            VerticalAlignment="Center">
-                    <TextBlock Text="NPLogic" 
-                              FontSize="20" 
-                              FontWeight="SemiBold"
-                              Foreground="{StaticResource PrimaryBrush}"
-                              VerticalAlignment="Center"/>
+                    <Image Source="/Assets/img/white-logo.png"
+                           Height="32"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- User Info & Actions -->
+                <!-- User Info & Actions - 흰색 아이콘으로 변경 -->
                 <StackPanel Grid.Column="2" 
                            Orientation="Horizontal" 
                            VerticalAlignment="Center">
@@ -52,7 +55,7 @@
                             Click="NotificationButton_Click">
                         <materialDesign:PackIcon Kind="Bell" 
                                                Width="20" Height="20"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="White"/>
                     </Button>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="설정"
@@ -60,11 +63,11 @@
                             Click="HeaderSettingsButton_Click">
                         <materialDesign:PackIcon Kind="Cog" 
                                                Width="20" Height="20"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="White"/>
                     </Button>
                     <Separator Width="1" 
                               Height="24" 
-                              Background="{StaticResource DividerBrush}"
+                              Background="#4A6B8A"
                               Margin="8,0"/>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="사용자 정보"
@@ -72,7 +75,7 @@
                             Click="UserInfoButton_Click">
                         <materialDesign:PackIcon Kind="Account" 
                                                Width="20" Height="20"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="White"/>
                     </Button>
                     <Button Style="{StaticResource IconButton}"
                             ToolTip="로그아웃"
@@ -80,7 +83,7 @@
                             Click="LogoutButton_Click">
                         <materialDesign:PackIcon Kind="Logout" 
                                                Width="20" Height="20"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                               Foreground="White"/>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -105,20 +108,22 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Property List -->
+                    <!-- Property List - Phase 5.1: 피드백에 따라 숨김 처리 -->
                     <Button x:Name="PropertyListButton"
                             Click="PropertyListButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ViewList" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="물건 목록" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
                     </Button>
 
-                    <!-- Data Upload -->
+                    <!-- Data Upload - Phase 5.3: 피드백에 따라 숨김 처리 (비핵심 기초데이터에서 업로드로 대체) -->
                     <Button x:Name="DataUploadButton"
                             Click="DataUploadButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -295,6 +300,7 @@
             </Grid>
         </Border>
     </Grid>
+    </Border>
 </Window>
 
 

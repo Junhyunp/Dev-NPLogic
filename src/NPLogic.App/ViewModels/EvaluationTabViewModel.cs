@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 
 namespace NPLogic.ViewModels

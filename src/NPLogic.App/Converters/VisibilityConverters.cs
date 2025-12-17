@@ -263,5 +263,30 @@ namespace NPLogic.Converters
             throw new NotImplementedException();
         }
     }
+
+    /// <summary>
+    /// bool을 체크 표시로 변환 (true = "O", false = "")
+    /// 롤업 화면에서 체크 상태 표시용
+    /// </summary>
+    public class BoolToCheckConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool boolValue)
+            {
+                return boolValue ? "O" : "";
+            }
+            return "";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string str)
+            {
+                return str == "O";
+            }
+            return false;
+        }
+    }
 }
 

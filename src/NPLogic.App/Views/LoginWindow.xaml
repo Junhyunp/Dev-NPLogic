@@ -15,6 +15,10 @@
         MinWidth="1000"
         MinHeight="600">
 
+    <!-- 피드백 반영: 로그인 화면도 남색 테두리로 통일 (메인 화면과 연결성) -->
+    <Border BorderBrush="{DynamicResource PrimaryBrush}" 
+            BorderThickness="3"
+            Background="{DynamicResource BackgroundBrush}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -393,4 +397,5 @@
             </Grid>
         </Border>
     </Grid>
+    </Border>
 </Window>

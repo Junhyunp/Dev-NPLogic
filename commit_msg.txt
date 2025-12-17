@@ -1,0 +1,26 @@
+feat: 유사물건 추천 시스템 통합 및 평가 탭 UI 연동
+
+주요 변경:
+- [DB]: auction_cases 테이블 생성 (경매 낙찰 사례 저장용)
+- [Python]: recommend/ 모듈 - 규칙 기반 추천 엔진 구현
+- [Python]: recommend_processor.py - C#에서 호출하는 진입점
+- [C#]: RecommendService.cs - Python 프로세스 호출 및 JSON 파싱
+- [C#]: EvaluationTabViewModel.cs - 추천 명령 및 결과 표시 로직
+- [UI]: EvaluationTab.xaml - 유사물건 추천 섹션 추가
+- [Python]: requirements.txt - PyYAML, supabase 의존성 추가
+
+신규 파일:
+- python/recommend/: 추천 모듈 (recommend.py, utils.py, config.yaml)
+- python/recommend_processor.py: CLI 진입점
+- src/NPLogic.App/Services/RecommendService.cs: C# 추천 서비스
+- src/NPLogic.App/Services/RegistryOcrService.cs: 등기부 OCR 서비스
+- docs/Auction-Recommend/: 원본 추천 로직 참고 문서
+- src/NPLogic.App/Views/*HomeView.*: 역할별 홈 화면
+- src/NPLogic.App/Views/ProgramManagementView.*: 프로그램 관리 화면
+- src/NPLogic.Core/Models/Program.cs, ProgramUser.cs: 프로그램 모델
+- src/NPLogic.Data/Repositories/Program*.cs: 프로그램 Repository
+- src/NPLogic.UI/Controls/NPExpandableSection.*: 확장 가능 섹션 컨트롤
+
+빌드: ✅
+
+

@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace NPLogic.Services
+namespace NPLogic.Data.Services
 {
     /// <summary>
     /// 세션 정보 로컬 저장 서비스

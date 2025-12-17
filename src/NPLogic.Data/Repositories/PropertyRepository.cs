@@ -284,6 +284,9 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
+                // 주소 앞뒤 공란 제거
+                TrimAddressFields(property);
+                
                 var client = await _supabaseService.GetClientAsync();
                 var propertyTable = MapToPropertyTable(property);
                 propertyTable.CreatedAt = DateTime.UtcNow;
@@ -312,6 +315,9 @@ namespace NPLogic.Data.Repositories
         {
             try
             {
+                // 주소 앞뒤 공란 제거
+                TrimAddressFields(property);
+                
                 var client = await _supabaseService.GetClientAsync();
                 var propertyTable = MapToPropertyTable(property);
                 propertyTable.UpdatedAt = DateTime.UtcNow;
@@ -432,6 +438,17 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 주소 필드의 앞뒤 공란 제거
+        /// </summary>
+        private void TrimAddressFields(Property property)
+        {
+            property.AddressFull = property.AddressFull?.Trim();
+            property.AddressRoad = property.AddressRoad?.Trim();
+            property.AddressJibun = property.AddressJibun?.Trim();
+            property.AddressDetail = property.AddressDetail?.Trim();
+        }
+
+        /// <summary>
         /// PropertyTable -> Property 매핑
         /// </summary>
         private Property MapToProperty(PropertyTable table)
@@ -455,6 +472,7 @@ namespace NPLogic.Data.Repositories
                 AppraisalValue = table.AppraisalValue,
                 MinimumBid = table.MinimumBid,
                 SalePrice = table.SalePrice,
+                Opb = table.Opb,
                 Latitude = table.Latitude,
                 Longitude = table.Longitude,
                 Status = table.Status ?? "pending",
@@ -470,6 +488,7 @@ namespace NPLogic.Data.Repositories
                 TenantDocs = table.TenantDocs,
                 SeniorRightsReview = table.SeniorRightsReview,
                 AppraisalConfirmed = table.AppraisalConfirmed,
+                HasCommercialDistrictData = table.HasCommercialDistrictData,
                 AuctionScheduleDate = table.AuctionScheduleDate,
                 QaUnansweredCount = table.QaUnansweredCount,
                 RightsAnalysisStatus = table.RightsAnalysisStatus ?? "pending",
@@ -503,6 +522,7 @@ namespace NPLogic.Data.Repositories
                 AppraisalValue = property.AppraisalValue,
                 MinimumBid = property.MinimumBid,
                 SalePrice = property.SalePrice,
+                Opb = property.Opb,
                 Latitude = property.Latitude,
                 Longitude = property.Longitude,
                 Status = property.Status,
@@ -518,6 +538,7 @@ namespace NPLogic.Data.Repositories
                 TenantDocs = property.TenantDocs,
                 SeniorRightsReview = property.SeniorRightsReview,
                 AppraisalConfirmed = property.AppraisalConfirmed,
+                HasCommercialDistrictData = property.HasCommercialDistrictData,
                 AuctionScheduleDate = property.AuctionScheduleDate,
                 QaUnansweredCount = property.QaUnansweredCount,
                 RightsAnalysisStatus = property.RightsAnalysisStatus,
@@ -566,6 +587,12 @@ namespace NPLogic.Data.Repositories
                         break;
                     case "appraisal_confirmed":
                         property.AppraisalConfirmed = Convert.ToBoolean(value);
+                        break;
+                    case "has_commercial_district_data":
+                        property.HasCommercialDistrictData = Convert.ToBoolean(value);
+                        break;
+                    case "opb":
+                        property.Opb = value == null ? null : Convert.ToDecimal(value);
                         break;
                     case "rights_analysis_status":
                         property.RightsAnalysisStatus = value?.ToString() ?? "pending";
@@ -652,6 +679,13 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("sale_price")]
         public decimal? SalePrice { get; set; }
 
+        /// <summary>
+        /// OPB (Outstanding Principal Balance, 대출잔액)
+        /// Phase 6.4
+        /// </summary>
+        [Postgrest.Attributes.Column("opb")]
+        public decimal? Opb { get; set; }
+
         [Postgrest.Attributes.Column("latitude")]
         public decimal? Latitude { get; set; }
 
@@ -695,6 +729,13 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("appraisal_confirmed")]
         public bool AppraisalConfirmed { get; set; }
+
+        /// <summary>
+        /// 상권 데이터 확보 여부 (상가/아파트형공장 전용)
+        /// Phase 6.5
+        /// </summary>
+        [Postgrest.Attributes.Column("has_commercial_district_data")]
+        public bool HasCommercialDistrictData { get; set; }
 
         [Postgrest.Attributes.Column("auction_schedule_date")]
         public DateTime? AuctionScheduleDate { get; set; }

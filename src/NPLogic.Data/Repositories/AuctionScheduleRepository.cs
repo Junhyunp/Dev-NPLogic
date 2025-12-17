@@ -177,6 +177,10 @@ namespace NPLogic.Data.Repositories
             MinimumBid = t.MinimumBid,
             SalePrice = t.SalePrice,
             Status = t.Status ?? "scheduled",
+            InterimPrincipalOffset = t.InterimPrincipalOffset,
+            InterimPrincipalRecovery = t.InterimPrincipalRecovery,
+            InterimInterestOffset = t.InterimInterestOffset,
+            InterimInterestRecovery = t.InterimInterestRecovery,
             CreatedAt = t.CreatedAt,
             UpdatedAt = t.UpdatedAt
         };
@@ -191,6 +195,10 @@ namespace NPLogic.Data.Repositories
             MinimumBid = a.MinimumBid,
             SalePrice = a.SalePrice,
             Status = a.Status,
+            InterimPrincipalOffset = a.InterimPrincipalOffset,
+            InterimPrincipalRecovery = a.InterimPrincipalRecovery,
+            InterimInterestOffset = a.InterimInterestOffset,
+            InterimInterestRecovery = a.InterimInterestRecovery,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         };
@@ -209,6 +217,10 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("minimum_bid")] public decimal? MinimumBid { get; set; }
         [Postgrest.Attributes.Column("sale_price")] public decimal? SalePrice { get; set; }
         [Postgrest.Attributes.Column("status")] public string? Status { get; set; }
+        [Postgrest.Attributes.Column("interim_principal_offset")] public decimal InterimPrincipalOffset { get; set; }
+        [Postgrest.Attributes.Column("interim_principal_recovery")] public decimal InterimPrincipalRecovery { get; set; }
+        [Postgrest.Attributes.Column("interim_interest_offset")] public decimal InterimInterestOffset { get; set; }
+        [Postgrest.Attributes.Column("interim_interest_recovery")] public decimal InterimInterestRecovery { get; set; }
         [Postgrest.Attributes.Column("created_at")] public DateTime CreatedAt { get; set; }
         [Postgrest.Attributes.Column("updated_at")] public DateTime UpdatedAt { get; set; }
     }

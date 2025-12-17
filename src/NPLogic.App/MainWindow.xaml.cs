@@ -5,7 +5,7 @@ using System.Windows.Media.Animation;
 using System.Threading.Tasks;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
-using NPLogic.Services;
+using NPLogic.Data.Services;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 
@@ -163,7 +163,7 @@ namespace NPLogic
         /// <summary>
         /// 대시보드로 이동
         /// </summary>
-        private void NavigateToDashboard()
+        public void NavigateToDashboard()
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider != null)
@@ -338,6 +338,28 @@ namespace NPLogic
                     viewModel.LoadProperty(property);
                     // 뒤로가기 액션 설정 (물건 목록으로)
                     viewModel.SetPropertyId(property.Id, NavigateToPropertyList);
+                }
+                MainContentControl.Content = propertyDetailView;
+            }
+        }
+
+        /// <summary>
+        /// 비핵심 화면으로 이동 (차주번호 클릭 시 - Phase 4.2 관련)
+        /// </summary>
+        public void NavigateToNonCoreView(Property property)
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                // PropertyDetailView를 비핵심 탭이 선택된 상태로 열기
+                var propertyDetailView = serviceProvider.GetRequiredService<Views.PropertyDetailView>();
+                var viewModel = propertyDetailView.DataContext as ViewModels.PropertyDetailViewModel;
+                if (viewModel != null)
+                {
+                    viewModel.LoadProperty(property);
+                    viewModel.SetPropertyId(property.Id, NavigateToPropertyList);
+                    // 비핵심 탭으로 설정
+                    viewModel.SetActiveTab("noncore");
                 }
                 MainContentControl.Content = propertyDetailView;
             }

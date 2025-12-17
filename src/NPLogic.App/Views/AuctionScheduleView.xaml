@@ -269,6 +269,46 @@
                             </ComboBox>
                         </StackPanel>
 
+                        <!-- 인터링/상계회수 섹션 -->
+                        <Border Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="인터링/상계회수" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,12"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="0">
+                                        <TextBlock Text="원금상계" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding EditInterimPrincipalOffset, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="8,6"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="2">
+                                        <TextBlock Text="원금회수" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding EditInterimPrincipalRecovery, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="8,6"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="0">
+                                        <TextBlock Text="이자상계" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding EditInterimInterestOffset, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="8,6"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="2">
+                                        <TextBlock Text="이자회수" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                        <TextBox Text="{Binding EditInterimInterestRecovery, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="8,6"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
                         <!-- 버튼 -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <Button Content="삭제" 

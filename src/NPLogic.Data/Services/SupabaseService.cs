@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace NPLogic.Services
+namespace NPLogic.Data.Services
 {
     /// <summary>
     /// Supabase 클라이언트 서비스

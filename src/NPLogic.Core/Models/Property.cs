@@ -50,6 +50,12 @@ namespace NPLogic.Core.Models
 
         public decimal? SalePrice { get; set; }
 
+        /// <summary>
+        /// OPB (Outstanding Principal Balance, 대출잔액)
+        /// Phase 6.4: 물건에 OPB 컬럼 추가
+        /// </summary>
+        public decimal? Opb { get; set; }
+
         // 위치 정보
         public decimal? Latitude { get; set; }
 
@@ -92,6 +98,12 @@ namespace NPLogic.Core.Models
 
         /// <summary>평가액확정 여부</summary>
         public bool AppraisalConfirmed { get; set; }
+
+        /// <summary>
+        /// 상권 데이터 확보 여부 (상가/아파트형공장 전용)
+        /// Phase 6.5: 자본소득률 → 상가/아파트형공장 상권 데이터 체크박스
+        /// </summary>
+        public bool HasCommercialDistrictData { get; set; }
 
         /// <summary>경(공)매일정</summary>
         public DateTime? AuctionScheduleDate { get; set; }

@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 
 namespace NPLogic.ViewModels

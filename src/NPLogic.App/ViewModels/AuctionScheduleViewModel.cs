@@ -88,6 +88,19 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _editStatus = "scheduled";
 
+        // 인터링/상계회수 편집 필드
+        [ObservableProperty]
+        private decimal _editInterimPrincipalOffset;
+
+        [ObservableProperty]
+        private decimal _editInterimPrincipalRecovery;
+
+        [ObservableProperty]
+        private decimal _editInterimInterestOffset;
+
+        [ObservableProperty]
+        private decimal _editInterimInterestRecovery;
+
         // ========== 보기 모드 ==========
         [ObservableProperty]
         private bool _isCalendarView;
@@ -222,6 +235,10 @@ namespace NPLogic.ViewModels
                 EditMinimumBid = value.MinimumBid ?? 0;
                 EditSalePrice = value.SalePrice ?? 0;
                 EditStatus = value.Status;
+                EditInterimPrincipalOffset = value.InterimPrincipalOffset;
+                EditInterimPrincipalRecovery = value.InterimPrincipalRecovery;
+                EditInterimInterestOffset = value.InterimInterestOffset;
+                EditInterimInterestRecovery = value.InterimInterestRecovery;
                 IsEditing = true;
                 IsNewRecord = false;
             }
@@ -241,6 +258,10 @@ namespace NPLogic.ViewModels
             EditMinimumBid = 0;
             EditSalePrice = 0;
             EditStatus = "scheduled";
+            EditInterimPrincipalOffset = 0;
+            EditInterimPrincipalRecovery = 0;
+            EditInterimInterestOffset = 0;
+            EditInterimInterestRecovery = 0;
             IsEditing = true;
             IsNewRecord = true;
         }
@@ -272,7 +293,11 @@ namespace NPLogic.ViewModels
                         BidDate = EditBidDate,
                         MinimumBid = EditMinimumBid,
                         SalePrice = EditSalePrice,
-                        Status = EditStatus
+                        Status = EditStatus,
+                        InterimPrincipalOffset = EditInterimPrincipalOffset,
+                        InterimPrincipalRecovery = EditInterimPrincipalRecovery,
+                        InterimInterestOffset = EditInterimInterestOffset,
+                        InterimInterestRecovery = EditInterimInterestRecovery
                     };
 
                     await _scheduleRepository.CreateAsync(newSchedule);
@@ -287,6 +312,10 @@ namespace NPLogic.ViewModels
                     SelectedSchedule.MinimumBid = EditMinimumBid;
                     SelectedSchedule.SalePrice = EditSalePrice;
                     SelectedSchedule.Status = EditStatus;
+                    SelectedSchedule.InterimPrincipalOffset = EditInterimPrincipalOffset;
+                    SelectedSchedule.InterimPrincipalRecovery = EditInterimPrincipalRecovery;
+                    SelectedSchedule.InterimInterestOffset = EditInterimInterestOffset;
+                    SelectedSchedule.InterimInterestRecovery = EditInterimInterestRecovery;
 
                     await _scheduleRepository.UpdateAsync(SelectedSchedule);
                     NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매 일정이 수정되었습니다.");

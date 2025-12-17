@@ -37,6 +37,7 @@
             <converters:BoolToTextConverter x:Key="BooleanToTextConverter"/>
             <converters:BoolToTextConverter x:Key="BoolToYesNoConverter"/>
             <converters:LessThanZeroConverter x:Key="LessThanZeroConverter"/>
+            <converters:BoolToCheckConverter x:Key="BoolToCheckConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

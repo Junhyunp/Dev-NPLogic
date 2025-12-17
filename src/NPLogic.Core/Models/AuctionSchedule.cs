@@ -39,6 +39,28 @@ namespace NPLogic.Core.Models
         /// 상태: scheduled, completed, cancelled
         /// </summary>
         public string Status { get; set; } = "scheduled";
+
+        // ========== 인터링/상계회수 ==========
+        
+        /// <summary>
+        /// 인터링 원금상계
+        /// </summary>
+        public decimal InterimPrincipalOffset { get; set; }
+        
+        /// <summary>
+        /// 인터링 원금회수
+        /// </summary>
+        public decimal InterimPrincipalRecovery { get; set; }
+        
+        /// <summary>
+        /// 인터링 이자상계
+        /// </summary>
+        public decimal InterimInterestOffset { get; set; }
+        
+        /// <summary>
+        /// 인터링 이자회수
+        /// </summary>
+        public decimal InterimInterestRecovery { get; set; }
         
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

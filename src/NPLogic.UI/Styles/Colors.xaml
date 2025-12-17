@@ -1,11 +1,15 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Bright Blue (밝은 블루 - 베이스) -->
-    <Color x:Key="Primary">#4A90E2</Color>
-    <Color x:Key="PrimaryLight">#6BA4E8</Color>
-    <Color x:Key="PrimaryDark">#3A7BC8</Color>
-    <Color x:Key="DeepNavy700">#4A90E2</Color>
+    <!-- Navy Blue (남색 - 베이스) - 피드백 반영: 기존 남색 톤으로 변경 -->
+    <Color x:Key="Primary">#1E3A5F</Color>
+    <Color x:Key="PrimaryLight">#2D5986</Color>
+    <Color x:Key="PrimaryDark">#152A47</Color>
+    <Color x:Key="DeepNavy700">#1E3A5F</Color>
+    
+    <!-- Header용 남색 (더 진한 톤) -->
+    <Color x:Key="HeaderNavy">#1A2F4A</Color>
+    <SolidColorBrush x:Key="HeaderNavyBrush" Color="{StaticResource HeaderNavy}"/>
     
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLight}"/>
@@ -60,7 +64,7 @@
     <Color x:Key="Success">#22C55E</Color>
     <Color x:Key="Warning">#F59E0B</Color>
     <Color x:Key="Error">#EF4444</Color>
-    <Color x:Key="Info">#4A90E2</Color>
+    <Color x:Key="Info">#1E3A5F</Color>
     
     <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}"/>
     <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}"/>

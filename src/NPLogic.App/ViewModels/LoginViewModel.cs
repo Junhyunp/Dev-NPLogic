@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NPLogic.Services;
+using NPLogic.Data.Services;
 
 namespace NPLogic.ViewModels
 {
