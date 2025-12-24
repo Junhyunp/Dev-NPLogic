@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,63 +11,22 @@ namespace NPLogic.Services
 {
     /// <summary>
     /// 유사물건 추천 서비스
-    /// Python recommend_processor.py를 호출하여 유사 경매 사례를 추천합니다.
+    /// PythonBackendService를 통해 HTTP API로 추천을 요청합니다.
     /// </summary>
     public class RecommendService : IDisposable
     {
         private bool _disposed;
-        private readonly string _pythonPath;
-        private readonly string _scriptPath;
+        private const string RecommendEndpoint = "/api/recommend";
         private readonly JsonSerializerOptions _jsonOptions;
 
-        /// <summary>
-        /// Python 스크립트 기본 경로
-        /// </summary>
-        private const string DefaultPythonPath = "python";
-        private const string ScriptFileName = "recommend_processor.py";
-
-        public RecommendService(string? pythonPath = null, string? scriptPath = null)
+        public RecommendService()
         {
-            _pythonPath = pythonPath ?? DefaultPythonPath;
-            _scriptPath = scriptPath ?? FindScriptPath();
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                 WriteIndented = false
             };
-        }
-
-        /// <summary>
-        /// 스크립트 경로 자동 탐색
-        /// </summary>
-        private string FindScriptPath()
-        {
-            var searchPaths = new List<string>
-            {
-                // 1. 앱 실행 디렉토리의 python 폴더
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "python", ScriptFileName),
-                
-                // 2. 개발 환경: 프로젝트 상대 경로
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", 
-                    "python", ScriptFileName),
-                
-                // 3. 프로젝트 루트 python 폴더
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", 
-                    "python", ScriptFileName),
-            };
-
-            foreach (var path in searchPaths)
-            {
-                var fullPath = Path.GetFullPath(path);
-                if (File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
-            }
-
-            // 기본값 반환 (존재하지 않을 수 있음)
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "python", ScriptFileName);
         }
 
         /// <summary>
@@ -85,23 +43,50 @@ namespace NPLogic.Services
         {
             options ??= new RecommendOptions();
 
-            if (!File.Exists(_scriptPath))
-            {
-                return new RecommendResult
-                {
-                    Success = false,
-                    Error = $"추천 스크립트를 찾을 수 없습니다: {_scriptPath}"
-                };
-            }
-
             try
             {
-                // 대상 물건 정보를 JSON으로 직렬화
-                var subjectJson = JsonSerializer.Serialize(subject, _jsonOptions);
+                // 서버가 실행 중인지 확인하고, 아니면 시작
+                if (!await PythonBackendService.Instance.EnsureServerRunningAsync())
+                {
+                    return new RecommendResult
+                    {
+                        Success = false,
+                        Error = "추천 서버를 시작할 수 없습니다."
+                    };
+                }
 
-                // Python 프로세스 실행
-                var result = await RunPythonProcessAsync(subjectJson, options, cancellationToken);
-                return result;
+                var httpClient = PythonBackendService.Instance.GetHttpClient();
+
+                // 요청 객체 생성
+                var request = new RecommendRequest
+                {
+                    Subject = subject,
+                    RuleIndex = options.RuleIndex,
+                    SimilarLand = options.SimilarLand,
+                    RegionScope = options.RegionScope,
+                    TopK = options.TopK,
+                    CandidatesSource = options.CandidatesSource,
+                    CandidatesPath = options.CandidatesPath,
+                    SupabaseUrl = options.SupabaseUrl,
+                    SupabaseKey = options.SupabaseKey
+                };
+
+                // JSON 직렬화
+                var jsonContent = JsonSerializer.Serialize(request, _jsonOptions);
+                var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                // API 호출
+                var response = await httpClient.PostAsync(RecommendEndpoint, content, cancellationToken);
+                var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                // 응답 파싱
+                var result = JsonSerializer.Deserialize<RecommendResult>(responseContent, _jsonOptions);
+                
+                return result ?? new RecommendResult
+                {
+                    Success = false,
+                    Error = "결과 파싱 실패"
+                };
             }
             catch (TaskCanceledException)
             {
@@ -121,165 +106,6 @@ namespace NPLogic.Services
             }
         }
 
-        /// <summary>
-        /// Python 프로세스를 실행하고 결과를 반환합니다.
-        /// </summary>
-        private async Task<RecommendResult> RunPythonProcessAsync(
-            string subjectJson,
-            RecommendOptions options,
-            CancellationToken cancellationToken)
-        {
-            var arguments = new StringBuilder();
-            arguments.Append($"\"{_scriptPath}\"");
-            arguments.Append($" --subject-json \"{EscapeJsonForCommandLine(subjectJson)}\"");
-
-            if (options.RuleIndex.HasValue)
-            {
-                arguments.Append($" --rule-index {options.RuleIndex.Value}");
-            }
-
-            if (options.SimilarLand)
-            {
-                arguments.Append(" --similar-land");
-            }
-
-            if (!string.IsNullOrEmpty(options.RegionScope))
-            {
-                arguments.Append($" --region-scope {options.RegionScope}");
-            }
-
-            if (options.TopK > 0)
-            {
-                arguments.Append($" --topk {options.TopK}");
-            }
-
-            if (!string.IsNullOrEmpty(options.CandidatesSource))
-            {
-                arguments.Append($" --candidates-source {options.CandidatesSource}");
-            }
-
-            if (!string.IsNullOrEmpty(options.CandidatesPath))
-            {
-                arguments.Append($" --candidates-path \"{options.CandidatesPath}\"");
-            }
-
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = _pythonPath,
-                Arguments = arguments.ToString(),
-                WorkingDirectory = Path.GetDirectoryName(_scriptPath),
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                StandardOutputEncoding = Encoding.UTF8,
-                StandardErrorEncoding = Encoding.UTF8
-            };
-
-            // Supabase 환경변수 전달
-            if (!string.IsNullOrEmpty(options.SupabaseUrl))
-            {
-                startInfo.EnvironmentVariables["SUPABASE_URL"] = options.SupabaseUrl;
-            }
-            if (!string.IsNullOrEmpty(options.SupabaseKey))
-            {
-                startInfo.EnvironmentVariables["SUPABASE_KEY"] = options.SupabaseKey;
-            }
-
-            using var process = new Process { StartInfo = startInfo };
-
-            var outputBuilder = new StringBuilder();
-            var errorBuilder = new StringBuilder();
-
-            process.OutputDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
-                {
-                    outputBuilder.AppendLine(e.Data);
-                }
-            };
-
-            process.ErrorDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
-                {
-                    errorBuilder.AppendLine(e.Data);
-                }
-            };
-
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            // 프로세스 완료 또는 취소 대기
-            var tcs = new TaskCompletionSource<bool>();
-            using var registration = cancellationToken.Register(() =>
-            {
-                try
-                {
-                    if (!process.HasExited)
-                    {
-                        process.Kill(entireProcessTree: true);
-                    }
-                }
-                catch { }
-                tcs.TrySetCanceled();
-            });
-
-            var exitTask = Task.Run(() =>
-            {
-                process.WaitForExit();
-                return true;
-            }, cancellationToken);
-
-            await Task.WhenAny(exitTask, tcs.Task);
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                throw new TaskCanceledException();
-            }
-
-            var output = outputBuilder.ToString().Trim();
-            var error = errorBuilder.ToString().Trim();
-
-            if (process.ExitCode != 0)
-            {
-                return new RecommendResult
-                {
-                    Success = false,
-                    Error = !string.IsNullOrEmpty(error) ? error : $"프로세스 종료 코드: {process.ExitCode}"
-                };
-            }
-
-            // JSON 결과 파싱
-            try
-            {
-                var result = JsonSerializer.Deserialize<RecommendResult>(output, _jsonOptions);
-                return result ?? new RecommendResult
-                {
-                    Success = false,
-                    Error = "결과 파싱 실패"
-                };
-            }
-            catch (JsonException ex)
-            {
-                return new RecommendResult
-                {
-                    Success = false,
-                    Error = $"JSON 파싱 오류: {ex.Message}\n출력: {output}"
-                };
-            }
-        }
-
-        /// <summary>
-        /// 명령줄용 JSON 이스케이프
-        /// </summary>
-        private static string EscapeJsonForCommandLine(string json)
-        {
-            // 쌍따옴표를 이스케이프
-            return json.Replace("\"", "\\\"");
-        }
-
         public void Dispose()
         {
             if (_disposed) return;
@@ -287,7 +113,40 @@ namespace NPLogic.Services
         }
     }
 
-    #region Models
+    #region Request/Response Models
+
+    /// <summary>
+    /// 추천 API 요청
+    /// </summary>
+    internal class RecommendRequest
+    {
+        [JsonPropertyName("subject")]
+        public RecommendSubject Subject { get; set; } = new();
+
+        [JsonPropertyName("rule_index")]
+        public int? RuleIndex { get; set; }
+
+        [JsonPropertyName("similar_land")]
+        public bool SimilarLand { get; set; }
+
+        [JsonPropertyName("region_scope")]
+        public string RegionScope { get; set; } = "big";
+
+        [JsonPropertyName("topk")]
+        public int TopK { get; set; } = 10;
+
+        [JsonPropertyName("candidates_source")]
+        public string CandidatesSource { get; set; } = "supabase";
+
+        [JsonPropertyName("candidates_path")]
+        public string? CandidatesPath { get; set; }
+
+        [JsonPropertyName("supabase_url")]
+        public string? SupabaseUrl { get; set; }
+
+        [JsonPropertyName("supabase_key")]
+        public string? SupabaseKey { get; set; }
+    }
 
     /// <summary>
     /// 추천 대상 물건 정보
@@ -502,4 +361,3 @@ namespace NPLogic.Services
 
     #endregion
 }
-

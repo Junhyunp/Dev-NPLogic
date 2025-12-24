@@ -1,7 +1,7 @@
 # 빌드 & 에러수정 & 커밋 & 푸시
 
 ## 작업 흐름
-1. `npm run build` 실행
+1. 빌드 명령 실행 (예: npm run build, ./gradlew build, dotnet build 등)
 2. 에러 있으면 수정 후 재빌드 (반복)
 3. 성공하면 아래 커밋 프로세스 실행
 4. 푸시
@@ -38,4 +38,3 @@ git diff --cached --diff-filter=A         # 신규 파일 (⚠️ 필수)
 git commit -m "메시지"
 git push
 ```
-

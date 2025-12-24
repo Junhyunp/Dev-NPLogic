@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,196 +12,36 @@ namespace NPLogic.Services
 {
     /// <summary>
     /// 등기부등본 OCR 서비스
-    /// Python FastAPI 서버를 관리하고 OCR API를 호출합니다.
+    /// PythonBackendService를 통해 서버 관리를 위임하고, OCR API 호출만 담당합니다.
     /// </summary>
     public class RegistryOcrService : IDisposable
     {
-        private readonly HttpClient _httpClient;
-        private Process? _serverProcess;
         private bool _disposed;
-
-        private const string DefaultServerUrl = "http://localhost:8000";
-        private const string ServerExeName = "registry_ocr.exe";
-        private const string HealthEndpoint = "/api/health";
         private const string OcrEndpoint = "/api/ocr/registry";
-        private const int MaxStartupWaitSeconds = 30;
-        private const int HealthCheckIntervalMs = 500;
 
-        public string ServerUrl { get; private set; }
-        public bool IsServerRunning { get; private set; }
-
-        public RegistryOcrService(string? serverUrl = null)
+        public RegistryOcrService()
         {
-            ServerUrl = serverUrl ?? DefaultServerUrl;
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri(ServerUrl),
-                Timeout = TimeSpan.FromMinutes(5) // OCR은 시간이 오래 걸릴 수 있음
-            };
         }
 
         /// <summary>
-        /// Python OCR 서버를 시작합니다.
+        /// 서버가 실행 중인지 확인
         /// </summary>
-        /// <param name="exePath">서버 실행 파일 경로 (null이면 자동 탐색)</param>
-        /// <returns>서버 시작 성공 여부</returns>
-        public async Task<bool> StartServerAsync(string? exePath = null)
+        public bool IsServerRunning => PythonBackendService.Instance.IsServerRunning;
+
+        /// <summary>
+        /// 서버 시작 (PythonBackendService에 위임)
+        /// </summary>
+        public Task<bool> StartServerAsync(string? exePath = null)
         {
-            // 이미 실행 중인지 확인
-            if (await CheckHealthAsync())
-            {
-                IsServerRunning = true;
-                return true;
-            }
-
-            // 실행 파일 경로 찾기
-            var serverExePath = exePath ?? FindServerExePath();
-            if (string.IsNullOrEmpty(serverExePath) || !File.Exists(serverExePath))
-            {
-                throw new FileNotFoundException(
-                    $"OCR 서버 실행 파일을 찾을 수 없습니다: {serverExePath ?? ServerExeName}");
-            }
-
-            try
-            {
-                // 프로세스 시작
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = serverExePath,
-                    WorkingDirectory = Path.GetDirectoryName(serverExePath),
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-
-                _serverProcess = Process.Start(startInfo);
-
-                if (_serverProcess == null)
-                {
-                    throw new Exception("서버 프로세스를 시작할 수 없습니다.");
-                }
-
-                // 서버가 준비될 때까지 대기
-                var waitResult = await WaitForServerReadyAsync(MaxStartupWaitSeconds);
-                
-                if (!waitResult)
-                {
-                    StopServer();
-                    throw new TimeoutException(
-                        $"OCR 서버가 {MaxStartupWaitSeconds}초 내에 시작되지 않았습니다.");
-                }
-
-                IsServerRunning = true;
-                return true;
-            }
-            catch (Exception ex)
-            {
-                StopServer();
-                throw new Exception($"OCR 서버 시작 실패: {ex.Message}", ex);
-            }
+            return PythonBackendService.Instance.EnsureServerRunningAsync();
         }
 
         /// <summary>
-        /// 서버 실행 파일 경로를 자동으로 찾습니다.
+        /// 헬스체크 (PythonBackendService에 위임)
         /// </summary>
-        private string? FindServerExePath()
+        public Task<bool> CheckHealthAsync()
         {
-            // 검색할 경로 목록 (우선순위순)
-            var searchPaths = new List<string>
-            {
-                // 1. 앱 실행 디렉토리의 backend 폴더
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backend", "registry_ocr", ServerExeName),
-                
-                // 2. 앱 실행 디렉토리
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "registry_ocr", ServerExeName),
-                
-                // 3. 개발 환경: 프로젝트 상대 경로
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", 
-                    "manager", "client", "Auction-Certificate", "dist", "registry_ocr", ServerExeName),
-            };
-
-            foreach (var path in searchPaths)
-            {
-                var fullPath = Path.GetFullPath(path);
-                if (File.Exists(fullPath))
-                {
-                    return fullPath;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// 서버가 준비될 때까지 대기합니다.
-        /// </summary>
-        private async Task<bool> WaitForServerReadyAsync(int maxWaitSeconds)
-        {
-            var startTime = DateTime.Now;
-            var maxWaitTime = TimeSpan.FromSeconds(maxWaitSeconds);
-
-            while (DateTime.Now - startTime < maxWaitTime)
-            {
-                if (await CheckHealthAsync())
-                {
-                    return true;
-                }
-
-                await Task.Delay(HealthCheckIntervalMs);
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 서버 헬스체크를 수행합니다.
-        /// </summary>
-        public async Task<bool> CheckHealthAsync()
-        {
-            try
-            {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                var response = await _httpClient.GetAsync(HealthEndpoint, cts.Token);
-                
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var health = JsonSerializer.Deserialize<HealthResponse>(content);
-                    return health?.Status == "ok";
-                }
-            }
-            catch
-            {
-                // 연결 실패 등의 예외는 무시
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Python OCR 서버를 중지합니다.
-        /// </summary>
-        public void StopServer()
-        {
-            try
-            {
-                if (_serverProcess != null && !_serverProcess.HasExited)
-                {
-                    _serverProcess.Kill(entireProcessTree: true);
-                    _serverProcess.WaitForExit(5000);
-                }
-            }
-            catch
-            {
-                // 종료 실패 무시
-            }
-            finally
-            {
-                _serverProcess?.Dispose();
-                _serverProcess = null;
-                IsServerRunning = false;
-            }
+            return PythonBackendService.Instance.CheckHealthAsync();
         }
 
         /// <summary>
@@ -227,13 +66,20 @@ namespace NPLogic.Services
 
             try
             {
-                // 서버 상태 확인
-                if (!await CheckHealthAsync())
+                // 서버가 실행 중인지 확인하고, 아니면 시작
+                if (!await PythonBackendService.Instance.EnsureServerRunningAsync())
                 {
-                    throw new Exception("OCR 서버가 응답하지 않습니다. 서버를 시작해주세요.");
+                    return new OcrResult
+                    {
+                        Success = false,
+                        FileName = fileName,
+                        Error = "OCR 서버를 시작할 수 없습니다."
+                    };
                 }
 
                 progress?.Report(new OcrProgress(fileName, OcrProgressStatus.Processing, 30));
+
+                var httpClient = PythonBackendService.Instance.GetHttpClient();
 
                 // Multipart form data 생성
                 using var fileStream = new FileStream(pdfFilePath, FileMode.Open, FileAccess.Read);
@@ -244,7 +90,7 @@ namespace NPLogic.Services
                 content.Add(streamContent, "file", fileName);
 
                 // API 호출
-                var response = await _httpClient.PostAsync(OcrEndpoint, content, cancellationToken);
+                var response = await httpClient.PostAsync(OcrEndpoint, content, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 progress?.Report(new OcrProgress(fileName, OcrProgressStatus.Parsing, 90));
@@ -340,8 +186,7 @@ namespace NPLogic.Services
         {
             if (!_disposed)
             {
-                StopServer();
-                _httpClient.Dispose();
+                // 서버 관리는 PythonBackendService에서 담당
                 _disposed = true;
             }
         }
@@ -457,8 +302,6 @@ namespace NPLogic.Services
 
     #endregion
 }
-
-
 
 
 

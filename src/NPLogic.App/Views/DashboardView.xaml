@@ -307,7 +307,7 @@
 
                                         <!-- 진행률 바 -->
                                         <Grid Grid.Row="2" Margin="0,6,0,0">
-                                            <ProgressBar Value="{Binding ProgressPercent}" 
+                                            <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" 
                                                          Maximum="100"
                                                          Height="6"
                                                          Foreground="{StaticResource SuccessBrush}"
@@ -316,7 +316,7 @@
                                                        Margin="0,8,0,0"
                                                        FontSize="11"
                                                        Foreground="{StaticResource TextSecondaryBrush}">
-                                                <Run Text="{Binding ProgressPercent}"/>
+                                                <Run Text="{Binding ProgressPercent, Mode=OneWay}"/>
                                                 <Run Text="%"/>
                                             </TextBlock>
                                         </Grid>

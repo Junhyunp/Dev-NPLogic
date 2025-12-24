@@ -17,7 +17,6 @@ namespace NPLogic
     public partial class App : Application
     {
         private ServiceProvider? _serviceProvider;
-        private RegistryOcrService? _registryOcrService;
 
         // Supabase 설정 (환경 변수 또는 설정 파일에서 로드하는 것이 좋습니다)
         private const string SupabaseUrl = "https://vuepmhwrizaabswlgiiy.supabase.co";
@@ -48,9 +47,6 @@ namespace NPLogic
                 var services = new ServiceCollection();
                 ConfigureServices(services);
                 _serviceProvider = services.BuildServiceProvider();
-
-                // OCR 서비스 참조 저장 (종료 시 서버 종료용)
-                _registryOcrService = _serviceProvider.GetService<RegistryOcrService>();
 
                 // Supabase 초기화
                 var supabaseService = _serviceProvider.GetRequiredService<SupabaseService>();
@@ -97,7 +93,11 @@ namespace NPLogic
             services.AddSingleton<AuthService>();
             services.AddSingleton<ExcelService>();
             services.AddSingleton<StorageService>();
+            
+            // Python Backend Services (Singleton)
+            // PythonBackendService는 자체 Singleton이므로 등록하지 않음 (Instance 프로퍼티 사용)
             services.AddSingleton<RegistryOcrService>();
+            services.AddSingleton<RecommendService>();
 
             // Repositories (Singleton)
             services.AddSingleton<Data.Repositories.UserRepository>();
@@ -342,11 +342,10 @@ namespace NPLogic
 
         protected override void OnExit(ExitEventArgs e)
         {
-            // OCR 서버 종료
+            // Python 백엔드 서버 종료
             try
             {
-                _registryOcrService?.StopServer();
-                _registryOcrService?.Dispose();
+                PythonBackendService.Shutdown();
             }
             catch
             {

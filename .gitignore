@@ -21,6 +21,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+publish/
 
 # Visual Studio cache/options
 .vs/
@@ -48,6 +49,7 @@ _ReSharper*/
 *.pidb
 *.svclog
 *.scc
+*.zip
 
 # NPLogic specific
 appsettings.json
