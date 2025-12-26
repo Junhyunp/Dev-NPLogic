@@ -45,7 +45,7 @@
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="+ 차주 추가" 
-                        Command="{Binding AddBorrowerCommand}"
+                        Command="{Binding OpenAddBorrowerModalCommand}"
                         Style="{StaticResource PrimaryButton}"
                         Padding="20,10"
                         Margin="0,0,8,0"/>
@@ -492,13 +492,19 @@
                                 </DataGrid>
                             </controls:NPExpandableSection>
 
-                            <!-- 저장 버튼 -->
-                            <Button Content="저장" 
-                                    Command="{Binding SaveBorrowerCommand}"
-                                    Style="{StaticResource PrimaryButton}"
-                                    HorizontalAlignment="Right"
-                                    Padding="32,12"
-                                    Margin="0,24,0,0"/>
+                            <!-- 저장 및 삭제 버튼 -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+                                <Button Content="삭제" 
+                                        Command="{Binding ConfirmDeleteBorrowerCommand}"
+                                        CommandParameter="{Binding SelectedBorrower}"
+                                        Style="{StaticResource DangerButton}"
+                                        Padding="24,12"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="저장" 
+                                        Command="{Binding SaveBorrowerCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="32,12"/>
+                            </StackPanel>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>
@@ -546,6 +552,83 @@
                 Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
             <TextBlock Text="{Binding ErrorMessage}" Foreground="White" TextWrapping="Wrap"/>
         </Border>
+
+        <!-- 차주 추가 모달 -->
+        <controls:NPModal Grid.RowSpan="5"
+                          Title="새 차주 등록"
+                          Visibility="{Binding IsAddModalOpen, Converter={StaticResource BoolToVisibilityConverter}}">
+            <controls:NPModal.ModalContent>
+                <StackPanel Width="400">
+                    <TextBlock Text="차주 정보" Style="{StaticResource H4TextStyle}" Margin="0,0,0,16"/>
+                    
+                    <TextBlock Text="차주번호" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewBorrower.BorrowerNumber}" Padding="12,10" Margin="0,0,0,12"/>
+                    
+                    <TextBlock Text="차주명" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NewBorrower.BorrowerName}" Padding="12,10" Margin="0,0,0,12"/>
+                    
+                    <TextBlock Text="차주유형" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                    <ComboBox SelectedItem="{Binding NewBorrower.BorrowerType}" Margin="0,0,0,12">
+                        <ComboBoxItem Content="개인"/>
+                        <ComboBoxItem Content="개인사업자"/>
+                        <ComboBoxItem Content="법인"/>
+                    </ComboBox>
+                    
+                    <TextBlock Text="프로그램 ID" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding Programs}" 
+                              SelectedItem="{Binding NewBorrower.ProgramId}" 
+                              Margin="0,0,0,12"/>
+                </StackPanel>
+            </controls:NPModal.ModalContent>
+            <controls:NPModal.FooterContent>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="취소" 
+                            Command="{Binding CloseModalCommand}" 
+                            Style="{StaticResource SecondaryButton}" 
+                            Margin="0,0,8,0"
+                            Padding="20,8"/>
+                    <Button Content="등록하기" 
+                            Command="{Binding AddBorrowerCommand}" 
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="20,8"/>
+                </StackPanel>
+            </controls:NPModal.FooterContent>
+        </controls:NPModal>
+
+        <!-- 삭제 확인 모달 -->
+        <controls:NPModal Grid.RowSpan="5"
+                          Title="차주 삭제 확인"
+                          Visibility="{Binding IsConfirmDeleteModalOpen, Converter={StaticResource BoolToVisibilityConverter}}">
+            <controls:NPModal.ModalContent>
+                <StackPanel Width="400">
+                    <TextBlock Text="정말로 이 차주를 삭제하시겠습니까?" 
+                               Style="{StaticResource BodyTextStyle}" 
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding BorrowerToDelete.BorrowerName}" 
+                               FontWeight="Bold" 
+                               FontSize="16" 
+                               HorizontalAlignment="Center"
+                               Margin="0,8"/>
+                    <TextBlock Text="삭제된 데이터는 복구할 수 없습니다." 
+                               Foreground="{StaticResource ErrorBrush}" 
+                               Style="{StaticResource CaptionTextStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </controls:NPModal.ModalContent>
+            <controls:NPModal.FooterContent>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="취소" 
+                            Command="{Binding CancelDeleteCommand}" 
+                            Style="{StaticResource SecondaryButton}" 
+                            Margin="0,0,8,0"
+                            Padding="20,8"/>
+                    <Button Content="삭제하기" 
+                            Command="{Binding DeleteBorrowerCommand}" 
+                            Style="{StaticResource DangerButton}"
+                            Padding="20,8"/>
+                </StackPanel>
+            </controls:NPModal.FooterContent>
+        </controls:NPModal>
     </Grid>
 </UserControl>
 

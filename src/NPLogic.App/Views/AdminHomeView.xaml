@@ -478,16 +478,33 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <!-- 상세 -->
-                        <DataGridTemplateColumn Header="" Width="50">
+                        <!-- 상세 링크 -->
+                        <DataGridTemplateColumn Header="" Width="45">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Button Content="상세" 
-                                           Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                           CommandParameter="{Binding}"
-                                           Style="{StaticResource PrimaryButton}"
-                                           Padding="6,2"
-                                           FontSize="10"/>
+                                    <TextBlock Text="상세" 
+                                               Foreground="{StaticResource PrimaryBrush}"
+                                               FontSize="11"
+                                               Cursor="Hand"
+                                               TextDecorations="Underline"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0">
+                                        <TextBlock.InputBindings>
+                                            <MouseBinding MouseAction="LeftClick" 
+                                                          Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                          CommandParameter="{Binding}"/>
+                                        </TextBlock.InputBindings>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        
+                        <!-- 우측 여백 -->
+                        <DataGridTemplateColumn Width="16" IsReadOnly="True">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Width="16"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -548,7 +565,7 @@
 
                 <!-- 프로그램 미선택 안내 -->
                 <Grid Grid.Row="2"
-                      Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=Inverse}"
+                      Visibility="{Binding SelectedProgram, Converter={StaticResource NullToInverseVisibilityConverter}}"
                       Background="#F8FAFC">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <materialDesign:PackIcon Kind="FolderOpen" Width="64" Height="64" Foreground="#CBD5E1"/>

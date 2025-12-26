@@ -51,22 +51,22 @@ namespace NPLogic.Views
             var property = viewModel.Property;
             if (property == null) return;
 
+            var address = property.AddressFull ?? property.AddressRoad ?? property.AddressJibun;
+
             // 위도/경도가 있는 경우
             if (property.Latitude.HasValue && property.Longitude.HasValue)
             {
                 await PropertyMapView.SetLocationAsync(
                     (double)property.Latitude.Value,
                     (double)property.Longitude.Value,
-                    property.AddressFull ?? property.AddressRoad ?? property.AddressJibun,
-                    property.PropertyNumber,
-                    property.PropertyType
+                    address
                 );
             }
-            // 위도/경도가 없고 주소가 있는 경우, 주소로 검색
-            else if (!string.IsNullOrEmpty(property.AddressFull) || !string.IsNullOrEmpty(property.AddressRoad))
+            // 위도/경도가 없고 주소가 있는 경우
+            else if (!string.IsNullOrEmpty(address))
             {
-                var address = property.AddressFull ?? property.AddressRoad ?? "";
-                await PropertyMapView.SearchAddressAsync(address);
+                // 기본 좌표로 설정 (주소 기반 검색은 MapView 내부에서 처리)
+                await PropertyMapView.SetLocationAsync(37.5665, 126.9780, address);
             }
         }
     }

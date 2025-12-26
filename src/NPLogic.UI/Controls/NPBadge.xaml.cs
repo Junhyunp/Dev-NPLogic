@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace NPLogic.UI.Controls
+namespace NPLogic.Controls
 {
     public partial class NPBadge : UserControl
     {

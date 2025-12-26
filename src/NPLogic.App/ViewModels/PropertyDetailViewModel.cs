@@ -37,19 +37,6 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
-    /// QA 항목 모델
-    /// </summary>
-    public class QAItem : ObservableObject
-    {
-        public Guid Id { get; set; }
-        public string Question { get; set; } = "";
-        public string? Answer { get; set; }
-        public bool IsAnswered => !string.IsNullOrWhiteSpace(Answer);
-        public DateTime CreatedAt { get; set; }
-        public DateTime? AnsweredAt { get; set; }
-    }
-
-    /// <summary>
     /// 물건 상세 ViewModel
     /// </summary>
     public partial class PropertyDetailViewModel : ObservableObject
@@ -60,6 +47,7 @@ namespace NPLogic.ViewModels
         private readonly RightAnalysisRepository? _rightAnalysisRepository;
         private readonly EvaluationRepository? _evaluationRepository;
         private readonly RegistryOcrService? _registryOcrService;
+        private readonly PropertyQaRepository? _propertyQaRepository;
 
         [ObservableProperty]
         private Property _property = new();
@@ -145,10 +133,13 @@ namespace NPLogic.ViewModels
 
         // QA 목록
         [ObservableProperty]
-        private ObservableCollection<QAItem> _qaList = new();
+        private ObservableCollection<PropertyQa> _qaList = new();
 
         [ObservableProperty]
         private bool _hasNoQA = true;
+
+        [ObservableProperty]
+        private string _newQuestion = "";
         
         // 데이터 업로드 정보 (Phase 5.4)
         [ObservableProperty]
@@ -157,7 +148,14 @@ namespace NPLogic.ViewModels
         private Guid? _propertyId;
         private Action? _goBackAction;
 
-        public PropertyDetailViewModel(PropertyRepository propertyRepository, StorageService? storageService = null, RegistryRepository? registryRepository = null, RightAnalysisRepository? rightAnalysisRepository = null, EvaluationRepository? evaluationRepository = null, RegistryOcrService? registryOcrService = null)
+        public PropertyDetailViewModel(
+            PropertyRepository propertyRepository, 
+            StorageService? storageService = null, 
+            RegistryRepository? registryRepository = null, 
+            RightAnalysisRepository? rightAnalysisRepository = null, 
+            EvaluationRepository? evaluationRepository = null, 
+            RegistryOcrService? registryOcrService = null,
+            PropertyQaRepository? propertyQaRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -165,6 +163,7 @@ namespace NPLogic.ViewModels
             _rightAnalysisRepository = rightAnalysisRepository;
             _evaluationRepository = evaluationRepository;
             _registryOcrService = registryOcrService;
+            _propertyQaRepository = propertyQaRepository;
 
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
@@ -337,11 +336,29 @@ namespace NPLogic.ViewModels
 
         private async Task LoadAttachmentsAsync()
         {
-            // TODO: Supabase Storage에서 첨부파일 목록 조회
-            // 현재는 빈 목록
-            Attachments.Clear();
-            HasNoAttachments = Attachments.Count == 0;
-            await Task.CompletedTask;
+            if (_storageService == null || _propertyId == null) return;
+
+            try
+            {
+                Attachments.Clear();
+                var files = await _storageService.ListFilesAsync("attachments", $"properties/{_propertyId}");
+                foreach (var file in files)
+                {
+                    Attachments.Add(new AttachmentItem
+                    {
+                        Id = Guid.NewGuid(),
+                        FileName = file.Name,
+                        FileSize = 0, // Supabase FileObject does not have a direct Size property
+                        StoragePath = $"properties/{_propertyId}/{file.Name}",
+                        CreatedAt = file.CreatedAt ?? DateTime.Now
+                    });
+                }
+                HasNoAttachments = Attachments.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"첨부파일 로드 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -378,16 +395,7 @@ namespace NPLogic.ViewModels
 
                     if (!string.IsNullOrEmpty(url))
                     {
-                        var attachment = new AttachmentItem
-                        {
-                            Id = Guid.NewGuid(),
-                            FileName = fileName,
-                            FileSize = fileBytes.Length,
-                            StoragePath = storagePath,
-                            CreatedAt = DateTime.Now
-                        };
-                        Attachments.Add(attachment);
-                        HasNoAttachments = false;
+                        await LoadAttachmentsAsync();
                         SuccessMessage = "파일이 업로드되었습니다.";
                     }
                 }
@@ -459,34 +467,85 @@ namespace NPLogic.ViewModels
 
         private async Task LoadQAListAsync()
         {
-            // TODO: DB에서 QA 목록 조회
-            // 현재는 빈 목록
-            QaList.Clear();
-            HasNoQA = QaList.Count == 0;
-            await Task.CompletedTask;
+            if (_propertyQaRepository == null || _propertyId == null) return;
+
+            try
+            {
+                var list = await _propertyQaRepository.GetByPropertyIdAsync(_propertyId.Value);
+                QaList.Clear();
+                foreach (var qa in list)
+                {
+                    QaList.Add(qa);
+                }
+                HasNoQA = QaList.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"QA 목록 로드 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
         /// QA 추가 명령
         /// </summary>
         [RelayCommand]
-        private void AddQA()
+        private async Task AddQAAsync()
         {
-            // TODO: QA 입력 다이얼로그 표시
-            // 현재는 테스트용 더미 QA 추가
-            var newQA = new QAItem
-            {
-                Id = Guid.NewGuid(),
-                Question = "새 질문입니다. (QA 입력 다이얼로그 구현 필요)",
-                CreatedAt = DateTime.Now
-            };
-            QaList.Insert(0, newQA);
-            HasNoQA = false;
+            if (_propertyQaRepository == null || _propertyId == null || string.IsNullOrWhiteSpace(NewQuestion)) return;
 
-            // QA 미회신 카운트 업데이트
-            if (Property != null)
+            try
             {
-                Property.QaUnansweredCount = QaList.Count(q => !q.IsAnswered);
+                var newQA = new PropertyQa
+                {
+                    Id = Guid.NewGuid(),
+                    PropertyId = _propertyId.Value,
+                    Question = NewQuestion,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _propertyQaRepository.CreateAsync(newQA);
+                NewQuestion = ""; // 입력 필드 초기화
+                await LoadQAListAsync();
+                
+                // QA 미회신 카운트 업데이트
+                if (Property != null)
+                {
+                    Property.QaUnansweredCount = QaList.Count(q => string.IsNullOrEmpty(q.Answer));
+                    await _propertyRepository.UpdateAsync(Property);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"QA 추가 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// QA 답변 저장 명령
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveQAAnswerAsync(PropertyQa qa)
+        {
+            if (_propertyQaRepository == null || qa == null) return;
+
+            try
+            {
+                qa.AnsweredAt = DateTime.UtcNow;
+                await _propertyQaRepository.UpdateAsync(qa);
+                await LoadQAListAsync();
+
+                // QA 미회신 카운트 업데이트
+                if (Property != null)
+                {
+                    Property.QaUnansweredCount = QaList.Count(q => string.IsNullOrEmpty(q.Answer));
+                    await _propertyRepository.UpdateAsync(Property);
+                }
+                
+                SuccessMessage = "답변이 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"답변 저장 실패: {ex.Message}";
             }
         }
 

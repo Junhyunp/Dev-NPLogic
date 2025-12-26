@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -16,6 +17,7 @@ namespace NPLogic.ViewModels
     {
         private readonly BorrowerRepository _borrowerRepository;
         private readonly LoanRepository _loanRepository;
+        private readonly ExcelService _excelService;
 
         [ObservableProperty]
         private ObservableCollection<Borrower> _restructuringBorrowers = new();
@@ -41,10 +43,12 @@ namespace NPLogic.ViewModels
 
         public RestructuringOverviewViewModel(
             BorrowerRepository borrowerRepository,
-            LoanRepository loanRepository)
+            LoanRepository loanRepository,
+            ExcelService excelService)
         {
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
+            _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
         }
 
         public async Task InitializeAsync()
@@ -126,11 +130,41 @@ namespace NPLogic.ViewModels
             await LoadRestructuringBorrowersAsync();
         }
 
+        /// <summary>
+        /// Excel 내보내기
+        /// </summary>
         [RelayCommand]
-        private void ExportToExcel()
+        private async Task ExportToExcelAsync()
         {
-            NPLogic.UI.Services.ToastService.Instance.ShowInfo("Excel 내보내기는 준비 중입니다.");
+            if (RestructuringBorrowers.Count == 0)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("내보낼 데이터가 없습니다.");
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Excel 파일|*.xlsx",
+                    FileName = $"회생차주목록_{DateTime.Now:yyyyMMdd}.xlsx"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await _excelService.ExportBorrowersToExcelAsync(RestructuringBorrowers, "회생 차주", dialog.FileName);
+                    NPLogic.UI.Services.ToastService.Instance.ShowSuccess("Excel 파일이 저장되었습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Excel 내보내기 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
     }
 }
-

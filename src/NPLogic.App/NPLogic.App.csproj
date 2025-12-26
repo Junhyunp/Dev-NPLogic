@@ -44,6 +44,13 @@
     </Content>
   </ItemGroup>
 
+  <!-- appsettings.json을 출력 디렉토리에 복사 -->
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <!-- OCR 서버 파일을 출력 디렉토리에 복사 (존재하는 경우에만) -->
   <ItemGroup Condition="Exists('..\..\manager\client\Auction-Certificate\dist\registry_ocr\')">
     <Content Include="..\..\manager\client\Auction-Certificate\dist\registry_ocr\**\*">

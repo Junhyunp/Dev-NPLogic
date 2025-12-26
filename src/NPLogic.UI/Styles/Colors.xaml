@@ -30,6 +30,8 @@
     <SolidColorBrush x:Key="BlueGray100Brush" Color="{StaticResource BlueGray100}"/>
     <SolidColorBrush x:Key="BlueGray200Brush" Color="{StaticResource BlueGray200}"/>
     <SolidColorBrush x:Key="BlueGray300Brush" Color="{StaticResource BlueGray300}"/>
+    <Color x:Key="BlueGray400">#94A3B8</Color>
+    <SolidColorBrush x:Key="BlueGray400Brush" Color="{StaticResource BlueGray400}"/>
     <SolidColorBrush x:Key="TableHeaderBrush" Color="{StaticResource TableHeader}"/>
     <SolidColorBrush x:Key="TableHoverBrush" Color="{StaticResource TableHover}"/>
     <SolidColorBrush x:Key="TableSelectedBrush" Color="{StaticResource TableSelected}"/>
@@ -45,6 +47,7 @@
     <SolidColorBrush x:Key="BackgroundColor" Color="{StaticResource Background}"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource Surface}"/>
     <SolidColorBrush x:Key="SurfaceColor" Color="{StaticResource Surface}"/>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource Surface}"/>
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource Border}"/>
     <SolidColorBrush x:Key="BorderColor" Color="{StaticResource Border}"/>
     <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Divider}"/>
@@ -60,8 +63,8 @@
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabled}"/>
 
 
-    <!-- Semantic Colors (상태 표시) - Brighter versions -->
-    <Color x:Key="Success">#22C55E</Color>
+    <!-- Semantic Colors (상태 표시) - 피드백 반영: 채도 낮춘 녹색 -->
+    <Color x:Key="Success">#059669</Color>
     <Color x:Key="Warning">#F59E0B</Color>
     <Color x:Key="Error">#EF4444</Color>
     <Color x:Key="Info">#1E3A5F</Color>

@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Core.Models;
 using NPLogic.ViewModels;
 
@@ -243,7 +244,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 내부 탭 변경
+        /// 내부 탭 변경 (Phase 6: 탭별 View 전환)
         /// </summary>
         private void InnerTab_Checked(object sender, RoutedEventArgs e)
         {
@@ -260,7 +261,136 @@ namespace NPLogic.Views
                     _ => "home"
                 };
 
+                // 탭 인덱스 업데이트
+                _currentTabIndex = System.Array.IndexOf(_innerTabs, tabName);
+                if (_currentTabIndex < 0) _currentTabIndex = 0;
+
                 viewModel.SetActiveTab(tabName);
+                
+                // 탭별 View 전환
+                SwitchTabContent(tabName);
+            }
+        }
+        
+        /// <summary>
+        /// 탭에 따른 컨텐츠 전환 (Phase 6)
+        /// </summary>
+        private void SwitchTabContent(string tabName)
+        {
+            // UI 요소가 아직 로드되지 않은 경우 종료
+            if (ProgressDataGrid == null || TabContentControl == null || SelectPropertyMessage == null)
+                return;
+            
+            if (tabName == "home")
+            {
+                // 홈 탭: DataGrid 표시
+                ProgressDataGrid.Visibility = Visibility.Visible;
+                TabContentControl.Visibility = Visibility.Collapsed;
+                SelectPropertyMessage.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                // 비핵심/등기부/권리분석/기초데이터/마감 탭
+                ProgressDataGrid.Visibility = Visibility.Collapsed;
+                
+                // 선택된 물건이 있는지 확인
+                var selectedProperty = ProgressDataGrid.SelectedItem as Property;
+                
+                if (selectedProperty != null)
+                {
+                    // 물건이 선택된 경우: 해당 탭의 View 로드
+                    LoadTabView(tabName, selectedProperty);
+                    TabContentControl.Visibility = Visibility.Visible;
+                    SelectPropertyMessage.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    // 물건이 선택되지 않은 경우: 안내 메시지 표시
+                    TabContentControl.Visibility = Visibility.Collapsed;
+                    SelectPropertyMessage.Visibility = Visibility.Visible;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 탭에 맞는 View 로드 (Phase 6)
+        /// </summary>
+        private void LoadTabView(string tabName, Property property)
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider == null) return;
+            
+            UserControl? view = null;
+            
+            switch (tabName)
+            {
+                case "noncore":
+                    // 비핵심 탭: MainWindow를 통해 NonCoreView로 이동
+                    MainWindow.Instance?.NavigateToNonCoreView(property);
+                    return;
+                    
+                case "registry":
+                    // 등기부 탭: RegistryTab 로드
+                    var registryTab = serviceProvider.GetService<RegistryTab>();
+                    if (registryTab != null)
+                    {
+                        var registryViewModel = serviceProvider.GetService<RegistryTabViewModel>();
+                        if (registryViewModel != null)
+                        {
+                            registryViewModel.SetPropertyId(property.Id);
+                            registryViewModel.SetPropertyInfo(property);
+                            _ = registryViewModel.LoadDataAsync();
+                            registryTab.DataContext = new { RegistryViewModel = registryViewModel };
+                        }
+                        view = registryTab;
+                    }
+                    break;
+                    
+                case "rights":
+                    // 권리분석 탭: RightsAnalysisTab 로드
+                    var rightsTab = serviceProvider.GetService<RightsAnalysisTab>();
+                    if (rightsTab != null)
+                    {
+                        var rightsViewModel = serviceProvider.GetService<RightsAnalysisTabViewModel>();
+                        if (rightsViewModel != null)
+                        {
+                            rightsViewModel.SetPropertyId(property.Id);
+                            rightsViewModel.SetProperty(property);
+                            _ = rightsViewModel.LoadDataAsync();
+                            rightsTab.DataContext = rightsViewModel;
+                        }
+                        view = rightsTab;
+                    }
+                    break;
+                    
+                case "basicdata":
+                    // 기초데이터 탭: BasicDataTab 로드
+                    var basicDataTab = serviceProvider.GetService<BasicDataTab>();
+                    if (basicDataTab != null)
+                    {
+                        // BasicDataTab은 Property를 직접 바인딩
+                        basicDataTab.DataContext = new { Property = property };
+                        view = basicDataTab;
+                    }
+                    break;
+                    
+                case "closing":
+                    // 마감 탭: 마감 화면 (아직 별도 View가 없으므로 메시지 표시)
+                    var closingMessage = new TextBlock
+                    {
+                        Text = "마감 기능은 준비 중입니다.",
+                        Style = FindResource("H3TextStyle") as Style,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Foreground = FindResource("TextSecondaryBrush") as System.Windows.Media.Brush
+                    };
+                    TabContentControl.Content = closingMessage;
+                    return;
+            }
+            
+            if (view != null)
+            {
+                TabContentControl.Content = view;
             }
         }
 

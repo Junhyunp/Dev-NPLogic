@@ -131,7 +131,7 @@
                 <local:EvaluationTab x:Name="EvaluationTabView"/>
             </TabItem>
 
-            <!-- 6. 지도 탭 -->
+            <!-- 6. 지도 탭 (Export 기능 포함) -->
             <TabItem Header="지도">
                 <local:MapView x:Name="PropertyMapView"/>
             </TabItem>

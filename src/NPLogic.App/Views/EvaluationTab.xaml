@@ -113,7 +113,7 @@
                                      GroupName="EvaluationType"
                                      Margin="0,0,24,0"
                                      FontSize="13"/>
-                        <RadioButton Content="5. 주택/근린시설/토지" 
+                        <RadioButton Content="5. 주택/근린시설/토지/기타" 
                                      IsChecked="{Binding IsHouseLandType}"
                                      GroupName="EvaluationType"
                                      FontSize="13"/>
@@ -232,7 +232,8 @@
                                       GridLinesVisibility="All"
                                       BorderThickness="1"
                                       BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="200"
+                                      MaxHeight="350"
+                                      MinHeight="200"
                                       FontSize="11"
                                       SelectionMode="Single">
                                 <DataGrid.Columns>
@@ -251,6 +252,21 @@
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat=N1}" Width="70" IsReadOnly="True"/>
                                     <DataGridTextColumn Header="규칙" Binding="{Binding RuleName}" Width="55" IsReadOnly="True"/>
+                                    <!-- 상세보기 버튼 -->
+                                    <DataGridTemplateColumn Header="상세" Width="50">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="📋"
+                                                        Command="{Binding DataContext.ShowCaseDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Style="{StaticResource SecondaryButton}"
+                                                        Padding="4,2"
+                                                        FontSize="12"
+                                                        ToolTip="상세보기"
+                                                        Cursor="Hand"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
@@ -260,16 +276,31 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <Grid Margin="0,0,0,12">
-                                <TextBlock Text="📋 사례평가" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                                <Button Content="경매사건검색" 
-                                        Command="{Binding SearchAuctionCaseCommand}"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Padding="12,4"
-                                        FontSize="12"
-                                        HorizontalAlignment="Right"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📋 사례평가" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                                    <TextBlock Text="(직접 입력 가능)" 
+                                               Style="{StaticResource LabelStyle}"
+                                               FontSize="11"
+                                               Opacity="0.7"
+                                               Margin="8,0,0,0"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="초기화" 
+                                            Command="{Binding ClearCaseEvaluationCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"
+                                            Margin="0,0,8,0"/>
+                                    <Button Content="경매사건검색" 
+                                            Command="{Binding SearchAuctionCaseCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"/>
+                                </StackPanel>
                             </Grid>
                             
-                            <!-- 사례평가 테이블 -->
+                            <!-- 사례평가 테이블 (사용자 편집 가능) -->
                             <DataGrid ItemsSource="{Binding CaseItems}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
@@ -278,8 +309,9 @@
                                       GridLinesVisibility="All"
                                       BorderThickness="1"
                                       BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="300"
-                                      FontSize="12">
+                                      MaxHeight="400"
+                                      FontSize="12"
+                                      SelectionUnit="Cell">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="100" IsReadOnly="True">
                                         <DataGridTextColumn.ElementStyle>
@@ -290,11 +322,66 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, StringFormat=N0}" Width="110"/>
-                                    <DataGridTextColumn Header="사례1" Binding="{Binding Case1Value, StringFormat=N0}" Width="110"/>
-                                    <DataGridTextColumn Header="사례2" Binding="{Binding Case2Value, StringFormat=N0}" Width="110"/>
-                                    <DataGridTextColumn Header="사례3" Binding="{Binding Case3Value, StringFormat=N0}" Width="110"/>
-                                    <DataGridTextColumn Header="사례4" Binding="{Binding Case4Value, StringFormat=N0}" Width="110"/>
+                                    <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Padding" Value="4,2"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="사례1" Binding="{Binding Case1Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Padding" Value="4,2"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="사례2" Binding="{Binding Case2Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Padding" Value="4,2"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="사례3" Binding="{Binding Case3Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Padding" Value="4,2"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="사례4" Binding="{Binding Case4Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Padding" Value="4,2"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>

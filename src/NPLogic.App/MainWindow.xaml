@@ -35,7 +35,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Logo - 엠필로지 로고 사용 -->
+                <!-- Logo -->
                 <StackPanel Grid.Column="0" 
                            Orientation="Horizontal"
                            VerticalAlignment="Center">
@@ -108,6 +108,8 @@
                         </StackPanel>
                     </Button>
 
+                    <Separator Width="1" Height="24" Background="{StaticResource DividerBrush}" Margin="8,0"/>
+
                     <!-- Property List - Phase 5.1: 피드백에 따라 숨김 처리 -->
                     <Button x:Name="PropertyListButton"
                             Click="PropertyListButton_Click"
@@ -130,22 +132,22 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Statistics -->
+                    <!-- Statistics - Phase 6: 비핵심 내부 탭으로 대체되어 숨김 처리 -->
                     <Button x:Name="StatisticsButton"
                             Click="StatisticsButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ChartBar" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="통계" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
                     </Button>
 
-                    <Separator Width="1" Height="24" Background="{StaticResource DividerBrush}" Margin="8,0"/>
-
-                    <!-- 차주/대출 메뉴 -->
+                    <!-- Phase 6: 차주/대출 메뉴 - 비핵심 내부 탭으로 대체되어 숨김 처리 -->
                     <Button x:Name="BorrowerOverviewButton"
                             Click="BorrowerOverviewButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AccountGroup" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="차주 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -154,7 +156,8 @@
 
                     <Button x:Name="CollateralSummaryButton"
                             Click="CollateralSummaryButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Home" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="담보 총괄" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -163,7 +166,8 @@
 
                     <Button x:Name="LoanDetailButton"
                             Click="LoanDetailButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CreditCard" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="Loan 상세" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -172,7 +176,8 @@
 
                     <Button x:Name="CashFlowSummaryButton"
                             Click="CashFlowSummaryButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -181,7 +186,8 @@
 
                     <Button x:Name="XnpvComparisonButton"
                             Click="XnpvComparisonButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Compare" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="XNPV" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
@@ -190,14 +196,13 @@
 
                     <Button x:Name="RestructuringOverviewButton"
                             Click="RestructuringOverviewButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Gavel" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="회생 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
                     </Button>
-
-                    <Separator Width="1" Height="24" Background="{StaticResource DividerBrush}" Margin="8,0"/>
 
                     <!-- 관리 메뉴 -->
                     <Button x:Name="ToolBoxButton"

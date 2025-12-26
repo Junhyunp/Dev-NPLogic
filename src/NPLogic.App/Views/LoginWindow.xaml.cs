@@ -36,6 +36,18 @@ namespace NPLogic.Views
                 _viewModel.Password = passwordBox.Password;
             }
         }
+
+        /// <summary>
+        /// 회원가입 Expander가 펼쳐질 때 스크롤을 아래로 내림
+        /// </summary>
+        private void SignUpExpander_Expanded(object sender, RoutedEventArgs e)
+        {
+            // 레이아웃 업데이트 후 스크롤
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, new System.Action(() =>
+            {
+                LoginScrollViewer.ScrollToEnd();
+            }));
+        }
     }
 }
 

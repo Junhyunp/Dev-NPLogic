@@ -15,14 +15,25 @@ namespace NPLogic.ViewModels
     /// <summary>
     /// 사례평가 테이블 행 아이템
     /// </summary>
-    public class CaseRowItem : ObservableObject
+    public partial class CaseRowItem : ObservableObject
     {
-        public string Label { get; set; } = "";
-        public string? BaseValue { get; set; }
-        public string? Case1Value { get; set; }
-        public string? Case2Value { get; set; }
-        public string? Case3Value { get; set; }
-        public string? Case4Value { get; set; }
+        [ObservableProperty]
+        private string _label = "";
+        
+        [ObservableProperty]
+        private string? _baseValue;
+        
+        [ObservableProperty]
+        private string? _case1Value;
+        
+        [ObservableProperty]
+        private string? _case2Value;
+        
+        [ObservableProperty]
+        private string? _case3Value;
+        
+        [ObservableProperty]
+        private string? _case4Value;
     }
 
     /// <summary>
@@ -225,6 +236,9 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private RecommendCaseItem? _selectedRecommendCase;
+
+        // === 사례 적용 슬롯 관리 ===
+        private int _nextCaseSlot = 1; // 다음에 사용할 사례 슬롯 (1~4)
 
         #endregion
 
@@ -649,13 +663,144 @@ namespace NPLogic.ViewModels
                     
                     // 시나리오 1 재계산
                     CalculateScenario1();
-                    
-                    SuccessMessage = $"사례 {SelectedRecommendCase.CaseNo}의 낙찰가율이 적용되었습니다.";
                 }
+
+                // 사례평가 테이블에 데이터 반영
+                ApplyCaseToEvaluationTable(SelectedRecommendCase, _nextCaseSlot);
+                
+                // 다음 슬롯으로 이동 (1~4 순환)
+                int usedSlot = _nextCaseSlot;
+                _nextCaseSlot = (_nextCaseSlot % 4) + 1;
+                
+                SuccessMessage = $"사례 {SelectedRecommendCase.CaseNo}가 사례{usedSlot}에 적용되었습니다.";
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"사례 적용 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 유사물건 상세보기 팝업
+        /// </summary>
+        [RelayCommand]
+        private void ShowCaseDetail(RecommendCaseItem? caseItem)
+        {
+            if (caseItem == null)
+                return;
+
+            try
+            {
+                // 상세 정보 팝업 표시
+                var message = $"사건번호: {caseItem.CaseNo}\n" +
+                              $"소재지: {caseItem.Address}\n" +
+                              $"용도: {caseItem.Usage}\n" +
+                              $"낙찰일: {caseItem.AuctionDate:yyyy-MM-dd}\n\n" +
+                              $"감정가: {caseItem.AppraisalPrice:N0}원\n" +
+                              $"낙찰가: {caseItem.WinningPrice:N0}원\n" +
+                              $"낙찰가율: {caseItem.WinningRateDisplay}\n\n" +
+                              $"건물면적: {caseItem.BuildingArea:N1}㎡\n" +
+                              $"토지면적: {caseItem.LandArea:N1}㎡\n" +
+                              $"적용규칙: {caseItem.RuleName}";
+
+                System.Windows.MessageBox.Show(message, $"유사물건 상세정보 - {caseItem.CaseNo}", 
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"상세보기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 사례평가 테이블 초기화
+        /// </summary>
+        [RelayCommand]
+        private void ClearCaseEvaluation()
+        {
+            try
+            {
+                foreach (var item in CaseItems)
+                {
+                    item.Case1Value = null;
+                    item.Case2Value = null;
+                    item.Case3Value = null;
+                    item.Case4Value = null;
+                }
+                _nextCaseSlot = 1;
+                SuccessMessage = "사례평가가 초기화되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"초기화 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 추천 사례를 사례평가 테이블의 특정 슬롯에 적용
+        /// </summary>
+        private void ApplyCaseToEvaluationTable(RecommendCaseItem caseItem, int slot)
+        {
+            if (slot < 1 || slot > 4)
+                return;
+
+            // 각 행에 해당 슬롯의 값 설정
+            foreach (var item in CaseItems)
+            {
+                string? value = null;
+
+                switch (item.Label)
+                {
+                    case "사례구분":
+                        value = $"사례{slot}";
+                        break;
+                    case "경매사건번호":
+                        value = caseItem.CaseNo;
+                        break;
+                    case "낙찰일자":
+                        value = caseItem.AuctionDate?.ToString("yyyy-MM-dd");
+                        break;
+                    case "용도":
+                        value = caseItem.Usage;
+                        break;
+                    case "소재지":
+                        value = caseItem.Address;
+                        break;
+                    case "토지면적(평)":
+                        value = caseItem.LandArea.HasValue ? (caseItem.LandArea.Value / 3.3058).ToString("N1") : null;
+                        break;
+                    case "건물연면적(평)":
+                        value = caseItem.BuildingArea.HasValue ? (caseItem.BuildingArea.Value / 3.3058).ToString("N1") : null;
+                        break;
+                    case "낙찰가액":
+                        value = caseItem.WinningPrice?.ToString("N0");
+                        break;
+                    case "낙찰가율":
+                        value = caseItem.WinningRateDisplay;
+                        break;
+                    case "법사가":
+                    case "토지":
+                    case "건물":
+                        value = caseItem.AppraisalPrice?.ToString("N0");
+                        break;
+                }
+
+                // 슬롯에 따라 해당 컬럼에 값 설정
+                switch (slot)
+                {
+                    case 1:
+                        item.Case1Value = value;
+                        break;
+                    case 2:
+                        item.Case2Value = value;
+                        break;
+                    case 3:
+                        item.Case3Value = value;
+                        break;
+                    case 4:
+                        item.Case4Value = value;
+                        break;
+                }
             }
         }
 

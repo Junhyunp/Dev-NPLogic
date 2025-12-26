@@ -412,15 +412,30 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private async Task DeletePropertyAsync(Property property)
         {
-            // TODO: 확인 다이얼로그 표시
+            if (property == null) return;
+
+            var result = System.Windows.MessageBox.Show(
+                $"정말로 물건 '{property.PropertyNumber}'을(를) 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",
+                "물건 삭제 확인",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
             try
             {
+                IsLoading = true;
                 await _propertyRepository.DeleteAsync(property.Id);
                 await LoadPropertiesAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("물건이 삭제되었습니다.");
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"물건 삭제 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 

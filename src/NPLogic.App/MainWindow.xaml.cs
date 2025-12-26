@@ -35,14 +35,14 @@ namespace NPLogic
             // Initialize Toast Service
             NPLogic.UI.Services.ToastService.Instance.Initialize(ToastContainer);
 
-            // 역할에 따른 홈 화면으로 이동
-            _ = NavigateToRoleBasedHomeAsync();
+            // 현재 사용자 정보를 로드하고 초기 화면으로 이동
+            _ = InitializeNavigationAsync();
         }
 
         /// <summary>
-        /// 역할에 따른 홈 화면으로 이동
+        /// 사용자 정보를 로드하고 역할에 따른 초기 화면으로 이동
         /// </summary>
-        private async Task NavigateToRoleBasedHomeAsync()
+        private async Task InitializeNavigationAsync()
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
@@ -59,24 +59,8 @@ namespace NPLogic
                     _currentUser = await userRepository.GetByAuthUserIdAsync(System.Guid.Parse(authUser.Id));
                 }
 
-                // 역할에 따라 다른 홈 화면으로 이동
-                if (_currentUser?.IsAdmin == true)
-                {
-                    NavigateToAdminHome();
-                }
-                else if (_currentUser?.IsPM == true)
-                {
-                    NavigateToPMHome();
-                }
-                else if (_currentUser?.IsEvaluator == true)
-                {
-                    NavigateToEvaluatorHome();
-                }
-                else
-                {
-                    // 기본적으로 대시보드로
-                    NavigateToDashboard();
-                }
+                // 대시보드(역할 기반)로 이동
+                NavigateToDashboard();
             }
             catch
             {
@@ -161,16 +145,32 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// 대시보드로 이동
+        /// 대시보드로 이동 (역할에 따라 적절한 홈 화면으로 리다이렉트)
         /// </summary>
         public void NavigateToDashboard()
         {
-            var serviceProvider = App.ServiceProvider;
-            if (serviceProvider != null)
+            if (_currentUser?.IsAdmin == true)
             {
-                var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
-                MainContentControl.Content = dashboardView;
-                UpdateSelectedMenu(DashboardButton);
+                NavigateToAdminHome();
+            }
+            else if (_currentUser?.IsPM == true)
+            {
+                NavigateToPMHome();
+            }
+            else if (_currentUser?.IsEvaluator == true)
+            {
+                NavigateToEvaluatorHome();
+            }
+            else
+            {
+                // 기본 대시보드 뷰로 이동 (역할이 없거나 매칭되지 않는 경우)
+                var serviceProvider = App.ServiceProvider;
+                if (serviceProvider != null)
+                {
+                    var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
+                    MainContentControl.Content = dashboardView;
+                    UpdateSelectedMenu(DashboardButton);
+                }
             }
         }
 
@@ -363,6 +363,14 @@ namespace NPLogic
                 }
                 MainContentControl.Content = propertyDetailView;
             }
+        }
+
+        /// <summary>
+        /// 로고 클릭 - 대시보드(홈)로 이동
+        /// </summary>
+        private void Logo_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToDashboard();
         }
 
         /// <summary>

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800"
+             d:DesignHeight="600" d:DesignWidth="1200"
              Loaded="MapView_Loaded"
              Unloaded="MapView_Unloaded">
     
@@ -15,203 +15,341 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <!-- 상단 레이어 컨트롤 패널 -->
+        <!-- 상단 헤더 -->
         <Border Grid.Row="0"
                 Background="{StaticResource BackgroundBrush}"
                 BorderBrush="{StaticResource BlueGray200Brush}"
                 BorderThickness="0,0,0,1"
-                Padding="16,10">
+                Padding="16,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 
-                <!-- 레이어 선택 체크박스 -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="레이어:" 
-                               VerticalAlignment="Center"
-                               Foreground="#64748B"
-                               FontWeight="SemiBold"
-                               Margin="0,0,16,0"/>
-                    
-                    <CheckBox x:Name="ChkBaseMap"
-                              Content="기본지도"
-                              IsChecked="True"
-                              VerticalAlignment="Center"
-                              Margin="0,0,16,0"
-                              Checked="LayerCheckbox_Changed"
-                              Unchecked="LayerCheckbox_Changed"/>
-                    
-                    <CheckBox x:Name="ChkSatellite"
-                              Content="위성지도"
-                              IsChecked="False"
-                              VerticalAlignment="Center"
-                              Margin="0,0,16,0"
-                              Checked="LayerCheckbox_Changed"
-                              Unchecked="LayerCheckbox_Changed"/>
-                    
-                    <CheckBox x:Name="ChkCadastral"
-                              Content="지적도"
-                              IsChecked="False"
-                              VerticalAlignment="Center"
-                              Margin="0,0,16,0"
-                              Checked="LayerCheckbox_Changed"
-                              Unchecked="LayerCheckbox_Changed"/>
-                    
-                    <CheckBox x:Name="ChkLandUse"
-                              Content="토지이용계획"
-                              IsChecked="False"
-                              VerticalAlignment="Center"
-                              Margin="0,0,16,0"
-                              Checked="LayerCheckbox_Changed"
-                              Unchecked="LayerCheckbox_Changed"
-                              ToolTip="국토이용정보서비스 연동 필요"/>
-                    
-                    <Border Background="{StaticResource BlueGray200Brush}" 
-                            Width="1" 
-                            Margin="8,4,16,4"/>
-                    
-                    <CheckBox x:Name="ChkRoadView"
-                              Content="로드뷰"
-                              IsChecked="False"
-                              VerticalAlignment="Center"
-                              Margin="0,0,0,0"
-                              Checked="RoadViewCheckbox_Changed"
-                              Unchecked="RoadViewCheckbox_Changed"/>
-                </StackPanel>
+                <TextBlock Grid.Column="0"
+                           Text="📄 담보물건 Export"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextPrimaryBrush}"
+                           VerticalAlignment="Center"/>
                 
-                <!-- 우측 버튼들 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button x:Name="BtnZoomIn"
-                            Content="+"
-                            Width="32" Height="32"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Click="ZoomIn_Click"
-                            Style="{StaticResource SecondaryButton}"
-                            Margin="0,0,4,0"/>
-                    
-                    <Button x:Name="BtnZoomOut"
-                            Content="-"
-                            Width="32" Height="32"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Click="ZoomOut_Click"
-                            Style="{StaticResource SecondaryButton}"
-                            Margin="0,0,16,0"/>
-                    
-                    <Button x:Name="BtnRefreshMap"
-                            Content="새로고침"
-                            Click="RefreshMap_Click"
+                    <Button x:Name="BtnRefreshAll"
+                            Content="🔄 새로고침"
+                            Click="RefreshAll_Click"
                             Style="{StaticResource SecondaryButton}"
                             Padding="12,6"
                             Margin="0,0,8,0"/>
                     
-                    <Button x:Name="BtnOpenExternal"
-                            Content="외부에서 열기"
-                            Click="OpenExternal_Click"
+                    <Button x:Name="BtnExportExcel"
+                            Content="📊 Excel Export"
+                            Click="ExportExcel_Click"
                             Style="{StaticResource PrimaryButton}"
                             Padding="12,6"/>
                 </StackPanel>
             </Grid>
         </Border>
         
-        <!-- 지도 영역 -->
-        <Grid Grid.Row="1">
-            <!-- WebView2 지도 컨트롤 -->
-            <wv2:WebView2 x:Name="MapWebView"
-                          DefaultBackgroundColor="Transparent"/>
+        <!-- 4분할 미리보기 영역 (메인 컨텐츠) -->
+        <Grid Grid.Row="1" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             
-            <!-- 로딩 오버레이 -->
-            <Border x:Name="LoadingOverlay"
-                    Background="#F0F5F9"
-                    Visibility="Visible">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <ProgressBar IsIndeterminate="True"
-                                 Width="200"
-                                 Height="4"
-                                 Margin="0,0,0,16"/>
-                    <TextBlock Text="지도 로딩 중..."
-                               FontSize="14"
-                               Foreground="#64748B"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-            
-            <!-- 로드뷰 컨테이너 (상단에 오버레이) -->
-            <Border x:Name="RoadViewContainer"
-                    Background="Transparent"
-                    Visibility="Collapsed"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Right"
-                    Margin="16"
-                    Width="320"
-                    Height="240">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="10" ShadowDepth="3"/>
-                </Border.Effect>
-                
+            <!-- 1. 지적도 (자동 캡처) -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource CardBackgroundBrush}"
+                    BorderBrush="{StaticResource BlueGray200Brush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="0,0,8,0">
                 <Grid>
-                    <wv2:WebView2 x:Name="RoadViewWebView"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     
-                    <!-- 로드뷰 닫기 버튼 -->
-                    <Button Content="✕"
-                            Width="24" Height="24"
-                            FontSize="12"
-                            Background="#EF4444"
-                            Foreground="White"
-                            BorderThickness="0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            Margin="4"
-                            Click="CloseRoadView_Click"/>
+                    <TextBlock Grid.Row="0"
+                               Text="지적도"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,8"/>
+                    
+                    <Border Grid.Row="1"
+                            Margin="8,0,8,8"
+                            Background="#F1F5F9"
+                            CornerRadius="4">
+                        <Grid>
+                            <!-- 이미지 표시 영역 -->
+                            <Image x:Name="PreviewMapImage"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            
+                            <!-- 로딩 상태 -->
+                            <StackPanel x:Name="MapLoadingState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <ProgressBar IsIndeterminate="True"
+                                             Width="80"
+                                             Height="3"
+                                             Margin="0,0,0,8"/>
+                                <TextBlock Text="로딩 중..."
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- 빈 상태 (에러 시) -->
+                            <StackPanel x:Name="MapEmptyState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Visibility="Collapsed">
+                                <TextBlock Text="🗺️"
+                                           FontSize="28"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="지도를 불러올 수 없습니다"
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                                <Button x:Name="BtnRetryMap"
+                                        Content="다시 시도"
+                                        Click="RetryMap_Click"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="16,4"
+                                        FontSize="11"
+                                        Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
             
-            <!-- 에러 메시지 -->
-            <Border x:Name="ErrorOverlay"
-                    Background="#1A2744"
-                    Visibility="Collapsed">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="🗺️"
-                               FontSize="48"
+            <!-- 2. 로드뷰 (자동 캡처) -->
+            <Border Grid.Column="1"
+                    Background="{StaticResource CardBackgroundBrush}"
+                    BorderBrush="{StaticResource BlueGray200Brush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="4,0,4,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0"
+                               Text="로드뷰"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}"
                                HorizontalAlignment="Center"
-                               Margin="0,0,0,16"/>
-                    <TextBlock x:Name="ErrorMessage"
-                               Text="지도를 불러올 수 없습니다."
-                               FontSize="16"
-                               Foreground="White"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8"/>
-                    <TextBlock x:Name="ErrorDetail"
-                               Text=""
-                               FontSize="12"
-                               Foreground="#94A3B8"
-                               HorizontalAlignment="Center"
-                               TextWrapping="Wrap"
-                               MaxWidth="300"/>
-                    <Button x:Name="RetryButton"
-                            Content="다시 시도"
-                            Margin="0,24,0,0"
-                            Padding="24,10"
-                            Click="RetryButton_Click"
-                            Style="{StaticResource SecondaryButton}"/>
-                </StackPanel>
+                               Margin="0,12,0,8"/>
+                    
+                    <Border Grid.Row="1"
+                            Margin="8,0,8,8"
+                            Background="#F1F5F9"
+                            CornerRadius="4">
+                        <Grid>
+                            <!-- 이미지 표시 영역 -->
+                            <Image x:Name="PreviewRoadViewImage"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            
+                            <!-- 로딩 상태 -->
+                            <StackPanel x:Name="RoadViewLoadingState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <ProgressBar IsIndeterminate="True"
+                                             Width="80"
+                                             Height="3"
+                                             Margin="0,0,0,8"/>
+                                <TextBlock Text="로딩 중..."
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- 빈 상태 -->
+                            <StackPanel x:Name="RoadViewEmptyState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Visibility="Collapsed">
+                                <TextBlock Text="🛣️"
+                                           FontSize="28"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="로드뷰를 불러올 수 없습니다"
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                                <Button x:Name="BtnRetryRoadView"
+                                        Content="다시 시도"
+                                        Click="RetryRoadView_Click"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="16,4"
+                                        FontSize="11"
+                                        Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Border>
             
-            <!-- 좌표 정보 표시 (좌하단) -->
-            <Border Background="#E0FFFFFF"
-                    CornerRadius="4"
-                    Padding="8,4"
-                    VerticalAlignment="Bottom"
-                    HorizontalAlignment="Left"
-                    Margin="16">
-                <TextBlock x:Name="CoordinateInfo"
-                           Text="좌표: -"
-                           FontSize="11"
-                           Foreground="#475569"/>
+            <!-- 3. 토지이용계획확인원 (자동 캡처) -->
+            <Border Grid.Column="2"
+                    Background="{StaticResource CardBackgroundBrush}"
+                    BorderBrush="{StaticResource BlueGray200Brush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="4,0,4,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0"
+                               Text="토지이용계획확인원"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,8"/>
+                    
+                    <Border Grid.Row="1"
+                            Margin="8,0,8,8"
+                            Background="#F1F5F9"
+                            CornerRadius="4">
+                        <Grid>
+                            <!-- 이미지 표시 영역 -->
+                            <Image x:Name="PreviewLandUsePlanImage"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            
+                            <!-- 로딩 상태 -->
+                            <StackPanel x:Name="LandUsePlanLoadingState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <ProgressBar IsIndeterminate="True"
+                                             Width="80"
+                                             Height="3"
+                                             Margin="0,0,0,8"/>
+                                <TextBlock Text="토지이음 조회 중..."
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- 빈 상태 (에러/수동 업로드) -->
+                            <StackPanel x:Name="LandUsePlanEmptyState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Visibility="Collapsed">
+                                <TextBlock Text="📋"
+                                           FontSize="28"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock x:Name="LandUsePlanStatusText"
+                                           Text="주소 정보가 필요합니다"
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                    <Button x:Name="BtnRetryLandUsePlan"
+                                            Content="다시 시도"
+                                            Click="RetryLandUsePlan_Click"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="11"
+                                            Margin="0,0,4,0"/>
+                                    <Button x:Name="BtnUploadLandUsePlan"
+                                            Content="직접 업로드"
+                                            Click="UploadLandUsePlan_Click"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
             </Border>
+            
+            <!-- 4. 요약건축물대장 -->
+            <Border Grid.Column="3"
+                    Background="{StaticResource CardBackgroundBrush}"
+                    BorderBrush="{StaticResource BlueGray200Brush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Margin="8,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0"
+                               Text="요약건축물대장"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,12,0,8"/>
+                    
+                    <Border Grid.Row="1"
+                            Margin="8,0,8,8"
+                            Background="#F1F5F9"
+                            CornerRadius="4">
+                        <Grid>
+                            <!-- 이미지 표시 영역 -->
+                            <Image x:Name="PreviewBuildingRegisterImage"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            
+                            <!-- 빈 상태 -->
+                            <StackPanel x:Name="BuildingRegisterEmptyState"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                <TextBlock Text="🏢"
+                                           FontSize="28"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock Text="업로드 필요"
+                                           FontSize="11"
+                                           Foreground="{StaticResource BlueGray400Brush}"
+                                           HorizontalAlignment="Center"/>
+                                <Button x:Name="BtnUploadBuildingRegister"
+                                        Content="업로드"
+                                        Click="UploadBuildingRegister_Click"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="16,4"
+                                        FontSize="11"
+                                        Margin="0,8,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <!-- 숨겨진 WebView2 (캡처용) -->
+        <Grid Visibility="Collapsed">
+            <wv2:WebView2 x:Name="MapWebView"
+                          Width="800" Height="600"
+                          DefaultBackgroundColor="Transparent"/>
+            <wv2:WebView2 x:Name="RoadViewWebView"
+                          Width="800" Height="600"
+                          DefaultBackgroundColor="Transparent"/>
+            <wv2:WebView2 x:Name="LandUsePlanWebView"
+                          Width="1200" Height="1800"
+                          DefaultBackgroundColor="White"/>
         </Grid>
     </Grid>
 </UserControl>

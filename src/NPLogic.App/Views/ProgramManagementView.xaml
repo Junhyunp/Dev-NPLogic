@@ -293,7 +293,7 @@
                                    Style="{StaticResource CaptionTextStyle}"
                                    Margin="0,0,0,8"/>
                         <TextBox Text="{Binding FormProgramName, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource TextBoxStyle}"
+                                 Style="{StaticResource NPTextBoxStyle}"
                                  Margin="0,0,0,16"/>
 
                         <!-- 담당팀 -->
@@ -301,7 +301,7 @@
                                    Style="{StaticResource CaptionTextStyle}"
                                    Margin="0,0,0,8"/>
                         <TextBox Text="{Binding FormTeam, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource TextBoxStyle}"
+                                 Style="{StaticResource NPTextBoxStyle}"
                                  Margin="0,0,0,16"/>
 
                         <!-- 회계법인 -->
@@ -309,7 +309,7 @@
                                    Style="{StaticResource CaptionTextStyle}"
                                    Margin="0,0,0,8"/>
                         <TextBox Text="{Binding FormAccountingFirm, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource TextBoxStyle}"
+                                 Style="{StaticResource NPTextBoxStyle}"
                                  Margin="0,0,0,16"/>
 
                         <!-- 날짜 -->
@@ -324,16 +324,14 @@
                                 <TextBlock Text="Cut-off 날짜" 
                                            Style="{StaticResource CaptionTextStyle}"
                                            Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding FormCutOffDate}"
-                                            Style="{StaticResource DatePickerStyle}"/>
+                                <DatePicker SelectedDate="{Binding FormCutOffDate}"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="입찰일" 
                                            Style="{StaticResource CaptionTextStyle}"
                                            Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding FormBidDate}"
-                                            Style="{StaticResource DatePickerStyle}"/>
+                                <DatePicker SelectedDate="{Binding FormBidDate}"/>
                             </StackPanel>
                         </Grid>
 
@@ -344,7 +342,7 @@
                         <ComboBox ItemsSource="{Binding PmUsers}"
                                   SelectedItem="{Binding FormSelectedPM}"
                                   DisplayMemberPath="Name"
-                                  Style="{StaticResource ComboBoxStyle}"
+                                  Style="{StaticResource NPComboBox}"
                                   Margin="0,0,0,24"/>
 
                         <!-- 버튼 -->

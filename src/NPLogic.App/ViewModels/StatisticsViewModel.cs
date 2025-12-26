@@ -8,6 +8,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using NPLogic.Data.Repositories;
+using NPLogic.Services;
 using SkiaSharp;
 
 namespace NPLogic.ViewModels
@@ -18,6 +19,7 @@ namespace NPLogic.ViewModels
     public partial class StatisticsViewModel : ObservableObject
     {
         private readonly StatisticsRepository _statisticsRepository;
+        private readonly ExcelService _excelService;
 
         #region Observable Properties
 
@@ -83,9 +85,10 @@ namespace NPLogic.ViewModels
             SKColor.Parse("#06B6D4"),  // Cyan
         };
 
-        public StatisticsViewModel(StatisticsRepository statisticsRepository)
+        public StatisticsViewModel(StatisticsRepository statisticsRepository, ExcelService excelService)
         {
             _statisticsRepository = statisticsRepository ?? throw new ArgumentNullException(nameof(statisticsRepository));
+            _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
         }
 
         /// <summary>
@@ -312,14 +315,41 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// Excel 출력 (추후 구현)
+        /// Excel 출력
         /// </summary>
         [RelayCommand]
-        private void ExportToExcel()
+        private async Task ExportToExcelAsync()
         {
-            // TODO: Excel 출력 기능 구현
-            System.Windows.MessageBox.Show("Excel 출력 기능은 추후 구현 예정입니다.", "알림", 
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            try
+            {
+                IsLoading = true;
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Excel 파일|*.xlsx",
+                    FileName = $"통계리포트_{SelectedProjectId}_{DateTime.Now:yyyyMMdd}.xlsx"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await _excelService.ExportStatisticsToExcelAsync(
+                        SelectedProjectId,
+                        TotalCount,
+                        AverageAppraisalValue,
+                        AverageRecoveryRate,
+                        CompletionRate,
+                        dialog.FileName);
+                    
+                    NPLogic.UI.Services.ToastService.Instance.ShowSuccess("Excel 파일이 저장되었습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Excel 내보내기 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         #region Helper Methods
@@ -345,4 +375,3 @@ namespace NPLogic.ViewModels
         #endregion
     }
 }
-

@@ -564,21 +564,22 @@
                             </ScrollViewer>
                         </Border>
 
-                        <!-- 데이터 그리드 -->
-                        <DataGrid Grid.Row="3"
-                                  x:Name="ProgressDataGrid"
-                                  ItemsSource="{Binding DashboardProperties}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  SelectionMode="Single"
-                                  GridLinesVisibility="All"
-                                  HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                  VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                  HeadersVisibility="Column"
-                                  Background="{StaticResource SurfaceBrush}"
-                                  BorderThickness="0"
-                                  HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto">
+                        <!-- 탭별 컨텐츠 영역 (Phase 6) -->
+                        <Grid Grid.Row="3">
+                            <!-- 홈 탭: 데이터 그리드 -->
+                            <DataGrid x:Name="ProgressDataGrid"
+                                      ItemsSource="{Binding DashboardProperties}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                                      HeadersVisibility="Column"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      BorderThickness="0"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Auto">
                             
                             <DataGrid.Columns>
                                 <!-- 차주번호 -->
@@ -868,6 +869,34 @@
                                 </Style>
                             </DataGrid.CellStyle>
                         </DataGrid>
+
+                            <!-- 비핵심/등기부/권리분석/기초데이터/마감 탭: 물건별 상세 View -->
+                            <ContentControl x:Name="TabContentControl"
+                                            Visibility="Collapsed"/>
+
+                            <!-- 물건 선택 안내 메시지 -->
+                            <Border x:Name="SelectPropertyMessage"
+                                    Background="{StaticResource BlueGray50Brush}"
+                                    Visibility="Collapsed">
+                                <StackPanel VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="CursorPointer" 
+                                                             Width="64" Height="64"
+                                                             Foreground="{StaticResource BlueGray300Brush}"
+                                                             HorizontalAlignment="Center"/>
+                                    <TextBlock Text="물건을 선택하세요" 
+                                               Style="{StaticResource H3TextStyle}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,16,0,8"/>
+                                    <TextBlock Text="위 목록에서 물건을 선택하거나 차주번호를 클릭하면&#10;해당 물건의 상세 정보를 볼 수 있습니다."
+                                               Style="{StaticResource BodyTextStyle}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               TextAlignment="Center"
+                                               Opacity="0.7"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>

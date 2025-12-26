@@ -93,6 +93,7 @@ namespace NPLogic
             services.AddSingleton<AuthService>();
             services.AddSingleton<ExcelService>();
             services.AddSingleton<StorageService>();
+            services.AddSingleton<StaticMapService>();
             
             // Python Backend Services (Singleton)
             // PythonBackendService는 자체 Singleton이므로 등록하지 않음 (Instance 프로퍼티 사용)
@@ -115,6 +116,7 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.AuditLogRepository>();
             services.AddSingleton<Data.Repositories.AuctionScheduleRepository>();
             services.AddSingleton<Data.Repositories.PublicSaleScheduleRepository>();
+            services.AddSingleton<Data.Repositories.PropertyQaRepository>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
@@ -140,7 +142,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
-                    sp.GetRequiredService<RegistryOcrService>()
+                    sp.GetRequiredService<RegistryOcrService>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyQaRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -164,6 +167,13 @@ namespace NPLogic
                 return new ViewModels.NonCoreViewModel(
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
+                );
+            });
+            services.AddTransient<ViewModels.MapTabViewModel>(sp =>
+            {
+                return new ViewModels.MapTabViewModel(
+                    sp.GetRequiredService<StorageService>(),
+                    sp.GetRequiredService<ExcelService>()
                 );
             });
 

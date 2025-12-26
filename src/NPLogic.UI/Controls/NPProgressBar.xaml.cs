@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace NPLogic.UI.Controls
+namespace NPLogic.Controls
 {
     public partial class NPProgressBar : UserControl
     {

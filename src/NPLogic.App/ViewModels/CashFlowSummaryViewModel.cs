@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Core.Services;
 using NPLogic.Data.Repositories;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -17,6 +19,7 @@ namespace NPLogic.ViewModels
     {
         private readonly BorrowerRepository _borrowerRepository;
         private readonly LoanRepository _loanRepository;
+        private readonly ExcelService _excelService;
 
         [ObservableProperty]
         private ObservableCollection<Borrower> _borrowers = new();
@@ -53,10 +56,12 @@ namespace NPLogic.ViewModels
 
         public CashFlowSummaryViewModel(
             BorrowerRepository borrowerRepository,
-            LoanRepository loanRepository)
+            LoanRepository loanRepository,
+            ExcelService excelService)
         {
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
+            _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
         }
 
         /// <summary>
@@ -295,9 +300,43 @@ namespace NPLogic.ViewModels
         /// Excel 내보내기
         /// </summary>
         [RelayCommand]
-        private void ExportToExcel()
+        private async Task ExportToExcelAsync()
         {
-            NPLogic.UI.Services.ToastService.Instance.ShowInfo("Excel 내보내기는 준비 중입니다.");
+            if (CashFlowItems.Count == 0)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("내보낼 데이터가 없습니다.");
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Excel 파일|*.xlsx",
+                    FileName = $"현금흐름집계_{SelectedBorrower?.BorrowerName ?? "전체"}_{DateTime.Now:yyyyMMdd}.xlsx"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await _excelService.ExportCashFlowToExcelAsync(
+                        CashFlowItems,
+                        SelectedBorrower?.BorrowerName ?? "전체",
+                        DiscountRate,
+                        XnpvResult?.Xnpv ?? 0,
+                        dialog.FileName);
+                    
+                    NPLogic.UI.Services.ToastService.Instance.ShowSuccess("Excel 파일이 저장되었습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Excel 내보내기 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
     }
 
@@ -314,4 +353,3 @@ namespace NPLogic.ViewModels
         public string XnpvDisplay => $"{Xnpv:N0}";
     }
 }
-

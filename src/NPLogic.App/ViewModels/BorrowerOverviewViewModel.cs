@@ -67,6 +67,18 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        [ObservableProperty]
+        private bool _isAddModalOpen;
+
+        [ObservableProperty]
+        private bool _isConfirmDeleteModalOpen;
+
+        [ObservableProperty]
+        private Borrower? _borrowerToDelete;
+
+        [ObservableProperty]
+        private Borrower _newBorrower = new();
+
         // 통계
         [ObservableProperty]
         private BorrowerStatistics? _statistics;
@@ -342,51 +354,109 @@ namespace NPLogic.ViewModels
         private bool CanGoNextPage() => CurrentPage < TotalPages;
 
         /// <summary>
-        /// 차주 추가
+        /// 차주 추가 모달 열기
+        /// </summary>
+        [RelayCommand]
+        private void OpenAddBorrowerModal()
+        {
+            NewBorrower = new Borrower
+            {
+                Id = Guid.NewGuid(),
+                BorrowerNumber = $"B-{DateTime.Now:yyyyMMddHHmmss}",
+                BorrowerType = "개인",
+                ProgramId = SelectedProgramId == "전체" ? null : SelectedProgramId
+            };
+            IsAddModalOpen = true;
+        }
+
+        /// <summary>
+        /// 차주 추가 (저장)
         /// </summary>
         [RelayCommand]
         private async Task AddBorrowerAsync()
         {
+            if (string.IsNullOrWhiteSpace(NewBorrower.BorrowerName))
+            {
+                ErrorMessage = "차주명을 입력해주세요.";
+                return;
+            }
+
             try
             {
-                // TODO: 차주 추가 모달 구현
-                var newBorrower = new Borrower
-                {
-                    Id = Guid.NewGuid(),
-                    BorrowerNumber = $"B-{DateTime.Now:yyyyMMddHHmmss}",
-                    BorrowerName = "새 차주",
-                    BorrowerType = "개인",
-                    ProgramId = SelectedProgramId == "전체" ? null : SelectedProgramId
-                };
-
-                await _borrowerRepository.CreateAsync(newBorrower);
+                IsLoading = true;
+                await _borrowerRepository.CreateAsync(NewBorrower);
+                IsAddModalOpen = false;
                 await LoadBorrowersAsync();
                 await LoadStatisticsAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("차주가 추가되었습니다.");
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"차주 추가 실패: {ex.Message}";
             }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         /// <summary>
-        /// 차주 삭제
+        /// 모달 닫기
         /// </summary>
         [RelayCommand]
-        private async Task DeleteBorrowerAsync(Borrower borrower)
+        private void CloseModal()
+        {
+            IsAddModalOpen = false;
+        }
+
+        /// <summary>
+        /// 삭제 확인 모달 열기
+        /// </summary>
+        [RelayCommand]
+        private void ConfirmDeleteBorrower(Borrower borrower)
         {
             if (borrower == null) return;
+            BorrowerToDelete = borrower;
+            IsConfirmDeleteModalOpen = true;
+        }
+
+        /// <summary>
+        /// 차주 삭제 실행
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteBorrowerAsync()
+        {
+            if (BorrowerToDelete == null) return;
 
             try
             {
-                await _borrowerRepository.DeleteAsync(borrower.Id);
+                IsLoading = true;
+                await _borrowerRepository.DeleteAsync(BorrowerToDelete.Id);
+                IsConfirmDeleteModalOpen = false;
+                BorrowerToDelete = null;
+                
                 await LoadBorrowersAsync();
                 await LoadStatisticsAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("차주가 삭제되었습니다.");
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"차주 삭제 실패: {ex.Message}";
             }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 삭제 취소
+        /// </summary>
+        [RelayCommand]
+        private void CancelDelete()
+        {
+            IsConfirmDeleteModalOpen = false;
+            BorrowerToDelete = null;
         }
 
         /// <summary>
