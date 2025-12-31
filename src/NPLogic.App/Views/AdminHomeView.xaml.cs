@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using NPLogic.Core.Models;
 using NPLogic.ViewModels;
 
@@ -10,9 +11,40 @@ namespace NPLogic.Views
     /// </summary>
     public partial class AdminHomeView : UserControl
     {
+        private double _savedLeftPanelWidth = 300;
+
         public AdminHomeView()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// 좌측 패널 접기/펼치기
+        /// </summary>
+        private void LeftPanelToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is ToggleButton toggleButton)
+            {
+                if (toggleButton.IsChecked == false)
+                {
+                    // 패널 접기
+                    _savedLeftPanelWidth = LeftPanelColumn.Width.Value;
+                    LeftPanelColumn.Width = new GridLength(0);
+                    LeftPanel.Visibility = Visibility.Collapsed;
+                    LeftPanelOpenButton.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 좌측 패널 열기
+        /// </summary>
+        private void LeftPanelOpen_Click(object sender, RoutedEventArgs e)
+        {
+            LeftPanelColumn.Width = new GridLength(_savedLeftPanelWidth > 0 ? _savedLeftPanelWidth : 300);
+            LeftPanel.Visibility = Visibility.Visible;
+            LeftPanelOpenButton.Visibility = Visibility.Collapsed;
+            LeftPanelToggle.IsChecked = true;
         }
 
         private async void AdminHomeView_Loaded(object sender, RoutedEventArgs e)
@@ -64,6 +96,35 @@ namespace NPLogic.Views
             {
                 var value = selectedItem.Content?.ToString() ?? "";
                 await viewModel.UpdateProgressFieldAsync(property.Id, fieldName, value);
+            }
+        }
+
+        /// <summary>
+        /// 차주번호/차주명 클릭 - 비핵심 화면으로 이동
+        /// </summary>
+        private void PropertyNumber_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is System.Windows.FrameworkElement element && 
+                element.DataContext is Property property)
+            {
+                // MainWindow의 NavigateToNonCoreView 호출
+                if (MainWindow.Instance != null)
+                {
+                    MainWindow.Instance.NavigateToNonCoreView(property);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 필터 뱃지 더블클릭 - 해당 상태만 필터링
+        /// </summary>
+        private void FilterBadge_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2 && sender is System.Windows.FrameworkElement element &&
+                element.Tag is string filterType &&
+                DataContext is AdminHomeViewModel viewModel)
+            {
+                viewModel.FilterByStatus(filterType);
             }
         }
     }

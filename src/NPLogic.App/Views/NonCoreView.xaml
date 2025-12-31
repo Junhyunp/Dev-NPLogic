@@ -15,13 +15,178 @@
     
     <Grid>
         <Grid.ColumnDefinitions>
+            <!-- 필터 패널 (좌측) -->
+            <ColumnDefinition Width="Auto"/>
             <!-- 메인 컨텐츠 영역 -->
             <ColumnDefinition Width="*"/>
             <!-- 툴박스 사이드 패널 -->
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         
-        <Grid Grid.Column="0">
+        <!-- 좌측 필터/검색 패널 -->
+        <Border Grid.Column="0"
+                x:Name="FilterPanel"
+                Width="180"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,1,0"
+                Visibility="{Binding IsFilterPanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- 필터 헤더 -->
+                <Border Grid.Row="0" 
+                        Background="{StaticResource HeaderNavyBrush}"
+                        Padding="12,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FilterVariant" 
+                                                     Width="18" Height="18" 
+                                                     Foreground="White"
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,8,0"/>
+                            <TextBlock Text="검색" 
+                                       Foreground="White"
+                                       FontWeight="SemiBold"
+                                       FontSize="14"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <Button Grid.Column="1"
+                                Style="{StaticResource IconButton}"
+                                Width="24" Height="24"
+                                Click="CloseFilterPanel_Click"
+                                ToolTip="필터 패널 닫기">
+                            <materialDesign:PackIcon Kind="ChevronLeft" 
+                                                     Width="18" Height="18"
+                                                     Foreground="White"/>
+                        </Button>
+                    </Grid>
+                </Border>
+                
+                <!-- 필터 조건 목록 -->
+                <ScrollViewer Grid.Row="1" 
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="8,12">
+                    <StackPanel>
+                        <!-- 조건별 검색 안내 -->
+                        <TextBlock Text="조건별로 검색"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="4,0,0,8"/>
+                        
+                        <!-- 회생차주 -->
+                        <CheckBox Content="회생차주"
+                                  IsChecked="{Binding FilterRestructuring}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <!-- 개인회생 -->
+                        <CheckBox Content="개인회생"
+                                  IsChecked="{Binding FilterPersonalRestructuring}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <!-- 차주거주 -->
+                        <CheckBox Content="차주거주"
+                                  IsChecked="{Binding FilterBorrowerResidence}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <!-- 경매진행 -->
+                        <CheckBox Content="경매진행"
+                                  IsChecked="{Binding FilterAuctionInProgress}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <Separator Margin="0,8"/>
+                        
+                        <!-- 물건유형 섹션 -->
+                        <TextBlock Text="물건유형"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="4,4,0,8"/>
+                        
+                        <!-- 상가 -->
+                        <CheckBox Content="상가"
+                                  IsChecked="{Binding FilterCommercial}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <!-- 주택 -->
+                        <CheckBox Content="주택"
+                                  IsChecked="{Binding FilterResidential}"
+                                  FontSize="12"
+                                  Margin="0,0,0,6"
+                                  Checked="Filter_Changed"
+                                  Unchecked="Filter_Changed"/>
+                        
+                        <Separator Margin="0,8"/>
+                        
+                        <!-- 필터 결과 표시 -->
+                        <Border Background="{StaticResource BlueGray50Brush}"
+                                CornerRadius="4"
+                                Padding="8"
+                                Margin="0,4,0,0">
+                            <StackPanel>
+                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                    <Run Text="검색결과: "/>
+                                    <Run Text="{Binding FilteredCount, Mode=OneWay}" FontWeight="Bold"/>
+                                    <Run Text=" / "/>
+                                    <Run Text="{Binding TotalCount, Mode=OneWay}"/>
+                                    <Run Text="건"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+                
+                <!-- 필터 버튼 영역 -->
+                <Border Grid.Row="2" 
+                        Background="{StaticResource BlueGray50Brush}"
+                        Padding="8">
+                    <Button Content="필터 초기화"
+                            Style="{StaticResource SecondaryButton}"
+                            FontSize="11"
+                            Padding="8,6"
+                            HorizontalAlignment="Stretch"
+                            Click="ClearFilters_Click"/>
+                </Border>
+            </Grid>
+        </Border>
+        
+        <!-- 필터 패널 열기 버튼 (숨겨져 있을 때) -->
+        <Button Grid.Column="0"
+                Style="{StaticResource IconButton}"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Left"
+                Margin="4,8"
+                Click="OpenFilterPanel_Click"
+                ToolTip="검색 필터 열기"
+                Visibility="{Binding IsFilterPanelVisible, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <materialDesign:PackIcon Kind="FilterVariant" Width="20" Height="20"/>
+        </Button>
+        
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>  <!-- 물건 번호 탭 바 -->
                 <RowDefinition Height="Auto"/>  <!-- 기능 탭 바 -->
@@ -107,13 +272,74 @@
                         </ItemsControl>
                     </ScrollViewer>
                     
-                    <!-- 기능별 일괄작업 버튼 및 롤업 버튼 -->
+                    <!-- 버튼 영역: 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                        <!-- 인쇄 버튼 -->
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="10,6"
+                                FontSize="12"
+                                Margin="0,0,4,0"
+                                ToolTip="인쇄 (전체/차주별)"
+                                Click="PrintButton_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="📄 전체 인쇄" Click="PrintAll_Click"/>
+                                    <MenuItem Header="👤 차주별 인쇄" Click="PrintByBorrower_Click"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Printer" 
+                                                         Width="14" Height="14" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,4,0"/>
+                                <TextBlock Text="인쇄" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- Excel 버튼 -->
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="10,6"
+                                FontSize="12"
+                                Margin="0,0,4,0"
+                                ToolTip="Excel 내려받기 (전체/차주별)"
+                                Click="ExcelButton_Click">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="📊 전체 Excel" Click="ExcelAll_Click"/>
+                                    <MenuItem Header="👤 차주별 Excel (시트 분리)" Click="ExcelByBorrower_Click"/>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="MicrosoftExcel" 
+                                                         Width="14" Height="14" 
+                                                         VerticalAlignment="Center"
+                                                         Foreground="#217346"
+                                                         Margin="0,0,4,0"/>
+                                <TextBlock Text="Excel" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- View(롤업) 버튼 -->
+                        <Button Style="{StaticResource PrimaryButton}"
+                                Padding="10,6"
+                                FontSize="12"
+                                Margin="0,0,8,0"
+                                Click="RollupButton_Click"
+                                ToolTip="전체 현황 창 열기 (View)">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Eye" 
+                                                         Width="14" Height="14" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,4,0"/>
+                                <TextBlock Text="View" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- 기능별 일괄작업 버튼 -->
                         <Button Content="기능별 일괄작업"
                                 Style="{StaticResource SecondaryButton}"
                                 Padding="12,6"
                                 FontSize="12"
-                                Margin="0,0,8,0"
                                 Click="BatchWorkButton_Click">
                             <Button.ContextMenu>
                                 <ContextMenu>
@@ -125,22 +351,66 @@
                                 </ContextMenu>
                             </Button.ContextMenu>
                         </Button>
-                        
-                        <!-- 롤업 버튼 (Phase 4.5) -->
-                        <Button Style="{StaticResource PrimaryButton}"
-                                Padding="12,6"
-                                FontSize="12"
-                                Click="RollupButton_Click"
-                                ToolTip="전체 현황 창 열기 (Ctrl+R)">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="TableLarge" 
-                                                         Width="14" Height="14" 
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,6,0"/>
-                                <TextBlock Text="롤업" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
                     </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Ctrl+F 검색 패널 (플로팅) -->
+            <Border Grid.Row="0" 
+                    x:Name="SearchPanel"
+                    Background="White"
+                    BorderBrush="{StaticResource PrimaryBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Margin="0,44,320,0"
+                    Visibility="{Binding IsSearchPanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Effect="{StaticResource CardShadow}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0"
+                             x:Name="SearchTextBox"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Width="200"
+                             Padding="8,6"
+                             FontSize="12"
+                             VerticalContentAlignment="Center"
+                             materialDesign:HintAssist.Hint="차주/물건번호 검색 (Enter)"
+                             KeyDown="SearchTextBox_KeyDown"/>
+                    
+                    <Button Grid.Column="1"
+                            Style="{StaticResource IconButton}"
+                            Width="28" Height="28"
+                            Margin="4,0,0,0"
+                            Click="FindPrevious_Click"
+                            ToolTip="이전 찾기 (Shift+Enter)">
+                        <materialDesign:PackIcon Kind="ChevronUp" Width="16" Height="16"/>
+                    </Button>
+                    
+                    <Button Grid.Column="2"
+                            Style="{StaticResource IconButton}"
+                            Width="28" Height="28"
+                            Click="FindNext_Click"
+                            ToolTip="다음 찾기 (Enter)">
+                        <materialDesign:PackIcon Kind="ChevronDown" Width="16" Height="16"/>
+                    </Button>
+                    
+                    <Button Grid.Column="3"
+                            Style="{StaticResource IconButton}"
+                            Width="28" Height="28"
+                            Margin="4,0,0,0"
+                            Click="CloseSearchPanel_Click"
+                            ToolTip="닫기 (Esc)">
+                        <materialDesign:PackIcon Kind="Close" Width="16" Height="16"/>
+                    </Button>
                 </Grid>
             </Border>
 
@@ -224,7 +494,7 @@
         </Grid>
         
         <!-- 툴박스 사이드 패널 -->
-        <Border Grid.Column="1" 
+        <Border Grid.Column="2" 
                 x:Name="ToolBoxPanel"
                 Width="300"
                 Background="{StaticResource SurfaceColor}"
@@ -387,7 +657,7 @@
         </Border>
         
         <!-- 툴박스 열기 버튼 (숨겨져 있을 때) -->
-        <Button Grid.Column="1"
+        <Button Grid.Column="2"
                 Style="{StaticResource IconButton}"
                 VerticalAlignment="Top"
                 Margin="4,8"
@@ -397,7 +667,7 @@
         </Button>
         
         <!-- 로딩 오버레이 -->
-        <Border Grid.ColumnSpan="2" 
+        <Border Grid.ColumnSpan="3" 
                 Background="#80000000" 
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

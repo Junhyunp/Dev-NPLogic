@@ -25,9 +25,9 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- 왼쪽: 브랜딩 영역 - 메인 화면 헤더와 동일한 색상으로 통일 -->
+        <!-- 왼쪽: 브랜딩 영역 - 피드백 반영: 채도 낮춘 남색 톤 -->
         <Border Grid.Column="0" 
-                Background="{DynamicResource HeaderNavyBrush}">
+                Background="{DynamicResource PrimaryBrush}">
             <StackPanel VerticalAlignment="Center"
                         HorizontalAlignment="Center"
                         Margin="40">

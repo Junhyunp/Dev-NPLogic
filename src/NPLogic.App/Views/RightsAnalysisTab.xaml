@@ -399,12 +399,20 @@
                                     <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
                                     <TextBlock Text="선순위 분석" Style="{StaticResource H4TextStyle}"/>
                                 </StackPanel>
-                                <Button Grid.Column="1" 
-                                        Content="💡 판단 로직 보기" 
-                                        Command="{Binding ShowRuleLogicCommand}"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Padding="12,4"
-                                        FontSize="12"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button Content="📊 권리분석 시트 보기" 
+                                            Command="{Binding OpenRightsSheetCommand}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"
+                                            Margin="0,0,8,0"
+                                            ToolTip="등기부등본 갑구/을구 데이터를 팝업 창으로 확인합니다"/>
+                                    <Button Content="💡 판단 로직 보기" 
+                                            Command="{Binding ShowRuleLogicCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="12"/>
+                                </StackPanel>
                             </Grid>
                         </Border>
                         
@@ -633,6 +641,26 @@
                         </Border>
                         
                         <StackPanel Margin="16">
+                            <!-- 위험도 평가 설명 -->
+                            <Border Background="{StaticResource BlueGray50Brush}" 
+                                    CornerRadius="4" 
+                                    Padding="10" 
+                                    Margin="0,0,0,12">
+                                <TextBlock TextWrapping="Wrap" 
+                                           FontSize="11" 
+                                           Foreground="{StaticResource TextSecondaryBrush}">
+                                    <Run FontWeight="SemiBold">위험도 평가란?</Run>
+                                    <LineBreak/>
+                                    예상 회수율을 기반으로 투자 위험도를 자동 분석합니다.
+                                    <LineBreak/>
+                                    • 🟢 낮음: 회수율 80% 이상
+                                    <LineBreak/>
+                                    • 🟡 중간: 회수율 50~80%
+                                    <LineBreak/>
+                                    • 🔴 높음: 회수율 50% 미만
+                                </TextBlock>
+                            </Border>
+                            
                             <!-- 위험도 레벨 -->
                             <Border x:Name="RiskLevelBorder"
                                     CornerRadius="8" 

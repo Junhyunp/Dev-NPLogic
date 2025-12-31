@@ -47,17 +47,27 @@
                 </TextBlock>
             </StackPanel>
 
-            <!-- 액션 버튼들 -->
+            <!-- 액션 버튼들 - 피드백 반영: 크기 축소 -->
             <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Button Content="저장" 
-                        Command="{Binding SaveCommand}"
+                <Button Command="{Binding SaveCommand}"
                         Style="{StaticResource PrimaryButton}"
-                        Padding="24,10"
-                        Margin="0,0,8,0"/>
-                <Button Content="새로고침" 
-                        Command="{Binding RefreshCommand}"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        ToolTip="변경사항 저장 (Ctrl+S)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="💾" FontSize="12" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="저장" VerticalAlignment="Center" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding RefreshCommand}"
                         Style="{StaticResource SecondaryButton}"
-                        Padding="24,10"/>
+                        Padding="12,6"
+                        ToolTip="데이터를 서버에서 다시 불러옵니다 (Ctrl+R)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🔄" FontSize="12" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                        <TextBlock Text="새로고침" VerticalAlignment="Center" FontSize="12"/>
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </Grid>
 
@@ -102,38 +112,46 @@
                 </Style>
             </TabControl.Resources>
 
-            <!-- 1. 기초데이터 탭 -->
-            <TabItem Header="기초데이터">
+            <!-- 피드백 반영: 탭 구조 변경 -->
+            
+            <!-- 1. 전체 탭 -->
+            <TabItem Header="전체">
+                <local:HomeTab DataContext="{Binding}"/>
+            </TabItem>
+
+            <!-- 2. 차주개요 탭 -->
+            <TabItem Header="차주개요">
+                <local:BorrowerOverviewView DataContext="{Binding}"/>
+            </TabItem>
+
+            <!-- 3. Loan 탭 -->
+            <TabItem Header="Loan">
+                <local:LoanDetailView DataContext="{Binding}"/>
+            </TabItem>
+
+            <!-- 4. 담보물건 탭 -->
+            <TabItem Header="담보물건">
                 <local:BasicDataTab DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 2. 담보물건 탭 -->
-            <TabItem Header="담보물건">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="담보물건 탭 (추후 구현)" 
-                               Style="{StaticResource BodyTextStyle}"
-                               Margin="24"/>
-                </ScrollViewer>
+            <!-- 5. 선순위 탭 -->
+            <TabItem Header="선순위">
+                <local:SeniorRightsView DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 3. 등기부 탭 -->
-            <TabItem Header="등기부">
-                <local:RegistryTab DataContext="{Binding}"/>
-            </TabItem>
-
-            <!-- 4. 선순위 탭 -->
-            <TabItem Header="선순위 (권리분석)">
-                <local:RightsAnalysisTab x:Name="RightsAnalysisTabView"/>
-            </TabItem>
-
-            <!-- 5. 평가 탭 -->
+            <!-- 6. 평가 탭 -->
             <TabItem Header="평가">
-                <local:EvaluationTab x:Name="EvaluationTabView"/>
+                <local:EvaluationTab DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 6. 지도 탭 (Export 기능 포함) -->
-            <TabItem Header="지도">
-                <local:MapView x:Name="PropertyMapView"/>
+            <!-- 7. 경(공)매 탭 -->
+            <TabItem Header="경(공)매">
+                <local:AuctionScheduleView DataContext="{Binding}"/>
+            </TabItem>
+
+            <!-- 8. 현금흐름 탭 -->
+            <TabItem Header="현금흐름">
+                <local:CashFlowSummaryView DataContext="{Binding}"/>
             </TabItem>
         </TabControl>
     </Grid>

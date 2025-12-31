@@ -149,54 +149,88 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<RealTransactionItem> _realTransactions = new();
 
-        // === 낙찰통계 ===
+        // === 낙찰통계 (피드백 반영: 시/군구/동 3×3 매트릭스) ===
         [ObservableProperty]
-        private string? _regionName1 = "부산";
+        private string? _regionName1 = "서울특별시";
 
         [ObservableProperty]
-        private string? _regionName2 = "남구";
+        private string? _regionName2 = "강남구";
 
+        [ObservableProperty]
+        private string? _regionName3 = "대치동";
+
+        // 1년 평균 - 시/도
         [ObservableProperty]
         private decimal? _stats1Year_Rate1;
 
         [ObservableProperty]
         private int? _stats1Year_Count1;
 
+        // 1년 평균 - 군/구
         [ObservableProperty]
         private decimal? _stats1Year_Rate2;
 
         [ObservableProperty]
         private int? _stats1Year_Count2;
 
+        // 1년 평균 - 동
+        [ObservableProperty]
+        private decimal? _stats1Year_Rate3;
+
+        [ObservableProperty]
+        private int? _stats1Year_Count3;
+
+        // 6개월 평균 - 시/도
         [ObservableProperty]
         private decimal? _stats6Month_Rate1;
 
         [ObservableProperty]
         private int? _stats6Month_Count1;
 
+        // 6개월 평균 - 군/구
         [ObservableProperty]
         private decimal? _stats6Month_Rate2;
 
         [ObservableProperty]
         private int? _stats6Month_Count2;
 
+        // 6개월 평균 - 동
+        [ObservableProperty]
+        private decimal? _stats6Month_Rate3;
+
+        [ObservableProperty]
+        private int? _stats6Month_Count3;
+
+        // 3개월 평균 - 시/도
         [ObservableProperty]
         private decimal? _stats3Month_Rate1;
 
         [ObservableProperty]
         private int? _stats3Month_Count1;
 
+        // 3개월 평균 - 군/구
         [ObservableProperty]
         private decimal? _stats3Month_Rate2;
 
         [ObservableProperty]
         private int? _stats3Month_Count2;
 
+        // 3개월 평균 - 동
+        [ObservableProperty]
+        private decimal? _stats3Month_Rate3;
+
+        [ObservableProperty]
+        private int? _stats3Month_Count3;
+
         [ObservableProperty]
         private decimal? _appliedBidRate = 0.70m;
 
         [ObservableProperty]
-        private string? _appliedBidRateDescription = "대연동 3개월 평균 낙찰가율";
+        private string? _appliedBidRateDescription = "3개월 평균 낙찰가율";
+
+        // 변경사항 추적 (피드백 반영: 저장 확인용)
+        [ObservableProperty]
+        private bool _isDirty;
 
         // === 평가결과 시나리오 1 ===
         [ObservableProperty]
@@ -449,6 +483,8 @@ namespace NPLogic.ViewModels
                 RegionName1 = parts[0]; // 시/도
             if (parts.Length >= 2)
                 RegionName2 = parts[1]; // 시/군/구
+            if (parts.Length >= 3)
+                RegionName3 = parts[2]; // 동
         }
 
         #endregion
@@ -494,6 +530,7 @@ namespace NPLogic.ViewModels
 
                 _evaluation = await _evaluationRepository.SaveAsync(evaluation);
                 
+                IsDirty = false; // 저장 완료 후 변경사항 플래그 리셋
                 SuccessMessage = "평가 정보가 저장되었습니다.";
             }
             catch (Exception ex)
@@ -938,14 +975,36 @@ namespace NPLogic.ViewModels
         partial void OnAppliedBidRateChanged(decimal? value)
         {
             CalculateScenario1();
+            IsDirty = true;
         }
 
         partial void OnIsApartmentTypeChanged(bool value)
         {
             if (value)
             {
-                AppliedBidRateDescription = $"{RegionName2} 3개월 평균 낙찰가율";
+                AppliedBidRateDescription = $"{RegionName3 ?? RegionName2} 3개월 평균 낙찰가율";
             }
+            IsDirty = true;
+        }
+
+        partial void OnScenario1_AmountChanged(decimal? value)
+        {
+            IsDirty = true;
+        }
+
+        partial void OnScenario1_ReasonChanged(string? value)
+        {
+            IsDirty = true;
+        }
+
+        partial void OnScenario2_AmountChanged(decimal? value)
+        {
+            IsDirty = true;
+        }
+
+        partial void OnScenario2_ReasonChanged(string? value)
+        {
+            IsDirty = true;
         }
 
         #endregion

@@ -1,8 +1,8 @@
 # 1205 미팅 피드백 개선 진행 상황
 
 > **생성일**: 2024-12-16  
-> **마지막 업데이트**: 2024-12-17  
-> **전체 진행률**: 32/35 (91%)
+> **마지막 업데이트**: 2024-12-31  
+> **전체 진행률**: 35/35 (100%)
 
 ---
 
@@ -289,6 +289,45 @@
 ---
 
 ## 📝 작업 로그
+
+### 2024-12-31 (추가 UI 개선 피드백 반영)
+- **폰트 크기 통일 (대시보드 기준)**
+  - Typography.xaml: FontSizeBody 14→12, FontSizeH1~H4 크기 축소
+  - NonCoreTabStyle: FontSize 13→12, Padding 16,12→12,8
+  - InnerTabButton: FontSize 13→12, Padding 16,8→12,6
+
+- **버튼 크기 축소**
+  - Buttons.xaml: PrimaryButton, SecondaryButton, DangerButton
+    - MinHeight 36→28, MinWidth 80→60, Padding 20,10→12,6
+  - IconButton: Width/Height 36→28
+
+- **물건 상세 화면 탭 구조 변경**
+  - PropertyDetailView.xaml: 6탭→8탭 재구성
+    - 이전: 홈/기초데이터/등기부/비핵심/권리분석/마감
+    - 변경: 전체/차주개요/Loan/담보물건/선순위/평가/경(공)매/현금흐름
+
+- **새로고침 버튼 개선**
+  - DashboardView: 새로고침/롤업/Excel 버튼에 아이콘+ToolTip 추가
+  - PropertyDetailView: 저장/새로고침 버튼에 아이콘+ToolTip 추가
+  - ToolTip에 단축키 정보 포함 (Ctrl+R, Ctrl+S)
+
+### 2024-12-31 (추가 피드백 구현)
+- **인쇄/Excel 내보내기 개선**
+  - NonCoreView.xaml: 인쇄, Excel 버튼 추가 (전체/차주별 선택 컨텍스트 메뉴)
+  - ExcelService.cs: ExportNonCoreAllToExcelAsync(), ExportNonCoreByBorrowerToExcelAsync() 메서드 추가
+  - 차주별 내보내기 시 각 차주별 시트 분리, 요약 시트 포함
+  
+- **Ctrl+F 검색 기능**
+  - NonCoreView.xaml: 플로팅 검색 패널 UI 추가
+  - NonCoreViewModel.cs: SearchText, IsSearchPanelVisible, FindNext(), FindPrevious() 추가
+  - Ctrl+F로 검색창 토글, Enter/Shift+Enter로 이전/다음 결과 이동, Esc로 닫기
+  
+- **조건별 필터 검색창**
+  - NonCoreView.xaml: 좌측 필터 패널 추가 (접기/펼치기 가능)
+  - NonCoreViewModel.cs: PropertyTabItem에 필터용 속성 추가 (PropertyType, IsAuctionInProgress, IsRestructuring 등)
+  - 필터 조건: 회생차주, 개인회생, 차주거주, 경매진행, 상가, 주택
+  - ApplyFilters(), ClearFilters() 메서드로 실시간 필터링
+  - 필터 결과 건수 표시 (검색결과: N/M건)
 
 ### 2024-12-16
 - Progress 파일 생성

@@ -114,6 +114,12 @@ namespace NPLogic.Core.Models
         /// <summary>권리분석 상태 (pending/processing/completed)</summary>
         public string RightsAnalysisStatus { get; set; } = "pending";
 
+        /// <summary>Interim 완료 여부</summary>
+        public bool InterimCompleted { get; set; }
+
+        /// <summary>전체 진행 상태 (pending/processing/completed)</summary>
+        public string OverallStatus => Status;
+
         // 메타데이터
         public Guid? CreatedBy { get; set; }
 

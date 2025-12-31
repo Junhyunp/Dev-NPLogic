@@ -567,6 +567,227 @@ namespace NPLogic.Services
                 }
             });
         }
+
+        /// <summary>
+        /// 비핵심 전체 데이터 Excel 내보내기
+        /// </summary>
+        public async Task<string> ExportNonCoreAllToExcelAsync(
+            IEnumerable<Core.Models.Property> properties,
+            string programName,
+            string outputPath)
+        {
+            return await Task.Run(() =>
+            {
+                using (var package = new ExcelPackage())
+                {
+                    var worksheet = package.Workbook.Worksheets.Add("비핵심 전체");
+
+                    // 프로그램 정보
+                    worksheet.Cells["A1"].Value = "프로그램:";
+                    worksheet.Cells["B1"].Value = programName;
+                    worksheet.Cells["A2"].Value = "출력일시:";
+                    worksheet.Cells["B2"].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    worksheet.Cells["A1:A2"].Style.Font.Bold = true;
+
+                    // 헤더 (4행부터)
+                    var headers = new[]
+                    {
+                        "차주명", "물건번호", "물건유형", "주소", "토지면적", "건물면적",
+                        "감정가", "최저입찰가", "OPB", "진행상태", "경매일정", "진행률"
+                    };
+
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        var cell = worksheet.Cells[4, i + 1];
+                        cell.Value = headers[i];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(30, 58, 95)); // 남색
+                        cell.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                    }
+
+                    // 데이터
+                    int row = 5;
+                    foreach (var p in properties)
+                    {
+                        worksheet.Cells[row, 1].Value = p.DebtorName;
+                        worksheet.Cells[row, 2].Value = p.PropertyNumber;
+                        worksheet.Cells[row, 3].Value = p.PropertyType;
+                        worksheet.Cells[row, 4].Value = p.AddressFull ?? p.AddressRoad ?? p.AddressJibun;
+                        worksheet.Cells[row, 5].Value = p.LandArea;
+                        worksheet.Cells[row, 6].Value = p.BuildingArea;
+                        worksheet.Cells[row, 7].Value = p.AppraisalValue;
+                        worksheet.Cells[row, 8].Value = p.MinimumBid;
+                        worksheet.Cells[row, 9].Value = p.Opb;
+                        worksheet.Cells[row, 10].Value = p.Status;
+                        worksheet.Cells[row, 11].Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
+                        worksheet.Cells[row, 12].Value = $"{p.GetProgressPercent()}%";
+
+                        // 포맷
+                        worksheet.Cells[row, 5, row, 6].Style.Numberformat.Format = "#,##0.00";
+                        worksheet.Cells[row, 7, row, 9].Style.Numberformat.Format = "#,##0";
+                        row++;
+                    }
+
+                    // 합계
+                    worksheet.Cells[row, 1].Value = "합계";
+                    worksheet.Cells[row, 7].Formula = $"SUM(G5:G{row - 1})";
+                    worksheet.Cells[row, 8].Formula = $"SUM(H5:H{row - 1})";
+                    worksheet.Cells[row, 9].Formula = $"SUM(I5:I{row - 1})";
+                    worksheet.Cells[row, 1, row, 12].Style.Font.Bold = true;
+                    worksheet.Cells[row, 7, row, 9].Style.Numberformat.Format = "#,##0";
+
+                    worksheet.Cells.AutoFitColumns();
+                    package.SaveAs(new FileInfo(outputPath));
+                    return outputPath;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 비핵심 차주별 데이터 Excel 내보내기 (각 차주별 시트 분리)
+        /// </summary>
+        public async Task<string> ExportNonCoreByBorrowerToExcelAsync(
+            Dictionary<string, List<Core.Models.Property>> propertiesByBorrower,
+            string programName,
+            string outputPath)
+        {
+            return await Task.Run(() =>
+            {
+                using (var package = new ExcelPackage())
+                {
+                    // 요약 시트
+                    var summarySheet = package.Workbook.Worksheets.Add("요약");
+                    summarySheet.Cells["A1"].Value = "프로그램:";
+                    summarySheet.Cells["B1"].Value = programName;
+                    summarySheet.Cells["A2"].Value = "출력일시:";
+                    summarySheet.Cells["B2"].Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    summarySheet.Cells["A3"].Value = "차주 수:";
+                    summarySheet.Cells["B3"].Value = propertiesByBorrower.Count;
+                    summarySheet.Cells["A1:A3"].Style.Font.Bold = true;
+
+                    // 차주별 요약 테이블
+                    var summaryHeaders = new[] { "차주명", "물건수", "총 감정가", "총 OPB", "평균 진행률" };
+                    for (int i = 0; i < summaryHeaders.Length; i++)
+                    {
+                        var cell = summarySheet.Cells[5, i + 1];
+                        cell.Value = summaryHeaders[i];
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(30, 58, 95));
+                        cell.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                    }
+
+                    int summaryRow = 6;
+                    foreach (var kvp in propertiesByBorrower.OrderBy(x => x.Key))
+                    {
+                        var borrowerName = kvp.Key;
+                        var props = kvp.Value;
+
+                        summarySheet.Cells[summaryRow, 1].Value = borrowerName;
+                        summarySheet.Cells[summaryRow, 2].Value = props.Count;
+                        summarySheet.Cells[summaryRow, 3].Value = props.Sum(p => p.AppraisalValue ?? 0);
+                        summarySheet.Cells[summaryRow, 4].Value = props.Sum(p => p.Opb ?? 0);
+                        summarySheet.Cells[summaryRow, 5].Value = props.Average(p => p.GetProgressPercent());
+
+                        summarySheet.Cells[summaryRow, 3, summaryRow, 4].Style.Numberformat.Format = "#,##0";
+                        summarySheet.Cells[summaryRow, 5].Style.Numberformat.Format = "0.0%";
+                        summaryRow++;
+                    }
+
+                    summarySheet.Cells.AutoFitColumns();
+
+                    // 각 차주별 시트 생성
+                    int sheetIndex = 1;
+                    foreach (var kvp in propertiesByBorrower.OrderBy(x => x.Key))
+                    {
+                        var borrowerName = kvp.Key;
+                        var props = kvp.Value;
+
+                        // 시트명 제한 (31자) 및 특수문자 제거
+                        var sheetName = $"{sheetIndex}_{SanitizeSheetName(borrowerName)}";
+                        if (sheetName.Length > 31) sheetName = sheetName.Substring(0, 31);
+
+                        var worksheet = package.Workbook.Worksheets.Add(sheetName);
+
+                        // 차주 정보
+                        worksheet.Cells["A1"].Value = "차주명:";
+                        worksheet.Cells["B1"].Value = borrowerName;
+                        worksheet.Cells["A2"].Value = "물건 수:";
+                        worksheet.Cells["B2"].Value = props.Count;
+                        worksheet.Cells["A1:A2"].Style.Font.Bold = true;
+
+                        // 헤더
+                        var headers = new[]
+                        {
+                            "물건번호", "물건유형", "주소", "토지면적", "건물면적",
+                            "감정가", "최저입찰가", "OPB", "진행상태", "경매일정", "진행률"
+                        };
+
+                        for (int i = 0; i < headers.Length; i++)
+                        {
+                            var cell = worksheet.Cells[4, i + 1];
+                            cell.Value = headers[i];
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                            cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+                        }
+
+                        // 데이터
+                        int row = 5;
+                        foreach (var p in props)
+                        {
+                            worksheet.Cells[row, 1].Value = p.PropertyNumber;
+                            worksheet.Cells[row, 2].Value = p.PropertyType;
+                            worksheet.Cells[row, 3].Value = p.AddressFull ?? p.AddressRoad ?? p.AddressJibun;
+                            worksheet.Cells[row, 4].Value = p.LandArea;
+                            worksheet.Cells[row, 5].Value = p.BuildingArea;
+                            worksheet.Cells[row, 6].Value = p.AppraisalValue;
+                            worksheet.Cells[row, 7].Value = p.MinimumBid;
+                            worksheet.Cells[row, 8].Value = p.Opb;
+                            worksheet.Cells[row, 9].Value = p.Status;
+                            worksheet.Cells[row, 10].Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
+                            worksheet.Cells[row, 11].Value = $"{p.GetProgressPercent()}%";
+
+                            worksheet.Cells[row, 4, row, 5].Style.Numberformat.Format = "#,##0.00";
+                            worksheet.Cells[row, 6, row, 8].Style.Numberformat.Format = "#,##0";
+                            row++;
+                        }
+
+                        // 합계
+                        worksheet.Cells[row, 1].Value = "합계";
+                        worksheet.Cells[row, 6].Formula = $"SUM(F5:F{row - 1})";
+                        worksheet.Cells[row, 7].Formula = $"SUM(G5:G{row - 1})";
+                        worksheet.Cells[row, 8].Formula = $"SUM(H5:H{row - 1})";
+                        worksheet.Cells[row, 1, row, 11].Style.Font.Bold = true;
+                        worksheet.Cells[row, 6, row, 8].Style.Numberformat.Format = "#,##0";
+
+                        worksheet.Cells.AutoFitColumns();
+                        sheetIndex++;
+                    }
+
+                    package.SaveAs(new FileInfo(outputPath));
+                    return outputPath;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 시트명 정리 (특수문자 제거)
+        /// </summary>
+        private string SanitizeSheetName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Unknown";
+
+            // Excel 시트명에 사용 불가능한 문자 제거
+            var invalid = new[] { ':', '\\', '/', '?', '*', '[', ']' };
+            foreach (var c in invalid)
+            {
+                name = name.Replace(c, '_');
+            }
+            return name.Trim();
+        }
     }
 }
 

@@ -247,7 +247,7 @@
             <!-- ========== 우측: 상세 정보 ========== -->
             <StackPanel Grid.Column="2">
                 
-                <!-- 데이터 업로드 섹션 (Phase 5.4) -->
+                <!-- 데이터디스크 업로드 섹션 (피드백 26, 27번) -->
                 <Border Background="{StaticResource PrimaryLightBrush}"
                         CornerRadius="8"
                         Padding="20"
@@ -265,27 +265,34 @@
                         </Grid.ColumnDefinitions>
                         
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="기초 데이터 업로드" 
+                            <TextBlock Text="데이터디스크 업로드" 
                                        Style="{StaticResource H4TextStyle}"
                                        Foreground="{StaticResource PrimaryBrush}"/>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <TextBlock Text="마지막 업로드:" 
-                                           Style="{StaticResource CaptionTextStyle}"
-                                           VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding LastDataUploadDate, StringFormat=yyyy-MM-dd HH:mm, TargetNullValue='업로드 내역 없음'}" 
-                                           Style="{StaticResource CaptionTextStyle}"
-                                           FontWeight="SemiBold"
-                                           Margin="6,0,0,0"
-                                           VerticalAlignment="Center"/>
+                                <Border Background="{StaticResource BlueGray100Brush}"
+                                        CornerRadius="4"
+                                        Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="업로드 일자:" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding LastDataUploadDate, StringFormat=yyyy-MM-dd HH:mm, TargetNullValue='업로드 내역 없음'}" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   Margin="6,0,0,0"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                            <TextBlock Text="엑셀 파일(.xlsx, .xls)로 기초 데이터를 업로드할 수 있습니다."
+                            <TextBlock Text="엑셀 파일(.xlsx, .xls)을 업로드하여 물건 데이터를 추가할 수 있습니다."
                                        Style="{StaticResource CaptionTextStyle}"
                                        Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,4,0,0"/>
+                                       Margin="0,8,0,0"/>
                         </StackPanel>
                         
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="데이터 업로드" 
+                            <Button Content="데이터디스크 업로드" 
                                     Command="{Binding UploadDataFileCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Padding="16,8"

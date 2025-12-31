@@ -1,9 +1,13 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
+using NPLogic.Services;
 using NPLogic.ViewModels;
 
 namespace NPLogic.Views
@@ -101,6 +105,41 @@ namespace NPLogic.Views
                         MainWindow.Instance?.NavigateToDashboard();
                         e.Handled = true;
                         break;
+                    case Key.F:
+                        // Ctrl+F: 검색창 토글
+                        ToggleSearchPanel();
+                        e.Handled = true;
+                        break;
+                }
+            }
+            else if (e.Key == Key.Escape)
+            {
+                // Esc: 검색창 닫기
+                if (_viewModel?.IsSearchPanelVisible == true)
+                {
+                    _viewModel.IsSearchPanelVisible = false;
+                    _viewModel.SearchText = "";
+                    e.Handled = true;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 검색창 토글
+        /// </summary>
+        private void ToggleSearchPanel()
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.IsSearchPanelVisible = !_viewModel.IsSearchPanelVisible;
+                if (_viewModel.IsSearchPanelVisible)
+                {
+                    // 검색창에 포커스
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        SearchTextBox?.Focus();
+                        SearchTextBox?.SelectAll();
+                    }), System.Windows.Threading.DispatcherPriority.Input);
                 }
             }
         }
@@ -443,6 +482,282 @@ namespace NPLogic.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"상권 지도를 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // ========== 인쇄/Excel 이벤트 핸들러 ==========
+
+        /// <summary>
+        /// 인쇄 버튼 클릭
+        /// </summary>
+        private void PrintButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.ContextMenu != null)
+            {
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        /// <summary>
+        /// Excel 버튼 클릭
+        /// </summary>
+        private void ExcelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.ContextMenu != null)
+            {
+                button.ContextMenu.IsOpen = true;
+            }
+        }
+
+        /// <summary>
+        /// 전체 인쇄
+        /// </summary>
+        private async void PrintAll_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Excel로 내보낸 후 인쇄
+                var tempPath = Path.Combine(Path.GetTempPath(), $"비핵심_전체_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                await ExportToExcelAll(tempPath);
+                
+                // Excel 파일 열기 (인쇄 대화상자)
+                Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
+                MessageBox.Show("Excel 파일이 열렸습니다.\nCtrl+P를 눌러 인쇄해주세요.", "인쇄", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"인쇄 준비 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 차주별 인쇄
+        /// </summary>
+        private async void PrintByBorrower_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var tempPath = Path.Combine(Path.GetTempPath(), $"비핵심_차주별_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                await ExportToExcelByBorrower(tempPath);
+                
+                Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
+                MessageBox.Show("Excel 파일이 열렸습니다.\nCtrl+P를 눌러 인쇄해주세요.", "인쇄", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"인쇄 준비 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 전체 Excel 내보내기
+        /// </summary>
+        private async void ExcelAll_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var dialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx",
+                    FileName = $"비핵심_전체_{DateTime.Now:yyyyMMdd}.xlsx",
+                    Title = "전체 데이터 Excel 저장"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await ExportToExcelAll(dialog.FileName);
+                    
+                    var result = MessageBox.Show(
+                        "Excel 파일이 저장되었습니다.\n파일을 열겠습니까?",
+                        "저장 완료",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Excel 내보내기 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 차주별 Excel 내보내기
+        /// </summary>
+        private async void ExcelByBorrower_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var dialog = new SaveFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx",
+                    FileName = $"비핵심_차주별_{DateTime.Now:yyyyMMdd}.xlsx",
+                    Title = "차주별 데이터 Excel 저장 (시트 분리)"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    await ExportToExcelByBorrower(dialog.FileName);
+                    
+                    var result = MessageBox.Show(
+                        "Excel 파일이 저장되었습니다.\n각 차주별로 시트가 분리되어 있습니다.\n파일을 열겠습니까?",
+                        "저장 완료",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Excel 내보내기 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 전체 데이터 Excel 내보내기 (공통 메서드)
+        /// </summary>
+        private async System.Threading.Tasks.Task ExportToExcelAll(string filePath)
+        {
+            if (_viewModel == null) return;
+
+            var excelService = App.ServiceProvider?.GetService<ExcelService>();
+            if (excelService == null)
+            {
+                MessageBox.Show("Excel 서비스를 사용할 수 없습니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var properties = await _viewModel.GetAllPropertiesAsync();
+            var programName = _viewModel.CurrentProjectName ?? "비핵심";
+            
+            await excelService.ExportNonCoreAllToExcelAsync(properties, programName, filePath);
+        }
+
+        /// <summary>
+        /// 차주별 데이터 Excel 내보내기 (공통 메서드)
+        /// </summary>
+        private async System.Threading.Tasks.Task ExportToExcelByBorrower(string filePath)
+        {
+            if (_viewModel == null) return;
+
+            var excelService = App.ServiceProvider?.GetService<ExcelService>();
+            if (excelService == null)
+            {
+                MessageBox.Show("Excel 서비스를 사용할 수 없습니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var propertiesByBorrower = await _viewModel.GetPropertiesGroupedByBorrowerAsync();
+            var programName = _viewModel.CurrentProjectName ?? "비핵심";
+            
+            await excelService.ExportNonCoreByBorrowerToExcelAsync(propertiesByBorrower, programName, filePath);
+        }
+
+        // ========== 검색 이벤트 핸들러 ==========
+
+        /// <summary>
+        /// 검색창 키보드 입력
+        /// </summary>
+        private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (_viewModel == null) return;
+
+            if (e.Key == Key.Enter)
+            {
+                if (Keyboard.Modifiers == ModifierKeys.Shift)
+                {
+                    // Shift+Enter: 이전 찾기
+                    _viewModel.FindPrevious();
+                }
+                else
+                {
+                    // Enter: 다음 찾기
+                    _viewModel.FindNext();
+                }
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape)
+            {
+                // Esc: 검색창 닫기
+                _viewModel.IsSearchPanelVisible = false;
+                _viewModel.SearchText = "";
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
+        /// 이전 찾기
+        /// </summary>
+        private void FindPrevious_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel?.FindPrevious();
+        }
+
+        /// <summary>
+        /// 다음 찾기
+        /// </summary>
+        private void FindNext_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel?.FindNext();
+        }
+
+        /// <summary>
+        /// 검색 패널 닫기
+        /// </summary>
+        private void CloseSearchPanel_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.IsSearchPanelVisible = false;
+                _viewModel.SearchText = "";
+            }
+        }
+
+        // ========== 필터 이벤트 핸들러 ==========
+
+        /// <summary>
+        /// 필터 조건 변경
+        /// </summary>
+        private void Filter_Changed(object sender, RoutedEventArgs e)
+        {
+            _viewModel?.ApplyFilters();
+        }
+
+        /// <summary>
+        /// 필터 초기화
+        /// </summary>
+        private void ClearFilters_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel?.ClearFilters();
+        }
+
+        /// <summary>
+        /// 필터 패널 닫기
+        /// </summary>
+        private void CloseFilterPanel_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.IsFilterPanelVisible = false;
+            }
+        }
+
+        /// <summary>
+        /// 필터 패널 열기
+        /// </summary>
+        private void OpenFilterPanel_Click(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.IsFilterPanelVisible = true;
             }
         }
     }

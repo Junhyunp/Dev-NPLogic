@@ -1,0 +1,358 @@
+<Window x:Class="NPLogic.Views.RightsAnalysisSheetWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="권리분석 시트" 
+        Height="700" 
+        Width="1200"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BackgroundBrush}">
+    
+    <Window.Resources>
+        <!-- 탭 헤더 스타일 -->
+        <Style x:Key="SheetTabStyle" TargetType="TabItem">
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <!-- 그리드 헤더 스타일 -->
+        <Style x:Key="GridHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 헤더 -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel>
+                <TextBlock Text="📊 권리분석 시트" 
+                           Style="{StaticResource H3TextStyle}"
+                           Margin="0,0,0,4"/>
+                <TextBlock x:Name="PropertyInfoText"
+                           Text="물건 정보가 로드되지 않았습니다."
+                           FontSize="13"
+                           Foreground="{StaticResource TextSecondaryBrush}"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="RefreshButton" 
+                        Content="🔄 새로고침" 
+                        Click="RefreshButton_Click"
+                        Style="{StaticResource SecondaryButton}"
+                        Padding="16,8"
+                        Margin="0,0,8,0"/>
+                <Button x:Name="ExportButton" 
+                        Content="📥 Excel 내보내기" 
+                        Click="ExportButton_Click"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="16,8"/>
+            </StackPanel>
+        </Grid>
+        
+        <!-- 탭 컨트롤: 갑구/을구 -->
+        <TabControl Grid.Row="1" x:Name="SheetTabControl">
+            
+            <!-- 갑구 (소유권 관련) 탭 -->
+            <TabItem Header="📋 갑구 (소유권)" Style="{StaticResource SheetTabStyle}">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 갑구 요약 -->
+                    <Border Grid.Row="0" 
+                            Background="{StaticResource WarningLightBrush}" 
+                            CornerRadius="6" 
+                            Padding="12" 
+                            Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📌 갑구" FontWeight="SemiBold" Margin="0,0,16,0"/>
+                            <TextBlock Text="소유권에 관한 사항 (소유권이전, 가압류, 가처분, 경매개시결정 등)"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Name="GapguCountText" 
+                                       Text=" | 총 0건"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource WarningBrush}"
+                                       Margin="16,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- 갑구 데이터 그리드 -->
+                    <DataGrid Grid.Row="1" 
+                              x:Name="GapguDataGrid"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              BorderThickness="1"
+                              BorderBrush="{StaticResource BlueGray200Brush}"
+                              ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
+                              RowHeight="36">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="순위번호" Binding="{Binding RightOrder}" Width="70">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="150"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="120"/>
+                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
+                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="Padding" Value="0,0,8,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="상태" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#E8F5E9"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                            <Setter Property="Background" Value="#FFEBEE"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="11">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="유효"/>
+                                                        <Setter Property="Foreground" Value="#388E3C"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                                <Setter Property="Text" Value="말소"/>
+                                                                <Setter Property="Foreground" Value="#D32F2F"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            
+            <!-- 을구 (소유권 외의 권리) 탭 -->
+            <TabItem Header="📋 을구 (소유권 외)" Style="{StaticResource SheetTabStyle}">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 을구 요약 -->
+                    <Border Grid.Row="0" 
+                            Background="{StaticResource SuccessLightBrush}" 
+                            CornerRadius="6" 
+                            Padding="12" 
+                            Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📌 을구" FontWeight="SemiBold" Margin="0,0,16,0"/>
+                            <TextBlock Text="소유권 이외의 권리에 관한 사항 (근저당권, 전세권, 지상권 등)"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Name="EulguCountText" 
+                                       Text=" | 총 0건"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource SuccessBrush}"
+                                       Margin="16,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- 을구 데이터 그리드 -->
+                    <DataGrid Grid.Row="1" 
+                              x:Name="EulguDataGrid"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              BorderThickness="1"
+                              BorderBrush="{StaticResource BlueGray200Brush}"
+                              ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
+                              RowHeight="36">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="순위번호" Binding="{Binding RightOrder}" Width="70">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="150"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="120"/>
+                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
+                            <DataGridTextColumn Header="채권최고액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="Padding" Value="0,0,8,0"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn Header="상태" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#E8F5E9"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                            <Setter Property="Background" Value="#FFEBEE"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock FontSize="11">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="유효"/>
+                                                        <Setter Property="Foreground" Value="#388E3C"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                                <Setter Property="Text" Value="말소"/>
+                                                                <Setter Property="Foreground" Value="#D32F2F"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <!-- 을구 합계 -->
+                    <Border Grid.Row="2" 
+                            Background="{StaticResource BlueGray50Brush}" 
+                            CornerRadius="4" 
+                            Padding="12" 
+                            Margin="0,8,0,0">
+                        <Grid>
+                            <TextBlock Text="채권최고액 합계" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="EulguTotalText" 
+                                       Text="0원" 
+                                       HorizontalAlignment="Right"
+                                       FontWeight="Bold"
+                                       FontSize="16"
+                                       Foreground="{StaticResource PrimaryBrush}"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+            
+            <!-- 소유자 정보 탭 -->
+            <TabItem Header="👤 소유자 정보" Style="{StaticResource SheetTabStyle}">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 소유자 요약 -->
+                    <Border Grid.Row="0" 
+                            Background="{StaticResource PrimaryLightBrush}" 
+                            CornerRadius="6" 
+                            Padding="12" 
+                            Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📌 소유자" FontWeight="SemiBold" Margin="0,0,16,0"/>
+                            <TextBlock Text="현재 등기부상 소유자 정보"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock x:Name="OwnerCountText" 
+                                       Text=" | 총 0명"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource PrimaryBrush}"
+                                       Margin="16,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- 소유자 데이터 그리드 -->
+                    <DataGrid Grid.Row="1" 
+                              x:Name="OwnerDataGrid"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="All"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              BorderThickness="1"
+                              BorderBrush="{StaticResource BlueGray200Brush}"
+                              ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
+                              RowHeight="36">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="소유자명" Binding="{Binding OwnerName}" Width="150"/>
+                            <DataGridTextColumn Header="주민번호/사업자번호" Binding="{Binding OwnerRegNo}" Width="150"/>
+                            <DataGridTextColumn Header="지분" Binding="{Binding ShareRatio}" Width="100"/>
+                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="등기원인" Binding="{Binding RegistrationCause}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
+        <!-- 하단 버튼 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="닫기" 
+                    Click="CloseButton_Click"
+                    Style="{StaticResource SecondaryButton}"
+                    Padding="24,10"/>
+        </StackPanel>
+    </Grid>
+</Window>
+

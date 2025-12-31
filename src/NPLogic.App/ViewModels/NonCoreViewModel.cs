@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,36 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasUnsavedChanges;
+
+        // ========== 필터용 추가 속성 ==========
+
+        /// <summary>물건유형</summary>
+        [ObservableProperty]
+        private string _propertyType = "";
+
+        /// <summary>차주명</summary>
+        [ObservableProperty]
+        private string _borrowerName = "";
+
+        /// <summary>경매진행 여부</summary>
+        [ObservableProperty]
+        private bool _isAuctionInProgress;
+
+        /// <summary>회생차주 여부</summary>
+        [ObservableProperty]
+        private bool _isRestructuring;
+
+        /// <summary>개인회생 여부</summary>
+        [ObservableProperty]
+        private bool _isPersonalRestructuring;
+
+        /// <summary>차주거주 여부</summary>
+        [ObservableProperty]
+        private bool _isBorrowerResidence;
+
+        /// <summary>주소</summary>
+        [ObservableProperty]
+        private string _address = "";
     }
 
     /// <summary>
@@ -131,6 +162,69 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private string? _currentProjectName;
+
+        // ========== 검색 및 필터 기능 (신규) ==========
+
+        /// <summary>
+        /// Ctrl+F 검색창 표시 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _isSearchPanelVisible;
+
+        /// <summary>
+        /// 검색어
+        /// </summary>
+        [ObservableProperty]
+        private string _searchText = "";
+
+        /// <summary>
+        /// 필터 패널 표시 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _isFilterPanelVisible = true;
+
+        /// <summary>
+        /// 전체 차주/물건 목록 (필터링 전)
+        /// </summary>
+        private List<PropertyTabItem> _allPropertyTabs = new();
+
+        // ========== 필터 조건들 ==========
+
+        /// <summary>회생차주 필터</summary>
+        [ObservableProperty]
+        private bool _filterRestructuring;
+
+        /// <summary>개인회생 필터</summary>
+        [ObservableProperty]
+        private bool _filterPersonalRestructuring;
+
+        /// <summary>차주거주 필터</summary>
+        [ObservableProperty]
+        private bool _filterBorrowerResidence;
+
+        /// <summary>경매진행 필터</summary>
+        [ObservableProperty]
+        private bool _filterAuctionInProgress;
+
+        /// <summary>상가 필터</summary>
+        [ObservableProperty]
+        private bool _filterCommercial;
+
+        /// <summary>주택 필터</summary>
+        [ObservableProperty]
+        private bool _filterResidential;
+
+        /// <summary>
+        /// 필터링된 물건 수
+        /// </summary>
+        [ObservableProperty]
+        private int _filteredCount;
+
+        /// <summary>
+        /// 전체 물건 수
+        /// </summary>
+        [ObservableProperty]
+        private int _totalCount;
 
         public NonCoreViewModel(PropertyRepository? propertyRepository = null, BorrowerRepository? borrowerRepository = null)
         {
@@ -400,6 +494,236 @@ namespace NPLogic.ViewModels
                 return null;
 
             return await _propertyRepository.GetByIdAsync(SelectedPropertyTab.PropertyId);
+        }
+
+        // ========== 검색 및 필터 기능 메서드 (신규) ==========
+
+        /// <summary>
+        /// 검색창 토글 (Ctrl+F)
+        /// </summary>
+        [RelayCommand]
+        public void ToggleSearchPanel()
+        {
+            IsSearchPanelVisible = !IsSearchPanelVisible;
+            if (!IsSearchPanelVisible)
+            {
+                SearchText = "";
+                ApplyFilters();
+            }
+        }
+
+        /// <summary>
+        /// 필터 패널 토글
+        /// </summary>
+        [RelayCommand]
+        public void ToggleFilterPanel()
+        {
+            IsFilterPanelVisible = !IsFilterPanelVisible;
+        }
+
+        /// <summary>
+        /// 검색 실행
+        /// </summary>
+        [RelayCommand]
+        public void ExecuteSearch()
+        {
+            ApplyFilters();
+        }
+
+        /// <summary>
+        /// 필터 적용
+        /// </summary>
+        public void ApplyFilters()
+        {
+            if (!_allPropertyTabs.Any())
+            {
+                _allPropertyTabs = PropertyTabs.ToList();
+            }
+
+            var filtered = _allPropertyTabs.AsEnumerable();
+
+            // 텍스트 검색 (차주번호, 물건번호에서 검색)
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var searchLower = SearchText.ToLower();
+                filtered = filtered.Where(p => 
+                    (p.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (p.BorrowerNumber?.ToLower().Contains(searchLower) ?? false));
+            }
+
+            // 필터 조건 적용 (PropertyType 기반)
+            if (FilterCommercial || FilterResidential)
+            {
+                filtered = filtered.Where(p =>
+                {
+                    if (FilterCommercial && p.PropertyType == "상가") return true;
+                    if (FilterResidential && (p.PropertyType == "주택" || p.PropertyType == "아파트" || p.PropertyType == "빌라")) return true;
+                    return !FilterCommercial && !FilterResidential;
+                });
+            }
+
+            // 경매진행 필터
+            if (FilterAuctionInProgress)
+            {
+                filtered = filtered.Where(p => p.IsAuctionInProgress);
+            }
+
+            // 회생차주 필터
+            if (FilterRestructuring)
+            {
+                filtered = filtered.Where(p => p.IsRestructuring);
+            }
+
+            // 개인회생 필터
+            if (FilterPersonalRestructuring)
+            {
+                filtered = filtered.Where(p => p.IsPersonalRestructuring);
+            }
+
+            // 차주거주 필터
+            if (FilterBorrowerResidence)
+            {
+                filtered = filtered.Where(p => p.IsBorrowerResidence);
+            }
+
+            var filteredList = filtered.ToList();
+            
+            PropertyTabs.Clear();
+            foreach (var item in filteredList)
+            {
+                PropertyTabs.Add(item);
+            }
+
+            FilteredCount = PropertyTabs.Count;
+            TotalCount = _allPropertyTabs.Count;
+
+            // 첫 번째 항목 선택
+            if (PropertyTabs.Any() && SelectedPropertyTab == null)
+            {
+                SelectPropertyTab(PropertyTabs.First().PropertyId);
+            }
+        }
+
+        /// <summary>
+        /// 필터 초기화
+        /// </summary>
+        [RelayCommand]
+        public void ClearFilters()
+        {
+            FilterRestructuring = false;
+            FilterPersonalRestructuring = false;
+            FilterBorrowerResidence = false;
+            FilterAuctionInProgress = false;
+            FilterCommercial = false;
+            FilterResidential = false;
+            SearchText = "";
+
+            // 전체 목록 복원
+            PropertyTabs.Clear();
+            foreach (var item in _allPropertyTabs)
+            {
+                PropertyTabs.Add(item);
+            }
+
+            FilteredCount = PropertyTabs.Count;
+            TotalCount = _allPropertyTabs.Count;
+        }
+
+        /// <summary>
+        /// 모든 물건 가져오기 (Excel/인쇄용)
+        /// </summary>
+        public async Task<List<Property>> GetAllPropertiesAsync()
+        {
+            if (_propertyRepository == null || !_currentProgramId.HasValue)
+                return new List<Property>();
+
+            var properties = await _propertyRepository.GetByProgramIdAsync(_currentProgramId.Value);
+            return properties.ToList();
+        }
+
+        /// <summary>
+        /// 차주별 물건 가져오기 (Excel/인쇄용)
+        /// </summary>
+        public async Task<Dictionary<string, List<Property>>> GetPropertiesGroupedByBorrowerAsync()
+        {
+            var properties = await GetAllPropertiesAsync();
+            return properties
+                .GroupBy(p => p.DebtorName ?? "미지정")
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
+
+        /// <summary>
+        /// 검색 하이라이트용 - 현재 검색어와 일치하는 다음 항목으로 이동
+        /// </summary>
+        [RelayCommand]
+        public void FindNext()
+        {
+            if (string.IsNullOrWhiteSpace(SearchText) || !PropertyTabs.Any())
+                return;
+
+            var searchLower = SearchText.ToLower();
+            var currentIndex = SelectedPropertyTab != null ? PropertyTabs.IndexOf(SelectedPropertyTab) : -1;
+
+            // 현재 위치 다음부터 검색
+            for (int i = currentIndex + 1; i < PropertyTabs.Count; i++)
+            {
+                var tab = PropertyTabs[i];
+                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                {
+                    SelectPropertyTab(tab.PropertyId);
+                    return;
+                }
+            }
+
+            // 처음부터 다시 검색
+            for (int i = 0; i <= currentIndex; i++)
+            {
+                var tab = PropertyTabs[i];
+                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                {
+                    SelectPropertyTab(tab.PropertyId);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 검색 하이라이트용 - 이전 항목으로 이동
+        /// </summary>
+        [RelayCommand]
+        public void FindPrevious()
+        {
+            if (string.IsNullOrWhiteSpace(SearchText) || !PropertyTabs.Any())
+                return;
+
+            var searchLower = SearchText.ToLower();
+            var currentIndex = SelectedPropertyTab != null ? PropertyTabs.IndexOf(SelectedPropertyTab) : PropertyTabs.Count;
+
+            // 현재 위치 이전부터 검색
+            for (int i = currentIndex - 1; i >= 0; i--)
+            {
+                var tab = PropertyTabs[i];
+                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                {
+                    SelectPropertyTab(tab.PropertyId);
+                    return;
+                }
+            }
+
+            // 끝에서부터 다시 검색
+            for (int i = PropertyTabs.Count - 1; i >= currentIndex; i--)
+            {
+                var tab = PropertyTabs[i];
+                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                {
+                    SelectPropertyTab(tab.PropertyId);
+                    return;
+                }
+            }
         }
     }
 }

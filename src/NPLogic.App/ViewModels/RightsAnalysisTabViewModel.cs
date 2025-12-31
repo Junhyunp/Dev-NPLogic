@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Core.Services;
 using NPLogic.Data.Repositories;
+using NPLogic.Views;
 
 namespace NPLogic.ViewModels
 {
@@ -18,6 +19,7 @@ namespace NPLogic.ViewModels
     public partial class RightsAnalysisTabViewModel : ObservableObject
     {
         private readonly RightAnalysisRepository _repository;
+        private readonly RegistryRepository _registryRepository;
         private readonly RightAnalysisRuleEngine _ruleEngine;
         private Guid? _propertyId;
         private Property? _property;
@@ -56,9 +58,10 @@ namespace NPLogic.ViewModels
 
         #endregion
 
-        public RightsAnalysisTabViewModel(RightAnalysisRepository repository)
+        public RightsAnalysisTabViewModel(RightAnalysisRepository repository, RegistryRepository registryRepository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _ruleEngine = new RightAnalysisRuleEngine();
             InitializeSeniorRightsItems();
         }
@@ -463,6 +466,39 @@ namespace NPLogic.ViewModels
                 MessageBoxButton.OK,
                 MessageBoxImage.Information
             );
+        }
+
+        /// <summary>
+        /// 권리분석 시트 팝업 열기
+        /// </summary>
+        [RelayCommand]
+        private void OpenRightsSheet()
+        {
+            if (_propertyId == null)
+            {
+                MessageBox.Show(
+                    "물건 정보가 선택되지 않았습니다.",
+                    "알림",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var propertyInfo = _property?.AddressFull ?? "물건 정보";
+                var window = new RightsAnalysisSheetWindow(
+                    _registryRepository,
+                    _propertyId.Value,
+                    propertyInfo);
+                
+                window.Owner = Application.Current.MainWindow;
+                window.Show(); // 모달리스로 열어서 계속 참조 가능
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"권리분석 시트 열기 실패: {ex.Message}";
+            }
         }
 
         #endregion

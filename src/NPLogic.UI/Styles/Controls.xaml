@@ -147,15 +147,15 @@
         </Setter>
     </Style>
 
-    <!-- NonCore Tab Style (Phase 3: 비핵심 9개 탭용) -->
+    <!-- NonCore Tab Style (Phase 3: 비핵심 9개 탭용) - 피드백 반영: 크기 축소 -->
     <Style x:Key="NonCoreTabStyle" TargetType="RadioButton">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="0,0,4,0"/>
+        <Setter Property="Margin" Value="0,0,2,0"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
@@ -163,7 +163,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="Transparent"
                             BorderThickness="0,0,0,2"
-                            Padding="16,12">
+                            Padding="12,8">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>

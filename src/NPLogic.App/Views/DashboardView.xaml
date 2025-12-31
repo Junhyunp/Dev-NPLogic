@@ -69,11 +69,11 @@
             </Setter>
         </Style>
 
-        <!-- 내부 탭 버튼 스타일 -->
+        <!-- 내부 탭 버튼 스타일 - 피드백 반영: 크기 축소 -->
         <Style x:Key="InnerTabButton" TargetType="RadioButton">
-            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Padding" Value="12,6"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -179,31 +179,47 @@
                     </TextBlock>
                 </StackPanel>
 
-                <!-- 우측 버튼들 -->
+                <!-- 우측 버튼들 - 피드백 반영: 아이콘+ToolTip 추가 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="새로고침" 
-                            Command="{Binding RefreshDataCommand}"
+                    <Button Command="{Binding RefreshDataCommand}"
                             Style="{StaticResource SecondaryButton}"
-                            Padding="12,8"
-                            Margin="0,0,8,0"/>
-                    <!-- 롤업 버튼 (Phase 4.5) -->
-                    <Button Style="{StaticResource SecondaryButton}"
-                            Padding="12,8"
+                            Padding="8,6"
                             Margin="0,0,8,0"
-                            Click="RollupButton_Click"
-                            ToolTip="전체 현황 창 열기">
+                            ToolTip="데이터를 서버에서 다시 불러옵니다 (Ctrl+R)">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="TableLarge" 
-                                                     Width="16" Height="16" 
+                            <materialDesign:PackIcon Kind="Refresh" 
+                                                     Width="14" Height="14" 
                                                      VerticalAlignment="Center"
-                                                     Margin="0,0,6,0"/>
-                            <TextBlock Text="롤업" VerticalAlignment="Center"/>
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="새로고침" VerticalAlignment="Center" FontSize="12"/>
                         </StackPanel>
                     </Button>
-                    <Button Content="Excel 내보내기" 
-                            Command="{Binding ExportToExcelCommand}"
+                    <!-- 롤업 버튼 (Phase 4.5) - 피드백 반영: 크기 축소 -->
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Padding="8,6"
+                            Margin="0,0,8,0"
+                            Click="RollupButton_Click"
+                            ToolTip="전체 현황 창 열기 (비핵심 전체 데이터 한눈에 보기)">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="TableLarge" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding ExportToExcelCommand}"
                             Style="{StaticResource PrimaryButton}"
-                            Padding="12,8"/>
+                            Padding="8,6"
+                            ToolTip="현재 데이터를 Excel 파일로 내보내기">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="MicrosoftExcel" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
 

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -7,24 +6,20 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
-using ClosedXML.Excel;
-using ClosedXML.Graphics;
 
 namespace NPLogic.Views
 {
     /// <summary>
-    /// 담보물건 Export 뷰 (4분할 미리보기)
+    /// 지도 탭 뷰 (5분할: 지적도, 위치도, 토지이용계획확인원, 요약건축물대장, 건축물대장 세부)
     /// </summary>
     public partial class MapView : UserControl
     {
         private bool _isInitialized = false;
         private bool _isMapReady = false;
-        private bool _isRoadViewInitialized = false;
+        private bool _isLocationMapInitialized = false;
         private bool _isLandUsePlanInitialized = false;
-        private string? _kakaoMapApiKey;
 
         // 현재 위치 (설정된 물건 위치)
         private double _currentLat = 37.5665;
@@ -36,10 +31,11 @@ namespace NPLogic.Views
 
         // Export 관련 필드
         private byte[]? _capturedMapImage;
-        private byte[]? _capturedRoadViewImage;
+        private byte[]? _capturedLocationMapImage;
         private byte[]? _capturedLandUsePlanImage;
         private string? _landUsePlanPath;
         private string? _buildingRegisterPath;
+        private string? _buildingDetailPath;
 
         /// <summary>
         /// 지도 준비 완료 이벤트
@@ -49,38 +45,6 @@ namespace NPLogic.Views
         public MapView()
         {
             InitializeComponent();
-            LoadApiKey();
-        }
-
-        /// <summary>
-        /// 설정 파일에서 API 키 로드
-        /// </summary>
-        private void LoadApiKey()
-        {
-            try
-            {
-                var basePath = AppDomain.CurrentDomain.BaseDirectory;
-                var configPath = Path.Combine(basePath, "appsettings.json");
-
-                if (File.Exists(configPath))
-                {
-                    var config = new ConfigurationBuilder()
-                        .SetBasePath(basePath)
-                        .AddJsonFile("appsettings.json", optional: true)
-                        .Build();
-
-                    _kakaoMapApiKey = config["KakaoMap:ApiKey"] ?? config["KakaoMapApiKey"];
-                }
-
-                if (string.IsNullOrEmpty(_kakaoMapApiKey))
-                {
-                    _kakaoMapApiKey = Environment.GetEnvironmentVariable("KAKAO_MAP_API_KEY");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"API 키 로드 실패: {ex.Message}");
-            }
         }
 
         private async void MapView_Loaded(object sender, RoutedEventArgs e)
@@ -95,7 +59,7 @@ namespace NPLogic.Views
             catch (Exception ex)
             {
                 ShowMapError();
-                ShowRoadViewError();
+                ShowLocationMapError();
                 ShowLandUsePlanError("초기화 실패");
                 System.Diagnostics.Debug.WriteLine($"초기화 실패: {ex.Message}");
             }
@@ -106,10 +70,6 @@ namespace NPLogic.Views
             if (MapWebView.CoreWebView2 != null)
             {
                 MapWebView.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
-            }
-            if (RoadViewWebView.CoreWebView2 != null)
-            {
-                RoadViewWebView.CoreWebView2.NavigationCompleted -= RoadViewWebView_NavigationCompleted;
             }
         }
 
@@ -170,64 +130,134 @@ namespace NPLogic.Views
                 ShowMapError();
             }
             
-            // 로드뷰 초기화 및 캡처
-            await InitializeAndCaptureRoadViewAsync();
+            // 위치도 초기화 및 캡처
+            await InitializeAndCaptureLocationMapAsync();
             
             // 토지이용계획확인원 자동 조회 (주소가 있는 경우)
             await InitializeAndCaptureLandUsePlanAsync();
         }
 
         /// <summary>
-        /// 로드뷰 초기화 및 캡처
+        /// 위치도 초기화 및 캡처 (외부 맵 서비스 - 일반 지도)
         /// </summary>
-        private async Task InitializeAndCaptureRoadViewAsync()
+        private async Task InitializeAndCaptureLocationMapAsync()
         {
             try
             {
-                if (string.IsNullOrEmpty(_kakaoMapApiKey))
-                {
-                    ShowRoadViewError();
-                    return;
-                }
-
-                if (!_isRoadViewInitialized)
+                if (!_isLocationMapInitialized)
                 {
                     var env = await CoreWebView2Environment.CreateAsync();
-                    await RoadViewWebView.EnsureCoreWebView2Async(env);
-                    _isRoadViewInitialized = true;
+                    await LocationMapWebView.EnsureCoreWebView2Async(env);
+                    _isLocationMapInitialized = true;
                 }
 
-                var roadViewTcs = new TaskCompletionSource<bool>();
+                var locationMapTcs = new TaskCompletionSource<bool>();
                 
                 void NavigationHandler(object? s, CoreWebView2NavigationCompletedEventArgs args)
                 {
-                    roadViewTcs.TrySetResult(args.IsSuccess);
+                    locationMapTcs.TrySetResult(args.IsSuccess);
                 }
                 
-                RoadViewWebView.CoreWebView2.NavigationCompleted += NavigationHandler;
+                LocationMapWebView.CoreWebView2.NavigationCompleted += NavigationHandler;
                 
-                var roadViewHtml = GenerateRoadViewHtml(_currentLat, _currentLng);
-                RoadViewWebView.NavigateToString(roadViewHtml);
+                // 외부 맵 서비스 사용 (지적도와 동일한 서비스, 위치도 모드)
+                string locationMapUrl = "http://54.116.25.55:8080/?mode=location";
+                LocationMapWebView.CoreWebView2.Navigate(locationMapUrl);
                 
-                // 로드뷰 로드 완료 대기 (최대 8초)
-                var roadViewLoaded = await Task.WhenAny(roadViewTcs.Task, Task.Delay(8000)) == roadViewTcs.Task && roadViewTcs.Task.Result;
+                // 위치도 로드 완료 대기 (최대 10초)
+                var locationMapLoaded = await Task.WhenAny(locationMapTcs.Task, Task.Delay(10000)) == locationMapTcs.Task && locationMapTcs.Task.Result;
                 
-                RoadViewWebView.CoreWebView2.NavigationCompleted -= NavigationHandler;
+                LocationMapWebView.CoreWebView2.NavigationCompleted -= NavigationHandler;
                 
-                if (roadViewLoaded)
+                if (locationMapLoaded)
                 {
-                    await Task.Delay(2000); // 로드뷰 렌더링 대기
-                    await CaptureRoadViewImageAsync();
+                    // 주소가 있으면 검색
+                    if (!string.IsNullOrEmpty(_currentAddress))
+                    {
+                        await SetLocationMapAddressAsync(_currentAddress);
+                        await Task.Delay(2000); // 검색 후 대기
+                    }
+                    else
+                    {
+                        await Task.Delay(1500); // 기본 로딩 대기
+                    }
+                    
+                    await CaptureLocationMapImageAsync();
                 }
                 else
                 {
-                    ShowRoadViewError();
+                    ShowLocationMapError();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"로드뷰 초기화 실패: {ex.Message}");
-                ShowRoadViewError();
+                System.Diagnostics.Debug.WriteLine($"위치도 초기화 실패: {ex.Message}");
+                ShowLocationMapError();
+            }
+        }
+
+        /// <summary>
+        /// 위치도에 주소 설정
+        /// </summary>
+        private async Task SetLocationMapAddressAsync(string address)
+        {
+            try
+            {
+                if (LocationMapWebView.CoreWebView2 == null) return;
+                
+                string script = $@"
+                    (function() {{
+                        var textarea = document.getElementById('batchAddressInput');
+                        var searchBtn = document.getElementById('batchSearchBtn');
+                        if (textarea && searchBtn) {{
+                            textarea.value = '{EscapeJsString(address)}';
+                            searchBtn.click();
+                        }}
+                    }})();
+                ";
+                await LocationMapWebView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"위치도 주소 설정 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 위치도 이미지 캡처
+        /// </summary>
+        private async Task CaptureLocationMapImageAsync()
+        {
+            try
+            {
+                if (LocationMapWebView.CoreWebView2 == null)
+                {
+                    ShowLocationMapError();
+                    return;
+                }
+
+                using var stream = new MemoryStream();
+                await LocationMapWebView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
+                _capturedLocationMapImage = stream.ToArray();
+
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.StreamSource = new MemoryStream(_capturedLocationMapImage);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+
+                Dispatcher.Invoke(() =>
+                {
+                    PreviewLocationMapImage.Source = bitmap;
+                    LocationMapLoadingState.Visibility = Visibility.Collapsed;
+                    LocationMapEmptyState.Visibility = Visibility.Collapsed;
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"위치도 캡처 실패: {ex.Message}");
+                ShowLocationMapError();
             }
         }
 
@@ -560,11 +590,6 @@ namespace NPLogic.Views
 
         #endregion
 
-        private void RoadViewWebView_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
-        {
-            // 필요 시 처리
-        }
-
         /// <summary>
         /// JavaScript에서 보낸 메시지 처리
         /// </summary>
@@ -605,84 +630,7 @@ namespace NPLogic.Views
             }
         }
 
-        /// <summary>
-        /// 로드뷰 HTML 생성
-        /// </summary>
-        private string GenerateRoadViewHtml(double lat, double lng)
-        {
-            var apiKey = _kakaoMapApiKey ?? "";
-            
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                return @"<!DOCTYPE html>
-<html><body style='background:#F1F5F9;color:#94A3B8;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;'>
-<p>API 키가 필요합니다</p>
-</body></html>";
-            }
-
-            return string.Format(@"<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='utf-8'>
-    <style>body{{margin:0;padding:0;}}#roadview{{width:100%;height:100vh;}}</style>
-    <script src='https://dapi.kakao.com/v2/maps/sdk.js?appkey={0}'></script>
-</head>
-<body>
-    <div id='roadview'></div>
-    <script>
-        var roadviewContainer = document.getElementById('roadview');
-        var roadview = new kakao.maps.Roadview(roadviewContainer);
-        var roadviewClient = new kakao.maps.RoadviewClient();
-        var position = new kakao.maps.LatLng({1}, {2});
-        
-        roadviewClient.getNearestPanoId(position, 50, function(panoId) {{
-            if (panoId) {{
-                roadview.setPanoId(panoId, position);
-            }} else {{
-                document.body.innerHTML = '<div style=""background:#F1F5F9;color:#94A3B8;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;""><p>이 위치에 로드뷰가 없습니다</p></div>';
-            }}
-        }});
-    </script>
-</body>
-</html>", apiKey, lat, lng);
-        }
-
         #region UI 이벤트 핸들러
-
-        /// <summary>
-        /// 새로고침 버튼 클릭
-        /// </summary>
-        private async void RefreshAll_Click(object sender, RoutedEventArgs e)
-        {
-            // 로딩 상태로 변경
-            MapLoadingState.Visibility = Visibility.Visible;
-            MapEmptyState.Visibility = Visibility.Collapsed;
-            PreviewMapImage.Source = null;
-            
-            RoadViewLoadingState.Visibility = Visibility.Visible;
-            RoadViewEmptyState.Visibility = Visibility.Collapsed;
-            PreviewRoadViewImage.Source = null;
-            
-            LandUsePlanLoadingState.Visibility = Visibility.Visible;
-            LandUsePlanEmptyState.Visibility = Visibility.Collapsed;
-            PreviewLandUsePlanImage.Source = null;
-            
-            _isInitialized = false;
-            _isMapReady = false;
-            
-            try
-            {
-                await InitializeAndCaptureAsync();
-                _isInitialized = true;
-            }
-            catch (Exception ex)
-            {
-                ShowMapError();
-                ShowRoadViewError();
-                ShowLandUsePlanError("새로고침 실패");
-                System.Diagnostics.Debug.WriteLine($"새로고침 실패: {ex.Message}");
-            }
-        }
 
         /// <summary>
         /// 지도 다시 시도 버튼 클릭
@@ -710,20 +658,20 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 로드뷰 다시 시도 버튼 클릭
+        /// 위치도 다시 시도 버튼 클릭
         /// </summary>
-        private async void RetryRoadView_Click(object sender, RoutedEventArgs e)
+        private async void RetryLocationMap_Click(object sender, RoutedEventArgs e)
         {
-            RoadViewLoadingState.Visibility = Visibility.Visible;
-            RoadViewEmptyState.Visibility = Visibility.Collapsed;
+            LocationMapLoadingState.Visibility = Visibility.Visible;
+            LocationMapEmptyState.Visibility = Visibility.Collapsed;
             
             try
             {
-                await InitializeAndCaptureRoadViewAsync();
+                await InitializeAndCaptureLocationMapAsync();
             }
             catch
             {
-                ShowRoadViewError();
+                ShowLocationMapError();
             }
         }
 
@@ -783,6 +731,24 @@ namespace NPLogic.Views
             }
         }
 
+        /// <summary>
+        /// 건축물대장 세부 업로드 버튼 클릭
+        /// </summary>
+        private void UploadBuildingDetail_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "건축물대장 세부 선택",
+                Filter = "이미지 파일|*.png;*.jpg;*.jpeg;*.pdf|모든 파일|*.*"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                _buildingDetailPath = dialog.FileName;
+                LoadPreviewImage(PreviewBuildingDetailImage, BuildingDetailEmptyState, _buildingDetailPath);
+            }
+        }
+
         #endregion
 
         #region 공개 API
@@ -807,7 +773,7 @@ namespace NPLogic.Views
             // 위치 변경 후 다시 캡처
             await Task.Delay(1500);
             await CaptureMapImageAsync();
-            await InitializeAndCaptureRoadViewAsync();
+            await InitializeAndCaptureLocationMapAsync();
             await InitializeAndCaptureLandUsePlanAsync();
         }
 
@@ -882,44 +848,6 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 로드뷰 이미지 캡처
-        /// </summary>
-        private async Task CaptureRoadViewImageAsync()
-        {
-            try
-            {
-                if (RoadViewWebView.CoreWebView2 == null)
-                {
-                    ShowRoadViewError();
-                    return;
-                }
-
-                using var stream = new MemoryStream();
-                await RoadViewWebView.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png, stream);
-                _capturedRoadViewImage = stream.ToArray();
-
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.StreamSource = new MemoryStream(_capturedRoadViewImage);
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.EndInit();
-                bitmap.Freeze();
-
-                Dispatcher.Invoke(() =>
-                {
-                    PreviewRoadViewImage.Source = bitmap;
-                    RoadViewLoadingState.Visibility = Visibility.Collapsed;
-                    RoadViewEmptyState.Visibility = Visibility.Collapsed;
-                });
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"로드뷰 캡처 실패: {ex.Message}");
-                ShowRoadViewError();
-            }
-        }
-
-        /// <summary>
         /// 파일에서 미리보기 이미지 로드
         /// </summary>
         private void LoadPreviewImage(System.Windows.Controls.Image imageControl, StackPanel emptyState, string filePath)
@@ -968,12 +896,12 @@ namespace NPLogic.Views
             });
         }
 
-        private void ShowRoadViewError()
+        private void ShowLocationMapError()
         {
             Dispatcher.Invoke(() =>
             {
-                RoadViewLoadingState.Visibility = Visibility.Collapsed;
-                RoadViewEmptyState.Visibility = Visibility.Visible;
+                LocationMapLoadingState.Visibility = Visibility.Collapsed;
+                LocationMapEmptyState.Visibility = Visibility.Visible;
             });
         }
 
@@ -989,205 +917,6 @@ namespace NPLogic.Views
 
         #endregion
 
-        #region Excel Export
-
-        /// <summary>
-        /// Excel Export 버튼 클릭
-        /// </summary>
-        private async void ExportExcel_Click(object sender, RoutedEventArgs e)
-        {
-            var saveDialog = new SaveFileDialog
-            {
-                Title = "Excel 파일 저장",
-                Filter = "Excel 파일|*.xlsx",
-                FileName = $"담보물건_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx"
-            };
-
-            if (saveDialog.ShowDialog() != true) return;
-
-            try
-            {
-                await ExportToExcelAsync(saveDialog.FileName);
-                
-                var result = MessageBox.Show(
-                    "Excel 파일이 저장되었습니다.\n\n파일을 열어보시겠습니까?",
-                    "완료",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Information);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    Process.Start(new ProcessStartInfo(saveDialog.FileName) { UseShellExecute = true });
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Excel 생성 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// Excel 파일로 Export
-        /// </summary>
-        private async Task ExportToExcelAsync(string filePath)
-        {
-            await Task.Run(() =>
-            {
-                LoadOptions.DefaultGraphicEngine = new DefaultGraphicEngine("Arial");
-
-                using var workbook = new XLWorkbook();
-                var worksheet = workbook.Worksheets.Add("담보물건");
-
-                worksheet.Column(1).Width = 20;
-                worksheet.Column(2).Width = 40;
-                worksheet.Column(3).Width = 20;
-                worksheet.Column(4).Width = 40;
-
-                int currentRow = 1;
-
-                // 제목
-                worksheet.Cell(currentRow, 1).Value = "담보물건 조사서";
-                worksheet.Range(currentRow, 1, currentRow, 4).Merge();
-                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                worksheet.Cell(currentRow, 1).Style.Font.FontSize = 16;
-                worksheet.Cell(currentRow, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                currentRow += 2;
-
-                // 기본 정보
-                worksheet.Cell(currentRow, 1).Value = "좌표";
-                worksheet.Cell(currentRow, 2).Value = $"{_currentLat:F6}, {_currentLng:F6}";
-                currentRow++;
-                
-                if (!string.IsNullOrEmpty(_currentAddress))
-                {
-                    worksheet.Cell(currentRow, 1).Value = "주소";
-                    worksheet.Cell(currentRow, 2).Value = _currentAddress;
-                }
-                currentRow += 2;
-
-                // 지적도 섹션
-                worksheet.Cell(currentRow, 1).Value = "지적도";
-                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                currentRow++;
-
-                if (_capturedMapImage != null)
-                {
-                    var tempMapPath = Path.Combine(Path.GetTempPath(), $"map_{Guid.NewGuid()}.png");
-                    File.WriteAllBytes(tempMapPath, _capturedMapImage);
-                    
-                    var mapPicture = worksheet.AddPicture(tempMapPath);
-                    mapPicture.MoveTo(worksheet.Cell(currentRow, 1));
-                    mapPicture.Scale(0.5);
-                    
-                    currentRow += 15;
-                    File.Delete(tempMapPath);
-                }
-                else
-                {
-                    worksheet.Cell(currentRow, 1).Value = "(캡처 없음)";
-                    currentRow += 2;
-                }
-
-                // 로드뷰 섹션
-                worksheet.Cell(currentRow, 1).Value = "로드뷰";
-                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                currentRow++;
-
-                if (_capturedRoadViewImage != null)
-                {
-                    var tempRoadViewPath = Path.Combine(Path.GetTempPath(), $"roadview_{Guid.NewGuid()}.png");
-                    File.WriteAllBytes(tempRoadViewPath, _capturedRoadViewImage);
-                    
-                    var roadViewPicture = worksheet.AddPicture(tempRoadViewPath);
-                    roadViewPicture.MoveTo(worksheet.Cell(currentRow, 1));
-                    roadViewPicture.Scale(0.5);
-                    
-                    currentRow += 15;
-                    File.Delete(tempRoadViewPath);
-                }
-                else
-                {
-                    worksheet.Cell(currentRow, 1).Value = "(캡처 없음)";
-                    currentRow += 2;
-                }
-
-                // 토지이용계획확인원 섹션
-                worksheet.Cell(currentRow, 1).Value = "토지이용계획확인원";
-                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                currentRow++;
-
-                if (_capturedLandUsePlanImage != null)
-                {
-                    var tempLandUsePath = Path.Combine(Path.GetTempPath(), $"landuse_{Guid.NewGuid()}.png");
-                    File.WriteAllBytes(tempLandUsePath, _capturedLandUsePlanImage);
-                    
-                    var landUsePicture = worksheet.AddPicture(tempLandUsePath);
-                    landUsePicture.MoveTo(worksheet.Cell(currentRow, 1));
-                    landUsePicture.Scale(0.4);
-                    
-                    currentRow += 20;
-                    File.Delete(tempLandUsePath);
-                }
-                else if (!string.IsNullOrEmpty(_landUsePlanPath) && File.Exists(_landUsePlanPath))
-                {
-                    var extension = Path.GetExtension(_landUsePlanPath).ToLower();
-                    if (extension != ".pdf")
-                    {
-                        var landUsePicture = worksheet.AddPicture(_landUsePlanPath);
-                        landUsePicture.MoveTo(worksheet.Cell(currentRow, 1));
-                        landUsePicture.Scale(0.5);
-                        currentRow += 15;
-                    }
-                    else
-                    {
-                        worksheet.Cell(currentRow, 1).Value = $"첨부: {Path.GetFileName(_landUsePlanPath)}";
-                        currentRow += 2;
-                    }
-                }
-                else
-                {
-                    worksheet.Cell(currentRow, 1).Value = "(첨부 없음)";
-                    currentRow += 2;
-                }
-
-                // 요약건축물대장 섹션
-                worksheet.Cell(currentRow, 1).Value = "요약건축물대장";
-                worksheet.Cell(currentRow, 1).Style.Font.Bold = true;
-                currentRow++;
-
-                if (!string.IsNullOrEmpty(_buildingRegisterPath) && File.Exists(_buildingRegisterPath))
-                {
-                    var extension = Path.GetExtension(_buildingRegisterPath).ToLower();
-                    if (extension != ".pdf")
-                    {
-                        var buildingPicture = worksheet.AddPicture(_buildingRegisterPath);
-                        buildingPicture.MoveTo(worksheet.Cell(currentRow, 1));
-                        buildingPicture.Scale(0.5);
-                        currentRow += 15;
-                    }
-                    else
-                    {
-                        worksheet.Cell(currentRow, 1).Value = $"첨부: {Path.GetFileName(_buildingRegisterPath)}";
-                        currentRow += 2;
-                    }
-                }
-                else
-                {
-                    worksheet.Cell(currentRow, 1).Value = "(첨부 없음)";
-                    currentRow += 2;
-                }
-
-                // 생성 일시
-                currentRow += 2;
-                worksheet.Cell(currentRow, 1).Value = $"생성일시: {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                worksheet.Cell(currentRow, 1).Style.Font.Italic = true;
-                worksheet.Cell(currentRow, 1).Style.Font.FontColor = XLColor.Gray;
-
-                workbook.SaveAs(filePath);
-            });
-        }
-
-        #endregion
 
         /// <summary>
         /// JavaScript 문자열 이스케이프

@@ -10,45 +10,18 @@
              d:DataContext="{d:DesignInstance Type=vm:EvaluationTabViewModel}">
 
     <UserControl.Resources>
-        <!-- 섹션 헤더 스타일 -->
-        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
-        </Style>
+        <!-- 피드백 반영: 공통 스타일 참조로 통일 -->
+        <!-- SectionHeader, LabelText, ValueText, AmountText, CardBorder 스타일은 Typography.xaml에서 참조 -->
         
-        <!-- 라벨 스타일 -->
-        <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        
-        <!-- 값 스타일 -->
-        <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        
-        <!-- 금액 스타일 -->
-        <Style x:Key="AmountStyle" TargetType="TextBlock">
+        <!-- 로컬 별칭 (하위 호환성) -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource SectionHeader}">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
-        
-        <!-- 카드 스타일 -->
-        <Style x:Key="CardStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="0,0,0,16"/>
+        <Style x:Key="LabelStyle" TargetType="TextBlock" BasedOn="{StaticResource LabelText}"/>
+        <Style x:Key="ValueStyle" TargetType="TextBlock" BasedOn="{StaticResource ValueText}"/>
+        <Style x:Key="AmountStyle" TargetType="TextBlock" BasedOn="{StaticResource AmountText}"/>
+        <Style x:Key="CardStyle" TargetType="Border" BasedOn="{StaticResource CardBorder}">
+            <Setter Property="Padding" Value="16"/>
         </Style>
     </UserControl.Resources>
 
@@ -119,18 +92,8 @@
                                      FontSize="13"/>
                     </StackPanel>
 
-                    <!-- 저장 버튼 -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
-                        <Button Content="저장" 
-                                Command="{Binding SaveCommand}"
-                                Style="{StaticResource PrimaryButton}"
-                                Padding="24,8"
-                                Margin="0,0,8,0"/>
-                        <Button Content="새로고침" 
-                                Command="{Binding RefreshCommand}"
-                                Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"/>
-                    </StackPanel>
+                    <!-- 피드백 반영: 탭 내부 저장/새로고침 버튼 제거 → 상단 헤더에서만 저장 -->
+                    <!-- 저장은 PropertyDetailView 헤더의 버튼 사용 -->
                 </Grid>
             </Border>
 
@@ -434,13 +397,22 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 낙찰통계 영역 -->
+                    <!-- 낙찰통계 영역 - 피드백 반영: 시/군구/동 3×3 매트릭스 -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <TextBlock Text="📈 낙찰통계" Style="{StaticResource SectionHeaderStyle}"/>
+                            <Grid Margin="0,0,0,12">
+                                <TextBlock Text="📈 낙찰통계" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
+                                <!-- 적용낙찰가율 헤더 - 피드백 반영: 가시성 개선 -->
+                                <TextBlock Text="적용낙찰가율" 
+                                           HorizontalAlignment="Right"
+                                           FontSize="14"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource PrimaryBrush}"/>
+                            </Grid>
                             
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -451,84 +423,122 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- 헤더 -->
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="지역통계" 
-                                           Style="{StaticResource LabelStyle}" FontWeight="SemiBold"
-                                           Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding RegionName1}" 
-                                           Style="{StaticResource ValueStyle}"
-                                           Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding RegionName2}" 
-                                           Style="{StaticResource ValueStyle}"
-                                           Margin="0,0,0,8"/>
-                                <TextBlock Grid.Row="0" Grid.Column="3" Text="적용낙찰가율" 
-                                           Style="{StaticResource LabelStyle}" FontWeight="SemiBold"
-                                           Margin="16,0,0,8"/>
+                                <!-- 헤더 행 -->
+                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
+                                    <TextBlock Text="지역통계" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
+                                    <TextBlock Text="{Binding RegionName1}" Style="{StaticResource ValueStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
+                                    <TextBlock Text="{Binding RegionName2}" Style="{StaticResource ValueStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,0,1">
+                                    <TextBlock Text="{Binding RegionName3}" Style="{StaticResource ValueStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                </Border>
 
                                 <!-- 1년 평균 -->
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="1년 평균" Style="{StaticResource LabelStyle}"/>
-                                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Stats1Year_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats1Year_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Stats1Year_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats1Year_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
+                                <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="8,6">
+                                    <TextBlock Text="1년 평균" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats1Year_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats1Year_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats1Year_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
 
                                 <!-- 6개월 평균 -->
-                                <TextBlock Grid.Row="2" Grid.Column="0" Text="6개월 평균" Style="{StaticResource LabelStyle}" Margin="0,8,0,0"/>
-                                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="{Binding Stats6Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats6Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="{Binding Stats6Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats6Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
-                                <TextBlock Grid.Row="2" Grid.Column="3" 
-                                           Text="10건이상 평균" 
-                                           Style="{StaticResource LabelStyle}"
-                                           Margin="16,8,0,0"
-                                           FontSize="11"/>
+                                <Border Grid.Row="2" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="8,6">
+                                    <TextBlock Text="6개월 평균" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats6Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats6Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats6Month_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
 
                                 <!-- 3개월 평균 -->
-                                <TextBlock Grid.Row="3" Grid.Column="0" Text="3개월 평균" Style="{StaticResource LabelStyle}" Margin="0,8,0,0"/>
-                                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="{Binding Stats3Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats3Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="{Binding Stats3Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                    <TextBlock Text=" / " Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Text="{Binding Stats3Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}"/>
-                                </StackPanel>
+                                <Border Grid.Row="3" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="8,6">
+                                    <TextBlock Text="3개월 평균" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats3Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats3Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding Stats3Month_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
 
-                                <!-- 적용 낙찰가율 -->
-                                <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="3"
-                                        Background="{StaticResource PrimaryLightBrush}"
-                                        CornerRadius="4"
-                                        Padding="16,8"
-                                        Margin="16,0,0,0"
+                                <!-- 적용 낙찰가율 - 피드백 반영: 가시성 대폭 개선 -->
+                                <Border Grid.Row="0" Grid.RowSpan="4" Grid.Column="4"
+                                        Background="{StaticResource PrimaryBrush}"
+                                        CornerRadius="8"
+                                        Padding="20,12"
+                                        Margin="12,0,0,0"
                                         VerticalAlignment="Center">
                                     <StackPanel>
                                         <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                                   Style="{StaticResource AmountStyle}"
-                                                   FontSize="24"
+                                                   FontSize="28"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
                                                    HorizontalAlignment="Center"/>
                                         <TextBlock Text="{Binding AppliedBidRateDescription}" 
-                                                   Style="{StaticResource LabelStyle}"
                                                    FontSize="11"
+                                                   Foreground="White"
+                                                   Opacity="0.9"
                                                    HorizontalAlignment="Center"
-                                                   Margin="0,4,0,0"/>
+                                                   TextWrapping="Wrap"
+                                                   MaxWidth="100"
+                                                   TextAlignment="Center"
+                                                   Margin="0,6,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>

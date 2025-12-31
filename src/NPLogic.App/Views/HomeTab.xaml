@@ -1,0 +1,505 @@
+<UserControl x:Class="NPLogic.Views.HomeTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1400"
+             d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- ========== 물건 개요 카드 ========== -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource PrimaryLightBrush}"
+                    CornerRadius="12"
+                    Padding="24"
+                    Margin="0,0,0,20"
+                    BorderBrush="{StaticResource PrimaryBrush}"
+                    BorderThickness="1">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="15" ShadowDepth="3"/>
+                </Border.Effect>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Style="{StaticResource H2TextStyle}" 
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   Margin="0,0,0,8">
+                            <Run Text="물건번호: "/>
+                            <Run Text="{Binding Property.PropertyNumber}" FontWeight="Bold"/>
+                        </TextBlock>
+                        
+                        <TextBlock Text="{Binding Property.AddressFull}" 
+                                   Style="{StaticResource BodyTextStyle}"
+                                   TextWrapping="Wrap"
+                                   Opacity="0.8"
+                                   Margin="0,0,0,12"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <!-- 물건 유형 뱃지 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="4"
+                                    Padding="12,6"
+                                    Margin="0,0,8,0">
+                                <TextBlock Text="{Binding Property.PropertyType}" 
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           FontSize="12"/>
+                            </Border>
+                            
+                            <!-- 상태 뱃지 -->
+                            <Border CornerRadius="4"
+                                    Padding="12,6">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Property.Status}" Value="completed">
+                                                <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Property.Status}" Value="processing">
+                                                <Setter Property="Background" Value="{StaticResource InfoBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="대기"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Property.Status}" Value="completed">
+                                                    <Setter Property="Text" Value="완료"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Property.Status}" Value="processing">
+                                                    <Setter Property="Text" Value="진행중"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <!-- 프로젝트 정보 -->
+                    <Border Grid.Column="1"
+                            Background="White"
+                            CornerRadius="8"
+                            Padding="16"
+                            VerticalAlignment="Center">
+                        <StackPanel>
+                            <TextBlock Text="프로젝트" 
+                                       Style="{StaticResource CaptionTextStyle}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <TextBlock Text="{Binding Property.ProjectId}" 
+                                       Style="{StaticResource H4TextStyle}"
+                                       FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+            
+            <!-- ========== 핵심 지표 카드들 ========== -->
+            <Grid Grid.Row="1" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 감정평가액 -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="감정평가액" 
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding Property.AppraisalValue, StringFormat={}{0:N0}원}" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 최저입찰가 -->
+                <Border Grid.Column="2"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="최저입찰가" 
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding Property.MinimumBid, StringFormat={}{0:N0}원}" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 토지 면적 -->
+                <Border Grid.Column="4"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="토지 면적" 
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
+                            <Run Text="{Binding Property.LandArea, StringFormat={}{0:N2}}"/>
+                            <Run Text="㎡" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 건물 면적 -->
+                <Border Grid.Column="6"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <StackPanel>
+                        <TextBlock Text="건물 면적" 
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Margin="0,0,0,8"/>
+                        <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
+                            <Run Text="{Binding Property.BuildingArea, StringFormat={}{0:N2}}"/>
+                            <Run Text="㎡" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            
+            <!-- ========== 상세 정보 그리드 ========== -->
+            <Grid Grid.Row="2" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 담보 정보 -->
+                <Border Grid.Column="0"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <controls:NPExpandableSection Header="담보 정보" IsExpanded="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="담보물형태" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                                       Text="{Binding Property.PropertyType}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       FontWeight="SemiBold"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="토지 면적 (평)" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                       Text="{Binding LandAreaPyeong, StringFormat={}{0:N2}평}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="건물 면적 (평)" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" 
+                                       Text="{Binding BuildingAreaPyeong, StringFormat={}{0:N2}평}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="층수" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" 
+                                       Text="{Binding Property.Floors}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="공장저당여부" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" 
+                                       Text="-" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                        </Grid>
+                    </controls:NPExpandableSection>
+                </Border>
+                
+                <!-- 평가 요약 -->
+                <Border Grid.Column="2"
+                        Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <controls:NPExpandableSection Header="평가 요약" IsExpanded="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="토지 감정평가액" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" 
+                                       Text="{Binding LandAppraisalValue, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="건물 감정평가액" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" 
+                                       Text="{Binding BuildingAppraisalValue, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="기계 감정평가액" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" 
+                                       Text="{Binding MachineAppraisalValue, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="감정평가액 합계" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       FontWeight="Bold"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" 
+                                       Text="{Binding Property.AppraisalValue, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       FontWeight="Bold"
+                                       Foreground="{StaticResource PrimaryBrush}"
+                                       Margin="0,8"/>
+                            
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="매각가" 
+                                       Style="{StaticResource CaptionTextStyle}" 
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Margin="0,8"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" 
+                                       Text="{Binding Property.SalePrice, StringFormat={}{0:N0}원}" 
+                                       Style="{StaticResource BodyTextStyle}"
+                                       Margin="0,8"/>
+                        </Grid>
+                    </controls:NPExpandableSection>
+                </Border>
+            </Grid>
+            
+            <!-- ========== 알림/진행상황 ========== -->
+            <Border Grid.Row="3"
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <controls:NPExpandableSection Header="진행 현황" IsExpanded="True">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 등기부 진행 -->
+                        <Border Grid.Column="0" Margin="0,0,8,0" Padding="12" CornerRadius="6"
+                                Background="{StaticResource BlueGray50Brush}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="등기부" 
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,4"/>
+                                <Border Width="40" Height="40" CornerRadius="20" 
+                                        Background="{StaticResource SuccessBrush}"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="✓" Foreground="White" 
+                                               FontSize="18" FontWeight="Bold"
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 비핵심 진행 -->
+                        <Border Grid.Column="1" Margin="0,0,8,0" Padding="12" CornerRadius="6"
+                                Background="{StaticResource BlueGray50Brush}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="비핵심" 
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,4"/>
+                                <Border Width="40" Height="40" CornerRadius="20" 
+                                        Background="{StaticResource InfoBrush}"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="..." Foreground="White" 
+                                               FontSize="14" FontWeight="Bold"
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 권리분석 진행 -->
+                        <Border Grid.Column="2" Margin="0,0,8,0" Padding="12" CornerRadius="6"
+                                Background="{StaticResource BlueGray50Brush}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="권리분석" 
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,4"/>
+                                <Border Width="40" Height="40" CornerRadius="20" 
+                                        Background="{StaticResource BlueGray300Brush}"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="-" Foreground="White" 
+                                               FontSize="18" FontWeight="Bold"
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 마감 진행 -->
+                        <Border Grid.Column="3" Margin="0,0,8,0" Padding="12" CornerRadius="6"
+                                Background="{StaticResource BlueGray50Brush}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="마감" 
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,4"/>
+                                <Border Width="40" Height="40" CornerRadius="20" 
+                                        Background="{StaticResource BlueGray300Brush}"
+                                        HorizontalAlignment="Center">
+                                    <TextBlock Text="-" Foreground="White" 
+                                               FontSize="18" FontWeight="Bold"
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- QA 상태 -->
+                        <Border Grid.Column="4" Padding="12" CornerRadius="6"
+                                Background="{StaticResource BlueGray50Brush}">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="QA" 
+                                           HorizontalAlignment="Center"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,4"/>
+                                <Border Width="40" Height="40" CornerRadius="20" 
+                                        HorizontalAlignment="Center">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Property.QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
+                                                    <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Foreground="White" 
+                                               FontSize="14" FontWeight="Bold"
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="✓"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Property.QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
+                                                        <Setter Property="Text" Value="{Binding Property.QaUnansweredCount}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </controls:NPExpandableSection>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
+

@@ -1,13 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -19,7 +23,9 @@ namespace NPLogic.ViewModels
         private readonly ProgramRepository _programRepository;
         private readonly ProgramUserRepository _programUserRepository;
         private readonly UserRepository _userRepository;
+        private readonly PropertyRepository _propertyRepository;
         private readonly AuthService _authService;
+        private readonly ExcelService _excelService;
 
         // ========== 프로그램 목록 ==========
         [ObservableProperty]
@@ -60,6 +66,27 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private User? _formSelectedPM;
 
+        // ========== 데이터디스크 업로드 ==========
+        [ObservableProperty]
+        private bool _hasDataDiskFile;
+
+        [ObservableProperty]
+        private string? _dataDiskFileName;
+
+        [ObservableProperty]
+        private string? _dataDiskFilePath;
+
+        [ObservableProperty]
+        private int _dataDiskTotalRows;
+
+        [ObservableProperty]
+        private ObservableCollection<string> _dataDiskColumns = new();
+
+        [ObservableProperty]
+        private string? _dataDiskErrorMessage;
+
+        private List<Dictionary<string, object>>? _dataDiskData;
+
         // ========== 상태 ==========
         [ObservableProperty]
         private bool _isLoading;
@@ -76,12 +103,16 @@ namespace NPLogic.ViewModels
             ProgramRepository programRepository,
             ProgramUserRepository programUserRepository,
             UserRepository userRepository,
-            AuthService authService)
+            PropertyRepository propertyRepository,
+            AuthService authService,
+            ExcelService excelService)
         {
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
         }
 
         /// <summary>
@@ -213,6 +244,21 @@ namespace NPLogic.ViewModels
             FormBidDate = null;
             FormSelectedPM = null;
             SelectedProgram = null;
+            ClearDataDiskFile();
+        }
+
+        /// <summary>
+        /// 데이터디스크 파일 초기화
+        /// </summary>
+        private void ClearDataDiskFile()
+        {
+            HasDataDiskFile = false;
+            DataDiskFileName = null;
+            DataDiskFilePath = null;
+            DataDiskTotalRows = 0;
+            DataDiskColumns.Clear();
+            DataDiskErrorMessage = null;
+            _dataDiskData = null;
         }
 
         /// <summary>
@@ -334,6 +380,255 @@ namespace NPLogic.ViewModels
         private void GoBack()
         {
             MainWindow.Instance?.NavigateToAdminHome();
+        }
+
+        // ========== 데이터디스크 업로드 관련 ==========
+
+        /// <summary>
+        /// 데이터디스크 파일 선택
+        /// </summary>
+        [RelayCommand]
+        private void SelectDataDiskFile()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Excel Files|*.xlsx;*.xls",
+                Title = "데이터디스크 파일 선택"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                HandleDataDiskFileDrop(dialog.FileName);
+            }
+        }
+
+        /// <summary>
+        /// 데이터디스크 파일 선택 취소
+        /// </summary>
+        [RelayCommand]
+        private void CancelDataDiskFile()
+        {
+            ClearDataDiskFile();
+        }
+
+        /// <summary>
+        /// 데이터디스크 파일 드롭 처리
+        /// </summary>
+        public async void HandleDataDiskFileDrop(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    DataDiskErrorMessage = "파일을 찾을 수 없습니다.";
+                    return;
+                }
+
+                var ext = Path.GetExtension(filePath).ToLower();
+                if (ext != ".xlsx" && ext != ".xls")
+                {
+                    DataDiskErrorMessage = "Excel 파일만 업로드 가능합니다 (.xlsx, .xls)";
+                    return;
+                }
+
+                DataDiskErrorMessage = null;
+                DataDiskFilePath = filePath;
+                DataDiskFileName = Path.GetFileName(filePath);
+
+                // Excel 파일 읽기
+                var (columns, data) = await _excelService.ReadExcelFileAsync(filePath);
+
+                DataDiskColumns.Clear();
+                foreach (var col in columns)
+                {
+                    DataDiskColumns.Add(col);
+                }
+
+                _dataDiskData = data;
+                DataDiskTotalRows = data.Count;
+                HasDataDiskFile = true;
+            }
+            catch (Exception ex)
+            {
+                DataDiskErrorMessage = $"Excel 파일 읽기 실패: {ex.Message}";
+                HasDataDiskFile = false;
+            }
+        }
+
+        /// <summary>
+        /// 프로그램 저장 및 물건 생성
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveProgramWithData()
+        {
+            if (string.IsNullOrWhiteSpace(FormProgramName))
+            {
+                ErrorMessage = "프로그램명을 입력해주세요.";
+                return;
+            }
+
+            if (_dataDiskData == null || _dataDiskData.Count == 0)
+            {
+                DataDiskErrorMessage = "업로드할 데이터가 없습니다.";
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+                DataDiskErrorMessage = null;
+
+                // 1. 프로그램 생성
+                Program savedProgram;
+
+                if (IsEditMode && SelectedProgram != null)
+                {
+                    // 수정
+                    SelectedProgram.ProgramName = FormProgramName;
+                    SelectedProgram.Team = FormTeam;
+                    SelectedProgram.AccountingFirm = FormAccountingFirm;
+                    SelectedProgram.CutOffDate = FormCutOffDate;
+                    SelectedProgram.BidDate = FormBidDate;
+
+                    savedProgram = await _programRepository.UpdateAsync(SelectedProgram);
+                }
+                else
+                {
+                    // 신규 생성
+                    var newProgram = new Program
+                    {
+                        ProgramName = FormProgramName,
+                        Team = FormTeam,
+                        AccountingFirm = FormAccountingFirm,
+                        CutOffDate = FormCutOffDate,
+                        BidDate = FormBidDate,
+                        Status = "active"
+                    };
+
+                    savedProgram = await _programRepository.CreateAsync(newProgram);
+                }
+
+                // PM 배정
+                if (FormSelectedPM != null)
+                {
+                    await _programUserRepository.AssignPMAsync(savedProgram.Id, FormSelectedPM.Id);
+                }
+
+                // 2. 물건 데이터 생성
+                int createdCount = 0;
+                int errorCount = 0;
+
+                foreach (var row in _dataDiskData)
+                {
+                    try
+                    {
+                        var property = MapRowToProperty(row, savedProgram.Id.ToString());
+                        await _propertyRepository.CreateAsync(property);
+                        createdCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"물건 생성 실패: {ex.Message}");
+                        errorCount++;
+                    }
+                }
+
+                // 완료 메시지
+                var message = $"프로그램이 등록되었습니다.\n총 {createdCount}개의 물건이 생성되었습니다.";
+                if (errorCount > 0)
+                {
+                    message += $"\n({errorCount}개 실패)";
+                }
+
+                MessageBox.Show(message, "완료", MessageBoxButton.OK, MessageBoxImage.Information);
+                
+                SuccessMessage = message;
+                CloseForm();
+                await LoadProgramsAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"저장 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 행 데이터를 Property 객체로 매핑
+        /// </summary>
+        private Property MapRowToProperty(Dictionary<string, object> row, string programId)
+        {
+            var property = new Property
+            {
+                Id = Guid.NewGuid(),
+                ProjectId = programId,
+                Status = "pending"
+            };
+
+            // 컬럼 이름으로 자동 매핑 시도
+            foreach (var kvp in row)
+            {
+                var colName = kvp.Key?.ToLower() ?? "";
+                var value = kvp.Value;
+
+                if (value == null) continue;
+
+                // 물건번호
+                if (colName.Contains("물건번호") || colName.Contains("번호") || colName.Contains("propertynumber"))
+                {
+                    property.PropertyNumber = value.ToString();
+                }
+                // 물건유형
+                else if (colName.Contains("유형") || colName.Contains("종류") || colName.Contains("propertytype") || colName.Contains("담보물형태"))
+                {
+                    property.PropertyType = value.ToString();
+                }
+                // 전체주소
+                else if (colName.Contains("전체주소") || colName.Contains("addressfull") || colName.Contains("물건지"))
+                {
+                    property.AddressFull = value.ToString();
+                }
+                // 도로명주소
+                else if (colName.Contains("도로명") || colName.Contains("addressroad"))
+                {
+                    property.AddressRoad = value.ToString();
+                }
+                // 지번주소
+                else if (colName.Contains("지번") || colName.Contains("addressjibun"))
+                {
+                    property.AddressJibun = value.ToString();
+                }
+                // 토지면적
+                else if (colName.Contains("토지") || colName.Contains("대지면적") || colName.Contains("landarea"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var landArea))
+                        property.LandArea = landArea;
+                }
+                // 건물면적
+                else if (colName.Contains("건물면적") || colName.Contains("buildingarea"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var buildingArea))
+                        property.BuildingArea = buildingArea;
+                }
+                // 감정가
+                else if (colName.Contains("감정") || colName.Contains("평가") || colName.Contains("appraisalvalue"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var appraisal))
+                        property.AppraisalValue = appraisal;
+                }
+                // 최저입찰가
+                else if (colName.Contains("최저") || colName.Contains("입찰") || colName.Contains("minimumbid"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var minimumBid))
+                        property.MinimumBid = minimumBid;
+                }
+            }
+
+            return property;
         }
     }
 }

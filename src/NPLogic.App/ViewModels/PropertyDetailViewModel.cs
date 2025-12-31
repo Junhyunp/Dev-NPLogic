@@ -15,6 +15,34 @@ using NPLogic.ViewModels;
 namespace NPLogic.ViewModels
 {
     /// <summary>
+    /// 마감 체크리스트 모델
+    /// </summary>
+    public partial class ClosingChecklistModel : ObservableObject
+    {
+        [ObservableProperty]
+        private bool _registryConfirmed;
+
+        [ObservableProperty]
+        private bool _rightsAnalysisConfirmed;
+
+        [ObservableProperty]
+        private bool _evaluationConfirmed;
+
+        [ObservableProperty]
+        private bool _qaComplete;
+    }
+
+    /// <summary>
+    /// 권리분석 알림 모델
+    /// </summary>
+    public class RightsAnalysisAlert
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public DateTime Date { get; set; }
+    }
+
+    /// <summary>
     /// 첨부파일 모델
     /// </summary>
     public class AttachmentItem : ObservableObject
@@ -75,6 +103,10 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private int _selectedTabIndex = 0;
+
+        // 이전 탭 인덱스 (저장 확인용)
+        private int _previousTabIndex = 0;
+        private bool _isChangingTab = false;
 
         [ObservableProperty]
         private bool _isLoading;
@@ -145,6 +177,189 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private DateTime? _lastDataUploadDate;
 
+        #region HomeTab 관련 속성
+
+        /// <summary>
+        /// 토지 면적 (평)
+        /// </summary>
+        public decimal LandAreaPyeong => Property?.LandArea != null ? Property.LandArea.Value / 3.3058m : 0;
+
+        /// <summary>
+        /// 건물 면적 (평)
+        /// </summary>
+        public decimal BuildingAreaPyeong => Property?.BuildingArea != null ? Property.BuildingArea.Value / 3.3058m : 0;
+
+        #endregion
+
+        #region NonCoreTab 관련 속성
+
+        // 채권 정보
+        [ObservableProperty]
+        private string? _loanSubject;
+
+        [ObservableProperty]
+        private string? _loanType;
+
+        [ObservableProperty]
+        private string? _accountNumber;
+
+        [ObservableProperty]
+        private DateTime? _firstLoanDate;
+
+        [ObservableProperty]
+        private decimal _originalPrincipal;
+
+        [ObservableProperty]
+        private decimal _remainingPrincipal;
+
+        [ObservableProperty]
+        private decimal _accruedInterest;
+
+        [ObservableProperty]
+        private decimal _normalInterestRate;
+
+        [ObservableProperty]
+        private decimal _overdueInterestRate;
+
+        // Loan Cap
+        [ObservableProperty]
+        private decimal _loanCap1;
+
+        [ObservableProperty]
+        private decimal _loanCap2;
+
+        // 보증서 정보
+        [ObservableProperty]
+        private string? _guaranteeOrganization;
+
+        [ObservableProperty]
+        private decimal _guaranteeBalance;
+
+        [ObservableProperty]
+        private decimal _guaranteeRatio;
+
+        [ObservableProperty]
+        private bool _isSubrogated;
+
+        [ObservableProperty]
+        private DateTime? _subrogationExpectedDate;
+
+        [ObservableProperty]
+        private decimal _subrogationPrincipal;
+
+        // 경매 정보
+        [ObservableProperty]
+        private bool _isAuctionStarted;
+
+        [ObservableProperty]
+        private string? _court;
+
+        [ObservableProperty]
+        private string? _auctionCaseNumber;
+
+        [ObservableProperty]
+        private DateTime? _auctionStartDate;
+
+        [ObservableProperty]
+        private DateTime? _dividendDeadline;
+
+        [ObservableProperty]
+        private decimal _claimAmount;
+
+        [ObservableProperty]
+        private decimal _winningBidAmount;
+
+        // 회생 정보
+        [ObservableProperty]
+        private string? _restructuringCourt;
+
+        [ObservableProperty]
+        private string? _restructuringCaseNumber;
+
+        [ObservableProperty]
+        private DateTime? _restructuringStartDate;
+
+        // 현금흐름
+        [ObservableProperty]
+        private decimal _xnpv1;
+
+        [ObservableProperty]
+        private decimal _xnpv2;
+
+        // 차주 개요
+        [ObservableProperty]
+        private string? _borrowerNumber;
+
+        [ObservableProperty]
+        private string? _borrowerName;
+
+        [ObservableProperty]
+        private string? _businessNumber;
+
+        [ObservableProperty]
+        private decimal _opb;
+
+        // 담보 물건
+        [ObservableProperty]
+        private bool _isFactoryMortgage;
+
+        // 선순위 평가
+        [ObservableProperty]
+        private decimal _seniorRightsTotal;
+
+        [ObservableProperty]
+        private decimal _tenantDeposit;
+
+        [ObservableProperty]
+        private decimal _localTax;
+
+        [ObservableProperty]
+        private decimal _otherSeniorRights;
+
+        // 경공매 추가 (인터링/상계회수 - 피드백 30번)
+        [ObservableProperty]
+        private decimal _interring;
+
+        [ObservableProperty]
+        private decimal _offsetRecovery;
+
+        // NPB
+        [ObservableProperty]
+        private decimal _npbAmount;
+
+        [ObservableProperty]
+        private decimal _npbRatio;
+
+        [ObservableProperty]
+        private string? _npbNote;
+
+        #endregion
+
+        #region ClosingTab 관련 속성
+
+        [ObservableProperty]
+        private bool _isClosingComplete;
+
+        [ObservableProperty]
+        private ClosingChecklistModel _closingChecklist = new();
+
+        [ObservableProperty]
+        private ObservableCollection<RightsAnalysisAlert> _rightsAnalysisAlerts = new();
+
+        [ObservableProperty]
+        private bool _hasNoAlerts = true;
+
+        [ObservableProperty]
+        private DateTime? _closingDate;
+
+        [ObservableProperty]
+        private string? _closingUser;
+
+        [ObservableProperty]
+        private string? _closingNote;
+
+        #endregion
+
         private Guid? _propertyId;
         private Action? _goBackAction;
 
@@ -172,9 +387,9 @@ namespace NPLogic.ViewModels
             }
 
             // 권리분석 탭 ViewModel 초기화
-            if (_rightAnalysisRepository != null)
+            if (_rightAnalysisRepository != null && _registryRepository != null)
             {
-                RightsAnalysisViewModel = new RightsAnalysisTabViewModel(_rightAnalysisRepository);
+                RightsAnalysisViewModel = new RightsAnalysisTabViewModel(_rightAnalysisRepository, _registryRepository);
             }
 
             // 평가 탭 ViewModel 초기화
@@ -734,6 +949,64 @@ namespace NPLogic.ViewModels
 
         #endregion
 
+        #region 마감 관련 명령
+
+        /// <summary>
+        /// 마감 처리/취소 명령
+        /// </summary>
+        [RelayCommand]
+        private async Task CompleteClosingAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                if (IsClosingComplete)
+                {
+                    // 마감 취소
+                    IsClosingComplete = false;
+                    ClosingDate = null;
+                    ClosingUser = null;
+                    SuccessMessage = "마감이 취소되었습니다.";
+                }
+                else
+                {
+                    // 마감 처리
+                    if (!ClosingChecklist.RegistryConfirmed ||
+                        !ClosingChecklist.RightsAnalysisConfirmed ||
+                        !ClosingChecklist.EvaluationConfirmed ||
+                        !ClosingChecklist.QaComplete)
+                    {
+                        ErrorMessage = "모든 체크리스트 항목을 완료해주세요.";
+                        return;
+                    }
+
+                    IsClosingComplete = true;
+                    ClosingDate = DateTime.Now;
+                    ClosingUser = Environment.UserName;
+                    SuccessMessage = "마감 처리가 완료되었습니다.";
+                }
+
+                // Property 상태 업데이트
+                if (Property != null)
+                {
+                    Property.Status = IsClosingComplete ? "completed" : "processing";
+                    await _propertyRepository.UpdateAsync(Property);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"마감 처리 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// 저장 명령
         /// </summary>
@@ -807,6 +1080,52 @@ namespace NPLogic.ViewModels
             // 아파트 여부 업데이트
             IsApartment = value?.PropertyType?.Contains("아파트") == true 
                        || value?.PropertyType?.Contains("오피스텔") == true;
+            
+            // HomeTab 면적 속성 변경 알림
+            OnPropertyChanged(nameof(LandAreaPyeong));
+            OnPropertyChanged(nameof(BuildingAreaPyeong));
+        }
+
+        /// <summary>
+        /// 탭 변경 시 저장 확인 (피드백 반영)
+        /// </summary>
+        partial void OnSelectedTabIndexChanging(int value)
+        {
+            // 탭 변경 중이 아니고, 저장되지 않은 변경사항이 있으면 확인
+            if (!_isChangingTab && HasUnsavedChanges && _previousTabIndex != value)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    "저장되지 않은 변경사항이 있습니다.\n저장하시겠습니까?",
+                    "저장 확인",
+                    System.Windows.MessageBoxButton.YesNoCancel,
+                    System.Windows.MessageBoxImage.Question);
+
+                if (result == System.Windows.MessageBoxResult.Yes)
+                {
+                    // 저장 후 탭 이동
+                    _ = SaveAsync();
+                }
+                else if (result == System.Windows.MessageBoxResult.Cancel)
+                {
+                    // 취소 - 이전 탭으로 복원
+                    _isChangingTab = true;
+                    SelectedTabIndex = _previousTabIndex;
+                    _isChangingTab = false;
+                    return;
+                }
+                // No - 저장하지 않고 이동
+            }
+        }
+
+        /// <summary>
+        /// 탭 변경 완료 시
+        /// </summary>
+        partial void OnSelectedTabIndexChanged(int value)
+        {
+            if (!_isChangingTab)
+            {
+                _previousTabIndex = value;
+            }
         }
     }
 }

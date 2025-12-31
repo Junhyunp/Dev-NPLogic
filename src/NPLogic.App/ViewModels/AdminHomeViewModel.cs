@@ -37,6 +37,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<Property> _properties = new();
 
+        // 필터링을 위한 전체 목록 보관
+        private List<Property> _allProperties = new();
+
+        // 현재 필터 상태
+        [ObservableProperty]
+        private string _currentFilter = "all";
+
         [ObservableProperty]
         private ObservableCollection<User> _evaluators = new();
 
@@ -201,8 +208,12 @@ namespace NPLogic.ViewModels
                 IsPropertiesLoading = true;
                 var properties = await _propertyRepository.GetByProgramIdAsync(programId);
 
+                // 전체 목록 보관
+                _allProperties = properties.ToList();
+                CurrentFilter = "all";
+
                 Properties.Clear();
-                foreach (var property in properties)
+                foreach (var property in _allProperties)
                 {
                     Properties.Add(property);
                 }
@@ -216,6 +227,29 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsPropertiesLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 상태별 필터링 (더블클릭 시 호출)
+        /// </summary>
+        public void FilterByStatus(string filterType)
+        {
+            CurrentFilter = filterType;
+            
+            Properties.Clear();
+            
+            IEnumerable<Property> filtered = filterType switch
+            {
+                "pending" => _allProperties.Where(p => p.Status == "pending" || string.IsNullOrEmpty(p.Status)),
+                "processing" => _allProperties.Where(p => p.Status == "processing"),
+                "completed" => _allProperties.Where(p => p.Status == "completed"),
+                _ => _allProperties // "all"
+            };
+
+            foreach (var property in filtered)
+            {
+                Properties.Add(property);
             }
         }
 

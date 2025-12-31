@@ -265,17 +265,23 @@
                 <Border Background="White"
                         CornerRadius="8"
                         Padding="32"
-                        MaxWidth="500"
-                        MaxHeight="600"
+                        MaxWidth="900"
+                        MaxHeight="700"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
                     <Border.Effect>
                         <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="20" ShadowDepth="5"/>
                     </Border.Effect>
                     
-                    <StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
                         <!-- 폼 헤더 -->
-                        <Grid Margin="0,0,0,24">
+                        <Grid Grid.Row="0" Margin="0,0,0,24">
                             <TextBlock Text="{Binding FormTitle}"
                                        FontSize="20"
                                        FontWeight="Bold"
@@ -288,76 +294,278 @@
                                     FontSize="16"/>
                         </Grid>
 
-                        <!-- 프로그램명 -->
-                        <TextBlock Text="프로그램명 *" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Margin="0,0,0,8"/>
-                        <TextBox Text="{Binding FormProgramName, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource NPTextBoxStyle}"
-                                 Margin="0,0,0,16"/>
-
-                        <!-- 담당팀 -->
-                        <TextBlock Text="담당팀" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Margin="0,0,0,8"/>
-                        <TextBox Text="{Binding FormTeam, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource NPTextBoxStyle}"
-                                 Margin="0,0,0,16"/>
-
-                        <!-- 회계법인 -->
-                        <TextBlock Text="담당 회계법인" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Margin="0,0,0,8"/>
-                        <TextBox Text="{Binding FormAccountingFirm, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource NPTextBoxStyle}"
-                                 Margin="0,0,0,16"/>
-
-                        <!-- 날짜 -->
-                        <Grid Margin="0,0,0,16">
+                        <!-- 메인 컨텐츠: 2열 레이아웃 -->
+                        <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="350"/>
+                                <ColumnDefinition Width="24"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
+                            <!-- 좌측: 프로그램 정보 입력 -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Cut-off 날짜" 
+                                <!-- 프로그램명 -->
+                                <TextBlock Text="프로그램명 *" 
                                            Style="{StaticResource CaptionTextStyle}"
                                            Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding FormCutOffDate}"/>
+                                <TextBox Text="{Binding FormProgramName, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource NPTextBoxStyle}"
+                                         Margin="0,0,0,16"/>
+
+                                <!-- 담당팀 -->
+                                <TextBlock Text="담당팀" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding FormTeam, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource NPTextBoxStyle}"
+                                         Margin="0,0,0,16"/>
+
+                                <!-- 회계법인 -->
+                                <TextBlock Text="담당 회계법인" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding FormAccountingFirm, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource NPTextBoxStyle}"
+                                         Margin="0,0,0,16"/>
+
+                                <!-- 날짜 -->
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Cut-off 날짜" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   Margin="0,0,0,8"/>
+                                        <DatePicker SelectedDate="{Binding FormCutOffDate}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="입찰일" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   Margin="0,0,0,8"/>
+                                        <DatePicker SelectedDate="{Binding FormBidDate}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- PM 배정 -->
+                                <TextBlock Text="담당 PM" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,8"/>
+                                <ComboBox ItemsSource="{Binding PmUsers}"
+                                          SelectedItem="{Binding FormSelectedPM}"
+                                          DisplayMemberPath="Name"
+                                          Style="{StaticResource NPComboBox}"
+                                          Margin="0,0,0,16"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="입찰일" 
-                                           Style="{StaticResource CaptionTextStyle}"
-                                           Margin="0,0,0,8"/>
-                                <DatePicker SelectedDate="{Binding FormBidDate}"/>
-                            </StackPanel>
+                            <!-- 구분선 -->
+                            <Border Grid.Column="1" 
+                                    Width="1" 
+                                    Background="{StaticResource BlueGray200Brush}"
+                                    HorizontalAlignment="Center"/>
+
+                            <!-- 우측: 데이터디스크 업로드 (선택사항) -->
+                            <Grid Grid.Column="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 헤더 -->
+                                <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                    <TextBlock Text="데이터디스크 업로드 (선택사항)" 
+                                               Style="{StaticResource H4TextStyle}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock Text="엑셀 파일을 업로드하여 물건 목록을 자동 생성합니다" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Opacity="0.7"/>
+                                </StackPanel>
+
+                                <!-- 업로드 영역 -->
+                                <Border Grid.Row="1"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        BorderBrush="{StaticResource BlueGray300Brush}"
+                                        BorderThickness="2"
+                                        CornerRadius="8"
+                                        AllowDrop="True"
+                                        Drop="DataDiskDropZone_Drop"
+                                        DragOver="DataDiskDropZone_DragOver">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding HasDataDiskFile}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
+                                                    <Setter Property="Background" Value="#F0FDF4"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+
+                                    <Grid>
+                                        <!-- 파일 미선택 상태 -->
+                                        <StackPanel HorizontalAlignment="Center" 
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding HasDataDiskFile, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                            <TextBlock Text="📁" 
+                                                       FontSize="36"
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,0,0,12"/>
+                                            <TextBlock Text="Excel 파일을 드래그하거나" 
+                                                       Style="{StaticResource BodyTextStyle}"
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,0,0,4"/>
+                                            <Button Content="파일 선택" 
+                                                    Command="{Binding SelectDataDiskFileCommand}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="16,8"
+                                                    Margin="0,8,0,0"/>
+                                            <TextBlock Text=".xlsx, .xls 지원" 
+                                                       Style="{StaticResource CaptionTextStyle}"
+                                                       Opacity="0.5"
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,12,0,0"/>
+                                        </StackPanel>
+
+                                        <!-- 파일 선택됨 상태 -->
+                                        <StackPanel Margin="16"
+                                                    Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <!-- 파일 정보 -->
+                                            <Border Background="{StaticResource SuccessBrush}"
+                                                    CornerRadius="6"
+                                                    Padding="12"
+                                                    Margin="0,0,0,12">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Text="✓" 
+                                                               FontSize="16"
+                                                               Foreground="White"
+                                                               FontWeight="Bold"
+                                                               VerticalAlignment="Center"
+                                                               Margin="0,0,10,0"/>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="파일 선택됨" 
+                                                                   Foreground="White"
+                                                                   FontWeight="SemiBold"
+                                                                   FontSize="12"/>
+                                                        <TextBlock Text="{Binding DataDiskFileName}" 
+                                                                   Foreground="White"
+                                                                   Opacity="0.9"
+                                                                   FontSize="11"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="2"
+                                                            Content="✕" 
+                                                            Command="{Binding CancelDataDiskFileCommand}"
+                                                            Background="Transparent"
+                                                            Foreground="White"
+                                                            BorderThickness="0"
+                                                            Padding="6,2"
+                                                            FontSize="14"
+                                                            FontWeight="Bold"
+                                                            Cursor="Hand"
+                                                            ToolTip="파일 선택 취소"/>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- 데이터 요약 -->
+                                            <Border Background="White"
+                                                    CornerRadius="6"
+                                                    Padding="12"
+                                                    Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <Grid Margin="0,0,0,8">
+                                                        <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
+                                                        <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                            <Run Text="{Binding DataDiskTotalRows}"/>
+                                                            <Run Text="행" FontWeight="Normal" FontSize="11"/>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                    <Grid>
+                                                        <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
+                                                        <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                            <Run Text="{Binding DataDiskColumns.Count}"/>
+                                                            <Run Text="개" FontWeight="Normal" FontSize="11"/>
+                                                        </TextBlock>
+                                                    </Grid>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- 컬럼 목록 -->
+                                            <TextBlock Text="컬럼 목록" 
+                                                       Style="{StaticResource CaptionTextStyle}"
+                                                       FontWeight="SemiBold"
+                                                       Margin="0,0,0,6"/>
+                                            <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                                                <ItemsControl ItemsSource="{Binding DataDiskColumns}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <WrapPanel/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Background="{StaticResource BlueGray200Brush}"
+                                                                    CornerRadius="3"
+                                                                    Padding="6,2"
+                                                                    Margin="0,0,4,4">
+                                                                <TextBlock Text="{Binding}" FontSize="10"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+
+                                            <!-- 다른 파일 선택 -->
+                                            <Button Content="다른 파일 선택"
+                                                    Command="{Binding SelectDataDiskFileCommand}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="12,6"
+                                                    FontSize="11"
+                                                    Margin="0,12,0,0"
+                                                    HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </Grid>
 
-                        <!-- PM 배정 -->
-                        <TextBlock Text="담당 PM" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Margin="0,0,0,8"/>
-                        <ComboBox ItemsSource="{Binding PmUsers}"
-                                  SelectedItem="{Binding FormSelectedPM}"
-                                  DisplayMemberPath="Name"
-                                  Style="{StaticResource NPComboBox}"
-                                  Margin="0,0,0,24"/>
+                        <!-- 버튼 영역 -->
+                        <Grid Grid.Row="2" Margin="0,24,0,0">
+                            <!-- 에러 메시지 -->
+                            <TextBlock Text="{Binding DataDiskErrorMessage}" 
+                                       Foreground="{StaticResource ErrorBrush}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding DataDiskErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
 
-                        <!-- 버튼 -->
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="취소"
-                                    Command="{Binding CloseFormCommand}"
-                                    Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"/>
-                            <Button Content="저장"
-                                    Command="{Binding SaveProgramCommand}"
-                                    Style="{StaticResource PrimaryButton}"
-                                    Padding="24,8"/>
-                        </StackPanel>
-                    </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="취소"
+                                        Command="{Binding CloseFormCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="16,8"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="저장"
+                                        Command="{Binding SaveProgramCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="24,8"
+                                        Visibility="{Binding HasDataDiskFile, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                <Button Content="저장 및 물건 생성"
+                                        Command="{Binding SaveProgramWithDataCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="24,8"
+                                        Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
                 </Border>
             </Grid>
 

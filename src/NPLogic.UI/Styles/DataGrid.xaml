@@ -100,5 +100,158 @@
         </Style.Triggers>
     </Style>
 
+    <!-- =============================================== -->
+    <!-- 콤팩트 DataGrid 스타일 (피드백 반영: 크기 통일) -->
+    <!-- =============================================== -->
+
+    <!-- 콤팩트 DataGrid (물건상세 등 작은 테이블용) -->
+    <Style x:Key="CompactDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="GridLinesVisibility" Value="All"/>
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="VerticalGridLinesBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="RowBackground" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="AlternatingRowBackground" Value="{StaticResource BlueGray50Brush}"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="CanUserDeleteRows" Value="False"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="RowHeight" Value="32"/>
+        <Setter Property="ColumnHeaderHeight" Value="32"/>
+    </Style>
+
+    <!-- 콤팩트 컬럼 헤더 스타일 -->
+    <Style x:Key="CompactColumnHeader" TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 콤팩트 로우 스타일 -->
+    <Style x:Key="CompactDataGridRow" TargetType="DataGridRow">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource TableSelectedBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 콤팩트 셀 스타일 -->
+    <Style x:Key="CompactDataGridCell" TargetType="DataGridCell">
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueGray100Brush}"/>
+        <Setter Property="Padding" Value="6,4"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- =============================================== -->
+    <!-- 물건상세용 통일 스타일 -->
+    <!-- =============================================== -->
+
+    <!-- 물건상세 정보 그리드 스타일 (라벨-값 쌍용) -->
+    <Style x:Key="PropertyInfoGrid" TargetType="Grid">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+    </Style>
+
+    <!-- 물건상세 라벨 셀 스타일 -->
+    <Style x:Key="PropertyLabelCell" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,8"/>
+    </Style>
+
+    <!-- 물건상세 값 셀 스타일 -->
+    <Style x:Key="PropertyValueCell" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+        <Setter Property="BorderThickness" Value="0,1,1,1"/>
+        <Setter Property="Padding" Value="10,8"/>
+    </Style>
+
+    <!-- 물건상세 라벨 텍스트 -->
+    <Style x:Key="PropertyLabelText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 물건상세 값 텍스트 -->
+    <Style x:Key="PropertyValueText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <!-- 상태 뱃지 스타일 (완성/일치 등) -->
+    <Style x:Key="StatusBadgeGreen" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="StatusBadgeRed" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="StatusBadgeYellow" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <Style x:Key="StatusBadgeBlue" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+    <!-- 뱃지 텍스트 (흰색) -->
+    <Style x:Key="StatusBadgeText" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
 </ResourceDictionary>
 

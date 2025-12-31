@@ -23,6 +23,24 @@ namespace NPLogic.ViewModels
         private readonly ExcelService _excelService;
         private readonly StorageService _storageService;
 
+        // ========== 프로그램 연결 ==========
+        /// <summary>
+        /// 업로드할 물건들이 연결될 프로그램 ID
+        /// </summary>
+        [ObservableProperty]
+        private string? _targetProgramId;
+
+        /// <summary>
+        /// 대상 프로그램명 (표시용)
+        /// </summary>
+        [ObservableProperty]
+        private string? _targetProgramName;
+
+        /// <summary>
+        /// 프로그램이 설정되어 있는지 여부
+        /// </summary>
+        public bool HasTargetProgram => !string.IsNullOrEmpty(TargetProgramId);
+
         // Excel 관련
         [ObservableProperty]
         private string? _selectedExcelFile;
@@ -92,6 +110,28 @@ namespace NPLogic.ViewModels
             _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
 
             InitializeColumnMappings();
+        }
+
+        /// <summary>
+        /// 대상 프로그램 설정
+        /// </summary>
+        /// <param name="programId">프로그램 ID</param>
+        /// <param name="programName">프로그램명 (표시용)</param>
+        public void SetTargetProgram(string programId, string? programName = null)
+        {
+            TargetProgramId = programId;
+            TargetProgramName = programName;
+            OnPropertyChanged(nameof(HasTargetProgram));
+        }
+
+        /// <summary>
+        /// 대상 프로그램 초기화
+        /// </summary>
+        public void ClearTargetProgram()
+        {
+            TargetProgramId = null;
+            TargetProgramName = null;
+            OnPropertyChanged(nameof(HasTargetProgram));
         }
 
         /// <summary>
@@ -420,6 +460,12 @@ namespace NPLogic.ViewModels
                 Status = "pending"
             };
 
+            // 대상 프로그램이 설정되어 있으면 우선 사용
+            if (!string.IsNullOrEmpty(TargetProgramId))
+            {
+                property.ProjectId = TargetProgramId;
+            }
+
             foreach (var mapping in ColumnMappings)
             {
                 if (string.IsNullOrEmpty(mapping.SourceColumn) || 
@@ -435,7 +481,11 @@ namespace NPLogic.ViewModels
                 switch (targetField)
                 {
                     case "ProjectId":
-                        property.ProjectId = value?.ToString();
+                        // 대상 프로그램이 설정되어 있지 않은 경우에만 Excel 값 사용
+                        if (string.IsNullOrEmpty(TargetProgramId))
+                        {
+                            property.ProjectId = value?.ToString();
+                        }
                         break;
                     case "PropertyNumber":
                         property.PropertyNumber = value?.ToString();

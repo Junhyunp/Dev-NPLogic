@@ -11,9 +11,9 @@
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BackgroundBrush}">
     
-    <!-- 피드백 반영: 엑셀 스타일 남색 테두리 -->
-    <Border BorderBrush="{StaticResource PrimaryBrush}" 
-            BorderThickness="3"
+    <!-- 피드백 반영: 테두리 제거 (깔끔한 UI) -->
+    <Border BorderBrush="Transparent" 
+            BorderThickness="0"
             Background="{StaticResource BackgroundBrush}">
     <Grid>
         <Grid.RowDefinitions>
