@@ -230,8 +230,8 @@ namespace NPLogic.Views
                     content = serviceProvider.GetRequiredService<CollateralSummaryView>();
                     break;
                 case "CollateralProperty":
-                    // 담보 물건 탭 - PropertyDetailView의 담보물건 탭과 유사
-                    content = CreatePlaceholder("담보 물건 탭 (추후 구현)");
+                    // 담보 물건 탭 - 지도 포함된 BasicDataTab 로드
+                    content = serviceProvider.GetRequiredService<BasicDataTab>();
                     break;
                 case "SeniorRights":
                     content = serviceProvider.GetRequiredService<SeniorRightsView>();
@@ -457,7 +457,9 @@ namespace NPLogic.Views
         {
             try
             {
-                var property = _viewModel?.GetCurrentProperty();
+                // 비동기 버전 사용으로 UI 스레드 deadlock 방지
+                var property = await _viewModel?.GetCurrentPropertyAsync()!;
+                
                 if (property == null)
                 {
                     MessageBox.Show("분석할 물건을 먼저 선택해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);

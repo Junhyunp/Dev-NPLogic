@@ -147,43 +147,7 @@
         </Setter>
     </Style>
 
-    <!-- NonCore Tab Style (Phase 3: 비핵심 9개 탭용) - 피드백 반영: 크기 축소 -->
-    <Style x:Key="NonCoreTabStyle" TargetType="RadioButton">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontWeight" Value="Normal"/>
-        <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="0,0,2,0"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="Transparent"
-                            BorderThickness="0,0,0,2"
-                            Padding="12,8">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                        </Trigger>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="{StaticResource TextDisabledBrush}"/>
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
+    <!-- NonCoreTabStyle은 Typography.xaml에 정의됨 (중복 제거) -->
 
     <!-- PasswordBox Style -->
     <Style x:Key="NPPasswordBox" TargetType="PasswordBox">

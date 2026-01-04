@@ -79,13 +79,16 @@ namespace NPLogic.Converters
     }
 
     /// <summary>
-    /// null을 Visibility로 변환 (null = Collapsed, not null = Visible)
+    /// null 또는 빈 문자열을 Visibility로 변환 (null/빈문자열 = Collapsed, 값 있음 = Visible)
     /// </summary>
     public class NullToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value != null ? Visibility.Visible : Visibility.Collapsed;
+            // null 또는 빈 문자열일 때 Collapsed
+            if (value == null) return Visibility.Collapsed;
+            if (value is string str && string.IsNullOrWhiteSpace(str)) return Visibility.Collapsed;
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

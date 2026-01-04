@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using NPLogic.Data.Exceptions;
 
 namespace NPLogic.Data.Services
 {
@@ -100,21 +101,36 @@ namespace NPLogic.Data.Services
 
         /// <summary>
         /// API 호출 전 세션 유효성 확인 및 필요 시 갱신
+        /// 토큰 갱신에 실패하면 SessionExpiredException을 발생시킵니다.
         /// </summary>
-        public async Task EnsureValidSessionAsync()
+        /// <param name="throwOnFailure">갱신 실패 시 예외 발생 여부 (기본값: true)</param>
+        public async Task EnsureValidSessionAsync(bool throwOnFailure = true)
         {
             if (_client?.Auth.CurrentSession == null)
+            {
+                if (throwOnFailure)
+                    throw new SessionExpiredException("로그인 세션이 없습니다. 다시 로그인해주세요.");
                 return;
+            }
 
             // 세션 만료 시간 확인 (5분 여유)
             var session = _client.Auth.CurrentSession;
             var expiresAt = session.ExpiresAt();
             var timeUntilExpiry = expiresAt - DateTime.UtcNow;
 
+            // 이미 만료되었거나 5분 이내에 만료 예정인 경우
             if (timeUntilExpiry.TotalMinutes < 5)
             {
                 System.Diagnostics.Debug.WriteLine($"Session expiring soon ({timeUntilExpiry.TotalMinutes:F1} min), refreshing...");
-                await TryRefreshTokenAsync();
+                
+                var refreshed = await TryRefreshTokenAsync();
+                
+                if (!refreshed && throwOnFailure)
+                {
+                    // 갱신 실패 시 세션 정보 삭제
+                    _sessionStorage.ClearSession();
+                    throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+                }
             }
         }
 
@@ -131,14 +147,34 @@ namespace NPLogic.Data.Services
 
         /// <summary>
         /// Supabase 클라이언트 가져오기 (세션 유효성 확인 후)
+        /// 세션이 만료되었고 갱신에 실패하면 SessionExpiredException을 발생시킵니다.
         /// </summary>
         public async Task<Supabase.Client> GetClientAsync()
         {
             if (_client == null)
                 throw new InvalidOperationException("Supabase client is not initialized. Call InitializeAsync() first.");
 
-            await EnsureValidSessionAsync();
+            // 세션 유효성 확인 및 필요 시 갱신 (실패 시 예외 발생)
+            await EnsureValidSessionAsync(throwOnFailure: true);
             return _client;
+        }
+
+        /// <summary>
+        /// 세션 유효성 확인 (예외 없이 결과만 반환)
+        /// 앱 포커스 복귀 시 선제적 확인에 사용
+        /// </summary>
+        /// <returns>세션이 유효하면 true, 만료되었으면 false</returns>
+        public async Task<bool> CheckAndRefreshSessionAsync()
+        {
+            try
+            {
+                await EnsureValidSessionAsync(throwOnFailure: false);
+                return _client?.Auth.CurrentSession != null;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>

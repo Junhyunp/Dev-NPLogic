@@ -12,6 +12,41 @@
              Loaded="AdminHomeView_Loaded">
     
     <UserControl.Resources>
+        <!-- 상세 모드 탭 스타일 (메인 컬러 사용) -->
+        <Style x:Key="DetailTabStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="16,8"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0,0,0,2"
+                                BorderBrush="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
         <!-- 패널 토글 버튼 스타일 -->
         <Style x:Key="PanelToggleButton" TargetType="ToggleButton">
             <Setter Property="Background" Value="Transparent"/>
@@ -85,15 +120,13 @@
                         </StackPanel>
                         
                         <Button Grid.Column="1"
-                                Content="프로그램 관리"
                                 Command="{Binding GoToProgramManagementCommand}"
-                                Style="{StaticResource SecondaryButton}"
-                                Foreground="White"
-                                Background="Transparent"
-                                BorderBrush="#80FFFFFF"
-                                Padding="8,4"
-                                FontSize="11"
-                                Margin="0,0,8,0"/>
+                                Style="{StaticResource IconButton}"
+                                Width="28" Height="28"
+                                Margin="0,0,8,0"
+                                ToolTip="프로그램 관리">
+                            <materialDesign:PackIcon Kind="Cog" Width="16" Height="16" Foreground="White"/>
+                        </Button>
                         
                         <!-- 좌측 패널 닫기 버튼 -->
                         <ToggleButton x:Name="LeftPanelToggle"
@@ -237,6 +270,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -247,13 +281,26 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         
+                        <!-- 목록으로 버튼 (상세 모드에서만 표시) -->
+                        <Button Grid.Column="0"
+                                x:Name="BackToListButton"
+                                Click="BackToListButton_Click"
+                                Style="{StaticResource IconButton}"
+                                Width="32" Height="32"
+                                Margin="0,0,8,0"
+                                ToolTip="목록으로 돌아가기"
+                                Visibility="Collapsed">
+                            <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
+                        </Button>
+                        
                         <!-- 좌측 패널 열기 버튼 (접혀있을 때만 표시) -->
                         <ToggleButton x:Name="LeftPanelOpenButton"
-                                      Grid.Column="0"
+                                      Grid.Column="1"
                                       Style="{StaticResource PanelToggleButton}"
                                       Visibility="Collapsed"
                                       Click="LeftPanelOpen_Click"
@@ -262,7 +309,7 @@
                             <materialDesign:PackIcon Kind="ChevronRight" Width="18" Height="18" Foreground="White"/>
                         </ToggleButton>
                         
-                        <StackPanel Grid.Column="1">
+                        <StackPanel Grid.Column="2">
                             <TextBlock Foreground="White" FontSize="13" FontWeight="SemiBold">
                                 <Run Text="프로그램별 진행사항"/>
                             </TextBlock>
@@ -272,15 +319,13 @@
                             </TextBlock>
                         </StackPanel>
                         
-                        <StackPanel Grid.Column="2" Orientation="Horizontal">
-                            <Button Content="Assign: 전체"
-                                    Style="{StaticResource SecondaryButton}"
-                                    Foreground="White"
-                                    Background="Transparent"
-                                    BorderBrush="#80FFFFFF"
-                                    Padding="8,4"
-                                    FontSize="11"
-                                    Margin="0,0,6,0"/>
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                            <Button Style="{StaticResource IconButton}"
+                                    Width="28" Height="28"
+                                    Margin="0,0,6,0"
+                                    ToolTip="Assign: 전체">
+                                <materialDesign:PackIcon Kind="AccountMultiple" Width="16" Height="16" Foreground="White"/>
+                            </Button>
                             <Button Content="새로고침"
                                     Command="{Binding RefreshCommand}"
                                     Style="{StaticResource SecondaryButton}"
@@ -293,12 +338,57 @@
                     </Grid>
                 </Border>
 
-                <!-- 통계 요약 - 더블클릭으로 필터링 -->
-                <Border Grid.Row="1" 
+                <!-- 상세 모드 탭 (상세 모드에서만 표시) -->
+                <Border Grid.Row="1"
+                        x:Name="DetailModeTabs"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,0,0,1"
+                        Background="{StaticResource SurfaceBrush}"
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Margin="8,4">
+                        <RadioButton x:Name="TabNonCore"
+                                     Content="비핵심"
+                                     GroupName="DetailTabs"
+                                     Style="{StaticResource DetailTabStyle}"
+                                     IsChecked="True"
+                                     Checked="DetailTab_Checked"
+                                     Tag="noncore"/>
+                        <RadioButton x:Name="TabRegistry"
+                                     Content="등기부등본"
+                                     GroupName="DetailTabs"
+                                     Style="{StaticResource DetailTabStyle}"
+                                     Checked="DetailTab_Checked"
+                                     Tag="registry"/>
+                        <RadioButton x:Name="TabRights"
+                                     Content="권리분석"
+                                     GroupName="DetailTabs"
+                                     Style="{StaticResource DetailTabStyle}"
+                                     Checked="DetailTab_Checked"
+                                     Tag="rights"/>
+                        <RadioButton x:Name="TabBasicData"
+                                     Content="기초데이터"
+                                     GroupName="DetailTabs"
+                                     Style="{StaticResource DetailTabStyle}"
+                                     Checked="DetailTab_Checked"
+                                     Tag="basicdata"/>
+                        <RadioButton x:Name="TabClosing"
+                                     Content="마감"
+                                     GroupName="DetailTabs"
+                                     Style="{StaticResource DetailTabStyle}"
+                                     Checked="DetailTab_Checked"
+                                     Tag="closing"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 통계 요약 - 클릭으로 필터링 (목록 모드에서만 표시) -->
+                <Border Grid.Row="2"
+                        x:Name="StatisticsSummary"
                         Background="{StaticResource BlueGray50Brush}"
-                        Padding="12,6">
+                        Padding="12,6"
+                        Visibility="Visible">
                     <StackPanel Orientation="Horizontal">
                         <Border x:Name="FilterAll" Background="{StaticResource PrimaryBrush}" CornerRadius="3" Padding="8,4" Margin="0,0,8,0" Cursor="Hand"
+                                BorderThickness="2" BorderBrush="White"
                                 MouseLeftButtonDown="FilterBadge_MouseLeftButtonDown" Tag="all">
                             <TextBlock Foreground="White" FontSize="11">
                                 <Run Text="전체"/>
@@ -306,6 +396,7 @@
                             </TextBlock>
                         </Border>
                         <Border x:Name="FilterPending" Background="{StaticResource WarningBrush}" CornerRadius="3" Padding="8,4" Margin="0,0,8,0" Cursor="Hand"
+                                BorderThickness="0"
                                 MouseLeftButtonDown="FilterBadge_MouseLeftButtonDown" Tag="pending">
                             <TextBlock Foreground="White" FontSize="11">
                                 <Run Text="대기"/>
@@ -313,6 +404,7 @@
                             </TextBlock>
                         </Border>
                         <Border x:Name="FilterProcessing" Background="{StaticResource InfoBrush}" CornerRadius="3" Padding="8,4" Margin="0,0,8,0" Cursor="Hand"
+                                BorderThickness="0"
                                 MouseLeftButtonDown="FilterBadge_MouseLeftButtonDown" Tag="processing">
                             <TextBlock Foreground="White" FontSize="11">
                                 <Run Text="진행"/>
@@ -320,6 +412,7 @@
                             </TextBlock>
                         </Border>
                         <Border x:Name="FilterCompleted" Background="{StaticResource SuccessBrush}" CornerRadius="3" Padding="8,4" Cursor="Hand"
+                                BorderThickness="0"
                                 MouseLeftButtonDown="FilterBadge_MouseLeftButtonDown" Tag="completed">
                             <TextBlock Foreground="White" FontSize="11">
                                 <Run Text="완료"/>
@@ -329,9 +422,10 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 물건 목록 -->
-                <DataGrid Grid.Row="2"
-                          x:Name="PropertiesDataGrid"
+                <!-- 물건 목록 / 상세 뷰 영역 -->
+                <Grid Grid.Row="3">
+                    <!-- 목록 모드: 물건 DataGrid -->
+                    <DataGrid x:Name="PropertiesDataGrid"
                           ItemsSource="{Binding Properties}"
                           AutoGenerateColumns="False"
                           CanUserAddRows="False"
@@ -346,7 +440,7 @@
                           VerticalScrollBarVisibility="Auto">
                     
                     <DataGrid.Columns>
-                        <!-- 차주번호 - 클릭시 비핵심으로 이동 -->
+                        <!-- 차주번호 - 클릭시 전체(홈)로 이동 -->
                         <DataGridTemplateColumn Header="차주번호" Width="80" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -358,12 +452,12 @@
                                                FontSize="11"
                                                Cursor="Hand"
                                                MouseLeftButtonUp="PropertyNumber_Click"
-                                               ToolTip="클릭하여 비핵심 화면으로 이동"/>
+                                               ToolTip="클릭하여 상세 보기"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         
-                        <!-- 차주명 - 클릭시 비핵심으로 이동 -->
+                        <!-- 차주명 - 클릭시 전체(홈)로 이동 -->
                         <DataGridTemplateColumn Header="차주명" Width="80" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -373,7 +467,7 @@
                                                FontSize="11"
                                                Cursor="Hand"
                                                MouseLeftButtonUp="PropertyNumber_Click"
-                                               ToolTip="클릭하여 비핵심 화면으로 이동"/>
+                                               ToolTip="클릭하여 상세 보기"/>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
@@ -664,8 +758,13 @@
                     </DataGrid.CellStyle>
                 </DataGrid>
 
+                    <!-- 상세 모드: NonCoreView -->
+                    <ContentControl x:Name="DetailContentControl"
+                                    Visibility="Collapsed"/>
+                </Grid>
+
                 <!-- 물건 로딩 표시 -->
-                <Grid Grid.Row="2"
+                <Grid Grid.Row="3"
                       Visibility="{Binding IsPropertiesLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
                       Background="#80FFFFFF">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -675,7 +774,7 @@
                 </Grid>
 
                 <!-- 프로그램 미선택 안내 -->
-                <Grid Grid.Row="2"
+                <Grid Grid.Row="3"
                       Visibility="{Binding SelectedProgram, Converter={StaticResource NullToInverseVisibilityConverter}}"
                       Background="#F8FAFC">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">

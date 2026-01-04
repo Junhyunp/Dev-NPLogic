@@ -3,6 +3,10 @@
     "Url": "https://your-project-id.supabase.co",
     "Key": "your-anon-key-here"
   },
+  "MapServer": {
+    "Url": "https://nplogic-map.com/",
+    "Comment": "NPLogic 지도 서버 (지적도, 위치도 등)"
+  },
   "KakaoMap": {
     "ApiKey": "YOUR_KAKAO_MAP_API_KEY",
     "Comment": "카카오 개발자 센터에서 발급: https://developers.kakao.com/"

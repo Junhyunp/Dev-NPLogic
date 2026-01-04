@@ -11,8 +11,9 @@ using NPLogic.Data.Services;
 namespace NPLogic.ViewModels
 {
     /// <summary>
-    /// 관리자용 홈 화면 ViewModel - 마스터-디테일 레이아웃
+    /// 통합 홈 화면 ViewModel - 마스터-디테일 레이아웃
     /// 좌측: 프로그램 목록, 우측: 선택된 프로그램의 물건 목록
+    /// Admin/PM/Evaluator 모든 역할에서 사용 (권한별 데이터 필터)
     /// </summary>
     public partial class AdminHomeViewModel : ObservableObject
     {
@@ -21,6 +22,9 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository _propertyRepository;
         private readonly UserRepository _userRepository;
         private readonly AuthService _authService;
+
+        // PM 담당 프로그램 ID 목록 (권한별 필터링용)
+        private List<Guid> _pmProgramIds = new();
 
         // ========== 사용자 정보 ==========
         [ObservableProperty]
@@ -149,14 +153,36 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 프로그램 목록 로드
+        /// 프로그램 목록 로드 (권한별 필터링)
+        /// - Admin: 전체 프로그램
+        /// - PM: 담당 프로그램만
+        /// - Evaluator: 배정된 물건의 프로그램만
         /// </summary>
         private async Task LoadProgramsAsync()
         {
             try
             {
                 IsProgramsLoading = true;
-                var programs = await _programRepository.GetActiveAsync();
+                
+                IEnumerable<Program> programs;
+                
+                if (CurrentUser?.IsPM == true && !CurrentUser.IsAdmin)
+                {
+                    // PM: 담당 프로그램만 로드
+                    await LoadPMProgramIdsAsync();
+                    var allPrograms = await _programRepository.GetActiveAsync();
+                    programs = allPrograms.Where(p => _pmProgramIds.Contains(p.Id));
+                }
+                else if (CurrentUser?.IsEvaluator == true && !CurrentUser.IsAdmin && !CurrentUser.IsPM)
+                {
+                    // Evaluator: 배정된 물건의 프로그램만 로드
+                    programs = await GetEvaluatorProgramsAsync();
+                }
+                else
+                {
+                    // Admin 또는 기타: 전체 프로그램
+                    programs = await _programRepository.GetActiveAsync();
+                }
                 
                 Programs.Clear();
                 foreach (var program in programs)
@@ -181,6 +207,56 @@ namespace NPLogic.ViewModels
                 IsProgramsLoading = false;
             }
         }
+        
+        /// <summary>
+        /// PM 담당 프로그램 ID 목록 로드
+        /// </summary>
+        private async Task LoadPMProgramIdsAsync()
+        {
+            _pmProgramIds.Clear();
+            
+            if (CurrentUser?.IsPM == true)
+            {
+                try
+                {
+                    var pmPrograms = await _programUserRepository.GetUserPMProgramsAsync(CurrentUser.Id);
+                    _pmProgramIds = pmPrograms.Select(p => p.ProgramId).ToList();
+                }
+                catch (Exception)
+                {
+                    // PM 프로그램 로드 실패 시 빈 목록 유지
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Evaluator 배정 물건의 프로그램 목록 로드
+        /// </summary>
+        private async Task<IEnumerable<Program>> GetEvaluatorProgramsAsync()
+        {
+            if (CurrentUser == null) return Enumerable.Empty<Program>();
+            
+            try
+            {
+                // 자기에게 배정된 물건 조회
+                var properties = await _propertyRepository.GetFilteredAsync(assignedTo: CurrentUser.Id);
+                
+                // 해당 물건들의 프로그램 ID 추출
+                var programIds = properties
+                    .Where(p => p.ProgramId.HasValue)
+                    .Select(p => p.ProgramId!.Value)
+                    .Distinct()
+                    .ToList();
+                
+                // 프로그램 목록 조회
+                var allPrograms = await _programRepository.GetActiveAsync();
+                return allPrograms.Where(p => programIds.Contains(p.Id));
+            }
+            catch (Exception)
+            {
+                return Enumerable.Empty<Program>();
+            }
+        }
 
         /// <summary>
         /// 프로그램 선택 변경 시 물건 목록 로드
@@ -199,7 +275,9 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 선택된 프로그램의 물건 목록 로드
+        /// 선택된 프로그램의 물건 목록 로드 (권한별 필터링)
+        /// - Admin/PM: 전체 물건
+        /// - Evaluator: 자기에게 배정된 물건만
         /// </summary>
         private async Task LoadPropertiesAsync(Guid programId)
         {
@@ -208,8 +286,15 @@ namespace NPLogic.ViewModels
                 IsPropertiesLoading = true;
                 var properties = await _propertyRepository.GetByProgramIdAsync(programId);
 
+                // Evaluator인 경우 자기에게 배정된 물건만 필터링
+                IEnumerable<Property> filteredProperties = properties;
+                if (CurrentUser?.IsEvaluator == true && !CurrentUser.IsAdmin && !CurrentUser.IsPM)
+                {
+                    filteredProperties = properties.Where(p => p.AssignedTo == CurrentUser.Id);
+                }
+
                 // 전체 목록 보관
-                _allProperties = properties.ToList();
+                _allProperties = filteredProperties.ToList();
                 CurrentFilter = "all";
 
                 Properties.Clear();
@@ -254,14 +339,14 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 통계 업데이트
+        /// 통계 업데이트 (전체 목록 기준)
         /// </summary>
         private void UpdateStatistics()
         {
-            TotalPropertyCount = Properties.Count;
-            PendingCount = Properties.Count(p => p.Status == "pending");
-            ProcessingCount = Properties.Count(p => p.Status == "processing");
-            CompletedCount = Properties.Count(p => p.Status == "completed");
+            TotalPropertyCount = _allProperties.Count;
+            PendingCount = _allProperties.Count(p => p.Status == "pending" || string.IsNullOrEmpty(p.Status));
+            ProcessingCount = _allProperties.Count(p => p.Status == "processing");
+            CompletedCount = _allProperties.Count(p => p.Status == "completed");
         }
 
         /// <summary>

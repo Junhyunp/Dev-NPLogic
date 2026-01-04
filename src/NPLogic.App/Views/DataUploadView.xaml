@@ -255,7 +255,7 @@
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="인식된 컬럼" Style="{StaticResource BodyTextStyle}" Opacity="0.7"/>
                                             <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="16">
-                                                <Run Text="{Binding ExcelColumns.Count}"/>
+                                                <Run Text="{Binding ExcelColumns.Count, Mode=OneWay}"/>
                                                 <Run Text="개" FontWeight="Normal" FontSize="12"/>
                                             </TextBlock>
                                         </Grid>
@@ -781,7 +781,7 @@
                                             CornerRadius="10"
                                             Padding="8,2"
                                             Margin="8,0,0,0">
-                                        <TextBlock Text="{Binding PdfFiles.Count}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding PdfFiles.Count, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold"/>
                                     </Border>
                                 </StackPanel>
                                 <Button Grid.Column="1"
@@ -948,7 +948,7 @@
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource H3TextStyle}">
                                             <Setter Property="Text">
                                                 <Setter.Value>
-                                                    <Binding Path="PdfFiles.Count" StringFormat="{}{0}개 파일 준비됨"/>
+                                                    <Binding Path="PdfFiles.Count" Mode="OneWay" StringFormat="{}{0}개 파일 준비됨"/>
                                                 </Setter.Value>
                                             </Setter>
                                             <Style.Triggers>

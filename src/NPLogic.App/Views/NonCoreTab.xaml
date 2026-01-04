@@ -26,39 +26,39 @@
                 <StackPanel Orientation="Horizontal">
                     <!-- 1. 차주 개요 -->
                     <RadioButton x:Name="TabBorrowerOverview" Content="차주 개요" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  IsChecked="True" Checked="SubTab_Checked" Tag="BorrowerOverview"/>
                     <!-- 2. 론 -->
                     <RadioButton x:Name="TabLoan" Content="론" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="Loan"/>
                     <!-- 3. 담보 총괄 -->
                     <RadioButton x:Name="TabCollateralSummary" Content="담보 총괄" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="CollateralSummary"/>
                     <!-- 4. 담보 물건 -->
                     <RadioButton x:Name="TabCollateralProperty" Content="담보 물건" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="CollateralProperty"/>
                     <!-- 5. 선순위 평가 -->
                     <RadioButton x:Name="TabSeniorRights" Content="선순위 평가" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="SeniorRights"/>
                     <!-- 6. 경공매 -->
                     <RadioButton x:Name="TabAuction" Content="경공매" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="Auction"/>
                     <!-- 7. 회생 개요 -->
                     <RadioButton x:Name="TabRestructuring" Content="회생 개요" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="Restructuring"/>
                     <!-- 8. 현금 흐름 집계 -->
                     <RadioButton x:Name="TabCashFlow" Content="현금 흐름 집계" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="CashFlow"/>
                     <!-- 9. NPB -->
                     <RadioButton x:Name="TabNPB" Content="NPB" 
-                                 Style="{StaticResource NonCoreSubTabStyle}"
+                                 Style="{StaticResource NonCoreTabStyle}"
                                  Checked="SubTab_Checked" Tag="NPB"/>
                 </StackPanel>
             </ScrollViewer>
@@ -714,37 +714,5 @@
         </Grid>
     </Grid>
     
-    <!-- 서브탭 스타일 정의 -->
-    <UserControl.Resources>
-        <Style x:Key="NonCoreSubTabStyle" TargetType="RadioButton">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="Border"
-                                Background="Transparent"
-                                BorderThickness="0,0,0,2"
-                                BorderBrush="Transparent"
-                                Padding="16,10"
-                                Margin="0,0,4,0"
-                                Cursor="Hand">
-                            <ContentPresenter VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-        </Style>
-    </UserControl.Resources>
+    <!-- NonCoreTabStyle은 Typography.xaml의 공통 스타일 사용 -->
 </UserControl>

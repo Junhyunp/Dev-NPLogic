@@ -566,6 +566,7 @@ namespace NPLogic.ViewModels
             {
                 Id = Guid.NewGuid(),
                 ProjectId = programId,
+                ProgramId = Guid.TryParse(programId, out var guid) ? guid : null,
                 Status = "pending"
             };
 

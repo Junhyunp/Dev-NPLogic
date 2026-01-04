@@ -141,63 +141,60 @@
         </Grid>
 
         <!-- 메인 레이아웃 -->
-        <Grid Margin="16">
+        <Grid Margin="16,8,16,16">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 헤더 영역 -->
-            <Grid Grid.Row="0" Margin="0,0,0,16">
+            <!-- 헤더 영역 (한 줄로 통합) -->
+            <Grid Grid.Row="0" Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="대시보드" 
-                                   Style="{StaticResource H2TextStyle}"
-                                   Margin="0,0,16,0"/>
-                        <!-- 역할 뱃지 -->
-                        <Border Background="{StaticResource PrimaryBrush}"
-                                CornerRadius="4"
-                                Padding="8,4"
-                                VerticalAlignment="Center"
-                                Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
-                            <TextBlock Text="{Binding RoleBadgeText}" 
-                                       Foreground="White"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"/>
-                        </Border>
-                    </StackPanel>
+                <!-- 좌측: 타이틀 + 뱃지 + 담당자 (한 줄) -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="대시보드" 
+                               Style="{StaticResource H2TextStyle}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"/>
+                    <!-- 역할 뱃지 -->
+                    <Border Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="4"
+                            Padding="6,3"
+                            VerticalAlignment="Center"
+                            Margin="0,0,16,0"
+                            Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
+                        <TextBlock Text="{Binding RoleBadgeText}" 
+                                   Foreground="White"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"/>
+                    </Border>
                     <TextBlock Style="{StaticResource BodyTextStyle}"
+                               VerticalAlignment="Center"
                                Opacity="0.7"
-                               Margin="0,4,0,0">
+                               FontSize="12">
                         <Run Text="담당자:"/>
                         <Run Text="{Binding CurrentUser.Name, FallbackValue='로그인 필요'}" FontWeight="SemiBold"/>
                     </TextBlock>
                 </StackPanel>
 
-                <!-- 우측 버튼들 - 피드백 반영: 아이콘+ToolTip 추가 -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- 우측 버튼들 -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button Command="{Binding RefreshDataCommand}"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="8,6"
-                            Margin="0,0,8,0"
-                            ToolTip="데이터를 서버에서 다시 불러옵니다 (Ctrl+R)">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Refresh" 
-                                                     Width="14" Height="14" 
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,4,0"/>
-                            <TextBlock Text="새로고침" VerticalAlignment="Center" FontSize="12"/>
-                        </StackPanel>
+                            Style="{StaticResource IconButton}"
+                            Width="32" Height="32"
+                            Margin="0,0,4,0"
+                            ToolTip="새로고침 (Ctrl+R)">
+                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
                     </Button>
-                    <!-- 롤업 버튼 (Phase 4.5) - 피드백 반영: 크기 축소 -->
                     <Button Style="{StaticResource SecondaryButton}"
-                            Padding="8,6"
-                            Margin="0,0,8,0"
+                            Padding="6,4"
+                            Margin="0,0,6,0"
                             Click="RollupButton_Click"
                             ToolTip="전체 현황 창 열기 (비핵심 전체 데이터 한눈에 보기)">
                         <StackPanel Orientation="Horizontal">
@@ -205,42 +202,105 @@
                                                      Width="14" Height="14" 
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,4,0"/>
-                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="12"/>
+                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="11"/>
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding ExportToExcelCommand}"
                             Style="{StaticResource PrimaryButton}"
-                            Padding="8,6"
+                            Padding="6,4"
                             ToolTip="현재 데이터를 Excel 파일로 내보내기">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="MicrosoftExcel" 
                                                      Width="14" Height="14" 
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,4,0"/>
-                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="12"/>
+                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="11"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
             </Grid>
+            
+            <!-- 브레드크럼 영역 -->
+            <Border Grid.Row="1" 
+                    Background="{StaticResource BlueGray50Brush}"
+                    CornerRadius="4"
+                    Padding="10,6"
+                    Margin="0,0,0,10">
+                <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="MapMarker" 
+                                             Width="14" Height="14" 
+                                             VerticalAlignment="Center"
+                                             Foreground="{StaticResource TextSecondaryBrush}"
+                                             Margin="0,0,6,0"/>
+                    <TextBlock x:Name="BreadcrumbHome"
+                               Text="대시보드"
+                               FontSize="12"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               VerticalAlignment="Center"
+                               Cursor="Hand"
+                               MouseLeftButtonDown="Breadcrumb_Home_Click"
+                               ToolTip="물건 목록으로 이동"/>
+                    <TextBlock Text=" › " 
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock x:Name="BreadcrumbProgram"
+                               Text="{Binding SelectedProgram.ProjectName}"
+                               FontSize="12"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               VerticalAlignment="Center"
+                               Cursor="Hand"
+                               MouseLeftButtonDown="Breadcrumb_Program_Click"
+                               ToolTip="물건 목록으로 이동"
+                               Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <!-- 상세 모드: 물건번호 표시 -->
+                    <TextBlock x:Name="BreadcrumbPropertySeparator"
+                               Text=" › " 
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <TextBlock x:Name="BreadcrumbProperty"
+                               Text="{Binding SelectedPropertyNumber}"
+                               FontSize="12"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <!-- 상세 모드: 현재 탭 표시 -->
+                    <TextBlock x:Name="BreadcrumbTabSeparator"
+                               Text=" › " 
+                               FontSize="12"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock x:Name="BreadcrumbTab"
+                               Text="{Binding CurrentTabName}"
+                               FontSize="12"
+                               Foreground="{StaticResource TextPrimaryBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                </StackPanel>
+            </Border>
 
-            <!-- 2영역 레이아웃 (Phase 2.2, 2.3, 2.4) -->
-            <Grid Grid.Row="1">
+            <!-- 2영역 레이아웃 (Phase 2.2, 2.4) - GridSplitter 제거, 토글 버튼 방식만 사용 -->
+            <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <!-- 좌측: 진행 중인 프로그램 (접을 수 있음) -->
-                    <ColumnDefinition x:Name="LeftPanelColumn" Width="280" MinWidth="0"/>
-                    <!-- GridSplitter -->
-                    <ColumnDefinition Width="Auto"/>
+                    <!-- 좌측: 진행 중인 프로그램 (기본 접힌 상태) -->
+                    <ColumnDefinition x:Name="LeftPanelColumn" Width="0" MinWidth="0"/>
                     <!-- 우측: 프로그램명 상세 -->
                     <ColumnDefinition Width="*" MinWidth="400"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ========== 좌측: 진행 중인 프로그램 ========== -->
+                <!-- ========== 좌측: 진행 중인 프로그램 (기본 접힌 상태) ========== -->
                 <Border x:Name="LeftPanel"
                         Grid.Column="0"
                         Background="{StaticResource SurfaceBrush}"
                         CornerRadius="8,0,0,8"
                         BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1,1,0,1">
+                        BorderThickness="1,1,0,1"
+                        Visibility="Collapsed">
                     <Border.Effect>
                         <DropShadowEffect Color="Black" Opacity="0.05" BlurRadius="8" ShadowDepth="2"/>
                     </Border.Effect>
@@ -273,7 +333,7 @@
                                 <ToggleButton x:Name="LeftPanelToggle"
                                               Grid.Column="1"
                                               Style="{StaticResource PanelToggleButton}"
-                                              IsChecked="True"
+                                              IsChecked="False"
                                               Click="LeftPanelToggle_Click"
                                               ToolTip="패널 접기/펼치기">
                                     <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
@@ -343,30 +403,8 @@
                     </Grid>
                 </Border>
 
-                <!-- ========== GridSplitter (Phase 2.3) ========== -->
-                <GridSplitter Grid.Column="1"
-                              Width="6"
-                              Background="{StaticResource BlueGray100Brush}"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Stretch"
-                              ResizeBehavior="PreviousAndNext"
-                              ShowsPreview="True"
-                              Cursor="SizeWE">
-                    <GridSplitter.Template>
-                        <ControlTemplate TargetType="GridSplitter">
-                            <Border Background="{StaticResource BlueGray200Brush}"
-                                    Width="6"
-                                    CornerRadius="3">
-                                <Rectangle Width="2" Height="30" Fill="{StaticResource BlueGray300Brush}" 
-                                           VerticalAlignment="Center" HorizontalAlignment="Center"
-                                           RadiusX="1" RadiusY="1"/>
-                            </Border>
-                        </ControlTemplate>
-                    </GridSplitter.Template>
-                </GridSplitter>
-
                 <!-- ========== 우측: 프로그램명 상세 ========== -->
-                <Border Grid.Column="2"
+                <Border Grid.Column="1"
                         Background="{StaticResource SurfaceBrush}"
                         CornerRadius="0,8,8,0"
                         BorderBrush="{StaticResource BorderBrush}"
@@ -396,11 +434,11 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- 좌측 패널 열기 버튼 (접혀있을 때만 표시) -->
+                                <!-- 좌측 패널 열기 버튼 (기본 표시 - 접혀있을 때) -->
                                 <ToggleButton x:Name="LeftPanelOpenButton"
                                               Grid.Column="0"
                                               Style="{StaticResource PanelToggleButton}"
-                                              Visibility="Collapsed"
+                                              Visibility="Visible"
                                               Click="LeftPanelOpen_Click"
                                               ToolTip="프로그램 목록 열기"
                                               Margin="0,0,12,0">
@@ -426,47 +464,64 @@
                             </Grid>
                         </Border>
 
-                        <!-- 내부 탭 메뉴 (Phase 2.5 - 상단 메뉴를 여기로 이동) -->
+                        <!-- 내부 탭 메뉴 (상세 모드에서만 표시) -->
                         <Border Grid.Row="1"
                                 BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="0,0,0,1"
-                                Background="{StaticResource SurfaceBrush}">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                                          VerticalScrollBarVisibility="Disabled">
-                                <StackPanel Orientation="Horizontal" Margin="8,0">
-                                    <RadioButton x:Name="TabHome" 
-                                                 Content="홈" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 IsChecked="True"
-                                                 Checked="InnerTab_Checked"/>
-                                    <RadioButton x:Name="TabNonCore" 
-                                                 Content="비핵심" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 Checked="InnerTab_Checked"/>
-                                    <RadioButton x:Name="TabRegistry" 
-                                                 Content="등기부" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 Checked="InnerTab_Checked"/>
-                                    <RadioButton x:Name="TabRights" 
-                                                 Content="권리분석" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 Checked="InnerTab_Checked"/>
-                                    <RadioButton x:Name="TabBasicData" 
-                                                 Content="기초데이터" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 Checked="InnerTab_Checked"/>
-                                    <RadioButton x:Name="TabClosing" 
-                                                 Content="마감" 
-                                                 Style="{StaticResource InnerTabButton}"
-                                                 GroupName="InnerTabs"
-                                                 Checked="InnerTab_Checked"/>
-                                </StackPanel>
-                            </ScrollViewer>
+                                Background="{StaticResource SurfaceBrush}"
+                                x:Name="DetailModeTabs"
+                                Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- 목록으로 버튼 -->
+                                <Button Grid.Column="0"
+                                        x:Name="BackToListButton"
+                                        Click="BackToListButton_Click"
+                                        Style="{StaticResource IconButton}"
+                                        Width="32" Height="32"
+                                        Margin="8,4"
+                                        ToolTip="목록으로 돌아가기">
+                                    <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18"/>
+                                </Button>
+                                
+                                <!-- 탭 버튼들 -->
+                                <ScrollViewer Grid.Column="1"
+                                              HorizontalScrollBarVisibility="Auto" 
+                                              VerticalScrollBarVisibility="Disabled">
+                                    <StackPanel Orientation="Horizontal" Margin="8,0">
+                                        <RadioButton x:Name="TabNonCore" 
+                                                     Content="비핵심" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     IsChecked="True"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabRegistry" 
+                                                     Content="등기부등본" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabRights" 
+                                                     Content="권리분석" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabBasicData" 
+                                                     Content="기초데이터" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabClosing" 
+                                                     Content="마감" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Grid>
                         </Border>
 
                         <!-- 컬럼별 진행률 표시 (Phase 2.6) -->
@@ -479,6 +534,57 @@
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" 
                                           VerticalScrollBarVisibility="Disabled">
                                 <StackPanel Orientation="Horizontal">
+                                    <!-- 상태 필터 버튼 (전체/대기/진행/완료) - 더블클릭으로 필터링 -->
+                                    <Border Background="{StaticResource SurfaceBrush}"
+                                            CornerRadius="4"
+                                            Padding="6,4"
+                                            Margin="0,0,16,0"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock x:Name="FilterAll"
+                                                       Text="전체" 
+                                                       Tag="all"
+                                                       FontSize="12" 
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                       Padding="8,4"
+                                                       Cursor="Hand"
+                                                       MouseLeftButtonDown="StatusFilter_MouseDown"
+                                                       ToolTip="더블클릭하여 전체 보기"/>
+                                            <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
+                                            <TextBlock x:Name="FilterPending"
+                                                       Text="대기" 
+                                                       Tag="pending"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       Padding="8,4"
+                                                       Cursor="Hand"
+                                                       MouseLeftButtonDown="StatusFilter_MouseDown"
+                                                       ToolTip="더블클릭하여 대기 항목만 보기"/>
+                                            <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
+                                            <TextBlock x:Name="FilterProcessing"
+                                                       Text="진행" 
+                                                       Tag="processing"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       Padding="8,4"
+                                                       Cursor="Hand"
+                                                       MouseLeftButtonDown="StatusFilter_MouseDown"
+                                                       ToolTip="더블클릭하여 진행 중 항목만 보기"/>
+                                            <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
+                                            <TextBlock x:Name="FilterCompleted"
+                                                       Text="완료" 
+                                                       Tag="completed"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       Padding="8,4"
+                                                       Cursor="Hand"
+                                                       MouseLeftButtonDown="StatusFilter_MouseDown"
+                                                       ToolTip="더블클릭하여 완료 항목만 보기"/>
+                                        </StackPanel>
+                                    </Border>
+
                                     <!-- 진행률 항목들 -->
                                     <Border Background="{StaticResource SurfaceBrush}"
                                             CornerRadius="4"
@@ -580,14 +686,15 @@
                             </ScrollViewer>
                         </Border>
 
-                        <!-- 탭별 컨텐츠 영역 (Phase 6) -->
+                        <!-- 탭별 컨텐츠 영역 -->
                         <Grid Grid.Row="3">
-                            <!-- 홈 탭: 데이터 그리드 -->
+                            <!-- 목록 모드: 데이터 그리드 -->
                             <DataGrid x:Name="ProgressDataGrid"
                                       ItemsSource="{Binding DashboardProperties}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
                                       SelectionMode="Single"
+                                      SelectionChanged="ProgressDataGrid_SelectionChanged"
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
@@ -609,7 +716,7 @@
                                                        FontWeight="SemiBold"
                                                        Cursor="Hand"
                                                        MouseLeftButtonUp="PropertyNumber_Click"
-                                                       ToolTip="클릭하여 비핵심 화면으로 이동"/>
+                                                       ToolTip="클릭하여 상세 화면으로 이동"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -886,32 +993,9 @@
                             </DataGrid.CellStyle>
                         </DataGrid>
 
-                            <!-- 비핵심/등기부/권리분석/기초데이터/마감 탭: 물건별 상세 View -->
+                            <!-- 상세 모드: 물건별 상세 View -->
                             <ContentControl x:Name="TabContentControl"
                                             Visibility="Collapsed"/>
-
-                            <!-- 물건 선택 안내 메시지 -->
-                            <Border x:Name="SelectPropertyMessage"
-                                    Background="{StaticResource BlueGray50Brush}"
-                                    Visibility="Collapsed">
-                                <StackPanel VerticalAlignment="Center" 
-                                            HorizontalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="CursorPointer" 
-                                                             Width="64" Height="64"
-                                                             Foreground="{StaticResource BlueGray300Brush}"
-                                                             HorizontalAlignment="Center"/>
-                                    <TextBlock Text="물건을 선택하세요" 
-                                               Style="{StaticResource H3TextStyle}"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,16,0,8"/>
-                                    <TextBlock Text="위 목록에서 물건을 선택하거나 차주번호를 클릭하면&#10;해당 물건의 상세 정보를 볼 수 있습니다."
-                                               Style="{StaticResource BodyTextStyle}"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               TextAlignment="Center"
-                                               Opacity="0.7"/>
-                                </StackPanel>
-                            </Border>
                         </Grid>
                     </Grid>
                 </Border>

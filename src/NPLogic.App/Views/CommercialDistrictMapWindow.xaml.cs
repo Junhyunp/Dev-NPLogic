@@ -26,6 +26,7 @@ namespace NPLogic.Views
         private Property? _property;
         private int _currentRadius = 500; // 기본 반경 500m
         private bool _isMapReady = false;
+        private bool _isInitializing = false;
 
         public CommercialDistrictMapWindow(IConfiguration? configuration = null)
         {
@@ -41,7 +42,7 @@ namespace NPLogic.Views
         /// <summary>
         /// 물건 정보로 창 열기
         /// </summary>
-        public static async Task OpenAsync(Property property, Window? owner = null)
+        public static Task OpenAsync(Property property, Window? owner = null)
         {
             var config = App.ServiceProvider?.GetService(typeof(IConfiguration)) as IConfiguration;
             var window = new CommercialDistrictMapWindow(config)
@@ -50,18 +51,57 @@ namespace NPLogic.Views
                 _property = property
             };
             
+            // Window_Loaded에서 InitializeMapAsync()가 호출됨
             window.Show();
-            await window.InitializeMapAsync();
+            return Task.CompletedTask;
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             if (_property != null)
             {
                 TxtPropertyInfo.Text = $"{_property.PropertyNumber} - {_property.GetShortAddress()}";
             }
             
-            await InitializeMapAsync();
+            // Dispatcher를 통해 UI가 완전히 렌더링된 후 초기화 시작
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(async () =>
+            {
+                await InitializeMapSafeAsync();
+            }));
+        }
+        
+        /// <summary>
+        /// 안전한 지도 초기화 (UI 스레드 블로킹 방지)
+        /// </summary>
+        private async Task InitializeMapSafeAsync()
+        {
+            if (_isInitializing) return;
+            _isInitializing = true;
+            
+            Debug.WriteLine("[CommercialMap] InitializeMapSafeAsync 시작");
+            
+            try
+            {
+                await InitializeMapAsync();
+                Debug.WriteLine("[CommercialMap] InitializeMapAsync 완료");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[CommercialMap] 지도 초기화 실패: {ex.Message}\n{ex.StackTrace}");
+                
+                // UI 스레드에서 메시지 박스 표시
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    LoadingOverlay.Visibility = Visibility.Collapsed;
+                    MessageBox.Show($"지도를 초기화할 수 없습니다.\n\n{ex.Message}", "WebView2 초기화 오류", MessageBoxButton.OK, MessageBoxImage.Warning);
+                });
+                
+                ShowNoApiKeyOverlay();
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -74,51 +114,103 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 지도 초기화
+        /// 지도 초기화 - 자체 서버 지도 사용
         /// </summary>
         private async Task InitializeMapAsync()
         {
+            Debug.WriteLine("지도 초기화 시작...");
+            
+            // WebView2 환경 초기화
+            await MapWebView.EnsureCoreWebView2Async(null);
+            
+            Debug.WriteLine("WebView2 환경 생성 완료");
+
+            if (MapWebView.CoreWebView2 == null)
+            {
+                Debug.WriteLine("CoreWebView2가 null입니다.");
+                ShowNoApiKeyOverlay();
+                return;
+            }
+
+            // 메시지 핸들러 등록
+            MapWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+
+            // 자체 서버 지도 URL 사용 (중앙 관리)
+            string mapUrl = AppConstants.MapServerUrl;
+            Debug.WriteLine($"지도 URL: {mapUrl}");
+
+            MapWebView.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+            MapWebView.CoreWebView2.Navigate(mapUrl);
+            Debug.WriteLine("지도 네비게이션 시작");
+        }
+        
+        /// <summary>
+        /// WebView2 네비게이션 완료 핸들러
+        /// </summary>
+        private async void CoreWebView2_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs args)
+        {
+            Debug.WriteLine($"네비게이션 완료: {args.IsSuccess}");
+            
+            if (args.IsSuccess)
+            {
+                _isMapReady = true;
+                LoadingOverlay.Visibility = Visibility.Collapsed;
+                
+                // 물건 주소가 있으면 검색
+                if (_property != null && !string.IsNullOrEmpty(_property.AddressFull))
+                {
+                    await Task.Delay(1000); // 페이지 로딩 대기
+                    await SetMapAddressAsync(_property.AddressFull);
+                }
+                
+                // 상권 데이터 로드
+                await LoadCommercialDataForPropertyAsync();
+            }
+            else
+            {
+                Debug.WriteLine($"네비게이션 실패: {args.WebErrorStatus}");
+                ShowNoApiKeyOverlay();
+            }
+        }
+        
+        /// <summary>
+        /// 지도에 주소 설정
+        /// </summary>
+        private async Task SetMapAddressAsync(string address)
+        {
             try
             {
-                // WebView2 환경 초기화
-                var env = await CoreWebView2Environment.CreateAsync();
-                await MapWebView.EnsureCoreWebView2Async(env);
-
-                // 메시지 핸들러 등록
-                MapWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
-
-                // HTML 파일 로드
-                var htmlPath = GetHtmlFilePath();
-
-                if (File.Exists(htmlPath))
-                {
-                    MapWebView.CoreWebView2.Navigate(new Uri(htmlPath).AbsoluteUri);
-
-                    MapWebView.CoreWebView2.NavigationCompleted += async (s, args) =>
-                    {
-                        if (args.IsSuccess)
-                        {
-                            // 카카오맵 초기화
-                            var apiKey = _kakaoMapApiKey ?? "";
-                            var script = $"initializeMap('{EscapeJsString(apiKey)}');";
-                            await MapWebView.CoreWebView2.ExecuteScriptAsync(script);
-                        }
-                        else
-                        {
-                            ShowNoApiKeyOverlay();
-                        }
-                    };
-                }
-                else
-                {
-                    ShowNoApiKeyOverlay();
-                }
+                if (MapWebView.CoreWebView2 == null) return;
+                
+                string script = $@"
+                    (function() {{
+                        var textarea = document.getElementById('batchAddressInput');
+                        var searchBtn = document.getElementById('batchSearchBtn');
+                        if (textarea && searchBtn) {{
+                            textarea.value = '{EscapeJsString(address)}';
+                            searchBtn.click();
+                        }}
+                    }})();
+                ";
+                await MapWebView.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"지도 초기화 실패: {ex.Message}");
-                ShowNoApiKeyOverlay();
+                Debug.WriteLine($"주소 설정 실패: {ex.Message}");
             }
+        }
+        
+        /// <summary>
+        /// 물건 기준 상권 데이터 로드
+        /// </summary>
+        private async Task LoadCommercialDataForPropertyAsync()
+        {
+            if (_property == null) return;
+            
+            var lat = (double)(_property.Latitude ?? 37.5665m);
+            var lng = (double)(_property.Longitude ?? 126.9780m);
+            
+            await LoadCommercialDataAsync(lat, lng);
         }
 
         /// <summary>
@@ -387,6 +479,8 @@ namespace NPLogic.Views
         }
     }
 }
+
+
 
 
 

@@ -492,7 +492,7 @@
                                                     <Grid>
                                                         <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
                                                         <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
-                                                            <Run Text="{Binding DataDiskColumns.Count}"/>
+                                                            <Run Text="{Binding DataDiskColumns.Count, Mode=OneWay}"/>
                                                             <Run Text="개" FontWeight="Normal" FontSize="11"/>
                                                         </TextBlock>
                                                     </Grid>

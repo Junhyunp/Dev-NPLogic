@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Data.Services;
+using NPLogic.Data.Exceptions;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 
@@ -24,6 +26,11 @@ namespace NPLogic
         private static readonly SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
         private static readonly SolidColorBrush AccentBrush = new SolidColorBrush(Color.FromRgb(0x4A, 0x90, 0xE2)); // 밝은 블루 accent
 
+        // 세션 체크 관련
+        private DateTime _lastSessionCheck = DateTime.MinValue;
+        private bool _isCheckingSession = false;
+        private static readonly TimeSpan SessionCheckInterval = TimeSpan.FromMinutes(1); // 1분마다 체크
+
         public static MainWindow? Instance { get; private set; }
 
         public MainWindow()
@@ -35,8 +42,61 @@ namespace NPLogic
             // Initialize Toast Service
             NPLogic.UI.Services.ToastService.Instance.Initialize(ToastContainer);
 
+            // 앱 포커스 복귀 시 세션 확인 이벤트 등록
+            this.Activated += MainWindow_Activated;
+
             // 현재 사용자 정보를 로드하고 초기 화면으로 이동
             _ = InitializeNavigationAsync();
+        }
+
+        /// <summary>
+        /// 앱 포커스 복귀 시 세션 유효성 선제적 확인
+        /// </summary>
+        private async void MainWindow_Activated(object? sender, EventArgs e)
+        {
+            // 중복 체크 방지 및 체크 간격 제한
+            if (_isCheckingSession)
+                return;
+
+            var now = DateTime.Now;
+            if (now - _lastSessionCheck < SessionCheckInterval)
+                return;
+
+            _isCheckingSession = true;
+            _lastSessionCheck = now;
+
+            try
+            {
+                var serviceProvider = App.ServiceProvider;
+                if (serviceProvider == null) return;
+
+                var supabaseService = serviceProvider.GetRequiredService<SupabaseService>();
+                
+                // 세션 유효성 확인 및 필요 시 갱신 (예외 없이)
+                var isValid = await supabaseService.CheckAndRefreshSessionAsync();
+                
+                if (!isValid)
+                {
+                    // 세션이 완전히 만료됨 - SessionExpiredException 발생시켜 전역 핸들러에서 처리
+                    throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Session check on focus: valid={isValid}");
+            }
+            catch (SessionExpiredException)
+            {
+                // 세션 만료 예외는 전역 핸들러로 전파
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // 네트워크 오류 등은 무시 (다음 API 호출 시 처리됨)
+                System.Diagnostics.Debug.WriteLine($"Session check failed: {ex.Message}");
+            }
+            finally
+            {
+                _isCheckingSession = false;
+            }
         }
 
         /// <summary>
@@ -70,7 +130,8 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// 관리자 홈 화면으로 이동
+        /// 통합 홈 화면으로 이동 (모든 역할 공통)
+        /// AdminHomeView에서 권한별 데이터 필터링 수행
         /// </summary>
         public void NavigateToAdminHome()
         {
@@ -84,31 +145,21 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// PM 홈 화면으로 이동
+        /// PM 홈 화면으로 이동 (통합으로 AdminHomeView 사용)
         /// </summary>
         public void NavigateToPMHome()
         {
-            var serviceProvider = App.ServiceProvider;
-            if (serviceProvider != null)
-            {
-                var pmHomeView = serviceProvider.GetRequiredService<Views.PMHomeView>();
-                MainContentControl.Content = pmHomeView;
-                UpdateSelectedMenu(DashboardButton);
-            }
+            // 통합: AdminHomeView 사용 (권한별 데이터 필터 적용)
+            NavigateToAdminHome();
         }
 
         /// <summary>
-        /// 평가자 홈 화면으로 이동
+        /// 평가자 홈 화면으로 이동 (통합으로 AdminHomeView 사용)
         /// </summary>
         public void NavigateToEvaluatorHome()
         {
-            var serviceProvider = App.ServiceProvider;
-            if (serviceProvider != null)
-            {
-                var evaluatorHomeView = serviceProvider.GetRequiredService<Views.EvaluatorHomeView>();
-                MainContentControl.Content = evaluatorHomeView;
-                UpdateSelectedMenu(DashboardButton);
-            }
+            // 통합: AdminHomeView 사용 (권한별 데이터 필터 적용)
+            NavigateToAdminHome();
         }
 
         /// <summary>
@@ -145,33 +196,12 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// 대시보드로 이동 (역할에 따라 적절한 홈 화면으로 리다이렉트)
+        /// 대시보드로 이동 (통합 홈 화면)
+        /// 모든 역할이 AdminHomeView를 사용하고, 권한별 데이터 필터링 적용
         /// </summary>
         public void NavigateToDashboard()
         {
-            if (_currentUser?.IsAdmin == true)
-            {
-                NavigateToAdminHome();
-            }
-            else if (_currentUser?.IsPM == true)
-            {
-                NavigateToPMHome();
-            }
-            else if (_currentUser?.IsEvaluator == true)
-            {
-                NavigateToEvaluatorHome();
-            }
-            else
-            {
-                // 기본 대시보드 뷰로 이동 (역할이 없거나 매칭되지 않는 경우)
-                var serviceProvider = App.ServiceProvider;
-                if (serviceProvider != null)
-                {
-                    var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
-                    MainContentControl.Content = dashboardView;
-                    UpdateSelectedMenu(DashboardButton);
-                }
-            }
+            NavigateToAdminHome();
         }
 
         /// <summary>
@@ -344,24 +374,20 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// 비핵심 화면으로 이동 (차주번호 클릭 시 - Phase 4.2 관련)
+        /// 홈(전체) 화면으로 이동 (차주번호 클릭 시 - 피드백 반영: 차주번호/명 클릭 시 전체로 바로 이어져야 함)
         /// </summary>
-        public void NavigateToNonCoreView(Property property)
+        public void NavigateToHomeView(Property property)
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider != null)
             {
-                // PropertyDetailView를 비핵심 탭이 선택된 상태로 열기
-                var propertyDetailView = serviceProvider.GetRequiredService<Views.PropertyDetailView>();
-                var viewModel = propertyDetailView.DataContext as ViewModels.PropertyDetailViewModel;
-                if (viewModel != null)
-                {
-                    viewModel.LoadProperty(property);
-                    viewModel.SetPropertyId(property.Id, NavigateToPropertyList);
-                    // 비핵심 탭으로 설정
-                    viewModel.SetActiveTab("noncore");
-                }
-                MainContentControl.Content = propertyDetailView;
+                // 통합 홈 화면으로 이동 후 상세 모드로 전환
+                var adminHomeView = serviceProvider.GetRequiredService<Views.AdminHomeView>();
+                MainContentControl.Content = adminHomeView;
+                UpdateSelectedMenu(DashboardButton);
+                
+                // 상세 모드로 전환
+                adminHomeView.SelectPropertyAndSwitchToDetail(property);
             }
         }
 

@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Data.Services;
+using NPLogic.Data.Exceptions;
 using NPLogic.Services;
 using NPLogic.ViewModels;
 using NPLogic.Views;
@@ -33,6 +35,14 @@ namespace NPLogic
             // 전역 예외 핸들러 추가
             this.DispatcherUnhandledException += (s, ex) =>
             {
+                // 세션 만료 예외 처리
+                if (IsSessionExpiredException(ex.Exception))
+                {
+                    HandleSessionExpired();
+                    ex.Handled = true;
+                    return;
+                }
+
                 MessageBox.Show(
                     $"예외 발생:\n\n{ex.Exception.GetType().Name}\n\n{ex.Exception.Message}\n\n스택 트레이스:\n{ex.Exception.StackTrace}",
                     "오류",
@@ -126,12 +136,14 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
                     sp.GetRequiredService<Data.Repositories.UserRepository>(),
                     sp.GetRequiredService<AuthService>(),
-                    sp.GetRequiredService<Data.Repositories.ProgramUserRepository>()
+                    sp.GetRequiredService<Data.Repositories.ProgramUserRepository>(),
+                    sp.GetRequiredService<Data.Repositories.ProgramRepository>()
                 );
             });
             services.AddTransient<ViewModels.AdminHomeViewModel>();
-            services.AddTransient<ViewModels.PMHomeViewModel>();
-            services.AddTransient<ViewModels.EvaluatorHomeViewModel>();
+            // PMHomeViewModel, EvaluatorHomeViewModel: AdminHomeView로 통합됨 (권한별 데이터 필터)
+            // services.AddTransient<ViewModels.PMHomeViewModel>();
+            // services.AddTransient<ViewModels.EvaluatorHomeViewModel>();
             services.AddTransient<ViewModels.PropertyListViewModel>();
             services.AddTransient<ViewModels.PropertyFormViewModel>();
             services.AddTransient<ViewModels.PropertyDetailViewModel>(sp =>
@@ -176,6 +188,20 @@ namespace NPLogic
                     sp.GetRequiredService<ExcelService>()
                 );
             });
+            services.AddTransient<ViewModels.RegistryTabViewModel>(sp =>
+            {
+                return new ViewModels.RegistryTabViewModel(
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
+                    sp.GetRequiredService<RegistryOcrService>()
+                );
+            });
+            services.AddTransient<ViewModels.RightsAnalysisTabViewModel>(sp =>
+            {
+                return new ViewModels.RightsAnalysisTabViewModel(
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>()
+                );
+            });
 
             // Views (Transient)
             services.AddTransient<Views.DashboardView>(sp =>
@@ -192,19 +218,19 @@ namespace NPLogic
                 return view;
             });
 
-            services.AddTransient<Views.PMHomeView>(sp =>
-            {
-                var view = new Views.PMHomeView();
-                view.DataContext = sp.GetRequiredService<ViewModels.PMHomeViewModel>();
-                return view;
-            });
-
-            services.AddTransient<Views.EvaluatorHomeView>(sp =>
-            {
-                var view = new Views.EvaluatorHomeView();
-                view.DataContext = sp.GetRequiredService<ViewModels.EvaluatorHomeViewModel>();
-                return view;
-            });
+            // PMHomeView, EvaluatorHomeView: AdminHomeView로 통합됨
+            // services.AddTransient<Views.PMHomeView>(sp =>
+            // {
+            //     var view = new Views.PMHomeView();
+            //     view.DataContext = sp.GetRequiredService<ViewModels.PMHomeViewModel>();
+            //     return view;
+            // });
+            // services.AddTransient<Views.EvaluatorHomeView>(sp =>
+            // {
+            //     var view = new Views.EvaluatorHomeView();
+            //     view.DataContext = sp.GetRequiredService<ViewModels.EvaluatorHomeViewModel>();
+            //     return view;
+            // });
 
             services.AddTransient<Views.PropertyListView>(sp =>
             {
@@ -339,6 +365,12 @@ namespace NPLogic
                 return view;
             });
 
+            // Tab Views (대시보드 내부 탭)
+            services.AddTransient<Views.RegistryTab>();
+            services.AddTransient<Views.RightsAnalysisTab>();
+            services.AddTransient<Views.BasicDataTab>();
+            services.AddTransient<Views.ClosingTab>();
+
             // Windows (Transient)
             services.AddTransient<MainWindow>();
             services.AddTransient<LoginWindow>(sp =>
@@ -372,6 +404,62 @@ namespace NPLogic
         /// </summary>
         public static ServiceProvider? ServiceProvider => 
             (Current as App)?._serviceProvider;
+
+        /// <summary>
+        /// 예외가 세션 만료 예외인지 확인 (내부 예외도 확인)
+        /// </summary>
+        private static bool IsSessionExpiredException(Exception exception)
+        {
+            // 직접 SessionExpiredException인 경우
+            if (exception is SessionExpiredException)
+                return true;
+
+            // InnerException 체인에서 SessionExpiredException 찾기
+            var innerException = exception.InnerException;
+            while (innerException != null)
+            {
+                if (innerException is SessionExpiredException)
+                    return true;
+                innerException = innerException.InnerException;
+            }
+
+            // AggregateException의 경우 내부 예외들도 확인
+            if (exception is AggregateException aggregateException)
+            {
+                return aggregateException.InnerExceptions.Any(e => IsSessionExpiredException(e));
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 세션 만료 시 처리 - 로그인 화면으로 리다이렉트
+        /// </summary>
+        private void HandleSessionExpired()
+        {
+            MessageBox.Show(
+                "세션이 만료되었습니다.\n다시 로그인해주세요.",
+                "세션 만료",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+
+            // 현재 열린 모든 창 닫기 (로그인 창 제외)
+            var windowsToClose = Current.Windows.Cast<Window>()
+                .Where(w => !(w is LoginWindow))
+                .ToList();
+
+            foreach (var window in windowsToClose)
+            {
+                window.Close();
+            }
+
+            // 로그인 창 표시
+            if (_serviceProvider != null)
+            {
+                var loginWindow = _serviceProvider.GetRequiredService<LoginWindow>();
+                loginWindow.Show();
+            }
+        }
     }
 }
 

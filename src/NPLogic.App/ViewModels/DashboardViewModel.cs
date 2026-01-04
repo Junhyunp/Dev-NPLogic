@@ -63,9 +63,13 @@ namespace NPLogic.ViewModels
         private readonly UserRepository _userRepository;
         private readonly AuthService _authService;
         private readonly ProgramUserRepository _programUserRepository;
+        private readonly ProgramRepository _programRepository;
         
         // PM 담당 프로그램 ID 목록 (캐시)
         private List<Guid> _pmProgramIds = new();
+        
+        // 프로그램 정보 캐시 (program_id -> program_name)
+        private Dictionary<Guid, string> _programNameCache = new();
 
         // ========== 사용자 정보 ==========
         [ObservableProperty]
@@ -90,7 +94,33 @@ namespace NPLogic.ViewModels
 
         // ========== 탭 상태 ==========
         [ObservableProperty]
-        private string _activeTab = "home";
+        private string _activeTab = "noncore";
+
+        // ========== 뎁스 모드 상태 ==========
+        /// <summary>
+        /// 상세 모드 여부 (false: 목록 모드, true: 상세 모드)
+        /// </summary>
+        [ObservableProperty]
+        private bool _isDetailMode = false;
+
+        // ========== 브레드크럼용 프로퍼티 ==========
+        /// <summary>
+        /// 현재 탭 표시 이름 (브레드크럼용)
+        /// </summary>
+        public string? CurrentTabName => IsDetailMode ? ActiveTab switch
+        {
+            "noncore" => "비핵심",
+            "registry" => "등기부등본",
+            "rights" => "권리분석",
+            "basicdata" => "기초데이터",
+            "closing" => "마감",
+            _ => null
+        } : null;
+
+        /// <summary>
+        /// 선택된 물건 번호 (브레드크럼용)
+        /// </summary>
+        public string? SelectedPropertyNumber => SelectedProperty?.PropertyNumber;
 
         // ========== 통계 ==========
         [ObservableProperty]
@@ -119,6 +149,10 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<Property> _dashboardProperties = new();
 
+        // ========== 선택된 물건 (피드백 반영: 대시보드 내 탭 전환용) ==========
+        [ObservableProperty]
+        private Property? _selectedProperty;
+
         [ObservableProperty]
         private ObservableCollection<User> _evaluators = new();
 
@@ -146,12 +180,14 @@ namespace NPLogic.ViewModels
             PropertyRepository propertyRepository,
             UserRepository userRepository,
             AuthService authService,
-            ProgramUserRepository programUserRepository)
+            ProgramUserRepository programUserRepository,
+            ProgramRepository programRepository)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
+            _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
         }
 
         /// <summary>
@@ -261,11 +297,19 @@ namespace NPLogic.ViewModels
         {
             try
             {
+                // 프로그램 목록을 먼저 로드하여 이름 캐시 구성
+                var programs = await _programRepository.GetAllAsync();
+                _programNameCache.Clear();
+                foreach (var program in programs)
+                {
+                    _programNameCache[program.Id] = program.ProgramName;
+                }
+
                 var allProperties = await _propertyRepository.GetAllAsync();
                 
-                // Phase 6: 권한별 필터링
+                // Phase 6: 권한별 필터링 - program_id가 있는 물건만 대상
                 IEnumerable<Property> filteredProperties = allProperties
-                    .Where(p => !string.IsNullOrWhiteSpace(p.ProjectId));
+                    .Where(p => p.ProgramId.HasValue);
 
                 if (CurrentUser?.IsAdmin == true)
                 {
@@ -292,22 +336,24 @@ namespace NPLogic.ViewModels
                         .Where(p => p.AssignedTo == CurrentUser.Id);
                 }
 
-                // 프로젝트별로 그룹화
-                var projectGroups = filteredProperties
-                    .GroupBy(p => p.ProjectId)
-                    .OrderBy(g => g.Key);
+                // program_id별로 그룹화 (ProjectId 대신 ProgramId 사용)
+                var programGroups = filteredProperties
+                    .Where(p => p.ProgramId.HasValue)
+                    .GroupBy(p => p.ProgramId!.Value)
+                    .OrderBy(g => GetProgramName(g.Key));
 
                 ProgramSummaries.Clear();
 
-                foreach (var group in projectGroups)
+                foreach (var group in programGroups)
                 {
                     var properties = group.ToList();
                     var completedCount = properties.Count(p => p.Status == "completed");
+                    var programName = GetProgramName(group.Key);
 
                     ProgramSummaries.Add(new ProgramSummary
                     {
-                        ProjectId = group.Key!,
-                        ProjectName = group.Key!,
+                        ProjectId = group.Key.ToString(),
+                        ProjectName = programName,
                         TotalCount = properties.Count,
                         CompletedCount = completedCount
                     });
@@ -318,13 +364,23 @@ namespace NPLogic.ViewModels
                 Projects.Add("전체");
                 foreach (var summary in ProgramSummaries)
                 {
-                    Projects.Add(summary.ProjectId);
+                    Projects.Add(summary.ProjectName); // ProjectId 대신 ProjectName 사용
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"프로그램 목록 로드 실패: {ex.Message}";
             }
+        }
+
+        /// <summary>
+        /// 프로그램 ID로 이름 조회 (캐시 사용)
+        /// </summary>
+        private string GetProgramName(Guid programId)
+        {
+            if (_programNameCache.TryGetValue(programId, out var name))
+                return name;
+            return programId.ToString(); // 캐시에 없으면 ID 반환
         }
 
         /// <summary>
@@ -338,7 +394,7 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 선택된 프로그램의 데이터 로드 (비동기)
         /// </summary>
-        private async Task LoadSelectedProgramDataAsync()
+        public async Task LoadSelectedProgramDataAsync()
         {
             if (SelectedProgram == null)
                 return;
@@ -508,7 +564,31 @@ namespace NPLogic.ViewModels
         public void SetActiveTab(string tabName)
         {
             ActiveTab = tabName;
-            // 탭 변경 시 필요한 추가 로직은 여기에
+            // 브레드크럼 업데이트
+            OnPropertyChanged(nameof(CurrentTabName));
+        }
+
+        /// <summary>
+        /// 상세 모드로 전환 (물건 선택 시)
+        /// </summary>
+        public void SwitchToDetailMode(Property property)
+        {
+            SelectedProperty = property;
+            IsDetailMode = true;
+            ActiveTab = "noncore"; // 기본 탭은 비핵심
+            OnPropertyChanged(nameof(CurrentTabName));
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
+        }
+
+        /// <summary>
+        /// 목록 모드로 전환 (목록으로 버튼 클릭 시)
+        /// </summary>
+        public void SwitchToListMode()
+        {
+            IsDetailMode = false;
+            SelectedProperty = null;
+            OnPropertyChanged(nameof(CurrentTabName));
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
         }
 
         /// <summary>
@@ -517,6 +597,14 @@ namespace NPLogic.ViewModels
         partial void OnSelectedProjectIdChanged(string value)
         {
             _ = RefreshDataAsync();
+        }
+
+        /// <summary>
+        /// 선택된 물건 변경 시 (브레드크럼 업데이트)
+        /// </summary>
+        partial void OnSelectedPropertyChanged(Property? value)
+        {
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
         }
 
         /// <summary>
@@ -668,7 +756,7 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 물건 상세 보기
+        /// 물건 상세 보기 - 상세 모드로 전환
         /// </summary>
         [RelayCommand]
         private void ViewPropertyDetail(Property property)
@@ -676,7 +764,25 @@ namespace NPLogic.ViewModels
             if (property == null)
                 return;
 
-            MainWindow.Instance?.NavigateToPropertyDetail(property);
+            // 상세 모드로 전환
+            SwitchToDetailMode(property);
+            // View에서 UI 업데이트를 처리하도록 이벤트 발생
+            OnPropertySelected?.Invoke(property);
+        }
+
+        /// <summary>
+        /// 물건 선택 이벤트 (피드백 반영: 대시보드 내 탭 전환용)
+        /// </summary>
+        public event Action<Property>? OnPropertySelected;
+
+        /// <summary>
+        /// 물건 선택 및 상세 모드 전환 (외부에서 호출 가능)
+        /// 차주번호/명 클릭 시 상세 화면으로 이동
+        /// </summary>
+        public void SelectPropertyAndSwitchToDetail(Property property)
+        {
+            SwitchToDetailMode(property);
+            OnPropertySelected?.Invoke(property);
         }
 
         /// <summary>

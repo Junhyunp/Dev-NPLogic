@@ -73,8 +73,8 @@ namespace NPLogic.Views
 
             try
             {
-                // 외부 맵 주소
-                string mapUrl = "http://54.116.25.55:8080/";
+                // NPLogic 지도 서버 (중앙 관리)
+                string mapUrl = AppConstants.MapServerUrl;
                 
                 // WebView를 외부 맵 서비스로 이동
                 MapWebView.Source = new Uri(mapUrl);

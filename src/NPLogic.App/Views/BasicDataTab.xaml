@@ -26,7 +26,7 @@
                         Padding="12"
                         Margin="0,0,0,16"
                         Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
-                    <TextBlock Text="{Binding ErrorMessage}" 
+                    <TextBlock Text="{Binding ErrorMessage, TargetNullValue='에러 메시지 없음', FallbackValue='에러 메시지 없음'}" 
                               Foreground="White"
                               TextWrapping="Wrap"/>
                 </Border>
@@ -36,7 +36,7 @@
                         Padding="12"
                         Margin="0,0,0,16"
                         Visibility="{Binding SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
-                    <TextBlock Text="{Binding SuccessMessage}" 
+                    <TextBlock Text="{Binding SuccessMessage, TargetNullValue='성공 메시지 없음', FallbackValue='성공 메시지 없음'}" 
                               Foreground="White"
                               TextWrapping="Wrap"/>
                 </Border>
@@ -267,19 +267,20 @@
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="데이터디스크 업로드" 
                                        Style="{StaticResource H4TextStyle}"
-                                       Foreground="{StaticResource PrimaryBrush}"/>
+                                       Foreground="White"/>
                             <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                <Border Background="{StaticResource BlueGray100Brush}"
+                                <Border Background="#33FFFFFF"
                                         CornerRadius="4"
                                         Padding="8,4">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="업로드 일자:" 
                                                    Style="{StaticResource CaptionTextStyle}"
+                                                   Foreground="#CCFFFFFF"
                                                    VerticalAlignment="Center"/>
                                         <TextBlock Text="{Binding LastDataUploadDate, StringFormat=yyyy-MM-dd HH:mm, TargetNullValue='업로드 내역 없음'}" 
                                                    Style="{StaticResource CaptionTextStyle}"
                                                    FontWeight="Bold"
-                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   Foreground="White"
                                                    Margin="6,0,0,0"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
@@ -287,7 +288,7 @@
                             </StackPanel>
                             <TextBlock Text="엑셀 파일(.xlsx, .xls)을 업로드하여 물건 데이터를 추가할 수 있습니다."
                                        Style="{StaticResource CaptionTextStyle}"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       Foreground="#B3FFFFFF"
                                        Margin="0,8,0,0"/>
                         </StackPanel>
                         

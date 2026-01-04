@@ -84,8 +84,8 @@ namespace NPLogic.Views
             
             MapWebView.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             
-            // 외부 맵 서비스로 이동
-            string mapUrl = "http://54.116.25.55:8080/";
+            // NPLogic 지도 서버 (중앙 관리)
+            string mapUrl = AppConstants.MapServerUrl;
             
             var mapTcs = new TaskCompletionSource<bool>();
             
@@ -160,8 +160,8 @@ namespace NPLogic.Views
                 
                 LocationMapWebView.CoreWebView2.NavigationCompleted += NavigationHandler;
                 
-                // 외부 맵 서비스 사용 (지적도와 동일한 서비스, 위치도 모드)
-                string locationMapUrl = "http://54.116.25.55:8080/?mode=location";
+                // NPLogic 지도 서버 - 위치도 모드 (중앙 관리)
+                string locationMapUrl = AppConstants.MapServerLocationUrl;
                 LocationMapWebView.CoreWebView2.Navigate(locationMapUrl);
                 
                 // 위치도 로드 완료 대기 (최대 10초)

@@ -14,14 +14,185 @@
              PreviewKeyDown="NonCoreView_PreviewKeyDown">
     
     <Grid>
-        <Grid.ColumnDefinitions>
-            <!-- 필터 패널 (좌측) -->
-            <ColumnDefinition Width="Auto"/>
-            <!-- 메인 컨텐츠 영역 -->
-            <ColumnDefinition Width="*"/>
-            <!-- 툴박스 사이드 패널 -->
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <!-- 물건 번호 탭 바 (전체 너비) -->
+            <RowDefinition Height="Auto"/>
+            <!-- 하단 메인 영역 -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 물건 번호 탭 바 (PDF 스타일) - 전체 너비로 맨 위에 배치 -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource BlueGray50Brush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="8,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 물건 탭 스크롤 영역 -->
+                <ScrollViewer Grid.Column="0" 
+                              HorizontalScrollBarVisibility="Auto" 
+                              VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding PropertyTabs}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="TabBorder"
+                                        Background="White"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1,1,1,0"
+                                        CornerRadius="4,4,0,0"
+                                        Margin="2,4,2,0"
+                                        Padding="8,6"
+                                        Cursor="Hand"
+                                        MouseLeftButtonDown="PropertyTab_Click">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- 물건 아이콘 -->
+                                        <materialDesign:PackIcon Grid.Column="0" 
+                                                                  Kind="FileDocument" 
+                                                                  Width="14" Height="14"
+                                                                  VerticalAlignment="Center"
+                                                                  Foreground="{StaticResource TextSecondaryBrush}"
+                                                                  Margin="0,0,6,0"/>
+                                        
+                                        <!-- 물건 번호 -->
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding PropertyNumber}" 
+                                                   FontSize="12"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0"/>
+                                        
+                                        <!-- 닫기 버튼 -->
+                                        <Button Grid.Column="2"
+                                                Style="{StaticResource IconButton}"
+                                                Width="16" Height="16"
+                                                Padding="0"
+                                                Click="ClosePropertyTab_Click"
+                                                Tag="{Binding PropertyId}">
+                                            <materialDesign:PackIcon Kind="Close" 
+                                                                      Width="12" Height="12"
+                                                                      Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                        <Setter TargetName="TabBorder" Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                                        <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                
+                <!-- 버튼 영역: 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                    <!-- 인쇄 버튼 -->
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Padding="10,6"
+                            FontSize="12"
+                            Margin="0,0,4,0"
+                            ToolTip="인쇄 (전체/차주별)"
+                            Click="PrintButton_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="📄 전체 인쇄" Click="PrintAll_Click"/>
+                                <MenuItem Header="👤 차주별 인쇄" Click="PrintByBorrower_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Printer" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="인쇄" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <!-- Excel 버튼 -->
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Padding="10,6"
+                            FontSize="12"
+                            Margin="0,0,4,0"
+                            ToolTip="Excel 내려받기 (전체/차주별)"
+                            Click="ExcelButton_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="📊 전체 Excel" Click="ExcelAll_Click"/>
+                                <MenuItem Header="👤 차주별 Excel (시트 분리)" Click="ExcelByBorrower_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="MicrosoftExcel" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="#217346"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="Excel" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <!-- View(롤업) 버튼 -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Padding="10,6"
+                            FontSize="12"
+                            Margin="0,0,8,0"
+                            Click="RollupButton_Click"
+                            ToolTip="전체 현황 창 열기 (View)">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Eye" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="View" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <!-- 기능별 일괄작업 버튼 -->
+                    <Button Content="기능별 일괄작업"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="12,6"
+                            FontSize="12"
+                            Click="BatchWorkButton_Click">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="선순위만 일괄작업" Click="BatchSeniorRights_Click"/>
+                                <MenuItem Header="평가만 일괄작업" Click="BatchEvaluation_Click"/>
+                                <MenuItem Header="경공매만 일괄작업" Click="BatchAuction_Click"/>
+                                <Separator/>
+                                <MenuItem Header="전체 물건 일괄작업" Click="BatchAll_Click"/>
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 하단 메인 영역 (검색패널, 기능탭, 컨텐츠, 툴박스) -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <!-- 필터 패널 (좌측) -->
+                <ColumnDefinition Width="Auto"/>
+                <!-- 메인 컨텐츠 영역 -->
+                <ColumnDefinition Width="*"/>
+                <!-- 툴박스 사이드 패널 -->
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
         
         <!-- 좌측 필터/검색 패널 -->
         <Border Grid.Column="0"
@@ -188,172 +359,9 @@
         
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>  <!-- 물건 번호 탭 바 -->
                 <RowDefinition Height="Auto"/>  <!-- 기능 탭 바 -->
                 <RowDefinition Height="*"/>     <!-- 컨텐츠 영역 -->
             </Grid.RowDefinitions>
-
-            <!-- 물건 번호 탭 바 (PDF 스타일) -->
-            <Border Grid.Row="0" 
-                    Background="{StaticResource BlueGray50Brush}"
-                    BorderBrush="{StaticResource BorderBrush}"
-                    BorderThickness="0,0,0,1"
-                    Padding="8,4">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <!-- 물건 탭 스크롤 영역 -->
-                    <ScrollViewer Grid.Column="0" 
-                                  HorizontalScrollBarVisibility="Auto" 
-                                  VerticalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{Binding PropertyTabs}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border x:Name="TabBorder"
-                                            Background="White"
-                                            BorderBrush="{StaticResource BorderBrush}"
-                                            BorderThickness="1,1,1,0"
-                                            CornerRadius="4,4,0,0"
-                                            Margin="2,4,2,0"
-                                            Padding="8,6"
-                                            Cursor="Hand"
-                                            MouseLeftButtonDown="PropertyTab_Click">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            
-                                            <!-- 물건 아이콘 -->
-                                            <materialDesign:PackIcon Grid.Column="0" 
-                                                                      Kind="FileDocument" 
-                                                                      Width="14" Height="14"
-                                                                      VerticalAlignment="Center"
-                                                                      Foreground="{StaticResource TextSecondaryBrush}"
-                                                                      Margin="0,0,6,0"/>
-                                            
-                                            <!-- 물건 번호 -->
-                                            <TextBlock Grid.Column="1" 
-                                                       Text="{Binding PropertyNumber}" 
-                                                       FontSize="12"
-                                                       VerticalAlignment="Center"
-                                                       Margin="0,0,8,0"/>
-                                            
-                                            <!-- 닫기 버튼 -->
-                                            <Button Grid.Column="2"
-                                                    Style="{StaticResource IconButton}"
-                                                    Width="16" Height="16"
-                                                    Padding="0"
-                                                    Click="ClosePropertyTab_Click"
-                                                    Tag="{Binding PropertyId}">
-                                                <materialDesign:PackIcon Kind="Close" 
-                                                                          Width="12" Height="12"
-                                                                          Foreground="{StaticResource TextSecondaryBrush}"/>
-                                            </Button>
-                                        </Grid>
-                                    </Border>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                            <Setter TargetName="TabBorder" Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                            <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                    
-                    <!-- 버튼 영역: 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
-                        <!-- 인쇄 버튼 -->
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="10,6"
-                                FontSize="12"
-                                Margin="0,0,4,0"
-                                ToolTip="인쇄 (전체/차주별)"
-                                Click="PrintButton_Click">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="📄 전체 인쇄" Click="PrintAll_Click"/>
-                                    <MenuItem Header="👤 차주별 인쇄" Click="PrintByBorrower_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Printer" 
-                                                         Width="14" Height="14" 
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,4,0"/>
-                                <TextBlock Text="인쇄" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <!-- Excel 버튼 -->
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="10,6"
-                                FontSize="12"
-                                Margin="0,0,4,0"
-                                ToolTip="Excel 내려받기 (전체/차주별)"
-                                Click="ExcelButton_Click">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="📊 전체 Excel" Click="ExcelAll_Click"/>
-                                    <MenuItem Header="👤 차주별 Excel (시트 분리)" Click="ExcelByBorrower_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="MicrosoftExcel" 
-                                                         Width="14" Height="14" 
-                                                         VerticalAlignment="Center"
-                                                         Foreground="#217346"
-                                                         Margin="0,0,4,0"/>
-                                <TextBlock Text="Excel" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <!-- View(롤업) 버튼 -->
-                        <Button Style="{StaticResource PrimaryButton}"
-                                Padding="10,6"
-                                FontSize="12"
-                                Margin="0,0,8,0"
-                                Click="RollupButton_Click"
-                                ToolTip="전체 현황 창 열기 (View)">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Eye" 
-                                                         Width="14" Height="14" 
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,4,0"/>
-                                <TextBlock Text="View" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <!-- 기능별 일괄작업 버튼 -->
-                        <Button Content="기능별 일괄작업"
-                                Style="{StaticResource SecondaryButton}"
-                                Padding="12,6"
-                                FontSize="12"
-                                Click="BatchWorkButton_Click">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="선순위만 일괄작업" Click="BatchSeniorRights_Click"/>
-                                    <MenuItem Header="평가만 일괄작업" Click="BatchEvaluation_Click"/>
-                                    <MenuItem Header="경공매만 일괄작업" Click="BatchAuction_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="전체 물건 일괄작업" Click="BatchAll_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-            </Border>
             
             <!-- Ctrl+F 검색 패널 (플로팅) -->
             <Border Grid.Row="0" 
@@ -367,7 +375,8 @@
                     VerticalAlignment="Top"
                     Margin="0,44,320,0"
                     Visibility="{Binding IsSearchPanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Effect="{StaticResource CardShadow}">
+                    Effect="{StaticResource CardShadow}"
+                    Panel.ZIndex="100">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -415,7 +424,7 @@
             </Border>
 
             <!-- 기능 탭 바 (9개 탭) -->
-            <Border Grid.Row="1" 
+            <Border Grid.Row="0" 
                     Background="White"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0,0,0,1">
@@ -490,7 +499,7 @@
             </Border>
 
             <!-- 컨텐츠 영역 -->
-            <ContentControl Grid.Row="2" x:Name="ContentArea"/>
+            <ContentControl Grid.Row="1" x:Name="ContentArea"/>
         </Grid>
         
         <!-- 툴박스 사이드 패널 -->
@@ -666,8 +675,10 @@
             <materialDesign:PackIcon Kind="Toolbox" Width="20" Height="20"/>
         </Button>
         
-        <!-- 로딩 오버레이 -->
-        <Border Grid.ColumnSpan="3" 
+        </Grid>
+        
+        <!-- 전체 화면 로딩 오버레이 -->
+        <Border Grid.RowSpan="2" 
                 Background="#80000000" 
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

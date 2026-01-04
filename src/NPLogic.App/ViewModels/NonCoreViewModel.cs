@@ -87,6 +87,11 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository? _propertyRepository;
         private readonly BorrowerRepository? _borrowerRepository;
 
+        /// <summary>
+        /// 초기화 여부 (탭 전환 시 재초기화 방지)
+        /// </summary>
+        private bool _isInitialized = false;
+
         [ObservableProperty]
         private bool _isLoading;
 
@@ -240,6 +245,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task InitializeAsync()
         {
+            // 이미 초기화되었고 탭이 있으면 재초기화하지 않음 (탭 상태 유지)
+            if (_isInitialized && PropertyTabs.Any())
+            {
+                return;
+            }
+
             try
             {
                 IsLoading = true;
@@ -250,6 +261,8 @@ namespace NPLogic.ViewModels
                 {
                     await LoadPropertyTabsAsync();
                 }
+
+                _isInitialized = true;
             }
             catch (Exception ex)
             {
@@ -284,6 +297,39 @@ namespace NPLogic.ViewModels
         public void SetBorrowerId(Guid borrowerId)
         {
             _currentBorrowerId = borrowerId;
+        }
+
+        /// <summary>
+        /// 물건(Property) 기반으로 로드 (피드백 반영: 대시보드 내에서 비핵심 탭 사용 시)
+        /// </summary>
+        public void LoadProperty(Property property)
+        {
+            if (property == null) return;
+
+            // 프로그램이 변경되면 기존 탭 모두 클리어
+            if (property.ProgramId.HasValue && _currentProgramId != property.ProgramId.Value)
+            {
+                PropertyTabs.Clear();
+                _currentProgramId = property.ProgramId.Value;
+                _isInitialized = false; // 새 프로그램이므로 초기화 상태 리셋
+            }
+            else if (property.ProgramId.HasValue)
+            {
+                _currentProgramId = property.ProgramId.Value;
+            }
+
+            // 프로젝트 정보 설정
+            CurrentProjectId = property.ProjectId;
+            CurrentProjectName = property.ProjectId;
+
+            // 물건 탭 추가
+            AddPropertyTab(property);
+
+            // 선택된 물건 탭으로 전환
+            if (PropertyTabs.Any())
+            {
+                SelectPropertyTab(property.Id);
+            }
         }
 
         /// <summary>
@@ -347,6 +393,15 @@ namespace NPLogic.ViewModels
                     SelectPropertyTab(PropertyTabs[newIndex].PropertyId);
                 }
             }
+        }
+        
+        /// <summary>
+        /// 모든 물건 탭 닫기 (뷰 통합: 브레드크럼 클릭 시 사용)
+        /// </summary>
+        public void CloseAllPropertyTabs()
+        {
+            PropertyTabs.Clear();
+            SelectedPropertyTab = null;
         }
 
         /// <summary>

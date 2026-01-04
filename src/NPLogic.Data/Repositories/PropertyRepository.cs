@@ -300,6 +300,19 @@ namespace NPLogic.Data.Repositories
                 if (created == null)
                     throw new Exception("물건 생성 후 데이터 조회 실패");
 
+                // Postgrest 클라이언트가 nullable Guid를 제대로 직렬화하지 않는 문제 해결
+                // ProgramId가 있는데 Insert 결과에 반영되지 않았으면 별도로 Update
+                if (property.ProgramId.HasValue && created.ProgramId != property.ProgramId)
+                {
+                    await client
+                        .From<PropertyTable>()
+                        .Where(x => x.Id == created.Id)
+                        .Set(x => x.ProgramId, property.ProgramId)
+                        .Update();
+                    
+                    created.ProgramId = property.ProgramId;
+                }
+
                 return MapToProperty(created);
             }
             catch (Exception ex)

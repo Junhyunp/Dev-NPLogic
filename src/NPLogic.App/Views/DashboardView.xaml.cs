@@ -1,9 +1,11 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Core.Models;
+using NPLogic.Services;
 using NPLogic.ViewModels;
 
 namespace NPLogic.Views
@@ -12,32 +14,166 @@ namespace NPLogic.Views
     /// DashboardView.xaml에 대한 상호 작용 논리
     /// Phase 2 업데이트: 2영역 레이아웃, GridSplitter, 토글, 내부 탭
     /// Phase 4 업데이트: 단축키 네비게이션 추가
+    /// Phase 7 업데이트: 상태 유지 기능 추가
     /// </summary>
     public partial class DashboardView : UserControl
     {
         private double _savedLeftPanelWidth = 280;
         
-        // 내부 탭 순서 배열
-        private readonly string[] _innerTabs = { "home", "noncore", "registry", "rights", "basicdata", "closing" };
+        // 내부 탭 순서 배열 (홈 탭 제거)
+        private readonly string[] _innerTabs = { "noncore", "registry", "rights", "basicdata", "closing" };
         private int _currentTabIndex = 0;
+
+        // 탭 View 캐싱 (탭 전환 시 상태 유지)
+        private NonCoreView? _cachedNonCoreView;
+        private NonCoreViewModel? _cachedNonCoreViewModel;
+
+        // 상태 복원 중 플래그 (이벤트 중복 방지)
+        private bool _isRestoringState = false;
 
         public DashboardView()
         {
             InitializeComponent();
+            
+            // Unloaded 이벤트 구독 (상태 저장)
+            this.Unloaded += DashboardView_Unloaded;
         }
 
         /// <summary>
-        /// Loaded 이벤트 - ViewModel 초기화
+        /// Loaded 이벤트 - ViewModel 초기화 및 상태 복원
         /// </summary>
         private async void DashboardView_Loaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is DashboardViewModel viewModel)
             {
+                // 물건 선택 이벤트 구독 (상세 버튼 클릭 시 상세 모드로 전환)
+                viewModel.OnPropertySelected += OnPropertySelectedHandler;
+                
                 await viewModel.InitializeAsync();
+                
+                // 저장된 상태가 있으면 복원
+                await RestoreNavigationStateAsync(viewModel);
+                
+                // 외부에서 SelectedProperty가 설정된 상태로 진입한 경우 상세 모드로 전환
+                if (viewModel.SelectedProperty != null && !_isRestoringState)
+                {
+                    SwitchToDetailMode(viewModel.SelectedProperty);
+                }
+                else
+                {
+                    // 기본은 목록 모드
+                    SwitchToListMode();
+                }
             }
             
             // 키보드 포커스 설정
             this.Focus();
+        }
+
+        /// <summary>
+        /// Unloaded 이벤트 - 상태 저장
+        /// </summary>
+        private void DashboardView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            SaveNavigationState();
+        }
+
+        /// <summary>
+        /// 현재 상태 저장
+        /// </summary>
+        private void SaveNavigationState()
+        {
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                var programId = viewModel.SelectedProgram?.ProjectId;
+                var tabName = viewModel.ActiveTab;
+                var propertyId = viewModel.SelectedProperty?.Id;
+                
+                NavigationStateService.Instance.SaveDashboardState(programId, tabName, propertyId);
+            }
+        }
+
+        /// <summary>
+        /// 저장된 상태 복원
+        /// </summary>
+        private async System.Threading.Tasks.Task RestoreNavigationStateAsync(DashboardViewModel viewModel)
+        {
+            var navService = NavigationStateService.Instance;
+            
+            if (!navService.HasSavedDashboardState())
+                return;
+                
+            _isRestoringState = true;
+            
+            try
+            {
+                var savedState = navService.DashboardState;
+                
+                // 1. 프로그램 복원
+                if (!string.IsNullOrEmpty(savedState.SelectedProgramId))
+                {
+                    var program = viewModel.ProgramSummaries.FirstOrDefault(p => p.ProjectId == savedState.SelectedProgramId);
+                    if (program != null)
+                    {
+                        viewModel.SelectedProgram = program;
+                        await viewModel.LoadSelectedProgramDataAsync();
+                    }
+                }
+                
+                // 2. 물건 복원 및 상세 모드 전환
+                if (savedState.SelectedPropertyId.HasValue)
+                {
+                    var property = viewModel.DashboardProperties.FirstOrDefault(p => p.Id == savedState.SelectedPropertyId.Value);
+                    if (property != null)
+                    {
+                        // 상세 모드로 전환
+                        SwitchToDetailMode(property);
+                        
+                        // 3. 탭 복원
+                        if (!string.IsNullOrEmpty(savedState.SelectedTab))
+                        {
+                            _currentTabIndex = System.Array.IndexOf(_innerTabs, savedState.SelectedTab);
+                            if (_currentTabIndex < 0) _currentTabIndex = 0;
+                            
+                            SelectInnerTab(savedState.SelectedTab);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                _isRestoringState = false;
+            }
+        }
+
+        /// <summary>
+        /// 물건 선택 이벤트 핸들러 - 상세 모드로 전환
+        /// </summary>
+        private void OnPropertySelectedHandler(Property property)
+        {
+            SwitchToDetailMode(property);
+        }
+
+        /// <summary>
+        /// 목록 모드 DataGrid 선택 변경 - 상세 모드로 전환
+        /// </summary>
+        private void ProgressDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // 상태 복원 중이면 자동 모드 전환 건너뛰기
+            if (_isRestoringState)
+                return;
+            
+            // 목록 모드에서 물건 선택 시 상세 모드로 전환
+            if (e.AddedItems.Count > 0 && 
+                e.AddedItems[0] is Property property &&
+                DataContext is DashboardViewModel viewModel &&
+                !viewModel.IsDetailMode)
+            {
+                SwitchToDetailMode(property);
+                
+                // 상태 저장
+                SaveNavigationState();
+            }
         }
         
         /// <summary>
@@ -90,8 +226,14 @@ namespace NPLogic.Views
             }
             else if (e.Key == Key.Enter && ProgressDataGrid.SelectedItem is Property property)
             {
-                // Enter: 선택된 물건의 비핵심 화면으로 이동
-                MainWindow.Instance?.NavigateToNonCoreView(property);
+                // Enter: 선택된 물건의 상세 모드로 전환
+                SwitchToDetailMode(property);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Escape && DataContext is DashboardViewModel vm && vm.IsDetailMode)
+            {
+                // Escape: 상세 모드에서 목록 모드로 전환
+                SwitchToListMode();
                 e.Handled = true;
             }
             else if (Keyboard.Modifiers == ModifierKeys.Control)
@@ -135,16 +277,62 @@ namespace NPLogic.Views
         {
             var radioButton = tabName switch
             {
-                "home" => TabHome,
                 "noncore" => TabNonCore,
                 "registry" => TabRegistry,
                 "rights" => TabRights,
                 "basicdata" => TabBasicData,
                 "closing" => TabClosing,
-                _ => TabHome
+                _ => TabNonCore
             };
             
             radioButton.IsChecked = true;
+        }
+        
+        /// <summary>
+        /// 상세 모드로 전환
+        /// </summary>
+        private void SwitchToDetailMode(Property property)
+        {
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                viewModel.SwitchToDetailMode(property);
+            }
+            
+            // UI 업데이트
+            ProgressDataGrid.Visibility = Visibility.Collapsed;
+            DetailModeTabs.Visibility = Visibility.Visible;
+            TabContentControl.Visibility = Visibility.Visible;
+            
+            // 기본 탭(비핵심) 선택 및 컨텐츠 로드
+            TabNonCore.IsChecked = true;
+            _currentTabIndex = 0;
+            LoadTabView("noncore", property);
+        }
+        
+        /// <summary>
+        /// 목록 모드로 전환
+        /// </summary>
+        private void SwitchToListMode()
+        {
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                viewModel.SwitchToListMode();
+            }
+            
+            // UI 업데이트
+            ProgressDataGrid.Visibility = Visibility.Visible;
+            ProgressDataGrid.SelectedItem = null;
+            DetailModeTabs.Visibility = Visibility.Collapsed;
+            TabContentControl.Visibility = Visibility.Collapsed;
+        }
+        
+        /// <summary>
+        /// 목록으로 버튼 클릭
+        /// </summary>
+        private void BackToListButton_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToListMode();
+            SaveNavigationState();
         }
         
         /// <summary>
@@ -207,6 +395,12 @@ namespace NPLogic.Views
             {
                 // ViewModel에서 선택된 프로그램 데이터 로드
                 viewModel.LoadSelectedProgramData();
+                
+                // 상태 저장 (상태 복원 중이 아닐 때만)
+                if (!_isRestoringState)
+                {
+                    SaveNavigationState();
+                }
             }
         }
 
@@ -244,7 +438,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 내부 탭 변경 (Phase 6: 탭별 View 전환)
+        /// 내부 탭 변경 (상세 모드에서만 동작)
         /// </summary>
         private void InnerTab_Checked(object sender, RoutedEventArgs e)
         {
@@ -252,13 +446,12 @@ namespace NPLogic.Views
             {
                 var tabName = radioButton.Name switch
                 {
-                    "TabHome" => "home",
                     "TabNonCore" => "noncore",
                     "TabRegistry" => "registry",
                     "TabRights" => "rights",
                     "TabBasicData" => "basicdata",
                     "TabClosing" => "closing",
-                    _ => "home"
+                    _ => "noncore"
                 };
 
                 // 탭 인덱스 업데이트
@@ -267,53 +460,23 @@ namespace NPLogic.Views
 
                 viewModel.SetActiveTab(tabName);
                 
-                // 탭별 View 전환
-                SwitchTabContent(tabName);
-            }
-        }
-        
-        /// <summary>
-        /// 탭에 따른 컨텐츠 전환 (Phase 6)
-        /// </summary>
-        private void SwitchTabContent(string tabName)
-        {
-            // UI 요소가 아직 로드되지 않은 경우 종료
-            if (ProgressDataGrid == null || TabContentControl == null || SelectPropertyMessage == null)
-                return;
-            
-            if (tabName == "home")
-            {
-                // 홈 탭: DataGrid 표시
-                ProgressDataGrid.Visibility = Visibility.Visible;
-                TabContentControl.Visibility = Visibility.Collapsed;
-                SelectPropertyMessage.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                // 비핵심/등기부/권리분석/기초데이터/마감 탭
-                ProgressDataGrid.Visibility = Visibility.Collapsed;
-                
-                // 선택된 물건이 있는지 확인
-                var selectedProperty = ProgressDataGrid.SelectedItem as Property;
-                
-                if (selectedProperty != null)
+                // 상세 모드에서만 탭 컨텐츠 전환
+                if (viewModel.IsDetailMode && viewModel.SelectedProperty != null)
                 {
-                    // 물건이 선택된 경우: 해당 탭의 View 로드
-                    LoadTabView(tabName, selectedProperty);
-                    TabContentControl.Visibility = Visibility.Visible;
-                    SelectPropertyMessage.Visibility = Visibility.Collapsed;
+                    LoadTabView(tabName, viewModel.SelectedProperty);
                 }
-                else
+                
+                // 상태 저장 (상태 복원 중이 아닐 때만)
+                if (!_isRestoringState)
                 {
-                    // 물건이 선택되지 않은 경우: 안내 메시지 표시
-                    TabContentControl.Visibility = Visibility.Collapsed;
-                    SelectPropertyMessage.Visibility = Visibility.Visible;
+                    SaveNavigationState();
                 }
             }
         }
         
+        
         /// <summary>
-        /// 탭에 맞는 View 로드 (Phase 6)
+        /// 탭에 맞는 View 로드 (상세 모드)
         /// </summary>
         private void LoadTabView(string tabName, Property property)
         {
@@ -325,9 +488,21 @@ namespace NPLogic.Views
             switch (tabName)
             {
                 case "noncore":
-                    // 비핵심 탭: MainWindow를 통해 NonCoreView로 이동
-                    MainWindow.Instance?.NavigateToNonCoreView(property);
-                    return;
+                    // 비핵심 탭: NonCoreView를 대시보드 내에서 표시 (피드백 반영)
+                    // 탭 상태 유지를 위해 캐싱된 인스턴스 재사용
+                    if (_cachedNonCoreView == null)
+                    {
+                        _cachedNonCoreView = serviceProvider.GetService<NonCoreView>();
+                        _cachedNonCoreViewModel = serviceProvider.GetService<NonCoreViewModel>();
+                    }
+                    
+                    if (_cachedNonCoreView != null && _cachedNonCoreViewModel != null)
+                    {
+                        _cachedNonCoreViewModel.LoadProperty(property);
+                        _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
+                        view = _cachedNonCoreView;
+                    }
+                    break;
                     
                 case "registry":
                     // 등기부 탭: RegistryTab 로드
@@ -375,17 +550,14 @@ namespace NPLogic.Views
                     break;
                     
                 case "closing":
-                    // 마감 탭: 마감 화면 (아직 별도 View가 없으므로 메시지 표시)
-                    var closingMessage = new TextBlock
+                    // 마감 탭: ClosingTab 로드
+                    var closingTab = serviceProvider.GetService<ClosingTab>();
+                    if (closingTab != null)
                     {
-                        Text = "마감 기능은 준비 중입니다.",
-                        Style = FindResource("H3TextStyle") as Style,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Foreground = FindResource("TextSecondaryBrush") as System.Windows.Media.Brush
-                    };
-                    TabContentControl.Content = closingMessage;
-                    return;
+                        closingTab.DataContext = new { Property = property };
+                        view = closingTab;
+                    }
+                    break;
             }
             
             if (view != null)
@@ -395,14 +567,13 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 차주번호 클릭 - 비핵심 화면으로 이동 (Phase 4.2 관련)
+        /// 차주번호 클릭 - 상세 모드로 전환
         /// </summary>
         private void PropertyNumber_Click(object sender, MouseButtonEventArgs e)
         {
             if (sender is TextBlock textBlock && textBlock.DataContext is Property property)
             {
-                // MainWindow를 통해 비핵심 화면으로 이동
-                MainWindow.Instance?.NavigateToNonCoreView(property);
+                SwitchToDetailMode(property);
             }
         }
 
@@ -418,6 +589,56 @@ namespace NPLogic.Views
                     viewModel.FilterByStatus(status);
                 }
             }
+        }
+
+        /// <summary>
+        /// 상태 필터 버튼 더블클릭 - 상태별 필터링 (피드백 6번)
+        /// </summary>
+        private void StatusFilter_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2) // 더블클릭 감지
+            {
+                if (sender is TextBlock textBlock && textBlock.Tag is string status)
+                {
+                    if (DataContext is DashboardViewModel viewModel)
+                    {
+                        viewModel.FilterByStatus(status);
+                        UpdateFilterButtonStyles(status);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 필터 버튼 스타일 업데이트 - 선택된 버튼 강조
+        /// </summary>
+        private void UpdateFilterButtonStyles(string selectedStatus)
+        {
+            // 모든 필터 버튼을 기본 스타일로 리셋
+            var defaultBrush = FindResource("TextSecondaryBrush") as System.Windows.Media.Brush;
+            var primaryBrush = FindResource("PrimaryBrush") as System.Windows.Media.Brush;
+
+            FilterAll.Foreground = defaultBrush;
+            FilterAll.FontWeight = FontWeights.Normal;
+            FilterPending.Foreground = defaultBrush;
+            FilterPending.FontWeight = FontWeights.Normal;
+            FilterProcessing.Foreground = defaultBrush;
+            FilterProcessing.FontWeight = FontWeights.Normal;
+            FilterCompleted.Foreground = defaultBrush;
+            FilterCompleted.FontWeight = FontWeights.Normal;
+
+            // 선택된 버튼 강조
+            TextBlock selectedButton = selectedStatus switch
+            {
+                "all" => FilterAll,
+                "pending" => FilterPending,
+                "processing" => FilterProcessing,
+                "completed" => FilterCompleted,
+                _ => FilterAll
+            };
+
+            selectedButton.Foreground = primaryBrush;
+            selectedButton.FontWeight = FontWeights.SemiBold;
         }
 
         /// <summary>
@@ -479,5 +700,34 @@ namespace NPLogic.Views
                 }
             }
         }
+
+        #region 브레드크럼 클릭 핸들러
+
+        /// <summary>
+        /// 브레드크럼 - 홈 클릭 (목록 모드로 전환)
+        /// </summary>
+        private void Breadcrumb_Home_Click(object sender, MouseButtonEventArgs e)
+        {
+            SwitchToListMode();
+        }
+
+        /// <summary>
+        /// 브레드크럼 - 프로그램 클릭 (목록 모드로 전환)
+        /// </summary>
+        private void Breadcrumb_Program_Click(object sender, MouseButtonEventArgs e)
+        {
+            SwitchToListMode();
+        }
+
+        /// <summary>
+        /// 브레드크럼 - 탭 클릭 (해당 탭으로 이동, 물건은 유지)
+        /// </summary>
+        private void Breadcrumb_Tab_Click(object sender, MouseButtonEventArgs e)
+        {
+            // 현재 탭 유지 (이미 해당 탭에 있으므로 아무 동작 안 함)
+            // 필요 시 탭 재로드 로직 추가 가능
+        }
+
+        #endregion
     }
 }
