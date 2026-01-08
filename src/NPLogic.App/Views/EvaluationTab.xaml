@@ -137,47 +137,46 @@
                     <!-- 유사물건 추천 영역 -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🎯 유사물건 추천" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                                    <!-- 로딩 표시 -->
-                                    <ProgressBar IsIndeterminate="True" 
-                                                 Width="80" Height="4" 
-                                                 Margin="12,0,0,0"
-                                                 VerticalAlignment="Center"
-                                                 Visibility="{Binding IsRecommendLoading, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <!-- 규칙 순위 선택 -->
-                                    <TextBlock Text="규칙:" Style="{StaticResource LabelStyle}" Margin="0,0,4,0"/>
-                                    <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
-                                              Width="70" FontSize="12" Padding="4,2" Margin="0,0,8,0">
-                                        <ComboBoxItem Content="1순위" Tag="1"/>
-                                        <ComboBoxItem Content="2순위" Tag="2"/>
-                                        <ComboBoxItem Content="3순위" Tag="3"/>
-                                        <ComboBoxItem Content="전체"/>
-                                    </ComboBox>
-                                    <!-- 지역 범위 선택 -->
-                                    <TextBlock Text="범위:" Style="{StaticResource LabelStyle}" Margin="0,0,4,0"/>
-                                    <ComboBox Width="70" FontSize="12" Padding="4,2" Margin="0,0,8,0"
-                                              SelectedValue="{Binding SelectedRegionScope, Mode=TwoWay}"
-                                              SelectedValuePath="Tag">
-                                        <ComboBoxItem Content="시/도" Tag="big"/>
-                                        <ComboBoxItem Content="시/군/구" Tag="mid"/>
-                                    </ComboBox>
-                                    <Button Content="추천 검색" 
-                                            Command="{Binding RecommendSimilarCasesCommand}"
-                                            Style="{StaticResource PrimaryButton}"
-                                            Padding="12,4"
-                                            FontSize="12"
-                                            Margin="0,0,8,0"/>
-                                    <Button Content="사례 적용" 
-                                            Command="{Binding ApplyRecommendedCaseCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="12"/>
-                                </StackPanel>
-                            </Grid>
+                            <!-- 제목 -->
+                            <TextBlock Text="🎯 유사물건 추천" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
+                            
+                            <!-- 필터 + 버튼 행 -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <!-- 규칙 순위 선택 -->
+                                <TextBlock Text="규칙:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
+                                          Width="70" FontSize="12" Padding="4,2" Margin="0,0,16,0">
+                                    <ComboBoxItem Content="1순위" Tag="1"/>
+                                    <ComboBoxItem Content="2순위" Tag="2"/>
+                                    <ComboBoxItem Content="3순위" Tag="3"/>
+                                    <ComboBoxItem Content="전체"/>
+                                </ComboBox>
+                                <!-- 지역 범위 선택 -->
+                                <TextBlock Text="범위:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <ComboBox Width="80" FontSize="12" Padding="4,2" Margin="0,0,16,0"
+                                          SelectedValue="{Binding SelectedRegionScope, Mode=TwoWay}"
+                                          SelectedValuePath="Tag">
+                                    <ComboBoxItem Content="시/도" Tag="big"/>
+                                    <ComboBoxItem Content="시/군/구" Tag="mid"/>
+                                </ComboBox>
+                                <Button Content="추천 검색" 
+                                        Command="{Binding RecommendSimilarCasesCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="12,4"
+                                        FontSize="12"
+                                        Margin="0,0,8,0"/>
+                                <Button Content="사례 적용" 
+                                        Command="{Binding ApplyRecommendedCaseCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="12,4"
+                                        FontSize="12"
+                                        Margin="0,0,16,0"/>
+                                <!-- 로딩 표시 -->
+                                <ProgressBar IsIndeterminate="True" 
+                                             Width="80" Height="4" 
+                                             VerticalAlignment="Center"
+                                             Visibility="{Binding IsRecommendLoading, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                            </StackPanel>
                             
                             <!-- 상태 메시지 -->
                             <TextBlock Text="{Binding RecommendStatusMessage}" 

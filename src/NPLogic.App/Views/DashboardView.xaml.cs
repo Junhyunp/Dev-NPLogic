@@ -498,6 +498,11 @@ namespace NPLogic.Views
                     
                     if (_cachedNonCoreView != null && _cachedNonCoreViewModel != null)
                     {
+                        // 프로그램 ID 설정 (물건 탭 로드를 위해 필수!)
+                        if (property.ProgramId.HasValue)
+                        {
+                            _cachedNonCoreViewModel.SetProgramId(property.ProgramId.Value);
+                        }
                         _cachedNonCoreViewModel.LoadProperty(property);
                         _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
                         view = _cachedNonCoreView;
@@ -543,8 +548,13 @@ namespace NPLogic.Views
                     var basicDataTab = serviceProvider.GetService<BasicDataTab>();
                     if (basicDataTab != null)
                     {
-                        // BasicDataTab은 Property를 직접 바인딩
-                        basicDataTab.DataContext = new { Property = property };
+                        // PropertyDetailViewModel을 사용하여 컬럼 매핑 등의 기능 지원
+                        var propertyDetailViewModel = serviceProvider.GetService<PropertyDetailViewModel>();
+                        if (propertyDetailViewModel != null)
+                        {
+                            propertyDetailViewModel.LoadProperty(property);
+                            basicDataTab.DataContext = propertyDetailViewModel;
+                        }
                         view = basicDataTab;
                     }
                     break;
@@ -567,13 +577,31 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 차주번호 클릭 - 상세 모드로 전환
+        /// 차주번호 클릭 - 상세 모드로 전환 및 프로그램 목록 자동 접기
         /// </summary>
         private void PropertyNumber_Click(object sender, MouseButtonEventArgs e)
         {
             if (sender is TextBlock textBlock && textBlock.DataContext is Property property)
             {
                 SwitchToDetailMode(property);
+                
+                // 프로그램 목록 자동 접기
+                CollapseLeftPanel();
+            }
+        }
+        
+        /// <summary>
+        /// 좌측 패널(프로그램 목록) 접기
+        /// </summary>
+        private void CollapseLeftPanel()
+        {
+            if (LeftPanel.Visibility == Visibility.Visible)
+            {
+                _savedLeftPanelWidth = LeftPanelColumn.Width.Value > 0 ? LeftPanelColumn.Width.Value : _savedLeftPanelWidth;
+                LeftPanelColumn.Width = new GridLength(0);
+                LeftPanel.Visibility = Visibility.Collapsed;
+                LeftPanelOpenButton.Visibility = Visibility.Visible;
+                LeftPanelToggle.IsChecked = false;
             }
         }
 

@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -168,6 +169,12 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _currentProjectName;
 
+        /// <summary>
+        /// 현재 선택된 물건의 회생차주 여부 (회생개요 탭 표시 조건)
+        /// </summary>
+        [ObservableProperty]
+        private bool _isRestructuringBorrower;
+
         // ========== 검색 및 필터 기능 (신규) ==========
 
         /// <summary>
@@ -183,10 +190,10 @@ namespace NPLogic.ViewModels
         private string _searchText = "";
 
         /// <summary>
-        /// 필터 패널 표시 여부
+        /// 필터 패널 표시 여부 (기본 접힘)
         /// </summary>
         [ObservableProperty]
-        private bool _isFilterPanelVisible = true;
+        private bool _isFilterPanelVisible = false;
 
         /// <summary>
         /// 전체 차주/물건 목록 (필터링 전)
@@ -245,6 +252,9 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task InitializeAsync()
         {
+            // 닫은 탭 상태 로드 (항상 먼저 로드)
+            NavigationStateService.Instance.LoadNonCoreTabState();
+
             // 이미 초기화되었고 탭이 있으면 재초기화하지 않음 (탭 상태 유지)
             if (_isInitialized && PropertyTabs.Any())
             {
@@ -279,6 +289,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         public void SetProgramId(Guid programId)
         {
+            // 프로그램이 변경되면 초기화 상태 리셋
+            if (_currentProgramId != programId)
+            {
+                _isInitialized = false;
+                PropertyTabs.Clear();
+            }
             _currentProgramId = programId;
         }
         
@@ -305,6 +321,9 @@ namespace NPLogic.ViewModels
         public void LoadProperty(Property property)
         {
             if (property == null) return;
+
+            // 닫은 탭 상태 로드 (파일에서)
+            NavigationStateService.Instance.LoadNonCoreTabState();
 
             // 프로그램이 변경되면 기존 탭 모두 클리어
             if (property.ProgramId.HasValue && _currentProgramId != property.ProgramId.Value)
@@ -342,9 +361,13 @@ namespace NPLogic.ViewModels
 
             PropertyTabs.Clear();
 
+            // 닫은 탭 목록 가져오기 (InitializeAsync에서 이미 로드됨)
+            var closedTabs = NavigationStateService.Instance.GetClosedTabs(_currentProgramId.Value);
+
             var properties = await _propertyRepository.GetByProgramIdAsync(_currentProgramId.Value);
             
-            foreach (var property in properties.Take(10)) // 초기에는 10개만 로드
+            // 처음 10개만 가져온 후, 그 중에서 닫은 탭 제외 (새 탭 추가 안 함)
+            foreach (var property in properties.Take(10).Where(p => !closedTabs.Contains(p.Id)))
             {
                 PropertyTabs.Add(new PropertyTabItem
                 {
@@ -373,6 +396,9 @@ namespace NPLogic.ViewModels
             }
 
             SelectedPropertyTab = PropertyTabs.FirstOrDefault(t => t.PropertyId == propertyId);
+            
+            // 회생차주 여부 업데이트 (회생개요 탭 표시 조건)
+            IsRestructuringBorrower = SelectedPropertyTab?.IsRestructuring ?? false;
         }
 
         /// <summary>
@@ -385,6 +411,12 @@ namespace NPLogic.ViewModels
             {
                 var index = PropertyTabs.IndexOf(tab);
                 PropertyTabs.Remove(tab);
+
+                // 닫은 탭 정보 저장 (프로그램 재시작 시에도 유지)
+                if (_currentProgramId.HasValue)
+                {
+                    NavigationStateService.Instance.AddClosedTab(_currentProgramId.Value, propertyId);
+                }
 
                 // 닫힌 탭이 선택된 탭이었다면 다음 탭 선택
                 if (tab.IsSelected && PropertyTabs.Any())
@@ -414,6 +446,12 @@ namespace NPLogic.ViewModels
             {
                 SelectPropertyTab(property.Id);
                 return;
+            }
+
+            // 닫은 탭 목록에서 제거 (다시 열었으므로)
+            if (_currentProgramId.HasValue)
+            {
+                NavigationStateService.Instance.RemoveClosedTab(_currentProgramId.Value, property.Id);
             }
 
             var newTab = new PropertyTabItem

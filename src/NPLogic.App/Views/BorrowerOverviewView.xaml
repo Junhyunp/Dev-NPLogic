@@ -11,12 +11,13 @@
              d:DataContext="{d:DesignInstance Type=vm:BorrowerOverviewViewModel}"
              Loaded="BorrowerOverviewView_Loaded">
     
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="32">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" MinHeight="450"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -630,5 +631,6 @@
             </controls:NPModal.FooterContent>
         </controls:NPModal>
     </Grid>
+    </ScrollViewer>
 </UserControl>
 

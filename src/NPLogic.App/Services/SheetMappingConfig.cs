@@ -1,0 +1,330 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NPLogic.Services
+{
+    /// <summary>
+    /// IBK Excel 시트별 컬럼 매핑 설정
+    /// </summary>
+    public static class SheetMappingConfig
+    {
+        /// <summary>
+        /// 시트 유형별 컬럼 매핑 가져오기
+        /// </summary>
+        public static List<ColumnMappingRule> GetMappingRules(SheetType sheetType)
+        {
+            return sheetType switch
+            {
+                SheetType.BorrowerGeneral => GetBorrowerGeneralMappings(),
+                SheetType.BorrowerRestructuring => GetBorrowerRestructuringMappings(),
+                SheetType.Loan => GetLoanMappings(),
+                SheetType.Property => GetPropertyMappings(),
+                _ => new List<ColumnMappingRule>()
+            };
+        }
+
+        /// <summary>
+        /// Sheet A: 차주일반정보 → borrowers
+        /// </summary>
+        private static List<ColumnMappingRule> GetBorrowerGeneralMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("Pool 구분", "pool_type", false, ColumnDataType.String),
+                new("차주구분", "borrower_category", false, ColumnDataType.String),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", true, ColumnDataType.String),
+                new("관련차주", "related_borrower", false, ColumnDataType.String),
+                new("차주형태", "borrower_type", false, ColumnDataType.String),
+                
+                // 금액 정보
+                new("대출원금잔액", "opb", false, ColumnDataType.Decimal),
+                new("가지급금", "advance_payment", false, ColumnDataType.Decimal),
+                new("미상환원금잔액", "unpaid_principal", false, ColumnDataType.Decimal),
+                new("미수이자", "accrued_interest", false, ColumnDataType.Decimal),
+                new("차주별 근저당권설정액", "mortgage_amount", false, ColumnDataType.Decimal),
+                new("차주별 선순위 근저당설정액", "senior_mortgage_amount", false, ColumnDataType.Decimal),
+                
+                // 비고
+                new("비고", "notes", false, ColumnDataType.String),
+            };
+        }
+
+        /// <summary>
+        /// Sheet A-1: 회생차주정보 → borrower_restructuring
+        /// </summary>
+        private static List<ColumnMappingRule> GetBorrowerRestructuringMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 정보 (차주 조회용)
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("Pool 구분", "pool_type", false, ColumnDataType.String),
+                new("차주구분", "borrower_category", false, ColumnDataType.String),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", false, ColumnDataType.String),
+                new("관련차주", "related_borrower", false, ColumnDataType.String),
+                
+                // 회생 정보
+                new("인가/미인가", "approval_status", false, ColumnDataType.String),
+                new("세부진행단계", "progress_stage", false, ColumnDataType.String),
+                new("관할법원", "court_name", false, ColumnDataType.String),
+                new("회생사건번호", "case_number", false, ColumnDataType.String),
+                
+                // 날짜 정보
+                new("회생신청일", "filing_date", false, ColumnDataType.Date),
+                new("보전처분일", "preservation_date", false, ColumnDataType.Date),
+                new("개시결정일", "commencement_date", false, ColumnDataType.Date),
+                new("채권신고일", "claim_filing_date", false, ColumnDataType.Date),
+                new("인가/폐지결정일", "approval_dismissal_date", false, ColumnDataType.Date),
+                
+                // 기타
+                new("회생탈락권", "excluded_claim", false, ColumnDataType.String),
+            };
+        }
+
+        /// <summary>
+        /// Sheet B: 채권일반정보 → loans
+        /// </summary>
+        private static List<ColumnMappingRule> GetLoanMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("Pool 구분", "pool_type", false, ColumnDataType.String),
+                new("차주구분", "borrower_category", false, ColumnDataType.String),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", false, ColumnDataType.String),
+                new("대출일련번호", "account_serial", true, ColumnDataType.String),
+                
+                // 대출 정보
+                new("대출과목", "loan_type", false, ColumnDataType.String),
+                new("계좌번호", "account_number", false, ColumnDataType.String),
+                new("이자율", "normal_interest_rate", false, ColumnDataType.Decimal),
+                
+                // 날짜
+                new("최초대출일", "initial_loan_date", false, ColumnDataType.Date),
+                new("대출만기일", "maturity_date", false, ColumnDataType.Date),
+                new("최종이수일", "last_interest_date", false, ColumnDataType.Date),
+                
+                // 금액
+                new("통화표시", "currency", false, ColumnDataType.String),
+                new("최초대출금액", "initial_loan_amount", false, ColumnDataType.Decimal),
+                new("대출금잔액", "loan_principal_balance", false, ColumnDataType.Decimal),
+            };
+        }
+
+        /// <summary>
+        /// Sheet C-1: 담보재산정보_물건정보 → properties
+        /// </summary>
+        private static List<ColumnMappingRule> GetPropertyMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("Pool 구분", "pool_type", false, ColumnDataType.String),
+                new("차주구분", "borrower_category", false, ColumnDataType.String),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", false, ColumnDataType.String),
+                new("물건번호", "collateral_number", false, ColumnDataType.String),
+                
+                // Property 정보
+                new("Property 일련번호", "property_number", true, ColumnDataType.String),
+                new("Property일련번호", "property_number", true, ColumnDataType.String),
+                
+                // 주소 정보
+                new("담보소재지1", "address_province", false, ColumnDataType.String),
+                new("담보소재지 1", "address_province", false, ColumnDataType.String),
+                new("(특별광역시/도)", "address_province", false, ColumnDataType.String),
+                new("담보소재지2", "address_city", false, ColumnDataType.String),
+                new("담보소재지 2", "address_city", false, ColumnDataType.String),
+                new("(시/군/구)", "address_city", false, ColumnDataType.String),
+                new("담보소재지3", "address_district", false, ColumnDataType.String),
+                new("담보소재지 3", "address_district", false, ColumnDataType.String),
+                new("(동/리/읍/면)", "address_district", false, ColumnDataType.String),
+                new("담보소재지4", "address_detail", false, ColumnDataType.String),
+                new("담보소재지 4", "address_detail", false, ColumnDataType.String),
+                new("(나머지/상세지번/기타재산내역)", "address_detail", false, ColumnDataType.String),
+                
+                // 물건 타입 및 면적
+                new("Property Type", "property_type", false, ColumnDataType.String),
+                new("Property-대지면적", "land_area", false, ColumnDataType.Decimal),
+                new("Property-건물면적", "building_area", false, ColumnDataType.Decimal),
+            };
+        }
+
+        /// <summary>
+        /// Excel 컬럼명으로 매핑 규칙 찾기 (유사 매칭 지원)
+        /// </summary>
+        public static ColumnMappingRule? FindMappingRule(List<ColumnMappingRule> rules, string excelColumnName)
+        {
+            if (string.IsNullOrWhiteSpace(excelColumnName))
+                return null;
+
+            // 줄바꿈을 공백으로 변환하고 정리
+            var normalizedName = excelColumnName
+                .Replace("\r\n", " ")
+                .Replace("\n", " ")
+                .Replace("\r", " ")
+                .Replace("  ", " ")
+                .Trim();
+
+            // 1. 정확한 매칭
+            var exactMatch = rules.FirstOrDefault(r => 
+                r.ExcelColumnName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
+            if (exactMatch != null)
+                return exactMatch;
+
+            // 2. 포함 매칭 (Excel 컬럼명이 규칙의 컬럼명을 포함)
+            var containsMatch = rules.FirstOrDefault(r => 
+                normalizedName.Contains(r.ExcelColumnName, StringComparison.OrdinalIgnoreCase));
+            if (containsMatch != null)
+                return containsMatch;
+
+            // 3. 역방향 포함 매칭 (규칙의 컬럼명이 Excel 컬럼명을 포함)
+            var reverseMatch = rules.FirstOrDefault(r => 
+                r.ExcelColumnName.Contains(normalizedName, StringComparison.OrdinalIgnoreCase));
+            
+            return reverseMatch;
+        }
+    }
+
+    /// <summary>
+    /// 컬럼 매핑 규칙
+    /// </summary>
+    public class ColumnMappingRule
+    {
+        public string ExcelColumnName { get; set; }
+        public string DbColumnName { get; set; }
+        public bool IsRequired { get; set; }
+        public ColumnDataType DataType { get; set; }
+
+        public ColumnMappingRule(string excelColumnName, string dbColumnName, bool isRequired, ColumnDataType dataType)
+        {
+            ExcelColumnName = excelColumnName;
+            DbColumnName = dbColumnName;
+            IsRequired = isRequired;
+            DataType = dataType;
+        }
+
+        /// <summary>
+        /// 값 변환
+        /// </summary>
+        public object? ConvertValue(object? rawValue)
+        {
+            if (rawValue == null || (rawValue is string s && string.IsNullOrWhiteSpace(s)))
+                return null;
+
+            try
+            {
+                return DataType switch
+                {
+                    ColumnDataType.String => rawValue.ToString()?.Trim(),
+                    ColumnDataType.Integer => Convert.ToInt32(rawValue),
+                    ColumnDataType.Decimal => ParseDecimal(rawValue),
+                    ColumnDataType.Date => ParseDate(rawValue),
+                    ColumnDataType.Boolean => ParseBoolean(rawValue),
+                    _ => rawValue
+                };
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static decimal? ParseDecimal(object value)
+        {
+            var str = value.ToString()?.Replace(",", "").Replace(" ", "").Trim();
+            if (string.IsNullOrEmpty(str) || str == "-")
+                return null;
+            
+            // 백분율 처리
+            if (str.EndsWith("%"))
+            {
+                str = str.TrimEnd('%');
+                if (decimal.TryParse(str, out var pctValue))
+                    return pctValue / 100;
+            }
+
+            if (decimal.TryParse(str, out var decValue))
+                return decValue;
+
+            return null;
+        }
+
+        private static DateTime? ParseDate(object value)
+        {
+            if (value is DateTime dt)
+                return dt;
+
+            var str = value.ToString()?.Trim();
+            if (string.IsNullOrEmpty(str) || str == "-")
+                return null;
+
+            // 다양한 날짜 형식 처리
+            var formats = new[]
+            {
+                "yyyy-MM-dd",
+                "yyyy/MM/dd",
+                "yyyy.MM.dd",
+                "yyyyMMdd",
+                "MM/dd/yyyy",
+                "dd/MM/yyyy"
+            };
+
+            foreach (var format in formats)
+            {
+                if (DateTime.TryParseExact(str, format, null, System.Globalization.DateTimeStyles.None, out var parsed))
+                    return parsed;
+            }
+
+            if (DateTime.TryParse(str, out var fallback))
+                return fallback;
+
+            // Excel 날짜 숫자 (OADate)
+            if (double.TryParse(str, out var oaDate) && oaDate > 0 && oaDate < 100000)
+            {
+                try
+                {
+                    return DateTime.FromOADate(oaDate);
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        private static bool? ParseBoolean(object value)
+        {
+            var str = value.ToString()?.Trim().ToLower();
+            if (string.IsNullOrEmpty(str))
+                return null;
+
+            return str switch
+            {
+                "y" or "yes" or "true" or "1" or "예" or "○" => true,
+                "n" or "no" or "false" or "0" or "아니오" or "x" => false,
+                _ => null
+            };
+        }
+    }
+
+    /// <summary>
+    /// 컬럼 데이터 타입
+    /// </summary>
+    public enum ColumnDataType
+    {
+        String,
+        Integer,
+        Decimal,
+        Date,
+        Boolean
+    }
+}
+

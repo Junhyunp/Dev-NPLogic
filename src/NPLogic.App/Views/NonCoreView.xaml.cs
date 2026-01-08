@@ -14,18 +14,19 @@ namespace NPLogic.Views
 {
     /// <summary>
     /// NonCoreView.xaml에 대한 상호 작용 논리
-    /// 비핵심 화면 - 9개 탭 구성
+    /// 비핵심 화면 - 10개 탭 구성 (전체, 차주개요, Loan, 담보물건, 선순위, 회생개요, 평가, 경(공)매일정, 현금흐름, XNPV비교)
     /// Phase 4 업데이트: 단축키 네비게이션 추가
     /// </summary>
     public partial class NonCoreView : UserControl
     {
         private NonCoreViewModel? _viewModel;
         
-        // 기능 탭 순서 배열
+        // 기능 탭 순서 배열 - 피드백 반영: 10개 탭
         private readonly string[] _functionTabs = 
         { 
-            "BorrowerOverview", "Loan", "CollateralSummary", "CollateralProperty", 
-            "SeniorRights", "Auction", "Restructuring", "CashFlow", "NPB" 
+            "Home", "BorrowerOverview", "Loan", "CollateralProperty", 
+            "SeniorRights", "Restructuring", "Evaluation", "AuctionSchedule", 
+            "CashFlow", "XnpvComparison" 
         };
         private int _currentFunctionTabIndex = 0;
 
@@ -41,8 +42,8 @@ namespace NPLogic.Views
             {
                 await _viewModel.InitializeAsync();
                 
-                // 기본 탭 로드 (차주 개요)
-                LoadFunctionContent("BorrowerOverview");
+                // 기본 탭 로드 (전체)
+                LoadFunctionContent("Home");
             }
             
             // 키보드 포커스 설정
@@ -169,16 +170,17 @@ namespace NPLogic.Views
         {
             var radioButton = tabName switch
             {
+                "Home" => TabHome,
                 "BorrowerOverview" => TabBorrowerOverview,
                 "Loan" => TabLoan,
-                "CollateralSummary" => TabCollateralSummary,
                 "CollateralProperty" => TabCollateralProperty,
                 "SeniorRights" => TabSeniorRights,
-                "Auction" => TabAuction,
                 "Restructuring" => TabRestructuring,
+                "Evaluation" => TabEvaluation,
+                "AuctionSchedule" => TabAuctionSchedule,
                 "CashFlow" => TabCashFlow,
-                "NPB" => TabNPB,
-                _ => TabBorrowerOverview
+                "XnpvComparison" => TabXnpvComparison,
+                _ => TabHome
             };
             
             radioButton.IsChecked = true;
@@ -209,7 +211,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 기능별 컨텐츠 로드
+        /// 기능별 컨텐츠 로드 - 피드백 반영: 10개 탭 구조
         /// </summary>
         private void LoadFunctionContent(string tabName)
         {
@@ -217,35 +219,96 @@ namespace NPLogic.Views
             if (serviceProvider == null) return;
 
             UserControl? content = null;
+            
+            // 현재 선택된 물건 ID 가져오기
+            var selectedPropertyId = _viewModel?.SelectedPropertyTab?.PropertyId;
 
             switch (tabName)
             {
+                case "Home":
+                    content = serviceProvider.GetRequiredService<HomeTab>();
+                    // PropertyDetailViewModel 항상 설정 (커맨드 바인딩을 위해)
+                    {
+                        var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
+                        if (selectedPropertyId.HasValue)
+                        {
+                            vm.SetPropertyId(selectedPropertyId.Value);
+                            _ = vm.InitializeAsync();
+                        }
+                        content.DataContext = vm;
+                    }
+                    break;
                 case "BorrowerOverview":
                     content = serviceProvider.GetRequiredService<BorrowerOverviewView>();
                     break;
                 case "Loan":
                     content = serviceProvider.GetRequiredService<LoanDetailView>();
                     break;
-                case "CollateralSummary":
-                    content = serviceProvider.GetRequiredService<CollateralSummaryView>();
-                    break;
                 case "CollateralProperty":
-                    // 담보 물건 탭 - 지도 포함된 BasicDataTab 로드
+                    // 담보물건 탭 - 지도+담보총괄 포함
                     content = serviceProvider.GetRequiredService<BasicDataTab>();
+                    // PropertyDetailViewModel 항상 설정 (커맨드 바인딩을 위해)
+                    {
+                        var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
+                        if (selectedPropertyId.HasValue)
+                        {
+                            vm.SetPropertyId(selectedPropertyId.Value);
+                            _ = vm.InitializeAsync();
+                        }
+                        content.DataContext = vm;
+                    }
                     break;
                 case "SeniorRights":
                     content = serviceProvider.GetRequiredService<SeniorRightsView>();
                     break;
-                case "Auction":
-                    content = serviceProvider.GetRequiredService<AuctionScheduleView>();
-                    break;
                 case "Restructuring":
+                    // 회생개요 탭 - 회생차주인 경우에만 표시
                     content = serviceProvider.GetRequiredService<RestructuringOverviewView>();
+                    break;
+                case "Evaluation":
+                    // 평가 탭 - 추천 시스템 포함
+                    content = serviceProvider.GetRequiredService<EvaluationTab>();
+                    // EvaluationViewModel을 DataContext로 설정 (EvaluationTab.xaml의 바인딩에 맞춤)
+                    {
+                        var parentVm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
+                        // 먼저 PropertyDetailViewModel 초기화 (EvaluationViewModel 생성을 위해)
+                        if (selectedPropertyId.HasValue)
+                        {
+                            parentVm.SetPropertyId(selectedPropertyId.Value);
+                            _ = parentVm.InitializeAsync();
+                        }
+                        
+                        if (parentVm.EvaluationViewModel != null)
+                        {
+                            // 선택된 물건 ID 및 Property 정보 설정
+                            if (selectedPropertyId.HasValue)
+                            {
+                                parentVm.EvaluationViewModel.SetPropertyId(selectedPropertyId.Value);
+                                // Property 정보도 설정 (지역명 추출 등에 필요)
+                                if (parentVm.Property != null)
+                                {
+                                    parentVm.EvaluationViewModel.SetProperty(parentVm.Property);
+                                }
+                            }
+                            content.DataContext = parentVm.EvaluationViewModel;
+                            // 데이터 로드 (백그라운드에서)
+                            _ = parentVm.EvaluationViewModel.LoadAsync();
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[NonCoreView] EvaluationViewModel is null! PropertyDetailViewModel may not be initialized.");
+                            content.DataContext = null;
+                        }
+                    }
+                    break;
+                case "AuctionSchedule":
+                    content = serviceProvider.GetRequiredService<AuctionScheduleView>();
                     break;
                 case "CashFlow":
                     content = serviceProvider.GetRequiredService<CashFlowSummaryView>();
                     break;
-                case "NPB":
+                case "XnpvComparison":
+                    // XNPV 비교 탭
                     content = serviceProvider.GetRequiredService<XnpvComparisonView>();
                     break;
                 default:
@@ -316,7 +379,8 @@ namespace NPLogic.Views
         private void BatchSeniorRights_Click(object sender, RoutedEventArgs e)
         {
             _viewModel?.StartBatchWork("SeniorRights");
-            TabSeniorRights.IsChecked = true;
+            // 선순위 페이지로 이동
+            MainWindow.Instance?.NavigateToSeniorRights();
         }
 
         /// <summary>
@@ -333,7 +397,8 @@ namespace NPLogic.Views
         private void BatchAuction_Click(object sender, RoutedEventArgs e)
         {
             _viewModel?.StartBatchWork("Auction");
-            TabAuction.IsChecked = true;
+            // 경매 페이지로 이동
+            MainWindow.Instance?.NavigateToAuctionSchedule();
         }
 
         /// <summary>

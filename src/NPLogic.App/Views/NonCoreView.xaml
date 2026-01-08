@@ -423,7 +423,7 @@
                 </Grid>
             </Border>
 
-            <!-- 기능 탭 바 (9개 탭) -->
+            <!-- 기능 탭 바 (10개 탭) - 피드백 반영: 전체, 차주개요, Loan, 담보물건, 선순위, 회생개요, 평가, 경(공)매일정, 현금흐름, XNPV비교 -->
             <Border Grid.Row="0" 
                     Background="White"
                     BorderBrush="{StaticResource BorderBrush}"
@@ -431,69 +431,77 @@
                 <ScrollViewer HorizontalScrollBarVisibility="Auto" 
                               VerticalScrollBarVisibility="Disabled">
                     <StackPanel Orientation="Horizontal" Margin="16,0">
-                        <!-- 1. 차주 개요 -->
-                        <RadioButton x:Name="TabBorrowerOverview"
-                                     Content="차주 개요"
+                        <!-- 1. 전체 -->
+                        <RadioButton x:Name="TabHome"
+                                     Content="전체"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      IsChecked="True"
                                      Checked="FunctionTab_Checked"
+                                     Tag="Home"/>
+                        
+                        <!-- 2. 차주개요 -->
+                        <RadioButton x:Name="TabBorrowerOverview"
+                                     Content="차주개요"
+                                     Style="{StaticResource NonCoreTabStyle}"
+                                     Checked="FunctionTab_Checked"
                                      Tag="BorrowerOverview"/>
                         
-                        <!-- 2. 론 -->
+                        <!-- 3. Loan -->
                         <RadioButton x:Name="TabLoan"
-                                     Content="론"
+                                     Content="Loan"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
                                      Tag="Loan"/>
                         
-                        <!-- 3. 담보 총괄 -->
-                        <RadioButton x:Name="TabCollateralSummary"
-                                     Content="담보 총괄"
-                                     Style="{StaticResource NonCoreTabStyle}"
-                                     Checked="FunctionTab_Checked"
-                                     Tag="CollateralSummary"/>
-                        
-                        <!-- 4. 담보 물건 -->
+                        <!-- 4. 담보물건 (지도+담보총괄 포함) -->
                         <RadioButton x:Name="TabCollateralProperty"
-                                     Content="담보 물건"
+                                     Content="담보물건"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
                                      Tag="CollateralProperty"/>
                         
-                        <!-- 5. 선순위 평가 -->
+                        <!-- 5. 선순위 -->
                         <RadioButton x:Name="TabSeniorRights"
-                                     Content="선순위 평가"
+                                     Content="선순위"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
                                      Tag="SeniorRights"/>
                         
-                        <!-- 6. 경공매 -->
-                        <RadioButton x:Name="TabAuction"
-                                     Content="경공매"
-                                     Style="{StaticResource NonCoreTabStyle}"
-                                     Checked="FunctionTab_Checked"
-                                     Tag="Auction"/>
-                        
-                        <!-- 7. 회생 개요 -->
+                        <!-- 6. 회생개요 (회생차주인 경우에만 표시) -->
                         <RadioButton x:Name="TabRestructuring"
-                                     Content="회생 개요"
+                                     Content="회생개요"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
-                                     Tag="Restructuring"/>
+                                     Tag="Restructuring"
+                                     Visibility="{Binding IsRestructuringBorrower, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         
-                        <!-- 8. 현금흐름 집계 -->
+                        <!-- 7. 평가 (추천 시스템 포함) -->
+                        <RadioButton x:Name="TabEvaluation"
+                                     Content="평가"
+                                     Style="{StaticResource NonCoreTabStyle}"
+                                     Checked="FunctionTab_Checked"
+                                     Tag="Evaluation"/>
+                        
+                        <!-- 8. 경(공)매일정 -->
+                        <RadioButton x:Name="TabAuctionSchedule"
+                                     Content="경(공)매일정"
+                                     Style="{StaticResource NonCoreTabStyle}"
+                                     Checked="FunctionTab_Checked"
+                                     Tag="AuctionSchedule"/>
+                        
+                        <!-- 9. 현금흐름 -->
                         <RadioButton x:Name="TabCashFlow"
-                                     Content="현금흐름 집계"
+                                     Content="현금흐름"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
                                      Tag="CashFlow"/>
                         
-                        <!-- 9. NPB -->
-                        <RadioButton x:Name="TabNPB"
-                                     Content="NPB"
+                        <!-- 10. XNPV 비교 -->
+                        <RadioButton x:Name="TabXnpvComparison"
+                                     Content="XNPV 비교"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
-                                     Tag="NPB"/>
+                                     Tag="XnpvComparison"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

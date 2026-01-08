@@ -20,6 +20,9 @@ namespace NPLogic.ViewModels
     public partial class DataUploadViewModel : ObservableObject
     {
         private readonly PropertyRepository _propertyRepository;
+        private readonly BorrowerRepository _borrowerRepository;
+        private readonly LoanRepository _loanRepository;
+        private readonly BorrowerRestructuringRepository _restructuringRepository;
         private readonly ExcelService _excelService;
         private readonly StorageService _storageService;
 
@@ -99,15 +102,43 @@ namespace NPLogic.ViewModels
         private int _totalPdfCount;
 
         private List<Dictionary<string, object>>? _allExcelData;
+        private string? _currentFilePath;
+
+        // ========== IBK Multi-Sheet 관련 ==========
+        [ObservableProperty]
+        private ObservableCollection<SelectableSheetInfo> _availableSheets = new();
+
+        [ObservableProperty]
+        private bool _showSheetSelection;
+
+        [ObservableProperty]
+        private string? _uploadStatusMessage;
+
+        [ObservableProperty]
+        private int _totalSheetsToProcess;
+
+        [ObservableProperty]
+        private int _processedSheets;
+
+        /// <summary>
+        /// 선택된 시트가 있는지
+        /// </summary>
+        public bool HasSelectedSheets => AvailableSheets.Any(s => s.IsSelected);
 
         public DataUploadViewModel(
             PropertyRepository propertyRepository,
             ExcelService excelService,
-            StorageService storageService)
+            StorageService storageService,
+            BorrowerRepository? borrowerRepository = null,
+            LoanRepository? loanRepository = null,
+            BorrowerRestructuringRepository? restructuringRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
             _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+            _borrowerRepository = borrowerRepository!;
+            _loanRepository = loanRepository!;
+            _restructuringRepository = restructuringRepository!;
 
             InitializeColumnMappings();
         }
@@ -279,34 +310,73 @@ namespace NPLogic.ViewModels
 
                 ExcelErrorMessage = null;
                 SelectedExcelFile = Path.GetFileName(filePath);
+                _currentFilePath = filePath;
 
-                // Excel 파일 읽기
-                var (columns, data) = await _excelService.ReadExcelFileAsync(filePath);
-
-                ExcelColumns.Clear();
-                ExcelColumns.Add("(선택 안 함)");
-                foreach (var col in columns)
+                // 시트 목록 조회 (IBK Multi-Sheet 지원)
+                var sheets = _excelService.GetSheetNames(filePath);
+                
+                // 여러 시트가 있거나 IBK 형식이면 시트 선택 UI 표시
+                if (sheets.Count > 1 || sheets.Any(s => s.SheetType != SheetType.Unknown))
                 {
-                    ExcelColumns.Add(col);
+                    AvailableSheets.Clear();
+                    foreach (var sheet in sheets)
+                    {
+                        var selectableSheet = new SelectableSheetInfo
+                        {
+                            Name = sheet.Name,
+                            Index = sheet.Index,
+                            RowCount = sheet.RowCount,
+                            Headers = sheet.Headers,
+                            SheetType = sheet.SheetType,
+                            IsSelected = sheet.SheetType != SheetType.Unknown // 감지된 시트는 기본 선택
+                        };
+                        AvailableSheets.Add(selectableSheet);
+                    }
+                    
+                    ShowSheetSelection = true;
+                    ShowMappingSection = false;
+                    OnPropertyChanged(nameof(HasSelectedSheets));
                 }
-
-                _allExcelData = data;
-
-                // 미리보기 데이터 (최대 10행)
-                PreviewData.Clear();
-                foreach (var row in data.Take(10))
+                else
                 {
-                    PreviewData.Add(row);
+                    // 단일 시트: 기존 방식
+                    ShowSheetSelection = false;
+                    await LoadSingleSheetDataAsync(filePath);
                 }
-
-                ShowMappingSection = true;
-                TotalRows = data.Count;
             }
             catch (Exception ex)
             {
                 ExcelErrorMessage = $"Excel 파일 읽기 실패: {ex.Message}";
                 ShowMappingSection = false;
+                ShowSheetSelection = false;
             }
+        }
+
+        /// <summary>
+        /// 단일 시트 데이터 로드 (기존 방식)
+        /// </summary>
+        private async Task LoadSingleSheetDataAsync(string filePath)
+        {
+            var (columns, data) = await _excelService.ReadExcelFileAsync(filePath);
+
+            ExcelColumns.Clear();
+            ExcelColumns.Add("(선택 안 함)");
+            foreach (var col in columns)
+            {
+                ExcelColumns.Add(col);
+            }
+
+            _allExcelData = data;
+
+            // 미리보기 데이터 (최대 10행)
+            PreviewData.Clear();
+            foreach (var row in data.Take(10))
+            {
+                PreviewData.Add(row);
+            }
+
+            ShowMappingSection = true;
+            TotalRows = data.Count;
         }
 
         /// <summary>
@@ -524,6 +594,558 @@ namespace NPLogic.ViewModels
             return property;
         }
 
+        // ==================== IBK Multi-Sheet Upload ====================
+
+        /// <summary>
+        /// 시트 선택 토글
+        /// </summary>
+        public void ToggleSheetSelection(SelectableSheetInfo sheet)
+        {
+            sheet.IsSelected = !sheet.IsSelected;
+            OnPropertyChanged(nameof(HasSelectedSheets));
+        }
+
+        /// <summary>
+        /// 선택된 시트들 업로드
+        /// </summary>
+        [RelayCommand]
+        private async Task UploadSelectedSheetsAsync()
+        {
+            if (string.IsNullOrEmpty(_currentFilePath) || !HasSelectedSheets)
+            {
+                ExcelErrorMessage = "업로드할 시트를 선택해주세요.";
+                return;
+            }
+
+            var selectedSheets = AvailableSheets.Where(s => s.IsSelected).ToList();
+
+            try
+            {
+                IsExcelUploading = true;
+                ExcelErrorMessage = null;
+                TotalSheetsToProcess = selectedSheets.Count;
+                ProcessedSheets = 0;
+                
+                var results = new List<SheetUploadResult>();
+
+                foreach (var sheet in selectedSheets)
+                {
+                    UploadStatusMessage = $"처리 중: {sheet.Name} ({sheet.SheetTypeDisplay})";
+                    
+                    try
+                    {
+                        var result = await ProcessSheetAsync(_currentFilePath, sheet);
+                        results.Add(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        results.Add(new SheetUploadResult
+                        {
+                            SheetName = sheet.Name,
+                            SheetType = sheet.SheetType,
+                            Success = false,
+                            ErrorMessage = ex.Message
+                        });
+                    }
+
+                    ProcessedSheets++;
+                    ExcelUploadProgress = (double)ProcessedSheets / TotalSheetsToProcess * 100;
+                }
+
+                // 결과 요약
+                var successCount = results.Count(r => r.Success);
+                var totalCreated = results.Sum(r => r.CreatedCount);
+                var totalUpdated = results.Sum(r => r.UpdatedCount);
+                var totalFailed = results.Sum(r => r.FailedCount);
+
+                var message = $"업로드 완료!\n\n" +
+                    $"처리 시트: {successCount}/{results.Count}\n" +
+                    $"생성: {totalCreated}건, 수정: {totalUpdated}건, 실패: {totalFailed}건";
+
+                if (results.Any(r => !r.Success))
+                {
+                    message += "\n\n실패한 시트:\n";
+                    foreach (var failed in results.Where(r => !r.Success))
+                    {
+                        message += $"- {failed.SheetName}: {failed.ErrorMessage}\n";
+                    }
+                }
+
+                System.Windows.MessageBox.Show(message, "업로드 완료",
+                    System.Windows.MessageBoxButton.OK,
+                    results.All(r => r.Success) ? System.Windows.MessageBoxImage.Information : System.Windows.MessageBoxImage.Warning);
+
+                ResetExcelUpload();
+            }
+            catch (Exception ex)
+            {
+                ExcelErrorMessage = $"업로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsExcelUploading = false;
+                UploadStatusMessage = null;
+            }
+        }
+
+        /// <summary>
+        /// 시트별 데이터 처리
+        /// </summary>
+        private async Task<SheetUploadResult> ProcessSheetAsync(string filePath, SelectableSheetInfo sheet)
+        {
+            var result = new SheetUploadResult
+            {
+                SheetName = sheet.Name,
+                SheetType = sheet.SheetType
+            };
+
+            // 헤더 행 감지 (IBK 형식의 경우 헤더가 중간에 있을 수 있음)
+            var headerRow = _excelService.DetectHeaderRow(filePath, sheet.Name);
+            
+            // 시트 데이터 읽기
+            var (columns, data) = await _excelService.ReadExcelSheetAsync(filePath, sheet.Name, headerRow);
+            
+            if (data.Count == 0)
+            {
+                result.Success = true;
+                return result;
+            }
+
+            // 매핑 규칙 가져오기
+            var mappingRules = SheetMappingConfig.GetMappingRules(sheet.SheetType);
+
+            switch (sheet.SheetType)
+            {
+                case SheetType.BorrowerGeneral:
+                    var borrowerResult = await ProcessBorrowerGeneralAsync(data, columns, mappingRules);
+                    result.CreatedCount = borrowerResult.Created;
+                    result.UpdatedCount = borrowerResult.Updated;
+                    result.FailedCount = borrowerResult.Failed;
+                    break;
+
+                case SheetType.BorrowerRestructuring:
+                    var restructuringResult = await ProcessBorrowerRestructuringAsync(data, columns, mappingRules);
+                    result.CreatedCount = restructuringResult.Created;
+                    result.UpdatedCount = restructuringResult.Updated;
+                    result.FailedCount = restructuringResult.Failed;
+                    break;
+
+                case SheetType.Loan:
+                    var loanResult = await ProcessLoanAsync(data, columns, mappingRules);
+                    result.CreatedCount = loanResult.Created;
+                    result.UpdatedCount = loanResult.Updated;
+                    result.FailedCount = loanResult.Failed;
+                    break;
+
+                case SheetType.Property:
+                    var propertyResult = await ProcessPropertyAsync(data, columns, mappingRules);
+                    result.CreatedCount = propertyResult.Created;
+                    result.UpdatedCount = propertyResult.Updated;
+                    result.FailedCount = propertyResult.Failed;
+                    break;
+
+                default:
+                    result.ErrorMessage = "알 수 없는 시트 유형";
+                    result.Success = false;
+                    return result;
+            }
+
+            result.Success = true;
+            return result;
+        }
+
+        /// <summary>
+        /// 차주일반정보 처리
+        /// </summary>
+        private async Task<(int Created, int Updated, int Failed)> ProcessBorrowerGeneralAsync(
+            List<Dictionary<string, object>> data,
+            List<string> columns,
+            List<ColumnMappingRule> rules)
+        {
+            if (_borrowerRepository == null)
+                return (0, 0, data.Count);
+
+            var borrowers = new List<Borrower>();
+
+            foreach (var row in data)
+            {
+                try
+                {
+                    var borrower = new Borrower
+                    {
+                        Id = Guid.NewGuid(),
+                        ProgramId = TargetProgramId
+                    };
+
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule == null) continue;
+
+                        var value = row.ContainsKey(col) ? rule.ConvertValue(row[col]) : null;
+
+                        switch (rule.DbColumnName)
+                        {
+                            case "borrower_number":
+                                borrower.BorrowerNumber = value?.ToString() ?? "";
+                                break;
+                            case "borrower_name":
+                                borrower.BorrowerName = value?.ToString() ?? "";
+                                break;
+                            case "borrower_type":
+                                borrower.BorrowerType = value?.ToString() ?? "개인";
+                                break;
+                            case "opb":
+                                if (value is decimal opb) borrower.Opb = opb;
+                                break;
+                            case "mortgage_amount":
+                                if (value is decimal mortgage) borrower.MortgageAmount = mortgage;
+                                break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(borrower.BorrowerNumber))
+                    {
+                        borrowers.Add(borrower);
+                    }
+                }
+                catch { /* 개별 행 에러 무시 */ }
+            }
+
+            return await _borrowerRepository.BulkUpsertAsync(borrowers);
+        }
+
+        /// <summary>
+        /// 회생차주정보 처리
+        /// </summary>
+        private async Task<(int Created, int Updated, int Failed)> ProcessBorrowerRestructuringAsync(
+            List<Dictionary<string, object>> data,
+            List<string> columns,
+            List<ColumnMappingRule> rules)
+        {
+            if (_borrowerRepository == null || _restructuringRepository == null)
+                return (0, 0, data.Count);
+
+            int created = 0, updated = 0, failed = 0;
+
+            foreach (var row in data)
+            {
+                try
+                {
+                    // 차주번호로 차주 조회
+                    string? borrowerNumber = null;
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule?.DbColumnName == "borrower_number")
+                        {
+                            borrowerNumber = row.ContainsKey(col) ? row[col]?.ToString() : null;
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(borrowerNumber))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                    if (borrower == null)
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    // 차주의 회생 플래그 업데이트
+                    borrower.IsRestructuring = true;
+                    await _borrowerRepository.UpdateAsync(borrower);
+
+                    // 회생 상세 정보 저장
+                    var restructuring = new BorrowerRestructuring
+                    {
+                        BorrowerId = borrower.Id
+                    };
+
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule == null) continue;
+
+                        var value = row.ContainsKey(col) ? rule.ConvertValue(row[col]) : null;
+
+                        switch (rule.DbColumnName)
+                        {
+                            case "approval_status":
+                                restructuring.ApprovalStatus = value?.ToString();
+                                break;
+                            case "progress_stage":
+                                restructuring.ProgressStage = value?.ToString();
+                                break;
+                            case "court_name":
+                                restructuring.CourtName = value?.ToString();
+                                break;
+                            case "case_number":
+                                restructuring.CaseNumber = value?.ToString();
+                                break;
+                            case "filing_date":
+                                if (value is DateTime fd) restructuring.FilingDate = fd;
+                                break;
+                            case "preservation_date":
+                                if (value is DateTime pd) restructuring.PreservationDate = pd;
+                                break;
+                            case "commencement_date":
+                                if (value is DateTime cd) restructuring.CommencementDate = cd;
+                                break;
+                            case "claim_filing_date":
+                                if (value is DateTime cfd) restructuring.ClaimFilingDate = cfd;
+                                break;
+                            case "approval_dismissal_date":
+                                if (value is DateTime add) restructuring.ApprovalDismissalDate = add;
+                                break;
+                            case "excluded_claim":
+                                restructuring.ExcludedClaim = value?.ToString();
+                                break;
+                        }
+                    }
+
+                    var existing = await _restructuringRepository.GetByBorrowerIdAsync(borrower.Id);
+                    if (existing != null)
+                    {
+                        restructuring.Id = existing.Id;
+                        await _restructuringRepository.UpdateAsync(restructuring);
+                        updated++;
+                    }
+                    else
+                    {
+                        await _restructuringRepository.CreateAsync(restructuring);
+                        created++;
+                    }
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+
+            return (created, updated, failed);
+        }
+
+        /// <summary>
+        /// 채권정보 처리
+        /// </summary>
+        private async Task<(int Created, int Updated, int Failed)> ProcessLoanAsync(
+            List<Dictionary<string, object>> data,
+            List<string> columns,
+            List<ColumnMappingRule> rules)
+        {
+            if (_borrowerRepository == null || _loanRepository == null)
+                return (0, 0, data.Count);
+
+            var loans = new List<Loan>();
+
+            foreach (var row in data)
+            {
+                try
+                {
+                    // 차주번호로 차주 조회
+                    string? borrowerNumber = null;
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule?.DbColumnName == "borrower_number")
+                        {
+                            borrowerNumber = row.ContainsKey(col) ? row[col]?.ToString() : null;
+                            break;
+                        }
+                    }
+
+                    Guid? borrowerId = null;
+                    if (!string.IsNullOrEmpty(borrowerNumber))
+                    {
+                        var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                        borrowerId = borrower?.Id;
+                    }
+
+                    var loan = new Loan
+                    {
+                        Id = Guid.NewGuid(),
+                        BorrowerId = borrowerId
+                    };
+
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule == null) continue;
+
+                        var value = row.ContainsKey(col) ? rule.ConvertValue(row[col]) : null;
+
+                        switch (rule.DbColumnName)
+                        {
+                            case "account_serial":
+                                loan.AccountSerial = value?.ToString();
+                                break;
+                            case "loan_type":
+                                loan.LoanType = value?.ToString();
+                                break;
+                            case "account_number":
+                                loan.AccountNumber = value?.ToString();
+                                break;
+                            case "normal_interest_rate":
+                                if (value is decimal rate) loan.NormalInterestRate = rate;
+                                break;
+                            case "initial_loan_date":
+                                if (value is DateTime ild) loan.InitialLoanDate = ild;
+                                break;
+                            case "last_interest_date":
+                                if (value is DateTime lid) loan.LastInterestDate = lid;
+                                break;
+                            case "initial_loan_amount":
+                                if (value is decimal ila) loan.InitialLoanAmount = ila;
+                                break;
+                            case "loan_principal_balance":
+                                if (value is decimal lpb) loan.LoanPrincipalBalance = lpb;
+                                break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(loan.AccountSerial))
+                    {
+                        loans.Add(loan);
+                    }
+                }
+                catch { /* 개별 행 에러 무시 */ }
+            }
+
+            return await _loanRepository.BulkUpsertAsync(loans);
+        }
+
+        /// <summary>
+        /// 담보물건정보 처리
+        /// </summary>
+        private async Task<(int Created, int Updated, int Failed)> ProcessPropertyAsync(
+            List<Dictionary<string, object>> data,
+            List<string> columns,
+            List<ColumnMappingRule> rules)
+        {
+            var properties = new List<Property>();
+
+            // 주소 조합을 위한 임시 저장소
+            var addressParts = new Dictionary<int, Dictionary<string, string>>();
+
+            for (int i = 0; i < data.Count; i++)
+            {
+                var row = data[i];
+                addressParts[i] = new Dictionary<string, string>();
+
+                try
+                {
+                    // 차주번호로 차주 조회
+                    string? borrowerNumber = null;
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule?.DbColumnName == "borrower_number")
+                        {
+                            borrowerNumber = row.ContainsKey(col) ? row[col]?.ToString() : null;
+                            break;
+                        }
+                    }
+
+                    Guid? borrowerId = null;
+                    if (!string.IsNullOrEmpty(borrowerNumber) && _borrowerRepository != null)
+                    {
+                        var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                        borrowerId = borrower?.Id;
+                    }
+
+                    var property = new Property
+                    {
+                        Id = Guid.NewGuid(),
+                        BorrowerId = borrowerId,
+                        Status = "pending"
+                    };
+
+                    if (!string.IsNullOrEmpty(TargetProgramId) && Guid.TryParse(TargetProgramId, out var programGuid))
+                    {
+                        property.ProgramId = programGuid;
+                    }
+
+                    foreach (var col in columns)
+                    {
+                        var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                        if (rule == null) continue;
+
+                        var value = row.ContainsKey(col) ? rule.ConvertValue(row[col]) : null;
+
+                        switch (rule.DbColumnName)
+                        {
+                            case "borrower_number":
+                                // 차주번호도 물건에 저장 (대시보드 표시용)
+                                property.BorrowerNumber = value?.ToString();
+                                break;
+                            case "borrower_name":
+                                // 차주명을 DebtorName에 저장
+                                property.DebtorName = value?.ToString();
+                                break;
+                            case "property_number":
+                                property.PropertyNumber = value?.ToString();
+                                break;
+                            case "collateral_number":
+                                property.CollateralNumber = value?.ToString();
+                                break;
+                            case "property_type":
+                                property.PropertyType = value?.ToString();
+                                break;
+                            case "land_area":
+                                if (value is decimal la) property.LandArea = la;
+                                break;
+                            case "building_area":
+                                if (value is decimal ba) property.BuildingArea = ba;
+                                break;
+                            case "address_province":
+                                addressParts[i]["province"] = value?.ToString() ?? "";
+                                break;
+                            case "address_city":
+                                addressParts[i]["city"] = value?.ToString() ?? "";
+                                break;
+                            case "address_district":
+                                addressParts[i]["district"] = value?.ToString() ?? "";
+                                break;
+                            case "address_detail":
+                                addressParts[i]["detail"] = value?.ToString() ?? "";
+                                break;
+                        }
+                    }
+
+                    // 주소 조합
+                    var parts = addressParts[i];
+                    var addressComponents = new List<string>();
+                    if (parts.TryGetValue("province", out var prov) && !string.IsNullOrEmpty(prov))
+                        addressComponents.Add(prov);
+                    if (parts.TryGetValue("city", out var city) && !string.IsNullOrEmpty(city))
+                        addressComponents.Add(city);
+                    if (parts.TryGetValue("district", out var dist) && !string.IsNullOrEmpty(dist))
+                        addressComponents.Add(dist);
+                    if (parts.TryGetValue("detail", out var detail) && !string.IsNullOrEmpty(detail))
+                        addressComponents.Add(detail);
+
+                    if (addressComponents.Count > 0)
+                    {
+                        property.AddressFull = string.Join(" ", addressComponents);
+                    }
+
+                    if (!string.IsNullOrEmpty(property.PropertyNumber))
+                    {
+                        properties.Add(property);
+                    }
+                }
+                catch { /* 개별 행 에러 무시 */ }
+            }
+
+            return await _propertyRepository.BulkUpsertAsync(properties);
+        }
+
         /// <summary>
         /// Excel 업로드 초기화
         /// </summary>
@@ -531,12 +1153,18 @@ namespace NPLogic.ViewModels
         {
             SelectedExcelFile = null;
             ShowMappingSection = false;
+            ShowSheetSelection = false;
             ExcelColumns.Clear();
             PreviewData.Clear();
+            AvailableSheets.Clear();
             _allExcelData = null;
+            _currentFilePath = null;
             ProcessedRows = 0;
             TotalRows = 0;
             ExcelUploadProgress = 0;
+            ProcessedSheets = 0;
+            TotalSheetsToProcess = 0;
+            UploadStatusMessage = null;
             InitializeColumnMappings();
         }
 
@@ -726,6 +1354,57 @@ namespace NPLogic.ViewModels
                     return $"{FileSize / (1024 * 1024):N1} MB";
             }
         }
+    }
+
+    /// <summary>
+    /// 선택 가능한 시트 정보
+    /// </summary>
+    public partial class SelectableSheetInfo : ObservableObject
+    {
+        public string Name { get; set; } = "";
+        public int Index { get; set; }
+        public int RowCount { get; set; }
+        public List<string> Headers { get; set; } = new();
+        public SheetType SheetType { get; set; }
+
+        [ObservableProperty]
+        private bool _isSelected;
+
+        /// <summary>
+        /// 시트 유형 표시명
+        /// </summary>
+        public string SheetTypeDisplay => SheetType switch
+        {
+            SheetType.BorrowerGeneral => "차주일반정보",
+            SheetType.BorrowerRestructuring => "회생차주정보",
+            SheetType.Loan => "채권정보",
+            SheetType.Property => "담보물건정보",
+            _ => "알 수 없음"
+        };
+
+        /// <summary>
+        /// 데이터 행 수 (헤더 제외)
+        /// </summary>
+        public int DataRowCount => Math.Max(0, RowCount - 1);
+
+        /// <summary>
+        /// 표시용 문자열
+        /// </summary>
+        public string DisplayText => $"{Name} ({SheetTypeDisplay}) - {DataRowCount}행";
+    }
+
+    /// <summary>
+    /// 시트 업로드 결과
+    /// </summary>
+    public class SheetUploadResult
+    {
+        public string SheetName { get; set; } = "";
+        public SheetType SheetType { get; set; }
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+        public int CreatedCount { get; set; }
+        public int UpdatedCount { get; set; }
+        public int FailedCount { get; set; }
     }
 }
 

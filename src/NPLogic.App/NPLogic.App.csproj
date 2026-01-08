@@ -26,6 +26,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <NoWarn>$(NoWarn);NU1902</NoWarn>
+    
+    <!-- Self-contained 배포 설정 (.NET 런타임 없이 실행 가능) -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>false</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
 
   <!-- Assets 폴더의 이미지를 리소스로 포함 -->

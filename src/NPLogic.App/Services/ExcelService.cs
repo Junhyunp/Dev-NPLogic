@@ -788,6 +788,254 @@ namespace NPLogic.Services
             }
             return name.Trim();
         }
+
+        // ==================== IBK Multi-Sheet Upload 지원 ====================
+
+        /// <summary>
+        /// Excel 파일의 시트 목록 조회
+        /// </summary>
+        public List<ExcelSheetInfo> GetSheetNames(string filePath)
+        {
+            var sheets = new List<ExcelSheetInfo>();
+
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                foreach (var worksheet in package.Workbook.Worksheets)
+                {
+                    var headers = new List<string>();
+                    
+                    // 헤더 읽기 (첫 번째 행)
+                    if (worksheet.Dimension != null)
+                    {
+                        int colCount = worksheet.Dimension.End.Column;
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            var cellValue = worksheet.Cells[1, col].Value;
+                            if (cellValue != null)
+                            {
+                                headers.Add(cellValue.ToString() ?? "");
+                            }
+                        }
+                    }
+
+                    var sheetInfo = new ExcelSheetInfo
+                    {
+                        Name = worksheet.Name,
+                        Index = worksheet.Index,
+                        RowCount = worksheet.Dimension?.End.Row ?? 0,
+                        Headers = headers,
+                        SheetType = DetectSheetType(worksheet.Name, headers)
+                    };
+
+                    sheets.Add(sheetInfo);
+                }
+            }
+
+            return sheets;
+        }
+
+        /// <summary>
+        /// 시트 유형 감지 (시트명 우선, 헤더 패턴 fallback)
+        /// </summary>
+        public SheetType DetectSheetType(string sheetName, List<string> headers)
+        {
+            // 1. 시트명 기반 감지
+            if (sheetName.Contains("차주일반") || sheetName.Contains("Sheet A") && !sheetName.Contains("A-1"))
+                return SheetType.BorrowerGeneral;
+            
+            if (sheetName.Contains("회생") || sheetName.Contains("Sheet A-1"))
+                return SheetType.BorrowerRestructuring;
+            
+            if (sheetName.Contains("채권") || sheetName.Contains("Sheet B"))
+                return SheetType.Loan;
+            
+            if (sheetName.Contains("담보") || sheetName.Contains("물건") || sheetName.Contains("Sheet C"))
+                return SheetType.Property;
+
+            // 2. 헤더 패턴 fallback
+            if (headers.Any(h => h.Contains("회생사건번호") || h.Contains("관할법원")))
+                return SheetType.BorrowerRestructuring;
+            
+            if (headers.Any(h => h.Contains("대출일련번호") || h.Contains("대출과목")))
+                return SheetType.Loan;
+            
+            if (headers.Any(h => h.Contains("Property") || h.Contains("담보소재지")))
+                return SheetType.Property;
+            
+            if (headers.Any(h => h.Contains("차주일련번호") || h.Contains("차주명")))
+                return SheetType.BorrowerGeneral;
+
+            return SheetType.Unknown;
+        }
+
+        /// <summary>
+        /// 특정 시트의 데이터 읽기
+        /// </summary>
+        public async Task<(List<string> Columns, List<Dictionary<string, object>> Data)> ReadExcelSheetAsync(
+            string filePath, 
+            string sheetName,
+            int headerRow = 1)
+        {
+            return await Task.Run(() =>
+            {
+                var columns = new List<string>();
+                var data = new List<Dictionary<string, object>>();
+
+                using (var package = new ExcelPackage(new FileInfo(filePath)))
+                {
+                    var worksheet = package.Workbook.Worksheets[sheetName];
+                    
+                    if (worksheet == null)
+                    {
+                        throw new Exception($"시트를 찾을 수 없습니다: {sheetName}");
+                    }
+
+                    if (worksheet.Dimension == null)
+                    {
+                        throw new Exception($"시트가 비어있습니다: {sheetName}");
+                    }
+
+                    int colCount = worksheet.Dimension.End.Column;
+                    int rowCount = worksheet.Dimension.End.Row;
+
+                    // 헤더 행에서 컬럼명 읽기
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var cellValue = worksheet.Cells[headerRow, col].Value;
+                        var columnName = cellValue?.ToString()?.Trim() ?? $"Column{col}";
+                        
+                        // 중복 컬럼명 처리
+                        if (columns.Contains(columnName))
+                        {
+                            columnName = $"{columnName}_{col}";
+                        }
+                        columns.Add(columnName);
+                    }
+
+                    // 데이터 읽기 (헤더 행 다음부터)
+                    for (int row = headerRow + 1; row <= rowCount; row++)
+                    {
+                        var rowData = new Dictionary<string, object>();
+                        bool hasData = false;
+
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            var cellValue = worksheet.Cells[row, col].Value;
+                            if (cellValue != null)
+                            {
+                                rowData[columns[col - 1]] = cellValue;
+                                hasData = true;
+                            }
+                            else
+                            {
+                                rowData[columns[col - 1]] = "";
+                            }
+                        }
+
+                        // 빈 행은 제외
+                        if (hasData)
+                        {
+                            data.Add(rowData);
+                        }
+                    }
+                }
+
+                return (columns, data);
+            });
+        }
+
+        /// <summary>
+        /// IBK Excel 헤더 행 자동 감지 (Field 1, Field 2... 패턴 찾기)
+        /// </summary>
+        public int DetectHeaderRow(string filePath, string sheetName)
+        {
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                var worksheet = package.Workbook.Worksheets[sheetName];
+                if (worksheet?.Dimension == null) return 1;
+
+                int rowCount = Math.Min(20, worksheet.Dimension.End.Row); // 상위 20행에서 찾기
+                int colCount = worksheet.Dimension.End.Column;
+
+                for (int row = 1; row <= rowCount; row++)
+                {
+                    // Col 1이 비어있을 수 있으므로 Col 1~3 확인
+                    var cell1 = worksheet.Cells[row, 1].Value?.ToString() ?? "";
+                    var cell2 = worksheet.Cells[row, 2].Value?.ToString() ?? "";
+                    var cell3 = worksheet.Cells[row, 3].Value?.ToString() ?? "";
+
+                    // "Field 1", "Field 2" 패턴 찾기 (Col 1 또는 Col 2에서)
+                    bool hasFieldPattern = cell1.Contains("Field") || cell2.Contains("Field");
+                    
+                    // "일련번호", "Pool 구분" 패턴 찾기 (Col 1~3에서)
+                    bool hasHeaderPattern = 
+                        cell1.Contains("일련번호") || cell2.Contains("일련번호") ||
+                        (cell2.Contains("Pool") || cell3.Contains("Pool"));
+
+                    if (hasFieldPattern)
+                    {
+                        // Field 패턴 발견 - 다음 행이 실제 헤더
+                        var nextCell1 = worksheet.Cells[row + 1, 1].Value?.ToString() ?? "";
+                        var nextCell2 = worksheet.Cells[row + 1, 2].Value?.ToString() ?? "";
+                        if (nextCell1.Contains("일련번호") || nextCell2.Contains("일련번호"))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': Field 패턴 발견 (row {row}), 헤더는 row {row + 1}");
+                            return row + 1;
+                        }
+                    }
+                    else if (hasHeaderPattern)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 패턴 발견 (row {row})");
+                        return row;
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 감지 실패, 기본값 1");
+                return 1; // 기본값: 첫 번째 행
+            }
+        }
+    }
+
+    /// <summary>
+    /// Excel 시트 정보
+    /// </summary>
+    public class ExcelSheetInfo
+    {
+        public string Name { get; set; } = "";
+        public int Index { get; set; }
+        public int RowCount { get; set; }
+        public List<string> Headers { get; set; } = new();
+        public SheetType SheetType { get; set; }
+        public bool IsSelected { get; set; }
+
+        /// <summary>
+        /// 시트 유형 표시명
+        /// </summary>
+        public string SheetTypeDisplay => SheetType switch
+        {
+            SheetType.BorrowerGeneral => "차주일반정보",
+            SheetType.BorrowerRestructuring => "회생차주정보",
+            SheetType.Loan => "채권정보",
+            SheetType.Property => "담보물건정보",
+            _ => "알 수 없음"
+        };
+
+        /// <summary>
+        /// 데이터 행 수 (헤더 제외)
+        /// </summary>
+        public int DataRowCount => Math.Max(0, RowCount - 1);
+    }
+
+    /// <summary>
+    /// 시트 유형
+    /// </summary>
+    public enum SheetType
+    {
+        Unknown,
+        BorrowerGeneral,       // Sheet A: 차주일반정보
+        BorrowerRestructuring, // Sheet A-1: 회생차주정보
+        Loan,                  // Sheet B: 채권일반정보
+        Property               // Sheet C-1: 담보물건정보
     }
 }
 

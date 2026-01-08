@@ -22,6 +22,14 @@ namespace NPLogic.Views
                 await viewModel.InitializeAsync();
             }
         }
+
+        /// <summary>
+        /// 뒤로가기 버튼 클릭 - 대시보드 → 비핵심 → 담보 총괄로 이동
+        /// </summary>
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow.Instance?.NavigateToDashboardCollateralSummary();
+        }
     }
 }
 

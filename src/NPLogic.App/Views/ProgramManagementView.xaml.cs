@@ -72,6 +72,20 @@ namespace NPLogic.Views
 
             e.Handled = true;
         }
+
+        /// <summary>
+        /// 시트 아이템 클릭 핸들러
+        /// </summary>
+        private void SheetItem_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is SelectableSheetInfo sheet)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    viewModel.ToggleSheetSelection(sheet);
+                }
+            }
+        }
     }
 }
 

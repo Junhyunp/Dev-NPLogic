@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -65,6 +66,15 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 미리보기 필드 데이터 모델
+    /// </summary>
+    public class PreviewFieldData
+    {
+        public string FieldName { get; set; } = "";
+        public string Value { get; set; } = "";
+    }
+
+    /// <summary>
     /// 물건 상세 ViewModel
     /// </summary>
     public partial class PropertyDetailViewModel : ObservableObject
@@ -76,6 +86,7 @@ namespace NPLogic.ViewModels
         private readonly EvaluationRepository? _evaluationRepository;
         private readonly RegistryOcrService? _registryOcrService;
         private readonly PropertyQaRepository? _propertyQaRepository;
+        private readonly SupabaseService? _supabaseService;
 
         [ObservableProperty]
         private Property _property = new();
@@ -176,6 +187,34 @@ namespace NPLogic.ViewModels
         // 데이터 업로드 정보 (Phase 5.4)
         [ObservableProperty]
         private DateTime? _lastDataUploadDate;
+
+        // 데이터디스크 컬럼 매핑 관련
+        [ObservableProperty]
+        private bool _isColumnMappingVisible;
+
+        [ObservableProperty]
+        private string? _selectedExcelFileName;
+
+        [ObservableProperty]
+        private string? _selectedExcelFilePath;
+
+        [ObservableProperty]
+        private ObservableCollection<string> _excelColumns = new();
+
+        [ObservableProperty]
+        private ObservableCollection<ColumnMapping> _dataDiskMappings = new();
+
+        [ObservableProperty]
+        private ObservableCollection<PreviewFieldData> _previewMappedData = new();
+
+        [ObservableProperty]
+        private bool _hasMatchedRow;
+
+        [ObservableProperty]
+        private bool _hasNoMatchedRow;
+
+        private List<Dictionary<string, object>>? _allExcelData;
+        private Dictionary<string, object>? _matchedRowData;
 
         #region HomeTab 관련 속성
 
@@ -335,6 +374,34 @@ namespace NPLogic.ViewModels
 
         #endregion
 
+        #region 담보총괄 통계 (프로그램 레벨)
+
+        /// <summary>
+        /// 프로그램 내 담보물건 수
+        /// </summary>
+        [ObservableProperty]
+        private int _collateralPropertyCount;
+
+        /// <summary>
+        /// 감정평가액 합계
+        /// </summary>
+        [ObservableProperty]
+        private decimal _totalAppraisalValue;
+
+        /// <summary>
+        /// 평가액 합계
+        /// </summary>
+        [ObservableProperty]
+        private decimal _totalEstimatedValue;
+
+        /// <summary>
+        /// Loan Cap 합계
+        /// </summary>
+        [ObservableProperty]
+        private decimal _loanCap;
+
+        #endregion
+
         #region ClosingTab 관련 속성
 
         [ObservableProperty]
@@ -370,7 +437,8 @@ namespace NPLogic.ViewModels
             RightAnalysisRepository? rightAnalysisRepository = null, 
             EvaluationRepository? evaluationRepository = null, 
             RegistryOcrService? registryOcrService = null,
-            PropertyQaRepository? propertyQaRepository = null)
+            PropertyQaRepository? propertyQaRepository = null,
+            SupabaseService? supabaseService = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -379,6 +447,7 @@ namespace NPLogic.ViewModels
             _evaluationRepository = evaluationRepository;
             _registryOcrService = registryOcrService;
             _propertyQaRepository = propertyQaRepository;
+            _supabaseService = supabaseService;
 
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
@@ -392,10 +461,28 @@ namespace NPLogic.ViewModels
                 RightsAnalysisViewModel = new RightsAnalysisTabViewModel(_rightAnalysisRepository, _registryRepository);
             }
 
-            // 평가 탭 ViewModel 초기화
+            // 평가 탭 ViewModel 초기화 - 항상 생성 (null이면 바인딩 실패함)
             if (_evaluationRepository != null)
             {
                 EvaluationViewModel = new EvaluationTabViewModel(_evaluationRepository);
+                Debug.WriteLine($"[PropertyDetailViewModel] EvaluationViewModel created successfully");
+                
+                // Supabase 연결 정보 설정 (유사물건 추천 API용)
+                if (_supabaseService != null)
+                {
+                    EvaluationViewModel.SupabaseUrl = _supabaseService.Url;
+                    EvaluationViewModel.SupabaseKey = _supabaseService.Key;
+                    Debug.WriteLine($"[PropertyDetailViewModel] Supabase configured: {_supabaseService.Url}");
+                }
+                else
+                {
+                    Debug.WriteLine("[PropertyDetailViewModel] WARNING: SupabaseService is null, recommendation will not work");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("[PropertyDetailViewModel] ERROR: EvaluationRepository is null! EvaluationViewModel will be null!");
+                Debug.WriteLine("[PropertyDetailViewModel] WARNING: EvaluationRepository is null, EvaluationViewModel not created");
             }
         }
 
@@ -474,6 +561,9 @@ namespace NPLogic.ViewModels
                 EvaluationViewModel.SetProperty(property);
             }
 
+            // 담보총괄 통계 로드 (프로그램 레벨)
+            _ = LoadCollateralStatisticsAsync(property.ProgramId);
+
             HasUnsavedChanges = false;
         }
 
@@ -531,6 +621,9 @@ namespace NPLogic.ViewModels
                     // QA, 첨부파일 로드
                     await LoadAttachmentsAsync();
                     await LoadQAListAsync();
+
+                    // 담보총괄 통계 로드 (프로그램 레벨)
+                    await LoadCollateralStatisticsAsync(property.ProgramId);
                 }
                 else
                 {
@@ -544,6 +637,57 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 담보총괄 통계 로드 (프로그램 레벨)
+        /// </summary>
+        private async Task LoadCollateralStatisticsAsync(Guid? programId)
+        {
+            if (!programId.HasValue)
+            {
+                // 프로그램 ID가 없으면 통계 초기화
+                CollateralPropertyCount = 0;
+                TotalAppraisalValue = 0;
+                TotalEstimatedValue = 0;
+                LoanCap = 0;
+                return;
+            }
+
+            try
+            {
+                // 프로그램에 속한 모든 물건 조회
+                var properties = await _propertyRepository.GetByProgramIdAsync(programId.Value);
+
+                // 통계 계산
+                CollateralPropertyCount = properties.Count;
+                TotalAppraisalValue = properties.Sum(p => p.AppraisalValue ?? 0);
+                TotalEstimatedValue = properties.Sum(p => p.SalePrice ?? p.AppraisalValue ?? 0);
+
+                // Loan Cap: right_analysis에서 조회 (있는 경우)
+                if (_rightAnalysisRepository != null)
+                {
+                    decimal totalLoanCap = 0;
+                    foreach (var prop in properties)
+                    {
+                        var analysis = await _rightAnalysisRepository.GetByPropertyIdAsync(prop.Id);
+                        if (analysis != null)
+                        {
+                            totalLoanCap += analysis.LoanCap ?? 0;
+                        }
+                    }
+                    LoanCap = totalLoanCap;
+                }
+                else
+                {
+                    LoanCap = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"담보총괄 통계 로드 실패: {ex.Message}");
+                // 실패 시 기본값 유지
             }
         }
 
@@ -856,14 +1000,14 @@ namespace NPLogic.ViewModels
         #region 데이터 업로드 관련 (Phase 5.4)
 
         /// <summary>
-        /// 기초 데이터 파일 업로드 명령
+        /// 기초 데이터 파일 업로드 명령 - 파일 선택 후 컬럼 매핑 모달 표시
         /// </summary>
         [RelayCommand]
         private async Task UploadDataFileAsync()
         {
             var dialog = new OpenFileDialog
             {
-                Title = "기초 데이터 파일 선택",
+                Title = "데이터디스크 파일 선택",
                 Filter = "Excel 파일|*.xlsx;*.xls|모든 파일|*.*",
                 Multiselect = false
             };
@@ -875,16 +1019,27 @@ namespace NPLogic.ViewModels
                     IsLoading = true;
                     ErrorMessage = null;
 
-                    // TODO: 엑셀 파일 파싱 및 데이터 업로드 로직 구현
-                    // 현재는 업로드 시뮬레이션
-                    await Task.Delay(1000);
+                    SelectedExcelFilePath = dialog.FileName;
+                    SelectedExcelFileName = System.IO.Path.GetFileName(dialog.FileName);
 
-                    LastDataUploadDate = DateTime.Now;
-                    SuccessMessage = $"데이터가 성공적으로 업로드되었습니다.\n파일: {System.IO.Path.GetFileName(dialog.FileName)}";
+                    // 엑셀 파일 파싱
+                    await ParseExcelFileAsync(dialog.FileName);
+
+                    // 컬럼 매핑 초기화
+                    InitializeDataDiskMappings();
+
+                    // 자동 매핑 시도
+                    AutoMapColumns();
+
+                    // 첫 번째 행을 사용 (물건번호 매칭 없이)
+                    UseFirstRow();
+
+                    // 컬럼 매핑 모달 표시
+                    IsColumnMappingVisible = true;
                 }
                 catch (Exception ex)
                 {
-                    ErrorMessage = $"데이터 업로드 실패: {ex.Message}";
+                    ErrorMessage = $"파일 읽기 실패: {ex.Message}";
                 }
                 finally
                 {
@@ -894,31 +1049,325 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 데이터 템플릿 다운로드 명령
+        /// 엑셀 파일 파싱
+        /// </summary>
+        private async Task ParseExcelFileAsync(string filePath)
+        {
+            await Task.Run(() =>
+            {
+                using var workbook = new ClosedXML.Excel.XLWorkbook(filePath);
+                var worksheet = workbook.Worksheets.First();
+
+                // 첫 번째 행에서 컬럼명 추출
+                var headerRow = worksheet.Row(1);
+                var columns = new List<string> { "" }; // 빈 옵션 추가
+                var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber() ?? 1;
+
+                for (int col = 1; col <= lastColumn; col++)
+                {
+                    var cellValue = headerRow.Cell(col).GetString();
+                    if (!string.IsNullOrWhiteSpace(cellValue))
+                    {
+                        columns.Add(cellValue);
+                    }
+                }
+
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                {
+                    ExcelColumns.Clear();
+                    foreach (var col in columns)
+                    {
+                        ExcelColumns.Add(col);
+                    }
+                });
+
+                // 데이터 행 파싱
+                var data = new List<Dictionary<string, object>>();
+                var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 1;
+
+                for (int row = 2; row <= lastRow; row++)
+                {
+                    var rowData = new Dictionary<string, object>();
+                    for (int col = 1; col <= lastColumn; col++)
+                    {
+                        var colName = headerRow.Cell(col).GetString();
+                        if (!string.IsNullOrWhiteSpace(colName))
+                        {
+                            var cell = worksheet.Cell(row, col);
+                            rowData[colName] = cell.Value.ToString() ?? "";
+                        }
+                    }
+                    if (rowData.Any())
+                    {
+                        data.Add(rowData);
+                    }
+                }
+
+                _allExcelData = data;
+            });
+        }
+
+        /// <summary>
+        /// 데이터디스크 컬럼 매핑 초기화
+        /// </summary>
+        private void InitializeDataDiskMappings()
+        {
+            DataDiskMappings.Clear();
+            
+            // 매핑 대상 필드들
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "물건유형" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "전체주소" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "도로명주소" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "지번주소" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "상세주소" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "토지면적" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "건물면적" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "층수" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "감정가" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "최저입찰가" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "매각가" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "차주명" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "담보번호" });
+            DataDiskMappings.Add(new ColumnMapping { TargetColumn = "OPB" });
+        }
+
+        /// <summary>
+        /// 자동 컬럼 매핑
+        /// </summary>
+        [RelayCommand]
+        private void AutoMapColumns()
+        {
+            var mappingRules = new Dictionary<string, string[]>
+            {
+                { "물건유형", new[] { "PropertyType", "물건유형", "property_type", "유형", "담보물형태" } },
+                { "전체주소", new[] { "AddressFull", "전체주소", "address_full", "주소", "소재지" } },
+                { "도로명주소", new[] { "AddressRoad", "도로명주소", "address_road", "도로명" } },
+                { "지번주소", new[] { "AddressJibun", "지번주소", "address_jibun", "지번" } },
+                { "상세주소", new[] { "AddressDetail", "상세주소", "address_detail" } },
+                { "토지면적", new[] { "LandArea", "토지면적", "land_area", "대지면적" } },
+                { "건물면적", new[] { "BuildingArea", "건물면적", "building_area", "연면적" } },
+                { "층수", new[] { "Floors", "층수", "floors", "층" } },
+                { "감정가", new[] { "AppraisalValue", "감정가", "appraisal_value", "감정평가액" } },
+                { "최저입찰가", new[] { "MinimumBid", "최저입찰가", "minimum_bid", "최저가" } },
+                { "매각가", new[] { "SalePrice", "매각가", "sale_price" } },
+                { "차주명", new[] { "DebtorName", "차주명", "debtor_name", "채무자" } },
+                { "담보번호", new[] { "CollateralNumber", "담보번호", "collateral_number" } },
+                { "OPB", new[] { "OPB", "opb", "대출잔액" } }
+            };
+
+            foreach (var mapping in DataDiskMappings)
+            {
+                if (mappingRules.TryGetValue(mapping.TargetColumn, out var possibleNames))
+                {
+                    var matchedColumn = ExcelColumns.FirstOrDefault(col =>
+                        possibleNames.Any(name => 
+                            col.Equals(name, StringComparison.OrdinalIgnoreCase) ||
+                            col.Contains(name, StringComparison.OrdinalIgnoreCase)));
+                    
+                    if (!string.IsNullOrEmpty(matchedColumn))
+                    {
+                        mapping.SourceColumn = matchedColumn;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 첫 번째 행을 사용 (물건번호 매칭 없이 단일 물건 업데이트)
+        /// </summary>
+        private void UseFirstRow()
+        {
+            _matchedRowData = null;
+            HasMatchedRow = false;
+            HasNoMatchedRow = true;
+            PreviewMappedData.Clear();
+
+            if (_allExcelData == null || !_allExcelData.Any())
+                return;
+
+            // 첫 번째 행 사용
+            _matchedRowData = _allExcelData.First();
+            HasMatchedRow = true;
+            HasNoMatchedRow = false;
+
+            // 미리보기 데이터 생성
+            UpdatePreviewData();
+        }
+
+        /// <summary>
+        /// 미리보기 데이터 업데이트
+        /// </summary>
+        private void UpdatePreviewData()
+        {
+            PreviewMappedData.Clear();
+
+            if (_matchedRowData == null) return;
+
+            foreach (var mapping in DataDiskMappings)
+            {
+                if (!string.IsNullOrEmpty(mapping.SourceColumn) && 
+                    _matchedRowData.TryGetValue(mapping.SourceColumn, out var value))
+                {
+                    PreviewMappedData.Add(new PreviewFieldData
+                    {
+                        FieldName = mapping.TargetColumn,
+                        Value = value?.ToString() ?? ""
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// 컬럼 매핑 모달 닫기
+        /// </summary>
+        [RelayCommand]
+        private void CloseColumnMapping()
+        {
+            IsColumnMappingVisible = false;
+            _allExcelData = null;
+            _matchedRowData = null;
+        }
+
+        /// <summary>
+        /// 데이터디스크 매핑 적용
+        /// </summary>
+        [RelayCommand]
+        private async Task ApplyDataDiskMappingAsync()
+        {
+            if (_matchedRowData == null || Property == null) return;
+            
+            // Property ID가 유효한지 확인
+            if (Property.Id == Guid.Empty)
+            {
+                ErrorMessage = "물건이 선택되지 않았습니다. 물건 목록에서 물건을 선택한 후 다시 시도하세요.";
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                // 매핑된 데이터로 Property 업데이트
+                foreach (var mapping in DataDiskMappings)
+                {
+                    if (string.IsNullOrEmpty(mapping.SourceColumn)) continue;
+                    if (!_matchedRowData.TryGetValue(mapping.SourceColumn, out var value)) continue;
+                    
+                    var strValue = value?.ToString();
+                    if (string.IsNullOrEmpty(strValue)) continue;
+
+                    switch (mapping.TargetColumn)
+                    {
+                        case "물건유형":
+                            Property.PropertyType = strValue;
+                            break;
+                        case "전체주소":
+                            Property.AddressFull = strValue;
+                            break;
+                        case "도로명주소":
+                            Property.AddressRoad = strValue;
+                            break;
+                        case "지번주소":
+                            Property.AddressJibun = strValue;
+                            break;
+                        case "상세주소":
+                            Property.AddressDetail = strValue;
+                            break;
+                        case "토지면적":
+                            if (decimal.TryParse(strValue, out var landArea))
+                                Property.LandArea = landArea;
+                            break;
+                        case "건물면적":
+                            if (decimal.TryParse(strValue, out var buildingArea))
+                                Property.BuildingArea = buildingArea;
+                            break;
+                        case "층수":
+                            Property.Floors = strValue;
+                            break;
+                        case "감정가":
+                            if (decimal.TryParse(strValue.Replace(",", ""), out var appraisalValue))
+                                Property.AppraisalValue = appraisalValue;
+                            break;
+                        case "최저입찰가":
+                            if (decimal.TryParse(strValue.Replace(",", ""), out var minimumBid))
+                                Property.MinimumBid = minimumBid;
+                            break;
+                        case "매각가":
+                            if (decimal.TryParse(strValue.Replace(",", ""), out var salePrice))
+                                Property.SalePrice = salePrice;
+                            break;
+                        case "차주명":
+                            Property.DebtorName = strValue;
+                            break;
+                        case "담보번호":
+                            Property.CollateralNumber = strValue;
+                            break;
+                        case "OPB":
+                            if (decimal.TryParse(strValue.Replace(",", ""), out var opb))
+                                Property.Opb = opb;
+                            break;
+                    }
+                }
+
+                // DB에 저장
+                await _propertyRepository.UpdateAsync(Property);
+                
+                LastDataUploadDate = DateTime.Now;
+                IsColumnMappingVisible = false;
+                SuccessMessage = "데이터디스크 데이터가 성공적으로 적용되었습니다.";
+
+                // Property 변경 알림
+                OnPropertyChanged(nameof(Property));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"데이터 적용 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 데이터 템플릿 다운로드 명령 - 현재 물건 정보가 모두 채워진 단일 행 템플릿
         /// </summary>
         [RelayCommand]
         private void DownloadTemplate()
         {
             try
             {
+                var propertyNumber = Property?.PropertyNumber ?? "물건";
                 var saveDialog = new SaveFileDialog
                 {
                     Title = "템플릿 저장",
                     Filter = "Excel 파일|*.xlsx",
-                    FileName = "기초데이터_템플릿.xlsx"
+                    FileName = $"물건정보_{propertyNumber}.xlsx"
                 };
 
                 if (saveDialog.ShowDialog() == true)
                 {
                     // 템플릿 파일 생성
                     using var workbook = new ClosedXML.Excel.XLWorkbook();
-                    var worksheet = workbook.Worksheets.Add("기초데이터");
+                    var worksheet = workbook.Worksheets.Add("물건정보");
 
-                    // 헤더 추가
-                    var headers = new[] { "프로젝트ID", "물건번호", "물건유형", "전체주소", "도로명주소", 
-                                         "지번주소", "상세주소", "토지면적", "건물면적", "층수",
-                                         "감정평가액", "최저입찰가", "매각가", "상태" };
+                    // 헤더 추가 (영문 + 한글 설명)
+                    var headers = new[] 
+                    { 
+                        "PropertyType", "AddressFull", "AddressRoad", "AddressJibun", "AddressDetail",
+                        "LandArea", "BuildingArea", "Floors", "AppraisalValue", "MinimumBid", 
+                        "SalePrice", "DebtorName", "CollateralNumber", "OPB"
+                    };
                     
+                    var headerLabels = new[] 
+                    { 
+                        "물건유형", "전체주소", "도로명주소", "지번주소", "상세주소",
+                        "토지면적(㎡)", "건물면적(㎡)", "층수", "감정가", "최저입찰가",
+                        "매각가", "차주명", "담보번호", "OPB"
+                    };
+
+                    // 첫 번째 행: 영문 헤더
                     for (int i = 0; i < headers.Length; i++)
                     {
                         var cell = worksheet.Cell(1, i + 1);
@@ -928,17 +1377,38 @@ namespace NPLogic.ViewModels
                         cell.Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
                     }
 
-                    // 샘플 데이터 행 추가
-                    worksheet.Cell(2, 1).Value = "PROJECT001";
-                    worksheet.Cell(2, 2).Value = "001";
-                    worksheet.Cell(2, 3).Value = "아파트";
-                    worksheet.Cell(2, 4).Value = "서울시 강남구 테헤란로 123";
-                    worksheet.Cell(2, 14).Value = "pending";
+                    // 두 번째 행: 한글 설명
+                    for (int i = 0; i < headerLabels.Length; i++)
+                    {
+                        var cell = worksheet.Cell(2, i + 1);
+                        cell.Value = headerLabels[i];
+                        cell.Style.Font.Italic = true;
+                        cell.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.FromHtml("#E8EEF4");
+                    }
+
+                    // 세 번째 행: 현재 물건 정보 채우기
+                    if (Property != null)
+                    {
+                        worksheet.Cell(3, 1).Value = Property.PropertyType ?? "";
+                        worksheet.Cell(3, 2).Value = Property.AddressFull ?? "";
+                        worksheet.Cell(3, 3).Value = Property.AddressRoad ?? "";
+                        worksheet.Cell(3, 4).Value = Property.AddressJibun ?? "";
+                        worksheet.Cell(3, 5).Value = Property.AddressDetail ?? "";
+                        worksheet.Cell(3, 6).Value = Property.LandArea ?? 0;
+                        worksheet.Cell(3, 7).Value = Property.BuildingArea ?? 0;
+                        worksheet.Cell(3, 8).Value = Property.Floors ?? "";
+                        worksheet.Cell(3, 9).Value = Property.AppraisalValue ?? 0;
+                        worksheet.Cell(3, 10).Value = Property.MinimumBid ?? 0;
+                        worksheet.Cell(3, 11).Value = Property.SalePrice ?? 0;
+                        worksheet.Cell(3, 12).Value = Property.DebtorName ?? "";
+                        worksheet.Cell(3, 13).Value = Property.CollateralNumber ?? "";
+                        worksheet.Cell(3, 14).Value = Property.Opb ?? 0;
+                    }
 
                     worksheet.Columns().AdjustToContents();
                     workbook.SaveAs(saveDialog.FileName);
 
-                    SuccessMessage = $"템플릿이 저장되었습니다.\n{saveDialog.FileName}";
+                    SuccessMessage = $"템플릿이 저장되었습니다: {System.IO.Path.GetFileName(saveDialog.FileName)}";
                 }
             }
             catch (Exception ex)

@@ -9,13 +9,95 @@
              d:DesignHeight="900" d:DesignWidth="1400"
              Loaded="BasicDataTab_Loaded">
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ClipToBounds="True">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ClipToBounds="True">
         <Grid Margin="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400"/>
-                <ColumnDefinition Width="24"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- ========== 상단: 담보총괄 요약 섹션 ========== -->
+            <Border Grid.Row="0"
+                    Background="{StaticResource PrimaryLightBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,0,16">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 담보총괄 헤더 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="📊 담보총괄" 
+                                   FontSize="16" 
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <!-- 담보총괄 요약 정보 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <!-- 담보 물건 수 -->
+                        <Border Background="#33FFFFFF" CornerRadius="6" Padding="16,8" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="담보물건 수" FontSize="11" Foreground="#CCFFFFFF"/>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,2,0,0">
+                                    <Run Text="{Binding CollateralPropertyCount, FallbackValue='-'}"/>
+                                    <Run Text="건" FontSize="12" FontWeight="Normal"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 감정평가액 합계 -->
+                        <Border Background="#33FFFFFF" CornerRadius="6" Padding="16,8" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="감정평가액 합계" FontSize="11" Foreground="#CCFFFFFF"/>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,2,0,0">
+                                    <Run Text="{Binding TotalAppraisalValue, StringFormat=N0, FallbackValue='-'}"/>
+                                    <Run Text="원" FontSize="12" FontWeight="Normal"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 평가액 합계 -->
+                        <Border Background="#33FFFFFF" CornerRadius="6" Padding="16,8" Margin="0,0,12,0">
+                            <StackPanel>
+                                <TextBlock Text="평가액 합계" FontSize="11" Foreground="#CCFFFFFF"/>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,2,0,0">
+                                    <Run Text="{Binding TotalEstimatedValue, StringFormat=N0, FallbackValue='-'}"/>
+                                    <Run Text="원" FontSize="12" FontWeight="Normal"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Loan Cap -->
+                        <Border Background="#33FFFFFF" CornerRadius="6" Padding="16,8">
+                            <StackPanel>
+                                <TextBlock Text="Loan Cap" FontSize="11" Foreground="#CCFFFFFF"/>
+                                <TextBlock FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,2,0,0">
+                                    <Run Text="{Binding LoanCap, StringFormat=N0, FallbackValue='-'}"/>
+                                    <Run Text="원" FontSize="12" FontWeight="Normal"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- ========== 하단: 기존 컨텐츠 영역 ========== -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="400"/>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
             
             <!-- ========== 좌측: 지도 & 문서 영역 ========== -->
             <StackPanel Grid.Column="0">
@@ -702,6 +784,232 @@
                 </Border>
 
             </StackPanel>
+            </Grid>
         </Grid>
     </ScrollViewer>
+        
+        <!-- ========== 컬럼 매핑 모달 오버레이 ========== -->
+    <Border x:Name="ColumnMappingOverlay"
+            Background="#80000000"
+            Visibility="{Binding IsColumnMappingVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"
+            Panel.ZIndex="100">
+        <Border Background="White"
+                CornerRadius="12"
+                MaxWidth="900"
+                MaxHeight="700"
+                Margin="40"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="20" ShadowDepth="5"/>
+            </Border.Effect>
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- 모달 헤더 -->
+                <Border Grid.Row="0" 
+                        Background="{StaticResource PrimaryBrush}"
+                        CornerRadius="12,12,0,0"
+                        Padding="24,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="데이터디스크 컬럼 매핑" 
+                                       FontSize="18" 
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                            <TextBlock Text="{Binding SelectedExcelFileName}" 
+                                       FontSize="12"
+                                       Foreground="#B3FFFFFF"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <Button Grid.Column="1"
+                                Content="✕"
+                                Command="{Binding CloseColumnMappingCommand}"
+                                Style="{StaticResource IconButton}"
+                                Foreground="White"
+                                FontSize="18"
+                                Width="32" Height="32"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 모달 본문 -->
+                <Grid Grid.Row="1" Margin="24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="24"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 좌측: 컬럼 매핑 -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="컬럼 매핑" 
+                                   Style="{StaticResource H4TextStyle}"
+                                   Margin="0,0,0,12"/>
+                        <TextBlock Text="엑셀 컬럼을 시스템 필드에 매핑하세요"
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="#64748B"
+                                   Margin="0,0,0,16"/>
+                        
+                        <!-- 자동 매핑 버튼 -->
+                        <Button Content="🔄 자동 매핑"
+                                Command="{Binding AutoMapColumnsCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                HorizontalAlignment="Left"
+                                Padding="12,6"
+                                Margin="0,0,0,16"/>
+                        
+                        <!-- 매핑 목록 -->
+                        <ScrollViewer MaxHeight="350" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding DataDiskMappings}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="140"/>
+                                                <ColumnDefinition Width="30"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- 시스템 필드 -->
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding TargetColumn}"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            
+                                            <!-- 화살표 -->
+                                            <TextBlock Grid.Column="1"
+                                                       Text="←"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="#94A3B8"/>
+                                            
+                                            <!-- 엑셀 컬럼 선택 -->
+                                            <ComboBox Grid.Column="2"
+                                                      ItemsSource="{Binding DataContext.ExcelColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                      SelectedItem="{Binding SourceColumn}"
+                                                      Padding="8,4"
+                                                      FontSize="12"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                    
+                    <!-- 우측: 미리보기 -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="업로드할 데이터 미리보기" 
+                                   Style="{StaticResource H4TextStyle}"
+                                   Margin="0,0,0,12"/>
+                        <TextBlock Text="엑셀 첫 번째 행의 데이터를 현재 물건에 적용합니다."
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="#64748B"
+                                   Margin="0,0,0,16"/>
+                        
+                        <!-- 데이터 상태 표시 -->
+                        <Border Background="{StaticResource SuccessBrush}"
+                                CornerRadius="4"
+                                Padding="12,8"
+                                Margin="0,0,0,16"
+                                Visibility="{Binding HasMatchedRow, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="✓ 데이터를 읽었습니다. 아래 내용을 확인하세요." 
+                                       Foreground="White"
+                                       FontSize="12"/>
+                        </Border>
+                        
+                        <Border Background="{StaticResource ErrorBrush}"
+                                CornerRadius="4"
+                                Padding="12,8"
+                                Margin="0,0,0,16"
+                                Visibility="{Binding HasNoMatchedRow, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <TextBlock Text="⚠ 엑셀 파일에 데이터가 없습니다" 
+                                       Foreground="White"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"/>
+                        </Border>
+                        
+                        <!-- 미리보기 데이터 -->
+                        <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding PreviewMappedData}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource BlueGray50Brush}"
+                                                CornerRadius="4"
+                                                Padding="12,8"
+                                                Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding FieldName}"
+                                                           FontSize="11"
+                                                           Foreground="#64748B"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Value}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- 모달 푸터 -->
+                <Border Grid.Row="2" 
+                        Background="{StaticResource BlueGray50Brush}"
+                        CornerRadius="0,0,12,12"
+                        Padding="24,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0"
+                                   Text="매핑된 데이터로 현재 물건 정보를 업데이트합니다."
+                                   FontSize="12"
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"/>
+                        
+                        <Button Grid.Column="1"
+                                Content="취소"
+                                Command="{Binding CloseColumnMappingCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="20,8"
+                                Margin="0,0,8,0"/>
+                        
+                        <Button Grid.Column="2"
+                                Content="적용하기"
+                                Command="{Binding ApplyDataDiskMappingCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Padding="20,8"
+                                IsEnabled="{Binding HasMatchedRow}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+    </Grid>
 </UserControl>

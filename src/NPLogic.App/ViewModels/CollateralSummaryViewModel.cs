@@ -156,8 +156,8 @@ namespace NPLogic.ViewModels
                     Borrowers.Add(borrower);
                 }
 
-                // 첫 번째 차주 선택
-                if (Borrowers.Count > 0 && SelectedBorrower == null)
+                // 첫 번째 차주 선택 (항상 선택)
+                if (Borrowers.Count > 0)
                 {
                     SelectedBorrower = Borrowers[0];
                 }
@@ -307,7 +307,18 @@ namespace NPLogic.ViewModels
 
             // Property 객체 찾기
             var property = new Property { Id = item.PropertyId };
-            MainWindow.Instance?.NavigateToPropertyDetail(property);
+            // 뒤로가기 시 담보총괄로 돌아가도록 콜백 전달
+            MainWindow.Instance?.NavigateToPropertyDetail(property, () => MainWindow.Instance?.NavigateToCollateralSummary());
+        }
+
+        /// <summary>
+        /// 담보물건 크게보기 (메인 화면 전체로 물건목록 표시)
+        /// </summary>
+        [RelayCommand]
+        private void ViewCollateralDetail()
+        {
+            // 물건 목록 페이지(CollateralSummaryView)를 전체 화면으로 표시
+            MainWindow.Instance?.NavigateToCollateralSummary();
         }
 
         /// <summary>

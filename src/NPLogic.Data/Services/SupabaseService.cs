@@ -23,6 +23,16 @@ namespace NPLogic.Data.Services
         }
 
         /// <summary>
+        /// Supabase 프로젝트 URL
+        /// </summary>
+        public string Url => _supabaseUrl;
+
+        /// <summary>
+        /// Supabase API 키
+        /// </summary>
+        public string Key => _supabaseKey;
+
+        /// <summary>
         /// Supabase 클라이언트 초기화
         /// </summary>
         public async Task InitializeAsync()

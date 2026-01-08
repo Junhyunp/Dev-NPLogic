@@ -219,6 +219,25 @@ namespace NPLogic
         }
 
         /// <summary>
+        /// 물건 목록으로 이동 (필터 적용)
+        /// </summary>
+        public void NavigateToPropertyListWithFilter(string? debtorName, Action? backAction = null)
+        {
+            var serviceProvider = App.ServiceProvider;
+            if (serviceProvider != null)
+            {
+                var propertyListView = serviceProvider.GetRequiredService<Views.PropertyListView>();
+                var viewModel = propertyListView.DataContext as ViewModels.PropertyListViewModel;
+                if (viewModel != null && !string.IsNullOrEmpty(debtorName))
+                {
+                    viewModel.SetDebtorFilter(debtorName, backAction, $"담보물건 - {debtorName}");
+                }
+                MainContentControl.Content = propertyListView;
+                UpdateSelectedMenu(PropertyListButton);
+            }
+        }
+
+        /// <summary>
         /// 데이터 업로드로 이동
         /// </summary>
         private void NavigateToDataUpload()
@@ -270,7 +289,7 @@ namespace NPLogic
         }
 
         /// <summary>
-        /// 담보 총괄로 이동
+        /// 담보 총괄로 이동 (물건 목록 전체 화면)
         /// </summary>
         public void NavigateToCollateralSummary()
         {
@@ -281,6 +300,15 @@ namespace NPLogic
                 MainContentControl.Content = collateralSummaryView;
                 UpdateSelectedMenu(CollateralSummaryButton);
             }
+        }
+
+        /// <summary>
+        /// 대시보드로 이동 (뒤로가기용)
+        /// </summary>
+        public void NavigateToDashboardCollateralSummary()
+        {
+            // 대시보드로 이동
+            NavigateToDashboard();
         }
 
         /// <summary>
@@ -358,6 +386,14 @@ namespace NPLogic
         /// </summary>
         public void NavigateToPropertyDetail(Property property)
         {
+            NavigateToPropertyDetail(property, null);
+        }
+
+        /// <summary>
+        /// 물건 상세로 이동 (뒤로가기 액션 지정 가능)
+        /// </summary>
+        public void NavigateToPropertyDetail(Property property, Action? backAction)
+        {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider != null)
             {
@@ -366,8 +402,8 @@ namespace NPLogic
                 if (viewModel != null)
                 {
                     viewModel.LoadProperty(property);
-                    // 뒤로가기 액션 설정 (물건 목록으로)
-                    viewModel.SetPropertyId(property.Id, NavigateToPropertyList);
+                    // 뒤로가기 액션 설정 (지정된 액션 또는 기본값으로 물건 목록으로)
+                    viewModel.SetPropertyId(property.Id, backAction ?? NavigateToPropertyList);
                 }
                 MainContentControl.Content = propertyDetailView;
             }

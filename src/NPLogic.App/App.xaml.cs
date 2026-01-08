@@ -120,6 +120,7 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.RightAnalysisRepository>();
             services.AddSingleton<Data.Repositories.BorrowerRepository>();
             services.AddSingleton<Data.Repositories.LoanRepository>();
+            services.AddSingleton<Data.Repositories.BorrowerRestructuringRepository>();
             services.AddSingleton<Data.Repositories.ReferenceDataRepository>();
             services.AddSingleton<Data.Repositories.EvaluationRepository>();
             services.AddSingleton<Data.Repositories.SettingsRepository>();
@@ -155,7 +156,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
                     sp.GetRequiredService<RegistryOcrService>(),
-                    sp.GetRequiredService<Data.Repositories.PropertyQaRepository>()
+                    sp.GetRequiredService<Data.Repositories.PropertyQaRepository>(),
+                    sp.GetRequiredService<SupabaseService>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -370,6 +372,8 @@ namespace NPLogic
             services.AddTransient<Views.RightsAnalysisTab>();
             services.AddTransient<Views.BasicDataTab>();
             services.AddTransient<Views.ClosingTab>();
+            services.AddTransient<Views.HomeTab>();
+            services.AddTransient<Views.EvaluationTab>();
 
             // Windows (Transient)
             services.AddTransient<MainWindow>();

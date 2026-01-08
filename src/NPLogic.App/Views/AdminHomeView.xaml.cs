@@ -151,16 +151,22 @@ namespace NPLogic.Views
             
             if (_cachedNonCoreView != null && _cachedNonCoreViewModel != null)
             {
-                // 프로그램 정보 전달
+                // 프로그램 정보 전달 및 프로그램 ID 설정
                 if (DataContext is AdminHomeViewModel viewModel && viewModel.SelectedProgram != null)
                 {
                     _cachedNonCoreViewModel.SetProjectInfo(
                         viewModel.SelectedProgram.Id.ToString(), 
                         viewModel.SelectedProgram.ProgramName);
+                    
+                    // 프로그램 ID 설정 (물건 탭 로드를 위해 필수!)
+                    _cachedNonCoreViewModel.SetProgramId(viewModel.SelectedProgram.Id);
                 }
                 
                 // 물건 로드
                 _cachedNonCoreViewModel.LoadProperty(property);
+                
+                // DataContext 설정 및 초기화
+                _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
                 
                 // ContentControl에 NonCoreView 설정
                 DetailContentControl.Content = _cachedNonCoreView;
@@ -268,8 +274,15 @@ namespace NPLogic.Views
                 case "basicdata":
                     // 기초데이터 탭 - BasicDataTab 로드
                     var basicDataView = serviceProvider.GetService<BasicDataTab>();
-                    if (basicDataView != null)
+                    if (basicDataView != null && _selectedProperty != null)
                     {
+                        // PropertyDetailViewModel을 사용하여 컬럼 매핑 등의 기능 지원
+                        var propertyDetailVm = serviceProvider.GetService<PropertyDetailViewModel>();
+                        if (propertyDetailVm != null)
+                        {
+                            propertyDetailVm.LoadProperty(_selectedProperty);
+                            basicDataView.DataContext = propertyDetailVm;
+                        }
                         DetailContentControl.Content = basicDataView;
                     }
                     break;

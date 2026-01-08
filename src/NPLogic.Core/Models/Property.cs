@@ -69,6 +69,9 @@ namespace NPLogic.Core.Models
 
         // ========== 대시보드 진행 관리 필드 ==========
         
+        /// <summary>차주번호 (엑셀 업로드시 저장, 예: R-003)</summary>
+        public string? BorrowerNumber { get; set; }
+
         /// <summary>차주명</summary>
         public string? DebtorName { get; set; }
 

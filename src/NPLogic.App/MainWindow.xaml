@@ -121,11 +121,11 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Data Upload - Phase 5.3: 피드백에 따라 숨김 처리 (비핵심 기초데이터에서 업로드로 대체) -->
+                    <!-- Data Upload - 데이터 업로드 메뉴 -->
                     <Button x:Name="DataUploadButton"
                             Click="DataUploadButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Collapsed">
+                            Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>

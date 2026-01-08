@@ -1,0 +1,17 @@
+{
+  "subject": {
+    "property_id": "test",
+    "address": "서울특별시 강남구 테헤란로 래미안아파트",
+    "usage": "아파트",
+    "region_big": "서울특별시",
+    "latitude": 37.5065,
+    "longitude": 127.0536,
+    "building_area": 84.95,
+    "auction_date": "2024-07-01"
+  },
+  "rule_index": 6,
+  "region_scope": "big",
+  "topk": 5,
+  "supabase_url": "https://vuepmhwrizaabswlgiiy.supabase.co",
+  "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1ZXBtaHdyaXphYWJzd2xnaWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NDA2MzUsImV4cCI6MjA3OTIxNjYzNX0.VJ6CG3alGGVK7HYfZabHd47q2RDR6EgGMPD1GS8YNu4"
+}

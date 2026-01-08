@@ -709,7 +709,7 @@
                                 <DataGridTemplateColumn Header="차주번호" Width="100" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding PropertyNumber}"
+                                            <TextBlock Text="{Binding BorrowerNumber}"
                                                        Padding="8,0"
                                                        VerticalAlignment="Center"
                                                        Foreground="{StaticResource PrimaryBrush}"

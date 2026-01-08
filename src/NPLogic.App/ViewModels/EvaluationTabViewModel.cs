@@ -559,7 +559,11 @@ namespace NPLogic.ViewModels
         private void LoadCaseMap()
         {
             // TODO: 사례지도 로드 구현
-            SuccessMessage = "사례지도 기능은 추후 구현 예정입니다.";
+            System.Windows.MessageBox.Show(
+                "사례지도 기능은 추후 구현 예정입니다.\n\n소재지 기준으로 본건 위치와 주변 거래사례를 지도에 표시하는 기능입니다.",
+                "사례지도",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
         }
 
         /// <summary>
@@ -597,6 +601,16 @@ namespace NPLogic.ViewModels
                 IsRecommendLoading = true;
                 RecommendStatusMessage = "유사물건을 검색 중입니다...";
                 ErrorMessage = null;
+                
+                // 디버그: Supabase 연결 정보 확인
+                Debug.WriteLine($"[EvaluationTab] SupabaseUrl: {SupabaseUrl ?? "NULL"}");
+                Debug.WriteLine($"[EvaluationTab] SupabaseKey: {(string.IsNullOrEmpty(SupabaseKey) ? "NULL/EMPTY" : "SET (" + SupabaseKey.Length + " chars)")}");
+                
+                if (string.IsNullOrEmpty(SupabaseUrl) || string.IsNullOrEmpty(SupabaseKey))
+                {
+                    ErrorMessage = "Supabase 연결 정보가 설정되지 않았습니다. 앱을 재시작해주세요.";
+                    return;
+                }
 
                 // 대상 물건 정보 구성
                 var subject = new RecommendSubject
@@ -865,10 +879,19 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                // TODO: 실제 API 연동
-                await Task.Delay(500); // 시뮬레이션
+                // TODO: 실제 API 연동 (국토교통부 실거래가 공개시스템)
+                await Task.Delay(300);
 
-                // 더미 데이터
+                // 안내 메시지 표시
+                System.Windows.MessageBox.Show(
+                    "실거래가 API 연동은 추후 구현 예정입니다.\n\n" +
+                    "현재는 샘플 데이터가 표시됩니다.\n" +
+                    "실제 데이터는 '🔗 rt.molit.go.kr' 버튼을 눌러 직접 조회해주세요.",
+                    "실거래가 조회",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+
+                // 샘플 데이터 (참고용)
                 RealTransactions.Clear();
                 RealTransactions.Add(new RealTransactionItem
                 {
@@ -898,7 +921,7 @@ namespace NPLogic.ViewModels
                     IsApplied = true
                 });
 
-                SuccessMessage = "실거래가가 조회되었습니다.";
+                SuccessMessage = "(샘플 데이터)";
             }
             catch (Exception ex)
             {

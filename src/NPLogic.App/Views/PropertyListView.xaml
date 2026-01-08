@@ -21,14 +21,31 @@
         <!-- 헤더 영역 -->
         <Grid Grid.Row="0" Margin="0,0,0,24">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
+            <!-- 뒤로가기 버튼 (필터 모드일 때만 표시) -->
+            <Button Grid.Column="0"
+                    Content="← 담보총괄"
+                    Command="{Binding GoBackCommand}"
+                    Style="{StaticResource SecondaryButton}"
+                    Padding="16,10"
+                    Margin="0,0,16,0"
+                    Visibility="{Binding HasBackAction, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+            <StackPanel Grid.Column="1">
+                <!-- 필터 제목 (있을 때) -->
+                <TextBlock Text="{Binding FilterTitle}" 
+                           Style="{StaticResource H2TextStyle}"
+                           Margin="0,0,0,8"
+                           Visibility="{Binding HasBackAction, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <!-- 기본 제목 (필터 없을 때) -->
                 <TextBlock Text="물건 목록" 
                            Style="{StaticResource H2TextStyle}"
-                           Margin="0,0,0,8"/>
+                           Margin="0,0,0,8"
+                           Visibility="{Binding HasBackAction, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                 <TextBlock Style="{StaticResource BodyTextStyle}"
                            Opacity="0.7">
                     <Run Text="전체"/>
@@ -37,7 +54,7 @@
                 </TextBlock>
             </StackPanel>
 
-            <Button Grid.Column="1"
+            <Button Grid.Column="2"
                     Content="+ 물건 추가" 
                     Command="{Binding AddPropertyCommand}"
                     Style="{StaticResource PrimaryButton}"

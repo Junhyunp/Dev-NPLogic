@@ -241,6 +241,77 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// Upsert (있으면 업데이트, 없으면 생성) - 계좌일련번호 기준
+        /// </summary>
+        public async Task<Loan> UpsertByAccountSerialAsync(Loan loan)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(loan.AccountSerial))
+                    throw new ArgumentException("계좌일련번호가 필요합니다.");
+
+                var existing = await GetByAccountSerialAsync(loan.AccountSerial);
+                
+                if (existing != null)
+                {
+                    loan.Id = existing.Id;
+                    return await UpdateAsync(loan);
+                }
+                else
+                {
+                    if (loan.Id == Guid.Empty)
+                        loan.Id = Guid.NewGuid();
+                    return await CreateAsync(loan);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"대출 Upsert 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 일괄 Upsert
+        /// </summary>
+        public async Task<(int Created, int Updated, int Failed)> BulkUpsertAsync(List<Loan> loans)
+        {
+            int created = 0, updated = 0, failed = 0;
+
+            foreach (var loan in loans)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(loan.AccountSerial))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    var existing = await GetByAccountSerialAsync(loan.AccountSerial);
+                    if (existing != null)
+                    {
+                        loan.Id = existing.Id;
+                        await UpdateAsync(loan);
+                        updated++;
+                    }
+                    else
+                    {
+                        if (loan.Id == Guid.Empty)
+                            loan.Id = Guid.NewGuid();
+                        await CreateAsync(loan);
+                        created++;
+                    }
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+
+            return (created, updated, failed);
+        }
+
+        /// <summary>
         /// 차주별 대출 통계
         /// </summary>
         public async Task<LoanStatistics> GetStatisticsByBorrowerIdAsync(Guid borrowerId)

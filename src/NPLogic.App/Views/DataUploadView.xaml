@@ -178,6 +178,7 @@
                                   Visibility="{Binding SelectedExcelFile, Converter={StaticResource NullToVisibilityConverter}}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
@@ -226,11 +227,115 @@
                                     </Grid>
                                 </Border>
 
-                                <!-- 데이터 요약 -->
+                                <!-- 시트 선택 (Multi-Sheet) -->
                                 <Border Grid.Row="1"
                                         Background="{StaticResource BlueGray50Brush}"
                                         CornerRadius="8"
-                                        Padding="20">
+                                        Padding="16"
+                                        Margin="0,0,0,16"
+                                        Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                            <TextBlock Text="📋" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Text="업로드할 시트 선택" 
+                                                       Style="{StaticResource H4TextStyle}" 
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        
+                                        <ScrollViewer MaxHeight="250" 
+                                                    VerticalScrollBarVisibility="Auto"
+                                                    HorizontalScrollBarVisibility="Disabled">
+                                            <ItemsControl ItemsSource="{Binding AvailableSheets}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="White"
+                                                            CornerRadius="6"
+                                                            Padding="12,10"
+                                                            Margin="0,0,0,8"
+                                                            Cursor="Hand">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            
+                                                            <CheckBox Grid.Column="0"
+                                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                      VerticalAlignment="Center"
+                                                                      Margin="0,0,12,0"/>
+                                                            
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="{Binding Name}" 
+                                                                           FontWeight="SemiBold"
+                                                                           FontSize="13"/>
+                                                                <TextBlock FontSize="11" Opacity="0.7">
+                                                                    <Run Text="{Binding SheetTypeDisplay, Mode=OneWay}"/>
+                                                                    <Run Text=" · "/>
+                                                                    <Run Text="{Binding DataRowCount, Mode=OneWay}"/>
+                                                                    <Run Text="행"/>
+                                                                </TextBlock>
+                                                            </StackPanel>
+                                                            
+                                                            <Border Grid.Column="2"
+                                                                    Background="{StaticResource PrimaryBrush}"
+                                                                    CornerRadius="4"
+                                                                    Padding="8,4"
+                                                                    VerticalAlignment="Center"
+                                                                    Opacity="0.8">
+                                                                <TextBlock Text="{Binding SheetTypeDisplay}" 
+                                                                           Foreground="White"
+                                                                           FontSize="10"
+                                                                           FontWeight="SemiBold"/>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                        
+                                        <!-- 업로드 버튼 -->
+                                        <Button Content="📤 선택한 시트 업로드"
+                                                Command="{Binding UploadSelectedSheetsCommand}"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="16,10"
+                                                Margin="0,8,0,0"
+                                                HorizontalAlignment="Stretch"
+                                                IsEnabled="{Binding HasSelectedSheets}"/>
+                                        
+                                        <!-- 업로드 진행률 -->
+                                        <StackPanel Visibility="{Binding IsExcelUploading, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                    Margin="0,12,0,0">
+                                            <TextBlock Text="{Binding UploadStatusMessage}" 
+                                                       FontSize="12" 
+                                                       Opacity="0.8"
+                                                       Margin="0,0,0,8"/>
+                                            <ProgressBar Value="{Binding ExcelUploadProgress}"
+                                                         Maximum="100"
+                                                         Height="8"
+                                                         Foreground="{StaticResource PrimaryBrush}"/>
+                                            <TextBlock FontSize="11" Opacity="0.6" Margin="0,4,0,0">
+                                                <Run Text="{Binding ProcessedSheets, Mode=OneWay}"/>
+                                                <Run Text=" / "/>
+                                                <Run Text="{Binding TotalSheetsToProcess, Mode=OneWay}"/>
+                                                <Run Text=" 시트 완료"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 데이터 요약 (단일 시트 모드) -->
+                                <Border Grid.Row="2"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        CornerRadius="8"
+                                        Padding="20"
+                                        Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                     <StackPanel>
                                         <TextBlock Text="데이터 요약" 
                                                    Style="{StaticResource H4TextStyle}"
@@ -287,7 +392,7 @@
                                 </Border>
 
                                 <!-- 다른 파일 선택 버튼 -->
-                                <Button Grid.Row="2"
+                                <Button Grid.Row="3"
                                         Content="📂 다른 파일 선택"
                                         Command="{Binding SelectExcelFileCommand}"
                                         Style="{StaticResource SecondaryButton}"

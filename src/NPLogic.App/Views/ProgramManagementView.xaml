@@ -476,53 +476,115 @@
                                                 </Grid>
                                             </Border>
 
-                                            <!-- 데이터 요약 -->
-                                            <Border Background="White"
-                                                    CornerRadius="6"
-                                                    Padding="12"
-                                                    Margin="0,0,0,12">
-                                                <StackPanel>
-                                                    <Grid Margin="0,0,0,8">
-                                                        <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
-                                                        <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
-                                                            <Run Text="{Binding DataDiskTotalRows}"/>
-                                                            <Run Text="행" FontWeight="Normal" FontSize="11"/>
-                                                        </TextBlock>
-                                                    </Grid>
-                                                    <Grid>
-                                                        <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
-                                                        <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
-                                                            <Run Text="{Binding DataDiskColumns.Count, Mode=OneWay}"/>
-                                                            <Run Text="개" FontWeight="Normal" FontSize="11"/>
-                                                        </TextBlock>
-                                                    </Grid>
-                                                </StackPanel>
-                                            </Border>
+                                            <!-- 시트 선택 모드 -->
+                                            <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="📋 업로드할 시트 선택" 
+                                                           Style="{StaticResource CaptionTextStyle}"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,8"/>
+                                                <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                                    <ItemsControl ItemsSource="{Binding AvailableSheets}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel/>
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Background="White"
+                                                                        CornerRadius="4"
+                                                                        Padding="8,6"
+                                                                        Margin="0,0,0,4"
+                                                                        Cursor="Hand"
+                                                                        MouseLeftButtonUp="SheetItem_Click">
+                                                                    <Grid>
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                            <ColumnDefinition Width="*"/>
+                                                                            <ColumnDefinition Width="Auto"/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        
+                                                                        <CheckBox IsChecked="{Binding IsSelected}" 
+                                                                                  VerticalAlignment="Center"
+                                                                                  Margin="0,0,8,0"/>
+                                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                            <TextBlock Text="{Binding Name}" 
+                                                                                       FontWeight="SemiBold"
+                                                                                       FontSize="12"/>
+                                                                            <TextBlock FontSize="10" Opacity="0.7">
+                                                                                <Run Text="{Binding RowCount}"/>
+                                                                                <Run Text="행"/>
+                                                                            </TextBlock>
+                                                                        </StackPanel>
+                                                                        <Border Grid.Column="2"
+                                                                                Background="{StaticResource PrimaryBrush}"
+                                                                                CornerRadius="3"
+                                                                                Padding="6,2"
+                                                                                VerticalAlignment="Center"
+                                                                                Visibility="{Binding SheetTypeDisplay, Converter={StaticResource NullToVisibilityConverter}}">
+                                                                            <TextBlock Text="{Binding SheetTypeDisplay}" 
+                                                                                       Foreground="White"
+                                                                                       FontSize="9"
+                                                                                       FontWeight="SemiBold"/>
+                                                                        </Border>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </ScrollViewer>
+                                            </StackPanel>
 
-                                            <!-- 컬럼 목록 -->
-                                            <TextBlock Text="컬럼 목록" 
-                                                       Style="{StaticResource CaptionTextStyle}"
-                                                       FontWeight="SemiBold"
-                                                       Margin="0,0,0,6"/>
-                                            <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
-                                                <ItemsControl ItemsSource="{Binding DataDiskColumns}">
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <WrapPanel/>
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Border Background="{StaticResource BlueGray200Brush}"
-                                                                    CornerRadius="3"
-                                                                    Padding="6,2"
-                                                                    Margin="0,0,4,4">
-                                                                <TextBlock Text="{Binding}" FontSize="10"/>
-                                                            </Border>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </ScrollViewer>
+                                            <!-- 단일 시트 모드 -->
+                                            <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                <!-- 데이터 요약 -->
+                                                <Border Background="White"
+                                                        CornerRadius="6"
+                                                        Padding="12"
+                                                        Margin="0,0,0,12">
+                                                    <StackPanel>
+                                                        <Grid Margin="0,0,0,8">
+                                                            <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
+                                                            <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                <Run Text="{Binding DataDiskTotalRows}"/>
+                                                                <Run Text="행" FontWeight="Normal" FontSize="11"/>
+                                                            </TextBlock>
+                                                        </Grid>
+                                                        <Grid>
+                                                            <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
+                                                            <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                <Run Text="{Binding DataDiskColumns.Count, Mode=OneWay}"/>
+                                                                <Run Text="개" FontWeight="Normal" FontSize="11"/>
+                                                            </TextBlock>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <!-- 컬럼 목록 -->
+                                                <TextBlock Text="컬럼 목록" 
+                                                           Style="{StaticResource CaptionTextStyle}"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,6"/>
+                                                <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                                                    <ItemsControl ItemsSource="{Binding DataDiskColumns}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel/>
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Background="{StaticResource BlueGray200Brush}"
+                                                                        CornerRadius="3"
+                                                                        Padding="6,2"
+                                                                        Margin="0,0,4,4">
+                                                                    <TextBlock Text="{Binding}" FontSize="10"/>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </ScrollViewer>
+                                            </StackPanel>
 
                                             <!-- 다른 파일 선택 -->
                                             <Button Content="다른 파일 선택"
@@ -574,9 +636,10 @@
                   Background="#80FFFFFF">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
-                    <TextBlock Text="처리 중..." 
+                    <TextBlock Text="{Binding ProgressText, FallbackValue='처리 중...'}" 
                                Style="{StaticResource BodyTextStyle}"
                                HorizontalAlignment="Center"
+                               FontWeight="SemiBold"
                                Margin="0,16,0,0"/>
                 </StackPanel>
             </Grid>

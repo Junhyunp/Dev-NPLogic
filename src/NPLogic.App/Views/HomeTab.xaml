@@ -51,12 +51,13 @@
                                    Margin="0,0,0,12"/>
                         
                         <StackPanel Orientation="Horizontal">
-                            <!-- 물건 유형 뱃지 -->
+                            <!-- 물건 유형 뱃지 (유형이 있을 때만 표시) -->
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="4"
                                     Padding="12,6"
-                                    Margin="0,0,8,0">
-                                <TextBlock Text="{Binding Property.PropertyType}" 
+                                    Margin="0,0,8,0"
+                                    Visibility="{Binding Property.PropertyType, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                                <TextBlock Text="{Binding Property.PropertyType, FallbackValue='-'}" 
                                            Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="12"/>

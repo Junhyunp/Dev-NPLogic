@@ -67,6 +67,14 @@ namespace NPLogic.ViewModels
         private bool _isLoading;
 
         [ObservableProperty]
+        private bool _hasBackAction;
+
+        [ObservableProperty]
+        private string? _filterTitle;
+
+        private Action? _backAction;
+
+        [ObservableProperty]
         private string? _errorMessage;
 
         public PropertyListViewModel(
@@ -291,6 +299,39 @@ namespace NPLogic.ViewModels
             SelectedStatus = Statuses.FirstOrDefault();
             CurrentPage = 1;
             await LoadPropertiesAsync();
+        }
+
+        /// <summary>
+        /// 차주명으로 필터 설정 (외부에서 호출)
+        /// </summary>
+        public void SetDebtorFilter(string debtorName, Action? backAction = null, string? filterTitle = null)
+        {
+            SearchText = debtorName;
+            CurrentPage = 1;
+            _backAction = backAction;
+            HasBackAction = backAction != null;
+            FilterTitle = filterTitle ?? $"담보물건 - {debtorName}";
+            _ = LoadPropertiesAsync();
+        }
+
+        /// <summary>
+        /// 필터 초기화 및 뒤로가기 상태 리셋
+        /// </summary>
+        public void ClearFilterState()
+        {
+            _backAction = null;
+            HasBackAction = false;
+            FilterTitle = null;
+        }
+
+        /// <summary>
+        /// 뒤로가기
+        /// </summary>
+        [RelayCommand]
+        private void GoBack()
+        {
+            _backAction?.Invoke();
+            ClearFilterState();
         }
 
         /// <summary>

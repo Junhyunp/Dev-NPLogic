@@ -296,6 +296,72 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// Upsert (있으면 업데이트, 없으면 생성) - 차주번호 기준
+        /// </summary>
+        public async Task<Borrower> UpsertByBorrowerNumberAsync(Borrower borrower)
+        {
+            try
+            {
+                // 기존 차주 확인
+                var existing = await GetByBorrowerNumberAsync(borrower.BorrowerNumber);
+                
+                if (existing != null)
+                {
+                    // 업데이트 (ID 유지, 기타 필드 갱신)
+                    borrower.Id = existing.Id;
+                    borrower.CreatedAt = existing.CreatedAt;
+                    return await UpdateAsync(borrower);
+                }
+                else
+                {
+                    // 신규 생성
+                    if (borrower.Id == Guid.Empty)
+                        borrower.Id = Guid.NewGuid();
+                    return await CreateAsync(borrower);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"차주 Upsert 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 일괄 Upsert
+        /// </summary>
+        public async Task<(int Created, int Updated, int Failed)> BulkUpsertAsync(List<Borrower> borrowers)
+        {
+            int created = 0, updated = 0, failed = 0;
+
+            foreach (var borrower in borrowers)
+            {
+                try
+                {
+                    var existing = await GetByBorrowerNumberAsync(borrower.BorrowerNumber);
+                    if (existing != null)
+                    {
+                        borrower.Id = existing.Id;
+                        await UpdateAsync(borrower);
+                        updated++;
+                    }
+                    else
+                    {
+                        if (borrower.Id == Guid.Empty)
+                            borrower.Id = Guid.NewGuid();
+                        await CreateAsync(borrower);
+                        created++;
+                    }
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+
+            return (created, updated, failed);
+        }
+
+        /// <summary>
         /// 통계 - 전체/유형별 개수
         /// </summary>
         public async Task<BorrowerStatistics> GetStatisticsAsync(string? programId = null)

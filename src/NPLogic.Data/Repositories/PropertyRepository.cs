@@ -374,6 +374,98 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 물건번호로 조회
+        /// </summary>
+        public async Task<Property?> GetByPropertyNumberAsync(string propertyNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<PropertyTable>()
+                    .Where(x => x.PropertyNumber == propertyNumber)
+                    .Single();
+
+                return response == null ? null : MapToProperty(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Upsert (있으면 업데이트, 없으면 생성) - 물건번호 기준
+        /// </summary>
+        public async Task<Property> UpsertByPropertyNumberAsync(Property property)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(property.PropertyNumber))
+                    throw new ArgumentException("물건번호가 필요합니다.");
+
+                var existing = await GetByPropertyNumberAsync(property.PropertyNumber);
+                
+                if (existing != null)
+                {
+                    property.Id = existing.Id;
+                    return await UpdateAsync(property);
+                }
+                else
+                {
+                    if (property.Id == Guid.Empty)
+                        property.Id = Guid.NewGuid();
+                    return await CreateAsync(property);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"물건 Upsert 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 일괄 Upsert
+        /// </summary>
+        public async Task<(int Created, int Updated, int Failed)> BulkUpsertAsync(List<Property> properties)
+        {
+            int created = 0, updated = 0, failed = 0;
+
+            foreach (var property in properties)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(property.PropertyNumber))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    var existing = await GetByPropertyNumberAsync(property.PropertyNumber);
+                    if (existing != null)
+                    {
+                        property.Id = existing.Id;
+                        await UpdateAsync(property);
+                        updated++;
+                    }
+                    else
+                    {
+                        if (property.Id == Guid.Empty)
+                            property.Id = Guid.NewGuid();
+                        await CreateAsync(property);
+                        created++;
+                    }
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+
+            return (created, updated, failed);
+        }
+
+        /// <summary>
         /// 물건 담당자 할당
         /// </summary>
         public async Task<bool> AssignToUserAsync(Guid propertyId, Guid userId)
@@ -491,6 +583,7 @@ namespace NPLogic.Data.Repositories
                 Status = table.Status ?? "pending",
                 AssignedTo = table.AssignedTo,
                 // 대시보드 진행 관리 필드
+                BorrowerNumber = table.BorrowerNumber,
                 DebtorName = table.DebtorName,
                 CollateralNumber = table.CollateralNumber,
                 AgreementDoc = table.AgreementDoc,
@@ -541,6 +634,7 @@ namespace NPLogic.Data.Repositories
                 Status = property.Status,
                 AssignedTo = property.AssignedTo,
                 // 대시보드 진행 관리 필드
+                BorrowerNumber = property.BorrowerNumber,
                 DebtorName = property.DebtorName,
                 CollateralNumber = property.CollateralNumber,
                 AgreementDoc = property.AgreementDoc,
@@ -712,6 +806,9 @@ namespace NPLogic.Data.Repositories
         public Guid? AssignedTo { get; set; }
 
         // ========== 대시보드 진행 관리 필드 ==========
+
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
 
         [Postgrest.Attributes.Column("debtor_name")]
         public string? DebtorName { get; set; }
