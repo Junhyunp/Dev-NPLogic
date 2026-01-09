@@ -100,8 +100,42 @@
                     </ItemsControl>
                 </ScrollViewer>
                 
-                <!-- 버튼 영역: 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
+                <!-- 버튼 영역: 저장, 새로고침, 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
+                    <!-- 저장 버튼 -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Padding="10,6"
+                            FontSize="12"
+                            Margin="0,0,4,0"
+                            ToolTip="변경사항 저장 (Ctrl+S)"
+                            Command="{Binding SaveCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="ContentSave" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="저장" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <!-- 새로고침 버튼 -->
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Padding="10,6"
+                            FontSize="12"
+                            Margin="0,0,8,0"
+                            ToolTip="데이터 새로고침 (Ctrl+R)"
+                            Command="{Binding RefreshCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" 
+                                                     Width="14" Height="14" 
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,4,0"/>
+                            <TextBlock Text="새로고침" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="0,4,8,4"/>
+                    
                     <!-- 인쇄 버튼 -->
                     <Button Style="{StaticResource SecondaryButton}"
                             Padding="10,6"
@@ -489,19 +523,22 @@
                                      Checked="FunctionTab_Checked"
                                      Tag="AuctionSchedule"/>
                         
-                        <!-- 9. 현금흐름 -->
+                        <!-- S-002: 현금흐름, XNPV 비교는 상단 메뉴로 이동 (Collapsed) -->
+                        <!-- 9. 현금흐름 - 상단 메뉴로 이동 -->
                         <RadioButton x:Name="TabCashFlow"
                                      Content="현금흐름"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
-                                     Tag="CashFlow"/>
+                                     Tag="CashFlow"
+                                     Visibility="Collapsed"/>
                         
-                        <!-- 10. XNPV 비교 -->
+                        <!-- 10. XNPV 비교 - 상단 메뉴로 이동 -->
                         <RadioButton x:Name="TabXnpvComparison"
                                      Content="XNPV 비교"
                                      Style="{StaticResource NonCoreTabStyle}"
                                      Checked="FunctionTab_Checked"
-                                     Tag="XnpvComparison"/>
+                                     Tag="XnpvComparison"
+                                     Visibility="Collapsed"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>

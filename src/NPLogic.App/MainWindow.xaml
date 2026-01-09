@@ -174,23 +174,25 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- S-001, S-006: 현금흐름 상단 메뉴로 이동 (전체 집계 형태) -->
                     <Button x:Name="CashFlowSummaryButton"
                             Click="CashFlowSummaryButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Collapsed">
+                            Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
                     </Button>
 
+                    <!-- S-001: MPV비교 상단 메뉴 추가 -->
                     <Button x:Name="XnpvComparisonButton"
                             Click="XnpvComparisonButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Collapsed">
+                            Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Compare" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="XNPV" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="MPV비교" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
                         </StackPanel>
                     </Button>
 
@@ -205,9 +207,11 @@
                     </Button>
 
                     <!-- 관리 메뉴 -->
+                    <!-- S-003: Tool Box를 상단 메뉴에서 제거 (하단 저장버튼 옆으로 이동) -->
                     <Button x:Name="ToolBoxButton"
                             Click="ToolBoxButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Toolbox" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="Tool Box" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>

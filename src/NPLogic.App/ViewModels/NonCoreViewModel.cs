@@ -552,6 +552,46 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
+        /// 저장 - 현재 선택된 물건의 변경사항 저장
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveAsync()
+        {
+            if (SelectedPropertyTab == null)
+            {
+                System.Windows.MessageBox.Show("저장할 물건을 선택해주세요.", "알림", 
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                
+                // 현재 선택된 물건 저장
+                if (_propertyRepository != null && SelectedPropertyTab.PropertyId != Guid.Empty)
+                {
+                    var property = await _propertyRepository.GetByIdAsync(SelectedPropertyTab.PropertyId);
+                    if (property != null)
+                    {
+                        await _propertyRepository.UpdateAsync(property);
+                        System.Windows.MessageBox.Show("저장되었습니다.", "알림",
+                            System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"저장 중 오류가 발생했습니다: {ex.Message}", "오류",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
         /// 새로고침
         /// </summary>
         [RelayCommand]

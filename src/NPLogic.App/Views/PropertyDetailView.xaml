@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}"
@@ -112,46 +113,38 @@
                 </Style>
             </TabControl.Resources>
 
-            <!-- 피드백 반영: 탭 구조 변경 -->
+            <!-- 피드백 반영: 탭 구조 변경 (S-002) -->
+            <!-- 하단 탭: 차주개요, 론, 담보물건, 선순위, 평가, 경공매일정 -->
+            <!-- 현금흐름은 상단 메뉴로 이동 예정 -->
             
-            <!-- 1. 전체 탭 -->
-            <TabItem Header="전체">
+            <!-- 1. 차주개요 탭 -->
+            <TabItem Header="차주개요">
                 <local:HomeTab DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 2. 차주개요 탭 -->
-            <TabItem Header="차주개요">
-                <local:BorrowerOverviewView DataContext="{Binding}"/>
-            </TabItem>
-
-            <!-- 3. Loan 탭 -->
-            <TabItem Header="Loan">
+            <!-- 2. 론 탭 -->
+            <TabItem Header="론">
                 <local:LoanDetailView DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 4. 담보물건 탭 -->
+            <!-- 3. 담보물건 탭 -->
             <TabItem Header="담보물건">
                 <local:BasicDataTab DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 5. 선순위 탭 -->
+            <!-- 4. 선순위 탭 -->
             <TabItem Header="선순위">
                 <local:SeniorRightsView DataContext="{Binding}"/>
             </TabItem>
 
-            <!-- 6. 평가 탭 -->
+            <!-- 5. 평가 탭 -->
             <TabItem Header="평가">
-                <local:EvaluationTab DataContext="{Binding}"/>
+                <local:EvaluationTab DataContext="{Binding EvaluationViewModel}"/>
             </TabItem>
 
-            <!-- 7. 경(공)매 탭 -->
-            <TabItem Header="경(공)매">
+            <!-- 6. 경공매일정 탭 -->
+            <TabItem Header="경공매일정">
                 <local:AuctionScheduleView DataContext="{Binding}"/>
-            </TabItem>
-
-            <!-- 8. 현금흐름 탭 -->
-            <TabItem Header="현금흐름">
-                <local:CashFlowSummaryView DataContext="{Binding}"/>
             </TabItem>
         </TabControl>
     </Grid>
