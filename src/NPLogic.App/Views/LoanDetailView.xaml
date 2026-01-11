@@ -61,18 +61,18 @@
 
             <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="대출 건수" FontSize="12" Opacity="0.7"/>
-                    <TextBlock FontSize="24" FontWeight="Bold" Margin="0,4,0,0">
+                    <TextBlock Text="대출 건수" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                    <TextBlock FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0">
                         <Run Text="{Binding Statistics.TotalCount, FallbackValue=0}"/>
-                        <Run Text="건" FontSize="12" FontWeight="Normal"/>
+                        <Run Text="건" FontSize="{StaticResource FontSizeBody}" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="대출원금잔액 합계" FontSize="12" Opacity="0.7"/>
-                    <TextBlock FontSize="20" FontWeight="Bold" Margin="0,4,0,0">
+                    <TextBlock Text="대출원금잔액 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                    <TextBlock FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold" Margin="0,4,0,0">
                         <Run Text="{Binding Statistics.TotalPrincipalBalance, StringFormat=N0, FallbackValue=0}"/>
                         <Run Text="원" FontSize="11" FontWeight="Normal"/>
                     </TextBlock>
@@ -81,8 +81,8 @@
 
             <Border Grid.Column="4" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Loan Cap (1안)" FontSize="12" Opacity="0.7"/>
-                    <TextBlock FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="#64B5F6">
+                    <TextBlock Text="Loan Cap (1안)" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                    <TextBlock FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold" Margin="0,4,0,0" Foreground="#64B5F6">
                         <Run Text="{Binding Statistics.TotalLoanCap1, StringFormat=N0, FallbackValue=0}"/>
                         <Run Text="원" FontSize="11" FontWeight="Normal"/>
                     </TextBlock>
@@ -91,8 +91,8 @@
 
             <Border Grid.Column="6" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="16">
                 <StackPanel>
-                    <TextBlock Text="Loan Cap (2안)" FontSize="12" Opacity="0.7"/>
-                    <TextBlock FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="#81C784">
+                    <TextBlock Text="Loan Cap (2안)" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                    <TextBlock FontSize="{StaticResource FontSizeLarge}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialGreenBrush}">
                         <Run Text="{Binding Statistics.TotalLoanCap2, StringFormat=N0, FallbackValue=0}"/>
                         <Run Text="원" FontSize="11" FontWeight="Normal"/>
                     </TextBlock>
@@ -414,7 +414,7 @@
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Row="0" Text="시나리오 1안" FontWeight="SemiBold" FontSize="14"/>
+                                            <TextBlock Grid.Row="0" Text="시나리오 1안" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
 
                                             <StackPanel Grid.Row="2">
                                                 <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
@@ -451,7 +451,7 @@
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Row="0" Text="시나리오 2안" FontWeight="SemiBold" FontSize="14"/>
+                                            <TextBlock Grid.Row="0" Text="시나리오 2안" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
 
                                             <StackPanel Grid.Row="2">
                                                 <TextBlock Text="예상배당일" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
@@ -469,7 +469,7 @@
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="1">
                                                     <TextBlock Text="Loan Cap" FontSize="11" Opacity="0.6"/>
-                                                    <TextBlock Text="{Binding SelectedLoan.LoanCap2, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="#81C784" Margin="0,4,0,0"/>
+                                                    <TextBlock Text="{Binding SelectedLoan.LoanCap2, StringFormat=N0, FallbackValue=-}" FontWeight="Bold" FontSize="16" Foreground="{StaticResource MaterialGreenBrush}" Margin="0,4,0,0"/>
                                                 </StackPanel>
                                             </Grid>
                                         </Grid>

@@ -469,7 +469,7 @@
                                                             Foreground="White"
                                                             BorderThickness="0"
                                                             Padding="6,2"
-                                                            FontSize="14"
+                                                            FontSize="{StaticResource FontSizeH4}"
                                                             FontWeight="Bold"
                                                             Cursor="Hand"
                                                             ToolTip="파일 선택 취소"/>

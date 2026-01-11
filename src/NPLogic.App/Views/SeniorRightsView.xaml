@@ -10,11 +10,19 @@
              d:DataContext="{d:DesignInstance Type=vm:SeniorRightsViewModel}"
              Loaded="SeniorRightsView_Loaded">
     
-    <Grid Margin="32">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <Grid Margin="32">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>  <!-- 0: 헤더 -->
+            <RowDefinition Height="Auto"/>  <!-- 1: 필터 -->
+            <RowDefinition Height="Auto"/>  <!-- 2: P-001 선순위 근저당 -->
+            <RowDefinition Height="Auto"/>  <!-- 3: P-002, P-003 유치권/소액보증금 -->
+            <RowDefinition Height="Auto"/>  <!-- 4: P-007 툴박스 버튼 -->
+            <RowDefinition Height="Auto"/>  <!-- 5: P-007 확장 패널 -->
+            <RowDefinition Height="Auto"/>  <!-- 6: 당해세 섹션 -->
+            <RowDefinition Height="Auto"/>  <!-- 7: 선순위 합계 -->
+            <RowDefinition Height="*"/>     <!-- 8: 전체 권리 목록 -->
         </Grid.RowDefinitions>
 
         <!-- 헤더 영역 -->
@@ -44,6 +52,12 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="선순위 분석 저장" 
+                        Command="{Binding SaveRightAnalysisCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="16,10"
+                        Margin="0,0,8,0"
+                        ToolTip="유치권, 소액보증금, 임대차, 임금채권 등 선순위 분석 데이터를 저장합니다"/>
                 <Button Content="+ 새 권리 추가" 
                         Command="{Binding NewRightCommand}"
                         Style="{StaticResource SecondaryButton}"
@@ -51,12 +65,12 @@
                         Margin="0,0,8,0"/>
                 <Button Content="새로고침" 
                         Command="{Binding RefreshCommand}"
-                        Style="{StaticResource PrimaryButton}"
+                        Style="{StaticResource SecondaryButton}"
                         Padding="20,10"/>
             </StackPanel>
         </Grid>
 
-        <!-- 필터 영역 -->
+        <!-- 1: 필터 영역 -->
         <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -72,8 +86,13 @@
                     <TextBlock Text="물건" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
                     <ComboBox ItemsSource="{Binding Properties}" 
                               SelectedItem="{Binding SelectedProperty}"
-                              DisplayMemberPath="AddressFull"
-                              Width="300" Padding="10,8"/>
+                              Width="400" Padding="10,8">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayAddress}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </StackPanel>
 
                 <!-- 권리 유형 -->
@@ -109,8 +128,405 @@
             </Grid>
         </Border>
 
-        <!-- 메인 컨텐츠 -->
-        <Grid Grid.Row="2">
+        <!-- 2: P-001 선순위 근저당 섹션 -->
+        <Border Grid.Row="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="선순위 근저당" 
+                           FontWeight="SemiBold" 
+                           FontSize="14" 
+                           Margin="0,0,0,12"/>
+                
+                <!-- 선순위 근저당 목록 -->
+                <DataGrid ItemsSource="{Binding SeniorMortgages}" 
+                          AutoGenerateColumns="False" 
+                          IsReadOnly="True"
+                          Background="{StaticResource SurfaceBrush}"
+                          BorderBrush="{StaticResource TableBorderBrush}"
+                          BorderThickness="1"
+                          CanUserAddRows="False"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          MaxHeight="200"
+                          RowHeight="36">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="50"/>
+                        <DataGridTextColumn Header="접수일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                        <DataGridTextColumn Header="근저당권자" Binding="{Binding RightHolder}" Width="180"/>
+                        <DataGridTextColumn Header="채권최고액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="130"/>
+                        <DataGridTemplateColumn Header="상태" Width="70">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                        <Setter Property="Background" Value="#FFEBEE"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="유효"/>
+                                                    <Setter Property="Foreground" Value="#388E3C"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
+                                                            <Setter Property="Text" Value="말소"/>
+                                                            <Setter Property="Foreground" Value="#D32F2F"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- 근저당 합계 -->
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0" HorizontalAlignment="Right">
+                    <TextBlock Text="근저당 합계:" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="{Binding SeniorMortgagesTotal, StringFormat=N0}" 
+                               FontWeight="SemiBold" 
+                               Foreground="#1976D2"
+                               FontSize="14"/>
+                    <TextBlock Text=" 원" VerticalAlignment="Center" Opacity="0.7"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 3: P-002, P-003 유치권/소액보증금 섹션 -->
+        <Border Grid.Row="3" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- P-002: 유치권 -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="유치권" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="DD금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" 
+                                 Text="{Binding LienDd, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,8"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="반영금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <TextBox Grid.Column="3" Grid.Row="0" 
+                                 Text="{Binding LienReflected, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="1" Text="근거:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3"
+                                 Text="{Binding LienReason, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- P-003: 소액보증금 + L-003: 자동 조회 -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="선순위 소액보증금" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- L-003: 자동 조회 영역 -->
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="지역:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <ComboBox Grid.Column="1" Grid.Row="0" 
+                                  ItemsSource="{Binding SmallDepositRegions}"
+                                  SelectedItem="{Binding SelectedSmallDepositRegion}"
+                                  Padding="8,6" Margin="0,0,16,8"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="근저당설정일:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <DatePicker Grid.Column="3" Grid.Row="0" 
+                                    SelectedDate="{Binding MortgageSetupDate}"
+                                    Margin="0,0,0,8"/>
+
+                        <Button Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"
+                                Content="🔍 자동 조회"
+                                Command="{Binding LookupSmallDepositCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="12,6"
+                                Margin="0,0,16,8"
+                                ToolTip="지역과 근저당설정일 기준으로 소액임차보증금을 자동 조회합니다"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="1" Grid.ColumnSpan="2"
+                                   Text="{Binding SmallDepositLookupInfo}"
+                                   FontSize="11"
+                                   Opacity="0.7"
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,8"/>
+
+                        <!-- 기존 DD금액/반영금액 -->
+                        <TextBlock Grid.Column="0" Grid.Row="2" Text="DD금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <TextBox Grid.Column="1" Grid.Row="2" 
+                                 Text="{Binding SmallDepositDd, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,8"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="2" Text="반영금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <TextBox Grid.Column="3" Grid.Row="2" 
+                                 Text="{Binding SmallDepositReflected, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="3" Text="근거:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="3"
+                                 Text="{Binding SmallDepositReason, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 4: P-007 툴박스 버튼 -->
+        <Border Grid.Row="4" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="추가 선순위 항목" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,12"/>
+                <StackPanel Orientation="Horizontal">
+                    <ToggleButton Content="주택임대차" 
+                                  IsChecked="{Binding IsResidentialLeaseExpanded}"
+                                  Padding="16,8"
+                                  Margin="0,0,8,0">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Background" Value="#E3F2FD"/>
+                                <Setter Property="Foreground" Value="#1976D2"/>
+                                <Setter Property="BorderBrush" Value="#1976D2"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#1976D2"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <ToggleButton Content="상가임대차" 
+                                  IsChecked="{Binding IsCommercialLeaseExpanded}"
+                                  Padding="16,8"
+                                  Margin="0,0,8,0">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Background" Value="#E8F5E9"/>
+                                <Setter Property="Foreground" Value="#388E3C"/>
+                                <Setter Property="BorderBrush" Value="#388E3C"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#388E3C"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <ToggleButton Content="임금채권" 
+                                  IsChecked="{Binding IsWageClaimExpanded}"
+                                  Padding="16,8">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Background" Value="#FFF3E0"/>
+                                <Setter Property="Foreground" Value="#F57C00"/>
+                                <Setter Property="BorderBrush" Value="#F57C00"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Background" Value="#F57C00"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 5: P-007 확장 패널 -->
+        <StackPanel Grid.Row="5" Margin="0,0,0,16">
+            <!-- 주택임대차 확장 패널 -->
+            <Border Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,8"
+                    Visibility="{Binding IsResidentialLeaseExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="주택임대차 상세" FontWeight="SemiBold" FontSize="13" Foreground="#1976D2" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Grid.Row="0" Text="임차인명:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <TextBox Grid.Column="1" Grid.Row="0" 
+                                 Text="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6" Margin="0,0,16,8"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="0" Text="전입일:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <DatePicker Grid.Column="3" Grid.Row="0" 
+                                    SelectedDate="{Binding TenantMoveInDate}"
+                                    Margin="0,0,16,8"/>
+
+                        <TextBlock Grid.Column="4" Grid.Row="0" Text="배당요구:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,8"/>
+                        <CheckBox Grid.Column="5" Grid.Row="0" 
+                                  IsChecked="{Binding TenantClaimSubmitted}"
+                                  VerticalAlignment="Center" Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Column="0" Grid.Row="1" Text="DD금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" Grid.Row="1" 
+                                 Text="{Binding LeaseDepositDd, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,0"/>
+                        
+                        <TextBlock Grid.Column="2" Grid.Row="1" Text="반영금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="3" Grid.Row="1" 
+                                 Text="{Binding LeaseDepositReflected, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,0"/>
+
+                        <TextBlock Grid.Column="4" Grid.Row="1" Text="근거:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="5" Grid.Row="1"
+                                 Text="{Binding LeaseDepositReason, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 상가임대차 확장 패널 -->
+            <Border Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,8"
+                    Visibility="{Binding IsCommercialLeaseExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="상가임대차 상세" FontWeight="SemiBold" FontSize="13" Foreground="#388E3C" Margin="0,0,0,12"/>
+                    <TextBlock Text="상가임대차 관련 데이터는 주택임대차와 공유됩니다." 
+                               FontSize="12" Opacity="0.7" Margin="0,0,0,8"/>
+                    <TextBlock Text="* 주택임대차 패널에서 임차보증금 정보를 입력하세요." 
+                               FontSize="11" Opacity="0.5"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 임금채권 확장 패널 -->
+            <Border Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16"
+                    Visibility="{Binding IsWageClaimExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel>
+                    <TextBlock Text="임금채권 상세" FontWeight="SemiBold" FontSize="13" Foreground="#F57C00" Margin="0,0,0,12"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="DD금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1" 
+                                 Text="{Binding WageClaimDd, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,0"/>
+                        
+                        <TextBlock Grid.Column="2" Text="반영금액:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="3" 
+                                 Text="{Binding WageClaimReflected, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right" Padding="8,6" Margin="0,0,16,0"/>
+
+                        <TextBlock Grid.Column="4" Text="배당요구:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <CheckBox Grid.Column="5" 
+                                  IsChecked="{Binding WageClaimSubmitted}"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="근거:" VerticalAlignment="Center" FontSize="12" Margin="0,0,8,0"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding WageClaimReason, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- 8: 전체 권리 목록 -->
+        <Grid Grid.Row="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -341,8 +757,197 @@
             </Border>
         </Grid>
 
-        <!-- 로딩 오버레이 -->
-        <Border Grid.RowSpan="3" Background="#80000000" CornerRadius="8"
+        <!-- 6: 당해세 섹션 (P-005, P-006) -->
+        <Border Grid.Row="6" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,16,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- etax korea 링크 버튼 -->
+                <Button Grid.Column="0"
+                        Command="{Binding OpenEtaxCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Padding="12,8"
+                        Margin="0,0,8,0"
+                        ToolTip="etax.go.kr 사이트를 열어 당해세를 조회합니다">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🔗" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="etax korea 바로가기" VerticalAlignment="Center" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- 대법원 경매 링크 버튼 (X-002) -->
+                <Button Command="{Binding OpenCourtAuctionCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Padding="12,8"
+                        Margin="0,0,16,0"
+                        ToolTip="대법원 경매 사이트를 열어 경매 정보를 조회합니다">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚖" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="대법원 경매 바로가기" VerticalAlignment="Center" FontSize="12"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- 당해세 입력 -->
+                <TextBlock Grid.Column="1" 
+                           Text="당해세:" 
+                           VerticalAlignment="Center" 
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Margin="0,0,8,0"/>
+                <TextBox Grid.Column="2"
+                         Text="{Binding CurrentTax, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                         Width="150"
+                         Padding="10,8"
+                         HorizontalContentAlignment="Right"/>
+                <TextBlock Grid.Column="3" 
+                           Text="원" 
+                           VerticalAlignment="Center" 
+                           FontSize="12"
+                           Margin="8,0,0,0"
+                           Opacity="0.7"/>
+
+                <!-- 안내 문구 -->
+                <TextBlock Grid.Column="4"
+                           Text="* etax korea에서 당해세를 조회한 후 입력해주세요"
+                           VerticalAlignment="Center"
+                           FontSize="11"
+                           Opacity="0.5"
+                           Margin="24,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <!-- 7: 선순위 합계 섹션 (P-004) -->
+        <Border Grid.Row="7" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,16,0,0">
+            <StackPanel>
+                <!-- 섹션 제목 -->
+                <TextBlock Text="선순위 합계" 
+                           FontWeight="SemiBold" 
+                           FontSize="14" 
+                           Margin="0,0,0,12"/>
+
+                <!-- 합계 테이블 -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 헤더 -->
+                    <Border Grid.Column="0" Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1,1,0,1" Padding="12,8">
+                        <TextBlock Text="예상 낙찰가" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Column="1" Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1,1,0,1" Padding="12,8">
+                        <TextBlock Text="배당가능 재원" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Column="2" Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1,1,0,1" Padding="12,8">
+                        <TextBlock Text="선순위 금액" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Column="3" Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1,1,0,1" Padding="12,8">
+                        <TextBlock Text="차감 배당가능 재원" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Column="4" Grid.Row="0" Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1" Padding="12,8">
+                        <TextBlock Text="롱캡" FontWeight="SemiBold" FontSize="11" HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <!-- 입력/표시 값 -->
+                    <Border Grid.Column="0" Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <TextBox Text="{Binding ExpectedBidPrice, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right"
+                                 Padding="8,6"
+                                 BorderThickness="1"
+                                 BorderBrush="#E0E0E0"/>
+                    </Border>
+                    <Border Grid.Column="1" Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <TextBlock Text="{Binding DistributableAmount, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"
+                                   FontSize="13"/>
+                    </Border>
+                    <Border Grid.Column="2" Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <TextBlock Text="{Binding SeniorRightsTotal, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"
+                                   FontSize="13"
+                                   Foreground="#D32F2F"/>
+                    </Border>
+                    <Border Grid.Column="3" Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <TextBlock Text="{Binding RemainingAmount, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" 
+                                   VerticalAlignment="Center"
+                                   FontSize="13"
+                                   FontWeight="SemiBold">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#388E3C"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding RemainingAmount, Converter={StaticResource LessThanZeroConverter}}" Value="True">
+                                            <Setter Property="Foreground" Value="#D32F2F"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+                    <Border Grid.Column="4" Grid.Row="1" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1" Padding="8">
+                        <TextBox Text="{Binding LongCap, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                 HorizontalContentAlignment="Right"
+                                 Padding="8,6"
+                                 BorderThickness="1"
+                                 BorderBrush="#E0E0E0"/>
+                    </Border>
+
+                    <!-- 부가 정보 행: 경매비용 입력 -->
+                    <Border Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="경매비용:" VerticalAlignment="Center" FontSize="11" Margin="0,0,8,0" Opacity="0.7"/>
+                            <TextBox Text="{Binding AuctionCost, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
+                                     Width="120"
+                                     HorizontalContentAlignment="Right"
+                                     Padding="6,4"
+                                     BorderThickness="1"
+                                     BorderBrush="#E0E0E0"/>
+                            <TextBlock Text="원" VerticalAlignment="Center" FontSize="11" Margin="4,0,0,0" Opacity="0.7"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Grid.Row="2" BorderBrush="#E0E0E0" BorderThickness="1,0,0,1" Padding="8">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock Text="(권리:" VerticalAlignment="Center" FontSize="10" Opacity="0.6"/>
+                            <TextBlock Text="{Binding TotalClaimAmount, StringFormat=N0}" VerticalAlignment="Center" FontSize="10" Opacity="0.6" Margin="2,0,0,0"/>
+                            <TextBlock Text=" + 당해세:" VerticalAlignment="Center" FontSize="10" Opacity="0.6"/>
+                            <TextBlock Text="{Binding CurrentTax, StringFormat=N0}" VerticalAlignment="Center" FontSize="10" Opacity="0.6" Margin="2,0,0,0"/>
+                            <TextBlock Text=")" VerticalAlignment="Center" FontSize="10" Opacity="0.6"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3" Grid.Row="2" Grid.ColumnSpan="2" BorderBrush="#E0E0E0" BorderThickness="1,0,1,1" Padding="8">
+                        <TextBlock Text="= 배당가능재원 - 선순위금액" 
+                                   VerticalAlignment="Center" 
+                                   FontSize="10" 
+                                   Opacity="0.6"
+                                   HorizontalAlignment="Right"/>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+            </Grid>
+        </ScrollViewer>
+
+        <!-- 로딩 오버레이 (ScrollViewer 밖에 위치) -->
+        <Border Background="#80000000" CornerRadius="8"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200"/>
@@ -351,11 +956,11 @@
         </Border>
 
         <!-- 에러 메시지 -->
-        <Border Grid.Row="1" 
-                Background="#FFEBEE" 
+        <Border Background="#FFEBEE" 
                 CornerRadius="8" 
                 Padding="16" 
                 VerticalAlignment="Top"
+                Margin="32,80,32,0"
                 Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
             <TextBlock Text="{Binding ErrorMessage}" Foreground="#C62828"/>
         </Border>

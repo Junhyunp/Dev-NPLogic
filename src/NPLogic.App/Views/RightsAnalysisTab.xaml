@@ -480,12 +480,12 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="합계" 
                                            FontWeight="Bold" 
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                                 <TextBlock Grid.Column="1" 
                                            Text="{Binding TotalDdAmount, StringFormat=N0}" 
                                            HorizontalAlignment="Right"
                                            FontWeight="Bold"
-                                           FontSize="14"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            Margin="0,0,16,0"/>
                                 <TextBlock Grid.Column="2" 
                                            Text="{Binding TotalReflectedAmount, StringFormat=N0}" 
@@ -536,7 +536,7 @@
                                                FontSize="12" 
                                                Foreground="{StaticResource TextSecondaryBrush}"/>
                                     <TextBox Text="{Binding Analysis.ExpectedWinningBid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
-                                             FontSize="20"
+                                             FontSize="{StaticResource FontSizeLarge}"
                                              FontWeight="Bold"
                                              BorderThickness="0"
                                              Background="Transparent"
@@ -597,7 +597,7 @@
                                                        FontSize="12" 
                                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                                             <TextBlock Text="{Binding Analysis.CapAppliedDividend, StringFormat=N0}" 
-                                                       FontSize="24"
+                                                       FontSize="{StaticResource FontSizeH1}"
                                                        FontWeight="Bold"
                                                        Foreground="{StaticResource SuccessBrush}"
                                                        Margin="0,4,0,0"/>
@@ -613,7 +613,7 @@
                                     Margin="0,12,0,0">
                                 <Grid>
                                     <TextBlock Text="예상 회수율" 
-                                               FontSize="14" 
+                                               FontSize="{StaticResource FontSizeH4}" 
                                                FontWeight="SemiBold"/>
                                     <TextBlock HorizontalAlignment="Right">
                                         <Run Text="{Binding Analysis.RecoveryRate, StringFormat=N1}" 
@@ -684,7 +684,7 @@
                                 </Border.Style>
                                 <StackPanel HorizontalAlignment="Center">
                                     <TextBlock x:Name="RiskIcon" 
-                                               FontSize="32" 
+                                               FontSize="{StaticResource FontSizeXXLarge}" 
                                                HorizontalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -769,7 +769,7 @@
                     <Grid Margin="16">
                         <CheckBox Content="권리분석 완료" 
                                   IsChecked="{Binding Analysis.IsCompleted}"
-                                  FontSize="14"
+                                  FontSize="{StaticResource FontSizeH4}"
                                   FontWeight="SemiBold"/>
                         <TextBlock Text="{Binding Analysis.AnalyzedAt, StringFormat='yyyy-MM-dd HH:mm'}" 
                                    HorizontalAlignment="Right"

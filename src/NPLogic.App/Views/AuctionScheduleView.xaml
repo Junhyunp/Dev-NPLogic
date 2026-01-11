@@ -25,7 +25,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="경매 일정" 
+                <TextBlock Text="경공매 일정" 
                            Style="{StaticResource H2TextStyle}"
                            Margin="0,0,0,8"/>
                 <StackPanel Orientation="Horizontal">
@@ -80,16 +80,22 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- 물건 선택 -->
+                <!-- 경매/공매 체크박스 (A-001) -->
                 <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                    <TextBlock Text="물건" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                    <ComboBox ItemsSource="{Binding Properties}" 
-                              SelectedItem="{Binding SelectedProperty}"
-                              DisplayMemberPath="AddressFull"
-                              Width="250" Padding="10,8"/>
+                    <TextBlock Text="유형" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <CheckBox Content="경매" 
+                                  IsChecked="{Binding ShowAuction}" 
+                                  Margin="0,0,12,0"
+                                  VerticalContentAlignment="Center"/>
+                        <CheckBox Content="공매" 
+                                  IsChecked="{Binding ShowPublicSale}"
+                                  VerticalContentAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <!-- 상태 -->
@@ -135,7 +141,38 @@
                           SelectionMode="Single"
                           RowHeight="50">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="경매일" Binding="{Binding AuctionDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                        <!-- 유형 컬럼 (A-001) -->
+                        <DataGridTemplateColumn Header="유형" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="6,3" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E3F2FD"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ScheduleType}" Value="public_sale">
+                                                        <Setter Property="Background" Value="#FFF3E0"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding ScheduleTypeDisplay}" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#1976D2"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ScheduleType}" Value="public_sale">
+                                                            <Setter Property="Foreground" Value="#E65100"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="경공매일" Binding="{Binding AuctionDate, StringFormat=yyyy-MM-dd}" Width="100"/>
                         <DataGridTemplateColumn Header="상태" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -175,8 +212,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="사건번호" Binding="{Binding AuctionNumber}" Width="120"/>
-                        <DataGridTextColumn Header="물건 주소" Binding="{Binding Property.AddressFull}" Width="*"/>
+                        <DataGridTextColumn Header="사건번호" Binding="{Binding AuctionNumber}" Width="*"/>
                         <DataGridTextColumn Header="최저매각가" Binding="{Binding MinimumBid, StringFormat=N0}" Width="120"/>
                         <DataGridTextColumn Header="낙찰가" Binding="{Binding SalePrice, StringFormat=N0}" Width="120"/>
                         <DataGridTextColumn Header="낙찰률" Binding="{Binding BidRate, StringFormat={}{0:F1}%}" Width="80"/>
@@ -216,14 +252,15 @@
                                     Padding="8,4"/>
                         </Grid>
 
-                        <!-- 물건 선택 -->
+                        <!-- 경공매 유형 (A-001) -->
                         <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="물건 선택" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
-                            <ComboBox ItemsSource="{Binding Properties}" 
-                                      SelectedValue="{Binding EditPropertyId}"
-                                      SelectedValuePath="Id"
-                                      DisplayMemberPath="AddressFull"
-                                      Padding="10,8"/>
+                            <TextBlock Text="유형 *" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <ComboBox SelectedValue="{Binding EditScheduleType}" 
+                                      SelectedValuePath="Tag"
+                                      Padding="10,8">
+                                <ComboBoxItem Content="경매" Tag="auction"/>
+                                <ComboBoxItem Content="공매" Tag="public_sale"/>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- 사건번호 -->
@@ -233,9 +270,9 @@
                                      Padding="10,8"/>
                         </StackPanel>
 
-                        <!-- 경매일 -->
+                        <!-- 경공매일 -->
                         <StackPanel Margin="0,0,0,12">
-                            <TextBlock Text="경매일 *" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="경공매일 *" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
                             <DatePicker SelectedDate="{Binding EditAuctionDate}"/>
                         </StackPanel>
 
@@ -272,7 +309,7 @@
                         <!-- 인터링/상계회수 섹션 -->
                         <Border Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="12" Margin="0,0,0,16">
                             <StackPanel>
-                                <TextBlock Text="인터링/상계회수" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,12"/>
+                                <TextBlock Text="인터링/상계회수" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,12"/>
                                 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -306,6 +343,109 @@
                                         <TextBox Text="{Binding EditInterimInterestRecovery, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" Padding="8,6"/>
                                     </StackPanel>
                                 </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 대법원 캡처 섹션 (A-002) -->
+                        <Border Background="{StaticResource BackgroundColor}" CornerRadius="8" Padding="12" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="대법원 경매 캡처" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,12"/>
+                                
+                                <!-- 사건내역 캡처 -->
+                                <StackPanel Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="사건내역" FontSize="11" Opacity="0.6" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Content="업로드" 
+                                                    Command="{Binding UploadCaseCaptureCommand}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    Margin="0,0,4,0"/>
+                                            <Button Content="보기" 
+                                                    Command="{Binding ShowCaptureImageCommand}"
+                                                    CommandParameter="{Binding EditCaseCaptureUrl}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    IsEnabled="{Binding EditCaseCaptureUrl, Converter={StaticResource NotNullToBoolConverter}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="{Binding EditCaseCaptureUrl}" 
+                                               FontSize="10" 
+                                               Opacity="0.5" 
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding EditCaseCaptureUrl, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                </StackPanel>
+
+                                <!-- 기일내역 캡처 -->
+                                <StackPanel Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="기일내역" FontSize="11" Opacity="0.6" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Content="업로드" 
+                                                    Command="{Binding UploadScheduleCaptureCommand}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    Margin="0,0,4,0"/>
+                                            <Button Content="보기" 
+                                                    Command="{Binding ShowCaptureImageCommand}"
+                                                    CommandParameter="{Binding EditScheduleCaptureUrl}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    IsEnabled="{Binding EditScheduleCaptureUrl, Converter={StaticResource NotNullToBoolConverter}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="{Binding EditScheduleCaptureUrl}" 
+                                               FontSize="10" 
+                                               Opacity="0.5" 
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding EditScheduleCaptureUrl, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                </StackPanel>
+
+                                <!-- 문건송달내역 캡처 -->
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="문건송달내역" FontSize="11" Opacity="0.6" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <Button Content="업로드" 
+                                                    Command="{Binding UploadDocumentCaptureCommand}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    Margin="0,0,4,0"/>
+                                            <Button Content="보기" 
+                                                    Command="{Binding ShowCaptureImageCommand}"
+                                                    CommandParameter="{Binding EditDocumentCaptureUrl}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="8,4"
+                                                    FontSize="11"
+                                                    IsEnabled="{Binding EditDocumentCaptureUrl, Converter={StaticResource NotNullToBoolConverter}}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Text="{Binding EditDocumentCaptureUrl}" 
+                                               FontSize="10" 
+                                               Opacity="0.5" 
+                                               TextTrimming="CharacterEllipsis"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding EditDocumentCaptureUrl, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 

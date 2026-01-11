@@ -17,6 +17,7 @@ namespace NPLogic.ViewModels
     {
         private readonly BorrowerRepository _borrowerRepository;
         private readonly PropertyRepository _propertyRepository;
+        private readonly PropertyQaRepository _qaRepository;
         private readonly AuthService _authService;
 
         [ObservableProperty]
@@ -30,6 +31,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<Property> _borrowerProperties = new();
+
+        // ========== QA 관련 (Q-001 ~ Q-003) ==========
+        [ObservableProperty]
+        private ObservableCollection<PropertyQa> _borrowerQas = new();
+
+        [ObservableProperty]
+        private string _newQuestion = "";
 
         [ObservableProperty]
         private string _searchText = "";
@@ -86,10 +94,12 @@ namespace NPLogic.ViewModels
         public BorrowerOverviewViewModel(
             BorrowerRepository borrowerRepository,
             PropertyRepository propertyRepository,
+            PropertyQaRepository qaRepository,
             AuthService authService)
         {
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
+            _qaRepository = qaRepository ?? throw new ArgumentNullException(nameof(qaRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
 
             InitializeFilterOptions();
@@ -237,6 +247,7 @@ namespace NPLogic.ViewModels
             if (SelectedBorrower == null)
             {
                 BorrowerProperties.Clear();
+                BorrowerQas.Clear();
                 return;
             }
 
@@ -254,10 +265,89 @@ namespace NPLogic.ViewModels
                 {
                     BorrowerProperties.Add(property);
                 }
+
+                // QA 로드 (Q-003)
+                await LoadBorrowerQasAsync();
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"담보물건 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 차주별 QA 로드 (Q-003 집계)
+        /// </summary>
+        private async Task LoadBorrowerQasAsync()
+        {
+            if (SelectedBorrower == null) return;
+
+            try
+            {
+                var qas = await _qaRepository.GetByBorrowerIdAsync(SelectedBorrower.Id);
+                BorrowerQas.Clear();
+                foreach (var qa in qas)
+                {
+                    BorrowerQas.Add(qa);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"QA 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// QA 답변 저장
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveQAAnswerAsync(PropertyQa qa)
+        {
+            if (qa == null) return;
+
+            try
+            {
+                IsLoading = true;
+                qa.AnsweredAt = DateTime.UtcNow;
+                // 현재 사용자 정보가 있다면 설정
+                // qa.AnsweredBy = CurrentUser?.Id; 
+
+                await _qaRepository.UpdateAsync(qa);
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("QA 답변이 저장되었습니다.");
+                await LoadBorrowerQasAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"QA 저장 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// QA 삭제
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteQAAsync(PropertyQa qa)
+        {
+            if (qa == null) return;
+
+            try
+            {
+                IsLoading = true;
+                await _qaRepository.DeleteAsync(qa.Id);
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("QA가 삭제되었습니다.");
+                await LoadBorrowerQasAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"QA 삭제 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 

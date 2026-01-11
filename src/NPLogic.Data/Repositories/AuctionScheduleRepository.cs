@@ -171,6 +171,7 @@ namespace NPLogic.Data.Repositories
         {
             Id = t.Id,
             PropertyId = t.PropertyId,
+            ScheduleType = t.ScheduleType ?? "auction",
             AuctionNumber = t.AuctionNumber,
             AuctionDate = t.AuctionDate,
             BidDate = t.BidDate,
@@ -181,6 +182,9 @@ namespace NPLogic.Data.Repositories
             InterimPrincipalRecovery = t.InterimPrincipalRecovery,
             InterimInterestOffset = t.InterimInterestOffset,
             InterimInterestRecovery = t.InterimInterestRecovery,
+            CaseCaptureUrl = t.CaseCaptureUrl,
+            ScheduleCaptureUrl = t.ScheduleCaptureUrl,
+            DocumentCaptureUrl = t.DocumentCaptureUrl,
             CreatedAt = t.CreatedAt,
             UpdatedAt = t.UpdatedAt
         };
@@ -189,6 +193,7 @@ namespace NPLogic.Data.Repositories
         {
             Id = a.Id,
             PropertyId = a.PropertyId,
+            ScheduleType = a.ScheduleType,
             AuctionNumber = a.AuctionNumber,
             AuctionDate = a.AuctionDate,
             BidDate = a.BidDate,
@@ -199,6 +204,9 @@ namespace NPLogic.Data.Repositories
             InterimPrincipalRecovery = a.InterimPrincipalRecovery,
             InterimInterestOffset = a.InterimInterestOffset,
             InterimInterestRecovery = a.InterimInterestRecovery,
+            CaseCaptureUrl = a.CaseCaptureUrl,
+            ScheduleCaptureUrl = a.ScheduleCaptureUrl,
+            DocumentCaptureUrl = a.DocumentCaptureUrl,
             CreatedAt = a.CreatedAt,
             UpdatedAt = a.UpdatedAt
         };
@@ -211,6 +219,7 @@ namespace NPLogic.Data.Repositories
     {
         [Postgrest.Attributes.PrimaryKey("id", false)] public Guid Id { get; set; }
         [Postgrest.Attributes.Column("property_id")] public Guid? PropertyId { get; set; }
+        [Postgrest.Attributes.Column("schedule_type")] public string? ScheduleType { get; set; }
         [Postgrest.Attributes.Column("auction_number")] public string? AuctionNumber { get; set; }
         [Postgrest.Attributes.Column("auction_date")] public DateTime? AuctionDate { get; set; }
         [Postgrest.Attributes.Column("bid_date")] public DateTime? BidDate { get; set; }
@@ -221,6 +230,9 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("interim_principal_recovery")] public decimal InterimPrincipalRecovery { get; set; }
         [Postgrest.Attributes.Column("interim_interest_offset")] public decimal InterimInterestOffset { get; set; }
         [Postgrest.Attributes.Column("interim_interest_recovery")] public decimal InterimInterestRecovery { get; set; }
+        [Postgrest.Attributes.Column("case_capture_url")] public string? CaseCaptureUrl { get; set; }
+        [Postgrest.Attributes.Column("schedule_capture_url")] public string? ScheduleCaptureUrl { get; set; }
+        [Postgrest.Attributes.Column("document_capture_url")] public string? DocumentCaptureUrl { get; set; }
         [Postgrest.Attributes.Column("created_at")] public DateTime CreatedAt { get; set; }
         [Postgrest.Attributes.Column("updated_at")] public DateTime UpdatedAt { get; set; }
     }

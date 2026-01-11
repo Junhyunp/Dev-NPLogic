@@ -1,0 +1,171 @@
+<UserControl x:Class="NPLogic.Views.ProgramSettingsTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
+             xmlns:System="clr-namespace:System;assembly=mscorlib"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200">
+    
+    <UserControl.Resources>
+        <Style x:Key="SettingCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- ========== 헤더 ========== -->
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="프로그램 기초데이터 설정" 
+                               Style="{StaticResource H2TextStyle}"
+                               Margin="0,0,0,8"/>
+                    <TextBlock Text="법원별 정보, 법률적용률, 임대차 기준 등 프로그램 레벨의 기초 데이터를 설정합니다."
+                               Style="{StaticResource BodyTextStyle}"
+                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                </StackPanel>
+                <Button Grid.Column="1" 
+                        Content="🔄 새로고침" 
+                        Command="{Binding RefreshCommand}" 
+                        Style="{StaticResource SecondaryButton}"
+                        Padding="16,8"/>
+            </Grid>
+            
+            <!-- ========== 1. 법원별 정보 설정 (C-001) ========== -->
+            <Border Grid.Row="1" Style="{StaticResource SettingCard}">
+                <controls:NPExpandableSection Header="🏛️ 법원별 정보 설정" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding Courts}"
+                              SelectedItem="{Binding SelectedCourt}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              HorizontalAlignment="Stretch"
+                              MinHeight="150"
+                              MaxHeight="250">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="법원코드" Binding="{Binding CourtCode}" Width="100"/>
+                            <DataGridTextColumn Header="법원명" Binding="{Binding CourtName}" Width="*" MinWidth="150"/>
+                            <DataGridTextColumn Header="지역" Binding="{Binding Region}" Width="80"/>
+                            <DataGridTextColumn Header="감액율1" Binding="{Binding DiscountRate1, StringFormat=P0}" Width="80"/>
+                            <DataGridTextColumn Header="감액율2" Binding="{Binding DiscountRate2, StringFormat=P0}" Width="80"/>
+                            <DataGridTextColumn Header="감액율3" Binding="{Binding DiscountRate3, StringFormat=P0}" Width="80"/>
+                            <DataGridTextColumn Header="감액율4" Binding="{Binding DiscountRate4, StringFormat=P0}" Width="80"/>
+                            <DataGridTemplateColumn Header="작업" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="저장" Command="{Binding DataContext.SaveCourtCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </controls:NPExpandableSection>
+            </Border>
+            
+            <!-- ========== 2. 법률적용률 설정 (C-002) ========== -->
+            <Border Grid.Row="2" Style="{StaticResource SettingCard}">
+                <controls:NPExpandableSection Header="⚖️ 법률적용률 설정" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding LegalRates}"
+                              SelectedItem="{Binding SelectedLegalRate}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              HorizontalAlignment="Stretch"
+                              MinHeight="150"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="물건유형" Binding="{Binding PropertyType}" Width="150"/>
+                            <DataGridTextColumn Header="법률적용률(%)" Binding="{Binding AppliedRate}" Width="130"/>
+                            <DataGridTextColumn Header="설명" Binding="{Binding Description}" Width="*" MinWidth="200"/>
+                            <DataGridTemplateColumn Header="작업" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="저장" Command="{Binding DataContext.SaveLegalRateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </controls:NPExpandableSection>
+            </Border>
+            
+            <!-- ========== 3 & 4. 임대차 기준 (C-003, C-004) ========== -->
+            <Border Grid.Row="3" Style="{StaticResource SettingCard}">
+                <controls:NPExpandableSection Header="🏠 임대차 기준 설정" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding LeaseStandards}"
+                              SelectedItem="{Binding SelectedLeaseStandard}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              HorizontalAlignment="Stretch"
+                              MinHeight="150"
+                              MaxHeight="250">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="유형" Binding="{Binding LeaseType}" Width="100"/>
+                            <DataGridTextColumn Header="지역" Binding="{Binding Region}" Width="80"/>
+                            <DataGridTextColumn Header="시작일" Binding="{Binding StartDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="종료일" Binding="{Binding EndDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                            <DataGridTextColumn Header="보증금범위" Binding="{Binding DepositLimit, StringFormat=N0}" Width="*" MinWidth="120"/>
+                            <DataGridTextColumn Header="변제금액" Binding="{Binding CompensationAmount, StringFormat=N0}" Width="*" MinWidth="120"/>
+                            <DataGridTemplateColumn Header="작업" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="저장" Command="{Binding DataContext.SaveLeaseStandardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </controls:NPExpandableSection>
+            </Border>
+            
+            <!-- ========== 5. 경매비용 산정 데이터 (C-005) ========== -->
+            <Border Grid.Row="4" Style="{StaticResource SettingCard}">
+                <controls:NPExpandableSection Header="💰 경매비용 산정 데이터" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding AuctionCostStandards}"
+                              SelectedItem="{Binding SelectedAuctionCostStandard}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              HorizontalAlignment="Stretch"
+                              MinHeight="150"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="항목명" Binding="{Binding CostType}" Width="150"/>
+                            <DataGridTextColumn Header="계산방식" Binding="{Binding CalculationMethod}" Width="100"/>
+                            <DataGridTextColumn Header="기본금액" Binding="{Binding BaseAmount, StringFormat=N0}" Width="130"/>
+                            <DataGridTextColumn Header="요율(%)" Binding="{Binding Rate}" Width="80"/>
+                            <DataGridTextColumn Header="설명" Binding="{Binding Description}" Width="*" MinWidth="200"/>
+                            <DataGridTemplateColumn Header="작업" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="저장" Command="{Binding DataContext.SaveAuctionCostStandardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </controls:NPExpandableSection>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -34,6 +34,17 @@ namespace NPLogic.Core.Models
 
         public string? AddressDetail { get; set; }
 
+        /// <summary>
+        /// 표시용 주소 (ComboBox 등에서 사용)
+        /// 지번주소 → 도로명주소 → 전체주소 → 물건번호 순으로 fallback
+        /// </summary>
+        public string DisplayAddress => 
+            !string.IsNullOrWhiteSpace(AddressJibun) ? AddressJibun :
+            !string.IsNullOrWhiteSpace(AddressRoad) ? AddressRoad :
+            !string.IsNullOrWhiteSpace(AddressFull) ? AddressFull :
+            !string.IsNullOrWhiteSpace(PropertyNumber) ? $"[{PropertyNumber}]" :
+            "(주소없음)";
+
         // 기본 정보
         public decimal? LandArea { get; set; }
 
@@ -119,6 +130,25 @@ namespace NPLogic.Core.Models
 
         /// <summary>Interim 완료 여부</summary>
         public bool InterimCompleted { get; set; }
+
+        // ========== 필터용 필드 (F-001) ==========
+
+        /// <summary>소유자 전입 여부</summary>
+        public bool OwnerMoveIn { get; set; }
+
+        /// <summary>차주 거주 여부</summary>
+        public bool BorrowerResiding { get; set; }
+
+        // ========== Borrower 조인용 확장 필드 (런타임 전용) ==========
+
+        /// <summary>차주 회생 여부 (Borrower 테이블에서 조인)</summary>
+        public bool? BorrowerIsRestructuring { get; set; }
+
+        /// <summary>차주 개회 여부 (Borrower 테이블에서 조인)</summary>
+        public bool? BorrowerIsOpened { get; set; }
+
+        /// <summary>차주 사망 여부 (Borrower 테이블에서 조인)</summary>
+        public bool? BorrowerIsDeceased { get; set; }
 
         /// <summary>전체 진행 상태 (pending/processing/completed)</summary>
         public string OverallStatus => Status;
@@ -282,6 +312,27 @@ namespace NPLogic.Core.Models
         Pending,      // 대기
         Processing,   // 진행중
         Completed     // 완료
+    }
+
+    /// <summary>
+    /// QA 모델 (Q-001 ~ Q-003)
+    /// </summary>
+    public class PropertyQa
+    {
+        public Guid Id { get; set; }
+        public Guid PropertyId { get; set; }
+        public string Question { get; set; } = "";
+        public string? Answer { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public Guid? AnsweredBy { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? AnsweredAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        // 조인용 확장 필드
+        public string? PropertyNumber { get; set; }
+        public string? AddressFull { get; set; }
+        public bool IsAnswered => !string.IsNullOrWhiteSpace(Answer);
     }
 }
 

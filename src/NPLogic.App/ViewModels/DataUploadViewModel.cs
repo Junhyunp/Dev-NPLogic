@@ -744,6 +744,24 @@ namespace NPLogic.ViewModels
                     result.FailedCount = propertyResult.Failed;
                     break;
 
+                case SheetType.RegistryDetail:
+                    // Sheet C-2: 등기부등본정보 - OCR로 처리하므로 여기서는 스킵
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet C-2 (등기부등본정보) 스킵 - OCR 탭에서 처리");
+                    result.Success = true;
+                    return result;
+
+                case SheetType.CollateralSetting:
+                    // Sheet C-3: 담보설정정보 - 향후 구현 예정
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet C-3 (담보설정정보) 스킵 - 향후 구현 예정");
+                    result.Success = true;
+                    return result;
+
+                case SheetType.Guarantee:
+                    // Sheet D: 보증정보 - 향후 구현 예정
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet D (보증정보) 스킵 - 향후 구현 예정");
+                    result.Success = true;
+                    return result;
+
                 default:
                     result.ErrorMessage = "알 수 없는 시트 유형";
                     result.Success = false;
@@ -1033,6 +1051,16 @@ namespace NPLogic.ViewModels
             // 주소 조합을 위한 임시 저장소
             var addressParts = new Dictionary<int, Dictionary<string, string>>();
 
+            // 디버그: 사용 가능한 컬럼 출력
+            System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] 데이터 행 수: {data.Count}");
+            System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] 컬럼 수: {columns.Count}");
+            System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] 컬럼 목록:");
+            foreach (var col in columns.Take(20))
+            {
+                var rule = SheetMappingConfig.FindMappingRule(rules, col);
+                System.Diagnostics.Debug.WriteLine($"  - '{col}' → {(rule != null ? rule.DbColumnName : "(매핑 없음)")}");
+            }
+
             for (int i = 0; i < data.Count; i++)
             {
                 var row = data[i];
@@ -1077,6 +1105,12 @@ namespace NPLogic.ViewModels
                         if (rule == null) continue;
 
                         var value = row.ContainsKey(col) ? rule.ConvertValue(row[col]) : null;
+                        
+                        // 첫 번째 행에서 매핑된 값 디버그 출력
+                        if (i == 0 && value != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row 0: '{col}' → {rule.DbColumnName} = '{value}'");
+                        }
 
                         switch (rule.DbColumnName)
                         {
@@ -1135,14 +1169,28 @@ namespace NPLogic.ViewModels
                         property.AddressFull = string.Join(" ", addressComponents);
                     }
 
+                    // 디버그: 첫 5개 행의 속성 값 출력
+                    if (i < 5)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: PropertyNumber='{property.PropertyNumber}', DebtorName='{property.DebtorName}', CollateralNumber='{property.CollateralNumber}', PropertyType='{property.PropertyType}'");
+                    }
+
                     if (!string.IsNullOrEmpty(property.PropertyNumber))
                     {
                         properties.Add(property);
                     }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: PropertyNumber가 비어있어 스킵");
+                    }
                 }
-                catch { /* 개별 행 에러 무시 */ }
+                catch (Exception ex) 
+                { 
+                    System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: 에러 - {ex.Message}");
+                }
             }
 
+            System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] 저장할 Property 수: {properties.Count}");
             return await _propertyRepository.BulkUpsertAsync(properties);
         }
 
@@ -1379,6 +1427,9 @@ namespace NPLogic.ViewModels
             SheetType.BorrowerRestructuring => "회생차주정보",
             SheetType.Loan => "채권정보",
             SheetType.Property => "담보물건정보",
+            SheetType.RegistryDetail => "등기부등본정보",
+            SheetType.CollateralSetting => "담보설정정보",
+            SheetType.Guarantee => "보증정보",
             _ => "알 수 없음"
         };
 

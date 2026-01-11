@@ -86,7 +86,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Text="{Binding RegistryViewModel.OcrServerStatus}" FontSize="12">
+                                <TextBlock Text="{Binding RegistryViewModel.OcrServerStatus}" FontSize="{StaticResource FontSizeBody}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Style.Triggers>
@@ -105,7 +105,7 @@
                                         Command="{Binding RegistryViewModel.SelectOcrPdfFilesCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="16,8"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         IsEnabled="{Binding RegistryViewModel.IsOcrServerReady}"/>
                             </StackPanel>
                         </Grid>
@@ -130,7 +130,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="12"/>
+                                    <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                     <Button Grid.Column="1"
                                             Content="✕ 전체 취소"
                                             Command="{Binding RegistryViewModel.CancelAllOcrPdfFilesCommand}"
@@ -162,7 +162,7 @@
                                                         
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <TextBlock Text="{Binding FileName}" 
-                                                                       FontSize="12"
+                                                                       FontSize="{StaticResource FontSizeBody}"
                                                                        TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Text="{Binding FileSizeFormatted}" 
                                                                        FontSize="10"
@@ -217,7 +217,7 @@
                                                                 BorderThickness="0"
                                                                 Foreground="{StaticResource TextSecondaryBrush}"
                                                                 Padding="6,2"
-                                                                FontSize="12"
+                                                                FontSize="{StaticResource FontSizeBody}"
                                                                 Cursor="Hand"/>
                                                     </Grid>
                                                 </Border>
@@ -235,7 +235,7 @@
                                 Padding="24"
                                 Visibility="{Binding RegistryViewModel.HasOcrPdfFiles, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="📄" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                <TextBlock Text="📄" FontSize="{StaticResource FontSizeXXLarge}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                 <TextBlock Text="등기부등본 PDF 파일을 선택하세요" 
                                            Style="{StaticResource CaptionTextStyle}"
                                            HorizontalAlignment="Center"
@@ -276,7 +276,7 @@
                                         Command="{Binding RegistryViewModel.CancelOcrProcessingCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="16,8"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"
                                         Visibility="{Binding RegistryViewModel.IsOcrProcessing, Converter={StaticResource BoolToVisibilityConverter}}"/>
                                 
@@ -285,7 +285,7 @@
                                         Command="{Binding RegistryViewModel.StartOcrProcessingCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="20,8"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Visibility="{Binding RegistryViewModel.IsOcrProcessing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                         IsEnabled="{Binding RegistryViewModel.HasOcrPdfFiles}"/>
                             </StackPanel>
@@ -308,7 +308,7 @@
                                     </Grid.ColumnDefinitions>
                                     
                                     <StackPanel>
-                                        <TextBlock Text="📋 OCR 추출 결과" FontWeight="SemiBold" FontSize="14"/>
+                                        <TextBlock Text="📋 OCR 추출 결과" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
                                         <TextBlock Text="{Binding RegistryViewModel.OcrExtractedAddress}" 
                                                    Style="{StaticResource CaptionTextStyle}"
                                                    Opacity="0.8"
@@ -321,7 +321,7 @@
                                             Command="{Binding RegistryViewModel.SaveOcrResultsCommand}"
                                             Style="{StaticResource PrimaryButton}"
                                             Padding="16,8"
-                                            FontSize="12"/>
+                                            FontSize="{StaticResource FontSizeBody}"/>
                                 </Grid>
                                 
                                 <!-- 요약 정보 -->
@@ -377,7 +377,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
@@ -443,14 +442,6 @@
                             </Grid>
                         </StackPanel>
                         
-                        <!-- 물건지 (DD) -->
-                        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,16,0">
-                            <TextBlock Text="물건지 (DD 데이터)" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding RegistryViewModel.DdAddress, Mode=TwoWay}"
-                                     Style="{StaticResource NPTextBoxStyle}"
-                                     IsReadOnly="True"
-                                     Opacity="0.7"/>
-                        </StackPanel>
                     </Grid>
                 </controls:NPExpandableSection>
             </Border>
@@ -478,13 +469,13 @@
                                         Command="{Binding RegistryViewModel.AddOwnerCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="12,6"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"/>
                                 <Button Content="삭제"
                                         Command="{Binding RegistryViewModel.DeleteOwnerCommand}"
                                         Style="{StaticResource DangerButton}"
                                         Padding="12,6"
-                                        FontSize="12"/>
+                                        FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Grid>
                         
@@ -555,13 +546,13 @@
                                         Command="{Binding RegistryViewModel.AddGapguRightCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="12,6"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"/>
                                 <Button Content="삭제"
                                         Command="{Binding RegistryViewModel.DeleteGapguRightCommand}"
                                         Style="{StaticResource DangerButton}"
                                         Padding="12,6"
-                                        FontSize="12"/>
+                                        FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Grid>
                         
@@ -641,13 +632,13 @@
                                         Command="{Binding RegistryViewModel.AddEulguRightCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="12,6"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"/>
                                 <Button Content="삭제"
                                         Command="{Binding RegistryViewModel.DeleteEulguRightCommand}"
                                         Style="{StaticResource DangerButton}"
                                         Padding="12,6"
-                                        FontSize="12"/>
+                                        FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Grid>
                         

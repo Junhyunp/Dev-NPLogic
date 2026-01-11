@@ -71,7 +71,7 @@
                     <TextBlock x:Name="ProgramNameText"
                                Text=""
                                Foreground="#A0C4E8"
-                               FontSize="14"
+                               FontSize="{StaticResource FontSizeH4}"
                                Margin="16,0,0,0"
                                VerticalAlignment="Center"/>
                 </StackPanel>
@@ -104,18 +104,18 @@
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="총 물건:" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center"/>
                         <TextBlock x:Name="TotalCountText" 
                                    Text="0" 
-                                   FontSize="14" 
+                                   FontSize="{StaticResource FontSizeH4}" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource PrimaryBrush}"
                                    Margin="6,0,0,0"
                                    VerticalAlignment="Center"/>
                         <TextBlock Text="건" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    Margin="2,0,0,0"
                                    VerticalAlignment="Center"/>
@@ -131,18 +131,18 @@
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="완료:" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource SuccessTextBrush}"
                                    VerticalAlignment="Center"/>
                         <TextBlock x:Name="CompletedCountText" 
                                    Text="0" 
-                                   FontSize="14" 
+                                   FontSize="{StaticResource FontSizeH4}" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource SuccessTextBrush}"
                                    Margin="6,0,0,0"
                                    VerticalAlignment="Center"/>
                         <TextBlock Text="건" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource SuccessTextBrush}"
                                    Margin="2,0,0,0"
                                    VerticalAlignment="Center"/>
@@ -158,18 +158,18 @@
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="진행 중:" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource WarningTextBrush}"
                                    VerticalAlignment="Center"/>
                         <TextBlock x:Name="ProcessingCountText" 
                                    Text="0" 
-                                   FontSize="14" 
+                                   FontSize="{StaticResource FontSizeH4}" 
                                    FontWeight="Bold"
                                    Foreground="{StaticResource WarningTextBrush}"
                                    Margin="6,0,0,0"
                                    VerticalAlignment="Center"/>
                         <TextBlock Text="건" 
-                                   FontSize="12" 
+                                   FontSize="{StaticResource FontSizeBody}" 
                                    Foreground="{StaticResource WarningTextBrush}"
                                    Margin="2,0,0,0"
                                    VerticalAlignment="Center"/>
@@ -206,19 +206,19 @@
             <DataGrid.Columns>
                 <!-- 차주번호 -->
                 <DataGridTextColumn Header="차주번호" 
-                                    Binding="{Binding PropertyNumber}" 
+                                    Binding="{Binding BorrowerNumber}" 
+                                    Width="80"
+                                    IsReadOnly="True"/>
+                
+                <!-- 물건번호 -->
+                <DataGridTextColumn Header="물건번호" 
+                                    Binding="{Binding CollateralNumber}" 
                                     Width="90"
                                     IsReadOnly="True"/>
                 
                 <!-- 차주명 -->
                 <DataGridTextColumn Header="차주명" 
                                     Binding="{Binding DebtorName}" 
-                                    Width="80"
-                                    IsReadOnly="True"/>
-                
-                <!-- 담보번호 -->
-                <DataGridTextColumn Header="담보번호" 
-                                    Binding="{Binding CollateralNumber}" 
                                     Width="80"
                                     IsReadOnly="True"/>
                 

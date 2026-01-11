@@ -3,12 +3,17 @@ using System;
 namespace NPLogic.Core.Models
 {
     /// <summary>
-    /// 경매 일정 모델
+    /// 경공매 일정 모델
     /// </summary>
     public class AuctionSchedule
     {
         public Guid Id { get; set; }
         public Guid? PropertyId { get; set; }
+        
+        /// <summary>
+        /// 일정 유형: auction(경매), public_sale(공매)
+        /// </summary>
+        public string ScheduleType { get; set; } = "auction";
         
         /// <summary>
         /// 사건번호
@@ -61,6 +66,23 @@ namespace NPLogic.Core.Models
         /// 인터링 이자회수
         /// </summary>
         public decimal InterimInterestRecovery { get; set; }
+
+        // ========== 대법원 경매 캡처 (A-002) ==========
+        
+        /// <summary>
+        /// 사건내역 캡처 이미지 URL
+        /// </summary>
+        public string? CaseCaptureUrl { get; set; }
+        
+        /// <summary>
+        /// 기일내역 캡처 이미지 URL
+        /// </summary>
+        public string? ScheduleCaptureUrl { get; set; }
+        
+        /// <summary>
+        /// 문건송달내역 캡처 이미지 URL
+        /// </summary>
+        public string? DocumentCaptureUrl { get; set; }
         
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -81,6 +103,16 @@ namespace NPLogic.Core.Models
             "completed" => "완료",
             "cancelled" => "취소",
             _ => Status
+        };
+
+        /// <summary>
+        /// 일정 유형 표시 (경매/공매)
+        /// </summary>
+        public string ScheduleTypeDisplay => ScheduleType switch
+        {
+            "auction" => "경매",
+            "public_sale" => "공매",
+            _ => ScheduleType
         };
 
         /// <summary>

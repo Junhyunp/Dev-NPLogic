@@ -818,6 +818,8 @@ namespace NPLogic.ViewModels
 
                 case SheetType.Property:
                     // Sheet C-1: 담보물건정보 -> properties 테이블
+                    // SheetMappingConfig 사용하여 중앙화된 매핑 적용
+                    var mappingRules = SheetMappingConfig.GetMappingRules(SheetType.Property);
                     int rowIndex = 0;
                     foreach (var row in data)
                     {
@@ -827,21 +829,30 @@ namespace NPLogic.ViewModels
                         
                         try
                         {
-                            var property = MapRowToProperty(row, programId);
-                            
-                            // 물건번호 설정 - 우선순위: CollateralNumber > PropertyNumber > 자동생성
-                            string finalPropertyNumber;
-                            if (!string.IsNullOrEmpty(property.CollateralNumber))
+                            // 중앙화된 매핑 규칙 사용
+                            var property = MapRowToPropertyWithRules(row, columns, mappingRules, programId);
+                            if (property == null)
                             {
-                                finalPropertyNumber = property.CollateralNumber;
+                                failed++;
+                                continue;
                             }
-                            else if (!string.IsNullOrEmpty(property.PropertyNumber) && 
-                                     !property.PropertyNumber.All(char.IsDigit))
+                            
+                            // 물건번호 설정 - 우선순위: 경매사건번호(PropertyNumber) > 물건번호(CollateralNumber) > 자동생성
+                            string finalPropertyNumber;
+                            if (!string.IsNullOrEmpty(property.PropertyNumber) && 
+                                !property.PropertyNumber.All(char.IsDigit))
                             {
+                                // 경매사건번호(IBK)가 있으면 사용
                                 finalPropertyNumber = property.PropertyNumber;
+                            }
+                            else if (!string.IsNullOrEmpty(property.CollateralNumber))
+                            {
+                                // 물건번호가 있으면 사용
+                                finalPropertyNumber = property.CollateralNumber;
                             }
                             else
                             {
+                                // 없으면 자동생성
                                 var prefix = property.BorrowerNumber ?? sheet.Name;
                                 finalPropertyNumber = $"{prefix}-P{rowIndex}";
                             }

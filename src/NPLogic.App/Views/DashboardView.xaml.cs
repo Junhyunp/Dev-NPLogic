@@ -544,18 +544,12 @@ namespace NPLogic.Views
                     break;
                     
                 case "basicdata":
-                    // 기초데이터 탭: BasicDataTab 로드
-                    var basicDataTab = serviceProvider.GetService<BasicDataTab>();
-                    if (basicDataTab != null)
+                    // 기초데이터 탭: ProgramSettingsTab 로드 (프로그램 레벨 설정 화면)
+                    // 참고: 물건별 담보물건 정보는 PropertyDetailView의 BasicDataTab에서 관리
+                    var programSettingsTab = serviceProvider.GetService<ProgramSettingsTab>();
+                    if (programSettingsTab != null)
                     {
-                        // PropertyDetailViewModel을 사용하여 컬럼 매핑 등의 기능 지원
-                        var propertyDetailViewModel = serviceProvider.GetService<PropertyDetailViewModel>();
-                        if (propertyDetailViewModel != null)
-                        {
-                            propertyDetailViewModel.LoadProperty(property);
-                            basicDataTab.DataContext = propertyDetailViewModel;
-                        }
-                        view = basicDataTab;
+                        view = programSettingsTab;
                     }
                     break;
                     
@@ -632,6 +626,28 @@ namespace NPLogic.Views
                     {
                         viewModel.FilterByStatus(status);
                         UpdateFilterButtonStyles(status);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// F-001: 소유자 전입 필터 콤보박스 변경
+        /// </summary>
+        private void OwnerMoveInFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox && DataContext is DashboardViewModel viewModel)
+            {
+                if (comboBox.SelectedItem is ComboBoxItem item)
+                {
+                    var tag = item.Tag?.ToString();
+                    if (string.IsNullOrEmpty(tag))
+                    {
+                        viewModel.FilterOwnerMoveIn = null;
+                    }
+                    else if (bool.TryParse(tag, out var value))
+                    {
+                        viewModel.FilterOwnerMoveIn = value;
                     }
                 }
             }

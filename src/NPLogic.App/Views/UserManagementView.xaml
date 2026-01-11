@@ -260,7 +260,7 @@
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="또는 '사용자 추가' 버튼을 클릭하세요" 
                                    Opacity="0.3"
-                                   FontSize="12"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    Margin="0,8,0,0"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
@@ -320,7 +320,7 @@
                                 Margin="0,0,0,24">
                             <TextBlock Text="{Binding EditingUser.Name, Converter={StaticResource FirstCharConverter}}" 
                                        Foreground="White"
-                                       FontSize="32"
+                                       FontSize="{StaticResource FontSizeXXLarge}"
                                        FontWeight="Bold"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center"/>
@@ -328,20 +328,20 @@
 
                         <!-- 폼 필드들 -->
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="이름 *" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="이름 *" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditingUser.Name, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,10"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="이메일 *" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="이메일 *" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditingUser.Email, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,10"
                                      IsEnabled="{Binding IsAddingNew}"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="역할 *" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="역할 *" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <ComboBox SelectedValue="{Binding EditingUser.Role}"
                                       SelectedValuePath="Tag"
                                       Padding="12,10">
@@ -352,7 +352,7 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="상태" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="상태" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <ComboBox SelectedValue="{Binding EditingUser.Status}"
                                       SelectedValuePath="Tag"
                                       Padding="12,10">
@@ -366,19 +366,19 @@
                         <TextBlock Text="추가 정보" FontWeight="SemiBold" Margin="0,0,0,16"/>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="소속 팀 (관리자용)" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="소속 팀 (관리자용)" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditingUser.Team, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,10"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="직책/직급" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="직책/직급" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditingUser.Position, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,10"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,16">
-                            <TextBlock Text="소속 회계법인 (PM/평가자용)" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="소속 회계법인 (PM/평가자용)" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <TextBox Text="{Binding EditingUser.AccountingFirm, UpdateSourceTrigger=PropertyChanged}" 
                                      Padding="12,10"/>
                         </StackPanel>
@@ -386,7 +386,7 @@
                         <!-- 새 사용자 추가 시 비밀번호 -->
                         <StackPanel Margin="0,0,0,16" 
                                     Visibility="{Binding IsAddingNew, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="임시 비밀번호 *" FontSize="12" Opacity="0.6" Margin="0,0,0,4"/>
+                            <TextBlock Text="임시 비밀번호 *" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <PasswordBox x:Name="PasswordBox" Padding="12,10"/>
                             <TextBlock Text="최초 로그인 시 비밀번호 변경 권장" 
                                        FontSize="11" Opacity="0.5" Margin="0,4,0,0"/>

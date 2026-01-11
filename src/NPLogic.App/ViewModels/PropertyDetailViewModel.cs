@@ -75,6 +75,32 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 등기부 요약 정보 모델 (D-002, D-009)
+    /// </summary>
+    public class RegistrySummaryModel
+    {
+        /// <summary>
+        /// 표제부 요약
+        /// </summary>
+        public string TitleSummary { get; set; } = "";
+
+        /// <summary>
+        /// 갑구 요약 (소유권)
+        /// </summary>
+        public string Section1Summary { get; set; } = "";
+
+        /// <summary>
+        /// 을구 요약 (근저당)
+        /// </summary>
+        public string Section2Summary { get; set; } = "";
+
+        /// <summary>
+        /// 등기부 주소
+        /// </summary>
+        public string RegistryAddress { get; set; } = "";
+    }
+
+    /// <summary>
     /// 물건 상세 ViewModel
     /// </summary>
     public partial class PropertyDetailViewModel : ObservableObject
@@ -87,12 +113,22 @@ namespace NPLogic.ViewModels
         private readonly RegistryOcrService? _registryOcrService;
         private readonly PropertyQaRepository? _propertyQaRepository;
         private readonly SupabaseService? _supabaseService;
+        private readonly ProgramRepository? _programRepository;
+        
+        // 프로그램 이름 캐시 (성능 최적화)
+        private static readonly Dictionary<Guid, string> _programNameCache = new();
 
         [ObservableProperty]
         private Property _property = new();
 
         [ObservableProperty]
         private Property _originalProperty = new();
+
+        /// <summary>
+        /// 프로그램명 (프로젝트명)
+        /// </summary>
+        [ObservableProperty]
+        private string _programName = "-";
 
         /// <summary>
         /// 등기부 탭 ViewModel
@@ -124,6 +160,17 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasUnsavedChanges;
+
+        // Undo 관련 (피드백 반영: 자동저장 + 되돌리기)
+        /// <summary>
+        /// Undo 가능 여부
+        /// </summary>
+        public bool CanUndo => Property?.Id != null && Property.Id != Guid.Empty && UndoService.Instance.CanUndo(Property.Id);
+
+        /// <summary>
+        /// Undo 가능 횟수
+        /// </summary>
+        public int UndoCount => Property?.Id != null && Property.Id != Guid.Empty ? UndoService.Instance.GetUndoCount(Property.Id) : 0;
 
         [ObservableProperty]
         private string? _errorMessage;
@@ -166,6 +213,40 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private decimal _machineAppraisalValue;
+
+        #region D-011: 감정평가 세부 정보
+
+        // 토지 세부 정보
+        [ObservableProperty]
+        private string? _landCategory;
+
+        [ObservableProperty]
+        private decimal _landUnitPrice;
+
+        [ObservableProperty]
+        private decimal _landPublicPrice;
+
+        // 건물 세부 정보
+        [ObservableProperty]
+        private string? _buildingStructure;
+
+        [ObservableProperty]
+        private decimal _buildingUnitPrice;
+
+        [ObservableProperty]
+        private string? _buildingAge;
+
+        // 기계기구 세부 정보
+        [ObservableProperty]
+        private string? _machineType;
+
+        [ObservableProperty]
+        private int _machineCount;
+
+        [ObservableProperty]
+        private decimal _machineDepreciationRate;
+
+        #endregion
 
         // 첨부파일 목록
         [ObservableProperty]
@@ -216,6 +297,58 @@ namespace NPLogic.ViewModels
         private List<Dictionary<string, object>>? _allExcelData;
         private Dictionary<string, object>? _matchedRowData;
 
+        #region 등기부 관련 속성 (D-002, D-009, D-010)
+
+        /// <summary>
+        /// 등기부 요약 정보
+        /// </summary>
+        [ObservableProperty]
+        private RegistrySummaryModel _registrySummary = new();
+
+        /// <summary>
+        /// 등기부 데이터 존재 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasRegistryData;
+
+        /// <summary>
+        /// DD 주소와 등기부 주소 일치 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _isAddressMatched = true;
+
+        /// <summary>
+        /// 등기부 요약 이미지 경로
+        /// </summary>
+        [ObservableProperty]
+        private string? _registrySummaryImagePath;
+
+        /// <summary>
+        /// 등기부 요약 이미지 존재 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasRegistrySummaryImage;
+
+        /// <summary>
+        /// 등기부 요약 이미지 없음 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasNoRegistrySummaryImage = true;
+
+        /// <summary>
+        /// 토지이용계획 상태
+        /// </summary>
+        [ObservableProperty]
+        private string _landUsePlanStatus = "클릭하여 조회";
+
+        /// <summary>
+        /// 건축물대장 상태
+        /// </summary>
+        [ObservableProperty]
+        private string _buildingRegisterStatus = "클릭하여 조회";
+
+        #endregion
+
         #region HomeTab 관련 속성
 
         /// <summary>
@@ -227,6 +360,23 @@ namespace NPLogic.ViewModels
         /// 건물 면적 (평)
         /// </summary>
         public decimal BuildingAreaPyeong => Property?.BuildingArea != null ? Property.BuildingArea.Value / 3.3058m : 0;
+
+        /// <summary>
+        /// 표시용 주소 (AddressFull → AddressJibun → AddressRoad 순서로 fallback)
+        /// </summary>
+        public string DisplayAddress
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(Property?.AddressFull))
+                    return Property.AddressFull;
+                if (!string.IsNullOrWhiteSpace(Property?.AddressJibun))
+                    return Property.AddressJibun;
+                if (!string.IsNullOrWhiteSpace(Property?.AddressRoad))
+                    return Property.AddressRoad;
+                return "주소 정보 없음";
+            }
+        }
 
         #endregion
 
@@ -429,6 +579,44 @@ namespace NPLogic.ViewModels
 
         private Guid? _propertyId;
         private Action? _goBackAction;
+        
+        // ========== N-001: 키보드 탐색 ==========
+        private List<Property>? _propertyList;
+        private int _currentIndex = -1;
+        private Action<Guid>? _navigateToPropertyAction;
+
+        /// <summary>
+        /// 현재 물건 인덱스 (1-based for display)
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanNavigatePrevious))]
+        [NotifyPropertyChangedFor(nameof(CanNavigateNext))]
+        [NotifyPropertyChangedFor(nameof(NavigationInfo))]
+        private int _currentPropertyIndex;
+
+        /// <summary>
+        /// 전체 물건 수
+        /// </summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(NavigationInfo))]
+        private int _totalPropertyCount;
+
+        /// <summary>
+        /// 이전 물건으로 이동 가능 여부
+        /// </summary>
+        public bool CanNavigatePrevious => _currentIndex > 0 && _propertyList != null && _propertyList.Count > 0;
+
+        /// <summary>
+        /// 다음 물건으로 이동 가능 여부
+        /// </summary>
+        public bool CanNavigateNext => _propertyList != null && _currentIndex < _propertyList.Count - 1;
+
+        /// <summary>
+        /// 네비게이션 정보 표시 (예: "2 / 15")
+        /// </summary>
+        public string NavigationInfo => TotalPropertyCount > 0 
+            ? $"{CurrentPropertyIndex} / {TotalPropertyCount}" 
+            : "-";
 
         public PropertyDetailViewModel(
             PropertyRepository propertyRepository, 
@@ -438,7 +626,8 @@ namespace NPLogic.ViewModels
             EvaluationRepository? evaluationRepository = null, 
             RegistryOcrService? registryOcrService = null,
             PropertyQaRepository? propertyQaRepository = null,
-            SupabaseService? supabaseService = null)
+            SupabaseService? supabaseService = null,
+            ProgramRepository? programRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -448,6 +637,13 @@ namespace NPLogic.ViewModels
             _registryOcrService = registryOcrService;
             _propertyQaRepository = propertyQaRepository;
             _supabaseService = supabaseService;
+            _programRepository = programRepository;
+            
+            // 프로그램 이름 캐시가 비어있으면 미리 로드 (첫 ViewModel 생성 시)
+            if (_programRepository != null && _programNameCache.Count == 0)
+            {
+                _ = PreloadProgramNamesAsync();
+            }
 
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
@@ -502,6 +698,25 @@ namespace NPLogic.ViewModels
 
             // 평가 탭 ViewModel에 물건 ID 설정
             EvaluationViewModel?.SetPropertyId(propertyId);
+        }
+
+        /// <summary>
+        /// 물건 ID와 네비게이션 정보로 초기화 (N-001)
+        /// </summary>
+        public void SetPropertyId(Guid propertyId, List<Property> propertyList, Action<Guid>? navigateAction, Action? goBackAction = null)
+        {
+            SetPropertyId(propertyId, goBackAction);
+            
+            _propertyList = propertyList;
+            _navigateToPropertyAction = navigateAction;
+            
+            // 현재 인덱스 찾기
+            _currentIndex = propertyList.FindIndex(p => p.Id == propertyId);
+            CurrentPropertyIndex = _currentIndex + 1; // 1-based
+            TotalPropertyCount = propertyList.Count;
+            
+            OnPropertyChanged(nameof(CanNavigatePrevious));
+            OnPropertyChanged(nameof(CanNavigateNext));
         }
 
         /// <summary>
@@ -564,6 +779,11 @@ namespace NPLogic.ViewModels
             // 담보총괄 통계 로드 (프로그램 레벨)
             _ = LoadCollateralStatisticsAsync(property.ProgramId);
 
+            // 프로그램 이름 설정 (캐시 우선, 동기적)
+            SetProgramNameFromCache(property.ProgramId, property.ProjectId);
+            // 캐시에 없으면 비동기로 로드
+            _ = LoadProgramNameAsync(property.ProgramId, property.ProjectId);
+
             HasUnsavedChanges = false;
         }
 
@@ -622,8 +842,16 @@ namespace NPLogic.ViewModels
                     await LoadAttachmentsAsync();
                     await LoadQAListAsync();
 
+                    // 등기부 요약 정보 로드 (D-002, D-009, D-010)
+                    await LoadRegistrySummaryAsync(property.Id);
+
                     // 담보총괄 통계 로드 (프로그램 레벨)
                     await LoadCollateralStatisticsAsync(property.ProgramId);
+
+                    // 프로그램 이름 설정 (캐시 우선, 동기적)
+                    SetProgramNameFromCache(property.ProgramId, property.ProjectId);
+                    // 캐시에 없으면 비동기로 로드
+                    await LoadProgramNameAsync(property.ProgramId, property.ProjectId);
                 }
                 else
                 {
@@ -637,6 +865,120 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 캐시에서 프로그램 이름 설정 (동기적)
+        /// </summary>
+        private void SetProgramNameFromCache(Guid? programId, string? projectId)
+        {
+            // ProgramId가 있고 캐시에 있으면 바로 설정
+            if (programId.HasValue && _programNameCache.TryGetValue(programId.Value, out var cachedName))
+            {
+                ProgramName = cachedName;
+                return;
+            }
+            
+            // ProjectId를 GUID로 파싱해서 캐시 확인
+            if (!string.IsNullOrWhiteSpace(projectId) && Guid.TryParse(projectId, out var projectGuid))
+            {
+                if (_programNameCache.TryGetValue(projectGuid, out var cachedName2))
+                {
+                    ProgramName = cachedName2;
+                    return;
+                }
+            }
+            
+            // ProjectId가 GUID가 아니면 프로그램명으로 간주
+            if (!string.IsNullOrWhiteSpace(projectId) && !Guid.TryParse(projectId, out _))
+            {
+                ProgramName = projectId;
+                return;
+            }
+            
+            // 기본값
+            ProgramName = "-";
+        }
+
+        /// <summary>
+        /// 프로그램 이름 로드 (캐시 우선 사용)
+        /// </summary>
+        private async Task LoadProgramNameAsync(Guid? programId, string? projectId)
+        {
+            // 1. 캐시에서 먼저 확인 (동기적으로 빠르게 표시)
+            Guid? targetProgramId = programId;
+            
+            // ProgramId가 없으면 ProjectId를 GUID로 파싱 시도
+            if (!targetProgramId.HasValue && !string.IsNullOrWhiteSpace(projectId) && Guid.TryParse(projectId, out var projectGuid))
+            {
+                targetProgramId = projectGuid;
+            }
+            
+            // 캐시에서 확인
+            if (targetProgramId.HasValue && _programNameCache.TryGetValue(targetProgramId.Value, out var cachedName))
+            {
+                ProgramName = cachedName;
+                return;
+            }
+            
+            // ProjectId가 GUID가 아닌 경우 프로그램명으로 간주
+            if (!string.IsNullOrWhiteSpace(projectId) && !Guid.TryParse(projectId, out _))
+            {
+                ProgramName = projectId;
+                return;
+            }
+
+            ProgramName = "-";
+
+            if (_programRepository == null)
+            {
+                return;
+            }
+
+            try
+            {
+                // DB에서 조회
+                if (targetProgramId.HasValue)
+                {
+                    var program = await _programRepository.GetByIdAsync(targetProgramId.Value);
+                    if (program != null && !string.IsNullOrWhiteSpace(program.ProgramName))
+                    {
+                        // 캐시에 저장
+                        _programNameCache[targetProgramId.Value] = program.ProgramName;
+                        ProgramName = program.ProgramName;
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"프로그램 이름 로드 실패: {ex.Message}");
+            }
+        }
+        
+        /// <summary>
+        /// 프로그램 이름 캐시 초기화 (앱 시작 시 호출 권장)
+        /// </summary>
+        public async Task PreloadProgramNamesAsync()
+        {
+            if (_programRepository == null) return;
+            
+            try
+            {
+                var programs = await _programRepository.GetAllAsync();
+                foreach (var program in programs)
+                {
+                    if (!string.IsNullOrWhiteSpace(program.ProgramName))
+                    {
+                        _programNameCache[program.Id] = program.ProgramName;
+                    }
+                }
+                Debug.WriteLine($"프로그램 이름 캐시 로드 완료: {_programNameCache.Count}개");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"프로그램 이름 캐시 로드 실패: {ex.Message}");
             }
         }
 
@@ -690,6 +1032,113 @@ namespace NPLogic.ViewModels
                 // 실패 시 기본값 유지
             }
         }
+
+        #region 등기부 요약 관련 (D-002, D-009, D-010)
+
+        /// <summary>
+        /// 등기부 요약 정보 로드
+        /// </summary>
+        private async Task LoadRegistrySummaryAsync(Guid propertyId)
+        {
+            if (_registryRepository == null) 
+            {
+                HasRegistryData = false;
+                HasRegistrySummaryImage = false;
+                HasNoRegistrySummaryImage = true;
+                return;
+            }
+
+            try
+            {
+                // 등기부 문서 조회
+                var documents = await _registryRepository.GetDocumentsByPropertyIdAsync(propertyId);
+                var latestDoc = documents.FirstOrDefault();
+                
+                if (latestDoc != null)
+                {
+                    HasRegistryData = true;
+
+                    // 갑구/을구 권리 정보 조회
+                    var gapguRights = await _registryRepository.GetGapguRightsAsync(propertyId);
+                    var eulguRights = await _registryRepository.GetEulguRightsAsync(propertyId);
+                    var owners = await _registryRepository.GetOwnersByPropertyIdAsync(propertyId);
+
+                    // 등기부 요약 정보 구성
+                    var titleSummary = !string.IsNullOrWhiteSpace(latestDoc.RegistryNumber)
+                        ? $"등기번호: {latestDoc.RegistryNumber}\n등기유형: {latestDoc.RegistryType ?? "-"}"
+                        : "표제부 정보 없음";
+
+                    var section1Summary = owners.Any()
+                        ? $"소유자: {string.Join(", ", owners.Select(o => o.OwnerName))}"
+                        : (gapguRights.Any()
+                            ? $"갑구 권리 {gapguRights.Count}건"
+                            : "갑구 정보 없음");
+
+                    var section2Summary = eulguRights.Any()
+                        ? $"근저당/전세권 {eulguRights.Count}건\n총액: {eulguRights.Sum(r => r.ClaimAmount ?? 0):N0}원"
+                        : "을구 정보 없음";
+
+                    RegistrySummary = new RegistrySummaryModel
+                    {
+                        TitleSummary = titleSummary,
+                        Section1Summary = section1Summary,
+                        Section2Summary = section2Summary,
+                        RegistryAddress = "" // 추후 ExtractedData에서 파싱 가능
+                    };
+
+                    // 주소 일치 여부 확인 (D-010) - 추후 ExtractedData에서 주소 추출 시 구현
+                    IsAddressMatched = true;
+
+                    // 등기부 요약 이미지 확인 (D-009) - 추후 OCR 시 캡처 이미지 저장 경로 사용
+                    RegistrySummaryImagePath = null;
+                    HasRegistrySummaryImage = false;
+                    HasNoRegistrySummaryImage = true;
+                }
+                else
+                {
+                    HasRegistryData = false;
+                    HasRegistrySummaryImage = false;
+                    HasNoRegistrySummaryImage = true;
+                    RegistrySummary = new RegistrySummaryModel();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"등기부 요약 로드 실패: {ex.Message}");
+                HasRegistryData = false;
+                HasRegistrySummaryImage = false;
+                HasNoRegistrySummaryImage = true;
+            }
+        }
+
+        /// <summary>
+        /// 주소 정규화 (비교용)
+        /// </summary>
+        private static string NormalizeAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address)) return "";
+            return address
+                .Replace(" ", "")
+                .Replace("-", "")
+                .Replace(",", "")
+                .Replace(".", "")
+                .Trim();
+        }
+
+        /// <summary>
+        /// 등기부 탭으로 이동 명령
+        /// </summary>
+        [RelayCommand]
+        private void GoToRegistryTab()
+        {
+            // PropertyDetailView의 탭 인덱스 변경 (등기부 탭은 인덱스 기반으로 찾아야 함)
+            // 현재 PropertyDetailView에서 탭 순서: 차주개요(0), 론(1), 담보물건(2), 선순위(3), 평가(4), 경공매일정(5)
+            // 등기부 탭은 상단 메뉴에 있으므로 DashboardView로 이동 필요
+            // 여기서는 SuccessMessage로 안내
+            SuccessMessage = "등기부 탭은 상단 '등기부(OCR)' 메뉴에서 확인할 수 있습니다.";
+        }
+
+        #endregion
 
         #region 첨부파일 관련
 
@@ -1489,6 +1938,14 @@ namespace NPLogic.ViewModels
                 ErrorMessage = null;
                 SuccessMessage = null;
 
+                // 저장 전 스냅샷 저장 (Undo용)
+                if (Property != null && Property.Id != Guid.Empty)
+                {
+                    UndoService.Instance.SaveSnapshot(Property, "저장 전");
+                    OnPropertyChanged(nameof(CanUndo));
+                    OnPropertyChanged(nameof(UndoCount));
+                }
+
                 await _propertyRepository.UpdateAsync(Property);
                 
                 // 성공 메시지
@@ -1501,6 +1958,53 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"저장 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 되돌리기 명령 (피드백 반영: 최대 3단계)
+        /// </summary>
+        [RelayCommand]
+        private async Task UndoAsync()
+        {
+            if (Property == null || Property.Id == Guid.Empty || !CanUndo)
+            {
+                ErrorMessage = "되돌릴 수 없습니다.";
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                var restoredProperty = UndoService.Instance.Undo(Property.Id);
+                if (restoredProperty != null)
+                {
+                    // DB에 복원된 상태 저장
+                    await _propertyRepository.UpdateAsync(restoredProperty);
+                    
+                    // Property 업데이트
+                    Property = restoredProperty;
+                    
+                    SuccessMessage = "이전 상태로 되돌렸습니다.";
+                    HasUnsavedChanges = false;
+                    
+                    OnPropertyChanged(nameof(CanUndo));
+                    OnPropertyChanged(nameof(UndoCount));
+                }
+                else
+                {
+                    ErrorMessage = "되돌리기에 실패했습니다.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"되돌리기 실패: {ex.Message}";
             }
             finally
             {
@@ -1539,6 +2043,102 @@ namespace NPLogic.ViewModels
             _goBackAction?.Invoke();
         }
 
+        // ========== N-001: 키보드 탐색 Commands ==========
+
+        /// <summary>
+        /// 이전 물건으로 이동 (N-001)
+        /// </summary>
+        [RelayCommand]
+        private async Task NavigatePreviousAsync()
+        {
+            if (!CanNavigatePrevious || _propertyList == null) return;
+            
+            // 변경사항이 있으면 자동 저장
+            if (HasUnsavedChanges)
+            {
+                await SaveAsync();
+            }
+            
+            _currentIndex--;
+            var targetProperty = _propertyList[_currentIndex];
+            _navigateToPropertyAction?.Invoke(targetProperty.Id);
+        }
+
+        /// <summary>
+        /// 다음 물건으로 이동 (N-001)
+        /// </summary>
+        [RelayCommand]
+        private async Task NavigateNextAsync()
+        {
+            if (!CanNavigateNext || _propertyList == null) return;
+            
+            // 변경사항이 있으면 자동 저장
+            if (HasUnsavedChanges)
+            {
+                await SaveAsync();
+            }
+            
+            _currentIndex++;
+            var targetProperty = _propertyList[_currentIndex];
+            _navigateToPropertyAction?.Invoke(targetProperty.Id);
+        }
+
+        /// <summary>
+        /// 첫 번째 물건으로 이동 (N-001)
+        /// </summary>
+        [RelayCommand]
+        private async Task NavigateFirstAsync()
+        {
+            if (_propertyList == null || _propertyList.Count == 0 || _currentIndex == 0) return;
+            
+            // 변경사항이 있으면 자동 저장
+            if (HasUnsavedChanges)
+            {
+                await SaveAsync();
+            }
+            
+            _currentIndex = 0;
+            var targetProperty = _propertyList[_currentIndex];
+            _navigateToPropertyAction?.Invoke(targetProperty.Id);
+        }
+
+        /// <summary>
+        /// 마지막 물건으로 이동 (N-001)
+        /// </summary>
+        [RelayCommand]
+        private async Task NavigateLastAsync()
+        {
+            if (_propertyList == null || _propertyList.Count == 0 || _currentIndex == _propertyList.Count - 1) return;
+            
+            // 변경사항이 있으면 자동 저장
+            if (HasUnsavedChanges)
+            {
+                await SaveAsync();
+            }
+            
+            _currentIndex = _propertyList.Count - 1;
+            var targetProperty = _propertyList[_currentIndex];
+            _navigateToPropertyAction?.Invoke(targetProperty.Id);
+        }
+
+        /// <summary>
+        /// 특정 인덱스의 물건으로 이동 (N-001)
+        /// </summary>
+        public async Task NavigateToIndexAsync(int index)
+        {
+            if (_propertyList == null || index < 0 || index >= _propertyList.Count || index == _currentIndex) return;
+            
+            // 변경사항이 있으면 자동 저장
+            if (HasUnsavedChanges)
+            {
+                await SaveAsync();
+            }
+            
+            _currentIndex = index;
+            var targetProperty = _propertyList[_currentIndex];
+            _navigateToPropertyAction?.Invoke(targetProperty.Id);
+        }
+
         /// <summary>
         /// Property 변경 시
         /// </summary>
@@ -1554,36 +2154,19 @@ namespace NPLogic.ViewModels
             // HomeTab 면적 속성 변경 알림
             OnPropertyChanged(nameof(LandAreaPyeong));
             OnPropertyChanged(nameof(BuildingAreaPyeong));
+            OnPropertyChanged(nameof(DisplayAddress));
         }
 
         /// <summary>
-        /// 탭 변경 시 저장 확인 (피드백 반영)
+        /// 탭 변경 시 자동저장 (피드백 반영: 팝업 제거, 자동저장 + 되돌리기)
         /// </summary>
         partial void OnSelectedTabIndexChanging(int value)
         {
-            // 탭 변경 중이 아니고, 저장되지 않은 변경사항이 있으면 확인
+            // 탭 변경 중이 아니고, 저장되지 않은 변경사항이 있으면 자동 저장
             if (!_isChangingTab && HasUnsavedChanges && _previousTabIndex != value)
             {
-                var result = System.Windows.MessageBox.Show(
-                    "저장되지 않은 변경사항이 있습니다.\n저장하시겠습니까?",
-                    "저장 확인",
-                    System.Windows.MessageBoxButton.YesNoCancel,
-                    System.Windows.MessageBoxImage.Question);
-
-                if (result == System.Windows.MessageBoxResult.Yes)
-                {
-                    // 저장 후 탭 이동
-                    _ = SaveAsync();
-                }
-                else if (result == System.Windows.MessageBoxResult.Cancel)
-                {
-                    // 취소 - 이전 탭으로 복원
-                    _isChangingTab = true;
-                    SelectedTabIndex = _previousTabIndex;
-                    _isChangingTab = false;
-                    return;
-                }
-                // No - 저장하지 않고 이동
+                // 자동 저장 (팝업 없이)
+                _ = SaveAsync();
             }
         }
 

@@ -60,7 +60,7 @@
                                 <TextBlock Text="{Binding Property.PropertyType, FallbackValue='-'}" 
                                            Foreground="White"
                                            FontWeight="SemiBold"
-                                           FontSize="12"/>
+                                           FontSize="{StaticResource FontSizeBody}"/>
                             </Border>
                             
                             <!-- 상태 뱃지 -->
@@ -79,7 +79,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="12">
+                                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="대기"/>
@@ -109,7 +109,7 @@
                                        Style="{StaticResource CaptionTextStyle}"
                                        Foreground="{StaticResource TextSecondaryBrush}"
                                        Margin="0,0,0,4"/>
-                            <TextBlock Text="{Binding Property.ProjectId}" 
+                            <TextBlock Text="{Binding ProgramName}" 
                                        Style="{StaticResource H4TextStyle}"
                                        FontWeight="Bold"/>
                         </StackPanel>
@@ -183,7 +183,7 @@
                                    Margin="0,0,0,8"/>
                         <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
                             <Run Text="{Binding Property.LandArea, StringFormat={}{0:N2}}"/>
-                            <Run Text="㎡" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="㎡" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </TextBlock>
                     </StackPanel>
                 </Border>
@@ -203,7 +203,7 @@
                                    Margin="0,0,0,8"/>
                         <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
                             <Run Text="{Binding Property.BuildingArea, StringFormat={}{0:N2}}"/>
-                            <Run Text="㎡" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <Run Text="㎡" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource TextSecondaryBrush}"/>
                         </TextBlock>
                     </StackPanel>
                 </Border>
@@ -414,7 +414,7 @@
                                         Background="{StaticResource InfoBrush}"
                                         HorizontalAlignment="Center">
                                     <TextBlock Text="..." Foreground="White" 
-                                               FontSize="14" FontWeight="Bold"
+                                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold"
                                                HorizontalAlignment="Center" 
                                                VerticalAlignment="Center"/>
                                 </Border>
@@ -480,7 +480,7 @@
                                         </Style>
                                     </Border.Style>
                                     <TextBlock Foreground="White" 
-                                               FontSize="14" FontWeight="Bold"
+                                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold"
                                                HorizontalAlignment="Center" 
                                                VerticalAlignment="Center">
                                         <TextBlock.Style>

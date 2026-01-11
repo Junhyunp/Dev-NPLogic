@@ -55,11 +55,15 @@
     <!-- Text Colors -->
     <Color x:Key="TextPrimary">#1F2937</Color>
     <Color x:Key="TextSecondary">#6B7280</Color>
+    <Color x:Key="TextMuted">#64748B</Color>
+    <Color x:Key="TextTertiary">#94A3B8</Color>
     <Color x:Key="TextDisabled">#9CA3AF</Color>
     
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource TextSecondary}"/>
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="{StaticResource TextTertiary}"/>
     <SolidColorBrush x:Key="TextDisabledBrush" Color="{StaticResource TextDisabled}"/>
 
 
@@ -94,6 +98,57 @@
     <SolidColorBrush x:Key="ErrorTextBrush" Color="{StaticResource ErrorText}"/>
     <SolidColorBrush x:Key="InfoBgBrush" Color="{StaticResource InfoBg}"/>
     <SolidColorBrush x:Key="InfoTextBrush" Color="{StaticResource InfoText}"/>
+
+    <!-- Overlay Colors (모달/팝업 배경) -->
+    <Color x:Key="Overlay">#80000000</Color>
+    <Color x:Key="OverlayLight">#33FFFFFF</Color>
+    <Color x:Key="OverlaySemiLight">#80FFFFFF</Color>
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource Overlay}"/>
+    <SolidColorBrush x:Key="OverlayLightBrush" Color="{StaticResource OverlayLight}"/>
+    <SolidColorBrush x:Key="OverlaySemiLightBrush" Color="{StaticResource OverlaySemiLight}"/>
+
+    <!-- Card Alternative Backgrounds -->
+    <Color x:Key="CardAlt">#F8FAFC</Color>
+    <Color x:Key="CardAlt2">#F0F5F9</Color>
+    <Color x:Key="CardAlt3">#F1F5F9</Color>
+    <SolidColorBrush x:Key="CardAltBrush" Color="{StaticResource CardAlt}"/>
+    <SolidColorBrush x:Key="CardAlt2Brush" Color="{StaticResource CardAlt2}"/>
+    <SolidColorBrush x:Key="CardAlt3Brush" Color="{StaticResource CardAlt3}"/>
+
+    <!-- Material Design Style Semantic Colors (기존 하드코딩 통합) -->
+    <Color x:Key="MaterialGreen">#81C784</Color>
+    <Color x:Key="MaterialGreenDark">#2E7D32</Color>
+    <Color x:Key="MaterialGreenBg">#E8F5E9</Color>
+    <Color x:Key="MaterialRed">#E57373</Color>
+    <Color x:Key="MaterialRedDark">#C62828</Color>
+    <Color x:Key="MaterialRedBg">#FFEBEE</Color>
+    <Color x:Key="MaterialBlue">#64B5F6</Color>
+    <Color x:Key="MaterialBlueDark">#1565C0</Color>
+    <Color x:Key="MaterialBlueBg">#E3F2FD</Color>
+    <Color x:Key="MaterialOrange">#D97706</Color>
+    <Color x:Key="MaterialOrangeBg">#FEF3C7</Color>
+    
+    <SolidColorBrush x:Key="MaterialGreenBrush" Color="{StaticResource MaterialGreen}"/>
+    <SolidColorBrush x:Key="MaterialGreenDarkBrush" Color="{StaticResource MaterialGreenDark}"/>
+    <SolidColorBrush x:Key="MaterialGreenBgBrush" Color="{StaticResource MaterialGreenBg}"/>
+    <SolidColorBrush x:Key="MaterialRedBrush" Color="{StaticResource MaterialRed}"/>
+    <SolidColorBrush x:Key="MaterialRedDarkBrush" Color="{StaticResource MaterialRedDark}"/>
+    <SolidColorBrush x:Key="MaterialRedBgBrush" Color="{StaticResource MaterialRedBg}"/>
+    <SolidColorBrush x:Key="MaterialBlueBrush" Color="{StaticResource MaterialBlue}"/>
+    <SolidColorBrush x:Key="MaterialBlueDarkBrush" Color="{StaticResource MaterialBlueDark}"/>
+    <SolidColorBrush x:Key="MaterialBlueBgBrush" Color="{StaticResource MaterialBlueBg}"/>
+    <SolidColorBrush x:Key="MaterialOrangeBrush" Color="{StaticResource MaterialOrange}"/>
+    <SolidColorBrush x:Key="MaterialOrangeBgBrush" Color="{StaticResource MaterialOrangeBg}"/>
+
+    <!-- White text variants (헤더/배너용) -->
+    <Color x:Key="TextWhite">#FFFFFF</Color>
+    <Color x:Key="TextWhite70">#B3FFFFFF</Color>
+    <Color x:Key="TextWhite80">#CCFFFFFF</Color>
+    <Color x:Key="TextWhite50">#80FFFFFF</Color>
+    <SolidColorBrush x:Key="TextWhiteBrush" Color="{StaticResource TextWhite}"/>
+    <SolidColorBrush x:Key="TextWhite70Brush" Color="{StaticResource TextWhite70}"/>
+    <SolidColorBrush x:Key="TextWhite80Brush" Color="{StaticResource TextWhite80}"/>
+    <SolidColorBrush x:Key="TextWhite50Brush" Color="{StaticResource TextWhite50}"/>
 
 </ResourceDictionary>
 

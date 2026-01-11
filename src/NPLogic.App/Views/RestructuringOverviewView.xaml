@@ -47,8 +47,8 @@
 
             <Border Grid.Column="0" Background="#E57373" CornerRadius="12" Padding="24">
                 <StackPanel>
-                    <TextBlock Text="회생 차주 수" FontSize="14" Foreground="White" Opacity="0.9"/>
-                    <TextBlock FontSize="36" FontWeight="Bold" Foreground="White" Margin="0,8,0,0">
+                    <TextBlock Text="회생 차주 수" FontSize="{StaticResource FontSizeH4}" Foreground="White" Opacity="0.9"/>
+                    <TextBlock FontSize="{StaticResource FontSizeXXLarge}" FontWeight="Bold" Foreground="White" Margin="0,8,0,0">
                         <Run Text="{Binding TotalRestructuringCount}"/>
                         <Run Text="건" FontSize="16" FontWeight="Normal"/>
                     </TextBlock>
@@ -57,10 +57,10 @@
 
             <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="24">
                 <StackPanel>
-                    <TextBlock Text="회생 차주 총 OPB" FontSize="14" Opacity="0.7"/>
-                    <TextBlock FontSize="28" FontWeight="Bold" Margin="0,8,0,0" Foreground="#E57373">
+                    <TextBlock Text="회생 차주 총 OPB" FontSize="{StaticResource FontSizeH4}" Opacity="0.7"/>
+                    <TextBlock FontSize="{StaticResource FontSizeXLarge}" FontWeight="Bold" Margin="0,8,0,0" Foreground="{StaticResource MaterialRedBrush}">
                         <Run Text="{Binding TotalRestructuringOpb, StringFormat=N0}"/>
-                        <Run Text="원" FontSize="14" FontWeight="Normal"/>
+                        <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -101,10 +101,10 @@
                                             <Ellipse Width="8" Height="8" Fill="#E57373" Margin="0,0,8,0"/>
                                             <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Row="1" Text="{Binding BorrowerNumber}" FontSize="12" Opacity="0.7" Margin="16,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding BorrowerNumber}" FontSize="{StaticResource FontSizeBody}" Opacity="0.7" Margin="16,4,0,0"/>
                                         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="16,4,0,0">
-                                            <TextBlock Text="OPB: " FontSize="12" Opacity="0.7"/>
-                                            <TextBlock Text="{Binding Opb, StringFormat=N0}" FontSize="12"/>
+                                            <TextBlock Text="OPB: " FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                                            <TextBlock Text="{Binding Opb, StringFormat=N0}" FontSize="{StaticResource FontSizeBody}"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -168,7 +168,7 @@
 
                             <StackPanel Grid.Row="2" Grid.Column="1">
                                 <TextBlock Text="OPB" FontSize="11" Opacity="0.6"/>
-                                <TextBlock FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#E57373">
+                                <TextBlock FontWeight="SemiBold" Margin="0,4,0,0" Foreground="{StaticResource MaterialRedBrush}">
                                     <Run Text="{Binding SelectedBorrower.Opb, StringFormat=N0}"/>
                                     <Run Text="원"/>
                                 </TextBlock>

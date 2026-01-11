@@ -5,7 +5,7 @@
     <FontFamily x:Key="FontPrimary">Segoe UI, Malgun Gothic, sans-serif</FontFamily>
     <FontFamily x:Key="FontMonospace">Consolas, Courier New, monospace</FontFamily>
 
-    <!-- Font Sizes - 대시보드 기준 통일 (피드백 반영) -->
+    <!-- Font Sizes - 대시보드 기준 통일 (피드백 반영: 본문 12pt 기준) -->
     <System:Double x:Key="FontSizeH1" xmlns:System="clr-namespace:System;assembly=mscorlib">24</System:Double>
     <System:Double x:Key="FontSizeH2" xmlns:System="clr-namespace:System;assembly=mscorlib">18</System:Double>
     <System:Double x:Key="FontSizeH3" xmlns:System="clr-namespace:System;assembly=mscorlib">16</System:Double>
@@ -13,6 +13,12 @@
     <System:Double x:Key="FontSizeBody" xmlns:System="clr-namespace:System;assembly=mscorlib">12</System:Double>
     <System:Double x:Key="FontSizeSmall" xmlns:System="clr-namespace:System;assembly=mscorlib">11</System:Double>
     <System:Double x:Key="FontSizeTiny" xmlns:System="clr-namespace:System;assembly=mscorlib">10</System:Double>
+    
+    <!-- 추가 폰트 크기 (통계/대형 숫자용) -->
+    <System:Double x:Key="FontSizeLarge" xmlns:System="clr-namespace:System;assembly=mscorlib">20</System:Double>
+    <System:Double x:Key="FontSizeXLarge" xmlns:System="clr-namespace:System;assembly=mscorlib">28</System:Double>
+    <System:Double x:Key="FontSizeXXLarge" xmlns:System="clr-namespace:System;assembly=mscorlib">36</System:Double>
+    <System:Double x:Key="FontSizeHero" xmlns:System="clr-namespace:System;assembly=mscorlib">48</System:Double>
 
     <!-- Font Weights -->
     <FontWeight x:Key="FontWeightRegular">Normal</FontWeight>
@@ -85,7 +91,7 @@
     <!-- 섹션 헤더 스타일 (전체 화면 통일) -->
     <Style x:Key="SectionHeader" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightSemiBold}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="Margin" Value="0,0,0,12"/>
@@ -94,7 +100,7 @@
     <!-- 소섹션 헤더 스타일 -->
     <Style x:Key="SubSectionHeader" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightSemiBold}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
@@ -103,7 +109,7 @@
     <!-- 라벨 스타일 (폼/테이블 라벨용) -->
     <Style x:Key="LabelText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
@@ -111,7 +117,7 @@
     <!-- 값 스타일 (폼/테이블 값용) -->
     <Style x:Key="ValueText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightMedium}"/>
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -120,7 +126,7 @@
     <!-- 금액 스타일 (강조 숫자용) -->
     <Style x:Key="AmountText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightBold}"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -129,7 +135,7 @@
     <!-- 큰 금액 스타일 -->
     <Style x:Key="LargeAmountText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeLarge}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightBold}"/>
         <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -138,7 +144,7 @@
     <!-- 퍼센트 스타일 -->
     <Style x:Key="PercentText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightSemiBold}"/>
         <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -147,10 +153,46 @@
     <!-- 상태 뱃지 텍스트 -->
     <Style x:Key="BadgeText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
         <Setter Property="FontWeight" Value="{StaticResource FontWeightSemiBold}"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 메뉴 텍스트 스타일 (사이드바용) -->
+    <Style x:Key="MenuTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightRegular}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 약한 텍스트 스타일 (보조 정보용) -->
+    <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightRegular}"/>
+        <Setter Property="Foreground" Value="{StaticResource BlueGray400Brush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 통계 숫자 스타일 (대형 숫자용) -->
+    <Style x:Key="StatNumberStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeXLarge}"/>
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightBold}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 히어로 숫자 스타일 (최대 크기) -->
+    <Style x:Key="HeroNumberStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeHero}"/>
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightBold}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
     <!-- 탭 스타일 (NonCore용) -->
@@ -158,7 +200,7 @@
         <Setter Property="Padding" Value="16,10"/>
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
-        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="Normal"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">

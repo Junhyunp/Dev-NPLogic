@@ -123,6 +123,22 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _isToolBoxVisible = true;
 
+        // Undo 관련 (피드백 반영: 자동저장 + 되돌리기)
+        /// <summary>
+        /// Undo 가능 여부
+        /// </summary>
+        public bool CanUndo => SelectedPropertyTab?.PropertyId != null && 
+                               SelectedPropertyTab.PropertyId != Guid.Empty && 
+                               UndoService.Instance.CanUndo(SelectedPropertyTab.PropertyId);
+
+        /// <summary>
+        /// Undo 가능 횟수
+        /// </summary>
+        public int UndoCount => SelectedPropertyTab?.PropertyId != null && 
+                                SelectedPropertyTab.PropertyId != Guid.Empty 
+                                ? UndoService.Instance.GetUndoCount(SelectedPropertyTab.PropertyId) 
+                                : 0;
+
         /// <summary>
         /// 일괄 작업 모드 여부
         /// </summary>
@@ -574,6 +590,11 @@ namespace NPLogic.ViewModels
                     var property = await _propertyRepository.GetByIdAsync(SelectedPropertyTab.PropertyId);
                     if (property != null)
                     {
+                        // 저장 전 스냅샷 저장 (Undo용)
+                        UndoService.Instance.SaveSnapshot(property, "저장 전");
+                        OnPropertyChanged(nameof(CanUndo));
+                        OnPropertyChanged(nameof(UndoCount));
+
                         await _propertyRepository.UpdateAsync(property);
                         System.Windows.MessageBox.Show("저장되었습니다.", "알림",
                             System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
@@ -583,6 +604,55 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"저장 중 오류가 발생했습니다: {ex.Message}", "오류",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 되돌리기 - 이전 상태로 복원 (피드백 반영: 최대 3단계)
+        /// </summary>
+        [RelayCommand]
+        private async Task UndoAsync()
+        {
+            if (SelectedPropertyTab == null || !CanUndo)
+            {
+                System.Windows.MessageBox.Show("되돌릴 수 없습니다.", "알림",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+
+                var restoredProperty = UndoService.Instance.Undo(SelectedPropertyTab.PropertyId);
+                if (restoredProperty != null && _propertyRepository != null)
+                {
+                    // DB에 복원된 상태 저장
+                    await _propertyRepository.UpdateAsync(restoredProperty);
+
+                    System.Windows.MessageBox.Show("이전 상태로 되돌렸습니다.", "알림",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+
+                    OnPropertyChanged(nameof(CanUndo));
+                    OnPropertyChanged(nameof(UndoCount));
+
+                    // 화면 새로고침
+                    await RefreshAsync();
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("되돌리기에 실패했습니다.", "오류",
+                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"되돌리기 중 오류가 발생했습니다: {ex.Message}", "오류",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
             finally
@@ -857,6 +927,15 @@ namespace NPLogic.ViewModels
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// SelectedPropertyTab 변경 시 Undo 상태 업데이트
+        /// </summary>
+        partial void OnSelectedPropertyTabChanged(PropertyTabItem? value)
+        {
+            OnPropertyChanged(nameof(CanUndo));
+            OnPropertyChanged(nameof(UndoCount));
         }
     }
 }

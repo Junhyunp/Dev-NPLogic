@@ -272,18 +272,12 @@ namespace NPLogic.Views
                     break;
                     
                 case "basicdata":
-                    // 기초데이터 탭 - BasicDataTab 로드
-                    var basicDataView = serviceProvider.GetService<BasicDataTab>();
-                    if (basicDataView != null && _selectedProperty != null)
+                    // 기초데이터 탭 - ProgramSettingsTab 로드 (프로그램 레벨 설정 화면)
+                    // 참고: 물건별 담보물건 정보는 NonCoreView의 "담보물건" 탭에서 관리
+                    var programSettingsView = serviceProvider.GetService<ProgramSettingsTab>();
+                    if (programSettingsView != null)
                     {
-                        // PropertyDetailViewModel을 사용하여 컬럼 매핑 등의 기능 지원
-                        var propertyDetailVm = serviceProvider.GetService<PropertyDetailViewModel>();
-                        if (propertyDetailVm != null)
-                        {
-                            propertyDetailVm.LoadProperty(_selectedProperty);
-                            basicDataView.DataContext = propertyDetailVm;
-                        }
-                        DetailContentControl.Content = basicDataView;
+                        DetailContentControl.Content = programSettingsView;
                     }
                     break;
                     

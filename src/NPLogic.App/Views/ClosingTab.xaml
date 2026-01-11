@@ -64,7 +64,7 @@
                             </Style>
                         </Border.Style>
                         <TextBlock Foreground="White" 
-                                   FontSize="28" 
+                                   FontSize="{StaticResource FontSizeXLarge}" 
                                    FontWeight="Bold"
                                    HorizontalAlignment="Center" 
                                    VerticalAlignment="Center">
@@ -115,7 +115,7 @@
                             Content="마감 처리"
                             Command="{Binding CompleteClosingCommand}"
                             Padding="24,12"
-                            FontSize="14"
+                            FontSize="{StaticResource FontSizeH4}"
                             FontWeight="Bold"
                             VerticalAlignment="Center">
                         <Button.Style>

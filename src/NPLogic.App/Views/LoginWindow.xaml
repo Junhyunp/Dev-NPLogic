@@ -55,13 +55,13 @@
                     
                     <!-- 제목 -->
                     <TextBlock Text="로그인"
-                              FontSize="32"
+                              FontSize="{StaticResource FontSizeXXLarge}"
                               FontWeight="Bold"
                               Foreground="{DynamicResource PrimaryBrush}"
                               Margin="0,0,0,8"/>
                     
                     <TextBlock Text="서비스를 이용하려면 로그인하세요"
-                              FontSize="14"
+                              FontSize="{StaticResource FontSizeH4}"
                               Foreground="#666"
                               Margin="0,0,0,25"/>
 
@@ -81,7 +81,7 @@
                                                     VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding ErrorMessage}"
                                       Foreground="#C62828"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       Margin="10,0,0,0"
                                       VerticalAlignment="Center"
                                       TextWrapping="Wrap"/>
@@ -104,7 +104,7 @@
                                                     VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding SuccessMessage}"
                                       Foreground="#2E7D32"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       Margin="10,0,0,0"
                                       VerticalAlignment="Center"
                                       TextWrapping="Wrap"/>
@@ -196,7 +196,7 @@
                             <TextBox Text="{Binding SignUpName, UpdateSourceTrigger=PropertyChanged}"
                                      Height="45"
                                      Padding="15,0"
-                                     FontSize="14"
+                                     FontSize="{StaticResource FontSizeH4}"
                                      VerticalContentAlignment="Center"
                                      Margin="0,0,0,10"/>
                             
@@ -206,7 +206,7 @@
                                       SelectedValuePath="Tag"
                                       Height="45"
                                       Padding="15,0"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       VerticalContentAlignment="Center"
                                       Margin="0,0,0,15">
                                 <ComboBoxItem Content="평가자" Tag="evaluator"/>
@@ -220,7 +220,7 @@
                                     Height="45"
                                     Style="{StaticResource PrimaryButton}">
                                 <TextBlock Text="회원가입"
-                                          FontSize="14"
+                                          FontSize="{StaticResource FontSizeH4}"
                                           FontWeight="SemiBold"/>
                             </Button>
                         </StackPanel>
@@ -237,7 +237,7 @@
                                     Height="24"
                                     Margin="0,0,10,0"/>
                         <TextBlock Text="로그인 중..."
-                                  FontSize="14"
+                                  FontSize="{StaticResource FontSizeH4}"
                                   Foreground="#666"
                                   VerticalAlignment="Center"/>
                     </StackPanel>
@@ -247,7 +247,7 @@
 
                     <!-- 푸터 -->
                     <TextBlock Text="© 2025 NPLogic. All rights reserved."
-                              FontSize="12"
+                              FontSize="{StaticResource FontSizeBody}"
                               Foreground="#999"
                               HorizontalAlignment="Center"
                               Margin="0,40,0,0"/>
@@ -275,7 +275,7 @@
                                                     Foreground="#666"
                                                     VerticalAlignment="Center"/>
                             <TextBlock Text="로그인으로 돌아가기"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       Foreground="#666"
                                       Margin="8,0,0,0"
                                       VerticalAlignment="Center"/>
@@ -284,13 +284,13 @@
                     
                     <!-- 제목 -->
                     <TextBlock Text="비밀번호 재설정"
-                              FontSize="32"
+                              FontSize="{StaticResource FontSizeXXLarge}"
                               FontWeight="Bold"
                               Foreground="{DynamicResource PrimaryBrush}"
                               Margin="0,0,0,8"/>
                     
                     <TextBlock Text="가입한 이메일 주소를 입력하시면&#x0a;비밀번호 재설정 링크를 보내드립니다."
-                              FontSize="14"
+                              FontSize="{StaticResource FontSizeH4}"
                               Foreground="#666"
                               Margin="0,0,0,25"
                               LineHeight="22"/>
@@ -311,7 +311,7 @@
                                                     VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding PasswordResetErrorMessage}"
                                       Foreground="#C62828"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       Margin="10,0,0,0"
                                       VerticalAlignment="Center"
                                       TextWrapping="Wrap"/>
@@ -334,7 +334,7 @@
                                                     VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding PasswordResetSuccessMessage}"
                                       Foreground="#2E7D32"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       Margin="10,0,0,0"
                                       VerticalAlignment="Center"
                                       TextWrapping="Wrap"/>
@@ -375,7 +375,7 @@
                                     Height="24"
                                     Margin="0,0,10,0"/>
                         <TextBlock Text="전송 중..."
-                                  FontSize="14"
+                                  FontSize="{StaticResource FontSizeH4}"
                                   Foreground="#666"
                                   VerticalAlignment="Center"/>
                     </StackPanel>
@@ -387,7 +387,7 @@
                             Margin="0,30,0,0">
                         <StackPanel>
                             <TextBlock Text="📧 이메일을 받지 못하셨나요?"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSizeH4}"
                                       FontWeight="SemiBold"
                                       Foreground="#1565C0"
                                       Margin="0,0,0,8"/>

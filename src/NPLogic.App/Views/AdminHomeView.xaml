@@ -245,7 +245,7 @@
                       Background="#80FFFFFF">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ProgressBar IsIndeterminate="True" Width="100" Height="4"/>
-                        <TextBlock Text="로딩 중..." Margin="0,8,0,0" FontSize="12" Opacity="0.7"/>
+                        <TextBlock Text="로딩 중..." Margin="0,8,0,0" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -437,11 +437,18 @@
                           VerticalScrollBarVisibility="Auto">
                     
                     <DataGrid.Columns>
-                        <!-- 차주번호 - 클릭시 전체(홈)로 이동 -->
-                        <DataGridTemplateColumn Header="차주번호" Width="80" IsReadOnly="True">
+                        <!-- 차주번호 -->
+                        <DataGridTextColumn Header="차주번호" 
+                                          Binding="{Binding BorrowerNumber}" 
+                                          Width="70"
+                                          IsReadOnly="True"
+                                          FontSize="11"/>
+                        
+                        <!-- 물건번호 - 클릭시 전체(홈)로 이동 -->
+                        <DataGridTemplateColumn Header="물건번호" Width="90" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding PropertyNumber}"
+                                    <TextBlock Text="{Binding CollateralNumber}"
                                                Padding="4,0"
                                                VerticalAlignment="Center"
                                                Foreground="{StaticResource PrimaryBrush}"
@@ -484,13 +491,6 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        
-                        <!-- 담보번호 -->
-                        <DataGridTextColumn Header="담보번호" 
-                                          Binding="{Binding CollateralNumber}" 
-                                          Width="80"
-                                          IsReadOnly="True"
-                                          FontSize="11"/>
                         
                         <!-- 담보종류 -->
                         <DataGridTextColumn Header="담보종류" 
@@ -766,7 +766,7 @@
                       Background="#80FFFFFF">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ProgressBar IsIndeterminate="True" Width="150" Height="4"/>
-                        <TextBlock Text="물건 목록 로딩 중..." Margin="0,8,0,0" FontSize="12" Opacity="0.7"/>
+                        <TextBlock Text="물건 목록 로딩 중..." Margin="0,8,0,0" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                     </StackPanel>
                 </Grid>
 
@@ -777,8 +777,8 @@
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <materialDesign:PackIcon Kind="FolderOpen" Width="64" Height="64" Foreground="#CBD5E1"/>
                         <TextBlock Text="좌측에서 프로그램을 선택해주세요" 
-                                   FontSize="14" 
-                                   Foreground="#94A3B8"
+                                   FontSize="{StaticResource FontSizeH4}" 
+                                   Foreground="{StaticResource TextTertiaryBrush}"
                                    Margin="0,16,0,0"/>
                     </StackPanel>
                 </Grid>

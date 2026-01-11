@@ -50,9 +50,9 @@
             <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
                 <StackPanel>
                     <TextBlock Text="시나리오 1안 합계" FontSize="13" Opacity="0.7"/>
-                    <TextBlock FontSize="28" FontWeight="Bold" Margin="0,8,0,0" Foreground="#64B5F6">
+                    <TextBlock FontSize="{StaticResource FontSizeXLarge}" FontWeight="Bold" Margin="0,8,0,0" Foreground="#64B5F6">
                         <Run Text="{Binding TotalXnpv1, StringFormat=N0}"/>
-                        <Run Text="원" FontSize="14" FontWeight="Normal"/>
+                        <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -60,9 +60,9 @@
             <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
                 <StackPanel>
                     <TextBlock Text="시나리오 2안 합계" FontSize="13" Opacity="0.7"/>
-                    <TextBlock FontSize="28" FontWeight="Bold" Margin="0,8,0,0" Foreground="#81C784">
+                    <TextBlock FontSize="{StaticResource FontSizeXLarge}" FontWeight="Bold" Margin="0,8,0,0" Foreground="{StaticResource MaterialGreenBrush}">
                         <Run Text="{Binding TotalXnpv2, StringFormat=N0}"/>
-                        <Run Text="원" FontSize="14" FontWeight="Normal"/>
+                        <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -70,7 +70,7 @@
             <Border Grid.Column="4" Background="#64B5F6" CornerRadius="12" Padding="20">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="투자 추천" FontSize="13" Foreground="White" Opacity="0.9"/>
-                    <TextBlock Text="{Binding Recommendation}" FontSize="14" FontWeight="Bold" Foreground="White" 
+                    <TextBlock Text="{Binding Recommendation}" FontSize="{StaticResource FontSizeH4}" FontWeight="Bold" Foreground="White" 
                                Margin="0,8,0,0" TextWrapping="Wrap"/>
                 </StackPanel>
             </Border>

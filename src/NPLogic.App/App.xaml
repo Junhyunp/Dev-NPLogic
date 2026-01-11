@@ -29,6 +29,7 @@
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <converters:NullToInverseVisibilityConverter x:Key="NullToInverseVisibilityConverter"/>
             <converters:NullToBoolConverter x:Key="NullToBoolConverter"/>
+            <converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter"/>
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
             <converters:ZeroToVisibilityConverter x:Key="ZeroToVisibilityConverter"/>
             <converters:FirstCharConverter x:Key="FirstCharConverter"/>

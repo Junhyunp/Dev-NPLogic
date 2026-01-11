@@ -286,7 +286,7 @@
                                                Margin="0,0,4,0">
                                             <TextBlock Text="&#xE8A5;" 
                                                        FontFamily="Segoe MDL2 Assets" 
-                                                       FontSize="14"
+                                                       FontSize="{StaticResource FontSizeH4}"
                                                        Foreground="{StaticResource PrimaryBrush}"/>
                                         </Button>
                                         <Button Command="{Binding DataContext.EditPropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -299,7 +299,7 @@
                                                Margin="0,0,4,0">
                                             <TextBlock Text="&#xE70F;" 
                                                        FontFamily="Segoe MDL2 Assets" 
-                                                       FontSize="14"
+                                                       FontSize="{StaticResource FontSizeH4}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                                         </Button>
                                         <Button Command="{Binding DataContext.DeletePropertyCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -311,7 +311,7 @@
                                                ToolTip="삭제">
                                             <TextBlock Text="&#xE74D;" 
                                                        FontFamily="Segoe MDL2 Assets" 
-                                                       FontSize="14"
+                                                       FontSize="{StaticResource FontSizeH4}"
                                                        Foreground="{StaticResource ErrorBrush}"/>
                                         </Button>
                                     </StackPanel>

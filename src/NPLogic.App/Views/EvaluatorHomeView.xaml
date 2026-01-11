@@ -34,16 +34,16 @@
                 <StackPanel>
                     <TextBlock Text="{Binding DisplayName}" 
                                Foreground="White"
-                               FontSize="20"
+                               FontSize="{StaticResource FontSizeLarge}"
                                FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                         <Border Background="#80FFFFFF" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
                             <TextBlock Text="평가자" 
                                        Foreground="{StaticResource SecondaryBrush}"
-                                       FontSize="12"
+                                       FontSize="{StaticResource FontSizeBody}"
                                        FontWeight="SemiBold"/>
                         </Border>
-                        <TextBlock Foreground="#B0FFFFFF" FontSize="12" VerticalAlignment="Center">
+                        <TextBlock Foreground="#B0FFFFFF" FontSize="{StaticResource FontSizeBody}" VerticalAlignment="Center">
                             <Run Text="진행중인 프로그램:"/>
                             <Run Text="{Binding CurrentProgramName, FallbackValue='N/A'}" FontWeight="SemiBold"/>
                         </TextBlock>
@@ -86,7 +86,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding TotalPropertyCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource PrimaryBrush}"
                                Margin="0,4,0,0"/>
@@ -106,7 +106,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding PendingCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource WarningBrush}"
                                Margin="0,4,0,0"/>
@@ -126,7 +126,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding ProcessingCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource InfoBrush}"
                                Margin="0,4,0,0"/>
@@ -146,7 +146,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding CompletedCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource SuccessBrush}"
                                Margin="0,4,0,0"/>
@@ -235,19 +235,19 @@
                     <DataGrid.Columns>
                         <!-- 차주번호 -->
                         <DataGridTextColumn Header="차주번호" 
-                                          Binding="{Binding PropertyNumber}" 
+                                          Binding="{Binding BorrowerNumber}" 
+                                          Width="80"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- 물건번호 -->
+                        <DataGridTextColumn Header="물건번호" 
+                                          Binding="{Binding CollateralNumber}" 
                                           Width="100"
                                           IsReadOnly="True"/>
                         
                         <!-- 차주명 -->
                         <DataGridTextColumn Header="차주명" 
                                           Binding="{Binding DebtorName}" 
-                                          Width="100"
-                                          IsReadOnly="True"/>
-                        
-                        <!-- 담보번호 -->
-                        <DataGridTextColumn Header="담보번호" 
-                                          Binding="{Binding CollateralNumber}" 
                                           Width="100"
                                           IsReadOnly="True"/>
                         
@@ -439,8 +439,8 @@
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <materialDesign:PackIcon Kind="FileDocumentOutline" Width="64" Height="64" Foreground="#CBD5E1"/>
                         <TextBlock Text="배정된 물건이 없습니다" 
-                                   FontSize="14" 
-                                   Foreground="#94A3B8"
+                                   FontSize="{StaticResource FontSizeH4}" 
+                                   Foreground="{StaticResource TextTertiaryBrush}"
                                    Margin="0,16,0,0"/>
                     </StackPanel>
                 </Grid>

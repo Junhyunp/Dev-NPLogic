@@ -130,6 +130,25 @@ namespace NPLogic.Converters
     }
 
     /// <summary>
+    /// null이 아님을 bool로 변환 (null/빈문자열 = false, 값 있음 = true)
+    /// IsEnabled 등에서 값이 있을 때 활성화하는 용도
+    /// </summary>
+    public class NotNullToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value == null) return false;
+            if (value is string str && string.IsNullOrWhiteSpace(str)) return false;
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
     /// int를 Visibility로 변환 (0 = Collapsed, > 0 = Visible)
     /// </summary>
     public class IntToVisibilityConverter : IValueConverter

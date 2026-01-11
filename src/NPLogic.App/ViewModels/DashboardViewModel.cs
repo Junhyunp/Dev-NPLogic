@@ -92,6 +92,62 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _statusFilter;
 
+        // ========== 고급 필터 (F-001) ==========
+
+        /// <summary>고급 필터 패널 표시 여부</summary>
+        [ObservableProperty]
+        private bool _isAdvancedFilterVisible;
+
+        // 차주 상태 필터
+        /// <summary>회생 필터</summary>
+        [ObservableProperty]
+        private bool _filterRestructuring;
+
+        /// <summary>개회(면책) 필터</summary>
+        [ObservableProperty]
+        private bool _filterOpened;
+
+        /// <summary>사망 필터</summary>
+        [ObservableProperty]
+        private bool _filterDeceased;
+
+        /// <summary>차주거주 필터</summary>
+        [ObservableProperty]
+        private bool _filterBorrowerResiding;
+
+        // 담보 유형 필터
+        /// <summary>담보 유형 목록</summary>
+        [ObservableProperty]
+        private ObservableCollection<string> _propertyTypes = new() 
+        { 
+            "전체", "아파트", "상가", "토지", "빌라", "오피스텔", "단독주택", "다가구주택", "공장", "기타" 
+        };
+
+        /// <summary>선택된 담보 유형</summary>
+        [ObservableProperty]
+        private string _selectedPropertyType = "전체";
+
+        // 선순위 필터
+        /// <summary>소유자 전입 필터 (null=전체, true=전입, false=미전입)</summary>
+        [ObservableProperty]
+        private bool? _filterOwnerMoveIn;
+
+        /// <summary>활성화된 필터 개수</summary>
+        public int ActiveFilterCount
+        {
+            get
+            {
+                int count = 0;
+                if (FilterRestructuring) count++;
+                if (FilterOpened) count++;
+                if (FilterDeceased) count++;
+                if (FilterBorrowerResiding) count++;
+                if (SelectedPropertyType != "전체") count++;
+                if (FilterOwnerMoveIn.HasValue) count++;
+                return count;
+            }
+        }
+
         // ========== 탭 상태 ==========
         [ObservableProperty]
         private string _activeTab = "noncore";
@@ -483,6 +539,7 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 대시보드 물건 목록 로드
         /// Phase 6: 권한별 필터링 추가
+        /// F-001: 고급 필터 적용
         /// </summary>
         private async Task LoadDashboardPropertiesAsync()
         {
@@ -518,6 +575,9 @@ namespace NPLogic.ViewModels
                     filteredProperties = Enumerable.Empty<Property>();
                 }
 
+                // ========== F-001: 고급 필터 적용 ==========
+                filteredProperties = ApplyAdvancedFilters(filteredProperties);
+
                 DashboardProperties.Clear();
                 RecentProperties.Clear();
 
@@ -534,6 +594,45 @@ namespace NPLogic.ViewModels
             {
                 ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
             }
+        }
+
+        /// <summary>
+        /// 고급 필터 적용 (F-001)
+        /// </summary>
+        private IEnumerable<Property> ApplyAdvancedFilters(IEnumerable<Property> properties)
+        {
+            var result = properties;
+
+            // 담보 유형 필터
+            if (!string.IsNullOrEmpty(SelectedPropertyType) && SelectedPropertyType != "전체")
+            {
+                result = result.Where(p => 
+                    string.Equals(p.PropertyType, SelectedPropertyType, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // 차주 상태 필터 (OR 조건 - 선택된 항목 중 하나라도 해당하면 표시)
+            var borrowerStatusFilters = new List<Func<Property, bool>>();
+            if (FilterRestructuring)
+                borrowerStatusFilters.Add(p => p.BorrowerIsRestructuring == true);
+            if (FilterOpened)
+                borrowerStatusFilters.Add(p => p.BorrowerIsOpened == true);
+            if (FilterDeceased)
+                borrowerStatusFilters.Add(p => p.BorrowerIsDeceased == true);
+            if (FilterBorrowerResiding)
+                borrowerStatusFilters.Add(p => p.BorrowerResiding);
+
+            if (borrowerStatusFilters.Count > 0)
+            {
+                result = result.Where(p => borrowerStatusFilters.Any(f => f(p)));
+            }
+
+            // 소유자 전입 필터
+            if (FilterOwnerMoveIn.HasValue)
+            {
+                result = result.Where(p => p.OwnerMoveIn == FilterOwnerMoveIn.Value);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -613,6 +712,69 @@ namespace NPLogic.ViewModels
         public void FilterByStatus(string status)
         {
             StatusFilter = status == "all" ? null : status;
+            _ = RefreshDataAsync();
+        }
+
+        // ========== 고급 필터 변경 감지 (F-001) ==========
+
+        partial void OnFilterRestructuringChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        partial void OnFilterOpenedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        partial void OnFilterDeceasedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        partial void OnFilterBorrowerResidingChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        partial void OnSelectedPropertyTypeChanged(string value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        partial void OnFilterOwnerMoveInChanged(bool? value)
+        {
+            OnPropertyChanged(nameof(ActiveFilterCount));
+            _ = RefreshDataAsync();
+        }
+
+        /// <summary>
+        /// 고급 필터 패널 토글
+        /// </summary>
+        [RelayCommand]
+        private void ToggleAdvancedFilter()
+        {
+            IsAdvancedFilterVisible = !IsAdvancedFilterVisible;
+        }
+
+        /// <summary>
+        /// 고급 필터 초기화
+        /// </summary>
+        [RelayCommand]
+        private void ResetAdvancedFilters()
+        {
+            FilterRestructuring = false;
+            FilterOpened = false;
+            FilterDeceased = false;
+            FilterBorrowerResiding = false;
+            SelectedPropertyType = "전체";
+            FilterOwnerMoveIn = null;
+            OnPropertyChanged(nameof(ActiveFilterCount));
             _ = RefreshDataAsync();
         }
 
@@ -704,10 +866,10 @@ namespace NPLogic.ViewModels
                     using var workbook = new ClosedXML.Excel.XLWorkbook();
                     var worksheet = workbook.Worksheets.Add("대시보드");
 
-                    // 헤더
-                    var headers = new[] { "차주번호", "차주명", "담보번호", "물건종류", "약정서", "보증서", 
+                    // 헤더 (순서 변경: 차주번호, 물건번호 앞으로)
+                    var headers = new[] { "차주번호", "물건번호", "차주명", "물건종류", "약정서", "보증서", 
                                          "경개1", "경개2", "경매열람", "전입열람", "선순위", "평가확정", 
-                                         "경매일정", "QA", "권리분석", "상태" };
+                                         "경매일정", "QA", "권리분석", "경매사건번호", "상태" };
                     for (int i = 0; i < headers.Length; i++)
                     {
                         worksheet.Cell(1, i + 1).Value = headers[i];
@@ -715,13 +877,13 @@ namespace NPLogic.ViewModels
                         worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
                     }
 
-                    // 데이터
+                    // 데이터 (순서 변경: 차주번호, 물건번호 앞으로)
                     int row = 2;
                     foreach (var p in DashboardProperties)
                     {
-                        worksheet.Cell(row, 1).Value = p.PropertyNumber;
-                        worksheet.Cell(row, 2).Value = p.DebtorName;
-                        worksheet.Cell(row, 3).Value = p.CollateralNumber;
+                        worksheet.Cell(row, 1).Value = p.BorrowerNumber;
+                        worksheet.Cell(row, 2).Value = p.CollateralNumber;
+                        worksheet.Cell(row, 3).Value = p.DebtorName;
                         worksheet.Cell(row, 4).Value = p.PropertyType;
                         worksheet.Cell(row, 5).Value = p.AgreementDoc ? "O" : "";
                         worksheet.Cell(row, 6).Value = p.GuaranteeDoc ? "O" : "";
@@ -734,7 +896,8 @@ namespace NPLogic.ViewModels
                         worksheet.Cell(row, 13).Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
                         worksheet.Cell(row, 14).Value = p.QaUnansweredCount;
                         worksheet.Cell(row, 15).Value = p.RightsAnalysisStatus;
-                        worksheet.Cell(row, 16).Value = p.Status;
+                        worksheet.Cell(row, 16).Value = p.PropertyNumber;
+                        worksheet.Cell(row, 17).Value = p.Status;
                         row++;
                     }
 

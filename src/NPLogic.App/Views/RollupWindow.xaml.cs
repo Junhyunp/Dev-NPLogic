@@ -132,10 +132,10 @@ namespace NPLogic.Views
                     using var workbook = new ClosedXML.Excel.XLWorkbook();
                     var worksheet = workbook.Worksheets.Add("롤업");
 
-                    // 헤더
-                    var headers = new[] { "차주번호", "차주명", "담보번호", "물건종류", "약정서", "보증서",
+                    // 헤더 (순서 변경: 차주번호, 물건번호 앞으로)
+                    var headers = new[] { "차주번호", "물건번호", "차주명", "물건종류", "약정서", "보증서",
                                          "경개1", "경개2", "경매열람", "전입열람", "선순위", "평가확정",
-                                         "경매일정", "QA", "권리분석", "상태" };
+                                         "경매일정", "QA", "권리분석", "경매사건번호", "상태" };
                     for (int i = 0; i < headers.Length; i++)
                     {
                         worksheet.Cell(1, i + 1).Value = headers[i];
@@ -144,13 +144,13 @@ namespace NPLogic.Views
                         worksheet.Cell(1, i + 1).Style.Font.FontColor = ClosedXML.Excel.XLColor.White;
                     }
 
-                    // 데이터
+                    // 데이터 (순서 변경: 차주번호, 물건번호 앞으로)
                     int row = 2;
                     foreach (var p in _properties)
                     {
-                        worksheet.Cell(row, 1).Value = p.PropertyNumber;
-                        worksheet.Cell(row, 2).Value = p.DebtorName;
-                        worksheet.Cell(row, 3).Value = p.CollateralNumber;
+                        worksheet.Cell(row, 1).Value = p.BorrowerNumber;
+                        worksheet.Cell(row, 2).Value = p.CollateralNumber;
+                        worksheet.Cell(row, 3).Value = p.DebtorName;
                         worksheet.Cell(row, 4).Value = p.PropertyType;
                         worksheet.Cell(row, 5).Value = p.AgreementDoc ? "O" : "";
                         worksheet.Cell(row, 6).Value = p.GuaranteeDoc ? "O" : "";
@@ -163,7 +163,8 @@ namespace NPLogic.Views
                         worksheet.Cell(row, 13).Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
                         worksheet.Cell(row, 14).Value = p.QaUnansweredCount;
                         worksheet.Cell(row, 15).Value = p.RightsAnalysisStatus;
-                        worksheet.Cell(row, 16).Value = p.Status;
+                        worksheet.Cell(row, 16).Value = p.PropertyNumber;
+                        worksheet.Cell(row, 17).Value = p.Status;
                         row++;
                     }
 

@@ -159,7 +159,7 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <TextBlock Text="{Binding ActionDisplay}" FontSize="12" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding ActionDisplay}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="#1976D2"/>

@@ -595,6 +595,9 @@ namespace NPLogic.Data.Repositories
                 SeniorRightsReview = table.SeniorRightsReview,
                 AppraisalConfirmed = table.AppraisalConfirmed,
                 HasCommercialDistrictData = table.HasCommercialDistrictData,
+                // F-001: 필터용 필드
+                OwnerMoveIn = table.OwnerMoveIn,
+                BorrowerResiding = table.BorrowerResiding,
                 AuctionScheduleDate = table.AuctionScheduleDate,
                 QaUnansweredCount = table.QaUnansweredCount,
                 RightsAnalysisStatus = table.RightsAnalysisStatus ?? "pending",
@@ -646,6 +649,9 @@ namespace NPLogic.Data.Repositories
                 SeniorRightsReview = property.SeniorRightsReview,
                 AppraisalConfirmed = property.AppraisalConfirmed,
                 HasCommercialDistrictData = property.HasCommercialDistrictData,
+                // F-001: 필터용 필드
+                OwnerMoveIn = property.OwnerMoveIn,
+                BorrowerResiding = property.BorrowerResiding,
                 AuctionScheduleDate = property.AuctionScheduleDate,
                 QaUnansweredCount = property.QaUnansweredCount,
                 RightsAnalysisStatus = property.RightsAnalysisStatus,
@@ -846,6 +852,20 @@ namespace NPLogic.Data.Repositories
         /// </summary>
         [Postgrest.Attributes.Column("has_commercial_district_data")]
         public bool HasCommercialDistrictData { get; set; }
+
+        // ========== F-001: 필터용 필드 ==========
+
+        /// <summary>
+        /// 소유자 전입 여부
+        /// </summary>
+        [Postgrest.Attributes.Column("owner_move_in")]
+        public bool OwnerMoveIn { get; set; }
+
+        /// <summary>
+        /// 차주 거주 여부
+        /// </summary>
+        [Postgrest.Attributes.Column("borrower_residing")]
+        public bool BorrowerResiding { get; set; }
 
         [Postgrest.Attributes.Column("auction_schedule_date")]
         public DateTime? AuctionScheduleDate { get; set; }

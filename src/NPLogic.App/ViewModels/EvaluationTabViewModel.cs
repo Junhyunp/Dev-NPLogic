@@ -73,6 +73,16 @@ namespace NPLogic.ViewModels
         public double? Longitude { get; set; }
         
         /// <summary>
+        /// E-005: 본건과의 거리 (km)
+        /// </summary>
+        public double? DistanceKm { get; set; }
+        
+        /// <summary>
+        /// E-005: 거리 표시 문자열
+        /// </summary>
+        public string DistanceDisplay => DistanceKm.HasValue ? $"{DistanceKm:N1}km" : "-";
+        
+        /// <summary>
         /// 낙찰가율 (%)
         /// </summary>
         public decimal? WinningRate => AppraisalPrice > 0 ? (WinningPrice / AppraisalPrice) * 100 : null;
@@ -88,6 +98,33 @@ namespace NPLogic.ViewModels
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
         }
+    }
+
+    /// <summary>
+    /// E-002: 시나리오별 배당 요약 항목
+    /// </summary>
+    public class ScenarioSummaryItem : ObservableObject
+    {
+        /// <summary>항목명 (경매비용, 배당회수, 상계회수, 현금흐름)</summary>
+        public string Label { get; set; } = "";
+        
+        /// <summary>시나리오 1 금액</summary>
+        public decimal? Scenario1Value { get; set; }
+        
+        /// <summary>시나리오 2 금액</summary>
+        public decimal? Scenario2Value { get; set; }
+        
+        /// <summary>시나리오 3 금액</summary>
+        public decimal? Scenario3Value { get; set; }
+        
+        /// <summary>합계</summary>
+        public decimal? TotalValue { get; set; }
+        
+        // 포맷된 표시 값
+        public string Scenario1Display => Scenario1Value.HasValue ? $"{Scenario1Value:N0}" : "-";
+        public string Scenario2Display => Scenario2Value.HasValue ? $"{Scenario2Value:N0}" : "-";
+        public string Scenario3Display => Scenario3Value.HasValue ? $"{Scenario3Value:N0}" : "-";
+        public string TotalDisplay => TotalValue.HasValue ? $"{TotalValue:N0}" : "-";
     }
 
     /// <summary>
@@ -124,6 +161,11 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _successMessage;
+
+        /// <summary>
+        /// E-001: 물건 주소 (지도 팝업용)
+        /// </summary>
+        public string? PropertyAddress => _property?.AddressFull ?? _property?.AddressJibun;
 
         // === 평가 유형 선택 ===
         [ObservableProperty]
@@ -252,6 +294,20 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _scenario2_Reason = "실거래가 적용";
 
+        // === E-002: 평가결과 시나리오 3 ===
+        [ObservableProperty]
+        private decimal? _scenario3_Amount;
+
+        [ObservableProperty]
+        private decimal? _scenario3_Rate;
+
+        [ObservableProperty]
+        private string? _scenario3_Reason = "보수적 평가";
+
+        // === E-002: 차주별 배당 요약 ===
+        [ObservableProperty]
+        private ObservableCollection<ScenarioSummaryItem> _scenarioSummaryItems = new();
+
         // === 유사물건 추천 ===
         [ObservableProperty]
         private ObservableCollection<RecommendCaseItem> _recommendedCases = new();
@@ -379,8 +435,79 @@ namespace NPLogic.ViewModels
                     
                     Scenario2_Amount = _property.AppraisalValue.Value * (AppliedBidRate.Value + 0.05m);
                     Scenario2_Rate = AppliedBidRate + 0.05m;
+                    
+                    // E-002: 시나리오 3 초기화 (보수적: -5%)
+                    Scenario3_Amount = _property.AppraisalValue.Value * (AppliedBidRate.Value - 0.05m);
+                    Scenario3_Rate = AppliedBidRate - 0.05m;
                 }
             }
+            
+            // E-002: 배당 요약 테이블 초기화
+            InitializeScenarioSummary();
+        }
+
+        /// <summary>
+        /// E-002: 시나리오별 배당 요약 테이블 초기화
+        /// </summary>
+        private void InitializeScenarioSummary()
+        {
+            ScenarioSummaryItems = new ObservableCollection<ScenarioSummaryItem>
+            {
+                new ScenarioSummaryItem 
+                { 
+                    Label = "경매비용",
+                    Scenario1Value = CalculateAuctionCost(Scenario1_Amount),
+                    Scenario2Value = CalculateAuctionCost(Scenario2_Amount),
+                    Scenario3Value = CalculateAuctionCost(Scenario3_Amount)
+                },
+                new ScenarioSummaryItem 
+                { 
+                    Label = "배당회수",
+                    Scenario1Value = CalculateDistribution(Scenario1_Amount),
+                    Scenario2Value = CalculateDistribution(Scenario2_Amount),
+                    Scenario3Value = CalculateDistribution(Scenario3_Amount)
+                },
+                new ScenarioSummaryItem 
+                { 
+                    Label = "상계회수",
+                    Scenario1Value = 0, // 인터림 파일에서 가져옴 (추후 구현)
+                    Scenario2Value = 0,
+                    Scenario3Value = 0
+                },
+                new ScenarioSummaryItem 
+                { 
+                    Label = "현금흐름",
+                    Scenario1Value = Scenario1_Amount,
+                    Scenario2Value = Scenario2_Amount,
+                    Scenario3Value = Scenario3_Amount
+                }
+            };
+            
+            // 합계 계산
+            foreach (var item in ScenarioSummaryItems)
+            {
+                item.TotalValue = (item.Scenario1Value ?? 0) + 
+                                  (item.Scenario2Value ?? 0) + 
+                                  (item.Scenario3Value ?? 0);
+            }
+        }
+
+        /// <summary>
+        /// E-002: 경매비용 계산 (낙찰가의 약 3%)
+        /// </summary>
+        private decimal? CalculateAuctionCost(decimal? amount)
+        {
+            return amount.HasValue ? amount.Value * 0.03m : null;
+        }
+
+        /// <summary>
+        /// E-002: 배당회수 계산 (낙찰가 - 경매비용 - 선순위)
+        /// </summary>
+        private decimal? CalculateDistribution(decimal? amount)
+        {
+            if (!amount.HasValue) return null;
+            var cost = CalculateAuctionCost(amount) ?? 0;
+            return amount.Value - cost;
         }
 
         private void LoadFromEvaluation(Evaluation evaluation)
@@ -644,6 +771,10 @@ namespace NPLogic.ViewModels
                 {
                     RecommendedCases.Clear();
                     
+                    // E-005: 본건 좌표 추출 (거리 계산용)
+                    var subjectLat = _property?.Latitude.HasValue == true ? (double)_property.Latitude.Value : (double?)null;
+                    var subjectLon = _property?.Longitude.HasValue == true ? (double)_property.Longitude.Value : (double?)null;
+                    
                     // 결과 변환
                     if (result.RuleResults != null)
                     {
@@ -651,6 +782,16 @@ namespace NPLogic.ViewModels
                         {
                             foreach (var caseItem in ruleResult.Value)
                             {
+                                // E-005: 거리 계산
+                                double? distanceKm = null;
+                                if (subjectLat.HasValue && subjectLon.HasValue && 
+                                    caseItem.Latitude.HasValue && caseItem.Longitude.HasValue)
+                                {
+                                    distanceKm = CalculateDistanceKm(
+                                        subjectLat.Value, subjectLon.Value,
+                                        caseItem.Latitude.Value, caseItem.Longitude.Value);
+                                }
+                                
                                 RecommendedCases.Add(new RecommendCaseItem
                                 {
                                     CaseNo = caseItem.CaseNo,
@@ -663,7 +804,8 @@ namespace NPLogic.ViewModels
                                     LandArea = caseItem.LandArea,
                                     Latitude = caseItem.Latitude,
                                     Longitude = caseItem.Longitude,
-                                    RuleName = caseItem.RuleName
+                                    RuleName = caseItem.RuleName,
+                                    DistanceKm = distanceKm // E-005
                                 });
                             }
                         }
@@ -950,6 +1092,24 @@ namespace NPLogic.ViewModels
             }
         }
 
+        /// <summary>
+        /// E-004: 시세 추이 사이트 열기 (KB부동산)
+        /// </summary>
+        [RelayCommand]
+        private void OpenPriceTrendSite()
+        {
+            try
+            {
+                // KB부동산 시세 사이트 열기
+                var url = "https://kbland.kr/";
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"사이트 열기 실패: {ex.Message}";
+            }
+        }
+
         #endregion
 
         #region 계산 메서드
@@ -991,6 +1151,59 @@ namespace NPLogic.ViewModels
             }
         }
 
+        /// <summary>
+        /// E-002: 시나리오 3 계산 (보수적 평가: 시나리오1 - 5%)
+        /// </summary>
+        public void CalculateScenario3()
+        {
+            if (_property?.AppraisalValue == null || !AppliedBidRate.HasValue)
+                return;
+
+            var conservativeRate = AppliedBidRate.Value - 0.05m;
+            if (conservativeRate < 0.3m) conservativeRate = 0.3m; // 최소 30%
+
+            Scenario3_Amount = _property.AppraisalValue.Value * conservativeRate;
+            Scenario3_Rate = conservativeRate;
+        }
+
+        /// <summary>
+        /// E-002: 배당 요약 테이블 업데이트
+        /// </summary>
+        public void UpdateScenarioSummary()
+        {
+            if (ScenarioSummaryItems.Count == 0)
+            {
+                InitializeScenarioSummary();
+                return;
+            }
+
+            // 각 항목 업데이트
+            foreach (var item in ScenarioSummaryItems)
+            {
+                switch (item.Label)
+                {
+                    case "경매비용":
+                        item.Scenario1Value = CalculateAuctionCost(Scenario1_Amount);
+                        item.Scenario2Value = CalculateAuctionCost(Scenario2_Amount);
+                        item.Scenario3Value = CalculateAuctionCost(Scenario3_Amount);
+                        break;
+                    case "배당회수":
+                        item.Scenario1Value = CalculateDistribution(Scenario1_Amount);
+                        item.Scenario2Value = CalculateDistribution(Scenario2_Amount);
+                        item.Scenario3Value = CalculateDistribution(Scenario3_Amount);
+                        break;
+                    case "현금흐름":
+                        item.Scenario1Value = Scenario1_Amount;
+                        item.Scenario2Value = Scenario2_Amount;
+                        item.Scenario3Value = Scenario3_Amount;
+                        break;
+                }
+                item.TotalValue = (item.Scenario1Value ?? 0) + 
+                                  (item.Scenario2Value ?? 0) + 
+                                  (item.Scenario3Value ?? 0);
+            }
+        }
+
         #endregion
 
         #region 속성 변경 핸들러
@@ -998,6 +1211,8 @@ namespace NPLogic.ViewModels
         partial void OnAppliedBidRateChanged(decimal? value)
         {
             CalculateScenario1();
+            CalculateScenario3(); // E-002: 시나리오 3도 재계산
+            UpdateScenarioSummary(); // E-002: 배당 요약 업데이트
             IsDirty = true;
         }
 
@@ -1012,6 +1227,7 @@ namespace NPLogic.ViewModels
 
         partial void OnScenario1_AmountChanged(decimal? value)
         {
+            UpdateScenarioSummary(); // E-002
             IsDirty = true;
         }
 
@@ -1022,6 +1238,7 @@ namespace NPLogic.ViewModels
 
         partial void OnScenario2_AmountChanged(decimal? value)
         {
+            UpdateScenarioSummary(); // E-002
             IsDirty = true;
         }
 
@@ -1029,6 +1246,38 @@ namespace NPLogic.ViewModels
         {
             IsDirty = true;
         }
+
+        // E-002: 시나리오 3 변경 핸들러
+        partial void OnScenario3_AmountChanged(decimal? value)
+        {
+            UpdateScenarioSummary();
+            IsDirty = true;
+        }
+
+        partial void OnScenario3_ReasonChanged(string? value)
+        {
+            IsDirty = true;
+        }
+
+        #endregion
+
+        #region E-005: 거리 계산
+
+        /// <summary>
+        /// Haversine 공식으로 두 좌표 간 거리 계산 (km)
+        /// </summary>
+        public static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double R = 6371; // 지구 반지름 (km)
+            var dLat = ToRad(lat2 - lat1);
+            var dLon = ToRad(lon2 - lon1);
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(ToRad(lat1)) * Math.Cos(ToRad(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            return R * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        }
+
+        private static double ToRad(double deg) => deg * Math.PI / 180;
 
         #endregion
     }

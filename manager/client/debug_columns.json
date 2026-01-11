@@ -1,0 +1,533 @@
+{
+  "columns": [
+    {
+      "index": 0,
+      "name": "Unnamed: 0",
+      "name_repr": "'Unnamed: 0'",
+      "has_newline": false
+    },
+    {
+      "index": 1,
+      "name": "일련번호",
+      "name_repr": "'일련번호'",
+      "has_newline": false
+    },
+    {
+      "index": 2,
+      "name": "Pool 구분",
+      "name_repr": "'Pool 구분'",
+      "has_newline": false
+    },
+    {
+      "index": 3,
+      "name": "차주구분",
+      "name_repr": "'차주구분'",
+      "has_newline": false
+    },
+    {
+      "index": 4,
+      "name": "차주일련번호",
+      "name_repr": "'차주일련번호'",
+      "has_newline": false
+    },
+    {
+      "index": 5,
+      "name": "차주명",
+      "name_repr": "'차주명'",
+      "has_newline": false
+    },
+    {
+      "index": 6,
+      "name": "물건번호",
+      "name_repr": "'물건번호'",
+      "has_newline": false
+    },
+    {
+      "index": 7,
+      "name": "Property\n일련번호",
+      "name_repr": "'Property\\n일련번호'",
+      "has_newline": true
+    },
+    {
+      "index": 8,
+      "name": "담보소재지1\n(특별,광역시/도)",
+      "name_repr": "'담보소재지1\\n(특별,광역시/도)'",
+      "has_newline": true
+    },
+    {
+      "index": 9,
+      "name": "담보소재지2\n(시/군/구)",
+      "name_repr": "'담보소재지2\\n(시/군/구)'",
+      "has_newline": true
+    },
+    {
+      "index": 10,
+      "name": "담보소재지 3\n(동/리/읍/면)",
+      "name_repr": "'담보소재지 3\\n(동/리/읍/면)'",
+      "has_newline": true
+    },
+    {
+      "index": 11,
+      "name": "담보소재지4 (나머지상세지번/기타재산내역)",
+      "name_repr": "'담보소재지4 (나머지상세지번/기타재산내역)'",
+      "has_newline": false
+    },
+    {
+      "index": 12,
+      "name": "Property Type",
+      "name_repr": "'Property Type'",
+      "has_newline": false
+    },
+    {
+      "index": 13,
+      "name": "Property-\n대지면적",
+      "name_repr": "'Property-\\n대지면적'",
+      "has_newline": true
+    },
+    {
+      "index": 14,
+      "name": "Property-\n건물면적",
+      "name_repr": "'Property-\\n건물면적'",
+      "has_newline": true
+    },
+    {
+      "index": 15,
+      "name": "Property-\n기타(기계기구등)",
+      "name_repr": "'Property-\\n기타(기계기구등)'",
+      "has_newline": true
+    },
+    {
+      "index": 16,
+      "name": "공장저당법 \n적용 유무\n(Y)",
+      "name_repr": "'공장저당법 \\n적용 유무\\n(Y)'",
+      "has_newline": true
+    },
+    {
+      "index": 17,
+      "name": "Property-\n기업은행\n최초 설정일자",
+      "name_repr": "'Property-\\n기업은행\\n최초 설정일자'",
+      "has_newline": true
+    },
+    {
+      "index": 18,
+      "name": "Property\n설정 순위",
+      "name_repr": "'Property\\n설정 순위'",
+      "has_newline": true
+    },
+    {
+      "index": 19,
+      "name": "통화표시",
+      "name_repr": "'통화표시'",
+      "has_newline": false
+    },
+    {
+      "index": 20,
+      "name": "Property별\n근저당권설정액",
+      "name_repr": "'Property별\\n근저당권설정액'",
+      "has_newline": true
+    },
+    {
+      "index": 21,
+      "name": "환산된 Property별\n근저당권설정액",
+      "name_repr": "'환산된 Property별\\n근저당권설정액'",
+      "has_newline": true
+    },
+    {
+      "index": 22,
+      "name": "공담\nProperty #",
+      "name_repr": "'공담\\nProperty #'",
+      "has_newline": true
+    },
+    {
+      "index": 23,
+      "name": "선순위 공담순위",
+      "name_repr": "'선순위 공담순위'",
+      "has_newline": false
+    },
+    {
+      "index": 24,
+      "name": "공담 Property 금액",
+      "name_repr": "'공담 Property 금액'",
+      "has_newline": false
+    },
+    {
+      "index": 25,
+      "name": "Property별 \n선순위 설정순위",
+      "name_repr": "'Property별 \\n선순위 설정순위'",
+      "has_newline": true
+    },
+    {
+      "index": 26,
+      "name": "통화표시.1",
+      "name_repr": "'통화표시.1'",
+      "has_newline": false
+    },
+    {
+      "index": 27,
+      "name": "Property별\n선순위 설정액",
+      "name_repr": "'Property별\\n선순위 설정액'",
+      "has_newline": true
+    },
+    {
+      "index": 28,
+      "name": "환산후 Property별\n선순위근저당권 설정액",
+      "name_repr": "'환산후 Property별\\n선순위근저당권 설정액'",
+      "has_newline": true
+    },
+    {
+      "index": 29,
+      "name": "선순위\n공담 Property #",
+      "name_repr": "'선순위\\n공담 Property #'",
+      "has_newline": true
+    },
+    {
+      "index": 30,
+      "name": "선순위 공담순위.1",
+      "name_repr": "'선순위 공담순위.1'",
+      "has_newline": false
+    },
+    {
+      "index": 31,
+      "name": "선순위 공담 설정액",
+      "name_repr": "'선순위 공담 설정액'",
+      "has_newline": false
+    },
+    {
+      "index": 32,
+      "name": "통화표시.2",
+      "name_repr": "'통화표시.2'",
+      "has_newline": false
+    },
+    {
+      "index": 33,
+      "name": "근저당권\n일부이전 금액",
+      "name_repr": "'근저당권\\n일부이전 금액'",
+      "has_newline": true
+    },
+    {
+      "index": 34,
+      "name": "근저당권\n일부이전정보",
+      "name_repr": "'근저당권\\n일부이전정보'",
+      "has_newline": true
+    },
+    {
+      "index": 35,
+      "name": "선순위\n가압류/압류/가처분 유무",
+      "name_repr": "'선순위\\n가압류/압류/가처분 유무'",
+      "has_newline": true
+    },
+    {
+      "index": 36,
+      "name": "선순위\n가압류/압류/가처분 금액",
+      "name_repr": "'선순위\\n가압류/압류/가처분 금액'",
+      "has_newline": true
+    },
+    {
+      "index": 37,
+      "name": "유치권 유무",
+      "name_repr": "'유치권 유무'",
+      "has_newline": false
+    },
+    {
+      "index": 38,
+      "name": "유치권자",
+      "name_repr": "'유치권자'",
+      "has_newline": false
+    },
+    {
+      "index": 39,
+      "name": "유치권 신고금액",
+      "name_repr": "'유치권 신고금액'",
+      "has_newline": false
+    },
+    {
+      "index": 40,
+      "name": "유치권 상세내용",
+      "name_repr": "'유치권 상세내용'",
+      "has_newline": false
+    },
+    {
+      "index": 41,
+      "name": "선순위\n소액보증금 (주택)",
+      "name_repr": "'선순위\\n소액보증금 (주택)'",
+      "has_newline": true
+    },
+    {
+      "index": 42,
+      "name": "선순위\n소액보증금 (상가)",
+      "name_repr": "'선순위\\n소액보증금 (상가)'",
+      "has_newline": true
+    },
+    {
+      "index": 43,
+      "name": "선순위\n임차보증금 (주택)",
+      "name_repr": "'선순위\\n임차보증금 (주택)'",
+      "has_newline": true
+    },
+    {
+      "index": 44,
+      "name": "선순위\n임차보증금 (상가)",
+      "name_repr": "'선순위\\n임차보증금 (상가)'",
+      "has_newline": true
+    },
+    {
+      "index": 45,
+      "name": "선순위 임금채권",
+      "name_repr": "'선순위 임금채권'",
+      "has_newline": false
+    },
+    {
+      "index": 46,
+      "name": "선순위 당해세",
+      "name_repr": "'선순위 당해세'",
+      "has_newline": false
+    },
+    {
+      "index": 47,
+      "name": "선순위 조세채권",
+      "name_repr": "'선순위 조세채권'",
+      "has_newline": false
+    },
+    {
+      "index": 48,
+      "name": "합계",
+      "name_repr": "'합계'",
+      "has_newline": false
+    },
+    {
+      "index": 49,
+      "name": "감정평가구분\n(Property별)",
+      "name_repr": "'감정평가구분\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 50,
+      "name": "감정평가일자\n(Property별)",
+      "name_repr": "'감정평가일자\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 51,
+      "name": "감정평가기관\n(Property별)",
+      "name_repr": "'감정평가기관\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 52,
+      "name": "토지감정평가액\n(Property별)",
+      "name_repr": "'토지감정평가액\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 53,
+      "name": "건물 감정평가액\n(Property별)",
+      "name_repr": "'건물 감정평가액\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 54,
+      "name": "기계평가액\n(Property별)",
+      "name_repr": "'기계평가액\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 55,
+      "name": "제시외\n(Property별)",
+      "name_repr": "'제시외\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 56,
+      "name": "감정평가액합계\n(Property별)",
+      "name_repr": "'감정평가액합계\\n(Property별)'",
+      "has_newline": true
+    },
+    {
+      "index": 57,
+      "name": "KB아파트시세\n(2025-01-17)",
+      "name_repr": "'KB아파트시세\\n(2025-01-17)'",
+      "has_newline": true
+    },
+    {
+      "index": 58,
+      "name": "경매개시 \n여부",
+      "name_repr": "'경매개시 \\n여부'",
+      "has_newline": true
+    },
+    {
+      "index": 59,
+      "name": "경매 관할법원",
+      "name_repr": "'경매 관할법원'",
+      "has_newline": false
+    },
+    {
+      "index": 60,
+      "name": "경매신청기관\n(IBK)",
+      "name_repr": "'경매신청기관\\n(IBK)'",
+      "has_newline": true
+    },
+    {
+      "index": 61,
+      "name": "경매개시일자\n(IBK)",
+      "name_repr": "'경매개시일자\\n(IBK)'",
+      "has_newline": true
+    },
+    {
+      "index": 62,
+      "name": "경매사건번호\n(IBK)",
+      "name_repr": "'경매사건번호\\n(IBK)'",
+      "has_newline": true
+    },
+    {
+      "index": 63,
+      "name": "배당요구종기일\n(IBK)",
+      "name_repr": "'배당요구종기일\\n(IBK)'",
+      "has_newline": true
+    },
+    {
+      "index": 64,
+      "name": "청구금액\n(IBK)",
+      "name_repr": "'청구금액\\n(IBK)'",
+      "has_newline": true
+    },
+    {
+      "index": 65,
+      "name": "경매신청기관\n(타채권자)",
+      "name_repr": "'경매신청기관\\n(타채권자)'",
+      "has_newline": true
+    },
+    {
+      "index": 66,
+      "name": "경매개시일자\n(타채권자)",
+      "name_repr": "'경매개시일자\\n(타채권자)'",
+      "has_newline": true
+    },
+    {
+      "index": 67,
+      "name": "경매사건번호\n(타채권자)",
+      "name_repr": "'경매사건번호\\n(타채권자)'",
+      "has_newline": true
+    },
+    {
+      "index": 68,
+      "name": "배당요구종기일\n(타채권자)",
+      "name_repr": "'배당요구종기일\\n(타채권자)'",
+      "has_newline": true
+    },
+    {
+      "index": 69,
+      "name": "청구금액\n(타채권자)",
+      "name_repr": "'청구금액\\n(타채권자)'",
+      "has_newline": true
+    },
+    {
+      "index": 70,
+      "name": "최초법사가",
+      "name_repr": "'최초법사가'",
+      "has_newline": false
+    },
+    {
+      "index": 71,
+      "name": "최초경매기일",
+      "name_repr": "'최초경매기일'",
+      "has_newline": false
+    },
+    {
+      "index": 72,
+      "name": "최종경매회차",
+      "name_repr": "'최종경매회차'",
+      "has_newline": false
+    },
+    {
+      "index": 73,
+      "name": "최종경매결과",
+      "name_repr": "'최종경매결과'",
+      "has_newline": false
+    },
+    {
+      "index": 74,
+      "name": "최종경매기일",
+      "name_repr": "'최종경매기일'",
+      "has_newline": false
+    },
+    {
+      "index": 75,
+      "name": "차기경매기일",
+      "name_repr": "'차기경매기일'",
+      "has_newline": false
+    },
+    {
+      "index": 76,
+      "name": "낙찰금액",
+      "name_repr": "'낙찰금액'",
+      "has_newline": false
+    },
+    {
+      "index": 77,
+      "name": "최종경매일의 \n최저입찰금액",
+      "name_repr": "'최종경매일의 \\n최저입찰금액'",
+      "has_newline": true
+    },
+    {
+      "index": 78,
+      "name": "차후예정경매일의 \n최저입찰금액",
+      "name_repr": "'차후예정경매일의 \\n최저입찰금액'",
+      "has_newline": true
+    },
+    {
+      "index": 79,
+      "name": "비고",
+      "name_repr": "'비고'",
+      "has_newline": false
+    }
+  ],
+  "first_row": {
+    "일련번호": "1",
+    "Pool 구분": "B",
+    "차주구분": "Regular",
+    "차주일련번호": "R-003",
+    "차주명": "(주)코***스",
+    "물건번호": "R-003-1",
+    "Property\n일련번호": "1",
+    "담보소재지1\n(특별,광역시/도)": "경기도",
+    "담보소재지2\n(시/군/구)": "용인시 처인구",
+    "담보소재지 3\n(동/리/읍/면)": "포곡읍 삼계리",
+    "담보소재지4 (나머지상세지번/기타재산내역)": "56-3(토지, 1동, 2동, 3동, 4동 건물 4개동), 56-22, 56-23(토지 2필지)",
+    "Property Type": "근린주택",
+    "Property-\n대지면적": "7934.0",
+    "Property-\n건물면적": "4091.0299999999997",
+    "Property-\n기업은행\n최초 설정일자": "2019-04-30 00:00:00",
+    "Property\n설정 순위": "1,2,3",
+    "통화표시": "KRW",
+    "Property별\n근저당권설정액": "11300000000",
+    "환산된 Property별\n근저당권설정액": "11300000000",
+    "선순위\n가압류/압류/가처분 유무": "무",
+    "유치권 유무": "추후제공",
+    "유치권자": "추후제공",
+    "유치권 신고금액": "추후제공",
+    "유치권 상세내용": "추후제공",
+    "선순위\n소액보증금 (주택)": "추후제공",
+    "선순위\n소액보증금 (상가)": "추후제공",
+    "선순위\n임차보증금 (주택)": "추후제공",
+    "선순위\n임차보증금 (상가)": "추후제공",
+    "선순위 임금채권": "추후제공",
+    "선순위 당해세": "추후제공",
+    "선순위 조세채권": "추후제공",
+    "합계": "추후제공",
+    "감정평가구분\n(Property별)": "구감정가",
+    "감정평가일자\n(Property별)": "2022-05-18 00:00:00",
+    "감정평가기관\n(Property별)": "대일감정원",
+    "토지감정평가액\n(Property별)": "8125740000",
+    "건물 감정평가액\n(Property별)": "5389334680",
+    "기계평가액\n(Property별)": "0",
+    "제시외\n(Property별)": "0",
+    "감정평가액합계\n(Property별)": "13515074680",
+    "경매개시 \n여부": "Filed",
+    "경매 관할법원": "수원지방법원",
+    "경매신청기관\n(IBK)": "IBK",
+    "경매개시일자\n(IBK)": "2025-05-28 00:00:00",
+    "경매사건번호\n(IBK)": "2025타경56142",
+    "배당요구종기일\n(IBK)": "2025-08-13 00:00:00",
+    "청구금액\n(IBK)": "11757577677"
+  }
+}

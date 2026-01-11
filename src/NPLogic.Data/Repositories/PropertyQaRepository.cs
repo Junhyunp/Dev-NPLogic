@@ -117,6 +117,54 @@ namespace NPLogic.Data.Repositories
             }
         }
 
+        /// <summary>
+        /// 차주별 QA 목록 조회 (Q-003)
+        /// 차주와 연결된 모든 물건의 QA를 가져옴
+        /// </summary>
+        public async Task<List<PropertyQa>> GetByBorrowerIdAsync(Guid borrowerId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                
+                // 1. 차주의 모든 물건 ID 조회
+                var propertiesResponse = await client
+                    .From<PropertyForQaTable>()
+                    .Where(x => x.BorrowerId == borrowerId)
+                    .Select("id, property_number, address_full")
+                    .Get();
+                
+                var propertyIds = propertiesResponse.Models.Select(p => p.Id).ToList();
+                if (!propertyIds.Any()) return new List<PropertyQa>();
+
+                // 2. 해당 물건들의 QA 조회
+                var response = await client
+                    .From<PropertyQaTable>()
+                    .Filter("property_id", Postgrest.Constants.Operator.In, propertyIds)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                var qas = response.Models.Select(MapToModel).ToList();
+                
+                // 물건 정보 매핑
+                foreach (var qa in qas)
+                {
+                    var prop = propertiesResponse.Models.FirstOrDefault(p => p.Id == qa.PropertyId);
+                    if (prop != null)
+                    {
+                        qa.PropertyNumber = prop.PropertyNumber;
+                        qa.AddressFull = prop.AddressFull;
+                    }
+                }
+
+                return qas;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"차주 QA 목록 조회 실패: {ex.Message}", ex);
+            }
+        }
+
         private PropertyQa MapToModel(PropertyQaTable table)
         {
             return new PropertyQa
@@ -150,22 +198,6 @@ namespace NPLogic.Data.Repositories
         }
     }
 
-    /// <summary>
-    /// QA 모델
-    /// </summary>
-    public class PropertyQa
-    {
-        public Guid Id { get; set; }
-        public Guid PropertyId { get; set; }
-        public string Question { get; set; } = "";
-        public string? Answer { get; set; }
-        public Guid? CreatedBy { get; set; }
-        public Guid? AnsweredBy { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? AnsweredAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
-    }
-
     [Postgrest.Attributes.Table("property_qa")]
     internal class PropertyQaTable : Postgrest.Models.BaseModel
     {
@@ -195,6 +227,16 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
+    }
+
+    // QA 조인용 간소화된 Property 테이블
+    [Postgrest.Attributes.Table("properties")]
+    internal class PropertyForQaTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)] public Guid Id { get; set; }
+        [Postgrest.Attributes.Column("borrower_id")] public Guid? BorrowerId { get; set; }
+        [Postgrest.Attributes.Column("property_number")] public string? PropertyNumber { get; set; }
+        [Postgrest.Attributes.Column("address_full")] public string? AddressFull { get; set; }
     }
 }
 

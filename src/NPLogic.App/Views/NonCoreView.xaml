@@ -72,7 +72,7 @@
                                         <!-- 물건 번호 -->
                                         <TextBlock Grid.Column="1" 
                                                    Text="{Binding PropertyNumber}" 
-                                                   FontSize="12"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    VerticalAlignment="Center"
                                                    Margin="0,0,8,0"/>
                                         
@@ -100,12 +100,12 @@
                     </ItemsControl>
                 </ScrollViewer>
                 
-                <!-- 버튼 영역: 저장, 새로고침, 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
+                <!-- 버튼 영역: 저장, 되돌리기, 인쇄, Excel, View(롤업), 기능별 일괄작업 -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="16,0,0,0">
                     <!-- 저장 버튼 -->
                     <Button Style="{StaticResource PrimaryButton}"
                             Padding="10,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Margin="0,0,4,0"
                             ToolTip="변경사항 저장 (Ctrl+S)"
                             Command="{Binding SaveCommand}">
@@ -118,19 +118,25 @@
                         </StackPanel>
                     </Button>
                     
-                    <!-- 새로고침 버튼 -->
+                    <!-- 되돌리기 버튼 (피드백 반영: 자동저장 + 되돌리기) -->
                     <Button Style="{StaticResource SecondaryButton}"
                             Padding="10,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Margin="0,0,8,0"
-                            ToolTip="데이터 새로고침 (Ctrl+R)"
-                            Command="{Binding RefreshCommand}">
+                            ToolTip="이전 상태로 되돌리기 (최대 3단계)"
+                            Command="{Binding UndoCommand}"
+                            IsEnabled="{Binding CanUndo}">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Refresh" 
+                            <materialDesign:PackIcon Kind="Undo" 
                                                      Width="14" Height="14" 
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,4,0"/>
-                            <TextBlock Text="새로고침" VerticalAlignment="Center"/>
+                            <TextBlock Text="되돌리기" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding UndoCount, StringFormat=({0})}" 
+                                       VerticalAlignment="Center" 
+                                       FontSize="{StaticResource FontSizeTiny}" 
+                                       Margin="4,0,0,0"
+                                       Opacity="0.7"/>
                         </StackPanel>
                     </Button>
                     
@@ -139,7 +145,7 @@
                     <!-- 인쇄 버튼 -->
                     <Button Style="{StaticResource SecondaryButton}"
                             Padding="10,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Margin="0,0,4,0"
                             ToolTip="인쇄 (전체/차주별)"
                             Click="PrintButton_Click">
@@ -161,7 +167,7 @@
                     <!-- Excel 버튼 -->
                     <Button Style="{StaticResource SecondaryButton}"
                             Padding="10,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Margin="0,0,4,0"
                             ToolTip="Excel 내려받기 (전체/차주별)"
                             Click="ExcelButton_Click">
@@ -184,7 +190,7 @@
                     <!-- View(롤업) 버튼 -->
                     <Button Style="{StaticResource PrimaryButton}"
                             Padding="10,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Margin="0,0,8,0"
                             Click="RollupButton_Click"
                             ToolTip="전체 현황 창 열기 (View)">
@@ -201,7 +207,7 @@
                     <Button Content="기능별 일괄작업"
                             Style="{StaticResource SecondaryButton}"
                             Padding="12,6"
-                            FontSize="12"
+                            FontSize="{StaticResource FontSizeBody}"
                             Click="BatchWorkButton_Click">
                         <Button.ContextMenu>
                             <ContextMenu>
@@ -285,14 +291,14 @@
                     <StackPanel>
                         <!-- 조건별 검색 안내 -->
                         <TextBlock Text="조건별로 검색"
-                                   FontSize="11"
+                                   FontSize="{StaticResource FontSizeSmall}"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    Margin="4,0,0,8"/>
                         
                         <!-- 회생차주 -->
                         <CheckBox Content="회생차주"
                                   IsChecked="{Binding FilterRestructuring}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -300,7 +306,7 @@
                         <!-- 개인회생 -->
                         <CheckBox Content="개인회생"
                                   IsChecked="{Binding FilterPersonalRestructuring}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -308,7 +314,7 @@
                         <!-- 차주거주 -->
                         <CheckBox Content="차주거주"
                                   IsChecked="{Binding FilterBorrowerResidence}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -316,7 +322,7 @@
                         <!-- 경매진행 -->
                         <CheckBox Content="경매진행"
                                   IsChecked="{Binding FilterAuctionInProgress}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -325,14 +331,14 @@
                         
                         <!-- 물건유형 섹션 -->
                         <TextBlock Text="물건유형"
-                                   FontSize="11"
+                                   FontSize="{StaticResource FontSizeSmall}"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    Margin="4,4,0,8"/>
                         
                         <!-- 상가 -->
                         <CheckBox Content="상가"
                                   IsChecked="{Binding FilterCommercial}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -340,7 +346,7 @@
                         <!-- 주택 -->
                         <CheckBox Content="주택"
                                   IsChecked="{Binding FilterResidential}"
-                                  FontSize="12"
+                                  FontSize="{StaticResource FontSizeBody}"
                                   Margin="0,0,0,6"
                                   Checked="Filter_Changed"
                                   Unchecked="Filter_Changed"/>
@@ -353,7 +359,7 @@
                                 Padding="8"
                                 Margin="0,4,0,0">
                             <StackPanel>
-                                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondaryBrush}">
+                                <TextBlock FontSize="{StaticResource FontSizeSmall}" Foreground="{StaticResource TextSecondaryBrush}">
                                     <Run Text="검색결과: "/>
                                     <Run Text="{Binding FilteredCount, Mode=OneWay}" FontWeight="Bold"/>
                                     <Run Text=" / "/>
@@ -371,7 +377,7 @@
                         Padding="8">
                     <Button Content="필터 초기화"
                             Style="{StaticResource SecondaryButton}"
-                            FontSize="11"
+                            FontSize="{StaticResource FontSizeSmall}"
                             Padding="8,6"
                             HorizontalAlignment="Stretch"
                             Click="ClearFilters_Click"/>
@@ -424,7 +430,7 @@
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Width="200"
                              Padding="8,6"
-                             FontSize="12"
+                             FontSize="{StaticResource FontSizeBody}"
                              VerticalContentAlignment="Center"
                              materialDesign:HintAssist.Hint="차주/물건번호 검색 (Enter)"
                              KeyDown="SearchTextBox_KeyDown"/>
@@ -607,19 +613,19 @@
                                     </Grid.RowDefinitions>
                                     
                                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,4">
-                                        <TextBlock Text="1회차" FontSize="11" Opacity="0.6"/>
+                                        <TextBlock Text="1회차" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                         <TextBlock Text="{Binding SelectedCourt.DiscountRate1, StringFormat=P0}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,4">
-                                        <TextBlock Text="2회차" FontSize="11" Opacity="0.6"/>
+                                        <TextBlock Text="2회차" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                         <TextBlock Text="{Binding SelectedCourt.DiscountRate2, StringFormat=P0}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,4,4,0">
-                                        <TextBlock Text="3회차" FontSize="11" Opacity="0.6"/>
+                                        <TextBlock Text="3회차" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                         <TextBlock Text="{Binding SelectedCourt.DiscountRate3, StringFormat=P0}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,4,0,0">
-                                        <TextBlock Text="4회차" FontSize="11" Opacity="0.6"/>
+                                        <TextBlock Text="4회차" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                         <TextBlock Text="{Binding SelectedCourt.DiscountRate4, StringFormat=P0}" FontWeight="SemiBold"/>
                                     </StackPanel>
                                 </Grid>
@@ -629,10 +635,10 @@
                         <!-- 빠른 계산 -->
                         <Expander Header="빠른 계산" IsExpanded="False" Margin="0,0,0,8">
                             <StackPanel Margin="8">
-                                <TextBlock Text="감정가" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                <TextBlock Text="감정가" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6" Margin="0,0,0,4"/>
                                 <TextBox x:Name="QuickCalcAppraisalValue" Margin="0,0,0,8" Padding="8,6"/>
                                 
-                                <TextBlock Text="저감율" FontSize="11" Opacity="0.6" Margin="0,0,0,4"/>
+                                <TextBlock Text="저감율" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6" Margin="0,0,0,4"/>
                                 <TextBox x:Name="QuickCalcDiscountRate" Text="20%" Margin="0,0,0,8" Padding="8,6"/>
                                 
                                 <Button Content="계산" 
@@ -644,11 +650,11 @@
                                         CornerRadius="4" 
                                         Padding="8">
                                     <StackPanel>
-                                        <TextBlock Text="예상 낙찰가" FontSize="11" Opacity="0.6"/>
+                                        <TextBlock Text="예상 낙찰가" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                         <TextBlock x:Name="QuickCalcResult" 
                                                    Text="-" 
                                                    FontWeight="Bold" 
-                                                   FontSize="16"/>
+                                                   FontSize="{StaticResource FontSizeH3}"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -658,8 +664,8 @@
                         <Expander Header="📊 상권 분석" IsExpanded="True" Margin="0,0,0,8">
                             <StackPanel Margin="8">
                                 <TextBlock Text="선택한 물건 주변의 상권 정보를 분석합니다."
-                                           FontSize="11"
-                                           Foreground="#64748B"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextMutedBrush}"
                                            TextWrapping="Wrap"
                                            Margin="0,0,0,8"/>
                                 <Button Style="{StaticResource PrimaryButton}"
@@ -675,8 +681,8 @@
                                     </StackPanel>
                                 </Button>
                                 <TextBlock Text="※ 상가/아파트형공장 물건에 유용합니다."
-                                           FontSize="10"
-                                           Foreground="#94A3B8"
+                                           FontSize="{StaticResource FontSizeTiny}"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
                                            Margin="0,8,0,0"/>
                             </StackPanel>
                         </Expander>
@@ -724,7 +730,7 @@
         
         <!-- 전체 화면 로딩 오버레이 -->
         <Border Grid.RowSpan="2" 
-                Background="#80000000" 
+                Background="{StaticResource OverlayBrush}" 
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200"/>

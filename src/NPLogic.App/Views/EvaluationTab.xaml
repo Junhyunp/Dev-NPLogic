@@ -36,7 +36,7 @@
 
             <!-- 로딩 오버레이 -->
             <Border Grid.RowSpan="2" 
-                    Background="#80FFFFFF" 
+                    Background="{StaticResource OverlaySemiLightBrush}" 
                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                     Panel.ZIndex="100">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -70,26 +70,26 @@
                                      IsChecked="{Binding IsApartmentType}"
                                      GroupName="EvaluationType"
                                      Margin="0,0,24,0"
-                                     FontSize="13"/>
+                                     FontSize="{StaticResource FontSizeBody}"/>
                         <RadioButton Content="2. 연립다세대" 
                                      IsChecked="{Binding IsMultiFamilyType}"
                                      GroupName="EvaluationType"
                                      Margin="0,0,24,0"
-                                     FontSize="13"/>
+                                     FontSize="{StaticResource FontSizeBody}"/>
                         <RadioButton Content="3. 공장/창고" 
                                      IsChecked="{Binding IsFactoryType}"
                                      GroupName="EvaluationType"
                                      Margin="0,0,24,0"
-                                     FontSize="13"/>
+                                     FontSize="{StaticResource FontSizeBody}"/>
                         <RadioButton Content="4. 상가/아파트형공장" 
                                      IsChecked="{Binding IsCommercialType}"
                                      GroupName="EvaluationType"
                                      Margin="0,0,24,0"
-                                     FontSize="13"/>
+                                     FontSize="{StaticResource FontSizeBody}"/>
                         <RadioButton Content="5. 주택/근린시설/토지/기타" 
                                      IsChecked="{Binding IsHouseLandType}"
                                      GroupName="EvaluationType"
-                                     FontSize="13"/>
+                                     FontSize="{StaticResource FontSizeBody}"/>
                     </StackPanel>
 
                     <!-- 피드백 반영: 탭 내부 저장/새로고침 버튼 제거 → 상단 헤더에서만 저장 -->
@@ -117,19 +117,31 @@
                                         Command="{Binding LoadCaseMapCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="12,4"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         HorizontalAlignment="Right"/>
                             </Grid>
                             
-                            <!-- 지도 플레이스홀더 -->
+                            <!-- 지도 플레이스홀더 (E-001: 클릭 시 팝업 확대) -->
                             <Border Background="{StaticResource BlueGray50Brush}" 
                                     CornerRadius="4"
-                                    Height="200">
-                                <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
-                                           Style="{StaticResource BodyTextStyle}"
-                                           Opacity="0.6"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
+                                    Height="200"
+                                    Cursor="Hand"
+                                    MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp"
+                                    ToolTip="클릭하여 확대">
+                                <Grid>
+                                    <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
+                                               Style="{StaticResource BodyTextStyle}"
+                                               Opacity="0.6"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="🔍 클릭하여 확대"
+                                               Style="{StaticResource BodyTextStyle}"
+                                               FontSize="{StaticResource FontSizeSmall}"
+                                               Opacity="0.5"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Bottom"
+                                               Margin="0,0,8,8"/>
+                                </Grid>
                             </Border>
                         </StackPanel>
                     </Border>
@@ -145,7 +157,7 @@
                                 <!-- 규칙 순위 선택 -->
                                 <TextBlock Text="규칙:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                 <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
-                                          Width="70" FontSize="12" Padding="4,2" Margin="0,0,16,0">
+                                          Width="70" FontSize="{StaticResource FontSizeBody}" Padding="4,2" Margin="0,0,16,0">
                                     <ComboBoxItem Content="1순위" Tag="1"/>
                                     <ComboBoxItem Content="2순위" Tag="2"/>
                                     <ComboBoxItem Content="3순위" Tag="3"/>
@@ -153,7 +165,7 @@
                                 </ComboBox>
                                 <!-- 지역 범위 선택 -->
                                 <TextBlock Text="범위:" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                <ComboBox Width="80" FontSize="12" Padding="4,2" Margin="0,0,16,0"
+                                <ComboBox Width="80" FontSize="{StaticResource FontSizeBody}" Padding="4,2" Margin="0,0,16,0"
                                           SelectedValue="{Binding SelectedRegionScope, Mode=TwoWay}"
                                           SelectedValuePath="Tag">
                                     <ComboBoxItem Content="시/도" Tag="big"/>
@@ -163,13 +175,13 @@
                                         Command="{Binding RecommendSimilarCasesCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="12,4"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"/>
                                 <Button Content="사례 적용" 
                                         Command="{Binding ApplyRecommendedCaseCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="12,4"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,16,0"/>
                                 <!-- 로딩 표시 -->
                                 <ProgressBar IsIndeterminate="True" 
@@ -196,7 +208,7 @@
                                       BorderBrush="{StaticResource BlueGray200Brush}"
                                       MaxHeight="350"
                                       MinHeight="200"
-                                      FontSize="11"
+                                      FontSize="{StaticResource FontSizeSmall}"
                                       SelectionMode="Single">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="사건번호" Binding="{Binding CaseNo}" Width="110" IsReadOnly="True"/>
@@ -214,6 +226,14 @@
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat=N1}" Width="70" IsReadOnly="True"/>
                                     <DataGridTextColumn Header="규칙" Binding="{Binding RuleName}" Width="55" IsReadOnly="True"/>
+                                    <!-- E-005: 거리 컬럼 추가 -->
+                                    <DataGridTextColumn Header="거리" Binding="{Binding DistanceDisplay}" Width="60" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
                                     <!-- 상세보기 버튼 -->
                                     <DataGridTemplateColumn Header="상세" Width="50">
                                         <DataGridTemplateColumn.CellTemplate>
@@ -223,7 +243,7 @@
                                                         CommandParameter="{Binding}"
                                                         Style="{StaticResource SecondaryButton}"
                                                         Padding="4,2"
-                                                        FontSize="12"
+                                                        FontSize="{StaticResource FontSizeBody}"
                                                         ToolTip="상세보기"
                                                         Cursor="Hand"/>
                                             </DataTemplate>
@@ -242,7 +262,7 @@
                                     <TextBlock Text="📋 사례평가" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
                                     <TextBlock Text="(직접 입력 가능)" 
                                                Style="{StaticResource LabelStyle}"
-                                               FontSize="11"
+                                               FontSize="{StaticResource FontSizeSmall}"
                                                Opacity="0.7"
                                                Margin="8,0,0,0"
                                                VerticalAlignment="Center"/>
@@ -252,13 +272,13 @@
                                             Command="{Binding ClearCaseEvaluationCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"
+                                            FontSize="{StaticResource FontSizeBody}"
                                             Margin="0,0,8,0"/>
                                     <Button Content="경매사건검색" 
                                             Command="{Binding SearchAuctionCaseCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"/>
+                                            FontSize="{StaticResource FontSizeBody}"/>
                                 </StackPanel>
                             </Grid>
                             
@@ -272,7 +292,7 @@
                                       BorderThickness="1"
                                       BorderBrush="{StaticResource BlueGray200Brush}"
                                       MaxHeight="400"
-                                      FontSize="12"
+                                      FontSize="{StaticResource FontSizeBody}"
                                       SelectionUnit="Cell">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="100" IsReadOnly="True">
@@ -363,17 +383,25 @@
                                             Command="{Binding FetchRealTransactionCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"
+                                            FontSize="{StaticResource FontSizeBody}"
+                                            Margin="0,0,8,0"/>
+                                    <!-- E-004: 시세 차트 대안 - 외부 링크 -->
+                                    <Button Content="📈 시세보기" 
+                                            Command="{Binding OpenPriceTrendSiteCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,4"
+                                            FontSize="{StaticResource FontSizeBody}"
+                                            ToolTip="KB부동산 시세 조회"
                                             Margin="0,0,8,0"/>
                                     <Button Content="🔗 rt.molit.go.kr" 
                                             Command="{Binding OpenRealTransactionSiteCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"/>
+                                            FontSize="{StaticResource FontSizeBody}"/>
                                 </StackPanel>
                             </Grid>
                             
-                            <!-- 실거래가 테이블 -->
+                            <!-- 실거래가 테이블 (E-003: 테이블 크기 축소 150→120) -->
                             <DataGrid ItemsSource="{Binding RealTransactions}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
@@ -382,8 +410,8 @@
                                       GridLinesVisibility="All"
                                       BorderThickness="1"
                                       BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="150"
-                                      FontSize="12">
+                                      MaxHeight="120"
+                                      FontSize="{StaticResource FontSizeBody}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="80"/>
                                     <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="90"/>
@@ -404,7 +432,7 @@
                                 <!-- 적용낙찰가율 헤더 - 피드백 반영: 가시성 개선 -->
                                 <TextBlock Text="적용낙찰가율" 
                                            HorizontalAlignment="Right"
-                                           FontSize="14"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            FontWeight="Bold"
                                            Foreground="{StaticResource PrimaryBrush}"/>
                             </Grid>
@@ -445,22 +473,22 @@
                                 <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats1Year_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats1Year_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats1Year_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats1Year_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats1Year_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats1Year_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats1Year_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
 
@@ -471,22 +499,22 @@
                                 <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats6Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats6Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats6Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats6Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats6Month_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats6Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats6Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
 
@@ -497,22 +525,22 @@
                                 <Border Grid.Row="3" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats3Month_Rate1, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats3Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count1, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats3Month_Rate2, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats3Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count2, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="{Binding Stats3Month_Rate3, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="11"/>
-                                        <TextBlock Text="{Binding Stats3Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="11"/>
+                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding Stats3Month_Count3, StringFormat={}{0}건}" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
 
@@ -525,12 +553,12 @@
                                         VerticalAlignment="Center">
                                     <StackPanel>
                                         <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                                   FontSize="28"
+                                                   FontSize="{StaticResource FontSizeXLarge}"
                                                    FontWeight="Bold"
                                                    Foreground="White"
                                                    HorizontalAlignment="Center"/>
                                         <TextBlock Text="{Binding AppliedBidRateDescription}" 
-                                                   FontSize="11"
+                                                   FontSize="{StaticResource FontSizeSmall}"
                                                    Foreground="White"
                                                    Opacity="0.9"
                                                    HorizontalAlignment="Center"
@@ -569,7 +597,7 @@
 
                                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
                                                Text="시나리오 1" 
-                                               FontWeight="Bold" FontSize="14"
+                                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                                Foreground="{StaticResource PrimaryBrush}"
                                                Margin="0,0,0,12"/>
 
@@ -589,14 +617,15 @@
                                              Text="{Binding Scenario1_Reason, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="8,8,0,0"
                                              Padding="8,4"
-                                             FontSize="12"/>
+                                             FontSize="{StaticResource FontSizeBody}"/>
                                 </Grid>
                             </Border>
 
                             <!-- 시나리오 2 -->
                             <Border Background="{StaticResource BlueGray50Brush}" 
                                     CornerRadius="4" 
-                                    Padding="16">
+                                    Padding="16"
+                                    Margin="0,0,0,12">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
@@ -612,7 +641,7 @@
 
                                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
                                                Text="시나리오 2" 
-                                               FontWeight="Bold" FontSize="14"
+                                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                                Foreground="{StaticResource SecondaryBrush}"
                                                Margin="0,0,0,12"/>
 
@@ -633,9 +662,120 @@
                                              Text="{Binding Scenario2_Reason, UpdateSourceTrigger=PropertyChanged}"
                                              Margin="8,8,0,0"
                                              Padding="8,4"
-                                             FontSize="12"/>
+                                             FontSize="{StaticResource FontSizeBody}"/>
                                 </Grid>
                             </Border>
+
+                            <!-- E-002: 시나리오 3 -->
+                            <Border Background="{StaticResource BlueGray50Brush}" 
+                                    CornerRadius="4" 
+                                    Padding="16"
+                                    Margin="0,0,0,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
+                                               Text="시나리오 3 (보수적)" 
+                                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
+                                               Foreground="{StaticResource WarningBrush}"
+                                               Margin="0,0,0,12"/>
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="낙찰가액" Style="{StaticResource LabelStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                                               Text="{Binding Scenario3_Amount, StringFormat={}{0:N0}원}" 
+                                               Style="{StaticResource AmountStyle}"
+                                               Foreground="{StaticResource WarningBrush}"
+                                               Margin="8,0,24,0"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelStyle}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="3" 
+                                               Text="{Binding Scenario3_Rate, StringFormat={}{0:P1}}" 
+                                               Style="{StaticResource ValueStyle}"
+                                               Margin="8,0,0,0"/>
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="평가 사유" Style="{StaticResource LabelStyle}" Margin="0,8,0,0"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                                             Text="{Binding Scenario3_Reason, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="8,8,0,0"
+                                             Padding="8,4"
+                                             FontSize="{StaticResource FontSizeBody}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- E-002: 차주별 배당 요약 -->
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="📊 시나리오별 배당 요약" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
+                            
+                            <DataGrid ItemsSource="{Binding ScenarioSummaryItems}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="All"
+                                      BorderThickness="1"
+                                      BorderBrush="{StaticResource BlueGray200Brush}"
+                                      FontSize="{StaticResource FontSizeBody}"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="80">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                                <Setter Property="Padding" Value="8,4"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="시나리오1" Binding="{Binding Scenario1Display}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                                <Setter Property="TextAlignment" Value="Right"/>
+                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="시나리오2" Binding="{Binding Scenario2Display}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                                <Setter Property="TextAlignment" Value="Right"/>
+                                                <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="시나리오3" Binding="{Binding Scenario3Display}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                                <Setter Property="TextAlignment" Value="Right"/>
+                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="합계" Binding="{Binding TotalDisplay}" Width="*">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="8,4"/>
+                                                <Setter Property="TextAlignment" Value="Right"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -643,27 +783,27 @@
 
             <!-- 메시지 표시 -->
             <Border Grid.Row="1" 
-                    Background="#E8F5E9" 
+                    Background="{StaticResource MaterialGreenBgBrush}" 
                     CornerRadius="4" 
                     Padding="12"
                     Margin="0,16,0,0"
                     VerticalAlignment="Bottom"
                     Visibility="{Binding SuccessMessage, Converter={StaticResource NullToVisibilityConverter}}">
                 <TextBlock Text="{Binding SuccessMessage}" 
-                           Foreground="#2E7D32"
-                           FontSize="13"/>
+                           Foreground="{StaticResource MaterialGreenDarkBrush}"
+                           FontSize="{StaticResource FontSizeBody}"/>
             </Border>
 
             <Border Grid.Row="1" 
-                    Background="#FFEBEE" 
+                    Background="{StaticResource MaterialRedBgBrush}" 
                     CornerRadius="4" 
                     Padding="12"
                     Margin="0,16,0,0"
                     VerticalAlignment="Bottom"
                     Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
                 <TextBlock Text="{Binding ErrorMessage}" 
-                           Foreground="#C62828"
-                           FontSize="13"/>
+                           Foreground="{StaticResource MaterialRedDarkBrush}"
+                           FontSize="{StaticResource FontSizeBody}"/>
             </Border>
         </Grid>
     </ScrollViewer>

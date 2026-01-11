@@ -34,16 +34,16 @@
                 <StackPanel>
                     <TextBlock Text="{Binding DisplayName}" 
                                Foreground="White"
-                               FontSize="20"
+                               FontSize="{StaticResource FontSizeLarge}"
                                FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                         <TextBlock Text="PM화면" 
                                    Foreground="#B0FFFFFF"
-                                   FontSize="12"/>
+                                   FontSize="{StaticResource FontSizeBody}"/>
                         <TextBlock Text=" | " Foreground="#80FFFFFF"/>
                         <TextBlock Text="프로그램별 진행사항" 
                                    Foreground="#B0FFFFFF"
-                                   FontSize="12"/>
+                                   FontSize="{StaticResource FontSizeBody}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -110,7 +110,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding TotalPropertyCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource PrimaryBrush}"
                                Margin="0,4,0,0"/>
@@ -130,7 +130,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding PendingCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource WarningBrush}"
                                Margin="0,4,0,0"/>
@@ -150,7 +150,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding ProcessingCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource InfoBrush}"
                                Margin="0,4,0,0"/>
@@ -170,7 +170,7 @@
                                Style="{StaticResource CaptionTextStyle}"
                                Opacity="0.7"/>
                     <TextBlock Text="{Binding CompletedCount}" 
-                               FontSize="28"
+                               FontSize="{StaticResource FontSizeXLarge}"
                                FontWeight="Bold"
                                Foreground="{StaticResource SuccessBrush}"
                                Margin="0,4,0,0"/>
@@ -255,7 +255,13 @@
                     <DataGrid.Columns>
                         <!-- 차주번호 -->
                         <DataGridTextColumn Header="차주번호" 
-                                          Binding="{Binding PropertyNumber}" 
+                                          Binding="{Binding BorrowerNumber}" 
+                                          Width="80"
+                                          IsReadOnly="True"/>
+                        
+                        <!-- 물건번호 -->
+                        <DataGridTextColumn Header="물건번호" 
+                                          Binding="{Binding CollateralNumber}" 
                                           Width="100"
                                           IsReadOnly="True"/>
                         
@@ -279,12 +285,6 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        
-                        <!-- 담보번호 -->
-                        <DataGridTextColumn Header="담보번호" 
-                                          Binding="{Binding CollateralNumber}" 
-                                          Width="100"
-                                          IsReadOnly="True"/>
                         
                         <!-- 물건종류 -->
                         <DataGridTextColumn Header="물건종류" 

@@ -104,7 +104,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ViewDashboard" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="대시보드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="대시보드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -117,7 +117,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ViewList" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="물건 목록" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="물건 목록" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -128,7 +128,7 @@
                             Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -139,7 +139,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ChartBar" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="통계" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="통계" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -150,7 +150,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AccountGroup" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="차주 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="차주 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -160,7 +160,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Home" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="담보 총괄" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="담보 총괄" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -170,7 +170,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CreditCard" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="Loan 상세" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="Loan 상세" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -181,7 +181,7 @@
                             Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -192,7 +192,7 @@
                             Visibility="Visible">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Compare" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="MPV비교" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="MPV비교" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -202,7 +202,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Gavel" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="회생 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="회생 개요" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -214,7 +214,7 @@
                             Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Toolbox" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="Tool Box" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="Tool Box" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -223,7 +223,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="AccountMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="사용자" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="사용자" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -232,7 +232,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Cog" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="설정" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="설정" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -241,7 +241,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="History" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="이력" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="이력" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -250,7 +250,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ListStatus" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="선순위" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="선순위" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -259,7 +259,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CalendarClock" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="경매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="경매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
@@ -268,7 +268,7 @@
                             Style="{StaticResource TopMenuButton}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CalendarCheck" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
-                            <TextBlock Text="공매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="13"/>
+                            <TextBlock Text="공매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

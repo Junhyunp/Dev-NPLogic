@@ -157,7 +157,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
                     sp.GetRequiredService<RegistryOcrService>(),
                     sp.GetRequiredService<Data.Repositories.PropertyQaRepository>(),
-                    sp.GetRequiredService<SupabaseService>()
+                    sp.GetRequiredService<SupabaseService>(),
+                    sp.GetRequiredService<Data.Repositories.ProgramRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -173,9 +174,16 @@ namespace NPLogic
             services.AddTransient<ViewModels.SettingsViewModel>();
             services.AddTransient<ViewModels.AuditLogsViewModel>();
             services.AddTransient<ViewModels.SeniorRightsViewModel>();
-            services.AddTransient<ViewModels.AuctionScheduleViewModel>();
+            services.AddTransient<ViewModels.AuctionScheduleViewModel>(sp =>
+            {
+                return new ViewModels.AuctionScheduleViewModel(
+                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
+                    sp.GetRequiredService<SupabaseService>()
+                );
+            });
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.ProgramManagementViewModel>();
+            services.AddTransient<ViewModels.ProgramSettingsViewModel>();
             services.AddTransient<ViewModels.NonCoreViewModel>(sp =>
             {
                 return new ViewModels.NonCoreViewModel(
@@ -374,6 +382,13 @@ namespace NPLogic
             services.AddTransient<Views.ClosingTab>();
             services.AddTransient<Views.HomeTab>();
             services.AddTransient<Views.EvaluationTab>();
+            services.AddTransient<Views.ProgramSettingsTab>(sp =>
+            {
+                var view = new Views.ProgramSettingsTab();
+                var viewModel = sp.GetRequiredService<ViewModels.ProgramSettingsViewModel>();
+                view.DataContext = viewModel;
+                return view;
+            });
 
             // Windows (Transient)
             services.AddTransient<MainWindow>();

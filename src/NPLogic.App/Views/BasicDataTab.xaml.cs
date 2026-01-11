@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Web.WebView2.Core;
 using NPLogic.ViewModels;
 
@@ -22,6 +24,99 @@ namespace NPLogic.Views
         {
             await InitializeMapWebViewAsync();
         }
+
+        #region 팝업 이벤트 핸들러 (D-004~D-009)
+
+        /// <summary>
+        /// 지도 팝업 확대 (D-004~D-006)
+        /// </summary>
+        private void OpenMapPopup_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is PropertyDetailViewModel viewModel && !string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+            {
+                var popup = new ImagePopupWindow(
+                    "지도 확대",
+                    viewModel.Property.AddressFull,
+                    ImagePopupWindow.PopupType.Map);
+                popup.Owner = Window.GetWindow(this);
+                popup.ShowDialog();
+            }
+        }
+
+        /// <summary>
+        /// 토지이용계획 팝업 (D-007)
+        /// </summary>
+        private void OpenLandUsePlanPopup_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is PropertyDetailViewModel viewModel && !string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+            {
+                // 토지이용계획 외부 사이트로 이동
+                try
+                {
+                    var encodedAddress = Uri.EscapeDataString(viewModel.Property.AddressFull);
+                    var url = $"https://www.eum.go.kr/web/ar/lu/luLandDet.jsp";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"토지이용계획 열기 실패: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 건축물대장 팝업 (D-008)
+        /// </summary>
+        private void OpenBuildingRegisterPopup_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is PropertyDetailViewModel viewModel && !string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+            {
+                // 건축물대장 외부 사이트로 이동 (정부24)
+                try
+                {
+                    var url = "https://www.gov.kr/portal/service/serviceInfo/B55001000021";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"건축물대장 열기 실패: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 등기부 요약 캡처 팝업 (D-009) - MouseLeftButtonUp 핸들러
+        /// </summary>
+        private void OpenRegistrySummaryPopup_Click(object sender, MouseButtonEventArgs e)
+        {
+            OpenRegistrySummaryPopupInternal();
+        }
+
+        /// <summary>
+        /// 등기부 요약 캡처 팝업 (D-009) - Button Click 핸들러
+        /// </summary>
+        private void OpenRegistrySummaryPopup_Button_Click(object sender, RoutedEventArgs e)
+        {
+            OpenRegistrySummaryPopupInternal();
+        }
+
+        /// <summary>
+        /// 등기부 요약 캡처 팝업 내부 메서드
+        /// </summary>
+        private void OpenRegistrySummaryPopupInternal()
+        {
+            if (DataContext is PropertyDetailViewModel viewModel && viewModel.HasRegistrySummaryImage)
+            {
+                var popup = new ImagePopupWindow(
+                    "등기부 요약",
+                    viewModel.RegistrySummaryImagePath ?? "",
+                    ImagePopupWindow.PopupType.Image);
+                popup.Owner = Window.GetWindow(this);
+                popup.ShowDialog();
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// WebView2 초기화

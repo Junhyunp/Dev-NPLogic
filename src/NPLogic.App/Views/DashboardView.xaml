@@ -106,7 +106,7 @@
         <!-- 로딩 오버레이 -->
         <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
               Panel.ZIndex="100">
-            <Border Background="#80FFFFFF"/>
+            <Border Background="{StaticResource OverlaySemiLightBrush}"/>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,0,0,16"/>
                 <TextBlock Text="데이터 로드 중..." 
@@ -118,7 +118,7 @@
 
         <!-- 에러 메시지 오버레이 -->
         <Grid Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"
-              Background="#80000000"
+              Background="{StaticResource OverlayBrush}"
               Panel.ZIndex="100">
             <Border Background="{StaticResource ErrorBrush}"
                     CornerRadius="8"
@@ -130,7 +130,7 @@
                     <TextBlock Text="{Binding ErrorMessage}" 
                                Foreground="White"
                                TextWrapping="Wrap"
-                               FontSize="14"/>
+                               FontSize="{StaticResource FontSizeH4}"/>
                     <Button Content="닫기" 
                             Command="{Binding ClearErrorCommand}"
                             Style="{StaticResource SecondaryButton}"
@@ -171,13 +171,13 @@
                             Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
                         <TextBlock Text="{Binding RoleBadgeText}" 
                                    Foreground="White"
-                                   FontSize="11"
+                                   FontSize="{StaticResource FontSizeSmall}"
                                    FontWeight="SemiBold"/>
                     </Border>
                     <TextBlock Style="{StaticResource BodyTextStyle}"
                                VerticalAlignment="Center"
                                Opacity="0.7"
-                               FontSize="12">
+                               FontSize="{StaticResource FontSizeBody}">
                         <Run Text="담당자:"/>
                         <Run Text="{Binding CurrentUser.Name, FallbackValue='로그인 필요'}" FontWeight="SemiBold"/>
                     </TextBlock>
@@ -202,7 +202,7 @@
                                                      Width="14" Height="14" 
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,4,0"/>
-                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="11"/>
+                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding ExportToExcelCommand}"
@@ -214,7 +214,7 @@
                                                      Width="14" Height="14" 
                                                      VerticalAlignment="Center"
                                                      Margin="0,0,4,0"/>
-                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="11"/>
+                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -234,20 +234,20 @@
                                              Margin="0,0,6,0"/>
                     <TextBlock x:Name="BreadcrumbHome"
                                Text="대시보드"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource PrimaryBrush}"
                                VerticalAlignment="Center"
                                Cursor="Hand"
                                MouseLeftButtonDown="Breadcrumb_Home_Click"
                                ToolTip="물건 목록으로 이동"/>
                     <TextBlock Text=" › " 
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
                     <TextBlock x:Name="BreadcrumbProgram"
                                Text="{Binding SelectedProgram.ProjectName}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource PrimaryBrush}"
                                VerticalAlignment="Center"
                                Cursor="Hand"
@@ -257,13 +257,13 @@
                     <!-- 상세 모드: 물건번호 표시 -->
                     <TextBlock x:Name="BreadcrumbPropertySeparator"
                                Text=" › " 
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <TextBlock x:Name="BreadcrumbProperty"
                                Text="{Binding SelectedPropertyNumber}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource PrimaryBrush}"
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"
@@ -271,13 +271,13 @@
                     <!-- 상세 모드: 현재 탭 표시 -->
                     <TextBlock x:Name="BreadcrumbTabSeparator"
                                Text=" › " 
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
                     <TextBlock x:Name="BreadcrumbTab"
                                Text="{Binding CurrentTabName}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextPrimaryBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
@@ -325,7 +325,7 @@
 
                                 <TextBlock Text="진행 중인 프로그램" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            Foreground="{StaticResource TextPrimaryBrush}"
                                            VerticalAlignment="Center"/>
 
@@ -364,13 +364,13 @@
                                         <TextBlock Grid.Row="0"
                                                    Text="{Binding ProjectName}"
                                                    FontWeight="SemiBold"
-                                                   FontSize="14"
+                                                   FontSize="{StaticResource FontSizeH4}"
                                                    Foreground="{StaticResource TextPrimaryBrush}"/>
 
                                         <!-- 물건 수 -->
                                         <TextBlock Grid.Row="1"
                                                    Margin="0,4,0,0"
-                                                   FontSize="12"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource TextSecondaryBrush}">
                                             <Run Text="물건"/>
                                             <Run Text="{Binding TotalCount}" FontWeight="SemiBold"/>
@@ -390,7 +390,7 @@
                                                          Background="{StaticResource BlueGray200Brush}"/>
                                             <TextBlock HorizontalAlignment="Right"
                                                        Margin="0,8,0,0"
-                                                       FontSize="11"
+                                                       FontSize="{StaticResource FontSizeSmall}"
                                                        Foreground="{StaticResource TextSecondaryBrush}">
                                                 <Run Text="{Binding ProgressPercent, Mode=OneWay}"/>
                                                 <Run Text="%"/>
@@ -418,6 +418,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>  <!-- F-001: 고급 필터 패널 -->
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
@@ -448,12 +449,12 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                                     <TextBlock Text="{Binding SelectedProgram.ProjectName, FallbackValue='프로그램을 선택하세요'}" 
                                                FontWeight="SemiBold"
-                                               FontSize="16"
+                                               FontSize="{StaticResource FontSizeH3}"
                                                Foreground="{StaticResource TextPrimaryBrush}"
                                                VerticalAlignment="Center"/>
                                     <TextBlock Margin="12,0,0,0"
                                                VerticalAlignment="Center"
-                                               FontSize="13"
+                                               FontSize="{StaticResource FontSizeBody}"
                                                Foreground="{StaticResource TextSecondaryBrush}"
                                                Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}">
                                         <Run Text="("/>
@@ -538,14 +539,14 @@
                                     <Border Background="{StaticResource SurfaceBrush}"
                                             CornerRadius="4"
                                             Padding="6,4"
-                                            Margin="0,0,16,0"
+                                            Margin="0,0,8,0"
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock x:Name="FilterAll"
                                                        Text="전체" 
                                                        Tag="all"
-                                                       FontSize="12" 
+                                                       FontSize="{StaticResource FontSizeBody}" 
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource PrimaryBrush}"
                                                        Padding="8,4"
@@ -556,7 +557,7 @@
                                             <TextBlock x:Name="FilterPending"
                                                        Text="대기" 
                                                        Tag="pending"
-                                                       FontSize="12"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
                                                        Padding="8,4"
                                                        Cursor="Hand"
@@ -566,7 +567,7 @@
                                             <TextBlock x:Name="FilterProcessing"
                                                        Text="진행" 
                                                        Tag="processing"
-                                                       FontSize="12"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
                                                        Padding="8,4"
                                                        Cursor="Hand"
@@ -576,7 +577,7 @@
                                             <TextBlock x:Name="FilterCompleted"
                                                        Text="완료" 
                                                        Tag="completed"
-                                                       FontSize="12"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
                                                        Padding="8,4"
                                                        Cursor="Hand"
@@ -584,6 +585,28 @@
                                                        ToolTip="더블클릭하여 완료 항목만 보기"/>
                                         </StackPanel>
                                     </Border>
+
+                                    <!-- F-001: 고급 필터 토글 버튼 -->
+                                    <Button Command="{Binding ToggleAdvancedFilterCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="8,4"
+                                            Margin="0,0,16,0"
+                                            ToolTip="고급 필터 패널 열기/닫기">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="FilterVariant" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <TextBlock Text="필터" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
+                                            <Border Background="{StaticResource PrimaryBrush}" 
+                                                    CornerRadius="8" 
+                                                    Padding="4,1" 
+                                                    Margin="4,0,0,0"
+                                                    Visibility="{Binding ActiveFilterCount, Converter={StaticResource IntToVisibilityConverter}}">
+                                                <TextBlock Text="{Binding ActiveFilterCount}" 
+                                                           Foreground="White" 
+                                                           FontSize="10" 
+                                                           FontWeight="Bold"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Button>
 
                                     <!-- 진행률 항목들 -->
                                     <Border Background="{StaticResource SurfaceBrush}"
@@ -593,9 +616,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="약정서" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="약정서" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.AgreementDocPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -607,9 +630,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="보증서" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="보증서" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.GuaranteeDocPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -621,9 +644,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="경매열람" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="경매열람" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.AuctionDocsPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -635,9 +658,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="전입열람" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="전입열람" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.TenantDocsPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -649,9 +672,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="선순위" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="선순위" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.SeniorRightsPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -663,9 +686,9 @@
                                             BorderBrush="{StaticResource BorderBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="평가확정" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="평가확정" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.AppraisalConfirmedPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -676,9 +699,9 @@
                                             BorderBrush="{StaticResource SuccessBrush}"
                                             BorderThickness="1">
                                         <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="전체 완료" FontSize="12" Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="전체 완료" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
                                             <TextBlock Text="{Binding ColumnProgress.OverallPercent, StringFormat={}{0}%}" 
-                                                       FontSize="12" FontWeight="Bold" Margin="6,0,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
                                                        Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
@@ -686,8 +709,98 @@
                             </ScrollViewer>
                         </Border>
 
+                        <!-- F-001: 고급 필터 패널 -->
+                        <Border Grid.Row="3"
+                                Background="{StaticResource BlueGray50Brush}"
+                                Padding="16,12"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Visibility="{Binding IsAdvancedFilterVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- 차주 상태 필터 -->
+                                <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                                    <TextBlock Text="차주 상태" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="{StaticResource FontSizeSmall}" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <WrapPanel>
+                                        <CheckBox Content="회생" 
+                                                  IsChecked="{Binding FilterRestructuring}"
+                                                  Margin="0,0,12,4"
+                                                  FontSize="{StaticResource FontSizeBody}"/>
+                                        <CheckBox Content="개회(면책)" 
+                                                  IsChecked="{Binding FilterOpened}"
+                                                  Margin="0,0,12,4"
+                                                  FontSize="{StaticResource FontSizeBody}"/>
+                                        <CheckBox Content="사망" 
+                                                  IsChecked="{Binding FilterDeceased}"
+                                                  Margin="0,0,12,4"
+                                                  FontSize="{StaticResource FontSizeBody}"/>
+                                        <CheckBox Content="차주거주" 
+                                                  IsChecked="{Binding FilterBorrowerResiding}"
+                                                  Margin="0,0,0,4"
+                                                  FontSize="{StaticResource FontSizeBody}"/>
+                                    </WrapPanel>
+                                </StackPanel>
+
+                                <!-- 담보 유형 필터 -->
+                                <StackPanel Grid.Column="1" Margin="0,0,24,0">
+                                    <TextBlock Text="담보 유형" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="{StaticResource FontSizeSmall}" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <ComboBox ItemsSource="{Binding PropertyTypes}" 
+                                              SelectedItem="{Binding SelectedPropertyType}"
+                                              Width="120"
+                                              Padding="8,6"
+                                              FontSize="{StaticResource FontSizeBody}"/>
+                                </StackPanel>
+
+                                <!-- 선순위 필터 -->
+                                <StackPanel Grid.Column="2" Margin="0,0,24,0">
+                                    <TextBlock Text="소유자 전입" 
+                                               FontWeight="SemiBold" 
+                                               FontSize="{StaticResource FontSizeSmall}" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <ComboBox Width="100"
+                                              Padding="8,6"
+                                              FontSize="{StaticResource FontSizeBody}"
+                                              SelectionChanged="OwnerMoveInFilter_SelectionChanged"
+                                              x:Name="OwnerMoveInComboBox">
+                                        <ComboBoxItem Content="전체" Tag="" IsSelected="True"/>
+                                        <ComboBoxItem Content="전입" Tag="True"/>
+                                        <ComboBoxItem Content="미전입" Tag="False"/>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <!-- 필터 초기화 버튼 -->
+                                <Button Grid.Column="4"
+                                        Command="{Binding ResetAdvancedFiltersCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="12,6"
+                                        VerticalAlignment="Bottom"
+                                        ToolTip="모든 고급 필터 초기화">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="FilterRemove" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                        <TextBlock Text="초기화" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+
                         <!-- 탭별 컨텐츠 영역 -->
-                        <Grid Grid.Row="3">
+                        <Grid Grid.Row="4">
                             <!-- 목록 모드: 데이터 그리드 -->
                             <DataGrid x:Name="ProgressDataGrid"
                                       ItemsSource="{Binding DashboardProperties}"
@@ -705,11 +818,17 @@
                                       VerticalScrollBarVisibility="Auto">
                             
                             <DataGrid.Columns>
-                                <!-- 차주번호 -->
-                                <DataGridTemplateColumn Header="차주번호" Width="100" IsReadOnly="True">
+                                <!-- 차주번호 (맨 앞으로) -->
+                                <DataGridTextColumn Header="차주번호" 
+                                                  Binding="{Binding BorrowerNumber}" 
+                                                  Width="80"
+                                                  IsReadOnly="True"/>
+                                
+                                <!-- 물건번호 (담보번호 → 물건번호로 명칭 변경, 앞으로 이동) -->
+                                <DataGridTemplateColumn Header="물건번호" Width="100" IsReadOnly="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding BorrowerNumber}"
+                                            <TextBlock Text="{Binding CollateralNumber}"
                                                        Padding="8,0"
                                                        VerticalAlignment="Center"
                                                        Foreground="{StaticResource PrimaryBrush}"
@@ -743,12 +862,6 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                
-                                <!-- 담보번호 -->
-                                <DataGridTextColumn Header="담보번호" 
-                                                  Binding="{Binding CollateralNumber}" 
-                                                  Width="100"
-                                                  IsReadOnly="True"/>
                                 
                                 <!-- 물건종류 -->
                                 <DataGridTextColumn Header="물건종류" 
@@ -884,7 +997,7 @@
                                                     Visibility="{Binding QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding QaUnansweredCount}"
                                                            Foreground="White"
-                                                           FontSize="11"
+                                                           FontSize="{StaticResource FontSizeSmall}"
                                                            FontWeight="Bold"/>
                                             </Border>
                                         </DataTemplate>
@@ -911,7 +1024,7 @@
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <TextBlock FontSize="11" HorizontalAlignment="Center">
+                                                <TextBlock FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="대기"/>
@@ -934,6 +1047,12 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
+                                <!-- 경매사건번호 (뒤쪽 배치) -->
+                                <DataGridTextColumn Header="경매사건번호" 
+                                                  Binding="{Binding PropertyNumber}" 
+                                                  Width="120"
+                                                  IsReadOnly="True"/>
+                                
                                 <!-- 상세 보기 버튼 -->
                                 <DataGridTemplateColumn Header="작업" Width="60">
                                     <DataGridTemplateColumn.CellTemplate>
@@ -943,7 +1062,7 @@
                                                    CommandParameter="{Binding}"
                                                    Style="{StaticResource PrimaryButton}"
                                                    Padding="8,2"
-                                                   FontSize="11"/>
+                                                   FontSize="{StaticResource FontSizeSmall}"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

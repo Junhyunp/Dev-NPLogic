@@ -52,7 +52,7 @@
                         <TextBlock x:Name="TxtPropertyInfo"
                                    Text="물건 정보"
                                    FontWeight="SemiBold"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSizeH4}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
@@ -61,7 +61,7 @@
                         <TextBlock Text="반경:"
                                    VerticalAlignment="Center"
                                    Margin="0,0,8,0"
-                                   Foreground="#64748B"/>
+                                   Foreground="{StaticResource TextMutedBrush}"/>
                         <ComboBox x:Name="CmbRadius"
                                   Width="100"
                                   SelectedIndex="1"
@@ -96,8 +96,8 @@
                                      Height="4"
                                      Margin="0,0,0,16"/>
                         <TextBlock Text="지도 로딩 중..."
-                                   FontSize="14"
-                                   Foreground="#64748B"
+                                   FontSize="{StaticResource FontSizeH4}"
+                                   Foreground="{StaticResource TextMutedBrush}"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
@@ -108,7 +108,7 @@
                         Visibility="Collapsed">
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Text="🗺️"
-                                   FontSize="48"
+                                   FontSize="{StaticResource FontSizeHero}"
                                    HorizontalAlignment="Center"
                                    Margin="0,0,0,16"/>
                         <TextBlock Text="API 키가 필요합니다"
@@ -118,7 +118,7 @@
                                    HorizontalAlignment="Center"
                                    Margin="0,0,0,8"/>
                         <TextBlock Text="카카오맵 API 키를 appsettings.json에 설정해주세요."
-                                   FontSize="12"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    Foreground="#94A3B8"
                                    HorizontalAlignment="Center"
                                    TextWrapping="Wrap"
@@ -152,7 +152,7 @@
                         <TextBlock Grid.Column="0"
                                    Text="📊 상권 분석 정보"
                                    FontWeight="SemiBold"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSizeH4}"
                                    VerticalAlignment="Center"/>
 
                         <Button Grid.Column="1"
@@ -203,10 +203,10 @@
                                         <StackPanel>
                                             <TextBlock Text="총 점포 수"
                                                        FontSize="11"
-                                                       Foreground="#64748B"/>
+                                                       Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtTotalStores"
                                                        Text="-"
-                                                       FontSize="24"
+                                                       FontSize="{StaticResource FontSizeH1}"
                                                        FontWeight="Bold"
                                                        Foreground="{StaticResource PrimaryBrush}"/>
                                         </StackPanel>
@@ -221,10 +221,10 @@
                                         <StackPanel>
                                             <TextBlock Text="업종 수"
                                                        FontSize="11"
-                                                       Foreground="#64748B"/>
+                                                       Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtIndustryCount"
                                                        Text="-"
-                                                       FontSize="24"
+                                                       FontSize="{StaticResource FontSizeH1}"
                                                        FontWeight="Bold"
                                                        Foreground="#D97706"/>
                                         </StackPanel>
@@ -239,10 +239,10 @@
                                         <StackPanel>
                                             <TextBlock Text="상권명"
                                                        FontSize="11"
-                                                       Foreground="#64748B"/>
+                                                       Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtDistrictName"
                                                        Text="-"
-                                                       FontSize="14"
+                                                       FontSize="{StaticResource FontSizeH4}"
                                                        FontWeight="SemiBold"
                                                        Foreground="#059669"
                                                        TextWrapping="Wrap"/>
@@ -279,11 +279,11 @@
 
                                                 <TextBlock Grid.Column="0"
                                                            Text="{Binding IndustryName}"
-                                                           FontSize="12"
+                                                           FontSize="{StaticResource FontSizeBody}"
                                                            VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="1"
                                                            Text="{Binding StoreCount, StringFormat={}{0}개}"
-                                                           FontSize="12"
+                                                           FontSize="{StaticResource FontSizeBody}"
                                                            FontWeight="SemiBold"
                                                            HorizontalAlignment="Right"
                                                            VerticalAlignment="Center"/>
@@ -301,7 +301,7 @@
                                 <!-- 데이터 없음 메시지 -->
                                 <TextBlock x:Name="TxtNoData"
                                            Text="상권 데이터를 불러오는 중..."
-                                           FontSize="12"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            Foreground="#94A3B8"
                                            HorizontalAlignment="Center"
                                            Margin="0,16"/>
@@ -331,7 +331,7 @@
                                                x:Name="TxtStoreListCount"
                                                Text=""
                                                FontSize="11"
-                                               Foreground="#64748B"
+                                               Foreground="{StaticResource TextMutedBrush}"
                                                VerticalAlignment="Center"/>
                                 </Grid>
 
@@ -364,7 +364,7 @@
                             <StackPanel>
                                 <TextBlock Text="💡 소상공인 상권정보 API"
                                            FontWeight="SemiBold"
-                                           FontSize="12"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            Foreground="#92400E"
                                            Margin="0,0,0,8"/>
                                 <TextBlock Text="상권 데이터를 사용하려면 data.go.kr에서 소상공인 상권정보 API 키를 발급받아 appsettings.json에 설정해주세요."

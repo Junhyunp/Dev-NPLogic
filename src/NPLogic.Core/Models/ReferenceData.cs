@@ -130,5 +130,53 @@ namespace NPLogic.Core.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
+
+    /// <summary>
+    /// 법률적용률 설정 (C-002)
+    /// </summary>
+    public class LegalApplicationRate
+    {
+        public Guid Id { get; set; }
+        public string PropertyType { get; set; } = ""; // 아파트, 연립, 공장 등
+        public decimal AppliedRate { get; set; } // 법률적용률 (%)
+        public string? Description { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// 임대차 기준 (C-003, C-004)
+    /// </summary>
+    public class LeaseStandard
+    {
+        public Guid Id { get; set; }
+        public string LeaseType { get; set; } = "residential"; // residential, commercial
+        public string Region { get; set; } = ""; // 서울, 수도권, 광역시, 기타
+        public DateTime StartDate { get; set; } // 적용 시작일
+        public DateTime? EndDate { get; set; } // 적용 종료일
+        public decimal DepositLimit { get; set; } // 적용 보증금 범위 (이하)
+        public decimal CompensationAmount { get; set; } // 최우선 변제금액
+        public string? Description { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// 경매비용 산정 기준 (C-005)
+    /// </summary>
+    public class AuctionCostStandard
+    {
+        public Guid Id { get; set; }
+        public string CostType { get; set; } = ""; // 송달료, 감정료, 매각수수료 등
+        public string? CalculationMethod { get; set; } // 고정, 비율, 복합
+        public decimal? BaseAmount { get; set; }
+        public decimal? Rate { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }
 

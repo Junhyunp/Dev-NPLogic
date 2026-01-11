@@ -20,6 +20,9 @@ namespace NPLogic.Services
                 SheetType.BorrowerRestructuring => GetBorrowerRestructuringMappings(),
                 SheetType.Loan => GetLoanMappings(),
                 SheetType.Property => GetPropertyMappings(),
+                SheetType.RegistryDetail => GetRegistryDetailMappings(),
+                SheetType.CollateralSetting => GetCollateralSettingMappings(),
+                SheetType.Guarantee => GetGuaranteeMappings(),
                 _ => new List<ColumnMappingRule>()
             };
         }
@@ -133,9 +136,15 @@ namespace NPLogic.Services
                 new("차주명", "borrower_name", false, ColumnDataType.String),
                 new("물건번호", "collateral_number", false, ColumnDataType.String),
                 
-                // Property 정보
-                new("Property 일련번호", "property_number", true, ColumnDataType.String),
-                new("Property일련번호", "property_number", true, ColumnDataType.String),
+                // Property 일련번호 (내부용, property_number와 별도)
+                new("Property 일련번호", "property_serial", false, ColumnDataType.Integer),
+                new("Property일련번호", "property_serial", false, ColumnDataType.Integer),
+                
+                // 경매사건번호 (대시보드의 "사건번호" 컬럼에 표시됨) - property_number로 매핑
+                new("경매사건번호", "property_number", false, ColumnDataType.String),
+                new("경매사건번호(IBK)", "property_number", false, ColumnDataType.String),
+                new("경매사건번호 (IBK)", "property_number", false, ColumnDataType.String),
+                new("경매사건번호\n(IBK)", "property_number", false, ColumnDataType.String),  // Excel 줄바꿈 버전
                 
                 // 주소 정보
                 new("담보소재지1", "address_province", false, ColumnDataType.String),
@@ -159,6 +168,61 @@ namespace NPLogic.Services
         }
 
         /// <summary>
+        /// Sheet C-2: 등기부등본정보 (OCR로 처리하므로 기본 매핑만 제공)
+        /// </summary>
+        private static List<ColumnMappingRule> GetRegistryDetailMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 조회용 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("차주일련번호", "borrower_number", false, ColumnDataType.String),
+                new("물건번호", "collateral_number", false, ColumnDataType.String),
+                new("Property 일련번호", "property_serial", false, ColumnDataType.Integer),
+            };
+        }
+
+        /// <summary>
+        /// Sheet C-3: 담보설정정보
+        /// </summary>
+        private static List<ColumnMappingRule> GetCollateralSettingMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 조회용 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("차주일련번호", "borrower_number", false, ColumnDataType.String),
+                new("물건번호", "collateral_number", false, ColumnDataType.String),
+                new("Property 일련번호", "property_serial", false, ColumnDataType.Integer),
+                
+                // 담보설정 정보
+                new("근저당설정액", "mortgage_amount", false, ColumnDataType.Decimal),
+                new("근저당권자", "mortgagee", false, ColumnDataType.String),
+                new("설정일", "setting_date", false, ColumnDataType.Date),
+                new("설정순위", "setting_rank", false, ColumnDataType.Integer),
+            };
+        }
+
+        /// <summary>
+        /// Sheet D: 보증정보
+        /// </summary>
+        private static List<ColumnMappingRule> GetGuaranteeMappings()
+        {
+            return new List<ColumnMappingRule>
+            {
+                // 기본 조회용 정보
+                new("일련번호", "serial_number", false, ColumnDataType.Integer),
+                new("차주일련번호", "borrower_number", false, ColumnDataType.String),
+                
+                // 보증 정보
+                new("보증인", "guarantor_name", false, ColumnDataType.String),
+                new("보증인유형", "guarantor_type", false, ColumnDataType.String),
+                new("보증금액", "guarantee_amount", false, ColumnDataType.Decimal),
+                new("보증종류", "guarantee_type", false, ColumnDataType.String),
+            };
+        }
+
+        /// <summary>
         /// Excel 컬럼명으로 매핑 규칙 찾기 (유사 매칭 지원)
         /// </summary>
         public static ColumnMappingRule? FindMappingRule(List<ColumnMappingRule> rules, string excelColumnName)
@@ -167,30 +231,41 @@ namespace NPLogic.Services
                 return null;
 
             // 줄바꿈을 공백으로 변환하고 정리
-            var normalizedName = excelColumnName
-                .Replace("\r\n", " ")
-                .Replace("\n", " ")
-                .Replace("\r", " ")
-                .Replace("  ", " ")
-                .Trim();
+            var normalizedName = NormalizeColumnName(excelColumnName);
 
-            // 1. 정확한 매칭
+            // 1. 정확한 매칭 (양쪽 모두 normalize해서 비교)
             var exactMatch = rules.FirstOrDefault(r => 
-                r.ExcelColumnName.Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
+                NormalizeColumnName(r.ExcelColumnName).Equals(normalizedName, StringComparison.OrdinalIgnoreCase));
             if (exactMatch != null)
                 return exactMatch;
 
             // 2. 포함 매칭 (Excel 컬럼명이 규칙의 컬럼명을 포함)
             var containsMatch = rules.FirstOrDefault(r => 
-                normalizedName.Contains(r.ExcelColumnName, StringComparison.OrdinalIgnoreCase));
+                normalizedName.Contains(NormalizeColumnName(r.ExcelColumnName), StringComparison.OrdinalIgnoreCase));
             if (containsMatch != null)
                 return containsMatch;
 
             // 3. 역방향 포함 매칭 (규칙의 컬럼명이 Excel 컬럼명을 포함)
             var reverseMatch = rules.FirstOrDefault(r => 
-                r.ExcelColumnName.Contains(normalizedName, StringComparison.OrdinalIgnoreCase));
+                NormalizeColumnName(r.ExcelColumnName).Contains(normalizedName, StringComparison.OrdinalIgnoreCase));
             
             return reverseMatch;
+        }
+
+        /// <summary>
+        /// 컬럼명 정규화 (줄바꿈, 연속 공백 처리)
+        /// </summary>
+        private static string NormalizeColumnName(string columnName)
+        {
+            if (string.IsNullOrWhiteSpace(columnName))
+                return string.Empty;
+
+            return columnName
+                .Replace("\r\n", " ")
+                .Replace("\n", " ")
+                .Replace("\r", " ")
+                .Replace("  ", " ")
+                .Trim();
         }
     }
 

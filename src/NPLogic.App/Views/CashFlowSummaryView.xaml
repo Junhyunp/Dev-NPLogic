@@ -5,12 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:CashFlowSummaryViewModel}"
              Loaded="CashFlowSummaryView_Loaded">
     
-    <Grid Margin="32">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -18,184 +19,267 @@
         </Grid.RowDefinitions>
 
         <!-- 헤더 영역 -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" Padding="24,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
-                <TextBlock Text="현금흐름 집계" 
-                           Style="{StaticResource H2TextStyle}"
-                           Margin="0,0,0,8"/>
-                <TextBlock Text="XNPV 및 IRR 계산, 현금흐름 시뮬레이션" 
-                           Style="{StaticResource BodyTextStyle}"
-                           Opacity="0.7"/>
-            </StackPanel>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="현금흐름 집계" 
+                               Style="{StaticResource H2TextStyle}"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
+                        <Run Text="액션데이트 기준 120개월(10년) 월별 현금흐름"/>
+                        <Run Text=" | "/>
+                        <Run Text="기준일:"/>
+                        <Run Text="{Binding ActionDate, StringFormat=yyyy-MM-dd}" FontWeight="SemiBold"/>
+                    </TextBlock>
+                </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Content="Excel 내보내기" 
-                        Command="{Binding ExportToExcelCommand}"
-                        Style="{StaticResource SecondaryButton}"
-                        Padding="20,10"
-                        Margin="0,0,8,0"/>
-                <Button Content="새로고침" 
-                        Command="{Binding RefreshCommand}"
-                        Style="{StaticResource PrimaryButton}"
-                        Padding="20,10"/>
-            </StackPanel>
-        </Grid>
-
-        <!-- 파라미터 및 결과 요약 -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <!-- 파라미터 설정 -->
-            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="계산 파라미터" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,16"/>
-                    
-                    <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="차주 선택" FontSize="12" Opacity="0.7" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding Borrowers}" 
-                                  SelectedItem="{Binding SelectedBorrower}"
-                                  DisplayMemberPath="BorrowerName"
-                                  Padding="12,10"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <!-- 액션데이트 설정 -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <TextBlock Text="액션데이트:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <DatePicker SelectedDate="{Binding ActionDate}" Width="120"/>
                     </StackPanel>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="할인율 (%)" FontSize="12" Opacity="0.7" Margin="0,0,0,4"/>
-                            <TextBox Text="{Binding DiscountRate, StringFormat=P0, UpdateSourceTrigger=PropertyChanged}" 
-                                     Padding="12,10"/>
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="시나리오" FontSize="12" Opacity="0.7" Margin="0,0,0,4"/>
-                            <ComboBox SelectedItem="{Binding SelectedScenario}" Padding="12,10">
-                                <ComboBoxItem Content="1안" Tag="1"/>
-                                <ComboBoxItem Content="2안" Tag="2"/>
-                            </ComboBox>
-                        </StackPanel>
-                    </Grid>
-
-                    <Button Content="재계산" 
-                            Command="{Binding RecalculateCommand}"
+                    
+                    <Button Content="Excel 내보내기" 
+                            Command="{Binding ExportToExcelCommand}"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="16,8"
+                            Margin="0,0,8,0"/>
+                    <Button Content="새로고침" 
+                            Command="{Binding RefreshCommand}"
                             Style="{StaticResource PrimaryButton}"
-                            Margin="0,16,0,0"
-                            Padding="16,10"/>
+                            Padding="16,8"/>
                 </StackPanel>
-            </Border>
+            </Grid>
+        </Border>
 
-            <!-- XNPV 결과 -->
-            <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="XNPV 결과" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,16"/>
+        <!-- 요약 카드 영역 -->
+        <Border Grid.Row="1" Background="{StaticResource BackgroundColor}" Padding="24,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="8"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="16"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <!-- 선택된 차주 수 -->
+                <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="선택 차주" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0">
+                            <Run Text="{Binding SelectedBorrowersCount, FallbackValue=0}"/>
+                            <Run Text=" / " FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
+                            <Run Text="{Binding TotalBorrowersCount, FallbackValue=0}" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel Grid.Row="0" Grid.Column="0">
-                            <TextBlock Text="XNPV" FontSize="12" Opacity="0.7"/>
-                            <TextBlock FontSize="24" FontWeight="Bold" Margin="0,4,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#81C784"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding XnpvResult.Xnpv, Converter={StaticResource LessThanZeroConverter}}" Value="True">
-                                                <Setter Property="Foreground" Value="#E57373"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                                <Run Text="{Binding XnpvResult.Xnpv, StringFormat=N0, FallbackValue=-}"/>
-                            </TextBlock>
-                        </StackPanel>
+                <!-- 총 XNPV -->
+                <Border Grid.Column="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="총 XNPV" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="{Binding TotalXnpv, StringFormat=N0, FallbackValue=-}" 
+                                   FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialGreenBrush}"/>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel Grid.Row="0" Grid.Column="1">
-                            <TextBlock Text="IRR" FontSize="12" Opacity="0.7"/>
-                            <TextBlock Text="{Binding XnpvResult.Irr, StringFormat=P2, FallbackValue=-}" 
-                                       FontSize="24" FontWeight="Bold" Margin="0,4,0,0"/>
-                        </StackPanel>
+                <!-- 총 유입 -->
+                <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
+                    <StackPanel>
+                        <TextBlock Text="총 유입" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="{Binding TotalInflow, StringFormat=N0, FallbackValue=-}" 
+                                   FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialBlueBrush}"/>
+                    </StackPanel>
+                </Border>
 
-                        <StackPanel Grid.Row="2" Grid.Column="0">
-                            <TextBlock Text="총 유입" FontSize="12" Opacity="0.7"/>
-                            <TextBlock Text="{Binding XnpvResult.TotalInflow, StringFormat=N0, FallbackValue=-}" 
-                                       FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0"/>
-                        </StackPanel>
+                <!-- 총 유출 -->
+                <Border Grid.Column="3" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="총 유출" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="{Binding TotalOutflow, StringFormat=N0, FallbackValue=-}" 
+                                   FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialRedBrush}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
 
-                        <StackPanel Grid.Row="2" Grid.Column="1">
-                            <TextBlock Text="총 유출" FontSize="12" Opacity="0.7"/>
-                            <TextBlock Text="{Binding XnpvResult.TotalOutflow, StringFormat=N0, FallbackValue=-}" 
-                                       FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#E57373"/>
-                        </StackPanel>
+        <!-- 메인 영역: 좌측 차주 리스트 + 우측 월별 테이블 -->
+        <Grid Grid.Row="2" Margin="24,12,24,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" MinWidth="200"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                        <Border Grid.Row="4" Grid.ColumnSpan="2" CornerRadius="8" Padding="12,8">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="#81C784"/>
+            <!-- S-007: 좌측 차주 리스트 + 검색 -->
+            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 헤더 -->
+                    <Border Grid.Row="0" Background="{StaticResource BlueGray50Brush}" Padding="12,10">
+                        <TextBlock Text="차주 리스트" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
+                    </Border>
+
+                    <!-- 검색 -->
+                    <Border Grid.Row="1" Padding="12,8">
+                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Padding="8,6"
+                                 FontSize="{StaticResource FontSizeBody}"
+                                 materialDesign:HintAssist.Hint="차주명/번호 검색...">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                 </Style>
-                            </Border.Style>
-                            <TextBlock Text="{Binding XnpvResult.InvestmentOpinion, FallbackValue=데이터 없음}" 
-                                       Foreground="White" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                </StackPanel>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Border>
+
+                    <!-- 전체 선택 -->
+                    <Border Grid.Row="2" Padding="12,4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <CheckBox Content="전체 선택" 
+                                  IsChecked="{Binding IsAllSelected}"
+                                  FontSize="{StaticResource FontSizeBody}"
+                                  FontWeight="SemiBold"/>
+                    </Border>
+
+                    <!-- 차주 목록 -->
+                    <ListView Grid.Row="3" 
+                              ItemsSource="{Binding FilteredBorrowers}"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="12,8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <CheckBox Grid.Column="0" 
+                                                  IsChecked="{Binding IsSelected}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,8,0"/>
+
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="{Binding BorrowerName}" 
+                                                       FontSize="{StaticResource FontSizeBody}" 
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding BorrowerNumber}" 
+                                                       FontSize="{StaticResource FontSizeSmall}" 
+                                                       Opacity="0.6"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
             </Border>
 
-            <!-- 민감도 분석 -->
-            <Border Grid.Column="4" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
+            <!-- 구분선 -->
+            <GridSplitter Grid.Column="1" Width="8" Background="Transparent" 
+                          HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+            <!-- S-008: 우측 120개월 월별 현금흐름 테이블 -->
+            <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="할인율 민감도 분석" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12"/>
+                    <!-- 헤더 -->
+                    <Border Grid.Row="0" Background="{StaticResource BlueGray50Brush}" Padding="12,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}">
+                                <Run Text="월별 현금흐름"/>
+                                <Run Text=" (120개월)" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Normal"/>
+                            </TextBlock>
+                            
+                            <TextBlock Grid.Column="1" FontSize="{StaticResource FontSizeBody}" Opacity="0.7">
+                                <Run Text="단위: 원"/>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
 
-                    <DataGrid Grid.Row="1" 
-                              ItemsSource="{Binding SensitivityResults}"
+                    <!-- 월별 현금흐름 DataGrid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding MonthlyCashFlowRows}"
                               AutoGenerateColumns="False"
                               IsReadOnly="True"
                               HeadersVisibility="Column"
                               GridLinesVisibility="All"
-                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                               BorderThickness="0"
                               Background="Transparent"
-                              MaxHeight="200">
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              CanUserReorderColumns="False"
+                              CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              FrozenColumnCount="1">
+                        
+                        <!-- 차주명 컬럼 (고정) -->
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="할인율" Binding="{Binding RateDisplay}" Width="80"/>
-                            <DataGridTextColumn Header="XNPV" Binding="{Binding XnpvDisplay}" Width="*">
+                            <DataGridTextColumn Header="차주" 
+                                                Binding="{Binding BorrowerName}" 
+                                                Width="120"
+                                                IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="Padding" Value="8,4"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                            <DataTrigger Binding="{Binding IsTotal}" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
                                                 <Setter Property="FontWeight" Value="Bold"/>
-                                                <Setter Property="Foreground" Value="#64B5F6"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -207,82 +291,13 @@
             </Border>
         </Grid>
 
-        <!-- 현금흐름 그리드 -->
-        <Border Grid.Row="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Text="현금흐름 상세" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,16"/>
-
-                <DataGrid Grid.Row="1"
-                          ItemsSource="{Binding CashFlowItems}"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          HeadersVisibility="Column"
-                          GridLinesVisibility="All"
-                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                          BorderThickness="0"
-                          Background="Transparent"
-                          AlternatingRowBackground="{StaticResource BackgroundColor}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="기간" Binding="{Binding Period}" Width="60">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="날짜" Binding="{Binding FlowDate, StringFormat=yyyy-MM-dd}" Width="100"/>
-                        <DataGridTextColumn Header="설명" Binding="{Binding Description}" Width="*"/>
-                        <DataGridTextColumn Header="현금유입" Binding="{Binding CashInflow, StringFormat=N0}" Width="120">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#81C784"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="현금유출" Binding="{Binding CashOutflow, StringFormat=N0}" Width="120">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#E57373"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="순현금흐름" Binding="{Binding NetCashFlow, StringFormat=N0}" Width="120">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="누적" Binding="{Binding CumulativeCashFlow, StringFormat=N0}" Width="120">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Right"/>
-                                    <Setter Property="Foreground" Value="#64B5F6"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </Border>
-
         <!-- 로딩 오버레이 -->
-        <Border Grid.RowSpan="3" Background="#80000000" CornerRadius="8"
+        <Border Grid.RowSpan="3" Background="{StaticResource OverlayBrush}"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200"/>
-                <TextBlock Text="계산 중..." Foreground="White" Margin="0,16,0,0"/>
+                <TextBlock Text="데이터 로딩 중..." Foreground="White" Margin="0,16,0,0"/>
             </StackPanel>
         </Border>
     </Grid>
 </UserControl>
-

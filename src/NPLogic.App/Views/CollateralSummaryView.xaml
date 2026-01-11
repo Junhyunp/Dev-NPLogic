@@ -145,10 +145,10 @@
                                         </Grid.RowDefinitions>
                                         <TextBlock Grid.Row="0" Text="{Binding BorrowerName}" FontWeight="SemiBold"/>
                                         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
-                                            <TextBlock Text="{Binding BorrowerNumber}" FontSize="12" Opacity="0.7"/>
-                                            <TextBlock Text=" | " FontSize="12" Opacity="0.5"/>
-                                            <TextBlock Text="{Binding PropertyCount}" FontSize="12" Opacity="0.7"/>
-                                            <TextBlock Text="건" FontSize="12" Opacity="0.7"/>
+                                            <TextBlock Text="{Binding BorrowerNumber}" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                                            <TextBlock Text=" | " FontSize="{StaticResource FontSizeBody}" Opacity="0.5"/>
+                                            <TextBlock Text="{Binding PropertyCount}" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                                            <TextBlock Text="건" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -218,7 +218,7 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <TextBlock Grid.Column="1" FontSize="14" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <TextBlock Grid.Column="1" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,16,0">
                                 <Run Text="총 "/>
                                 <Run Text="{Binding TotalPropertyCount}" FontWeight="Bold"/>
                                 <Run Text="건"/>
@@ -229,7 +229,7 @@
                                     Command="{Binding ViewCollateralDetailCommand}"
                                     Style="{StaticResource SecondaryButton}"
                                     Padding="12,6"
-                                    FontSize="12"
+                                    FontSize="{StaticResource FontSizeBody}"
                                     VerticalAlignment="Center"/>
                         </Grid>
 
@@ -344,7 +344,7 @@
                                                         MinWidth="60"
                                                         MinHeight="28"
                                                         Padding="10,4"
-                                                        FontSize="12"/>
+                                                        FontSize="{StaticResource FontSizeBody}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -373,7 +373,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="감정평가액 합계" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="감정평가액 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding TotalAppraisalValue, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -381,7 +381,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="평가액 합계" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="평가액 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding TotalEstimatedValue, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -389,7 +389,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="선순위 합계" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="선순위 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#E57373">
                                     <Run Text="{Binding TotalSeniorRights, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -397,7 +397,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
-                                <TextBlock Text="배당가능재원 합계" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="배당가능재원 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#81C784">
                                     <Run Text="{Binding TotalRecoverable, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -416,7 +416,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Loan Cap" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="Loan Cap" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding LoanCap, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -424,7 +424,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
-                                <TextBlock Text="Cap 반영 후" FontSize="12" Opacity="0.7"/>
+                                <TextBlock Text="Cap 반영 후" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
                                 <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#64B5F6">
                                     <Run Text="{Binding CapAdjustedAmount, StringFormat=N0}"/>
                                     <Run Text="원" FontSize="11" FontWeight="Normal"/>
@@ -443,7 +443,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </Border.Style>
-                                    <TextBlock Text="Cap 적용 가능" Foreground="White" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center">
+                                    <TextBlock Text="Cap 적용 가능" Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="Cap 적용 가능"/>

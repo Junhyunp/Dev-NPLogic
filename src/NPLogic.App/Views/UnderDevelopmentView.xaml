@@ -15,13 +15,13 @@
                                      Foreground="{StaticResource BlueGray300Brush}"
                                      HorizontalAlignment="Center"/>
             <TextBlock Text="개발 중입니다" 
-                       FontSize="24" 
+                       FontSize="{StaticResource FontSizeH1}" 
                        FontWeight="Bold"
                        Foreground="{StaticResource DeepNavy700Brush}"
                        HorizontalAlignment="Center"
                        Margin="0,24,0,8"/>
             <TextBlock Text="이 기능은 현재 개발 중입니다. 곧 사용할 수 있습니다." 
-                       FontSize="14" 
+                       FontSize="{StaticResource FontSizeH4}" 
                        Foreground="{StaticResource BlueGray500Brush}"
                        HorizontalAlignment="Center"/>
         </StackPanel>
