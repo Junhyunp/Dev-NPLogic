@@ -589,27 +589,111 @@
                         </Border>
                         
                         <Grid Grid.Row="1" ClipToBounds="True">
-                            <!-- 지도 WebView -->
-                            <wv2:WebView2 x:Name="MapWebView"
-                                          DefaultBackgroundColor="Transparent"
-                                          ClipToBounds="True"/>
+                            <!-- 지적도 Static 이미지 (Kakao Static Map) -->
+                            <Grid x:Name="CadastralMapPanel" ClipToBounds="True">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=MapTabCadastral}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                
+                                <!-- 지적도 이미지 -->
+                                <Image x:Name="CadastralMapImage" 
+                                       Stretch="Uniform" 
+                                       Visibility="{Binding HasCadastralMapImage, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                                
+                                <!-- 이미지 없을 때 -->
+                                <Border Background="{StaticResource CardAlt2Brush}"
+                                        Visibility="{Binding HasCadastralMapImage, Converter={StaticResource InverseBoolToVisibilityConverter}, FallbackValue=Visible}">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="🗺️ 지적도 이미지 없음"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   Foreground="{StaticResource TextMutedBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button Content="지적도 이미지 생성"
+                                                Command="{Binding GenerateCadastralMapCommand}"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="12,6"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                             
-                            <!-- 로딩/에러 오버레이 -->
-                            <Border x:Name="MapLoadingOverlay"
-                                    Background="{StaticResource CardAlt2Brush}"
-                                    Visibility="Visible">
-                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <TextBlock Text="지도 로딩 중..."
-                                               FontSize="{StaticResource FontSizeH4}"
-                                               Foreground="{StaticResource TextMutedBrush}"
-                                               HorizontalAlignment="Center"/>
-                                    <TextBlock Text="주소가 입력되면 표시됩니다"
-                                               FontSize="{StaticResource FontSizeBody}"
-                                               Foreground="{StaticResource TextTertiaryBrush}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Border>
+                            <!-- 위치도 Static 이미지 (위성지도) -->
+                            <Grid x:Name="LocationMapPanel" ClipToBounds="True">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=MapTabLocation}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                
+                                <!-- 위치도 이미지 -->
+                                <Image x:Name="LocationMapImage" 
+                                       Stretch="Uniform" 
+                                       Visibility="{Binding HasLocationMapImage, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                                
+                                <!-- 이미지 없을 때 -->
+                                <Border Background="{StaticResource CardAlt2Brush}"
+                                        Visibility="{Binding HasLocationMapImage, Converter={StaticResource InverseBoolToVisibilityConverter}, FallbackValue=Visible}">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="📍 위치도 이미지 없음"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   Foreground="{StaticResource TextMutedBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button Content="위치도 이미지 생성"
+                                                Command="{Binding GenerateLocationMapCommand}"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="12,6"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                            
+                            <!-- 로드뷰 WebView (기존 유지) -->
+                            <Grid x:Name="RoadViewPanel" ClipToBounds="True">
+                                <Grid.Style>
+                                    <Style TargetType="Grid">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=MapTabRoadView}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                
+                                <!-- 지도 WebView -->
+                                <wv2:WebView2 x:Name="MapWebView"
+                                              DefaultBackgroundColor="Transparent"
+                                              ClipToBounds="True"/>
+                                
+                                <!-- 로딩/에러 오버레이 -->
+                                <Border x:Name="MapLoadingOverlay"
+                                        Background="{StaticResource CardAlt2Brush}"
+                                        Visibility="Visible">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="로드뷰 로딩 중..."
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   Foreground="{StaticResource TextMutedBrush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="주소가 입력되면 표시됩니다"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   Foreground="{StaticResource TextTertiaryBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Border>
@@ -735,6 +819,64 @@
                                 Margin="0,12,0,0"
                                 Padding="8,6"
                                 FontSize="{StaticResource FontSizeSmall}"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 분양면적/분양가 (아파트인 경우 분양면적만, 상가/공장인 경우 분양면적+분양가) -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsApartment}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCommercialOrFactory}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    
+                    <StackPanel>
+                        <TextBlock Text="📐 분양 정보" 
+                                   Style="{StaticResource H4TextStyle}"
+                                   Margin="0,0,0,12"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 분양면적 (항상 표시) -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="분양면적 (㎡)" 
+                                           Style="{StaticResource CaptionTextStyle}" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding SupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="8,6"/>
+                            </StackPanel>
+                            
+                            <!-- 분양가 (상가/공장인 경우만 표시) -->
+                            <StackPanel Grid.Column="2"
+                                        Visibility="{Binding IsCommercialOrFactory, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="분양가 (원)" 
+                                           Style="{StaticResource CaptionTextStyle}" 
+                                           FontWeight="SemiBold" 
+                                           Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding SupplyPrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="8,6"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
                 
@@ -907,6 +1049,90 @@
                                                Foreground="{StaticResource TextMutedBrush}"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="등기부 탭에서 OCR 실행 시 자동 생성됩니다"
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="{StaticResource TextTertiaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- 등기부 원본 파일 섹션 (피드백 3번) -->
+                <Border Background="{StaticResource BackgroundBrush}"
+                        CornerRadius="8"
+                        Padding="20"
+                        Margin="0,0,0,16">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+                    </Border.Effect>
+                    
+                    <StackPanel>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="📋 등기부 원본" 
+                                       Style="{StaticResource H4TextStyle}"/>
+                            <Button Grid.Column="1"
+                                    Content="보기"
+                                    Command="{Binding ViewRegistryDocumentCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="8,4"
+                                    Margin="0,0,8,0"
+                                    FontSize="{StaticResource FontSizeSmall}"
+                                    Visibility="{Binding HasRegistryDocument, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
+                            <Button Grid.Column="2"
+                                    Content="파일 업로드"
+                                    Command="{Binding UploadRegistryDocumentCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    Padding="8,4"
+                                    FontSize="{StaticResource FontSizeSmall}"/>
+                        </Grid>
+                        
+                        <!-- 등기부 원본 파일 상태 표시 -->
+                        <Border Background="{StaticResource BlueGray50Brush}" 
+                                CornerRadius="6" 
+                                MinHeight="80"
+                                Padding="16">
+                            <Grid>
+                                <!-- 파일이 있는 경우 -->
+                                <StackPanel Visibility="{Binding HasRegistryDocument, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="📄" FontSize="24" VerticalAlignment="Center"/>
+                                        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="등기부등본 원본 파일"
+                                                       Style="{StaticResource BodyTextStyle}"
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding RegistryDocumentFullPath}"
+                                                       Style="{StaticResource CaptionTextStyle}"
+                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="280"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Button Content="파일 열기 (외부 뷰어)"
+                                            Command="{Binding ViewRegistryDocumentCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Margin="0,12,0,0"
+                                            Padding="8,6"
+                                            FontSize="{StaticResource FontSizeSmall}"
+                                            HorizontalAlignment="Left"/>
+                                </StackPanel>
+                                
+                                <!-- 파일이 없는 경우 -->
+                                <StackPanel VerticalAlignment="Center" 
+                                            HorizontalAlignment="Center"
+                                            Visibility="{Binding HasNoRegistryDocument, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Visible}">
+                                    <TextBlock Text="등기부 원본 파일 없음"
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="{StaticResource TextMutedBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="PDF 또는 이미지 파일을 업로드해주세요"
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextTertiaryBrush}"
                                                HorizontalAlignment="Center"

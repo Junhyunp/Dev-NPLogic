@@ -51,10 +51,9 @@ namespace NPLogic.Views
         }
         
         /// <summary>
-        /// 키보드 단축키 처리 (Phase 4.3)
-        /// Shift+Tab: 이전 탭, Tab: 다음 탭
-        /// Alt+Left/Right: 이전/다음 물건
-        /// Alt+Up/Down: 이전/다음 기능 탭
+        /// 키보드 단축키 처리
+        /// Tab: 다음 기능 탭, Shift+Tab: 이전 기능 탭
+        /// Alt+Up/Down: 이전/다음 차주 (상하 이동)
         /// </summary>
         private void NonCoreView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -75,23 +74,23 @@ namespace NPLogic.Views
             {
                 switch (e.SystemKey)
                 {
-                    case Key.Left:
-                        // Alt+Left: 이전 물건으로 이동
-                        _viewModel?.PreviousProperty();
-                        e.Handled = true;
-                        break;
-                    case Key.Right:
-                        // Alt+Right: 다음 물건으로 이동
-                        _viewModel?.NextProperty();
-                        e.Handled = true;
-                        break;
                     case Key.Up:
-                        // Alt+Up: 이전 기능 탭으로 이동
-                        NavigateToPreviousFunctionTab();
+                        // Alt+Up: 이전 차주로 이동 (상하 이동)
+                        _viewModel?.PreviousBorrower();
                         e.Handled = true;
                         break;
                     case Key.Down:
-                        // Alt+Down: 다음 기능 탭으로 이동
+                        // Alt+Down: 다음 차주로 이동 (상하 이동)
+                        _viewModel?.NextBorrower();
+                        e.Handled = true;
+                        break;
+                    case Key.Left:
+                        // Alt+Left: 이전 기능 탭으로 이동
+                        NavigateToPreviousFunctionTab();
+                        e.Handled = true;
+                        break;
+                    case Key.Right:
+                        // Alt+Right: 다음 기능 탭으로 이동
                         NavigateToNextFunctionTab();
                         e.Handled = true;
                         break;
@@ -107,42 +106,34 @@ namespace NPLogic.Views
                         e.Handled = true;
                         break;
                     case Key.F:
-                        // Ctrl+F: 검색창 토글
-                        ToggleSearchPanel();
+                        // Ctrl+F: 검색창에 포커스
+                        FocusSearchBox();
                         e.Handled = true;
                         break;
                 }
             }
             else if (e.Key == Key.Escape)
             {
-                // Esc: 검색창 닫기
-                if (_viewModel?.IsSearchPanelVisible == true)
+                // Esc: 검색어 초기화
+                if (_viewModel != null && !string.IsNullOrEmpty(_viewModel.SearchText))
                 {
-                    _viewModel.IsSearchPanelVisible = false;
                     _viewModel.SearchText = "";
+                    _viewModel.ApplyFilters();
                     e.Handled = true;
                 }
             }
         }
         
         /// <summary>
-        /// 검색창 토글
+        /// 검색창에 포커스
         /// </summary>
-        private void ToggleSearchPanel()
+        private void FocusSearchBox()
         {
-            if (_viewModel != null)
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                _viewModel.IsSearchPanelVisible = !_viewModel.IsSearchPanelVisible;
-                if (_viewModel.IsSearchPanelVisible)
-                {
-                    // 검색창에 포커스
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        SearchTextBox?.Focus();
-                        SearchTextBox?.SelectAll();
-                    }), System.Windows.Threading.DispatcherPriority.Input);
-                }
-            }
+                BorrowerSearchBox?.Focus();
+                BorrowerSearchBox?.SelectAll();
+            }), System.Windows.Threading.DispatcherPriority.Input);
         }
         
         /// <summary>
@@ -340,73 +331,52 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 물건 탭 클릭
+        /// 차주 리스트 선택 변경
         /// </summary>
-        private void PropertyTab_Click(object sender, MouseButtonEventArgs e)
+        private void BorrowerListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is PropertyTabItem tabItem)
+            if (sender is ListBox listBox && listBox.SelectedItem is BorrowerListItem selectedItem)
             {
-                _viewModel?.SelectPropertyTab(tabItem.PropertyId);
+                _viewModel?.SelectBorrower(selectedItem.BorrowerId);
+                
+                // 현재 탭 컨텐츠 새로고침
+                if (_viewModel?.ActiveTab != null)
+                {
+                    LoadFunctionContent(_viewModel.ActiveTab);
+                }
             }
         }
 
         /// <summary>
-        /// 물건 탭 닫기
+        /// 차주 검색 입력
         /// </summary>
-        private void ClosePropertyTab_Click(object sender, RoutedEventArgs e)
+        private void BorrowerSearchBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (sender is Button button && button.Tag is Guid propertyId)
+            if (_viewModel == null) return;
+
+            if (e.Key == Key.Enter)
             {
-                _viewModel?.ClosePropertyTab(propertyId);
+                // Enter: 필터 적용 후 다음 찾기
+                _viewModel.ApplyFilters();
+                if (_viewModel.BorrowerItems.Any())
+                {
+                    _viewModel.SelectBorrower(_viewModel.BorrowerItems.First().BorrowerId);
+                }
                 e.Handled = true;
             }
-        }
-
-        /// <summary>
-        /// 기능별 일괄작업 버튼 클릭
-        /// </summary>
-        private void BatchWorkButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.ContextMenu != null)
+            else if (e.Key == Key.Escape)
             {
-                button.ContextMenu.IsOpen = true;
+                // Esc: 검색어 초기화
+                _viewModel.SearchText = "";
+                _viewModel.ClearFilters();
+                e.Handled = true;
             }
-        }
-
-        /// <summary>
-        /// 선순위만 일괄작업
-        /// </summary>
-        private void BatchSeniorRights_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.StartBatchWork("SeniorRights");
-            // 선순위 페이지로 이동
-            MainWindow.Instance?.NavigateToSeniorRights();
-        }
-
-        /// <summary>
-        /// 평가만 일괄작업
-        /// </summary>
-        private void BatchEvaluation_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.StartBatchWork("Evaluation");
-        }
-
-        /// <summary>
-        /// 경공매만 일괄작업
-        /// </summary>
-        private void BatchAuction_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.StartBatchWork("Auction");
-            // 경매 페이지로 이동
-            MainWindow.Instance?.NavigateToAuctionSchedule();
-        }
-
-        /// <summary>
-        /// 전체 물건 일괄작업
-        /// </summary>
-        private void BatchAll_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.StartBatchWork("All");
+            else if (e.Key == Key.Down)
+            {
+                // Down: 리스트로 포커스 이동
+                BorrowerListBox?.Focus();
+                e.Handled = true;
+            }
         }
 
         /// <summary>
@@ -728,105 +698,6 @@ namespace NPLogic.Views
             await excelService.ExportNonCoreByBorrowerToExcelAsync(propertiesByBorrower, programName, filePath);
         }
 
-        // ========== 검색 이벤트 핸들러 ==========
-
-        /// <summary>
-        /// 검색창 키보드 입력
-        /// </summary>
-        private void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (_viewModel == null) return;
-
-            if (e.Key == Key.Enter)
-            {
-                if (Keyboard.Modifiers == ModifierKeys.Shift)
-                {
-                    // Shift+Enter: 이전 찾기
-                    _viewModel.FindPrevious();
-                }
-                else
-                {
-                    // Enter: 다음 찾기
-                    _viewModel.FindNext();
-                }
-                e.Handled = true;
-            }
-            else if (e.Key == Key.Escape)
-            {
-                // Esc: 검색창 닫기
-                _viewModel.IsSearchPanelVisible = false;
-                _viewModel.SearchText = "";
-                e.Handled = true;
-            }
-        }
-
-        /// <summary>
-        /// 이전 찾기
-        /// </summary>
-        private void FindPrevious_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.FindPrevious();
-        }
-
-        /// <summary>
-        /// 다음 찾기
-        /// </summary>
-        private void FindNext_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.FindNext();
-        }
-
-        /// <summary>
-        /// 검색 패널 닫기
-        /// </summary>
-        private void CloseSearchPanel_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel != null)
-            {
-                _viewModel.IsSearchPanelVisible = false;
-                _viewModel.SearchText = "";
-            }
-        }
-
-        // ========== 필터 이벤트 핸들러 ==========
-
-        /// <summary>
-        /// 필터 조건 변경
-        /// </summary>
-        private void Filter_Changed(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.ApplyFilters();
-        }
-
-        /// <summary>
-        /// 필터 초기화
-        /// </summary>
-        private void ClearFilters_Click(object sender, RoutedEventArgs e)
-        {
-            _viewModel?.ClearFilters();
-        }
-
-        /// <summary>
-        /// 필터 패널 닫기
-        /// </summary>
-        private void CloseFilterPanel_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel != null)
-            {
-                _viewModel.IsFilterPanelVisible = false;
-            }
-        }
-
-        /// <summary>
-        /// 필터 패널 열기
-        /// </summary>
-        private void OpenFilterPanel_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel != null)
-            {
-                _viewModel.IsFilterPanelVisible = true;
-            }
-        }
     }
 }
 

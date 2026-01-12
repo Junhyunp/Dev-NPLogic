@@ -54,6 +54,36 @@ namespace NPLogic.Core.Models
 
         public DateTime? CompletionDate { get; set; }
 
+        // ========== 담보 총괄 관련 필드 (S-004, S-005) ==========
+
+        /// <summary>기계기구 가치</summary>
+        public decimal? MachineryValue { get; set; }
+
+        /// <summary>공장저당 여부</summary>
+        public bool? IsFactoryMortgage { get; set; }
+
+        /// <summary>공단 소재 여부</summary>
+        public bool? IsIndustrialComplex { get; set; }
+
+        // ========== 분양 정보 (아파트/상가/공장용) ==========
+
+        /// <summary>분양면적 (㎡)</summary>
+        public decimal? SupplyArea { get; set; }
+
+        /// <summary>분양가 (원)</summary>
+        public decimal? SupplyPrice { get; set; }
+
+        // ========== 지적도/위치도/등기부 이미지 경로 ==========
+
+        /// <summary>지적도 이미지 경로</summary>
+        public string? CadastralMapImagePath { get; set; }
+
+        /// <summary>위치도 이미지 경로</summary>
+        public string? LocationMapImagePath { get; set; }
+
+        /// <summary>등기부 원본 파일 경로 (PDF/이미지)</summary>
+        public string? RegistryDocumentPath { get; set; }
+
         // 가격 정보
         public decimal? AppraisalValue { get; set; }
 

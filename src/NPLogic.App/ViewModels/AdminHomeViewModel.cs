@@ -51,6 +51,36 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<User> _evaluators = new();
 
+        // ========== 3단계 네비게이션 ==========
+        
+        /// <summary>
+        /// 네비게이션 레벨: "Borrower" (차주 목록), "Property" (물건 목록), "Detail" (상세)
+        /// </summary>
+        [ObservableProperty]
+        private string _navigationLevel = "Borrower";
+
+        /// <summary>
+        /// 차주 목록 (프로그램 선택 시 로드)
+        /// </summary>
+        [ObservableProperty]
+        private ObservableCollection<BorrowerListItem> _borrowerList = new();
+
+        /// <summary>
+        /// 선택된 차주
+        /// </summary>
+        [ObservableProperty]
+        private BorrowerListItem? _selectedBorrower;
+
+        /// <summary>
+        /// 브레드크럼용 선택된 차주명
+        /// </summary>
+        public string? SelectedBorrowerName => SelectedBorrower?.BorrowerName;
+
+        /// <summary>
+        /// 브레드크럼용 선택된 차주번호
+        /// </summary>
+        public string? SelectedBorrowerNumber => SelectedBorrower?.BorrowerNumber;
+
         // ========== 통계 ==========
         [ObservableProperty]
         private int _totalProgramCount;
@@ -259,18 +289,166 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 프로그램 선택 변경 시 물건 목록 로드
+        /// 프로그램 선택 변경 시 차주 목록 로드 (3단계 네비게이션)
         /// </summary>
         partial void OnSelectedProgramChanged(Program? value)
         {
             if (value != null)
             {
-                _ = LoadPropertiesAsync(value.Id);
+                // 3단계 네비게이션: 프로그램 선택 시 차주 목록으로 이동
+                NavigationLevel = "Borrower";
+                SelectedBorrower = null;
+                Properties.Clear();
+                _ = LoadBorrowersForProgramAsync(value.Id);
             }
             else
             {
+                BorrowerList.Clear();
                 Properties.Clear();
                 UpdateStatistics();
+            }
+        }
+
+        /// <summary>
+        /// 선택된 프로그램의 차주 목록 로드
+        /// properties 테이블에서 BorrowerNumber로 그룹화
+        /// </summary>
+        public async Task LoadBorrowersForProgramAsync(Guid programId)
+        {
+            try
+            {
+                IsPropertiesLoading = true;
+                BorrowerList.Clear();
+
+                // 프로그램의 물건 목록 조회
+                var properties = await _propertyRepository.GetByProgramIdAsync(programId);
+
+                // Evaluator인 경우 자기에게 배정된 물건만 필터링
+                IEnumerable<Property> filteredProperties = properties;
+                if (CurrentUser?.IsEvaluator == true && !CurrentUser.IsAdmin && !CurrentUser.IsPM)
+                {
+                    filteredProperties = properties.Where(p => p.AssignedTo == CurrentUser.Id);
+                }
+
+                // 전체 목록 보관 (통계용)
+                _allProperties = filteredProperties.ToList();
+
+                // BorrowerNumber로 그룹화하여 차주 목록 생성
+                var borrowerGroups = _allProperties
+                    .GroupBy(p => p.BorrowerNumber ?? "UNKNOWN")
+                    .OrderBy(g => g.Key);
+
+                foreach (var group in borrowerGroups)
+                {
+                    var firstProperty = group.First();
+                    var borrowerNumber = group.Key;
+                    var borrowerName = firstProperty.DebtorName ?? borrowerNumber;
+                    var isRestructuring = firstProperty.BorrowerIsRestructuring ?? false;
+
+                    BorrowerList.Add(new BorrowerListItem
+                    {
+                        BorrowerId = Guid.NewGuid(), // 임시 ID
+                        BorrowerNumber = borrowerNumber,
+                        BorrowerName = borrowerName,
+                        BorrowerType = "",
+                        PropertyCount = group.Count(),
+                        Opb = 0,
+                        IsRestructuring = isRestructuring,
+                        IsSelected = false
+                    });
+                }
+
+                UpdateStatistics();
+                OnPropertyChanged(nameof(SelectedBorrowerName));
+                OnPropertyChanged(nameof(SelectedBorrowerNumber));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsPropertiesLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 차주 선택 시 물건 목록 로드
+        /// </summary>
+        public async Task SelectBorrowerAsync(BorrowerListItem borrower)
+        {
+            if (borrower == null) return;
+
+            try
+            {
+                IsPropertiesLoading = true;
+
+                // 선택된 차주 설정
+                foreach (var item in BorrowerList)
+                {
+                    item.IsSelected = item.BorrowerNumber == borrower.BorrowerNumber;
+                }
+                SelectedBorrower = borrower;
+
+                // 네비게이션 레벨을 물건 목록으로 변경
+                NavigationLevel = "Property";
+
+                // 해당 차주의 물건 목록 필터링
+                Properties.Clear();
+                var borrowerProperties = _allProperties.Where(p =>
+                    p.BorrowerNumber == borrower.BorrowerNumber
+                ).ToList();
+
+                foreach (var property in borrowerProperties)
+                {
+                    Properties.Add(property);
+                }
+
+                OnPropertyChanged(nameof(SelectedBorrowerName));
+                OnPropertyChanged(nameof(SelectedBorrowerNumber));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsPropertiesLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 차주 목록으로 돌아가기 (브레드크럼 클릭 시)
+        /// </summary>
+        public void NavigateBackToBorrowerList()
+        {
+            NavigationLevel = "Borrower";
+            SelectedBorrower = null;
+            Properties.Clear();
+
+            OnPropertyChanged(nameof(SelectedBorrowerName));
+            OnPropertyChanged(nameof(SelectedBorrowerNumber));
+        }
+
+        /// <summary>
+        /// 물건 목록으로 돌아가기 (브레드크럼 클릭 시)
+        /// </summary>
+        public void NavigateBackToPropertyList()
+        {
+            NavigationLevel = "Property";
+
+            // 선택된 차주의 물건 목록 다시 표시
+            if (SelectedBorrower != null)
+            {
+                Properties.Clear();
+                var borrowerProperties = _allProperties.Where(p =>
+                    p.BorrowerNumber == SelectedBorrower.BorrowerNumber
+                ).ToList();
+
+                foreach (var property in borrowerProperties)
+                {
+                    Properties.Add(property);
+                }
             }
         }
 

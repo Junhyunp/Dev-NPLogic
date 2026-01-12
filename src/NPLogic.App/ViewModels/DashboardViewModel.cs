@@ -56,6 +56,7 @@ namespace NPLogic.ViewModels
     /// 대시보드 ViewModel - Phase 2 업데이트
     /// 2영역 레이아웃, 프로그램별 진행률, 컬럼별 진행률 지원
     /// Phase 6: 권한별 화면 필터링 추가
+    /// 3단계 드릴다운 네비게이션: 프로그램 -> 차주 -> 물건
     /// </summary>
     public partial class DashboardViewModel : ObservableObject
     {
@@ -64,6 +65,7 @@ namespace NPLogic.ViewModels
         private readonly AuthService _authService;
         private readonly ProgramUserRepository _programUserRepository;
         private readonly ProgramRepository _programRepository;
+        private readonly BorrowerRepository _borrowerRepository;
         
         // PM 담당 프로그램 ID 목록 (캐시)
         private List<Guid> _pmProgramIds = new();
@@ -212,6 +214,36 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<User> _evaluators = new();
 
+        // ========== 3단계 드릴다운 네비게이션 ==========
+        
+        /// <summary>
+        /// 네비게이션 레벨: "Borrower" (차주 목록), "Property" (물건 목록), "Detail" (상세)
+        /// </summary>
+        [ObservableProperty]
+        private string _navigationLevel = "Borrower";
+
+        /// <summary>
+        /// 차주 목록 (프로그램 선택 시 로드)
+        /// </summary>
+        [ObservableProperty]
+        private ObservableCollection<BorrowerListItem> _borrowerList = new();
+
+        /// <summary>
+        /// 선택된 차주
+        /// </summary>
+        [ObservableProperty]
+        private BorrowerListItem? _selectedBorrower;
+
+        /// <summary>
+        /// 브레드크럼용 선택된 차주명
+        /// </summary>
+        public string? SelectedBorrowerName => SelectedBorrower?.BorrowerName;
+
+        /// <summary>
+        /// 브레드크럼용 선택된 차주번호
+        /// </summary>
+        public string? SelectedBorrowerNumber => SelectedBorrower?.BorrowerNumber;
+
         // ========== 상태 ==========
         [ObservableProperty]
         private bool _isLoading;
@@ -237,13 +269,15 @@ namespace NPLogic.ViewModels
             UserRepository userRepository,
             AuthService authService,
             ProgramUserRepository programUserRepository,
-            ProgramRepository programRepository)
+            ProgramRepository programRepository,
+            BorrowerRepository borrowerRepository)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
+            _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
         }
 
         /// <summary>
@@ -449,6 +483,7 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 선택된 프로그램의 데이터 로드 (비동기)
+        /// 3단계 네비게이션: 프로그램 선택 시 차주 목록 표시
         /// </summary>
         public async Task LoadSelectedProgramDataAsync()
         {
@@ -461,15 +496,17 @@ namespace NPLogic.ViewModels
                 ErrorMessage = null;
 
                 SelectedProjectId = SelectedProgram.ProjectId;
+                
+                // 3단계 네비게이션: 프로그램 선택 시 차주 목록으로 이동
+                NavigationLevel = "Borrower";
+                SelectedBorrower = null;
+                SelectedProperty = null;
+
+                // 차주 목록 로드
+                await LoadBorrowersForProgramAsync();
 
                 // 통계 로드
                 await LoadStatisticsAsync();
-
-                // 대시보드 물건 목록 로드
-                await LoadDashboardPropertiesAsync();
-
-                // 컬럼별 진행률 계산
-                RecalculateColumnProgress();
             }
             catch (Exception ex)
             {
@@ -479,6 +516,209 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        /// <summary>
+        /// 선택된 프로그램의 차주 목록 로드
+        /// borrowers 테이블에 데이터가 없으면 properties 테이블에서 추출
+        /// </summary>
+        public async Task LoadBorrowersForProgramAsync()
+        {
+            if (SelectedProgram == null)
+                return;
+
+            try
+            {
+                BorrowerList.Clear();
+
+                // 물건 목록 조회 (차주 정보 추출용)
+                var properties = await _propertyRepository.GetFilteredAsync(projectId: SelectedProgram.ProjectId);
+                
+                if (properties == null || !properties.Any())
+                    return;
+
+                // borrowers 테이블에서 조회 시도
+                List<Borrower>? borrowers = null;
+                if (_borrowerRepository != null)
+                {
+                    try
+                    {
+                        borrowers = await _borrowerRepository.GetByProgramIdAsync(SelectedProgram.ProjectId);
+                    }
+                    catch
+                    {
+                        // borrowers 테이블 조회 실패 시 무시
+                    }
+                }
+
+                if (borrowers != null && borrowers.Any())
+                {
+                    // borrowers 테이블에 데이터가 있는 경우
+                    var propertiesByBorrower = properties
+                        .GroupBy(p => p.BorrowerNumber ?? p.DebtorName ?? "")
+                        .ToDictionary(g => g.Key, g => g.Count());
+
+                    foreach (var borrower in borrowers.OrderBy(b => b.BorrowerNumber))
+                    {
+                        var propertyCount = 0;
+                        if (propertiesByBorrower.TryGetValue(borrower.BorrowerNumber, out var count1))
+                            propertyCount = count1;
+                        else if (propertiesByBorrower.TryGetValue(borrower.BorrowerName, out var count2))
+                            propertyCount = count2;
+                        else
+                            propertyCount = borrower.PropertyCount;
+
+                        BorrowerList.Add(new BorrowerListItem
+                        {
+                            BorrowerId = borrower.Id,
+                            BorrowerNumber = borrower.BorrowerNumber,
+                            BorrowerName = borrower.BorrowerName,
+                            BorrowerType = borrower.BorrowerType,
+                            PropertyCount = propertyCount,
+                            Opb = borrower.Opb,
+                            IsRestructuring = borrower.IsRestructuring,
+                            IsSelected = false
+                        });
+                    }
+                }
+                else
+                {
+                    // borrowers 테이블에 데이터가 없는 경우: properties에서 차주 정보 추출
+                    var borrowerGroups = properties
+                        .GroupBy(p => p.BorrowerNumber ?? "UNKNOWN")
+                        .OrderBy(g => g.Key);
+
+                    foreach (var group in borrowerGroups)
+                    {
+                        var firstProperty = group.First();
+                        var borrowerNumber = group.Key;
+                        var borrowerName = firstProperty.DebtorName ?? borrowerNumber;
+                        var isRestructuring = firstProperty.BorrowerIsRestructuring ?? false;
+
+                        BorrowerList.Add(new BorrowerListItem
+                        {
+                            BorrowerId = Guid.NewGuid(), // 임시 ID
+                            BorrowerNumber = borrowerNumber,
+                            BorrowerName = borrowerName,
+                            BorrowerType = "",
+                            PropertyCount = group.Count(),
+                            Opb = 0,
+                            IsRestructuring = isRestructuring,
+                            IsSelected = false
+                        });
+                    }
+                }
+
+                OnPropertyChanged(nameof(SelectedBorrowerName));
+                OnPropertyChanged(nameof(SelectedBorrowerNumber));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 차주 선택 시 물건 목록 로드
+        /// </summary>
+        public async Task SelectBorrowerAsync(BorrowerListItem borrower)
+        {
+            if (borrower == null)
+                return;
+
+            try
+            {
+                IsLoading = true;
+
+                // 선택된 차주 설정
+                foreach (var item in BorrowerList)
+                {
+                    item.IsSelected = item.BorrowerId == borrower.BorrowerId;
+                }
+                SelectedBorrower = borrower;
+
+                // 네비게이션 레벨을 물건 목록으로 변경
+                NavigationLevel = "Property";
+
+                // 해당 차주의 물건 목록 로드
+                await LoadPropertiesForBorrowerAsync();
+
+                OnPropertyChanged(nameof(SelectedBorrowerName));
+                OnPropertyChanged(nameof(SelectedBorrowerNumber));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 선택된 차주의 물건 목록 로드
+        /// </summary>
+        private async Task LoadPropertiesForBorrowerAsync()
+        {
+            if (SelectedBorrower == null || SelectedProgram == null)
+                return;
+
+            try
+            {
+                DashboardProperties.Clear();
+
+                // 프로그램의 전체 물건 중 해당 차주의 물건만 필터링
+                var properties = await _propertyRepository.GetFilteredAsync(projectId: SelectedProgram.ProjectId);
+                
+                var borrowerProperties = properties.Where(p =>
+                    p.DebtorName == SelectedBorrower.BorrowerName ||
+                    p.DebtorName == SelectedBorrower.BorrowerNumber ||
+                    p.BorrowerNumber == SelectedBorrower.BorrowerNumber
+                ).ToList();
+
+                foreach (var property in borrowerProperties)
+                {
+                    DashboardProperties.Add(property);
+                }
+
+                // 컬럼별 진행률 계산
+                RecalculateColumnProgress();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 차주 목록으로 돌아가기 (브레드크럼 클릭 시)
+        /// </summary>
+        public void NavigateBackToBorrowerList()
+        {
+            NavigationLevel = "Borrower";
+            SelectedBorrower = null;
+            SelectedProperty = null;
+            IsDetailMode = false;
+            DashboardProperties.Clear();
+
+            OnPropertyChanged(nameof(SelectedBorrowerName));
+            OnPropertyChanged(nameof(SelectedBorrowerNumber));
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
+            OnPropertyChanged(nameof(CurrentTabName));
+        }
+
+        /// <summary>
+        /// 물건 목록으로 돌아가기 (브레드크럼 클릭 시)
+        /// </summary>
+        public void NavigateBackToPropertyList()
+        {
+            NavigationLevel = "Property";
+            SelectedProperty = null;
+            IsDetailMode = false;
+
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
+            OnPropertyChanged(nameof(CurrentTabName));
         }
 
         /// <summary>
@@ -669,11 +909,13 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 상세 모드로 전환 (물건 선택 시)
+        /// 3단계 네비게이션: NavigationLevel = "Detail"
         /// </summary>
         public void SwitchToDetailMode(Property property)
         {
             SelectedProperty = property;
             IsDetailMode = true;
+            NavigationLevel = "Detail";
             ActiveTab = "noncore"; // 기본 탭은 비핵심
             OnPropertyChanged(nameof(CurrentTabName));
             OnPropertyChanged(nameof(SelectedPropertyNumber));
@@ -681,10 +923,12 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 목록 모드로 전환 (목록으로 버튼 클릭 시)
+        /// 3단계 네비게이션: NavigationLevel = "Property"
         /// </summary>
         public void SwitchToListMode()
         {
             IsDetailMode = false;
+            NavigationLevel = "Property";
             SelectedProperty = null;
             OnPropertyChanged(nameof(CurrentTabName));
             OnPropertyChanged(nameof(SelectedPropertyNumber));

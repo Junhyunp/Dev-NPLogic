@@ -114,6 +114,7 @@ namespace NPLogic.ViewModels
         private readonly PropertyQaRepository? _propertyQaRepository;
         private readonly SupabaseService? _supabaseService;
         private readonly ProgramRepository? _programRepository;
+        private readonly StaticMapService? _staticMapService;
         
         // 프로그램 이름 캐시 (성능 최적화)
         private static readonly Dictionary<Guid, string> _programNameCache = new();
@@ -346,6 +347,70 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private string _buildingRegisterStatus = "클릭하여 조회";
+
+        #endregion
+
+        #region 지적도/위치도/등기부 원본 관련 속성 (피드백 3, 4번)
+
+        /// <summary>
+        /// 지적도 이미지 바이트 배열
+        /// </summary>
+        [ObservableProperty]
+        private byte[]? _cadastralMapImageData;
+
+        /// <summary>
+        /// 위치도 이미지 바이트 배열
+        /// </summary>
+        [ObservableProperty]
+        private byte[]? _locationMapImageData;
+
+        /// <summary>
+        /// 지적도 이미지 존재 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasCadastralMapImage;
+
+        /// <summary>
+        /// 위치도 이미지 존재 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasLocationMapImage;
+
+        /// <summary>
+        /// 등기부 원본 파일 경로
+        /// </summary>
+        [ObservableProperty]
+        private string? _registryDocumentFullPath;
+
+        /// <summary>
+        /// 등기부 원본 파일 존재 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasRegistryDocument;
+
+        /// <summary>
+        /// 등기부 원본 없음 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasNoRegistryDocument = true;
+
+        /// <summary>
+        /// 상가/공장 여부 (분양정보 표시 조건)
+        /// </summary>
+        [ObservableProperty]
+        private bool _isCommercialOrFactory;
+
+        /// <summary>
+        /// 분양면적 (㎡)
+        /// </summary>
+        [ObservableProperty]
+        private decimal _supplyArea;
+
+        /// <summary>
+        /// 분양가 (원)
+        /// </summary>
+        [ObservableProperty]
+        private decimal _supplyPrice;
 
         #endregion
 
@@ -627,12 +692,14 @@ namespace NPLogic.ViewModels
             RegistryOcrService? registryOcrService = null,
             PropertyQaRepository? propertyQaRepository = null,
             SupabaseService? supabaseService = null,
-            ProgramRepository? programRepository = null)
+            ProgramRepository? programRepository = null,
+            StaticMapService? staticMapService = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
             _registryRepository = registryRepository;
             _rightAnalysisRepository = rightAnalysisRepository;
+            _staticMapService = staticMapService ?? new StaticMapService();
             _evaluationRepository = evaluationRepository;
             _registryOcrService = registryOcrService;
             _propertyQaRepository = propertyQaRepository;
@@ -784,6 +851,15 @@ namespace NPLogic.ViewModels
             // 캐시에 없으면 비동기로 로드
             _ = LoadProgramNameAsync(property.ProgramId, property.ProjectId);
 
+            // 물건 유형별 속성 초기화 (분양정보 등)
+            InitializePropertyTypeAttributes(property);
+
+            // 지적도/위치도 이미지 로드
+            _ = LoadMapImagesAsync(property);
+
+            // 등기부 원본 파일 로드
+            _ = LoadRegistryDocumentAsync(property);
+
             HasUnsavedChanges = false;
         }
 
@@ -852,6 +928,15 @@ namespace NPLogic.ViewModels
                     SetProgramNameFromCache(property.ProgramId, property.ProjectId);
                     // 캐시에 없으면 비동기로 로드
                     await LoadProgramNameAsync(property.ProgramId, property.ProjectId);
+
+                    // 물건 유형별 속성 초기화 (분양정보 등)
+                    InitializePropertyTypeAttributes(property);
+
+                    // 지적도/위치도 이미지 로드
+                    await LoadMapImagesAsync(property);
+
+                    // 등기부 원본 파일 로드
+                    await LoadRegistryDocumentAsync(property);
                 }
                 else
                 {
@@ -1136,6 +1221,401 @@ namespace NPLogic.ViewModels
             // 등기부 탭은 상단 메뉴에 있으므로 DashboardView로 이동 필요
             // 여기서는 SuccessMessage로 안내
             SuccessMessage = "등기부 탭은 상단 '등기부(OCR)' 메뉴에서 확인할 수 있습니다.";
+        }
+
+        #endregion
+
+        #region 지적도/위치도/등기부 원본 관련 (피드백 3, 4번)
+
+        /// <summary>
+        /// 물건의 분양정보 및 물건유형별 속성 초기화
+        /// </summary>
+        private void InitializePropertyTypeAttributes(Property property)
+        {
+            // 상가/공장 여부 확인 (분양정보 표시 조건)
+            var propertyType = property.PropertyType?.ToLower() ?? "";
+            IsCommercialOrFactory = propertyType.Contains("상가") 
+                                 || propertyType.Contains("공장") 
+                                 || propertyType.Contains("근린")
+                                 || propertyType.Contains("factory")
+                                 || propertyType.Contains("commercial");
+
+            // 분양 정보 로드 (Property 모델에서)
+            SupplyArea = property.SupplyArea ?? 0;
+            SupplyPrice = property.SupplyPrice ?? 0;
+        }
+
+        /// <summary>
+        /// 지적도/위치도 이미지 로드 (Kakao Static Map API 사용)
+        /// </summary>
+        private async Task LoadMapImagesAsync(Property property)
+        {
+            // 좌표가 있는 경우에만 이미지 로드
+            if (property.Latitude.HasValue && property.Longitude.HasValue && _staticMapService != null)
+            {
+                try
+                {
+                    var lat = (double)property.Latitude.Value;
+                    var lng = (double)property.Longitude.Value;
+
+                    // 지적도 이미지 로드 (저장된 경로가 있으면 먼저 확인)
+                    if (!string.IsNullOrWhiteSpace(property.CadastralMapImagePath) && _storageService != null)
+                    {
+                        try
+                        {
+                            CadastralMapImageData = await _storageService.DownloadFileAsync("maps", property.CadastralMapImagePath);
+                            HasCadastralMapImage = CadastralMapImageData != null && CadastralMapImageData.Length > 0;
+                        }
+                        catch
+                        {
+                            HasCadastralMapImage = false;
+                        }
+                    }
+                    else
+                    {
+                        // 저장된 이미지가 없으면 API 호출
+                        CadastralMapImageData = await _staticMapService.GetCadastralMapImageAsync(lat, lng, 600, 400, 3);
+                        HasCadastralMapImage = CadastralMapImageData != null && CadastralMapImageData.Length > 0;
+                    }
+
+                    // 위치도 이미지 로드 (저장된 경로가 있으면 먼저 확인)
+                    if (!string.IsNullOrWhiteSpace(property.LocationMapImagePath) && _storageService != null)
+                    {
+                        try
+                        {
+                            LocationMapImageData = await _storageService.DownloadFileAsync("maps", property.LocationMapImagePath);
+                            HasLocationMapImage = LocationMapImageData != null && LocationMapImageData.Length > 0;
+                        }
+                        catch
+                        {
+                            HasLocationMapImage = false;
+                        }
+                    }
+                    else
+                    {
+                        // 저장된 이미지가 없으면 위성지도 API 호출 (위치도로 활용)
+                        LocationMapImageData = await _staticMapService.GetSatelliteMapImageAsync(lat, lng, 600, 400, 3);
+                        HasLocationMapImage = LocationMapImageData != null && LocationMapImageData.Length > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"지도 이미지 로드 실패: {ex.Message}");
+                    HasCadastralMapImage = false;
+                    HasLocationMapImage = false;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(property.AddressJibun) || !string.IsNullOrWhiteSpace(property.AddressFull))
+            {
+                // 좌표가 없고 주소가 있으면 Geocoding 시도
+                try
+                {
+                    var address = !string.IsNullOrWhiteSpace(property.AddressJibun) 
+                        ? property.AddressJibun 
+                        : property.AddressFull;
+
+                    if (_staticMapService != null)
+                    {
+                        var coords = await _staticMapService.GeocodeAddressAsync(address!);
+                        if (coords.HasValue)
+                        {
+                            // 지적도 이미지
+                            CadastralMapImageData = await _staticMapService.GetCadastralMapImageAsync(coords.Value.lat, coords.Value.lng, 600, 400, 3);
+                            HasCadastralMapImage = CadastralMapImageData != null && CadastralMapImageData.Length > 0;
+
+                            // 위치도 이미지 (위성)
+                            LocationMapImageData = await _staticMapService.GetSatelliteMapImageAsync(coords.Value.lat, coords.Value.lng, 600, 400, 3);
+                            HasLocationMapImage = LocationMapImageData != null && LocationMapImageData.Length > 0;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"주소로 지도 이미지 로드 실패: {ex.Message}");
+                    HasCadastralMapImage = false;
+                    HasLocationMapImage = false;
+                }
+            }
+            else
+            {
+                HasCadastralMapImage = false;
+                HasLocationMapImage = false;
+            }
+        }
+
+        /// <summary>
+        /// 지적도 이미지 생성 (버튼 클릭 시 호출)
+        /// </summary>
+        [RelayCommand]
+        private async Task GenerateCadastralMapAsync()
+        {
+            if (Property == null) return;
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                double lat, lng;
+
+                if (Property.Latitude.HasValue && Property.Longitude.HasValue)
+                {
+                    lat = (double)Property.Latitude.Value;
+                    lng = (double)Property.Longitude.Value;
+                }
+                else if (!string.IsNullOrWhiteSpace(Property.AddressJibun) || !string.IsNullOrWhiteSpace(Property.AddressFull))
+                {
+                    var address = !string.IsNullOrWhiteSpace(Property.AddressJibun) 
+                        ? Property.AddressJibun 
+                        : Property.AddressFull;
+
+                    var coords = await _staticMapService?.GeocodeAddressAsync(address!)!;
+                    if (!coords.HasValue)
+                    {
+                        ErrorMessage = "주소로 좌표를 찾을 수 없습니다.";
+                        return;
+                    }
+                    lat = coords.Value.lat;
+                    lng = coords.Value.lng;
+                }
+                else
+                {
+                    ErrorMessage = "좌표 또는 주소 정보가 없습니다.";
+                    return;
+                }
+
+                CadastralMapImageData = await _staticMapService!.GetCadastralMapImageAsync(lat, lng, 600, 400, 3);
+                HasCadastralMapImage = CadastralMapImageData != null && CadastralMapImageData.Length > 0;
+
+                if (HasCadastralMapImage)
+                {
+                    SuccessMessage = "지적도 이미지가 생성되었습니다.";
+                }
+                else
+                {
+                    ErrorMessage = "지적도 이미지 생성에 실패했습니다.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"지적도 생성 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 위치도 이미지 생성 (버튼 클릭 시 호출)
+        /// </summary>
+        [RelayCommand]
+        private async Task GenerateLocationMapAsync()
+        {
+            if (Property == null) return;
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                double lat, lng;
+
+                if (Property.Latitude.HasValue && Property.Longitude.HasValue)
+                {
+                    lat = (double)Property.Latitude.Value;
+                    lng = (double)Property.Longitude.Value;
+                }
+                else if (!string.IsNullOrWhiteSpace(Property.AddressJibun) || !string.IsNullOrWhiteSpace(Property.AddressFull))
+                {
+                    var address = !string.IsNullOrWhiteSpace(Property.AddressJibun) 
+                        ? Property.AddressJibun 
+                        : Property.AddressFull;
+
+                    var coords = await _staticMapService?.GeocodeAddressAsync(address!)!;
+                    if (!coords.HasValue)
+                    {
+                        ErrorMessage = "주소로 좌표를 찾을 수 없습니다.";
+                        return;
+                    }
+                    lat = coords.Value.lat;
+                    lng = coords.Value.lng;
+                }
+                else
+                {
+                    ErrorMessage = "좌표 또는 주소 정보가 없습니다.";
+                    return;
+                }
+
+                LocationMapImageData = await _staticMapService!.GetSatelliteMapImageAsync(lat, lng, 600, 400, 3);
+                HasLocationMapImage = LocationMapImageData != null && LocationMapImageData.Length > 0;
+
+                if (HasLocationMapImage)
+                {
+                    SuccessMessage = "위치도 이미지가 생성되었습니다.";
+                }
+                else
+                {
+                    ErrorMessage = "위치도 이미지 생성에 실패했습니다.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"위치도 생성 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 등기부 원본 파일 로드
+        /// </summary>
+        private async Task LoadRegistryDocumentAsync(Property property)
+        {
+            // 등기부 원본 파일 경로 확인
+            if (!string.IsNullOrWhiteSpace(property.RegistryDocumentPath))
+            {
+                if (_storageService != null)
+                {
+                    try
+                    {
+                        // Storage에서 URL 가져오기
+                        RegistryDocumentFullPath = await _storageService.GetPublicUrlAsync("registry", property.RegistryDocumentPath);
+                        HasRegistryDocument = !string.IsNullOrWhiteSpace(RegistryDocumentFullPath);
+                        HasNoRegistryDocument = !HasRegistryDocument;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"등기부 원본 URL 로드 실패: {ex.Message}");
+                        HasRegistryDocument = false;
+                        HasNoRegistryDocument = true;
+                    }
+                }
+                else
+                {
+                    // 로컬 파일 경로로 가정
+                    RegistryDocumentFullPath = property.RegistryDocumentPath;
+                    HasRegistryDocument = System.IO.File.Exists(property.RegistryDocumentPath);
+                    HasNoRegistryDocument = !HasRegistryDocument;
+                }
+            }
+            else
+            {
+                // 등기부 문서 테이블에서 파일 경로 검색
+                if (_registryRepository != null)
+                {
+                    try
+                    {
+                        var documents = await _registryRepository.GetDocumentsByPropertyIdAsync(property.Id);
+                        var latestDoc = documents.FirstOrDefault();
+                        
+                        if (latestDoc != null && !string.IsNullOrWhiteSpace(latestDoc.FilePath))
+                        {
+                            RegistryDocumentFullPath = latestDoc.FilePath;
+                            HasRegistryDocument = true;
+                            HasNoRegistryDocument = false;
+                        }
+                        else
+                        {
+                            HasRegistryDocument = false;
+                            HasNoRegistryDocument = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"등기부 문서 검색 실패: {ex.Message}");
+                        HasRegistryDocument = false;
+                        HasNoRegistryDocument = true;
+                    }
+                }
+                else
+                {
+                    HasRegistryDocument = false;
+                    HasNoRegistryDocument = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 등기부 원본 파일 업로드
+        /// </summary>
+        [RelayCommand]
+        private async Task UploadRegistryDocumentAsync()
+        {
+            if (Property == null || _storageService == null) 
+            {
+                ErrorMessage = "Storage 서비스가 초기화되지 않았습니다.";
+                return;
+            }
+
+            var dialog = new OpenFileDialog
+            {
+                Title = "등기부등본 파일 선택",
+                Filter = "PDF 파일|*.pdf|이미지 파일|*.jpg;*.jpeg;*.png|모든 파일|*.*",
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    IsLoading = true;
+                    ErrorMessage = null;
+
+                    var fileName = System.IO.Path.GetFileName(dialog.FileName);
+                    var fileBytes = await System.IO.File.ReadAllBytesAsync(dialog.FileName);
+                    var storagePath = $"properties/{Property.Id}/registry/{fileName}";
+
+                    var url = await _storageService.UploadFileAsync("registry", storagePath, fileBytes);
+
+                    if (!string.IsNullOrEmpty(url))
+                    {
+                        // Property 모델에 경로 저장
+                        Property.RegistryDocumentPath = storagePath;
+                        await _propertyRepository.UpdateAsync(Property);
+
+                        RegistryDocumentFullPath = url;
+                        HasRegistryDocument = true;
+                        HasNoRegistryDocument = false;
+
+                        SuccessMessage = "등기부등본 파일이 업로드되었습니다.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"등기부등본 업로드 실패: {ex.Message}";
+                }
+                finally
+                {
+                    IsLoading = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 등기부 원본 보기 명령
+        /// </summary>
+        [RelayCommand]
+        private void ViewRegistryDocument()
+        {
+            if (string.IsNullOrWhiteSpace(RegistryDocumentFullPath)) return;
+
+            try
+            {
+                // URL 또는 로컬 파일 열기
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = RegistryDocumentFullPath,
+                    UseShellExecute = true
+                };
+                System.Diagnostics.Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"등기부 원본 열기 실패: {ex.Message}";
+            }
         }
 
         #endregion

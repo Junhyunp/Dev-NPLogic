@@ -220,7 +220,7 @@
                 </StackPanel>
             </Grid>
             
-            <!-- 브레드크럼 영역 -->
+            <!-- 브레드크럼 영역 (3단계 네비게이션: 대시보드 > 프로그램 > 차주 > 물건 > 탭) -->
             <Border Grid.Row="1" 
                     Background="{StaticResource BlueGray50Brush}"
                     CornerRadius="4"
@@ -232,6 +232,7 @@
                                              VerticalAlignment="Center"
                                              Foreground="{StaticResource TextSecondaryBrush}"
                                              Margin="0,0,6,0"/>
+                    <!-- 1. 대시보드 -->
                     <TextBlock x:Name="BreadcrumbHome"
                                Text="대시보드"
                                FontSize="{StaticResource FontSizeBody}"
@@ -239,7 +240,9 @@
                                VerticalAlignment="Center"
                                Cursor="Hand"
                                MouseLeftButtonDown="Breadcrumb_Home_Click"
-                               ToolTip="물건 목록으로 이동"/>
+                               ToolTip="프로그램 선택 화면으로 이동"/>
+                    
+                    <!-- 2. 프로그램명 (프로그램 선택 시 표시) -->
                     <TextBlock Text=" › " 
                                FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextSecondaryBrush}"
@@ -252,9 +255,27 @@
                                VerticalAlignment="Center"
                                Cursor="Hand"
                                MouseLeftButtonDown="Breadcrumb_Program_Click"
-                               ToolTip="물건 목록으로 이동"
+                               ToolTip="차주 목록으로 이동"
                                Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    <!-- 상세 모드: 물건번호 표시 -->
+                    
+                    <!-- 3. 차주명 (차주 선택 시 표시) -->
+                    <TextBlock x:Name="BreadcrumbBorrowerSeparator"
+                               Text=" › " 
+                               FontSize="{StaticResource FontSizeBody}"
+                               Foreground="{StaticResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding SelectedBorrower, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    <TextBlock x:Name="BreadcrumbBorrower"
+                               Text="{Binding SelectedBorrowerName}"
+                               FontSize="{StaticResource FontSizeBody}"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               VerticalAlignment="Center"
+                               Cursor="Hand"
+                               MouseLeftButtonDown="Breadcrumb_Borrower_Click"
+                               ToolTip="물건 목록으로 이동"
+                               Visibility="{Binding SelectedBorrower, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    
+                    <!-- 4. 물건번호 (물건 선택 시 = 상세 모드) -->
                     <TextBlock x:Name="BreadcrumbPropertySeparator"
                                Text=" › " 
                                FontSize="{StaticResource FontSizeBody}"
@@ -268,7 +289,8 @@
                                FontWeight="SemiBold"
                                VerticalAlignment="Center"
                                Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <!-- 상세 모드: 현재 탭 표시 -->
+                    
+                    <!-- 5. 현재 탭명 (상세 모드에서 탭 선택 시) -->
                     <TextBlock x:Name="BreadcrumbTabSeparator"
                                Text=" › " 
                                FontSize="{StaticResource FontSizeBody}"
@@ -799,9 +821,91 @@
                             </Grid>
                         </Border>
 
-                        <!-- 탭별 컨텐츠 영역 -->
+                        <!-- 탭별 컨텐츠 영역 (3단계 네비게이션) -->
                         <Grid Grid.Row="4">
-                            <!-- 목록 모드: 데이터 그리드 -->
+                            <!-- ========== 차주 목록 (NavigationLevel == "Borrower") ========== -->
+                            <DataGrid x:Name="BorrowerDataGrid"
+                                      ItemsSource="{Binding BorrowerList}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      SelectionMode="Single"
+                                      SelectionChanged="BorrowerDataGrid_SelectionChanged"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                                      HeadersVisibility="Column"
+                                      Background="{StaticResource SurfaceBrush}"
+                                      BorderThickness="0"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Visibility="Visible">
+                                
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGrid.RowStyle>
+                                
+                                <DataGrid.Columns>
+                                    <!-- 차주번호 -->
+                                    <DataGridTemplateColumn Header="차주번호" Width="150" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Padding="12,8"
+                                                           VerticalAlignment="Center">
+                                                    <Run Text="{Binding BorrowerNumber}" FontWeight="SemiBold"/>
+                                                    <Run Text=" [회생]" Foreground="{StaticResource WarningBrush}" FontSize="11">
+                                                        <Run.Style>
+                                                            <Style TargetType="Run">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsRestructuring}" Value="False">
+                                                                        <Setter Property="Text" Value=""/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Run.Style>
+                                                    </Run>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    
+                                    <!-- 차주명 -->
+                                    <DataGridTextColumn Header="차주명" 
+                                                       Binding="{Binding BorrowerName}" 
+                                                       Width="*"
+                                                       IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Padding" Value="12,8"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    
+                                    <!-- 물건 수 -->
+                                    <DataGridTemplateColumn Header="물건 수" Width="100" IsReadOnly="True">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Padding="12,8"
+                                                           VerticalAlignment="Center"
+                                                           HorizontalAlignment="Center">
+                                                    <Run Text="{Binding PropertyCount}"/>
+                                                    <Run Text="건" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            
+                            <!-- ========== 물건 목록 (NavigationLevel == "Property") ========== -->
                             <DataGrid x:Name="ProgressDataGrid"
                                       ItemsSource="{Binding DashboardProperties}"
                                       AutoGenerateColumns="False"
@@ -815,7 +919,8 @@
                                       Background="{StaticResource SurfaceBrush}"
                                       BorderThickness="0"
                                       HorizontalScrollBarVisibility="Auto"
-                                      VerticalScrollBarVisibility="Auto">
+                                      VerticalScrollBarVisibility="Auto"
+                                      Visibility="Collapsed">
                             
                             <DataGrid.Columns>
                                 <!-- 차주번호 (맨 앞으로) -->

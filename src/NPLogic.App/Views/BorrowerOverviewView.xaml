@@ -451,7 +451,7 @@
                                 </Grid>
                             </controls:NPExpandableSection>
 
-                            <!-- 담보 총괄 (S-004, S-005) -->
+                            <!-- 담보 총괄 (S-004, S-005) - 물건 데이터 합산 표시 -->
                             <controls:NPExpandableSection Header="담보 총괄" IsExpanded="True">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -487,32 +487,29 @@
                                         <TextBlock Text="공단" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                     </Border>
 
-                                    <!-- 데이터 행 -->
+                                    <!-- 데이터 행 (ViewModel의 계산된 속성 바인딩) -->
                                     <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,1" Padding="8,6">
-                                        <TextBlock Text="{Binding SelectedBorrower.CollateralType, FallbackValue='-'}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CollateralTypeSummary, FallbackValue='-'}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" TextWrapping="Wrap"/>
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,1" Padding="8,6">
-                                        <TextBlock Text="{Binding SelectedBorrower.TotalLandArea, StringFormat={}{0:N2} ㎡, FallbackValue='-'}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding TotalLandArea, StringFormat={}{0:N2} ㎡}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,1" Padding="8,6">
-                                        <TextBlock Text="{Binding SelectedBorrower.TotalBuildingArea, StringFormat={}{0:N2} ㎡, FallbackValue='-'}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding TotalBuildingArea, StringFormat={}{0:N2} ㎡}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,1" Padding="8,6">
-                                        <TextBlock Text="{Binding SelectedBorrower.MachineryValue, StringFormat=N0, FallbackValue='-'}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding TotalMachineryValue, StringFormat=N0}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Right"/>
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BorderColor}" BorderThickness="1,0,0,1" Padding="8,6">
                                         <TextBlock FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="-"/>
+                                                    <Setter Property="Text" Value="N"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding SelectedBorrower.IsFactoryMortgage}" Value="True">
+                                                        <DataTrigger Binding="{Binding HasFactoryMortgage}" Value="True">
                                                             <Setter Property="Text" Value="Y"/>
                                                             <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
                                                             <Setter Property="FontWeight" Value="Bold"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedBorrower.IsFactoryMortgage}" Value="False">
-                                                            <Setter Property="Text" Value="N"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -523,15 +520,12 @@
                                         <TextBlock FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="-"/>
+                                                    <Setter Property="Text" Value="N"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding SelectedBorrower.IsIndustrialComplex}" Value="True">
+                                                        <DataTrigger Binding="{Binding IsInIndustrialComplex}" Value="True">
                                                             <Setter Property="Text" Value="Y"/>
                                                             <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
                                                             <Setter Property="FontWeight" Value="Bold"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding SelectedBorrower.IsIndustrialComplex}" Value="False">
-                                                            <Setter Property="Text" Value="N"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

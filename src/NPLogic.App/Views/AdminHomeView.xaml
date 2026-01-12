@@ -318,20 +318,13 @@
                             </TextBlock>
                         </StackPanel>
                         
-                        <StackPanel Grid.Column="3" Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}"
-                                    Width="28" Height="28"
-                                    Margin="0,0,6,0"
-                                    ToolTip="Assign: 전체">
-                                <materialDesign:PackIcon Kind="AccountMultiple" Width="16" Height="16" Foreground="White"/>
-                            </Button>
-                            <Button Command="{Binding RefreshCommand}"
-                                    Style="{StaticResource IconButton}"
-                                    Width="28" Height="28"
-                                    ToolTip="새로고침">
-                                <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" Foreground="White"/>
-                            </Button>
-                        </StackPanel>
+                        <Button Grid.Column="3"
+                                Command="{Binding RefreshCommand}"
+                                Style="{StaticResource IconButton}"
+                                Width="28" Height="28"
+                                ToolTip="새로고침">
+                            <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" Foreground="White"/>
+                        </Button>
                     </Grid>
                 </Border>
 
@@ -419,9 +412,94 @@
                     </StackPanel>
                 </Border>
 
-                <!-- 물건 목록 / 상세 뷰 영역 -->
+                <!-- 물건 목록 / 상세 뷰 영역 (3단계 네비게이션) -->
                 <Grid Grid.Row="3">
-                    <!-- 목록 모드: 물건 DataGrid -->
+                    <!-- ========== 차주 목록 (NavigationLevel == "Borrower") ========== -->
+                    <DataGrid x:Name="BorrowerDataGrid"
+                              ItemsSource="{Binding BorrowerList}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              SelectionMode="Single"
+                              SelectionChanged="BorrowerDataGrid_SelectionChanged"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                              HeadersVisibility="Column"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              VerticalScrollBarVisibility="Auto"
+                              Visibility="Visible">
+                        
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                                <Setter Property="Height" Value="36"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                        
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="Padding" Value="12,10"/>
+                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        
+                        <DataGrid.Columns>
+                            <!-- 차주번호 -->
+                            <DataGridTextColumn Header="차주번호" 
+                                               Binding="{Binding BorrowerNumber}" 
+                                               Width="120"
+                                               IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="12,8"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            
+                            <!-- 차주명 -->
+                            <DataGridTextColumn Header="차주명" 
+                                               Binding="{Binding BorrowerName}" 
+                                               Width="*"
+                                               IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Padding" Value="12,8"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            
+                            <!-- 물건 수 -->
+                            <DataGridTemplateColumn Header="물건 수" Width="100" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Padding="12,8" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                            <Run Text="{Binding PropertyCount}" FontWeight="SemiBold"/>
+                                            <Run Text="건" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    
+                    <!-- ========== 물건 목록 (NavigationLevel == "Property") ========== -->
                     <DataGrid x:Name="PropertiesDataGrid"
                           ItemsSource="{Binding Properties}"
                           AutoGenerateColumns="False"
@@ -434,7 +512,8 @@
                           Background="Transparent"
                           BorderThickness="0"
                           HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto">
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="Collapsed">
                     
                     <DataGrid.Columns>
                         <!-- 차주번호 -->

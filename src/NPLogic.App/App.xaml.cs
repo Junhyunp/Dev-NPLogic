@@ -138,7 +138,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.UserRepository>(),
                     sp.GetRequiredService<AuthService>(),
                     sp.GetRequiredService<Data.Repositories.ProgramUserRepository>(),
-                    sp.GetRequiredService<Data.Repositories.ProgramRepository>()
+                    sp.GetRequiredService<Data.Repositories.ProgramRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
                 );
             });
             services.AddTransient<ViewModels.AdminHomeViewModel>();

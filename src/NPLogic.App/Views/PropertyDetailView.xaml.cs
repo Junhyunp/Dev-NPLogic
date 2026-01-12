@@ -40,7 +40,7 @@ namespace NPLogic.Views
         /// N-001: 키보드 탐색 핸들러
         /// Ctrl + 화살표: 물건 간 이동
         /// </summary>
-        private async void PropertyDetailView_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void PropertyDetailView_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (DataContext is not PropertyDetailViewModel viewModel) return;
 
@@ -51,32 +51,38 @@ namespace NPLogic.Views
             {
                 case Key.Left:
                     // Ctrl + ←: 이전 물건
-                    if (viewModel.CanNavigatePrevious)
+                    if (viewModel.CanNavigatePrevious && viewModel.NavigatePreviousCommand.CanExecute(null))
                     {
-                        await viewModel.NavigatePreviousAsync();
+                        viewModel.NavigatePreviousCommand.Execute(null);
                         e.Handled = true;
                     }
                     break;
 
                 case Key.Right:
                     // Ctrl + →: 다음 물건
-                    if (viewModel.CanNavigateNext)
+                    if (viewModel.CanNavigateNext && viewModel.NavigateNextCommand.CanExecute(null))
                     {
-                        await viewModel.NavigateNextAsync();
+                        viewModel.NavigateNextCommand.Execute(null);
                         e.Handled = true;
                     }
                     break;
 
                 case Key.Up:
                     // Ctrl + ↑: 첫 번째 물건
-                    await viewModel.NavigateFirstAsync();
-                    e.Handled = true;
+                    if (viewModel.NavigateFirstCommand.CanExecute(null))
+                    {
+                        viewModel.NavigateFirstCommand.Execute(null);
+                        e.Handled = true;
+                    }
                     break;
 
                 case Key.Down:
                     // Ctrl + ↓: 마지막 물건
-                    await viewModel.NavigateLastAsync();
-                    e.Handled = true;
+                    if (viewModel.NavigateLastCommand.CanExecute(null))
+                    {
+                        viewModel.NavigateLastCommand.Execute(null);
+                        e.Handled = true;
+                    }
                     break;
             }
         }

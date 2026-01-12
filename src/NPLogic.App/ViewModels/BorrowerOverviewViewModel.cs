@@ -91,6 +91,25 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private BorrowerStatistics? _statistics;
 
+        // ========== 담보 총괄 계산 속성 (S-004, S-005) ==========
+        [ObservableProperty]
+        private string _collateralTypeSummary = "-";
+
+        [ObservableProperty]
+        private decimal _totalLandArea;
+
+        [ObservableProperty]
+        private decimal _totalBuildingArea;
+
+        [ObservableProperty]
+        private decimal _totalMachineryValue;
+
+        [ObservableProperty]
+        private bool _hasFactoryMortgage;
+
+        [ObservableProperty]
+        private bool _isInIndustrialComplex;
+
         public BorrowerOverviewViewModel(
             BorrowerRepository borrowerRepository,
             PropertyRepository propertyRepository,
@@ -248,6 +267,7 @@ namespace NPLogic.ViewModels
             {
                 BorrowerProperties.Clear();
                 BorrowerQas.Clear();
+                ClearCollateralSummary();
                 return;
             }
 
@@ -266,6 +286,9 @@ namespace NPLogic.ViewModels
                     BorrowerProperties.Add(property);
                 }
 
+                // 담보 총괄 계산 (S-004, S-005)
+                CalculateCollateralSummary(matchingProperties);
+
                 // QA 로드 (Q-003)
                 await LoadBorrowerQasAsync();
             }
@@ -273,6 +296,51 @@ namespace NPLogic.ViewModels
             {
                 ErrorMessage = $"담보물건 로드 실패: {ex.Message}";
             }
+        }
+
+        /// <summary>
+        /// 담보 총괄 정보 계산 (S-004, S-005)
+        /// </summary>
+        private void CalculateCollateralSummary(List<Property> properties)
+        {
+            if (properties == null || properties.Count == 0)
+            {
+                ClearCollateralSummary();
+                return;
+            }
+
+            // 담보종류 요약 (유형별 개수)
+            var typeGroups = properties
+                .GroupBy(p => p.PropertyType ?? "기타")
+                .Select(g => $"{g.Key}({g.Count()})")
+                .ToList();
+            CollateralTypeSummary = typeGroups.Count > 0 ? string.Join(", ", typeGroups) : "-";
+
+            // 면적 합계
+            TotalLandArea = properties.Sum(p => p.LandArea ?? 0);
+            TotalBuildingArea = properties.Sum(p => p.BuildingArea ?? 0);
+
+            // 기계기구 가치 합계 (MachineryValue 필드가 있으면 사용, 없으면 0)
+            TotalMachineryValue = properties.Sum(p => p.MachineryValue ?? 0);
+
+            // 공장저당 여부 (하나라도 있으면 true)
+            HasFactoryMortgage = properties.Any(p => p.IsFactoryMortgage == true);
+
+            // 공단 여부 (하나라도 있으면 true)
+            IsInIndustrialComplex = properties.Any(p => p.IsIndustrialComplex == true);
+        }
+
+        /// <summary>
+        /// 담보 총괄 정보 초기화
+        /// </summary>
+        private void ClearCollateralSummary()
+        {
+            CollateralTypeSummary = "-";
+            TotalLandArea = 0;
+            TotalBuildingArea = 0;
+            TotalMachineryValue = 0;
+            HasFactoryMortgage = false;
+            IsInIndustrialComplex = false;
         }
 
         /// <summary>

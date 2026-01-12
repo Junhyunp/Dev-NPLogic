@@ -62,6 +62,64 @@ namespace NPLogic.Views
             if (DataContext is AdminHomeViewModel viewModel)
             {
                 await viewModel.InitializeAsync();
+                
+                // 3단계 네비게이션: 초기 UI 업데이트
+                UpdateNavigationUI();
+            }
+        }
+
+        /// <summary>
+        /// 차주 목록 선택 변경 - 물건 목록으로 이동 (3단계 네비게이션)
+        /// </summary>
+        private async void BorrowerDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0 && 
+                e.AddedItems[0] is BorrowerListItem borrower && 
+                DataContext is AdminHomeViewModel viewModel)
+            {
+                await viewModel.SelectBorrowerAsync(borrower);
+                UpdateNavigationUI();
+            }
+        }
+
+        /// <summary>
+        /// NavigationLevel에 따라 UI 업데이트 (3단계 네비게이션)
+        /// </summary>
+        private void UpdateNavigationUI()
+        {
+            if (DataContext is not AdminHomeViewModel viewModel) return;
+
+            switch (viewModel.NavigationLevel)
+            {
+                case "Borrower":
+                    // 차주 목록 표시
+                    BorrowerDataGrid.Visibility = Visibility.Visible;
+                    PropertiesDataGrid.Visibility = Visibility.Collapsed;
+                    DetailModeTabs.Visibility = Visibility.Collapsed;
+                    DetailContentControl.Visibility = Visibility.Collapsed;
+                    BackToListButton.Visibility = Visibility.Collapsed;
+                    StatisticsSummary.Visibility = Visibility.Visible;
+                    break;
+
+                case "Property":
+                    // 물건 목록 표시
+                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
+                    PropertiesDataGrid.Visibility = Visibility.Visible;
+                    DetailModeTabs.Visibility = Visibility.Collapsed;
+                    DetailContentControl.Visibility = Visibility.Collapsed;
+                    BackToListButton.Visibility = Visibility.Visible; // 차주 목록으로 돌아가기
+                    StatisticsSummary.Visibility = Visibility.Visible;
+                    break;
+
+                case "Detail":
+                    // 상세 모드 표시
+                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
+                    PropertiesDataGrid.Visibility = Visibility.Collapsed;
+                    DetailModeTabs.Visibility = Visibility.Visible;
+                    DetailContentControl.Visibility = Visibility.Visible;
+                    BackToListButton.Visibility = Visibility.Visible;
+                    StatisticsSummary.Visibility = Visibility.Collapsed;
+                    break;
             }
         }
 
@@ -134,6 +192,7 @@ namespace NPLogic.Views
         
         /// <summary>
         /// 상세 모드로 전환 (우측 영역만 NonCoreView로 교체)
+        /// 3단계 네비게이션: NavigationLevel = "Detail"
         /// </summary>
         private void SwitchToDetailMode(Property property)
         {
@@ -160,6 +219,9 @@ namespace NPLogic.Views
                     
                     // 프로그램 ID 설정 (물건 탭 로드를 위해 필수!)
                     _cachedNonCoreViewModel.SetProgramId(viewModel.SelectedProgram.Id);
+                    
+                    // NavigationLevel 업데이트
+                    viewModel.NavigationLevel = "Detail";
                 }
                 
                 // 물건 로드
@@ -172,12 +234,8 @@ namespace NPLogic.Views
                 DetailContentControl.Content = _cachedNonCoreView;
             }
             
-            // UI 업데이트: 목록 숨기고 상세 표시
-            PropertiesDataGrid.Visibility = Visibility.Collapsed;
-            StatisticsSummary.Visibility = Visibility.Collapsed;
-            DetailModeTabs.Visibility = Visibility.Visible;
-            DetailContentControl.Visibility = Visibility.Visible;
-            BackToListButton.Visibility = Visibility.Visible;
+            // UI 업데이트
+            UpdateNavigationUI();
             
             // 기본 탭(비핵심) 선택
             TabNonCore.IsChecked = true;
@@ -185,26 +243,39 @@ namespace NPLogic.Views
         }
         
         /// <summary>
-        /// 목록 모드로 전환
+        /// 목록 모드로 전환 (물건 목록으로)
+        /// 3단계 네비게이션: NavigationLevel = "Property"
         /// </summary>
         private void SwitchToListMode()
         {
             _selectedProperty = null;
             
-            // UI 업데이트: 상세 숨기고 목록 표시
-            DetailContentControl.Visibility = Visibility.Collapsed;
-            DetailModeTabs.Visibility = Visibility.Collapsed;
-            BackToListButton.Visibility = Visibility.Collapsed;
-            PropertiesDataGrid.Visibility = Visibility.Visible;
-            StatisticsSummary.Visibility = Visibility.Visible;
+            if (DataContext is AdminHomeViewModel viewModel)
+            {
+                viewModel.NavigateBackToPropertyList();
+                UpdateNavigationUI();
+            }
         }
         
         /// <summary>
-        /// 목록으로 버튼 클릭
+        /// 목록으로 버튼 클릭 - NavigationLevel에 따라 다른 동작
         /// </summary>
         private void BackToListButton_Click(object sender, RoutedEventArgs e)
         {
-            SwitchToListMode();
+            if (DataContext is AdminHomeViewModel viewModel)
+            {
+                if (viewModel.NavigationLevel == "Detail")
+                {
+                    // 상세 모드에서 물건 목록으로
+                    SwitchToListMode();
+                }
+                else if (viewModel.NavigationLevel == "Property")
+                {
+                    // 물건 목록에서 차주 목록으로
+                    viewModel.NavigateBackToBorrowerList();
+                    UpdateNavigationUI();
+                }
+            }
         }
         
         /// <summary>

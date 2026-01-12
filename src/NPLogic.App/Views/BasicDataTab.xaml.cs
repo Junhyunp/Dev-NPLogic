@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 using NPLogic.ViewModels;
 
@@ -23,6 +25,13 @@ namespace NPLogic.Views
         private async void BasicDataTab_Loaded(object sender, RoutedEventArgs e)
         {
             await InitializeMapWebViewAsync();
+            
+            // 초기 이미지 로드
+            if (DataContext is PropertyDetailViewModel viewModel)
+            {
+                UpdateCadastralMapImage(viewModel.CadastralMapImageData);
+                UpdateLocationMapImage(viewModel.LocationMapImageData);
+            }
         }
 
         #region 팝업 이벤트 핸들러 (D-004~D-009)
@@ -32,14 +41,66 @@ namespace NPLogic.Views
         /// </summary>
         private void OpenMapPopup_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is PropertyDetailViewModel viewModel && !string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+            if (DataContext is PropertyDetailViewModel viewModel)
             {
+                // 현재 선택된 탭에 따라 다른 팝업 표시
+                if (MapTabCadastral.IsChecked == true && viewModel.HasCadastralMapImage && viewModel.CadastralMapImageData != null)
+                {
+                    // 지적도 이미지 팝업
+                    OpenImagePopupFromBytes("지적도 확대", viewModel.CadastralMapImageData);
+                }
+                else if (MapTabLocation.IsChecked == true && viewModel.HasLocationMapImage && viewModel.LocationMapImageData != null)
+                {
+                    // 위치도 이미지 팝업
+                    OpenImagePopupFromBytes("위치도 확대", viewModel.LocationMapImageData);
+                }
+                else if (MapTabRoadView.IsChecked == true && !string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+                {
+                    // 로드뷰 팝업 (기존 방식)
+                    var popup = new ImagePopupWindow(
+                        "로드뷰 확대",
+                        viewModel.Property.AddressFull,
+                        ImagePopupWindow.PopupType.Map);
+                    popup.Owner = Window.GetWindow(this);
+                    popup.ShowDialog();
+                }
+                else if (!string.IsNullOrWhiteSpace(viewModel.Property?.AddressFull))
+                {
+                    // 폴백: 기존 방식으로 지도 표시
+                    var popup = new ImagePopupWindow(
+                        "지도 확대",
+                        viewModel.Property.AddressFull,
+                        ImagePopupWindow.PopupType.Map);
+                    popup.Owner = Window.GetWindow(this);
+                    popup.ShowDialog();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 바이트 배열로부터 이미지 팝업 열기
+        /// </summary>
+        private void OpenImagePopupFromBytes(string title, byte[] imageData)
+        {
+            try
+            {
+                // 임시 파일로 저장 후 팝업
+                var tempPath = Path.Combine(Path.GetTempPath(), $"nplogic_map_{Guid.NewGuid()}.png");
+                File.WriteAllBytes(tempPath, imageData);
+
                 var popup = new ImagePopupWindow(
-                    "지도 확대",
-                    viewModel.Property.AddressFull,
-                    ImagePopupWindow.PopupType.Map);
+                    title,
+                    tempPath,
+                    ImagePopupWindow.PopupType.Image);
                 popup.Owner = Window.GetWindow(this);
                 popup.ShowDialog();
+
+                // 팝업 닫힌 후 임시 파일 삭제
+                try { File.Delete(tempPath); } catch { }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"이미지 팝업 열기 실패: {ex.Message}");
             }
         }
 
@@ -137,6 +198,10 @@ namespace NPLogic.Views
                     
                     // 초기 지도 로드
                     UpdateMap(viewModel.Property?.AddressFull);
+                    
+                    // 초기 지적도/위치도 이미지 로드
+                    UpdateCadastralMapImage(viewModel.CadastralMapImageData);
+                    UpdateLocationMapImage(viewModel.LocationMapImageData);
                 }
 
                 MapLoadingOverlay.Visibility = Visibility.Collapsed;
@@ -150,12 +215,86 @@ namespace NPLogic.Views
 
         private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PropertyDetailViewModel.Property))
+            if (sender is PropertyDetailViewModel viewModel)
             {
-                if (sender is PropertyDetailViewModel viewModel)
+                switch (e.PropertyName)
                 {
-                    UpdateMap(viewModel.Property?.AddressFull);
+                    case nameof(PropertyDetailViewModel.Property):
+                        UpdateMap(viewModel.Property?.AddressFull);
+                        break;
+                    
+                    case nameof(PropertyDetailViewModel.CadastralMapImageData):
+                        UpdateCadastralMapImage(viewModel.CadastralMapImageData);
+                        break;
+                    
+                    case nameof(PropertyDetailViewModel.LocationMapImageData):
+                        UpdateLocationMapImage(viewModel.LocationMapImageData);
+                        break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 지적도 이미지 업데이트
+        /// </summary>
+        private void UpdateCadastralMapImage(byte[]? imageData)
+        {
+            try
+            {
+                if (imageData != null && imageData.Length > 0)
+                {
+                    var bitmapImage = new BitmapImage();
+                    using (var ms = new MemoryStream(imageData))
+                    {
+                        bitmapImage.BeginInit();
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.StreamSource = ms;
+                        bitmapImage.EndInit();
+                        bitmapImage.Freeze();
+                    }
+                    CadastralMapImage.Source = bitmapImage;
+                }
+                else
+                {
+                    CadastralMapImage.Source = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"지적도 이미지 로드 실패: {ex.Message}");
+                CadastralMapImage.Source = null;
+            }
+        }
+
+        /// <summary>
+        /// 위치도 이미지 업데이트
+        /// </summary>
+        private void UpdateLocationMapImage(byte[]? imageData)
+        {
+            try
+            {
+                if (imageData != null && imageData.Length > 0)
+                {
+                    var bitmapImage = new BitmapImage();
+                    using (var ms = new MemoryStream(imageData))
+                    {
+                        bitmapImage.BeginInit();
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.StreamSource = ms;
+                        bitmapImage.EndInit();
+                        bitmapImage.Freeze();
+                    }
+                    LocationMapImage.Source = bitmapImage;
+                }
+                else
+                {
+                    LocationMapImage.Source = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"위치도 이미지 로드 실패: {ex.Message}");
+                LocationMapImage.Source = null;
             }
         }
 

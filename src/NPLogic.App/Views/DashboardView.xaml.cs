@@ -59,11 +59,9 @@ namespace NPLogic.Views
                 {
                     SwitchToDetailMode(viewModel.SelectedProperty);
                 }
-                else
-                {
-                    // 기본은 목록 모드
-                    SwitchToListMode();
-                }
+                
+                // 항상 NavigationLevel에 맞게 UI 업데이트 (3단계 네비게이션)
+                UpdateNavigationUI();
             }
             
             // 키보드 포커스 설정
@@ -296,12 +294,8 @@ namespace NPLogic.Views
             if (DataContext is DashboardViewModel viewModel)
             {
                 viewModel.SwitchToDetailMode(property);
+                UpdateNavigationUI();
             }
-            
-            // UI 업데이트
-            ProgressDataGrid.Visibility = Visibility.Collapsed;
-            DetailModeTabs.Visibility = Visibility.Visible;
-            TabContentControl.Visibility = Visibility.Visible;
             
             // 기본 탭(비핵심) 선택 및 컨텐츠 로드
             TabNonCore.IsChecked = true;
@@ -310,20 +304,15 @@ namespace NPLogic.Views
         }
         
         /// <summary>
-        /// 목록 모드로 전환
+        /// 목록 모드로 전환 (물건 목록으로 이동)
         /// </summary>
         private void SwitchToListMode()
         {
             if (DataContext is DashboardViewModel viewModel)
             {
                 viewModel.SwitchToListMode();
+                UpdateNavigationUI();
             }
-            
-            // UI 업데이트
-            ProgressDataGrid.Visibility = Visibility.Visible;
-            ProgressDataGrid.SelectedItem = null;
-            DetailModeTabs.Visibility = Visibility.Collapsed;
-            TabContentControl.Visibility = Visibility.Collapsed;
         }
         
         /// <summary>
@@ -387,14 +376,17 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 프로그램 목록 선택 변경
+        /// 프로그램 목록 선택 변경 - 3단계 네비게이션: 차주 목록으로 이동
         /// </summary>
-        private void ProgramListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ProgramListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (DataContext is DashboardViewModel viewModel && e.AddedItems.Count > 0)
             {
-                // ViewModel에서 선택된 프로그램 데이터 로드
-                viewModel.LoadSelectedProgramData();
+                // ViewModel에서 선택된 프로그램 데이터 로드 (비동기)
+                await viewModel.LoadSelectedProgramDataAsync();
+                
+                // UI 업데이트 (차주 목록 표시)
+                UpdateNavigationUI();
                 
                 // 상태 저장 (상태 복원 중이 아닐 때만)
                 if (!_isRestoringState)
@@ -748,19 +740,42 @@ namespace NPLogic.Views
         #region 브레드크럼 클릭 핸들러
 
         /// <summary>
-        /// 브레드크럼 - 홈 클릭 (목록 모드로 전환)
+        /// 브레드크럼 - 홈 클릭 (대시보드/프로그램 선택 화면으로 이동)
         /// </summary>
         private void Breadcrumb_Home_Click(object sender, MouseButtonEventArgs e)
         {
-            SwitchToListMode();
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                // 차주 목록으로 이동
+                viewModel.NavigateBackToBorrowerList();
+                UpdateNavigationUI();
+            }
         }
 
         /// <summary>
-        /// 브레드크럼 - 프로그램 클릭 (목록 모드로 전환)
+        /// 브레드크럼 - 프로그램 클릭 (차주 목록으로 이동)
         /// </summary>
         private void Breadcrumb_Program_Click(object sender, MouseButtonEventArgs e)
         {
-            SwitchToListMode();
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                // 차주 목록으로 이동
+                viewModel.NavigateBackToBorrowerList();
+                UpdateNavigationUI();
+            }
+        }
+
+        /// <summary>
+        /// 브레드크럼 - 차주명 클릭 (물건 목록으로 이동)
+        /// </summary>
+        private void Breadcrumb_Borrower_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                // 물건 목록으로 이동
+                viewModel.NavigateBackToPropertyList();
+                UpdateNavigationUI();
+            }
         }
 
         /// <summary>
@@ -770,6 +785,62 @@ namespace NPLogic.Views
         {
             // 현재 탭 유지 (이미 해당 탭에 있으므로 아무 동작 안 함)
             // 필요 시 탭 재로드 로직 추가 가능
+        }
+
+        #endregion
+
+        #region 3단계 네비게이션 지원
+
+        /// <summary>
+        /// 차주 목록 DataGrid 선택 변경 - 물건 목록으로 이동
+        /// </summary>
+        private async void BorrowerDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isRestoringState) return;
+
+            if (e.AddedItems.Count > 0 && 
+                e.AddedItems[0] is BorrowerListItem borrower && 
+                DataContext is DashboardViewModel viewModel)
+            {
+                await viewModel.SelectBorrowerAsync(borrower);
+                UpdateNavigationUI();
+            }
+        }
+
+        /// <summary>
+        /// NavigationLevel에 따라 UI 업데이트
+        /// </summary>
+        private void UpdateNavigationUI()
+        {
+            if (DataContext is not DashboardViewModel viewModel) return;
+
+            switch (viewModel.NavigationLevel)
+            {
+                case "Borrower":
+                    // 차주 목록 표시
+                    BorrowerDataGrid.Visibility = Visibility.Visible;
+                    ProgressDataGrid.Visibility = Visibility.Collapsed;
+                    DetailModeTabs.Visibility = Visibility.Collapsed;
+                    TabContentControl.Visibility = Visibility.Collapsed;
+                    break;
+
+                case "Property":
+                    // 물건 목록 표시
+                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
+                    ProgressDataGrid.Visibility = Visibility.Visible;
+                    ProgressDataGrid.SelectedItem = null;
+                    DetailModeTabs.Visibility = Visibility.Collapsed;
+                    TabContentControl.Visibility = Visibility.Collapsed;
+                    break;
+
+                case "Detail":
+                    // 상세 모드 표시
+                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
+                    ProgressDataGrid.Visibility = Visibility.Collapsed;
+                    DetailModeTabs.Visibility = Visibility.Visible;
+                    TabContentControl.Visibility = Visibility.Visible;
+                    break;
+            }
         }
 
         #endregion

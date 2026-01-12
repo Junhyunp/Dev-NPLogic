@@ -63,6 +63,46 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 차주 리스트 아이템 모델 (좌측 패널용)
+    /// </summary>
+    public partial class BorrowerListItem : ObservableObject
+    {
+        [ObservableProperty]
+        private Guid _borrowerId;
+
+        [ObservableProperty]
+        private string _borrowerNumber = "";
+
+        [ObservableProperty]
+        private string _borrowerName = "";
+
+        [ObservableProperty]
+        private string _borrowerType = "";
+
+        [ObservableProperty]
+        private int _propertyCount;
+
+        [ObservableProperty]
+        private decimal _opb;
+
+        [ObservableProperty]
+        private bool _isRestructuring;
+
+        [ObservableProperty]
+        private bool _isSelected;
+
+        /// <summary>
+        /// 표시용 차주번호 (회생인 경우 표시)
+        /// </summary>
+        public string DisplayNumber => IsRestructuring ? $"[회생] {BorrowerNumber}" : BorrowerNumber;
+
+        /// <summary>
+        /// OPB 표시 (백만원 단위)
+        /// </summary>
+        public string OpbDisplay => $"{Opb / 1_000_000:N0}백만";
+    }
+
+    /// <summary>
     /// 법원 정보 모델 (툴박스용)
     /// </summary>
     public partial class CourtInfo : ObservableObject
@@ -79,9 +119,8 @@ namespace NPLogic.ViewModels
     /// 비핵심 화면 ViewModel
     /// Phase 3: 비핵심 내부 구조 변경
     /// - 9개 탭 구성: 차주 개요, 론, 담보 총괄, 담보 물건, 선순위 평가, 경공매, 회생개요, 현금 흐름 집계, NPB
-    /// - 물건 번호 탭 (PDF 스타일)
+    /// - 좌측 차주 리스트 (수직)
     /// - 툴박스 사이드 패널
-    /// - 기능별 일괄 작업
     /// </summary>
     public partial class NonCoreViewModel : ObservableObject
     {
@@ -99,14 +138,33 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        // ========== 차주 리스트 (좌측 패널) ==========
+
         /// <summary>
-        /// 물건 탭 목록 (PDF 스타일로 나열)
+        /// 차주 목록 (좌측 패널에 수직으로 표시)
+        /// </summary>
+        [ObservableProperty]
+        private ObservableCollection<BorrowerListItem> _borrowerItems = new();
+
+        /// <summary>
+        /// 현재 선택된 차주
+        /// </summary>
+        [ObservableProperty]
+        private BorrowerListItem? _selectedBorrower;
+
+        /// <summary>
+        /// 전체 차주 목록 (필터링 전)
+        /// </summary>
+        private List<BorrowerListItem> _allBorrowerItems = new();
+
+        /// <summary>
+        /// 물건 탭 목록 (PDF 스타일로 나열) - 레거시 호환용
         /// </summary>
         [ObservableProperty]
         private ObservableCollection<PropertyTabItem> _propertyTabs = new();
 
         /// <summary>
-        /// 현재 선택된 물건 탭
+        /// 현재 선택된 물건 탭 - 레거시 호환용
         /// </summary>
         [ObservableProperty]
         private PropertyTabItem? _selectedPropertyTab;
@@ -115,13 +173,13 @@ namespace NPLogic.ViewModels
         /// 현재 활성 기능 탭
         /// </summary>
         [ObservableProperty]
-        private string _activeTab = "BorrowerOverview";
+        private string _activeTab = "Home";
 
         /// <summary>
         /// 툴박스 표시 여부
         /// </summary>
         [ObservableProperty]
-        private bool _isToolBoxVisible = true;
+        private bool _isToolBoxVisible = false;
 
         // Undo 관련 (피드백 반영: 자동저장 + 되돌리기)
         /// <summary>
@@ -268,11 +326,8 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task InitializeAsync()
         {
-            // 닫은 탭 상태 로드 (항상 먼저 로드)
-            NavigationStateService.Instance.LoadNonCoreTabState();
-
-            // 이미 초기화되었고 탭이 있으면 재초기화하지 않음 (탭 상태 유지)
-            if (_isInitialized && PropertyTabs.Any())
+            // 이미 초기화되었고 차주 목록이 있으면 재초기화하지 않음
+            if (_isInitialized && BorrowerItems.Any())
             {
                 return;
             }
@@ -282,10 +337,10 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                // 물건 탭 초기화 (현재 프로그램의 물건들)
-                if (_currentProgramId.HasValue && _propertyRepository != null)
+                // 차주 목록 로드
+                if (!string.IsNullOrEmpty(CurrentProjectId) && _borrowerRepository != null)
                 {
-                    await LoadPropertyTabsAsync();
+                    await LoadBorrowersAsync();
                 }
 
                 _isInitialized = true;
@@ -301,6 +356,154 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
+        /// 차주 목록 로드
+        /// </summary>
+        public async Task LoadBorrowersAsync()
+        {
+            if (_borrowerRepository == null || string.IsNullOrEmpty(CurrentProjectId))
+                return;
+
+            try
+            {
+                var borrowers = await _borrowerRepository.GetByProgramIdAsync(CurrentProjectId);
+
+                BorrowerItems.Clear();
+                _allBorrowerItems.Clear();
+
+                foreach (var borrower in borrowers.OrderBy(b => b.BorrowerNumber))
+                {
+                    var item = new BorrowerListItem
+                    {
+                        BorrowerId = borrower.Id,
+                        BorrowerNumber = borrower.BorrowerNumber,
+                        BorrowerName = borrower.BorrowerName,
+                        BorrowerType = borrower.BorrowerType,
+                        PropertyCount = borrower.PropertyCount,
+                        Opb = borrower.Opb,
+                        IsRestructuring = borrower.IsRestructuring,
+                        IsSelected = false
+                    };
+
+                    BorrowerItems.Add(item);
+                    _allBorrowerItems.Add(item);
+                }
+
+                FilteredCount = BorrowerItems.Count;
+                TotalCount = _allBorrowerItems.Count;
+
+                // 첫 번째 차주 선택
+                if (BorrowerItems.Any())
+                {
+                    SelectBorrower(BorrowerItems.First().BorrowerId);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 차주 선택
+        /// </summary>
+        public void SelectBorrower(Guid borrowerId)
+        {
+            foreach (var item in BorrowerItems)
+            {
+                item.IsSelected = item.BorrowerId == borrowerId;
+            }
+
+            SelectedBorrower = BorrowerItems.FirstOrDefault(b => b.BorrowerId == borrowerId);
+
+            // 회생차주 여부 업데이트 (회생개요 탭 표시 조건)
+            IsRestructuringBorrower = SelectedBorrower?.IsRestructuring ?? false;
+
+            // 선택된 차주의 물건 목록 로드
+            _ = LoadPropertiesForBorrowerAsync(borrowerId);
+        }
+
+        /// <summary>
+        /// 선택된 차주의 물건 목록 로드
+        /// </summary>
+        private async Task LoadPropertiesForBorrowerAsync(Guid borrowerId)
+        {
+            if (_propertyRepository == null || borrowerId == Guid.Empty)
+                return;
+
+            try
+            {
+                // 차주의 물건 목록 조회 (BorrowerNumber 기준)
+                var borrower = SelectedBorrower;
+                if (borrower == null) return;
+
+                // PropertyTabs 갱신 (해당 차주의 물건들)
+                PropertyTabs.Clear();
+
+                if (_currentProgramId.HasValue)
+                {
+                    var properties = await _propertyRepository.GetByProgramIdAsync(_currentProgramId.Value);
+                    var borrowerProperties = properties
+                        .Where(p => p.DebtorName == borrower.BorrowerName || p.DebtorName == borrower.BorrowerNumber)
+                        .ToList();
+
+                    foreach (var property in borrowerProperties)
+                    {
+                        PropertyTabs.Add(new PropertyTabItem
+                        {
+                            PropertyId = property.Id,
+                            PropertyNumber = property.PropertyNumber ?? "-",
+                            BorrowerNumber = borrower.BorrowerNumber,
+                            BorrowerName = borrower.BorrowerName,
+                            IsSelected = false
+                        });
+                    }
+
+                    // 첫 번째 물건 선택
+                    if (PropertyTabs.Any())
+                    {
+                        SelectPropertyTab(PropertyTabs.First().PropertyId);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"물건 목록 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 다음 차주로 이동 (상하 이동)
+        /// </summary>
+        [RelayCommand]
+        public void NextBorrower()
+        {
+            if (SelectedBorrower == null || !BorrowerItems.Any())
+                return;
+
+            var currentIndex = BorrowerItems.IndexOf(SelectedBorrower);
+            if (currentIndex < BorrowerItems.Count - 1)
+            {
+                SelectBorrower(BorrowerItems[currentIndex + 1].BorrowerId);
+            }
+        }
+
+        /// <summary>
+        /// 이전 차주로 이동 (상하 이동)
+        /// </summary>
+        [RelayCommand]
+        public void PreviousBorrower()
+        {
+            if (SelectedBorrower == null || !BorrowerItems.Any())
+                return;
+
+            var currentIndex = BorrowerItems.IndexOf(SelectedBorrower);
+            if (currentIndex > 0)
+            {
+                SelectBorrower(BorrowerItems[currentIndex - 1].BorrowerId);
+            }
+        }
+
+        /// <summary>
         /// 프로그램 ID 설정
         /// </summary>
         public void SetProgramId(Guid programId)
@@ -310,6 +513,8 @@ namespace NPLogic.ViewModels
             {
                 _isInitialized = false;
                 PropertyTabs.Clear();
+                BorrowerItems.Clear();
+                _allBorrowerItems.Clear();
             }
             _currentProgramId = programId;
         }
@@ -319,6 +524,14 @@ namespace NPLogic.ViewModels
         /// </summary>
         public void SetProjectInfo(string projectId, string projectName)
         {
+            // 프로젝트가 변경되면 초기화 상태 리셋
+            if (CurrentProjectId != projectId)
+            {
+                _isInitialized = false;
+                BorrowerItems.Clear();
+                _allBorrowerItems.Clear();
+                PropertyTabs.Clear();
+            }
             CurrentProjectId = projectId;
             CurrentProjectName = projectName;
         }
@@ -734,76 +947,47 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 필터 적용
+        /// 필터 적용 (차주 목록에 적용)
         /// </summary>
         public void ApplyFilters()
         {
-            if (!_allPropertyTabs.Any())
+            if (!_allBorrowerItems.Any())
             {
-                _allPropertyTabs = PropertyTabs.ToList();
+                _allBorrowerItems = BorrowerItems.ToList();
             }
 
-            var filtered = _allPropertyTabs.AsEnumerable();
+            var filtered = _allBorrowerItems.AsEnumerable();
 
-            // 텍스트 검색 (차주번호, 물건번호에서 검색)
+            // 텍스트 검색 (차주번호, 차주명에서 검색)
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var searchLower = SearchText.ToLower();
-                filtered = filtered.Where(p => 
-                    (p.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
-                    (p.BorrowerNumber?.ToLower().Contains(searchLower) ?? false));
-            }
-
-            // 필터 조건 적용 (PropertyType 기반)
-            if (FilterCommercial || FilterResidential)
-            {
-                filtered = filtered.Where(p =>
-                {
-                    if (FilterCommercial && p.PropertyType == "상가") return true;
-                    if (FilterResidential && (p.PropertyType == "주택" || p.PropertyType == "아파트" || p.PropertyType == "빌라")) return true;
-                    return !FilterCommercial && !FilterResidential;
-                });
-            }
-
-            // 경매진행 필터
-            if (FilterAuctionInProgress)
-            {
-                filtered = filtered.Where(p => p.IsAuctionInProgress);
+                filtered = filtered.Where(b => 
+                    (b.BorrowerNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (b.BorrowerName?.ToLower().Contains(searchLower) ?? false));
             }
 
             // 회생차주 필터
             if (FilterRestructuring)
             {
-                filtered = filtered.Where(p => p.IsRestructuring);
-            }
-
-            // 개인회생 필터
-            if (FilterPersonalRestructuring)
-            {
-                filtered = filtered.Where(p => p.IsPersonalRestructuring);
-            }
-
-            // 차주거주 필터
-            if (FilterBorrowerResidence)
-            {
-                filtered = filtered.Where(p => p.IsBorrowerResidence);
+                filtered = filtered.Where(b => b.IsRestructuring);
             }
 
             var filteredList = filtered.ToList();
             
-            PropertyTabs.Clear();
+            BorrowerItems.Clear();
             foreach (var item in filteredList)
             {
-                PropertyTabs.Add(item);
+                BorrowerItems.Add(item);
             }
 
-            FilteredCount = PropertyTabs.Count;
-            TotalCount = _allPropertyTabs.Count;
+            FilteredCount = BorrowerItems.Count;
+            TotalCount = _allBorrowerItems.Count;
 
             // 첫 번째 항목 선택
-            if (PropertyTabs.Any() && SelectedPropertyTab == null)
+            if (BorrowerItems.Any() && SelectedBorrower == null)
             {
-                SelectPropertyTab(PropertyTabs.First().PropertyId);
+                SelectBorrower(BorrowerItems.First().BorrowerId);
             }
         }
 
@@ -821,15 +1005,15 @@ namespace NPLogic.ViewModels
             FilterResidential = false;
             SearchText = "";
 
-            // 전체 목록 복원
-            PropertyTabs.Clear();
-            foreach (var item in _allPropertyTabs)
+            // 전체 차주 목록 복원
+            BorrowerItems.Clear();
+            foreach (var item in _allBorrowerItems)
             {
-                PropertyTabs.Add(item);
+                BorrowerItems.Add(item);
             }
 
-            FilteredCount = PropertyTabs.Count;
-            TotalCount = _allPropertyTabs.Count;
+            FilteredCount = BorrowerItems.Count;
+            TotalCount = _allBorrowerItems.Count;
         }
 
         /// <summary>
@@ -856,25 +1040,25 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 검색 하이라이트용 - 현재 검색어와 일치하는 다음 항목으로 이동
+        /// 검색 하이라이트용 - 현재 검색어와 일치하는 다음 차주로 이동
         /// </summary>
         [RelayCommand]
         public void FindNext()
         {
-            if (string.IsNullOrWhiteSpace(SearchText) || !PropertyTabs.Any())
+            if (string.IsNullOrWhiteSpace(SearchText) || !BorrowerItems.Any())
                 return;
 
             var searchLower = SearchText.ToLower();
-            var currentIndex = SelectedPropertyTab != null ? PropertyTabs.IndexOf(SelectedPropertyTab) : -1;
+            var currentIndex = SelectedBorrower != null ? BorrowerItems.IndexOf(SelectedBorrower) : -1;
 
             // 현재 위치 다음부터 검색
-            for (int i = currentIndex + 1; i < PropertyTabs.Count; i++)
+            for (int i = currentIndex + 1; i < BorrowerItems.Count; i++)
             {
-                var tab = PropertyTabs[i];
-                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
-                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                var item = BorrowerItems[i];
+                if ((item.BorrowerNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (item.BorrowerName?.ToLower().Contains(searchLower) ?? false))
                 {
-                    SelectPropertyTab(tab.PropertyId);
+                    SelectBorrower(item.BorrowerId);
                     return;
                 }
             }
@@ -882,48 +1066,48 @@ namespace NPLogic.ViewModels
             // 처음부터 다시 검색
             for (int i = 0; i <= currentIndex; i++)
             {
-                var tab = PropertyTabs[i];
-                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
-                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                var item = BorrowerItems[i];
+                if ((item.BorrowerNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (item.BorrowerName?.ToLower().Contains(searchLower) ?? false))
                 {
-                    SelectPropertyTab(tab.PropertyId);
+                    SelectBorrower(item.BorrowerId);
                     return;
                 }
             }
         }
 
         /// <summary>
-        /// 검색 하이라이트용 - 이전 항목으로 이동
+        /// 검색 하이라이트용 - 이전 차주로 이동
         /// </summary>
         [RelayCommand]
         public void FindPrevious()
         {
-            if (string.IsNullOrWhiteSpace(SearchText) || !PropertyTabs.Any())
+            if (string.IsNullOrWhiteSpace(SearchText) || !BorrowerItems.Any())
                 return;
 
             var searchLower = SearchText.ToLower();
-            var currentIndex = SelectedPropertyTab != null ? PropertyTabs.IndexOf(SelectedPropertyTab) : PropertyTabs.Count;
+            var currentIndex = SelectedBorrower != null ? BorrowerItems.IndexOf(SelectedBorrower) : BorrowerItems.Count;
 
             // 현재 위치 이전부터 검색
             for (int i = currentIndex - 1; i >= 0; i--)
             {
-                var tab = PropertyTabs[i];
-                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
-                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                var item = BorrowerItems[i];
+                if ((item.BorrowerNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (item.BorrowerName?.ToLower().Contains(searchLower) ?? false))
                 {
-                    SelectPropertyTab(tab.PropertyId);
+                    SelectBorrower(item.BorrowerId);
                     return;
                 }
             }
 
             // 끝에서부터 다시 검색
-            for (int i = PropertyTabs.Count - 1; i >= currentIndex; i--)
+            for (int i = BorrowerItems.Count - 1; i >= currentIndex; i--)
             {
-                var tab = PropertyTabs[i];
-                if ((tab.PropertyNumber?.ToLower().Contains(searchLower) ?? false) ||
-                    (tab.BorrowerNumber?.ToLower().Contains(searchLower) ?? false))
+                var item = BorrowerItems[i];
+                if ((item.BorrowerNumber?.ToLower().Contains(searchLower) ?? false) ||
+                    (item.BorrowerName?.ToLower().Contains(searchLower) ?? false))
                 {
-                    SelectPropertyTab(tab.PropertyId);
+                    SelectBorrower(item.BorrowerId);
                     return;
                 }
             }
@@ -936,6 +1120,17 @@ namespace NPLogic.ViewModels
         {
             OnPropertyChanged(nameof(CanUndo));
             OnPropertyChanged(nameof(UndoCount));
+        }
+
+        /// <summary>
+        /// SelectedBorrower 변경 시 처리
+        /// </summary>
+        partial void OnSelectedBorrowerChanged(BorrowerListItem? value)
+        {
+            if (value != null)
+            {
+                IsRestructuringBorrower = value.IsRestructuring;
+            }
         }
     }
 }
