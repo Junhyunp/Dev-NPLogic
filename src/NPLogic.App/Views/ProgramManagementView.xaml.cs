@@ -86,6 +86,69 @@ namespace NPLogic.Views
                 }
             }
         }
+
+        /// <summary>
+        /// Interim 드롭존 드래그 오버 핸들러
+        /// </summary>
+        private void InterimDropZone_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.None;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files != null && files.Length > 0)
+                {
+                    var ext = Path.GetExtension(files[0]).ToLower();
+                    if (ext == ".xlsx" || ext == ".xls")
+                    {
+                        e.Effects = DragDropEffects.Copy;
+                    }
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Interim 드롭존 드롭 핸들러
+        /// </summary>
+        private void InterimDropZone_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files != null && files.Length > 0)
+                {
+                    var filePath = files.FirstOrDefault(f =>
+                    {
+                        var ext = Path.GetExtension(f).ToLower();
+                        return ext == ".xlsx" || ext == ".xls";
+                    });
+
+                    if (!string.IsNullOrEmpty(filePath) && DataContext is ProgramManagementViewModel viewModel)
+                    {
+                        viewModel.HandleInterimFileDrop(filePath);
+                    }
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Interim 시트 아이템 클릭 핸들러
+        /// </summary>
+        private void InterimSheetItem_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is SelectableSheetInfo sheet)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    viewModel.ToggleInterimSheetSelection(sheet);
+                }
+            }
+        }
     }
 }
 

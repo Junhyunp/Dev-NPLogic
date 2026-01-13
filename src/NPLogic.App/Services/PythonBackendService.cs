@@ -97,13 +97,13 @@ namespace NPLogic.Services
         /// </summary>
         private async Task<bool> StartServerInternalAsync()
         {
-            // 1. exe 파일 먼저 찾기 (패키징 환경)
-            var exePath = FindServerExePath();
-
-            // 2. exe 없으면 Python 스크립트 찾기 (개발 환경)
+            // 1. Python 스크립트 먼저 찾기 (개발 환경 우선 - recommend 모듈 지원)
             var pythonScriptPath = FindPythonScriptPath();
 
-            if (string.IsNullOrEmpty(exePath) && string.IsNullOrEmpty(pythonScriptPath))
+            // 2. Python 스크립트 없으면 exe 찾기 (패키징 환경)
+            var exePath = FindServerExePath();
+
+            if (string.IsNullOrEmpty(pythonScriptPath) && string.IsNullOrEmpty(exePath))
             {
                 throw new FileNotFoundException(
                     "Python 백엔드 서버를 찾을 수 없습니다. exe 파일 또는 Python 스크립트가 필요합니다.");
@@ -113,23 +113,9 @@ namespace NPLogic.Services
             {
                 ProcessStartInfo startInfo;
 
-                if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+                // 개발 환경: Python 스크립트 우선 (recommend 모듈 포함)
+                if (!string.IsNullOrEmpty(pythonScriptPath))
                 {
-                    // exe 파일로 실행 (패키징 환경)
-                    startInfo = new ProcessStartInfo
-                    {
-                        FileName = exePath,
-                        WorkingDirectory = Path.GetDirectoryName(exePath),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    };
-                    Debug.WriteLine($"[PythonBackendService] Starting exe: {exePath}");
-                }
-                else if (!string.IsNullOrEmpty(pythonScriptPath))
-                {
-                    // Python 스크립트로 실행 (개발 환경)
                     startInfo = new ProcessStartInfo
                     {
                         FileName = "python",
@@ -141,6 +127,20 @@ namespace NPLogic.Services
                         RedirectStandardError = true
                     };
                     Debug.WriteLine($"[PythonBackendService] Starting python script: {pythonScriptPath}");
+                }
+                else if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+                {
+                    // 패키징 환경: exe 파일로 실행
+                    startInfo = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        WorkingDirectory = Path.GetDirectoryName(exePath),
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+                    Debug.WriteLine($"[PythonBackendService] Starting exe: {exePath}");
                 }
                 else
                 {
@@ -213,10 +213,17 @@ namespace NPLogic.Services
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             
+            // 개발 환경 경로 계산
+            // baseDir 예: C:\Users\pwm89\dev\nplogic\src\NPLogic.App\bin\Debug\net10.0-windows\win-x64\
+            // 필요 경로: C:\Users\pwm89\dev\nplogic\manager\client\Auction-Certificate\server.py
+            // baseDir에서 6단계 상위로 이동하면 프로젝트 루트 (nplogic)
+            
             var searchPaths = new[]
             {
-                // 개발 환경: bin/Debug/net8.0-windows/ 에서 프로젝트 루트로
-                // src/NPLogic.App/bin/Debug/net8.0-windows/ -> 프로젝트 루트
+                // src/NPLogic.App/bin/Debug/net10.0-windows/win-x64/ -> nplogic/ (6 levels up)
+                Path.Combine(baseDir, "..", "..", "..", "..", "..", "..",
+                    "manager", "client", "Auction-Certificate", PythonServerScript),
+                // src/NPLogic.App/bin/Debug/net8.0-windows/ -> nplogic/ (5 levels up, 이전 버전 호환)
                 Path.Combine(baseDir, "..", "..", "..", "..", "..", 
                     "manager", "client", "Auction-Certificate", PythonServerScript),
             };

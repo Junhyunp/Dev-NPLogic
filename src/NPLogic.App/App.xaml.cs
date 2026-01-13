@@ -128,6 +128,7 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.AuctionScheduleRepository>();
             services.AddSingleton<Data.Repositories.PublicSaleScheduleRepository>();
             services.AddSingleton<Data.Repositories.PropertyQaRepository>();
+            services.AddSingleton<Data.Repositories.InterimRepository>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
@@ -142,10 +143,7 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
                 );
             });
-            services.AddTransient<ViewModels.AdminHomeViewModel>();
-            // PMHomeViewModel, EvaluatorHomeViewModel: AdminHomeView로 통합됨 (권한별 데이터 필터)
-            // services.AddTransient<ViewModels.PMHomeViewModel>();
-            // services.AddTransient<ViewModels.EvaluatorHomeViewModel>();
+            // AdminHomeViewModel, PMHomeViewModel, EvaluatorHomeViewModel: DashboardView로 통합됨 (삭제)
             services.AddTransient<ViewModels.PropertyListViewModel>();
             services.AddTransient<ViewModels.PropertyFormViewModel>();
             services.AddTransient<ViewModels.PropertyDetailViewModel>(sp =>
@@ -222,26 +220,7 @@ namespace NPLogic
                 return view;
             });
 
-            services.AddTransient<Views.AdminHomeView>(sp =>
-            {
-                var view = new Views.AdminHomeView();
-                view.DataContext = sp.GetRequiredService<ViewModels.AdminHomeViewModel>();
-                return view;
-            });
-
-            // PMHomeView, EvaluatorHomeView: AdminHomeView로 통합됨
-            // services.AddTransient<Views.PMHomeView>(sp =>
-            // {
-            //     var view = new Views.PMHomeView();
-            //     view.DataContext = sp.GetRequiredService<ViewModels.PMHomeViewModel>();
-            //     return view;
-            // });
-            // services.AddTransient<Views.EvaluatorHomeView>(sp =>
-            // {
-            //     var view = new Views.EvaluatorHomeView();
-            //     view.DataContext = sp.GetRequiredService<ViewModels.EvaluatorHomeViewModel>();
-            //     return view;
-            // });
+            // AdminHomeView, PMHomeView, EvaluatorHomeView: DashboardView로 통합됨 (삭제)
 
             services.AddTransient<Views.PropertyListView>(sp =>
             {

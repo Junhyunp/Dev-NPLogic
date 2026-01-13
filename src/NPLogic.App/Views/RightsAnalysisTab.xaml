@@ -386,7 +386,7 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- ===== 3. 선순위 분석 그리드 ===== -->
+                <!-- ===== 3. 선순위 분석 (간소화) ===== -->
                 <Border Style="{StaticResource SectionCardStyle}">
                     <StackPanel>
                         <Border Style="{StaticResource SectionHeaderStyle}">
@@ -399,101 +399,45 @@
                                     <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
                                     <TextBlock Text="선순위 분석" Style="{StaticResource H4TextStyle}"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <Button Content="📊 권리분석 시트 보기" 
-                                            Command="{Binding OpenRightsSheetCommand}"
-                                            Style="{StaticResource PrimaryButton}"
-                                            Padding="12,4"
-                                            FontSize="12"
-                                            Margin="0,0,8,0"
-                                            ToolTip="등기부등본 갑구/을구 데이터를 팝업 창으로 확인합니다"/>
-                                    <Button Content="💡 판단 로직 보기" 
-                                            Command="{Binding ShowRuleLogicCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="12"/>
-                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Content="📊 선순위 분석 열기" 
+                                        Command="{Binding OpenSeniorRightsCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="16,8"
+                                        FontSize="13"
+                                        ToolTip="선순위 관리 화면을 열어 세부 분석을 진행합니다"/>
                             </Grid>
                         </Border>
                         
-                        <DataGrid Margin="16"
-                                  ItemsSource="{Binding SeniorRightsItems}"
-                                  AutoGenerateColumns="False"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  HeadersVisibility="Column"
-                                  GridLinesVisibility="All"
-                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                  BorderThickness="1"
-                                  BorderBrush="{StaticResource BlueGray200Brush}">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="선순위 구분" 
-                                                    Binding="{Binding Category}" 
-                                                    Width="150"
-                                                    IsReadOnly="True"/>
-                                <DataGridTextColumn Header="DD 금액" 
-                                                    Binding="{Binding DdAmount, StringFormat=N0}" 
-                                                    Width="120">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                                            <Setter Property="Padding" Value="8,0"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="평가자 반영금액" 
-                                                    Binding="{Binding ReflectedAmount, StringFormat=N0}" 
-                                                    Width="130">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Right"/>
-                                            <Setter Property="Padding" Value="8,0"/>
-                                            <Setter Property="FontWeight" Value="SemiBold"/>
-                                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="상세추정 근거" 
-                                                    Binding="{Binding Reason}" 
-                                                    Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="TextWrapping" Value="Wrap"/>
-                                            <Setter Property="Padding" Value="8,4"/>
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        
-                        <!-- 합계 -->
-                        <Border Background="{StaticResource BlueGray50Brush}" 
-                                Margin="16,0,16,16" 
-                                Padding="16,12"
-                                CornerRadius="4">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="합계" 
-                                           FontWeight="Bold" 
-                                           FontSize="{StaticResource FontSizeH4}"/>
-                                <TextBlock Grid.Column="1" 
-                                           Text="{Binding TotalDdAmount, StringFormat=N0}" 
-                                           HorizontalAlignment="Right"
-                                           FontWeight="Bold"
-                                           FontSize="{StaticResource FontSizeH4}"
-                                           Margin="0,0,16,0"/>
-                                <TextBlock Grid.Column="2" 
-                                           Text="{Binding TotalReflectedAmount, StringFormat=N0}" 
-                                           FontWeight="Bold"
-                                           FontSize="16"
-                                           Foreground="{StaticResource PrimaryBrush}"/>
-                            </Grid>
-                        </Border>
+                        <!-- 선순위 합계 요약 -->
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="선순위 합계" 
+                                           Style="{StaticResource FieldLabelStyle}"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}">
+                                    <Run Text="{Binding TotalReflectedAmount, StringFormat=N0}"/>
+                                    <Run Text="원" FontSize="14" FontWeight="Normal"/>
+                                </TextBlock>
+                                <TextBlock Text="선순위 관리에서 상세 내역을 확인하세요" 
+                                           FontSize="12" 
+                                           Opacity="0.6"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <Button Grid.Column="1"
+                                    Content="새로고침"
+                                    Command="{Binding RefreshSeniorRightsCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="12,6"
+                                    VerticalAlignment="Center"
+                                    ToolTip="선순위 데이터를 다시 불러옵니다"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
                 

@@ -248,7 +248,7 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
-        /// 페이지네이션된 물건 목록 조회
+        /// 페이지네이션된 물건 목록 조회 (클라이언트 사이드 - Legacy)
         /// </summary>
         public async Task<(List<Property> Items, int TotalCount)> GetPagedAsync(
             int page = 1,
@@ -274,6 +274,184 @@ namespace NPLogic.Data.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"페이지네이션 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 서버 사이드 페이지네이션된 물건 목록 조회
+        /// Supabase Range를 사용하여 DB에서 필요한 범위만 조회
+        /// </summary>
+        public async Task<(List<Property> Items, int TotalCount)> GetPagedServerSideAsync(
+            int page = 1,
+            int pageSize = 50,
+            Guid? programId = null,
+            string? status = null,
+            Guid? assignedTo = null,
+            List<Guid>? filterProgramIds = null)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                
+                // 페이지네이션 범위 계산
+                int from = (page - 1) * pageSize;
+                int to = from + pageSize - 1;
+                
+                // 조건에 따라 쿼리 실행 (Supabase C# 클라이언트의 체이닝 제약으로 인해 분기)
+                Postgrest.Responses.ModeledResponse<PropertyTable> response;
+                
+                if (programId.HasValue && !string.IsNullOrEmpty(status) && assignedTo.HasValue)
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.Status == status)
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                else if (programId.HasValue && !string.IsNullOrEmpty(status))
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.Status == status)
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                else if (programId.HasValue && assignedTo.HasValue)
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                else if (programId.HasValue)
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Where(x => x.ProgramId == programId)
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                else if (assignedTo.HasValue)
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                else if (filterProgramIds != null && filterProgramIds.Count > 0)
+                {
+                    // PM 권한: 담당 프로그램 목록으로 필터링 - 클라이언트 측 필터링 사용
+                    var allResponse = await client
+                        .From<PropertyTable>()
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Get();
+                    
+                    var filteredItems = allResponse.Models
+                        .Where(x => x.ProgramId.HasValue && filterProgramIds.Contains(x.ProgramId.Value))
+                        .Skip(from)
+                        .Take(pageSize)
+                        .ToList();
+                    
+                    var totalFiltered = allResponse.Models
+                        .Count(x => x.ProgramId.HasValue && filterProgramIds.Contains(x.ProgramId.Value));
+                    
+                    return (filteredItems.Select(MapToProperty).ToList(), totalFiltered);
+                }
+                else
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Range(from, to)
+                        .Get();
+                }
+                
+                var items = response.Models.Select(MapToProperty).ToList();
+                
+                // Total Count 조회 (별도 쿼리) - 페이지네이션 정보 필요
+                int totalCount = await GetTotalCountAsync(programId, status, assignedTo);
+                
+                return (items, totalCount);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"서버 사이드 페이지네이션 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 조건에 맞는 전체 개수 조회 (서버 사이드 페이지네이션용)
+        /// </summary>
+        private async Task<int> GetTotalCountAsync(Guid? programId, string? status, Guid? assignedTo)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                Postgrest.Responses.ModeledResponse<PropertyTable> response;
+                
+                // 조건에 따라 Count 쿼리 실행
+                if (programId.HasValue && !string.IsNullOrEmpty(status) && assignedTo.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.Status == status)
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else if (programId.HasValue && !string.IsNullOrEmpty(status))
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.Status == status)
+                        .Get();
+                }
+                else if (programId.HasValue && assignedTo.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else if (programId.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Where(x => x.ProgramId == programId)
+                        .Get();
+                }
+                else if (assignedTo.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("id")
+                        .Get();
+                }
+                
+                return response.Models.Count;
+            }
+            catch
+            {
+                return 0;
             }
         }
 
@@ -543,6 +721,134 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 프로그램별 통계 집계 조회 (전체 물건 로드 없이)
+        /// 최소한의 필드만 선택하여 메모리/네트워크 사용 최소화
+        /// </summary>
+        public async Task<List<ProgramStatistics>> GetProgramStatisticsAsync(
+            List<Guid>? filterProgramIds = null,
+            Guid? assignedTo = null)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                
+                // 최소한의 필드만 선택하여 조회
+                Postgrest.Responses.ModeledResponse<PropertyTable> response;
+                
+                if (assignedTo.HasValue)
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Select("program_id, status")
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else
+                {
+                    response = await client
+                        .From<PropertyTable>()
+                        .Select("program_id, status")
+                        .Get();
+                }
+                
+                // 클라이언트에서 그룹화 (최소 데이터로)
+                var allModels = response.Models.Where(x => x.ProgramId.HasValue);
+                
+                // PM 권한 필터링
+                if (filterProgramIds != null && filterProgramIds.Count > 0)
+                {
+                    allModels = allModels.Where(x => filterProgramIds.Contains(x.ProgramId!.Value));
+                }
+                
+                var stats = allModels
+                    .GroupBy(x => x.ProgramId!.Value)
+                    .Select(g => new ProgramStatistics
+                    {
+                        ProgramId = g.Key,
+                        TotalCount = g.Count(),
+                        CompletedCount = g.Count(x => x.Status == "completed")
+                    })
+                    .ToList();
+                
+                return stats;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"프로그램별 통계 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 서버 사이드 통계 조회 (프로그램별, Count만)
+        /// 간소화된 버전 - 한번 조회 후 클라이언트에서 집계
+        /// </summary>
+        public async Task<PropertyStatistics> GetStatisticsServerSideAsync(
+            Guid? programId = null,
+            string? status = null,
+            Guid? assignedTo = null,
+            List<Guid>? filterProgramIds = null)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                
+                // 최소 필드만 조회 (status와 program_id)
+                Postgrest.Responses.ModeledResponse<PropertyTable> response;
+                
+                if (programId.HasValue && assignedTo.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("status, program_id")
+                        .Where(x => x.ProgramId == programId)
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else if (programId.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("status, program_id")
+                        .Where(x => x.ProgramId == programId)
+                        .Get();
+                }
+                else if (assignedTo.HasValue)
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("status, program_id")
+                        .Where(x => x.AssignedTo == assignedTo)
+                        .Get();
+                }
+                else
+                {
+                    response = await client.From<PropertyTable>()
+                        .Select("status, program_id")
+                        .Get();
+                }
+                
+                var models = response.Models.AsEnumerable();
+                
+                // filterProgramIds가 있으면 추가 필터링
+                if (filterProgramIds != null && filterProgramIds.Count > 0 && !programId.HasValue)
+                {
+                    models = models.Where(x => x.ProgramId.HasValue && filterProgramIds.Contains(x.ProgramId.Value));
+                }
+                
+                var modelList = models.ToList();
+                
+                return new PropertyStatistics
+                {
+                    TotalCount = modelList.Count,
+                    PendingCount = modelList.Count(x => x.Status == "pending"),
+                    ProcessingCount = modelList.Count(x => x.Status == "processing"),
+                    CompletedCount = modelList.Count(x => x.Status == "completed")
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"서버 사이드 통계 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// 주소 필드의 앞뒤 공란 제거
         /// </summary>
         private void TrimAddressFields(Property property)
@@ -733,6 +1039,18 @@ namespace NPLogic.Data.Repositories
         public int PendingCount { get; set; }
         public int ProcessingCount { get; set; }
         public int CompletedCount { get; set; }
+    }
+
+    /// <summary>
+    /// 프로그램별 통계
+    /// </summary>
+    public class ProgramStatistics
+    {
+        public Guid ProgramId { get; set; }
+        public string ProgramName { get; set; } = "";
+        public int TotalCount { get; set; }
+        public int CompletedCount { get; set; }
+        public int ProgressPercent => TotalCount > 0 ? (int)Math.Round((double)CompletedCount / TotalCount * 100) : 0;
     }
 
     /// <summary>

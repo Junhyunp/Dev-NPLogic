@@ -91,6 +91,18 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private BorrowerStatistics? _statistics;
 
+        // ========== 선택된 물건 모드 (대시보드에서 진입 시) ==========
+        /// <summary>
+        /// 선택된 물건 (대시보드에서 진입 시 설정됨)
+        /// </summary>
+        [ObservableProperty]
+        private Property? _selectedProperty;
+
+        /// <summary>
+        /// 단일 차주 모드 여부 (선택된 물건이 있는 경우 true)
+        /// </summary>
+        public bool IsSingleBorrowerMode => SelectedProperty != null;
+
         // ========== 담보 총괄 계산 속성 (S-004, S-005) ==========
         [ObservableProperty]
         private string _collateralTypeSummary = "-";
@@ -148,6 +160,13 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // 단일 차주 모드인 경우 (선택된 물건이 있는 경우)
+                if (IsSingleBorrowerMode && SelectedProperty != null)
+                {
+                    await LoadSingleBorrowerDataAsync();
+                    return;
+                }
+
                 // 프로그램 목록 로드
                 await LoadProgramsAsync();
 
@@ -164,6 +183,107 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 선택된 물건을 설정하고 해당 차주 정보만 로드
+        /// </summary>
+        public async Task SetSelectedPropertyAsync(Property property)
+        {
+            SelectedProperty = property;
+            OnPropertyChanged(nameof(IsSingleBorrowerMode));
+            
+            if (property != null)
+            {
+                await LoadSingleBorrowerDataAsync();
+            }
+        }
+
+        /// <summary>
+        /// 단일 차주 모드 데이터 로드 (선택된 물건의 차주 정보만)
+        /// </summary>
+        private async Task LoadSingleBorrowerDataAsync()
+        {
+            if (SelectedProperty == null) return;
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                // 1. 선택된 물건의 차주 정보로 SelectedBorrower 설정
+                // DebtorName 또는 BorrowerNumber로 차주 찾기
+                var allBorrowers = await _borrowerRepository.GetAllAsync();
+                var matchingBorrower = allBorrowers.FirstOrDefault(b =>
+                    b.BorrowerName == SelectedProperty.DebtorName ||
+                    b.BorrowerNumber == SelectedProperty.BorrowerNumber);
+
+                if (matchingBorrower != null)
+                {
+                    SelectedBorrower = matchingBorrower;
+                }
+                else
+                {
+                    // 차주가 없으면 물건 정보로 임시 차주 생성 (표시용)
+                    SelectedBorrower = new Borrower
+                    {
+                        BorrowerNumber = SelectedProperty.BorrowerNumber ?? "-",
+                        BorrowerName = SelectedProperty.DebtorName ?? "-",
+                        BorrowerType = "", // Property에는 BorrowerType이 없으므로 빈 값
+                        Opb = SelectedProperty.Opb ?? 0,
+                        IsRestructuring = SelectedProperty.BorrowerIsRestructuring ?? false
+                    };
+                }
+
+                // 2. 해당 차주의 물건 목록 로드
+                await LoadBorrowerPropertiesAsync();
+
+                // 3. 통계 계산 (선택된 차주 기준)
+                await LoadSingleBorrowerStatisticsAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 정보 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 단일 차주 통계 계산
+        /// </summary>
+        private async Task LoadSingleBorrowerStatisticsAsync()
+        {
+            if (SelectedBorrower == null) return;
+
+            try
+            {
+                // 해당 차주의 물건 목록에서 통계 계산
+                var allProperties = await _propertyRepository.GetAllAsync();
+                var borrowerProperties = allProperties
+                    .Where(p => p.DebtorName == SelectedBorrower.BorrowerName ||
+                                p.BorrowerNumber == SelectedBorrower.BorrowerNumber)
+                    .ToList();
+
+                Statistics = new BorrowerStatistics
+                {
+                    TotalCount = 1, // 선택된 차주 1명
+                    IndividualCount = SelectedBorrower.BorrowerType == "개인" ? 1 : 0,
+                    SoleProprietorCount = SelectedBorrower.BorrowerType == "개인사업자" ? 1 : 0,
+                    CorporationCount = SelectedBorrower.BorrowerType == "법인" ? 1 : 0,
+                    RestructuringCount = SelectedBorrower.IsRestructuring ? 1 : 0,
+                    TotalOpb = SelectedBorrower.Opb,
+                    TotalMortgageAmount = SelectedBorrower.MortgageAmount // 차주의 근저당설정액 사용
+                };
+
+                TotalCount = borrowerProperties.Count; // 물건 수로 표시
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"통계 로드 실패: {ex.Message}";
             }
         }
 

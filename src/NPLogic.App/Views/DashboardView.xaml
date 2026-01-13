@@ -220,7 +220,7 @@
                 </StackPanel>
             </Grid>
             
-            <!-- 브레드크럼 영역 (3단계 네비게이션: 대시보드 > 프로그램 > 차주 > 물건 > 탭) -->
+            <!-- 브레드크럼 영역 (간소화된 네비게이션: 대시보드 > 프로그램 > 물건 > 탭) -->
             <Border Grid.Row="1" 
                     Background="{StaticResource BlueGray50Brush}"
                     CornerRadius="4"
@@ -255,42 +255,36 @@
                                VerticalAlignment="Center"
                                Cursor="Hand"
                                MouseLeftButtonDown="Breadcrumb_Program_Click"
-                               ToolTip="차주 목록으로 이동"
+                               ToolTip="물건 목록으로 이동"
                                Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
                     
-                    <!-- 3. 차주명 (차주 선택 시 표시) -->
-                    <TextBlock x:Name="BreadcrumbBorrowerSeparator"
-                               Text=" › " 
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding SelectedBorrower, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    <TextBlock x:Name="BreadcrumbBorrower"
-                               Text="{Binding SelectedBorrowerName}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               VerticalAlignment="Center"
-                               Cursor="Hand"
-                               MouseLeftButtonDown="Breadcrumb_Borrower_Click"
-                               ToolTip="물건 목록으로 이동"
-                               Visibility="{Binding SelectedBorrower, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    
-                    <!-- 4. 물건번호 (물건 선택 시 = 상세 모드) -->
+                    <!-- 3. 물건번호 + 차주명 (물건 선택 시 = 상세 모드) -->
                     <TextBlock x:Name="BreadcrumbPropertySeparator"
                                Text=" › " 
                                FontSize="{StaticResource FontSizeBody}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <TextBlock x:Name="BreadcrumbProperty"
-                               Text="{Binding SelectedPropertyNumber}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <StackPanel x:Name="BreadcrumbProperty"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="{Binding SelectedProperty.CollateralNumber}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   Foreground="{StaticResource PrimaryBrush}"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text=" ("
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding SelectedProperty.DebtorName}"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                        <TextBlock Text=")"
+                                   FontSize="{StaticResource FontSizeBody}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                    </StackPanel>
                     
-                    <!-- 5. 현재 탭명 (상세 모드에서 탭 선택 시) -->
+                    <!-- 4. 현재 탭명 (상세 모드에서 탭 선택 시) -->
                     <TextBlock x:Name="BreadcrumbTabSeparator"
                                Text=" › " 
                                FontSize="{StaticResource FontSizeBody}"
@@ -309,119 +303,275 @@
             <!-- 2영역 레이아웃 (Phase 2.2, 2.4) - GridSplitter 제거, 토글 버튼 방식만 사용 -->
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
-                    <!-- 좌측: 진행 중인 프로그램 (기본 접힌 상태) -->
-                    <ColumnDefinition x:Name="LeftPanelColumn" Width="0" MinWidth="0"/>
+                    <!-- 좌측: 진행 중인 프로그램 (기본 펼친 상태) -->
+                    <ColumnDefinition x:Name="LeftPanelColumn" Width="280" MinWidth="0"/>
                     <!-- 우측: 프로그램명 상세 -->
                     <ColumnDefinition Width="*" MinWidth="400"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ========== 좌측: 진행 중인 프로그램 (기본 접힌 상태) ========== -->
+                <!-- ========== 좌측: 진행 중인 프로그램 (일반 모드) / 물건 리스트 (상세 모드) ========== -->
                 <Border x:Name="LeftPanel"
                         Grid.Column="0"
                         Background="{StaticResource SurfaceBrush}"
                         CornerRadius="8,0,0,8"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1,1,0,1"
-                        Visibility="Collapsed">
+                        Visibility="Visible">
                     <Border.Effect>
                         <DropShadowEffect Color="Black" Opacity="0.05" BlurRadius="8" ShadowDepth="2"/>
                     </Border.Effect>
 
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                        <!-- 일반 모드: 프로그램 목록 -->
+                        <Grid x:Name="ProgramListPanel"
+                              Visibility="Visible">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                        <!-- 좌측 패널 헤더 -->
-                        <Border Grid.Row="0" 
-                                Background="{StaticResource BlueGray50Brush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="0,0,0,1"
-                                Padding="12,10">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                            <!-- 좌측 패널 헤더 -->
+                            <Border Grid.Row="0" 
+                                    Background="{StaticResource BlueGray50Brush}"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="12,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="진행 중인 프로그램" 
-                                           FontWeight="SemiBold"
-                                           FontSize="{StaticResource FontSizeH4}"
-                                           Foreground="{StaticResource TextPrimaryBrush}"
-                                           VerticalAlignment="Center"/>
+                                    <TextBlock Text="진행 중인 프로그램" 
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"/>
 
-                                <!-- 좌측 패널 닫기/열기 토글 -->
-                                <ToggleButton x:Name="LeftPanelToggle"
-                                              Grid.Column="1"
-                                              Style="{StaticResource PanelToggleButton}"
-                                              IsChecked="False"
-                                              Click="LeftPanelToggle_Click"
-                                              ToolTip="패널 접기/펼치기">
-                                    <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
-                                </ToggleButton>
-                            </Grid>
-                        </Border>
+                                    <!-- 프로그램 추가 버튼 -->
+                                    <Button Grid.Column="1"
+                                            Content="+"
+                                            Command="{Binding AddProgramCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="6,2"
+                                            FontSize="14"
+                                            FontWeight="Bold"
+                                            Margin="0,0,8,0"
+                                            ToolTip="새 프로그램 등록"/>
 
-                        <!-- 프로그램 목록 -->
-                        <ListBox Grid.Row="1"
-                                 x:Name="ProgramListBox"
-                                 ItemsSource="{Binding ProgramSummaries}"
-                                 SelectedItem="{Binding SelectedProgram}"
-                                 SelectionChanged="ProgramListBox_SelectionChanged"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                 ItemContainerStyle="{StaticResource ProgramListItem}">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+                                    <!-- 좌측 패널 닫기/열기 토글 -->
+                                    <ToggleButton x:Name="LeftPanelToggle"
+                                                  Grid.Column="2"
+                                                  Style="{StaticResource PanelToggleButton}"
+                                                  IsChecked="True"
+                                                  Click="LeftPanelToggle_Click"
+                                                  ToolTip="패널 접기/펼치기">
+                                        <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
 
-                                        <!-- 프로그램명 -->
-                                        <TextBlock Grid.Row="0"
-                                                   Text="{Binding ProjectName}"
+                            <!-- 프로그램 목록 -->
+                            <ListBox Grid.Row="1"
+                                     x:Name="ProgramListBox"
+                                     ItemsSource="{Binding ProgramSummaries}"
+                                     SelectedItem="{Binding SelectedProgram}"
+                                     SelectionChanged="ProgramListBox_SelectionChanged"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     ItemContainerStyle="{StaticResource ProgramListItem}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- 프로그램명 -->
+                                            <TextBlock Grid.Row="0"
+                                                       Text="{Binding ProjectName}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="{StaticResource FontSizeH4}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+
+                                            <!-- 물건 수 -->
+                                            <TextBlock Grid.Row="1"
+                                                       Margin="0,4,0,0"
+                                                       FontSize="{StaticResource FontSizeBody}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}">
+                                                <Run Text="물건"/>
+                                                <Run Text="{Binding TotalCount}" FontWeight="SemiBold"/>
+                                                <Run Text="건"/>
+                                                <Run Text=" | "/>
+                                                <Run Text="완료"/>
+                                                <Run Text="{Binding CompletedCount}" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
+                                                <Run Text="건"/>
+                                            </TextBlock>
+
+                                            <!-- 진행률 바 -->
+                                            <Grid Grid.Row="2" Margin="0,6,0,0">
+                                                <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" 
+                                                             Maximum="100"
+                                                             Height="6"
+                                                             Foreground="{StaticResource SuccessBrush}"
+                                                             Background="{StaticResource BlueGray200Brush}"/>
+                                                <TextBlock HorizontalAlignment="Right"
+                                                           Margin="0,8,0,0"
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}">
+                                                    <Run Text="{Binding ProgressPercent, Mode=OneWay}"/>
+                                                    <Run Text="%"/>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+
+                        <!-- 상세 모드: 물건 리스트 -->
+                        <Grid x:Name="PropertyListPanel"
+                              Visibility="Collapsed">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 물건 리스트 헤더 -->
+                            <Border Grid.Row="0" 
+                                    Background="{StaticResource HeaderNavyBrush}"
+                                    Padding="12,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- 뒤로 버튼 -->
+                                    <Button Grid.Column="0"
+                                            Style="{StaticResource IconButton}"
+                                            Click="PropertyListBackButton_Click"
+                                            ToolTip="물건 목록으로 돌아가기"
+                                            Margin="0,0,8,0">
+                                        <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
+                                    </Button>
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="Home" 
+                                                                 Width="16" Height="16" 
+                                                                 Foreground="White"
+                                                                 VerticalAlignment="Center"
+                                                                 Margin="0,0,6,0"/>
+                                        <TextBlock Text="물건 목록" 
                                                    FontWeight="SemiBold"
                                                    FontSize="{StaticResource FontSizeH4}"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
+                                                   Foreground="White"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
 
-                                        <!-- 물건 수 -->
-                                        <TextBlock Grid.Row="1"
-                                                   Margin="0,4,0,0"
-                                                   FontSize="{StaticResource FontSizeBody}"
-                                                   Foreground="{StaticResource TextSecondaryBrush}">
-                                            <Run Text="물건"/>
-                                            <Run Text="{Binding TotalCount}" FontWeight="SemiBold"/>
-                                            <Run Text="건"/>
-                                            <Run Text=" | "/>
-                                            <Run Text="완료"/>
-                                            <Run Text="{Binding CompletedCount}" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}"/>
-                                            <Run Text="건"/>
-                                        </TextBlock>
+                                    <!-- 패널 닫기 토글 -->
+                                    <ToggleButton x:Name="PropertyListPanelToggle"
+                                                  Grid.Column="2"
+                                                  Style="{StaticResource PanelToggleButton}"
+                                                  IsChecked="True"
+                                                  Click="LeftPanelToggle_Click"
+                                                  ToolTip="패널 접기/펼치기">
+                                        <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20" Foreground="White"/>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
 
-                                        <!-- 진행률 바 -->
-                                        <Grid Grid.Row="2" Margin="0,6,0,0">
-                                            <ProgressBar Value="{Binding ProgressPercent, Mode=OneWay}" 
-                                                         Maximum="100"
-                                                         Height="6"
-                                                         Foreground="{StaticResource SuccessBrush}"
-                                                         Background="{StaticResource BlueGray200Brush}"/>
-                                            <TextBlock HorizontalAlignment="Right"
-                                                       Margin="0,8,0,0"
-                                                       FontSize="{StaticResource FontSizeSmall}"
-                                                       Foreground="{StaticResource TextSecondaryBrush}">
-                                                <Run Text="{Binding ProgressPercent, Mode=OneWay}"/>
-                                                <Run Text="%"/>
+                            <!-- 물건 리스트 -->
+                            <ListBox Grid.Row="1"
+                                     x:Name="PropertySideListBox"
+                                     ItemsSource="{Binding DashboardProperties}"
+                                     SelectedItem="{Binding SelectedProperty}"
+                                     SelectionChanged="PropertySideListBox_SelectionChanged"
+                                     Background="{StaticResource HeaderNavyBrush}"
+                                     BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="12,8"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <Border x:Name="ItemBorder"
+                                                            Background="Transparent"
+                                                            BorderBrush="{StaticResource BlueGray300Brush}"
+                                                            BorderThickness="0,0,0,1"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#3F4E6B"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- 물건번호 -->
+                                            <TextBlock Grid.Row="0"
+                                                       FontSize="{StaticResource FontSizeBody}"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="White">
+                                                <Run Text="{Binding CollateralNumber, FallbackValue='-'}"/>
                                             </TextBlock>
+
+                                            <!-- 차주번호 + 차주명 -->
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
+                                                <TextBlock Text="{Binding BorrowerNumber}"
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           Foreground="#B0BEC5"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="60"/>
+                                                <TextBlock Text=" | "
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           Foreground="#B0BEC5"/>
+                                                <TextBlock Text="{Binding DebtorName}"
+                                                           FontSize="{StaticResource FontSizeSmall}"
+                                                           Foreground="#B0BEC5"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxWidth="100"/>
+                                            </StackPanel>
                                         </Grid>
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <!-- 하단 정보 -->
+                            <Border Grid.Row="2" 
+                                    Background="#263238"
+                                    Padding="12,8">
+                                <TextBlock FontSize="{StaticResource FontSizeSmall}" 
+                                           Foreground="#B0BEC5"
+                                           HorizontalAlignment="Center">
+                                    <Run Text="{Binding DashboardProperties.Count, Mode=OneWay}"/>
+                                    <Run Text="건"/>
+                                </TextBlock>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Border>
 
@@ -457,11 +607,11 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- 좌측 패널 열기 버튼 (기본 표시 - 접혀있을 때) -->
+                                <!-- 좌측 패널 열기 버튼 (기본 숨김 - 펼쳐져 있을 때) -->
                                 <ToggleButton x:Name="LeftPanelOpenButton"
                                               Grid.Column="0"
                                               Style="{StaticResource PanelToggleButton}"
-                                              Visibility="Visible"
+                                              Visibility="Collapsed"
                                               Click="LeftPanelOpen_Click"
                                               ToolTip="프로그램 목록 열기"
                                               Margin="0,0,12,0">
@@ -821,97 +971,16 @@
                             </Grid>
                         </Border>
 
-                        <!-- 탭별 컨텐츠 영역 (3단계 네비게이션) -->
+                        <!-- 탭별 컨텐츠 영역 (물건 목록 또는 상세 화면) -->
                         <Grid Grid.Row="4">
-                            <!-- ========== 차주 목록 (NavigationLevel == "Borrower") ========== -->
-                            <DataGrid x:Name="BorrowerDataGrid"
-                                      ItemsSource="{Binding BorrowerList}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      SelectionMode="Single"
-                                      SelectionChanged="BorrowerDataGrid_SelectionChanged"
-                                      GridLinesVisibility="Horizontal"
-                                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                      HeadersVisibility="Column"
-                                      Background="{StaticResource SurfaceBrush}"
-                                      BorderThickness="0"
-                                      VerticalScrollBarVisibility="Auto"
-                                      Visibility="Visible">
-                                
-                                <DataGrid.RowStyle>
-                                    <Style TargetType="DataGridRow">
-                                        <Setter Property="Cursor" Value="Hand"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGrid.RowStyle>
-                                
-                                <DataGrid.Columns>
-                                    <!-- 차주번호 -->
-                                    <DataGridTemplateColumn Header="차주번호" Width="150" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Padding="12,8"
-                                                           VerticalAlignment="Center">
-                                                    <Run Text="{Binding BorrowerNumber}" FontWeight="SemiBold"/>
-                                                    <Run Text=" [회생]" Foreground="{StaticResource WarningBrush}" FontSize="11">
-                                                        <Run.Style>
-                                                            <Style TargetType="Run">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsRestructuring}" Value="False">
-                                                                        <Setter Property="Text" Value=""/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Run.Style>
-                                                    </Run>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    
-                                    <!-- 차주명 -->
-                                    <DataGridTextColumn Header="차주명" 
-                                                       Binding="{Binding BorrowerName}" 
-                                                       Width="*"
-                                                       IsReadOnly="True">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="12,8"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    
-                                    <!-- 물건 수 -->
-                                    <DataGridTemplateColumn Header="물건 수" Width="100" IsReadOnly="True">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Padding="12,8"
-                                                           VerticalAlignment="Center"
-                                                           HorizontalAlignment="Center">
-                                                    <Run Text="{Binding PropertyCount}"/>
-                                                    <Run Text="건" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            
-                            <!-- ========== 물건 목록 (NavigationLevel == "Property") ========== -->
+                            <!-- ========== 물건 목록 (서버 사이드 페이지네이션 + 무한 스크롤) ========== -->
                             <DataGrid x:Name="ProgressDataGrid"
                                       ItemsSource="{Binding DashboardProperties}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
                                       SelectionMode="Single"
                                       SelectionChanged="ProgressDataGrid_SelectionChanged"
+                                      ScrollViewer.ScrollChanged="ProgressDataGrid_ScrollChanged"
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
@@ -920,7 +989,11 @@
                                       BorderThickness="0"
                                       HorizontalScrollBarVisibility="Auto"
                                       VerticalScrollBarVisibility="Auto"
-                                      Visibility="Collapsed">
+                                      EnableRowVirtualization="True"
+                                      EnableColumnVirtualization="True"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling"
+                                      Visibility="Visible">
                             
                             <DataGrid.Columns>
                                 <!-- 차주번호 (맨 앞으로) -->

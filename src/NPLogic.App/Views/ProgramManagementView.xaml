@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1200"
@@ -360,6 +361,48 @@
                                           DisplayMemberPath="Name"
                                           Style="{StaticResource NPComboBox}"
                                           Margin="0,0,0,16"/>
+
+                                <!-- 적용환율 -->
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="16"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="적용환율 (1 USD)" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBox Text="{Binding FormExchangeRateUsd, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource NPTextBoxStyle}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="적용환율 (1 JPY)" 
+                                                   Style="{StaticResource CaptionTextStyle}"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBox Text="{Binding FormExchangeRateJpy, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource NPTextBoxStyle}"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- 은행명 -->
+                                <TextBlock Text="은행명" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding FormBankName, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource NPTextBoxStyle}"
+                                         Margin="0,0,0,16"/>
+
+                                <!-- Pool -->
+                                <TextBlock Text="Pool" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Margin="0,0,0,8"/>
+                                <TextBox Text="{Binding FormPool, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource NPTextBoxStyle}"
+                                         Margin="0,0,0,16"
+                                         ToolTip="예: A+B+C+D+E"/>
                             </StackPanel>
 
                             <!-- 구분선 -->
@@ -368,235 +411,562 @@
                                     Background="{StaticResource BlueGray200Brush}"
                                     HorizontalAlignment="Center"/>
 
-                            <!-- 우측: 데이터디스크 업로드 (선택사항) -->
+                            <!-- 우측: 파일 업로드 영역 -->
                             <Grid Grid.Column="2">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
 
-                                <!-- 헤더 -->
-                                <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                                    <TextBlock Text="데이터디스크 업로드 (선택사항)" 
-                                               Style="{StaticResource H4TextStyle}"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="엑셀 파일을 업로드하여 물건 목록을 자동 생성합니다" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               Opacity="0.7"/>
-                                </StackPanel>
-
-                                <!-- 업로드 영역 -->
-                                <Border Grid.Row="1"
+                                <!-- 기존 매핑 정보 (수정 모드일 때) -->
+                                <Border Grid.Row="0"
                                         Background="{StaticResource BlueGray50Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="2"
                                         CornerRadius="8"
-                                        AllowDrop="True"
-                                        Drop="DataDiskDropZone_Drop"
-                                        DragOver="DataDiskDropZone_DragOver">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding HasDataDiskFile}" Value="True">
-                                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
-                                                    <Setter Property="Background" Value="#F0FDF4"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
+                                        Padding="12"
+                                        Margin="0,0,0,12"
+                                        Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Text="등록된 시트 정보" 
+                                                   Style="{StaticResource H4TextStyle}"
+                                                   Margin="0,0,0,8"/>
+                                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl ItemsSource="{Binding ExistingSheetMappings}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="White"
+                                                                CornerRadius="4"
+                                                                Padding="10,8"
+                                                                Margin="0,0,0,4">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
 
-                                    <Grid>
-                                        <!-- 파일 미선택 상태 -->
-                                        <StackPanel HorizontalAlignment="Center" 
-                                                    VerticalAlignment="Center"
-                                                    Visibility="{Binding HasDataDiskFile, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                            <TextBlock Text="📁" 
-                                                       FontSize="36"
-                                                       HorizontalAlignment="Center"
-                                                       Margin="0,0,0,12"/>
-                                            <TextBlock Text="Excel 파일을 드래그하거나" 
-                                                       Style="{StaticResource BodyTextStyle}"
-                                                       HorizontalAlignment="Center"
+                                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding SheetTypeDisplayName}" 
+                                                                               FontWeight="SemiBold"
+                                                                               FontSize="12"/>
+                                                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                                        <TextBlock Text="{Binding UploadedAtDisplay}" 
+                                                                                   FontSize="10"
+                                                                                   Opacity="0.7"
+                                                                                   Visibility="{Binding UploadedByName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                                        <TextBlock Text=" · " 
+                                                                                   FontSize="10"
+                                                                                   Opacity="0.7"
+                                                                                   Visibility="{Binding UploadedByName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                                        <TextBlock Text="{Binding UploadedByName}" 
+                                                                                   FontSize="10"
+                                                                                   Opacity="0.7"
+                                                                                   Visibility="{Binding UploadedByName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                                                        <TextBlock Text="미등록" 
+                                                                                   FontSize="10"
+                                                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                                                   Visibility="{Binding UploadedByName, Converter={StaticResource NullToInverseVisibilityConverter}}"/>
+                                                                    </StackPanel>
+                                                                </StackPanel>
+
+                                                                <TextBlock Grid.Column="1"
+                                                                           VerticalAlignment="Center"
+                                                                           Margin="8,0">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value=""/>
+                                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding UploadedByName, Converter={StaticResource NullToBoolConverter}}" Value="False">
+                                                                                    <Setter Property="Text" Value="{Binding RowCount, StringFormat={}{0}행}"/>
+                                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                                    <Setter Property="FontSize" Value="10"/>
+                                                                                    <Setter Property="Opacity" Value="0.7"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+
+                                                                <Button Grid.Column="2"
+                                                                        Content="업로드"
+                                                                        Style="{StaticResource SecondaryButton}"
+                                                                        Padding="8,4"
+                                                                        FontSize="10"
+                                                                        VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- 파일 업로드 탭 -->
+                                <TabControl Grid.Row="1">
+                                <!-- 데이터디스크 탭 -->
+                                <TabItem Header="데이터디스크">
+                                    <Grid Margin="0,16,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 헤더 -->
+                                        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                            <TextBlock Text="데이터디스크 업로드 (선택사항)" 
+                                                       Style="{StaticResource H4TextStyle}"
                                                        Margin="0,0,0,4"/>
-                                            <Button Content="파일 선택" 
-                                                    Command="{Binding SelectDataDiskFileCommand}"
-                                                    Style="{StaticResource SecondaryButton}"
-                                                    Padding="16,8"
-                                                    Margin="0,8,0,0"/>
-                                            <TextBlock Text=".xlsx, .xls 지원" 
+                                            <TextBlock Text="엑셀 파일을 업로드하여 물건 목록을 자동 생성합니다" 
                                                        Style="{StaticResource CaptionTextStyle}"
-                                                       Opacity="0.5"
-                                                       HorizontalAlignment="Center"
-                                                       Margin="0,12,0,0"/>
+                                                       Opacity="0.7"/>
                                         </StackPanel>
 
-                                        <!-- 파일 선택됨 상태 -->
-                                        <StackPanel Margin="16"
-                                                    Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <!-- 파일 정보 -->
-                                            <Border Background="{StaticResource SuccessBrush}"
-                                                    CornerRadius="6"
-                                                    Padding="12"
-                                                    Margin="0,0,0,12">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                                        <!-- 업로드 영역 -->
+                                        <Border Grid.Row="1"
+                                                Background="{StaticResource BlueGray50Brush}"
+                                                BorderBrush="{StaticResource BlueGray300Brush}"
+                                                BorderThickness="2"
+                                                CornerRadius="8"
+                                                AllowDrop="True"
+                                                Drop="DataDiskDropZone_Drop"
+                                                DragOver="DataDiskDropZone_DragOver">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasDataDiskFile}" Value="True">
+                                                            <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}"/>
+                                                            <Setter Property="Background" Value="#F0FDF4"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
 
-                                                    <TextBlock Text="✓" 
-                                                               FontSize="16"
-                                                               Foreground="White"
-                                                               FontWeight="Bold"
-                                                               VerticalAlignment="Center"
-                                                               Margin="0,0,10,0"/>
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                        <TextBlock Text="파일 선택됨" 
-                                                                   Foreground="White"
+                                            <Grid>
+                                                <!-- 파일 미선택 상태 -->
+                                                <StackPanel HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding HasDataDiskFile, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="📁" 
+                                                               FontSize="36"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,0,0,12"/>
+                                                    <TextBlock Text="Excel 파일을 드래그하거나" 
+                                                               Style="{StaticResource BodyTextStyle}"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,0,0,4"/>
+                                                    <Button Content="파일 선택" 
+                                                            Command="{Binding SelectDataDiskFileCommand}"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Padding="16,8"
+                                                            Margin="0,8,0,0"/>
+                                                    <TextBlock Text=".xlsx, .xls 지원" 
+                                                               Style="{StaticResource CaptionTextStyle}"
+                                                               Opacity="0.5"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,12,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- 파일 선택됨 상태 -->
+                                                <StackPanel Margin="16"
+                                                            Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <!-- 파일 정보 -->
+                                                    <Border Background="{StaticResource SuccessBrush}"
+                                                            CornerRadius="6"
+                                                            Padding="12"
+                                                            Margin="0,0,0,12">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Text="✓" 
+                                                                       FontSize="16"
+                                                                       Foreground="White"
+                                                                       FontWeight="Bold"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,10,0"/>
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="파일 선택됨"
+                                                                           Foreground="White"
+                                                                           FontWeight="SemiBold"
+                                                                           FontSize="12"/>
+                                                                <TextBlock Text="{Binding DataDiskFileName}"
+                                                                           Foreground="White"
+                                                                           Opacity="0.9"
+                                                                           FontSize="11"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                                    <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                    <TextBlock Text=" · "
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                    <TextBlock Text="{Binding CurrentUserName}"
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="2"
+                                                                    Content="✕"
+                                                                    Command="{Binding CancelDataDiskFileCommand}"
+                                                                    Background="Transparent"
+                                                                    Foreground="White"
+                                                                    BorderThickness="0"
+                                                                    Padding="6,2"
+                                                                    FontSize="{StaticResource FontSizeH4}"
+                                                                    FontWeight="Bold"
+                                                                    Cursor="Hand"
+                                                                    ToolTip="파일 선택 취소"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- 시트 선택 모드 -->
+                                                    <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <TextBlock Text="📋 업로드할 시트 선택" 
+                                                                   Style="{StaticResource CaptionTextStyle}"
                                                                    FontWeight="SemiBold"
-                                                                   FontSize="12"/>
-                                                        <TextBlock Text="{Binding DataDiskFileName}" 
-                                                                   Foreground="White"
-                                                                   Opacity="0.9"
-                                                                   FontSize="11"
-                                                                   TextTrimming="CharacterEllipsis"/>
+                                                                   Margin="0,0,0,8"/>
+                                                        <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                                            <ItemsControl ItemsSource="{Binding AvailableSheets}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <StackPanel/>
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="White"
+                                                                                CornerRadius="4"
+                                                                                Padding="8,6"
+                                                                                Margin="0,0,0,4"
+                                                                                Cursor="Hand"
+                                                                                MouseLeftButtonUp="SheetItem_Click">
+                                                                            <Grid>
+                                                                                <Grid.ColumnDefinitions>
+                                                                                    <ColumnDefinition Width="Auto"/>
+                                                                                    <ColumnDefinition Width="*"/>
+                                                                                    <ColumnDefinition Width="Auto"/>
+                                                                                </Grid.ColumnDefinitions>
+                                                                                
+                                                                                <CheckBox IsChecked="{Binding IsSelected}" 
+                                                                                          VerticalAlignment="Center"
+                                                                                          Margin="0,0,8,0"/>
+                                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                                    <TextBlock Text="{Binding Name}" 
+                                                                                               FontWeight="SemiBold"
+                                                                                               FontSize="12"/>
+                                                                                    <TextBlock FontSize="10" Opacity="0.7">
+                                                                                        <Run Text="{Binding RowCount}"/>
+                                                                                        <Run Text="행"/>
+                                                                                    </TextBlock>
+                                                                                </StackPanel>
+                                                                                <Border Grid.Column="2"
+                                                                                        Background="{StaticResource PrimaryBrush}"
+                                                                                        CornerRadius="3"
+                                                                                        Padding="6,2"
+                                                                                        VerticalAlignment="Center"
+                                                                                        Visibility="{Binding SheetTypeDisplay, Converter={StaticResource NullToVisibilityConverter}}">
+                                                                                    <TextBlock Text="{Binding SheetTypeDisplay}" 
+                                                                                               Foreground="White"
+                                                                                               FontSize="9"
+                                                                                               FontWeight="SemiBold"/>
+                                                                                </Border>
+                                                                            </Grid>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </ScrollViewer>
                                                     </StackPanel>
-                                                    <Button Grid.Column="2"
-                                                            Content="✕" 
-                                                            Command="{Binding CancelDataDiskFileCommand}"
-                                                            Background="Transparent"
-                                                            Foreground="White"
-                                                            BorderThickness="0"
-                                                            Padding="6,2"
-                                                            FontSize="{StaticResource FontSizeH4}"
-                                                            FontWeight="Bold"
-                                                            Cursor="Hand"
-                                                            ToolTip="파일 선택 취소"/>
-                                                </Grid>
-                                            </Border>
 
-                                            <!-- 시트 선택 모드 -->
-                                            <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                <TextBlock Text="📋 업로드할 시트 선택" 
-                                                           Style="{StaticResource CaptionTextStyle}"
-                                                           FontWeight="SemiBold"
-                                                           Margin="0,0,0,8"/>
-                                                <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
-                                                    <ItemsControl ItemsSource="{Binding AvailableSheets}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <StackPanel/>
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Border Background="White"
-                                                                        CornerRadius="4"
-                                                                        Padding="8,6"
-                                                                        Margin="0,0,0,4"
-                                                                        Cursor="Hand"
-                                                                        MouseLeftButtonUp="SheetItem_Click">
-                                                                    <Grid>
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                            <ColumnDefinition Width="*"/>
-                                                                            <ColumnDefinition Width="Auto"/>
-                                                                        </Grid.ColumnDefinitions>
-                                                                        
-                                                                        <CheckBox IsChecked="{Binding IsSelected}" 
-                                                                                  VerticalAlignment="Center"
-                                                                                  Margin="0,0,8,0"/>
-                                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                            <TextBlock Text="{Binding Name}" 
-                                                                                       FontWeight="SemiBold"
-                                                                                       FontSize="12"/>
-                                                                            <TextBlock FontSize="10" Opacity="0.7">
-                                                                                <Run Text="{Binding RowCount}"/>
-                                                                                <Run Text="행"/>
-                                                                            </TextBlock>
-                                                                        </StackPanel>
-                                                                        <Border Grid.Column="2"
-                                                                                Background="{StaticResource PrimaryBrush}"
+                                                    <!-- 단일 시트 모드 -->
+                                                    <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                        <!-- 데이터 요약 -->
+                                                        <Border Background="White"
+                                                                CornerRadius="6"
+                                                                Padding="12"
+                                                                Margin="0,0,0,12">
+                                                            <StackPanel>
+                                                                <Grid Margin="0,0,0,8">
+                                                                    <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
+                                                                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                        <Run Text="{Binding DataDiskTotalRows}"/>
+                                                                        <Run Text="행" FontWeight="Normal" FontSize="11"/>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                                <Grid>
+                                                                    <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
+                                                                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                        <Run Text="{Binding DataDiskColumns.Count, Mode=OneWay}"/>
+                                                                        <Run Text="개" FontWeight="Normal" FontSize="11"/>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Border>
+
+                                                        <!-- 컬럼 목록 -->
+                                                        <TextBlock Text="컬럼 목록" 
+                                                                   Style="{StaticResource CaptionTextStyle}"
+                                                                   FontWeight="SemiBold"
+                                                                   Margin="0,0,0,6"/>
+                                                        <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                                                            <ItemsControl ItemsSource="{Binding DataDiskColumns}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <WrapPanel/>
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="{StaticResource BlueGray200Brush}"
                                                                                 CornerRadius="3"
                                                                                 Padding="6,2"
-                                                                                VerticalAlignment="Center"
-                                                                                Visibility="{Binding SheetTypeDisplay, Converter={StaticResource NullToVisibilityConverter}}">
-                                                                            <TextBlock Text="{Binding SheetTypeDisplay}" 
-                                                                                       Foreground="White"
-                                                                                       FontSize="9"
-                                                                                       FontWeight="SemiBold"/>
+                                                                                Margin="0,0,4,4">
+                                                                            <TextBlock Text="{Binding}" FontSize="10"/>
                                                                         </Border>
-                                                                    </Grid>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </ScrollViewer>
-                                            </StackPanel>
-
-                                            <!-- 단일 시트 모드 -->
-                                            <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                                                <!-- 데이터 요약 -->
-                                                <Border Background="White"
-                                                        CornerRadius="6"
-                                                        Padding="12"
-                                                        Margin="0,0,0,12">
-                                                    <StackPanel>
-                                                        <Grid Margin="0,0,0,8">
-                                                            <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
-                                                            <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
-                                                                <Run Text="{Binding DataDiskTotalRows}"/>
-                                                                <Run Text="행" FontWeight="Normal" FontSize="11"/>
-                                                            </TextBlock>
-                                                        </Grid>
-                                                        <Grid>
-                                                            <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
-                                                            <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
-                                                                <Run Text="{Binding DataDiskColumns.Count, Mode=OneWay}"/>
-                                                                <Run Text="개" FontWeight="Normal" FontSize="11"/>
-                                                            </TextBlock>
-                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </ScrollViewer>
                                                     </StackPanel>
-                                                </Border>
 
-                                                <!-- 컬럼 목록 -->
-                                                <TextBlock Text="컬럼 목록" 
-                                                           Style="{StaticResource CaptionTextStyle}"
-                                                           FontWeight="SemiBold"
-                                                           Margin="0,0,0,6"/>
-                                                <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
-                                                    <ItemsControl ItemsSource="{Binding DataDiskColumns}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <WrapPanel/>
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <Border Background="{StaticResource BlueGray200Brush}"
-                                                                        CornerRadius="3"
-                                                                        Padding="6,2"
-                                                                        Margin="0,0,4,4">
-                                                                    <TextBlock Text="{Binding}" FontSize="10"/>
-                                                                </Border>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                </ScrollViewer>
-                                            </StackPanel>
-
-                                            <!-- 다른 파일 선택 -->
-                                            <Button Content="다른 파일 선택"
-                                                    Command="{Binding SelectDataDiskFileCommand}"
-                                                    Style="{StaticResource SecondaryButton}"
-                                                    Padding="12,6"
-                                                    FontSize="11"
-                                                    Margin="0,12,0,0"
-                                                    HorizontalAlignment="Center"/>
-                                        </StackPanel>
+                                                    <!-- 다른 파일 선택 -->
+                                                    <Button Content="다른 파일 선택"
+                                                            Command="{Binding SelectDataDiskFileCommand}"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Padding="12,6"
+                                                            FontSize="11"
+                                                            Margin="0,12,0,0"
+                                                            HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                     </Grid>
-                                </Border>
+                                </TabItem>
+
+                                <!-- Interim 탭 -->
+                                <TabItem Header="Interim">
+                                    <Grid Margin="0,16,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 헤더 -->
+                                        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                                            <TextBlock Text="Interim 업로드 (선택사항)" 
+                                                       Style="{StaticResource H4TextStyle}"
+                                                       Margin="0,0,0,4"/>
+                                            <TextBlock Text="Cut-off 이후 추가 데이터 (가지급금, 회수정보 등)" 
+                                                       Style="{StaticResource CaptionTextStyle}"
+                                                       Opacity="0.7"/>
+                                        </StackPanel>
+
+                                        <!-- 업로드 영역 -->
+                                        <Border Grid.Row="1"
+                                                Background="{StaticResource BlueGray50Brush}"
+                                                BorderBrush="{StaticResource BlueGray300Brush}"
+                                                BorderThickness="2"
+                                                CornerRadius="8"
+                                                AllowDrop="True"
+                                                Drop="InterimDropZone_Drop"
+                                                DragOver="InterimDropZone_DragOver">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasInterimFile}" Value="True">
+                                                            <Setter Property="BorderBrush" Value="{StaticResource InfoBrush}"/>
+                                                            <Setter Property="Background" Value="#EFF6FF"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+
+                                            <Grid>
+                                                <!-- 파일 미선택 상태 -->
+                                                <StackPanel HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"
+                                                            Visibility="{Binding HasInterimFile, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                    <TextBlock Text="📋" 
+                                                               FontSize="36"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,0,0,12"/>
+                                                    <TextBlock Text="Interim Excel 파일을 드래그하거나" 
+                                                               Style="{StaticResource BodyTextStyle}"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,0,0,4"/>
+                                                    <Button Content="파일 선택" 
+                                                            Command="{Binding SelectInterimFileCommand}"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Padding="16,8"
+                                                            Margin="0,8,0,0"/>
+                                                    <TextBlock Text=".xlsx, .xls 지원" 
+                                                               Style="{StaticResource CaptionTextStyle}"
+                                                               Opacity="0.5"
+                                                               HorizontalAlignment="Center"
+                                                               Margin="0,12,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- 파일 선택됨 상태 -->
+                                                <StackPanel Margin="16"
+                                                            Visibility="{Binding HasInterimFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <!-- 파일 정보 -->
+                                                    <Border Background="{StaticResource InfoBrush}"
+                                                            CornerRadius="6"
+                                                            Padding="12"
+                                                            Margin="0,0,0,12">
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
+                                                            </Grid.ColumnDefinitions>
+
+                                                            <TextBlock Text="✓" 
+                                                                       FontSize="16"
+                                                                       Foreground="White"
+                                                                       FontWeight="Bold"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="0,0,10,0"/>
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                <TextBlock Text="Interim 파일 선택됨"
+                                                                           Foreground="White"
+                                                                           FontWeight="SemiBold"
+                                                                           FontSize="12"/>
+                                                                <TextBlock Text="{Binding InterimFileName}"
+                                                                           Foreground="White"
+                                                                           Opacity="0.9"
+                                                                           FontSize="11"
+                                                                           TextTrimming="CharacterEllipsis"/>
+                                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                                    <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                    <TextBlock Text=" · "
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                    <TextBlock Text="{Binding CurrentUserName}"
+                                                                               Foreground="White"
+                                                                               Opacity="0.7"
+                                                                               FontSize="10"/>
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                            <Button Grid.Column="2"
+                                                                    Content="✕"
+                                                                    Command="{Binding CancelInterimFileCommand}"
+                                                                    Background="Transparent"
+                                                                    Foreground="White"
+                                                                    BorderThickness="0"
+                                                                    Padding="6,2"
+                                                                    FontSize="{StaticResource FontSizeH4}"
+                                                                    FontWeight="Bold"
+                                                                    Cursor="Hand"
+                                                                    ToolTip="파일 선택 취소"/>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- 시트 선택 모드 -->
+                                                    <StackPanel Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <TextBlock Text="📋 업로드할 시트 선택" 
+                                                                   Style="{StaticResource CaptionTextStyle}"
+                                                                   FontWeight="SemiBold"
+                                                                   Margin="0,0,0,8"/>
+                                                        <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                                            <ItemsControl ItemsSource="{Binding InterimAvailableSheets}">
+                                                                <ItemsControl.ItemsPanel>
+                                                                    <ItemsPanelTemplate>
+                                                                        <StackPanel/>
+                                                                    </ItemsPanelTemplate>
+                                                                </ItemsControl.ItemsPanel>
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Border Background="White"
+                                                                                CornerRadius="4"
+                                                                                Padding="8,6"
+                                                                                Margin="0,0,0,4"
+                                                                                Cursor="Hand"
+                                                                                MouseLeftButtonUp="InterimSheetItem_Click">
+                                                                            <Grid>
+                                                                                <Grid.ColumnDefinitions>
+                                                                                    <ColumnDefinition Width="Auto"/>
+                                                                                    <ColumnDefinition Width="*"/>
+                                                                                    <ColumnDefinition Width="Auto"/>
+                                                                                </Grid.ColumnDefinitions>
+                                                                                
+                                                                                <CheckBox IsChecked="{Binding IsSelected}" 
+                                                                                          VerticalAlignment="Center"
+                                                                                          Margin="0,0,8,0"/>
+                                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                                                    <TextBlock Text="{Binding Name}" 
+                                                                                               FontWeight="SemiBold"
+                                                                                               FontSize="12"/>
+                                                                                    <TextBlock FontSize="10" Opacity="0.7">
+                                                                                        <Run Text="{Binding RowCount}"/>
+                                                                                        <Run Text="행"/>
+                                                                                    </TextBlock>
+                                                                                </StackPanel>
+                                                                            </Grid>
+                                                                        </Border>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </ScrollViewer>
+                                                    </StackPanel>
+
+                                                    <!-- 단일 시트 모드 -->
+                                                    <StackPanel Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                        <!-- 데이터 요약 -->
+                                                        <Border Background="White"
+                                                                CornerRadius="6"
+                                                                Padding="12"
+                                                                Margin="0,0,0,12">
+                                                            <StackPanel>
+                                                                <Grid Margin="0,0,0,8">
+                                                                    <TextBlock Text="총 데이터 행" Style="{StaticResource CaptionTextStyle}"/>
+                                                                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                        <Run Text="{Binding InterimTotalRows}"/>
+                                                                        <Run Text="행" FontWeight="Normal" FontSize="11"/>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                                <Grid>
+                                                                    <TextBlock Text="인식된 컬럼" Style="{StaticResource CaptionTextStyle}"/>
+                                                                    <TextBlock HorizontalAlignment="Right" FontWeight="SemiBold">
+                                                                        <Run Text="{Binding InterimColumns.Count, Mode=OneWay}"/>
+                                                                        <Run Text="개" FontWeight="Normal" FontSize="11"/>
+                                                                    </TextBlock>
+                                                                </Grid>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </StackPanel>
+
+                                                    <!-- 다른 파일 선택 -->
+                                                    <Button Content="다른 파일 선택"
+                                                            Command="{Binding SelectInterimFileCommand}"
+                                                            Style="{StaticResource SecondaryButton}"
+                                                            Padding="12,6"
+                                                            FontSize="11"
+                                                            Margin="0,12,0,0"
+                                                            HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </TabItem>
+                                </TabControl>
                             </Grid>
                         </Grid>
 

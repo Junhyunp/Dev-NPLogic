@@ -1169,6 +1169,13 @@ namespace NPLogic.ViewModels
                         property.AddressFull = string.Join(" ", addressComponents);
                     }
 
+                    // PropertyNumber가 비어있으면 CollateralNumber 사용 (경매사건번호가 없는 Excel 대응)
+                    if (string.IsNullOrEmpty(property.PropertyNumber) && !string.IsNullOrEmpty(property.CollateralNumber))
+                    {
+                        property.PropertyNumber = property.CollateralNumber;
+                        System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: PropertyNumber가 비어있어 CollateralNumber('{property.CollateralNumber}') 사용");
+                    }
+
                     // 디버그: 첫 5개 행의 속성 값 출력
                     if (i < 5)
                     {
@@ -1181,7 +1188,7 @@ namespace NPLogic.ViewModels
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: PropertyNumber가 비어있어 스킵");
+                        System.Diagnostics.Debug.WriteLine($"[ProcessPropertyAsync] Row {i}: PropertyNumber가 비어있어 스킵 (CollateralNumber도 없음)");
                     }
                 }
                 catch (Exception ex) 

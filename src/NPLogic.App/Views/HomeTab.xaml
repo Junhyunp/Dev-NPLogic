@@ -15,6 +15,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             
@@ -368,7 +369,8 @@
             <Border Grid.Row="3"
                     Background="{StaticResource BackgroundBrush}"
                     CornerRadius="8"
-                    Padding="20">
+                    Padding="20"
+                    Margin="0,0,0,20">
                 <Border.Effect>
                     <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
                 </Border.Effect>
@@ -498,6 +500,188 @@
                             </StackPanel>
                         </Border>
                     </Grid>
+                </controls:NPExpandableSection>
+            </Border>
+            
+            <!-- ========== QA 종합 현황 ========== -->
+            <Border Grid.Row="4"
+                    Background="{StaticResource BackgroundBrush}"
+                    CornerRadius="8"
+                    Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                </Border.Effect>
+                
+                <controls:NPExpandableSection Header="QA 종합 현황" IsExpanded="True">
+                    <StackPanel>
+                        <!-- QA 요약 통계 -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 전체 QA -->
+                            <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="16" Margin="0,0,8,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="전체 QA" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding TotalQaCount, FallbackValue=0}" 
+                                               Style="{StaticResource H2TextStyle}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 미회신 -->
+                            <Border Grid.Column="1" Background="#FFF3E0" CornerRadius="6" Padding="16" Margin="0,0,8,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="미회신" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="#E65100"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding Property.QaUnansweredCount, FallbackValue=0}" 
+                                               Style="{StaticResource H2TextStyle}"
+                                               FontWeight="Bold"
+                                               Foreground="#E65100"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 답변완료 -->
+                            <Border Grid.Column="2" Background="#E8F5E9" CornerRadius="6" Padding="16">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="답변완료" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="#2E7D32"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding AnsweredQaCount, FallbackValue=0}" 
+                                               Style="{StaticResource H2TextStyle}"
+                                               FontWeight="Bold"
+                                               Foreground="#2E7D32"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- 탭별 QA 현황 -->
+                        <TextBlock Text="탭별 QA 현황" 
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   FontWeight="SemiBold"
+                                   Margin="0,0,0,12"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 론 QA -->
+                            <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="론" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding LoanQaPendingCount, FallbackValue=0}" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#E65100"/>
+                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                        <TextBlock Text="{Binding LoanQaTotalCount, FallbackValue=0}" 
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 담보물건 QA -->
+                            <Border Grid.Column="1" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="담보물건" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding CollateralQaPendingCount, FallbackValue=0}" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#E65100"/>
+                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                        <TextBlock Text="{Binding CollateralQaTotalCount, FallbackValue=0}" 
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 선순위 QA -->
+                            <Border Grid.Column="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="선순위" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding SeniorQaPendingCount, FallbackValue=0}" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#E65100"/>
+                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                        <TextBlock Text="{Binding SeniorQaTotalCount, FallbackValue=0}" 
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 평가 QA -->
+                            <Border Grid.Column="3" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="평가" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding EvalQaPendingCount, FallbackValue=0}" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#E65100"/>
+                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                        <TextBlock Text="{Binding EvalQaTotalCount, FallbackValue=0}" 
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 경공매일정 QA -->
+                            <Border Grid.Column="4" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="경공매" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,4"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding AuctionQaPendingCount, FallbackValue=0}" 
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#E65100"/>
+                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                        <TextBlock Text="{Binding AuctionQaTotalCount, FallbackValue=0}" 
+                                                   Opacity="0.7"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- 안내 문구 -->
+                        <TextBlock Text="* 미회신/전체 형식으로 표시됩니다. 각 탭에서 QA를 관리할 수 있습니다."
+                                   Style="{StaticResource CaptionTextStyle}"
+                                   Foreground="{StaticResource TextTertiaryBrush}"
+                                   Margin="0,12,0,0"/>
+                    </StackPanel>
                 </controls:NPExpandableSection>
             </Border>
         </Grid>

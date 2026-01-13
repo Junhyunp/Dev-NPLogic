@@ -778,6 +778,94 @@
                             </DataGrid>
                         </StackPanel>
                     </Border>
+
+                    <!-- QA 관리 섹션 (평가) -->
+                    <Border Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="❓ QA 관리 (평가)" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
+                            
+                            <!-- QA 입력 -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" 
+                                         Text="{Binding NewEvalQuestion, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="10,8"
+                                         Margin="0,0,8,0"/>
+                                <Button Grid.Column="1" 
+                                        Content="QA 등록" 
+                                        Command="{Binding AddEvalQACommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="16,8"/>
+                            </Grid>
+
+                            <!-- QA 목록 -->
+                            <ItemsControl ItemsSource="{Binding EvalQaList}" MaxHeight="150">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{StaticResource BlueGray50Brush}"
+                                                CornerRadius="4"
+                                                Padding="12"
+                                                Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="{Binding Question}" 
+                                                               TextWrapping="Wrap"
+                                                               FontSize="13"/>
+                                                    <TextBlock Text="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" 
+                                                               FontSize="11"
+                                                               Opacity="0.6"
+                                                               Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                                
+                                                <Border Grid.Column="1"
+                                                        CornerRadius="4"
+                                                        Padding="8,4"
+                                                        VerticalAlignment="Top">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#FFC107"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                    <Setter Property="Background" Value="#4CAF50"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Foreground="White" FontSize="11">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="대기"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                        <Setter Property="Text" Value="완료"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            
+                            <!-- 빈 상태 -->
+                            <TextBlock Text="등록된 QA가 없습니다"
+                                       FontSize="12"
+                                       Opacity="0.5"
+                                       HorizontalAlignment="Center"
+                                       Visibility="{Binding HasNoEvalQA, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Visible}"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Grid>
 

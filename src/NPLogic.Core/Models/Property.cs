@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace NPLogic.Core.Models
 {
@@ -169,15 +170,18 @@ namespace NPLogic.Core.Models
         /// <summary>차주 거주 여부</summary>
         public bool BorrowerResiding { get; set; }
 
-        // ========== Borrower 조인용 확장 필드 (런타임 전용) ==========
+        // ========== Borrower 조인용 확장 필드 (런타임 전용, DB 저장 안 함) ==========
 
         /// <summary>차주 회생 여부 (Borrower 테이블에서 조인)</summary>
+        [JsonIgnore]
         public bool? BorrowerIsRestructuring { get; set; }
 
         /// <summary>차주 개회 여부 (Borrower 테이블에서 조인)</summary>
+        [JsonIgnore]
         public bool? BorrowerIsOpened { get; set; }
 
         /// <summary>차주 사망 여부 (Borrower 테이블에서 조인)</summary>
+        [JsonIgnore]
         public bool? BorrowerIsDeceased { get; set; }
 
         /// <summary>전체 진행 상태 (pending/processing/completed)</summary>

@@ -27,6 +27,15 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private Borrower? _selectedBorrower;
 
+        // 선택된 물건 (단일 차주 모드용)
+        [ObservableProperty]
+        private Property? _selectedProperty;
+
+        /// <summary>
+        /// 단일 차주 모드 여부 (선택된 물건이 있으면 true)
+        /// </summary>
+        public bool IsSingleBorrowerMode => SelectedProperty != null;
+
         [ObservableProperty]
         private ObservableCollection<Loan> _loans = new();
 
@@ -75,7 +84,16 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                await LoadBorrowersAsync();
+                if (IsSingleBorrowerMode)
+                {
+                    // 단일 차주 모드: 선택된 물건의 차주만 로드
+                    await LoadSingleBorrowerDataAsync();
+                }
+                else
+                {
+                    // 전체 모드: 모든 차주 로드
+                    await LoadBorrowersAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -84,6 +102,59 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 선택된 물건으로 단일 차주 모드 설정
+        /// </summary>
+        public async Task SetSelectedPropertyAsync(Property property)
+        {
+            SelectedProperty = property;
+            OnPropertyChanged(nameof(IsSingleBorrowerMode));
+            await InitializeAsync();
+        }
+
+        /// <summary>
+        /// 단일 차주 데이터 로드
+        /// </summary>
+        private async Task LoadSingleBorrowerDataAsync()
+        {
+            if (SelectedProperty == null) return;
+
+            try
+            {
+                // 선택된 물건의 차주 찾기
+                var allBorrowers = await _borrowerRepository.GetAllAsync();
+                var matchingBorrower = allBorrowers.FirstOrDefault(b => 
+                    b.BorrowerNumber == SelectedProperty.BorrowerNumber ||
+                    b.BorrowerName == SelectedProperty.DebtorName);
+
+                Borrowers.Clear();
+
+                if (matchingBorrower != null)
+                {
+                    Borrowers.Add(matchingBorrower);
+                    SelectedBorrower = matchingBorrower;
+                }
+                else
+                {
+                    // 차주가 없으면 물건 정보로 임시 차주 생성 (표시용)
+                    var tempBorrower = new Borrower
+                    {
+                        BorrowerNumber = SelectedProperty.BorrowerNumber ?? "-",
+                        BorrowerName = SelectedProperty.DebtorName ?? "-",
+                        BorrowerType = "",
+                        Opb = SelectedProperty.Opb ?? 0,
+                        IsRestructuring = SelectedProperty.BorrowerIsRestructuring ?? false
+                    };
+                    Borrowers.Add(tempBorrower);
+                    SelectedBorrower = tempBorrower;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 데이터 로드 실패: {ex.Message}";
             }
         }
 

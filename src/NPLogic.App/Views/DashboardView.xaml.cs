@@ -173,6 +173,38 @@ namespace NPLogic.Views
                 SaveNavigationState();
             }
         }
+
+        /// <summary>
+        /// DataGrid 스크롤 변경 - 무한 스크롤 (서버 사이드 페이지네이션)
+        /// 스크롤이 하단 90% 지점에 도달하면 추가 데이터 로드
+        /// </summary>
+        private async void ProgressDataGrid_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (DataContext is not DashboardViewModel viewModel)
+                return;
+            
+            // 수직 스크롤만 처리 (수평 스크롤 무시)
+            if (e.VerticalChange == 0)
+                return;
+            
+            // 이미 로드 중이거나 더 이상 데이터가 없으면 무시
+            if (viewModel.IsLoadingMore || !viewModel.HasMoreData)
+                return;
+            
+            // 스크롤 가능한 영역이 있는지 확인
+            if (e.ExtentHeight <= e.ViewportHeight)
+                return;
+            
+            // 스크롤이 하단 90% 지점에 도달했는지 확인
+            var scrollableHeight = e.ExtentHeight - e.ViewportHeight;
+            var scrollPercentage = e.VerticalOffset / scrollableHeight;
+            
+            if (scrollPercentage >= 0.9)
+            {
+                // 추가 데이터 로드
+                await viewModel.LoadMorePropertiesAsync();
+            }
+        }
         
         /// <summary>
         /// 키보드 단축키 처리 (Phase 4.3)
@@ -286,6 +318,14 @@ namespace NPLogic.Views
             radioButton.IsChecked = true;
         }
         
+        /// <summary>
+        /// 외부에서 호출 가능한 상세 모드 전환 (MainWindow에서 사용)
+        /// </summary>
+        public void SelectPropertyAndSwitchToDetail(Property property)
+        {
+            SwitchToDetailMode(property);
+        }
+
         /// <summary>
         /// 상세 모드로 전환
         /// </summary>
@@ -740,35 +780,22 @@ namespace NPLogic.Views
         #region 브레드크럼 클릭 핸들러
 
         /// <summary>
-        /// 브레드크럼 - 홈 클릭 (대시보드/프로그램 선택 화면으로 이동)
+        /// 브레드크럼 - 홈 클릭 (프로그램 선택 화면으로 이동)
         /// </summary>
         private void Breadcrumb_Home_Click(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is DashboardViewModel viewModel)
             {
-                // 차주 목록으로 이동
-                viewModel.NavigateBackToBorrowerList();
+                // 물건 목록으로 이동
+                viewModel.NavigateBackToPropertyList();
                 UpdateNavigationUI();
             }
         }
 
         /// <summary>
-        /// 브레드크럼 - 프로그램 클릭 (차주 목록으로 이동)
+        /// 브레드크럼 - 프로그램 클릭 (물건 목록으로 이동)
         /// </summary>
         private void Breadcrumb_Program_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (DataContext is DashboardViewModel viewModel)
-            {
-                // 차주 목록으로 이동
-                viewModel.NavigateBackToBorrowerList();
-                UpdateNavigationUI();
-            }
-        }
-
-        /// <summary>
-        /// 브레드크럼 - 차주명 클릭 (물건 목록으로 이동)
-        /// </summary>
-        private void Breadcrumb_Borrower_Click(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is DashboardViewModel viewModel)
             {
@@ -789,26 +816,43 @@ namespace NPLogic.Views
 
         #endregion
 
-        #region 3단계 네비게이션 지원
+        #region 상세 모드 물건 리스트 핸들러
 
         /// <summary>
-        /// 차주 목록 DataGrid 선택 변경 - 물건 목록으로 이동
+        /// 물건 리스트 뒤로가기 버튼 클릭 (상세 모드에서 목록으로)
         /// </summary>
-        private async void BorrowerDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void PropertyListBackButton_Click(object sender, RoutedEventArgs e)
+        {
+            SwitchToListMode();
+        }
+
+        /// <summary>
+        /// 좌측 패널 물건 리스트 선택 변경 - 상세 화면 전환
+        /// </summary>
+        private void PropertySideListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_isRestoringState) return;
 
             if (e.AddedItems.Count > 0 && 
-                e.AddedItems[0] is BorrowerListItem borrower && 
-                DataContext is DashboardViewModel viewModel)
+                e.AddedItems[0] is Property property && 
+                DataContext is DashboardViewModel viewModel &&
+                viewModel.IsDetailMode)
             {
-                await viewModel.SelectBorrowerAsync(borrower);
-                UpdateNavigationUI();
+                // 이미 상세 모드이므로 선택된 물건만 변경
+                viewModel.SelectPropertyInDetailMode(property);
+                
+                // 탭 컨텐츠 업데이트
+                LoadTabView(viewModel.ActiveTab, property);
             }
         }
 
+        #endregion
+
+        #region 간소화된 네비게이션 지원
+
         /// <summary>
         /// NavigationLevel에 따라 UI 업데이트
+        /// 간소화된 네비게이션: Property와 Detail 모드만 사용
         /// </summary>
         private void UpdateNavigationUI()
         {
@@ -816,29 +860,35 @@ namespace NPLogic.Views
 
             switch (viewModel.NavigationLevel)
             {
-                case "Borrower":
-                    // 차주 목록 표시
-                    BorrowerDataGrid.Visibility = Visibility.Visible;
+                case "Detail":
+                    // 상세 모드 표시
                     ProgressDataGrid.Visibility = Visibility.Collapsed;
-                    DetailModeTabs.Visibility = Visibility.Collapsed;
-                    TabContentControl.Visibility = Visibility.Collapsed;
+                    DetailModeTabs.Visibility = Visibility.Visible;
+                    TabContentControl.Visibility = Visibility.Visible;
+                    
+                    // 좌측 패널: 물건 리스트 표시 및 패널 열기
+                    ProgramListPanel.Visibility = Visibility.Collapsed;
+                    PropertyListPanel.Visibility = Visibility.Visible;
+                    
+                    // 좌측 패널 자동 열기 (상세 모드 진입 시)
+                    if (LeftPanel.Visibility == Visibility.Collapsed)
+                    {
+                        LeftPanelColumn.Width = new GridLength(_savedLeftPanelWidth > 0 ? _savedLeftPanelWidth : 280);
+                        LeftPanel.Visibility = Visibility.Visible;
+                        LeftPanelOpenButton.Visibility = Visibility.Collapsed;
+                    }
                     break;
-
-                case "Property":
+                    
+                default: // "Property" 및 기타
                     // 물건 목록 표시
-                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
                     ProgressDataGrid.Visibility = Visibility.Visible;
                     ProgressDataGrid.SelectedItem = null;
                     DetailModeTabs.Visibility = Visibility.Collapsed;
                     TabContentControl.Visibility = Visibility.Collapsed;
-                    break;
-
-                case "Detail":
-                    // 상세 모드 표시
-                    BorrowerDataGrid.Visibility = Visibility.Collapsed;
-                    ProgressDataGrid.Visibility = Visibility.Collapsed;
-                    DetailModeTabs.Visibility = Visibility.Visible;
-                    TabContentControl.Visibility = Visibility.Visible;
+                    
+                    // 좌측 패널: 프로그램 목록 표시
+                    ProgramListPanel.Visibility = Visibility.Visible;
+                    PropertyListPanel.Visibility = Visibility.Collapsed;
                     break;
             }
         }

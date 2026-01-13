@@ -29,7 +29,18 @@
                 <TextBlock Text="Loan 상세" 
                            Style="{StaticResource H2TextStyle}"
                            Margin="0,0,0,8"/>
-                <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
+                <!-- 단일 차주 모드: 선택된 차주 정보 표시 -->
+                <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7"
+                           Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Run Text="차주번호:"/>
+                    <Run Text="{Binding SelectedBorrower.BorrowerNumber, FallbackValue=-}" FontWeight="SemiBold"/>
+                    <Run Text=" | "/>
+                    <Run Text="차주명:"/>
+                    <Run Text="{Binding SelectedBorrower.BorrowerName, FallbackValue=-}" FontWeight="SemiBold"/>
+                </TextBlock>
+                <!-- 전체 모드: 일반 설명 -->
+                <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7"
+                           Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <Run Text="채권정보 관리 및 Loan Cap 계산"/>
                 </TextBlock>
             </StackPanel>
@@ -103,13 +114,36 @@
         <!-- 메인 컨텐츠 -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280" MinWidth="250"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="280" MinWidth="250">
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="280"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSingleBorrowerMode}" Value="True">
+                                    <Setter Property="Width" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
+                <ColumnDefinition Width="16">
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="16"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSingleBorrowerMode}" Value="True">
+                                    <Setter Property="Width" Value="0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 차주 및 대출 목록 (좌측) -->
-            <Grid Grid.Column="0">
+            <!-- 차주 및 대출 목록 (좌측) - 전체 모드에서만 표시 -->
+            <Grid Grid.Column="0"
+                  Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -226,11 +260,12 @@
             <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="24">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <Grid>
-                        <!-- 선택된 대출이 없을 때 -->
+                        <!-- 선택된 대출이 없을 때 (전체 모드) -->
                         <TextBlock Text="좌측에서 대출을 선택해주세요"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
-                                   Opacity="0.5">
+                                   Opacity="0.5"
+                                   Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -242,6 +277,54 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
+
+                        <!-- 단일 차주 모드: 대출 목록 선택 영역 -->
+                        <StackPanel Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="0,0,0,16">
+                            <!-- 대출 목록 헤더 -->
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="14">
+                                    <Run Text="대출 목록 ("/>
+                                    <Run Text="{Binding Loans.Count, Mode=OneWay, FallbackValue=0}"/>
+                                    <Run Text="건)"/>
+                                </TextBlock>
+                                <Button Grid.Column="1" Content="+ 대출 추가" 
+                                        Command="{Binding AddLoanCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="12,6"/>
+                            </Grid>
+                            
+                            <!-- 대출 선택 ListBox -->
+                            <ListBox ItemsSource="{Binding Loans}"
+                                     SelectedItem="{Binding SelectedLoan}"
+                                     Background="Transparent"
+                                     BorderThickness="1"
+                                     BorderBrush="{StaticResource BorderColor}"
+                                     MaxHeight="150">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Padding="12,8" Margin="4" Background="{StaticResource BackgroundColor}" CornerRadius="6">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock FontSize="11" Opacity="0.7">
+                                                    <Run Text="잔액: "/>
+                                                    <Run Text="{Binding LoanPrincipalBalance, StringFormat=N0}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
 
                         <!-- 대출 상세 정보 -->
                         <StackPanel>
@@ -478,7 +561,7 @@
                             </controls:NPExpandableSection>
 
                             <!-- 버튼 영역 -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
                                 <Button Content="Loan Cap 재계산" 
                                         Command="{Binding RecalculateLoanCapCommand}"
                                         Style="{StaticResource SecondaryButton}"
@@ -494,6 +577,92 @@
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="32,10"/>
                             </StackPanel>
+
+                            <!-- QA 관리 섹션 (론 탭) -->
+                            <controls:NPExpandableSection Header="QA 관리 (론)" IsExpanded="True">
+                                <StackPanel>
+                                    <!-- QA 입력 -->
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" 
+                                                 Text="{Binding NewLoanQuestion, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Padding="10,8"
+                                                 Margin="0,0,8,0"/>
+                                        <Button Grid.Column="1" 
+                                                Content="QA 등록" 
+                                                Command="{Binding AddLoanQACommand}"
+                                                Style="{StaticResource PrimaryButton}"
+                                                Padding="16,8"/>
+                                    </Grid>
+
+                                    <!-- QA 목록 -->
+                                    <ItemsControl ItemsSource="{Binding LoanQaList}" MaxHeight="200">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{StaticResource BackgroundColor}"
+                                                        CornerRadius="4"
+                                                        Padding="12"
+                                                        Margin="0,0,0,8">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <StackPanel Grid.Column="0">
+                                                            <TextBlock Text="{Binding Question}" 
+                                                                       TextWrapping="Wrap"
+                                                                       FontSize="13"/>
+                                                            <TextBlock Text="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" 
+                                                                       FontSize="11"
+                                                                       Opacity="0.6"
+                                                                       Margin="0,4,0,0"/>
+                                                        </StackPanel>
+                                                        
+                                                        <Border Grid.Column="1"
+                                                                CornerRadius="4"
+                                                                Padding="8,4"
+                                                                VerticalAlignment="Top">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="#FFC107"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                            <Setter Property="Background" Value="#4CAF50"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Foreground="White" FontSize="11">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="대기"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsAnswered}" Value="True">
+                                                                                <Setter Property="Text" Value="완료"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    
+                                    <!-- 빈 상태 -->
+                                    <TextBlock Text="등록된 QA가 없습니다"
+                                               FontSize="12"
+                                               Opacity="0.5"
+                                               HorizontalAlignment="Center"
+                                               Visibility="{Binding HasNoLoanQA, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Visible}"/>
+                                </StackPanel>
+                            </controls:NPExpandableSection>
                         </StackPanel>
                     </Grid>
                 </ScrollViewer>

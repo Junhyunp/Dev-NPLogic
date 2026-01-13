@@ -143,7 +143,7 @@
                 
                 <controls:NPExpandableSection Header="마감 체크리스트" IsExpanded="True">
                     <StackPanel>
-                        <!-- 등기부 확인 -->
+                        <!-- 마감요청 -->
                         <Border Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="16"
@@ -156,14 +156,14 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <CheckBox Grid.Column="0" 
-                                          IsChecked="{Binding ClosingChecklist.RegistryConfirmed}"
+                                          IsChecked="{Binding ClosingChecklist.ClosingRequested}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="등기부 정보 확인" 
+                                    <TextBlock Text="마감요청" 
                                                Style="{StaticResource BodyTextStyle}"
                                                FontWeight="SemiBold"/>
-                                    <TextBlock Text="등기부 정보가 정확하게 입력되었는지 확인" 
+                                    <TextBlock Text="마감요청 여부 확인" 
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
@@ -172,7 +172,7 @@
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{StaticResource BlueGray300Brush}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ClosingChecklist.RegistryConfirmed}" Value="True">
+                                                <DataTrigger Binding="{Binding ClosingChecklist.ClosingRequested}" Value="True">
                                                     <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -183,7 +183,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="미완료"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ClosingChecklist.RegistryConfirmed}" Value="True">
+                                                    <DataTrigger Binding="{Binding ClosingChecklist.ClosingRequested}" Value="True">
                                                         <Setter Property="Text" Value="완료"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -194,7 +194,7 @@
                             </Grid>
                         </Border>
                         
-                        <!-- 권리분석 확인 -->
+                        <!-- 낙찰여부 -->
                         <Border Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="16"
@@ -207,14 +207,14 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <CheckBox Grid.Column="0" 
-                                          IsChecked="{Binding ClosingChecklist.RightsAnalysisConfirmed}"
+                                          IsChecked="{Binding ClosingChecklist.WinningBidConfirmed}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="권리분석 확인" 
+                                    <TextBlock Text="낙찰여부" 
                                                Style="{StaticResource BodyTextStyle}"
                                                FontWeight="SemiBold"/>
-                                    <TextBlock Text="선순위, 임차인, 당해세 등 권리분석 완료 확인" 
+                                    <TextBlock Text="낙찰 여부 확인" 
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
@@ -223,7 +223,7 @@
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{StaticResource BlueGray300Brush}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ClosingChecklist.RightsAnalysisConfirmed}" Value="True">
+                                                <DataTrigger Binding="{Binding ClosingChecklist.WinningBidConfirmed}" Value="True">
                                                     <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -234,7 +234,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="미완료"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ClosingChecklist.RightsAnalysisConfirmed}" Value="True">
+                                                    <DataTrigger Binding="{Binding ClosingChecklist.WinningBidConfirmed}" Value="True">
                                                         <Setter Property="Text" Value="완료"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -245,7 +245,40 @@
                             </Grid>
                         </Border>
                         
-                        <!-- 평가 확인 -->
+                        <!-- 비낙찰시 낙찰자 입찰가 -->
+                        <Border Background="{StaticResource BlueGray50Brush}"
+                                CornerRadius="6"
+                                Padding="16"
+                                Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="180"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock Text="비낙찰시 낙찰자 입찰가" 
+                                               Style="{StaticResource BodyTextStyle}"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock Text="비낙찰시 낙찰자의 입찰가 입력" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                                    <TextBox Text="{Binding ClosingChecklist.WinnerBidAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             Width="180"
+                                             Padding="8,6"
+                                             HorizontalContentAlignment="Right"/>
+                                    <TextBlock Text="원" 
+                                               Style="{StaticResource BodyTextStyle}"
+                                               VerticalAlignment="Center"
+                                               Margin="8,0,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- 입찰물건 지도표시 -->
                         <Border Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="16"
@@ -258,14 +291,14 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <CheckBox Grid.Column="0" 
-                                          IsChecked="{Binding ClosingChecklist.EvaluationConfirmed}"
+                                          IsChecked="{Binding ClosingChecklist.MapDisplayConfirmed}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="평가 확인" 
+                                    <TextBlock Text="입찰물건 지도표시" 
                                                Style="{StaticResource BodyTextStyle}"
                                                FontWeight="SemiBold"/>
-                                    <TextBlock Text="감정평가, 낙찰가율, 예상매각가 확인" 
+                                    <TextBlock Text="입찰물건 지도 표시 완료" 
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
@@ -274,7 +307,7 @@
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{StaticResource BlueGray300Brush}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ClosingChecklist.EvaluationConfirmed}" Value="True">
+                                                <DataTrigger Binding="{Binding ClosingChecklist.MapDisplayConfirmed}" Value="True">
                                                     <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -285,7 +318,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="미완료"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ClosingChecklist.EvaluationConfirmed}" Value="True">
+                                                    <DataTrigger Binding="{Binding ClosingChecklist.MapDisplayConfirmed}" Value="True">
                                                         <Setter Property="Text" Value="완료"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
@@ -296,7 +329,7 @@
                             </Grid>
                         </Border>
                         
-                        <!-- QA 완료 -->
+                        <!-- 용량 압축 -->
                         <Border Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="16">
@@ -308,26 +341,23 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <CheckBox Grid.Column="0" 
-                                          IsChecked="{Binding ClosingChecklist.QaComplete}"
+                                          IsChecked="{Binding ClosingChecklist.DataCompressed}"
                                           VerticalAlignment="Center"
                                           Margin="0,0,12,0"/>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="QA 완료" 
+                                    <TextBlock Text="용량 압축" 
                                                Style="{StaticResource BodyTextStyle}"
                                                FontWeight="SemiBold"/>
-                                    <TextBlock Style="{StaticResource CaptionTextStyle}"
-                                               Foreground="{StaticResource TextSecondaryBrush}">
-                                        <Run Text="미회신 QA:"/>
-                                        <Run Text="{Binding Property.QaUnansweredCount, FallbackValue=0}"/>
-                                        <Run Text="건"/>
-                                    </TextBlock>
+                                    <TextBlock Text="데이터 용량 압축 완료" 
+                                               Style="{StaticResource CaptionTextStyle}"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
                                 </StackPanel>
                                 <Border Grid.Column="2" CornerRadius="4" Padding="8,4">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Setter Property="Background" Value="{StaticResource BlueGray300Brush}"/>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ClosingChecklist.QaComplete}" Value="True">
+                                                <DataTrigger Binding="{Binding ClosingChecklist.DataCompressed}" Value="True">
                                                     <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -338,7 +368,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="미완료"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ClosingChecklist.QaComplete}" Value="True">
+                                                    <DataTrigger Binding="{Binding ClosingChecklist.DataCompressed}" Value="True">
                                                         <Setter Property="Text" Value="완료"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

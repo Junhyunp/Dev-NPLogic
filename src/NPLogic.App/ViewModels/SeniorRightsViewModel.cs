@@ -901,6 +901,62 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(SeniorRightsTotal));
             OnPropertyChanged(nameof(RemainingAmount));
         }
+
+        /// <summary>
+        /// 자동 계산 - 등기부등본 데이터 기반 선순위 자동 추출
+        /// </summary>
+        [RelayCommand]
+        private async Task AutoCalculateAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                ErrorMessage = "물건을 선택하세요.";
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                // 1. 등기부등본에서 권리 데이터 다시 로드
+                await LoadRightsAsync();
+
+                // 2. 선순위 근저당 자동 추출 (을구에서 근저당권)
+                LoadSeniorMortgages();
+
+                // 3. 소액보증금 자동 조회 (지역, 근저당설정일 기준)
+                if (_referenceDataRepository != null && 
+                    !string.IsNullOrEmpty(SelectedSmallDepositRegion) && 
+                    MortgageSetupDate.HasValue)
+                {
+                    var standard = await _referenceDataRepository.GetSmallDepositAsync(
+                        SelectedSmallDepositRegion, 
+                        MortgageSetupDate.Value, 
+                        "residential");
+                    
+                    if (standard != null)
+                    {
+                        SmallDepositDd = standard.CompensationAmount;
+                        SmallDepositReason = $"자동계산: {SelectedSmallDepositRegion} 지역, {MortgageSetupDate.Value:yyyy-MM-dd} 기준";
+                        SmallDepositLookupInfo = $"기준: {standard.StartDate:yyyy-MM-dd} ~ {(standard.EndDate?.ToString("yyyy-MM-dd") ?? "현재")}";
+                    }
+                }
+
+                // 4. 합계 갱신
+                UpdateSummaryProperties();
+
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("자동 계산이 완료되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"자동 계산 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
     }
 }
 

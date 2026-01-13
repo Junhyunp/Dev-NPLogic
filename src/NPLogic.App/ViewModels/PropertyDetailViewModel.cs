@@ -21,16 +21,19 @@ namespace NPLogic.ViewModels
     public partial class ClosingChecklistModel : ObservableObject
     {
         [ObservableProperty]
-        private bool _registryConfirmed;
+        private bool _closingRequested;  // 마감요청
 
         [ObservableProperty]
-        private bool _rightsAnalysisConfirmed;
+        private bool _winningBidConfirmed;  // 낙찰여부
 
         [ObservableProperty]
-        private bool _evaluationConfirmed;
+        private decimal? _winnerBidAmount;  // 비낙찰시 낙찰자 입찰가
 
         [ObservableProperty]
-        private bool _qaComplete;
+        private bool _mapDisplayConfirmed;  // 입찰물건 지도표시
+
+        [ObservableProperty]
+        private bool _dataCompressed;  // 용량 압축
     }
 
     /// <summary>
@@ -2372,10 +2375,10 @@ namespace NPLogic.ViewModels
                 else
                 {
                     // 마감 처리
-                    if (!ClosingChecklist.RegistryConfirmed ||
-                        !ClosingChecklist.RightsAnalysisConfirmed ||
-                        !ClosingChecklist.EvaluationConfirmed ||
-                        !ClosingChecklist.QaComplete)
+                    if (!ClosingChecklist.ClosingRequested ||
+                        !ClosingChecklist.WinningBidConfirmed ||
+                        !ClosingChecklist.MapDisplayConfirmed ||
+                        !ClosingChecklist.DataCompressed)
                     {
                         ErrorMessage = "모든 체크리스트 항목을 완료해주세요.";
                         return;

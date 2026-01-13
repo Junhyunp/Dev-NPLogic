@@ -119,6 +119,15 @@ namespace NPLogic
                     _currentUser = await userRepository.GetByAuthUserIdAsync(System.Guid.Parse(authUser.Id));
                 }
 
+                // 권한에 따른 메뉴 표시 제어
+                if (_currentUser != null)
+                {
+                    // 관리자만 사용자 관리 메뉴 표시
+                    UserManagementButton.Visibility = _currentUser.IsAdmin 
+                        ? Visibility.Visible 
+                        : Visibility.Collapsed;
+                }
+
                 // 대시보드(역할 기반)로 이동
                 NavigateToDashboard();
             }
@@ -131,35 +140,41 @@ namespace NPLogic
 
         /// <summary>
         /// 통합 홈 화면으로 이동 (모든 역할 공통)
-        /// AdminHomeView에서 권한별 데이터 필터링 수행
+        /// DashboardView에서 권한별 데이터 필터링 수행
         /// </summary>
-        public void NavigateToAdminHome()
+        public void NavigateToDashboardView()
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider != null)
             {
-                var adminHomeView = serviceProvider.GetRequiredService<Views.AdminHomeView>();
-                MainContentControl.Content = adminHomeView;
+                var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
+                MainContentControl.Content = dashboardView;
                 UpdateSelectedMenu(DashboardButton);
             }
         }
 
         /// <summary>
-        /// PM 홈 화면으로 이동 (통합으로 AdminHomeView 사용)
+        /// 관리자 홈 화면으로 이동 (통합: DashboardView 사용)
         /// </summary>
-        public void NavigateToPMHome()
+        public void NavigateToAdminHome()
         {
-            // 통합: AdminHomeView 사용 (권한별 데이터 필터 적용)
-            NavigateToAdminHome();
+            NavigateToDashboardView();
         }
 
         /// <summary>
-        /// 평가자 홈 화면으로 이동 (통합으로 AdminHomeView 사용)
+        /// PM 홈 화면으로 이동 (통합: DashboardView 사용)
+        /// </summary>
+        public void NavigateToPMHome()
+        {
+            NavigateToDashboardView();
+        }
+
+        /// <summary>
+        /// 평가자 홈 화면으로 이동 (통합: DashboardView 사용)
         /// </summary>
         public void NavigateToEvaluatorHome()
         {
-            // 통합: AdminHomeView 사용 (권한별 데이터 필터 적용)
-            NavigateToAdminHome();
+            NavigateToDashboardView();
         }
 
         /// <summary>
@@ -197,11 +212,11 @@ namespace NPLogic
 
         /// <summary>
         /// 대시보드로 이동 (통합 홈 화면)
-        /// 모든 역할이 AdminHomeView를 사용하고, 권한별 데이터 필터링 적용
+        /// 모든 역할이 DashboardView를 사용하고, 권한별 데이터 필터링 적용
         /// </summary>
         public void NavigateToDashboard()
         {
-            NavigateToAdminHome();
+            NavigateToDashboardView();
         }
 
         /// <summary>
@@ -418,12 +433,12 @@ namespace NPLogic
             if (serviceProvider != null)
             {
                 // 통합 홈 화면으로 이동 후 상세 모드로 전환
-                var adminHomeView = serviceProvider.GetRequiredService<Views.AdminHomeView>();
-                MainContentControl.Content = adminHomeView;
+                var dashboardView = serviceProvider.GetRequiredService<Views.DashboardView>();
+                MainContentControl.Content = dashboardView;
                 UpdateSelectedMenu(DashboardButton);
                 
                 // 상세 모드로 전환
-                adminHomeView.SelectPropertyAndSwitchToDetail(property);
+                dashboardView.SelectPropertyAndSwitchToDetail(property);
             }
         }
 

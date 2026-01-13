@@ -121,11 +121,11 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Data Upload - 데이터 업로드 메뉴 -->
+                    <!-- Data Upload - 데이터 업로드 메뉴 (프로그램 생성으로 이동되어 숨김 처리) -->
                     <Button x:Name="DataUploadButton"
                             Click="DataUploadButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Visible">
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="업로드" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
@@ -245,9 +245,11 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- 선순위, 경매, 공매 - 사용하지 않아 숨김 처리 -->
                     <Button x:Name="SeniorRightsButton"
                             Click="SeniorRightsButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="ListStatus" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="선순위" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
@@ -256,7 +258,8 @@
 
                     <Button x:Name="AuctionScheduleButton"
                             Click="AuctionScheduleButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CalendarClock" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="경매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
@@ -265,7 +268,8 @@
 
                     <Button x:Name="PublicSaleScheduleButton"
                             Click="PublicSaleScheduleButton_Click"
-                            Style="{StaticResource TopMenuButton}">
+                            Style="{StaticResource TopMenuButton}"
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CalendarCheck" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="공매" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>

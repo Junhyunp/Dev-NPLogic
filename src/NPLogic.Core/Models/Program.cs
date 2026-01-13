@@ -50,6 +50,26 @@ namespace NPLogic.Core.Models
         public string Status { get; set; } = "active";
 
         /// <summary>
+        /// 적용환율 (1 USD)
+        /// </summary>
+        public decimal? ExchangeRateUsd { get; set; }
+
+        /// <summary>
+        /// 적용환율 (1 JPY)
+        /// </summary>
+        public decimal? ExchangeRateJpy { get; set; }
+
+        /// <summary>
+        /// 은행명
+        /// </summary>
+        public string? BankName { get; set; }
+
+        /// <summary>
+        /// Pool (예: A+B+C+D+E)
+        /// </summary>
+        public string? Pool { get; set; }
+
+        /// <summary>
         /// 생성자 ID
         /// </summary>
         public Guid? CreatedBy { get; set; }

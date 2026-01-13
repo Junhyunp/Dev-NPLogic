@@ -73,6 +73,13 @@ namespace NPLogic.ViewModels
         // 프로그램 정보 캐시 (program_id -> program_name)
         private Dictionary<Guid, string> _programNameCache = new();
 
+        // ========== 페이지네이션 상태 (서버 사이드) ==========
+        private int _currentPage = 1;
+        private const int PageSize = 50;
+        private bool _hasMoreData = true;
+        private bool _isLoadingMore = false;
+        private int _totalPropertyCount = 0;
+
         // ========== 사용자 정보 ==========
         [ObservableProperty]
         private User? _currentUser;
@@ -220,7 +227,7 @@ namespace NPLogic.ViewModels
         /// 네비게이션 레벨: "Borrower" (차주 목록), "Property" (물건 목록), "Detail" (상세)
         /// </summary>
         [ObservableProperty]
-        private string _navigationLevel = "Borrower";
+        private string _navigationLevel = "Property";
 
         /// <summary>
         /// 차주 목록 (프로그램 선택 시 로드)
@@ -250,6 +257,16 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _errorMessage;
+
+        // ========== 무한 스크롤 상태 (UI 바인딩용) ==========
+        /// <summary>추가 데이터 로드 가능 여부</summary>
+        public bool HasMoreData => _hasMoreData;
+        
+        /// <summary>추가 데이터 로드 중 여부</summary>
+        public bool IsLoadingMore => _isLoadingMore;
+        
+        /// <summary>전체 물건 수 (페이지네이션용)</summary>
+        public int TotalPropertyCount => _totalPropertyCount;
 
         // ========== 역할별 뷰 표시 여부 ==========
         public bool IsPMView => CurrentUser?.IsPM == true || CurrentUser?.IsAdmin == true;
@@ -378,6 +395,7 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 프로그램(프로젝트) 요약 목록 로드 (Phase 2.2 - 좌측 패널)
+        /// 서버 사이드 통계 사용으로 최적화
         /// Phase 6: 권한별 필터링 추가
         /// - 관리자(Admin): 전체 보임
         /// - PM: 담당 프로그램만 보임
@@ -395,11 +413,9 @@ namespace NPLogic.ViewModels
                     _programNameCache[program.Id] = program.ProgramName;
                 }
 
-                var allProperties = await _propertyRepository.GetAllAsync();
-                
-                // Phase 6: 권한별 필터링 - program_id가 있는 물건만 대상
-                IEnumerable<Property> filteredProperties = allProperties
-                    .Where(p => p.ProgramId.HasValue);
+                // 권한별 필터 설정
+                List<Guid>? filterProgramIds = null;
+                Guid? assignedTo = null;
 
                 if (CurrentUser?.IsAdmin == true)
                 {
@@ -410,42 +426,41 @@ namespace NPLogic.ViewModels
                     // PM: 담당 프로그램만 보임
                     if (_pmProgramIds.Count > 0)
                     {
-                        filteredProperties = filteredProperties
-                            .Where(p => p.ProgramId.HasValue && _pmProgramIds.Contains(p.ProgramId.Value));
+                        filterProgramIds = _pmProgramIds;
                     }
                     else
                     {
                         // PM이지만 담당 프로그램이 없으면 빈 목록
-                        filteredProperties = Enumerable.Empty<Property>();
+                        ProgramSummaries.Clear();
+                        Projects.Clear();
+                        Projects.Add("전체");
+                        return;
                     }
                 }
                 else if (CurrentUser?.IsEvaluator == true)
                 {
                     // 평가자: 자기에게 할당된 물건만 보임
-                    filteredProperties = filteredProperties
-                        .Where(p => p.AssignedTo == CurrentUser.Id);
+                    assignedTo = CurrentUser.Id;
                 }
 
-                // program_id별로 그룹화 (ProjectId 대신 ProgramId 사용)
-                var programGroups = filteredProperties
-                    .Where(p => p.ProgramId.HasValue)
-                    .GroupBy(p => p.ProgramId!.Value)
-                    .OrderBy(g => GetProgramName(g.Key));
+                // 서버 사이드 통계 조회 (전체 물건 로드 없이)
+                var programStats = await _propertyRepository.GetProgramStatisticsAsync(
+                    filterProgramIds: filterProgramIds,
+                    assignedTo: assignedTo
+                );
 
                 ProgramSummaries.Clear();
 
-                foreach (var group in programGroups)
+                foreach (var stat in programStats.OrderBy(s => GetProgramName(s.ProgramId)))
                 {
-                    var properties = group.ToList();
-                    var completedCount = properties.Count(p => p.Status == "completed");
-                    var programName = GetProgramName(group.Key);
+                    var programName = GetProgramName(stat.ProgramId);
 
                     ProgramSummaries.Add(new ProgramSummary
                     {
-                        ProjectId = group.Key.ToString(),
+                        ProjectId = stat.ProgramId.ToString(),
                         ProjectName = programName,
-                        TotalCount = properties.Count,
-                        CompletedCount = completedCount
+                        TotalCount = stat.TotalCount,
+                        CompletedCount = stat.CompletedCount
                     });
                 }
 
@@ -454,7 +469,7 @@ namespace NPLogic.ViewModels
                 Projects.Add("전체");
                 foreach (var summary in ProgramSummaries)
                 {
-                    Projects.Add(summary.ProjectName); // ProjectId 대신 ProjectName 사용
+                    Projects.Add(summary.ProjectName);
                 }
             }
             catch (Exception ex)
@@ -483,7 +498,7 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 선택된 프로그램의 데이터 로드 (비동기)
-        /// 3단계 네비게이션: 프로그램 선택 시 차주 목록 표시
+        /// 간소화된 네비게이션: 프로그램 선택 시 바로 물건 목록 표시
         /// </summary>
         public async Task LoadSelectedProgramDataAsync()
         {
@@ -497,16 +512,19 @@ namespace NPLogic.ViewModels
 
                 SelectedProjectId = SelectedProgram.ProjectId;
                 
-                // 3단계 네비게이션: 프로그램 선택 시 차주 목록으로 이동
-                NavigationLevel = "Borrower";
+                // 간소화된 네비게이션: 프로그램 선택 시 바로 물건 목록으로 이동 (차주 단계 스킵)
+                NavigationLevel = "Property";
                 SelectedBorrower = null;
                 SelectedProperty = null;
 
-                // 차주 목록 로드
-                await LoadBorrowersForProgramAsync();
+                // 프로그램의 전체 물건 목록 로드
+                await LoadAllPropertiesForProgramAsync();
 
                 // 통계 로드
                 await LoadStatisticsAsync();
+                
+                // 컬럼별 진행률 계산
+                RecalculateColumnProgress();
             }
             catch (Exception ex)
             {
@@ -515,6 +533,151 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 프로그램의 물건 목록 로드 (서버 사이드 페이지네이션)
+        /// 첫 페이지만 로드하고, 스크롤 시 추가 로드
+        /// </summary>
+        public async Task LoadAllPropertiesForProgramAsync()
+        {
+            if (SelectedProgram == null)
+                return;
+
+            try
+            {
+                // 페이지네이션 상태 초기화
+                _currentPage = 1;
+                _hasMoreData = true;
+                _totalPropertyCount = 0;
+                DashboardProperties.Clear();
+                
+                OnPropertyChanged(nameof(HasMoreData));
+                OnPropertyChanged(nameof(TotalPropertyCount));
+
+                // 프로그램 ID 파싱
+                Guid? programId = Guid.TryParse(SelectedProgram.ProjectId, out var pid) ? pid : null;
+                
+                // 권한별 필터 설정
+                Guid? assignedTo = null;
+                List<Guid>? filterProgramIds = null;
+                
+                if (CurrentUser?.IsEvaluator == true)
+                {
+                    // 평가자: 자기에게 할당된 물건만
+                    assignedTo = CurrentUser.Id;
+                }
+                else if (CurrentUser?.IsPM == true && _pmProgramIds.Count > 0)
+                {
+                    // PM: 담당 프로그램만
+                    filterProgramIds = _pmProgramIds;
+                }
+
+                // 서버 사이드 페이지네이션으로 첫 페이지 조회
+                var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
+                    page: _currentPage,
+                    pageSize: PageSize,
+                    programId: programId,
+                    status: StatusFilter,
+                    assignedTo: assignedTo,
+                    filterProgramIds: filterProgramIds
+                );
+                
+                _totalPropertyCount = totalCount;
+                
+                // 고급 필터는 클라이언트에서 적용 (고급 필터가 활성화된 경우)
+                IEnumerable<Property> filteredItems = items;
+                if (ActiveFilterCount > 0)
+                {
+                    filteredItems = ApplyAdvancedFilters(items);
+                }
+
+                foreach (var property in filteredItems)
+                {
+                    DashboardProperties.Add(property);
+                }
+                
+                // 더 로드할 데이터가 있는지 확인
+                _hasMoreData = DashboardProperties.Count < totalCount;
+                OnPropertyChanged(nameof(HasMoreData));
+                OnPropertyChanged(nameof(TotalPropertyCount));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 추가 물건 로드 (무한 스크롤)
+        /// </summary>
+        public async Task LoadMorePropertiesAsync()
+        {
+            if (_isLoadingMore || !_hasMoreData || SelectedProgram == null)
+                return;
+
+            try
+            {
+                _isLoadingMore = true;
+                OnPropertyChanged(nameof(IsLoadingMore));
+                
+                _currentPage++;
+
+                // 프로그램 ID 파싱
+                Guid? programId = Guid.TryParse(SelectedProgram.ProjectId, out var pid) ? pid : null;
+                
+                // 권한별 필터 설정
+                Guid? assignedTo = null;
+                List<Guid>? filterProgramIds = null;
+                
+                if (CurrentUser?.IsEvaluator == true)
+                {
+                    assignedTo = CurrentUser.Id;
+                }
+                else if (CurrentUser?.IsPM == true && _pmProgramIds.Count > 0)
+                {
+                    filterProgramIds = _pmProgramIds;
+                }
+
+                // 다음 페이지 조회
+                var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
+                    page: _currentPage,
+                    pageSize: PageSize,
+                    programId: programId,
+                    status: StatusFilter,
+                    assignedTo: assignedTo,
+                    filterProgramIds: filterProgramIds
+                );
+                
+                _totalPropertyCount = totalCount;
+
+                // 고급 필터 적용
+                IEnumerable<Property> filteredItems = items;
+                if (ActiveFilterCount > 0)
+                {
+                    filteredItems = ApplyAdvancedFilters(items);
+                }
+
+                foreach (var property in filteredItems)
+                {
+                    DashboardProperties.Add(property);
+                }
+                
+                // 더 로드할 데이터가 있는지 확인
+                _hasMoreData = DashboardProperties.Count < totalCount;
+                OnPropertyChanged(nameof(HasMoreData));
+                OnPropertyChanged(nameof(TotalPropertyCount));
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"추가 로드 실패: {ex.Message}";
+                _currentPage--; // 실패 시 롤백
+            }
+            finally
+            {
+                _isLoadingMore = false;
+                OnPropertyChanged(nameof(IsLoadingMore));
             }
         }
 
@@ -692,24 +855,8 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 차주 목록으로 돌아가기 (브레드크럼 클릭 시)
-        /// </summary>
-        public void NavigateBackToBorrowerList()
-        {
-            NavigationLevel = "Borrower";
-            SelectedBorrower = null;
-            SelectedProperty = null;
-            IsDetailMode = false;
-            DashboardProperties.Clear();
-
-            OnPropertyChanged(nameof(SelectedBorrowerName));
-            OnPropertyChanged(nameof(SelectedBorrowerNumber));
-            OnPropertyChanged(nameof(SelectedPropertyNumber));
-            OnPropertyChanged(nameof(CurrentTabName));
-        }
-
-        /// <summary>
         /// 물건 목록으로 돌아가기 (브레드크럼 클릭 시)
+        /// 간소화된 네비게이션: 바로 물건 목록으로 이동
         /// </summary>
         public void NavigateBackToPropertyList()
         {
@@ -719,6 +866,21 @@ namespace NPLogic.ViewModels
 
             OnPropertyChanged(nameof(SelectedPropertyNumber));
             OnPropertyChanged(nameof(CurrentTabName));
+            OnPropertyChanged(nameof(SelectedBorrowerName));
+        }
+
+        /// <summary>
+        /// 프로그램 선택 화면으로 돌아가기 (브레드크럼 홈 클릭 시)
+        /// </summary>
+        public void NavigateBackToPrograms()
+        {
+            NavigationLevel = "Property";
+            SelectedProperty = null;
+            IsDetailMode = false;
+            
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
+            OnPropertyChanged(nameof(CurrentTabName));
+            OnPropertyChanged(nameof(SelectedBorrowerName));
         }
 
         /// <summary>
@@ -909,7 +1071,7 @@ namespace NPLogic.ViewModels
 
         /// <summary>
         /// 상세 모드로 전환 (물건 선택 시)
-        /// 3단계 네비게이션: NavigationLevel = "Detail"
+        /// 간소화된 네비게이션: 좌측에 물건 리스트 유지, 우측에 상세 페이지
         /// </summary>
         public void SwitchToDetailMode(Property property)
         {
@@ -919,11 +1081,12 @@ namespace NPLogic.ViewModels
             ActiveTab = "noncore"; // 기본 탭은 비핵심
             OnPropertyChanged(nameof(CurrentTabName));
             OnPropertyChanged(nameof(SelectedPropertyNumber));
+            OnPropertyChanged(nameof(SelectedBorrowerName));
         }
 
         /// <summary>
         /// 목록 모드로 전환 (목록으로 버튼 클릭 시)
-        /// 3단계 네비게이션: NavigationLevel = "Property"
+        /// 간소화된 네비게이션: 물건 목록으로 바로 이동
         /// </summary>
         public void SwitchToListMode()
         {
@@ -932,6 +1095,20 @@ namespace NPLogic.ViewModels
             SelectedProperty = null;
             OnPropertyChanged(nameof(CurrentTabName));
             OnPropertyChanged(nameof(SelectedPropertyNumber));
+        }
+
+        /// <summary>
+        /// 좌측 물건 리스트에서 다른 물건 선택 시 상세 화면 전환
+        /// 주의: 이미 상세 모드이므로 OnPropertySelected 이벤트를 발생시키지 않음 (무한 루프 방지)
+        /// </summary>
+        public void SelectPropertyInDetailMode(Property property)
+        {
+            if (property == null) return;
+
+            SelectedProperty = property;
+            OnPropertyChanged(nameof(SelectedPropertyNumber));
+            OnPropertyChanged(nameof(SelectedBorrowerName));
+            // 이벤트 발생하지 않음 - View에서 직접 탭 컨텐츠 업데이트
         }
 
         /// <summary>
@@ -1199,6 +1376,15 @@ namespace NPLogic.ViewModels
         private void GoToPropertyList()
         {
             MainWindow.Instance?.NavigateToPropertyList();
+        }
+
+        /// <summary>
+        /// 프로그램 추가 화면으로 이동
+        /// </summary>
+        [RelayCommand]
+        private void AddProgram()
+        {
+            MainWindow.Instance?.NavigateToProgramManagement();
         }
     }
 }

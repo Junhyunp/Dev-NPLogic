@@ -246,14 +246,17 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 합계 계산
+        /// 합계 계산 - 선순위 관리에서 저장된 값을 사용
         /// </summary>
         private void CalculateTotals()
         {
-            TotalDdAmount = SeniorRightsItems.Sum(x => x.DdAmount);
-            TotalReflectedAmount = SeniorRightsItems.Sum(x => x.ReflectedAmount);
+            // 선순위 관리 화면에서 저장된 SeniorRightsTotal 값 사용
+            TotalReflectedAmount = Analysis.SeniorRightsTotal ?? 0;
             
-            Analysis.SeniorRightsTotal = TotalReflectedAmount;
+            // DD 금액은 개별 항목 합산 (호환성 유지)
+            TotalDdAmount = Analysis.SeniorMortgageDd + Analysis.LienDd + 
+                           Analysis.SmallDepositDd + Analysis.LeaseDepositDd + 
+                           Analysis.WageClaimDd + Analysis.CurrentTaxDd + Analysis.SeniorTaxDd;
         }
 
         #region Commands
@@ -498,6 +501,72 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"권리분석 시트 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 선순위 관리 화면 열기 (팝업)
+        /// </summary>
+        [RelayCommand]
+        private void OpenSeniorRights()
+        {
+            if (_propertyId == null)
+            {
+                MessageBox.Show(
+                    "물건 정보가 선택되지 않았습니다.",
+                    "알림",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                var propertyInfo = _property?.AddressFull ?? "물건 정보";
+                var window = new SeniorRightsWindow(_propertyId.Value, propertyInfo);
+                window.Owner = Application.Current.MainWindow;
+                window.Closed += async (s, e) =>
+                {
+                    // 창이 닫히면 선순위 데이터 새로고침
+                    await RefreshSeniorRightsAsync();
+                };
+                window.Show();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"선순위 분석 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 선순위 데이터 새로고침
+        /// </summary>
+        [RelayCommand]
+        private async Task RefreshSeniorRightsAsync()
+        {
+            if (_propertyId == null) return;
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                // 권리분석 데이터 다시 로드
+                var analysis = await _repository.GetByPropertyIdAsync(_propertyId.Value);
+                if (analysis != null)
+                {
+                    Analysis = analysis;
+                    TotalReflectedAmount = Analysis.SeniorRightsTotal ?? 0;
+                    SuccessMessage = "선순위 데이터가 새로고침되었습니다.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"새로고침 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
             }
         }
 

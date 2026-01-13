@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -43,7 +44,7 @@ namespace NPLogic.Views
                 await _viewModel.InitializeAsync();
                 
                 // 기본 탭 로드 (전체)
-                LoadFunctionContent("Home");
+                await LoadFunctionContentAsync("Home");
             }
             
             // 키보드 포커스 설정
@@ -193,18 +194,18 @@ namespace NPLogic.Views
         /// <summary>
         /// 기능 탭 체크 이벤트
         /// </summary>
-        private void FunctionTab_Checked(object sender, RoutedEventArgs e)
+        private async void FunctionTab_Checked(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton radioButton && radioButton.Tag is string tabName)
             {
-                LoadFunctionContent(tabName);
+                await LoadFunctionContentAsync(tabName);
             }
         }
 
         /// <summary>
         /// 기능별 컨텐츠 로드 - 피드백 반영: 10개 탭 구조
         /// </summary>
-        private void LoadFunctionContent(string tabName)
+        private async Task LoadFunctionContentAsync(string tabName)
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
@@ -230,10 +231,42 @@ namespace NPLogic.Views
                     }
                     break;
                 case "BorrowerOverview":
+                    // 차주개요 탭 - 선택된 물건의 차주 정보만 표시
                     content = serviceProvider.GetRequiredService<BorrowerOverviewView>();
+                    {
+                        var borrowerVm = serviceProvider.GetRequiredService<BorrowerOverviewViewModel>();
+                        
+                        // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
+                        if (_viewModel?.SelectedPropertyTab != null)
+                        {
+                            var property = await _viewModel.GetCurrentPropertyAsync();
+                            if (property != null)
+                            {
+                                await borrowerVm.SetSelectedPropertyAsync(property);
+                            }
+                        }
+                        
+                        content.DataContext = borrowerVm;
+                    }
                     break;
                 case "Loan":
+                    // Loan 상세 탭 - 선택된 물건의 차주 대출 정보만 표시
                     content = serviceProvider.GetRequiredService<LoanDetailView>();
+                    {
+                        var loanVm = serviceProvider.GetRequiredService<LoanDetailViewModel>();
+                        
+                        // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
+                        if (_viewModel?.SelectedPropertyTab != null)
+                        {
+                            var property = await _viewModel.GetCurrentPropertyAsync();
+                            if (property != null)
+                            {
+                                await loanVm.SetSelectedPropertyAsync(property);
+                            }
+                        }
+                        
+                        content.DataContext = loanVm;
+                    }
                     break;
                 case "CollateralProperty":
                     // 담보물건 탭 - 지도+담보총괄 포함
@@ -333,7 +366,7 @@ namespace NPLogic.Views
         /// <summary>
         /// 차주 리스트 선택 변경
         /// </summary>
-        private void BorrowerListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void BorrowerListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (sender is ListBox listBox && listBox.SelectedItem is BorrowerListItem selectedItem)
             {
@@ -342,7 +375,7 @@ namespace NPLogic.Views
                 // 현재 탭 컨텐츠 새로고침
                 if (_viewModel?.ActiveTab != null)
                 {
-                    LoadFunctionContent(_viewModel.ActiveTab);
+                    await LoadFunctionContentAsync(_viewModel.ActiveTab);
                 }
             }
         }
