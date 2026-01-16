@@ -269,15 +269,15 @@ namespace NPLogic.Views
                     }
                     break;
                 case "CollateralProperty":
-                    // 담보물건 탭 - 지도+담보총괄 포함
-                    content = serviceProvider.GetRequiredService<BasicDataTab>();
-                    // PropertyDetailViewModel 항상 설정 (커맨드 바인딩을 위해)
+                    // 담보물건 탭 - 물건 기본 정보, 등기부등본 정보, 감정평가 정보를 테이블 형태로 표시
+                    // 피드백 반영: 위성도/지적도/로드뷰/토지이용계획/건축물대장 버튼을 한 행에 배치
+                    content = serviceProvider.GetRequiredService<CollateralPropertyView>();
                     {
                         var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
                         if (selectedPropertyId.HasValue)
                         {
                             vm.SetPropertyId(selectedPropertyId.Value);
-                            _ = vm.InitializeAsync();
+                            await vm.InitializeAsync();
                         }
                         content.DataContext = vm;
                     }
@@ -326,7 +326,32 @@ namespace NPLogic.Views
                     }
                     break;
                 case "AuctionSchedule":
-                    content = serviceProvider.GetRequiredService<AuctionScheduleView>();
+                    // 경(공)매일정 상세 화면 (산출화면 기반)
+                    content = new AuctionScheduleDetailView();
+                    {
+                        var auctionParentVm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
+                        // 먼저 PropertyDetailViewModel 초기화 (AuctionScheduleDetailViewModel 생성을 위해)
+                        if (selectedPropertyId.HasValue)
+                        {
+                            auctionParentVm.SetPropertyId(selectedPropertyId.Value);
+                            _ = auctionParentVm.InitializeAsync();
+                        }
+                        
+                        if (auctionParentVm.AuctionScheduleDetailViewModel != null)
+                        {
+                            // 선택된 물건 ID 설정
+                            if (selectedPropertyId.HasValue)
+                            {
+                                auctionParentVm.AuctionScheduleDetailViewModel.SetPropertyId(selectedPropertyId.Value);
+                            }
+                            content.DataContext = auctionParentVm.AuctionScheduleDetailViewModel;
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[NonCoreView] AuctionScheduleDetailViewModel is null!");
+                            content.DataContext = null;
+                        }
+                    }
                     break;
                 case "CashFlow":
                     content = serviceProvider.GetRequiredService<CashFlowSummaryView>();

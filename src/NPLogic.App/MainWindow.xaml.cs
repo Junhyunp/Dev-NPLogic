@@ -122,10 +122,14 @@ namespace NPLogic
                 // 권한에 따른 메뉴 표시 제어
                 if (_currentUser != null)
                 {
-                    // 관리자만 사용자 관리 메뉴 표시
-                    UserManagementButton.Visibility = _currentUser.IsAdmin 
+                    // 관리자만 사용자 관리, 설정, 이력 메뉴 표시
+                    var adminVisibility = _currentUser.IsAdmin 
                         ? Visibility.Visible 
                         : Visibility.Collapsed;
+                    
+                    UserManagementButton.Visibility = adminVisibility;
+                    SettingsButton.Visibility = adminVisibility;
+                    AuditLogsButton.Visibility = adminVisibility;
                 }
 
                 // 대시보드(역할 기반)로 이동
@@ -640,28 +644,6 @@ namespace NPLogic
         private void SeniorRightsButton_Click(object sender, RoutedEventArgs e)
         {
             NavigateToSeniorRights();
-        }
-
-        /// <summary>
-        /// 경매 일정으로 이동
-        /// </summary>
-        public void NavigateToAuctionSchedule()
-        {
-            var serviceProvider = App.ServiceProvider;
-            if (serviceProvider != null)
-            {
-                var auctionScheduleView = serviceProvider.GetRequiredService<Views.AuctionScheduleView>();
-                MainContentControl.Content = auctionScheduleView;
-                UpdateSelectedMenu(AuctionScheduleButton);
-            }
-        }
-
-        /// <summary>
-        /// 경매 일정 버튼 클릭
-        /// </summary>
-        private void AuctionScheduleButton_Click(object sender, RoutedEventArgs e)
-        {
-            NavigateToAuctionSchedule();
         }
 
         /// <summary>

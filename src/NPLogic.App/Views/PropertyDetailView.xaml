@@ -192,7 +192,7 @@
 
             <!-- 6. 경공매일정 탭 -->
             <TabItem Header="경공매일정">
-                <local:AuctionScheduleView DataContext="{Binding}"/>
+                <local:AuctionScheduleDetailView DataContext="{Binding AuctionScheduleDetailViewModel}"/>
             </TabItem>
         </TabControl>
     </Grid>

@@ -5,194 +5,180 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1200"
+             d:DesignHeight="900" d:DesignWidth="1200"
              Loaded="MapView_Loaded"
              Unloaded="MapView_Unloaded">
     
-    <Grid>
-        <!-- 5분할 미리보기 영역 (상단 2개 + 하단 3개) -->
-        <Grid Margin="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            
-            <!-- Row 0: 지적도, 위치도 (2개) -->
-            <Grid Grid.Row="0" Margin="0,0,0,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24">
                 
-                <!-- 1. 지적도 (자동 캡처) -->
-                <Border Grid.Column="0"
-                        Background="{StaticResource CardBackgroundBrush}"
+                <!-- Row 1: 지적도, 위치도 (2열) -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 1. 지적도 -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource CardBackgroundBrush}"
+                            BorderBrush="{StaticResource BlueGray200Brush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="350"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="지적도"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,8"/>
+                            
+                            <Border Grid.Row="1"
+                                    Margin="8,0,8,8"
+                                    Background="#F1F5F9"
+                                    CornerRadius="4">
+                                <Grid>
+                                    <!-- 이미지 표시 영역 -->
+                                    <Image x:Name="PreviewMapImage"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    
+                                    <!-- 로딩 상태 -->
+                                    <StackPanel x:Name="MapLoadingState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <ProgressBar IsIndeterminate="True"
+                                                     Width="80"
+                                                     Height="3"
+                                                     Margin="0,0,0,8"/>
+                                        <TextBlock Text="로딩 중..."
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    
+                                    <!-- 빈 상태 (에러 시) -->
+                                    <StackPanel x:Name="MapEmptyState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Visibility="Collapsed">
+                                        <TextBlock Text="🗺️"
+                                                   FontSize="36"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBlock Text="지도를 불러올 수 없습니다"
+                                                   FontSize="13"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button x:Name="BtnRetryMap"
+                                                Content="다시 시도"
+                                                Click="RetryMap_Click"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="20,6"
+                                                FontSize="12"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- 2. 위치도 -->
+                    <Border Grid.Column="2"
+                            Background="{StaticResource CardBackgroundBrush}"
+                            BorderBrush="{StaticResource BlueGray200Brush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="350"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="위치도"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,8"/>
+                            
+                            <Border Grid.Row="1"
+                                    Margin="8,0,8,8"
+                                    Background="#F1F5F9"
+                                    CornerRadius="4">
+                                <Grid>
+                                    <!-- 이미지 표시 영역 -->
+                                    <Image x:Name="PreviewLocationMapImage"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    
+                                    <!-- 로딩 상태 -->
+                                    <StackPanel x:Name="LocationMapLoadingState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <ProgressBar IsIndeterminate="True"
+                                                     Width="80"
+                                                     Height="3"
+                                                     Margin="0,0,0,8"/>
+                                        <TextBlock Text="로딩 중..."
+                                                   FontSize="12"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    
+                                    <!-- 빈 상태 -->
+                                    <StackPanel x:Name="LocationMapEmptyState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                Visibility="Collapsed">
+                                        <TextBlock Text="📍"
+                                                   FontSize="36"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBlock Text="위치도를 불러올 수 없습니다"
+                                                   FontSize="13"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button x:Name="BtnRetryLocationMap"
+                                                Content="다시 시도"
+                                                Click="RetryLocationMap_Click"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="20,6"
+                                                FontSize="12"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+                
+                <!-- Row 2: 토지이용계획확인원 (전체 너비) -->
+                <Border Background="{StaticResource CardBackgroundBrush}"
                         BorderBrush="{StaticResource BlueGray200Brush}"
                         BorderThickness="1"
                         CornerRadius="8"
-                        Margin="0,0,8,0">
+                        Margin="0,0,0,16">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0"
-                                   Text="지적도"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,12,0,8"/>
-                        
-                        <Border Grid.Row="1"
-                                Margin="8,0,8,8"
-                                Background="#F1F5F9"
-                                CornerRadius="4">
-                            <Grid>
-                                <!-- 이미지 표시 영역 -->
-                                <Image x:Name="PreviewMapImage"
-                                       Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="HighQuality"/>
-                                
-                                <!-- 로딩 상태 -->
-                                <StackPanel x:Name="MapLoadingState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center">
-                                    <ProgressBar IsIndeterminate="True"
-                                                 Width="80"
-                                                 Height="3"
-                                                 Margin="0,0,0,8"/>
-                                    <TextBlock Text="로딩 중..."
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                                
-                                <!-- 빈 상태 (에러 시) -->
-                                <StackPanel x:Name="MapEmptyState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            Visibility="Collapsed">
-                                    <TextBlock Text="🗺️"
-                                               FontSize="28"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="지도를 불러올 수 없습니다"
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                    <Button x:Name="BtnRetryMap"
-                                            Content="다시 시도"
-                                            Click="RetryMap_Click"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="16,4"
-                                            FontSize="11"
-                                            Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-                
-                <!-- 2. 위치도 -->
-                <Border Grid.Column="1"
-                        Background="{StaticResource CardBackgroundBrush}"
-                        BorderBrush="{StaticResource BlueGray200Brush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Margin="8,0,0,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0"
-                                   Text="위치도"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,12,0,8"/>
-                        
-                        <Border Grid.Row="1"
-                                Margin="8,0,8,8"
-                                Background="#F1F5F9"
-                                CornerRadius="4">
-                            <Grid>
-                                <!-- 이미지 표시 영역 -->
-                                <Image x:Name="PreviewLocationMapImage"
-                                       Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="HighQuality"/>
-                                
-                                <!-- 로딩 상태 -->
-                                <StackPanel x:Name="LocationMapLoadingState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center">
-                                    <ProgressBar IsIndeterminate="True"
-                                                 Width="80"
-                                                 Height="3"
-                                                 Margin="0,0,0,8"/>
-                                    <TextBlock Text="로딩 중..."
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                                
-                                <!-- 빈 상태 -->
-                                <StackPanel x:Name="LocationMapEmptyState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center"
-                                            Visibility="Collapsed">
-                                    <TextBlock Text="📍"
-                                               FontSize="28"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="위치도를 불러올 수 없습니다"
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                    <Button x:Name="BtnRetryLocationMap"
-                                            Content="다시 시도"
-                                            Click="RetryLocationMap_Click"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="16,4"
-                                            FontSize="11"
-                                            Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
-            
-            <!-- Row 1: 토지이용계획확인원, 요약건축물대장, 건축물대장 세부 (3개) -->
-            <Grid Grid.Row="1" Margin="0,8,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <!-- 3. 토지이용계획확인원 (자동 캡처) -->
-                <Border Grid.Column="0"
-                        Background="{StaticResource CardBackgroundBrush}"
-                        BorderBrush="{StaticResource BlueGray200Brush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Margin="0,0,8,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="400"/>
                         </Grid.RowDefinitions>
                         
                         <TextBlock Grid.Row="0"
                                    Text="토지이용계획확인원"
-                                   FontSize="13"
+                                   FontSize="14"
                                    FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
                                    HorizontalAlignment="Center"
                                    Margin="0,12,0,8"/>
                         
@@ -215,7 +201,7 @@
                                                  Height="3"
                                                  Margin="0,0,0,8"/>
                                     <TextBlock Text="토지이음 조회 중..."
-                                               FontSize="11"
+                                               FontSize="12"
                                                Foreground="{StaticResource BlueGray400Brush}"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -226,28 +212,28 @@
                                             HorizontalAlignment="Center"
                                             Visibility="Collapsed">
                                     <TextBlock Text="📋"
-                                               FontSize="28"
+                                               FontSize="36"
                                                HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
+                                               Margin="0,0,0,8"/>
                                     <TextBlock x:Name="LandUsePlanStatusText"
                                                Text="주소 정보가 필요합니다"
-                                               FontSize="11"
+                                               FontSize="13"
                                                Foreground="{StaticResource BlueGray400Brush}"
                                                HorizontalAlignment="Center"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
                                         <Button x:Name="BtnRetryLandUsePlan"
                                                 Content="다시 시도"
                                                 Click="RetryLandUsePlan_Click"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="12,4"
-                                                FontSize="11"
-                                                Margin="0,0,4,0"/>
+                                                Padding="16,6"
+                                                FontSize="12"
+                                                Margin="0,0,8,0"/>
                                         <Button x:Name="BtnUploadLandUsePlan"
                                                 Content="직접 업로드"
                                                 Click="UploadLandUsePlan_Click"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="12,4"
-                                                FontSize="11"/>
+                                                Padding="16,6"
+                                                FontSize="12"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
@@ -255,119 +241,127 @@
                     </Grid>
                 </Border>
                 
-                <!-- 4. 요약건축물대장 -->
-                <Border Grid.Column="1"
-                        Background="{StaticResource CardBackgroundBrush}"
-                        BorderBrush="{StaticResource BlueGray200Brush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Margin="4,0,4,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0"
-                                   Text="요약건축물대장"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,12,0,8"/>
-                        
-                        <Border Grid.Row="1"
-                                Margin="8,0,8,8"
-                                Background="#F1F5F9"
-                                CornerRadius="4">
-                            <Grid>
-                                <!-- 이미지 표시 영역 -->
-                                <Image x:Name="PreviewBuildingRegisterImage"
-                                       Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="HighQuality"/>
-                                
-                                <!-- 빈 상태 -->
-                                <StackPanel x:Name="BuildingRegisterEmptyState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center">
-                                    <TextBlock Text="🏢"
-                                               FontSize="28"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="업로드 필요"
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                    <Button x:Name="BtnUploadBuildingRegister"
-                                            Content="업로드"
-                                            Click="UploadBuildingRegister_Click"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="16,4"
-                                            FontSize="11"
-                                            Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
+                <!-- Row 3: 요약건축물대장, 건축물대장 세부 (2열) -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 4. 요약건축물대장 -->
+                    <Border Grid.Column="0"
+                            Background="{StaticResource CardBackgroundBrush}"
+                            BorderBrush="{StaticResource BlueGray200Brush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="350"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="요약건축물대장"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,8"/>
+                            
+                            <Border Grid.Row="1"
+                                    Margin="8,0,8,8"
+                                    Background="#F1F5F9"
+                                    CornerRadius="4">
+                                <Grid>
+                                    <!-- 이미지 표시 영역 -->
+                                    <Image x:Name="PreviewBuildingRegisterImage"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    
+                                    <!-- 빈 상태 -->
+                                    <StackPanel x:Name="BuildingRegisterEmptyState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <TextBlock Text="🏢"
+                                                   FontSize="36"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBlock Text="업로드 필요"
+                                                   FontSize="13"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button x:Name="BtnUploadBuildingRegister"
+                                                Content="업로드"
+                                                Click="UploadBuildingRegister_Click"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="20,6"
+                                                FontSize="12"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- 5. 건축물대장 세부 -->
+                    <Border Grid.Column="2"
+                            Background="{StaticResource CardBackgroundBrush}"
+                            BorderBrush="{StaticResource BlueGray200Brush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="350"/>
+                            </Grid.RowDefinitions>
+                            
+                            <TextBlock Grid.Row="0"
+                                       Text="건축물대장 세부"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,12,0,8"/>
+                            
+                            <Border Grid.Row="1"
+                                    Margin="8,0,8,8"
+                                    Background="#F1F5F9"
+                                    CornerRadius="4">
+                                <Grid>
+                                    <!-- 이미지 표시 영역 -->
+                                    <Image x:Name="PreviewBuildingDetailImage"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    
+                                    <!-- 빈 상태 -->
+                                    <StackPanel x:Name="BuildingDetailEmptyState"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center">
+                                        <TextBlock Text="🏗️"
+                                                   FontSize="36"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+                                        <TextBlock Text="업로드 필요"
+                                                   FontSize="13"
+                                                   Foreground="{StaticResource BlueGray400Brush}"
+                                                   HorizontalAlignment="Center"/>
+                                        <Button x:Name="BtnUploadBuildingDetail"
+                                                Content="업로드"
+                                                Click="UploadBuildingDetail_Click"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="20,6"
+                                                FontSize="12"
+                                                Margin="0,12,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
                 
-                <!-- 5. 건축물대장 세부 -->
-                <Border Grid.Column="2"
-                        Background="{StaticResource CardBackgroundBrush}"
-                        BorderBrush="{StaticResource BlueGray200Brush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Margin="8,0,0,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <TextBlock Grid.Row="0"
-                                   Text="건축물대장 세부"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   HorizontalAlignment="Center"
-                                   Margin="0,12,0,8"/>
-                        
-                        <Border Grid.Row="1"
-                                Margin="8,0,8,8"
-                                Background="#F1F5F9"
-                                CornerRadius="4">
-                            <Grid>
-                                <!-- 이미지 표시 영역 -->
-                                <Image x:Name="PreviewBuildingDetailImage"
-                                       Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="HighQuality"/>
-                                
-                                <!-- 빈 상태 -->
-                                <StackPanel x:Name="BuildingDetailEmptyState"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center">
-                                    <TextBlock Text="🏗️"
-                                               FontSize="28"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock Text="업로드 필요"
-                                               FontSize="11"
-                                               Foreground="{StaticResource BlueGray400Brush}"
-                                               HorizontalAlignment="Center"/>
-                                    <Button x:Name="BtnUploadBuildingDetail"
-                                            Content="업로드"
-                                            Click="UploadBuildingDetail_Click"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="16,4"
-                                            FontSize="11"
-                                            Margin="0,8,0,0"/>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Grid>
+            </StackPanel>
+        </ScrollViewer>
         
         <!-- 숨겨진 WebView2 (캡처용) -->
         <Grid Visibility="Collapsed">

@@ -157,7 +157,11 @@ namespace NPLogic
                     sp.GetRequiredService<RegistryOcrService>(),
                     sp.GetRequiredService<Data.Repositories.PropertyQaRepository>(),
                     sp.GetRequiredService<SupabaseService>(),
-                    sp.GetRequiredService<Data.Repositories.ProgramRepository>()
+                    sp.GetRequiredService<Data.Repositories.ProgramRepository>(),
+                    null, // StaticMapService - default
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<Data.Repositories.LoanRepository>(),
+                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
@@ -173,13 +177,6 @@ namespace NPLogic
             services.AddTransient<ViewModels.SettingsViewModel>();
             services.AddTransient<ViewModels.AuditLogsViewModel>();
             services.AddTransient<ViewModels.SeniorRightsViewModel>();
-            services.AddTransient<ViewModels.AuctionScheduleViewModel>(sp =>
-            {
-                return new ViewModels.AuctionScheduleViewModel(
-                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
-                    sp.GetRequiredService<SupabaseService>()
-                );
-            });
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.ProgramManagementViewModel>();
             services.AddTransient<ViewModels.ProgramSettingsViewModel>();
@@ -327,13 +324,6 @@ namespace NPLogic
                 return view;
             });
 
-            services.AddTransient<Views.AuctionScheduleView>(sp =>
-            {
-                var view = new Views.AuctionScheduleView();
-                view.DataContext = sp.GetRequiredService<ViewModels.AuctionScheduleViewModel>();
-                return view;
-            });
-
             services.AddTransient<Views.PublicSaleScheduleView>(sp =>
             {
                 var view = new Views.PublicSaleScheduleView();
@@ -362,6 +352,8 @@ namespace NPLogic
             services.AddTransient<Views.ClosingTab>();
             services.AddTransient<Views.HomeTab>();
             services.AddTransient<Views.EvaluationTab>();
+            services.AddTransient<Views.MapView>();
+            services.AddTransient<Views.CollateralPropertyView>();
             services.AddTransient<Views.ProgramSettingsTab>(sp =>
             {
                 var view = new Views.ProgramSettingsTab();

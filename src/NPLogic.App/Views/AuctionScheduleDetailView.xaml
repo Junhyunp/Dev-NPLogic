@@ -1,0 +1,780 @@
+<UserControl x:Class="NPLogic.Views.AuctionScheduleDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NPLogic.Views"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1200"
+             Loaded="AuctionScheduleDetailView_Loaded">
+    
+    <UserControl.Resources>
+        <!-- 섹션 헤더 스타일 -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        
+        <!-- 라벨 스타일 -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <!-- 값 스타일 -->
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <!-- 금액 스타일 -->
+        <Style x:Key="AmountStyle" TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+        
+        <!-- 테이블 셀 Border 스타일 -->
+        <Style x:Key="TableCellStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        
+        <!-- 테이블 헤더 셀 스타일 -->
+        <Style x:Key="TableHeaderCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
+            <Setter Property="Background" Value="{StaticResource SurfaceColor}"/>
+        </Style>
+        
+        <!-- 토글 라디오 버튼 스타일 -->
+        <Style x:Key="ToggleRadioButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" 
+                                Background="{StaticResource SurfaceColor}"
+                                BorderBrush="{StaticResource TableBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4"
+                                Padding="12,6"
+                                Cursor="Hand">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- ========== 헤더 + 유형 선택 ========== -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="경(공)매 일정" 
+                               Style="{StaticResource H2TextStyle}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+                    
+                    <!-- 경매/공매 탭 -->
+                    <RadioButton x:Name="AuctionTab" 
+                                 Content="경매" 
+                                 GroupName="ScheduleType"
+                                 IsChecked="True"
+                                 Checked="ScheduleType_Changed"
+                                 Style="{StaticResource ToggleRadioButtonStyle}"
+                                 Margin="0,0,4,0"/>
+                    <RadioButton x:Name="PublicSaleTab" 
+                                 Content="공매" 
+                                 GroupName="ScheduleType"
+                                 Checked="ScheduleType_Changed"
+                                 Style="{StaticResource ToggleRadioButtonStyle}"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" 
+                        Content="저장" 
+                        Click="SaveButton_Click"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="24,10"/>
+            </Grid>
+            
+            <!-- ========== 1. 평가결과 섹션 ========== -->
+            <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="평가결과" Style="{StaticResource SectionHeaderStyle}"/>
+                    
+                    <!-- 테이블 -->
+                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 헤더 -->
+                            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="구분" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="낙찰가액" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="낙찰가율" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="토지평당낙찰가" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="건물평당 낙찰가" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="5" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="평가 사유" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            
+                            <!-- 시나리오 1 (하한) -->
+                            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="시나리오 1" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox x:Name="Scenario1WinningBid" 
+                                         Text="{Binding Scenario1WinningBid, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBlock x:Name="Scenario1BidRate" 
+                                           Text="{Binding Scenario1BidRate, StringFormat={}{0:F1}%}" 
+                                           Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="-" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="-" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="5" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="낙찰사례 적용" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- 시나리오 2 (상한) -->
+                            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="시나리오 2" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox x:Name="Scenario2WinningBid" 
+                                         Text="{Binding Scenario2WinningBid, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBlock x:Name="Scenario2BidRate" 
+                                           Text="{Binding Scenario2BidRate, StringFormat={}{0:F1}%}" 
+                                           Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="-" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="-" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="실거래가 적용" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 2. 대금 회수 섹션 ========== -->
+            <Border Grid.Row="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="대금 회수" Style="{StaticResource SectionHeaderStyle}"/>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 1안 -->
+                        <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" CornerRadius="4" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="1안 (하한)" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="일자" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="1" 
+                                                SelectedDate="{Binding RecoveryDate1}"
+                                                HorizontalAlignment="Stretch"/>
+                                    
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="금액" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" 
+                                             Text="{Binding RecoveryAmount1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 2안 -->
+                        <Border Grid.Column="2" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" CornerRadius="4" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="2안 (상한)" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="8"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="일자" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                    <DatePicker Grid.Row="0" Grid.Column="1" 
+                                                SelectedDate="{Binding RecoveryDate2}"
+                                                HorizontalAlignment="Stretch"/>
+                                    
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="금액" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                    <TextBox Grid.Row="2" Grid.Column="1" 
+                                             Text="{Binding RecoveryAmount2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 비고 -->
+                        <Border Grid.Column="4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" CornerRadius="4" Padding="12">
+                            <StackPanel>
+                                <TextBlock Text="비고" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                                <TextBox Text="{Binding RecoveryNote, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True"
+                                         TextWrapping="Wrap"
+                                         Height="60"
+                                         VerticalScrollBarVisibility="Auto"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 3. 수익자변경비용 / 경(공)매비용 섹션 ========== -->
+            <Border Grid.Row="3" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- 수익자변경비용 -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="수익자변경비용" Style="{StaticResource SectionHeaderStyle}"/>
+                        
+                        <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="1안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="2안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                
+                                <!-- 경(공)매개시일 -->
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock x:Name="SaleStartLabel" Text="경매개시일" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                    <DatePicker SelectedDate="{Binding SaleStartDate1}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <DatePicker SelectedDate="{Binding SaleStartDate2}"/>
+                                </Border>
+                                
+                                <!-- 낙찰가역 -->
+                                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="낙찰가역" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding Scenario1WinningBid, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding Scenario2WinningBid, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                
+                                <!-- 낙찰가율 -->
+                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="낙찰가율" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding Scenario1BidRate, StringFormat={}{0:F1}%}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding Scenario2BidRate, StringFormat={}{0:F1}%}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                    
+                    <!-- 경(공)매비용 -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock x:Name="SaleCostLabel" Text="경매비용" Style="{StaticResource SectionHeaderStyle}"/>
+                        
+                        <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <!-- 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="구분" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="1안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="2안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                
+                                <!-- 온비드수수료 (공매) / 경매비용 (경매) -->
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock x:Name="CostItem1Label" Text="경매비용" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                    <TextBox Text="{Binding AuctionCost1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBox Text="{Binding AuctionCost2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Border>
+                                
+                                <!-- 감정평가료 -->
+                                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="감정평가료" Style="{StaticResource LabelStyle}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                    <TextBox Text="{Binding AppraisalFee1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBox Text="{Binding AppraisalFee2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </Border>
+                                
+                                <!-- 합계 -->
+                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                    <TextBlock Text="합계" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                    <TextBlock Text="{Binding TotalCost1, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                    <TextBlock Text="{Binding TotalCost2, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- ========== 4. 배당/회수 계산 섹션 ========== -->
+            <Border Grid.Row="4" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="배당/회수 계산" Style="{StaticResource SectionHeaderStyle}"/>
+                    
+                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="200"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 헤더 -->
+                            <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="항목" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="1안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="2안" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
+                                <TextBlock Text="비고" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            
+                            <!-- 추정낙찰액 -->
+                            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="추정낙찰액" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding Scenario1WinningBid, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding Scenario2WinningBid, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- 선순위차감 -->
+                            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="선순위차감" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding SeniorDeduction1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding SeniorDeduction2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="선순위 참고" Style="{StaticResource ValueStyle}" Foreground="{StaticResource PrimaryBrush}"/>
+                            </Border>
+                            
+                            <!-- 경(공)매비용 -->
+                            <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock x:Name="SaleCostRowLabel" Text="경매비용" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding TotalCost1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding TotalCost2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- 환가처분 보수 -->
+                            <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="환가처분 보수" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding DisposalFee1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding DisposalFee2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- 배당가능액-안분전 -->
+                            <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="배당가능액-안분전" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding DistributableBeforeProration1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="{Binding DistributableBeforeProration2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- LoanCap -->
+                            <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="LoanCap" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding LoanCap1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding LoanCap2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- MortgageCap -->
+                            <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="MortgageCap" Style="{StaticResource LabelStyle}"/>
+                            </Border>
+                            <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding MortgageCap1, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                <TextBox Text="{Binding MortgageCap2, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                         HorizontalContentAlignment="Right"/>
+                            </Border>
+                            <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                            
+                            <!-- Cap반영배당액 -->
+                            <Border Grid.Row="8" Grid.Column="0" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                <TextBlock Text="Cap반영배당액" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Row="8" Grid.Column="1" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                <TextBlock Text="{Binding CapAppliedDividend1, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"/>
+                            </Border>
+                            <Border Grid.Row="8" Grid.Column="2" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                <TextBlock Text="{Binding CapAppliedDividend2, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"/>
+                            </Border>
+                            <Border Grid.Row="8" Grid.Column="3" Style="{StaticResource TableCellStyle}" Background="{StaticResource SurfaceColor}">
+                                <TextBlock Text="" Style="{StaticResource ValueStyle}"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 5. Lead time 추정 섹션 ========== -->
+            <Border Grid.Row="5" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <TextBlock Grid.Column="0" Text="Lead time 추정" Style="{StaticResource SectionHeaderStyle}"/>
+                            
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,16,0">
+                                <TextBlock x:Name="LeadTimeLabel" Text="* 경매 Lead time" Style="{StaticResource LabelStyle}" Margin="0,0,8,0"/>
+                                <TextBox x:Name="LeadTimeInput" 
+                                         Text="{Binding LeadTimeDays, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="50" 
+                                         HorizontalContentAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                <TextBlock x:Name="DiscountRateLabel" Text="* 경매 저감율" Style="{StaticResource LabelStyle}" Margin="0,0,8,0"/>
+                                <TextBox Text="{Binding DiscountRate, UpdateSourceTrigger=PropertyChanged}"
+                                         Width="50" 
+                                         HorizontalContentAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                        
+                        <!-- Lead time 테이블 -->
+                        <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0" MaxHeight="300">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding LeadTimeSchedules}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="60"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <Border Grid.Column="0" Style="{StaticResource TableCellStyle}">
+                                                    <TextBlock Text="{Binding Round}" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border Grid.Column="1" Style="{StaticResource TableCellStyle}">
+                                                    <TextBlock Text="{Binding Date, StringFormat=yyyy-MM-dd}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                                    <TextBlock Text="{Binding MinimumBid, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                        
+                        <!-- 헤더 (테이블 위에 고정) -->
+                        <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,0,0,0" Margin="0,-300,0,0" VerticalAlignment="Top" Visibility="Collapsed">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Border Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="회차" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="날짜" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="최저입찰가" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                    
+                    <!-- 감정평가 정보 -->
+                    <Border Grid.Column="2" 
+                            BorderBrush="{StaticResource TableBorderBrush}" 
+                            BorderThickness="1" 
+                            CornerRadius="4" 
+                            Padding="12"
+                            Width="200">
+                        <StackPanel>
+                            <TextBlock Text="&lt;&lt; 감정평가" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
+                            
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="8"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="감정가" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppraisalValue, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="기준일" Style="{StaticResource LabelStyle}" Margin="0,0,12,0"/>
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AppraisalDate, StringFormat=yyyy-MM-dd}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+            
+            <!-- ========== 6. 회수가능액 요약 ========== -->
+            <Border Grid.Row="6" Background="{StaticResource PrimaryBrush}" CornerRadius="8" Padding="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" 
+                               Text="회수가능액" 
+                               FontSize="16" 
+                               FontWeight="SemiBold" 
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                    
+                    <StackPanel Grid.Column="1" Margin="0,0,40,0">
+                        <TextBlock Text="1안 (하한)" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="{Binding RecoverableAmount1, StringFormat=N0}" 
+                                   Foreground="White" 
+                                   FontSize="20" 
+                                   FontWeight="Bold"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="2안 (상한)" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="{Binding RecoverableAmount2, StringFormat=N0}" 
+                                   Foreground="White" 
+                                   FontSize="20" 
+                                   FontWeight="Bold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

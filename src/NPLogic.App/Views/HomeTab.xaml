@@ -6,8 +6,57 @@
              xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="900" d:DesignWidth="1400"
+             d:DesignHeight="1200" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}">
+    
+    <UserControl.Resources>
+        <!-- 카드 스타일 -->
+        <Style x:Key="SummaryCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- 카드 헤더 스타일 -->
+        <Style x:Key="CardHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+        
+        <!-- 라벨 스타일 -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+        
+        <!-- 값 스타일 -->
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+        
+        <!-- 금액 값 스타일 -->
+        <Style x:Key="AmountValueStyle" TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        </Style>
+        
+        <!-- 상태 뱃지 스타일 -->
+        <Style x:Key="StatusBadgeStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="4,0"/>
+        </Style>
+    </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="24">
@@ -16,10 +65,10 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
-            <!-- ========== 물건 개요 카드 ========== -->
+            <!-- ========== Row 0: 물건 헤더 ========== -->
             <Border Grid.Row="0"
                     Background="{StaticResource PrimaryLightBrush}"
                     CornerRadius="12"
@@ -45,14 +94,14 @@
                             <Run Text="{Binding Property.PropertyNumber}" FontWeight="Bold"/>
                         </TextBlock>
                         
-                        <TextBlock Text="{Binding Property.AddressFull}" 
+                        <TextBlock Text="{Binding DisplayAddress}" 
                                    Style="{StaticResource BodyTextStyle}"
                                    TextWrapping="Wrap"
                                    Opacity="0.8"
                                    Margin="0,0,0,12"/>
                         
                         <StackPanel Orientation="Horizontal">
-                            <!-- 물건 유형 뱃지 (유형이 있을 때만 표시) -->
+                            <!-- 물건 유형 뱃지 -->
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="4"
                                     Padding="12,6"
@@ -65,8 +114,7 @@
                             </Border>
                             
                             <!-- 상태 뱃지 -->
-                            <Border CornerRadius="4"
-                                    Padding="12,6">
+                            <Border CornerRadius="4" Padding="12,6">
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
@@ -118,119 +166,290 @@
                 </Grid>
             </Border>
             
-            <!-- ========== 핵심 지표 카드들 ========== -->
-            <Grid Grid.Row="1" Margin="0,0,0,20">
+            <!-- ========== Row 1: 차주 정보 + Loan 요약 ========== -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <!-- 감정평가액 -->
-                <Border Grid.Column="0"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
+                <!-- 차주 정보 카드 -->
+                <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="감정평가액" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding Property.AppraisalValue, StringFormat={}{0:N0}원}" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   Foreground="{StaticResource PrimaryBrush}"
-                                   FontWeight="Bold"/>
+                        <TextBlock Text="차주 정보" Style="{StaticResource CardHeaderStyle}"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 차주번호 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="차주번호" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding BorrowerSummary.BorrowerNumber, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 차주명 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="차주명" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding BorrowerSummary.BorrowerName, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 차주유형 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="차주유형" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding BorrowerSummary.BorrowerType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 상태 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="상태" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                                <Border Background="#FFEBEE" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
+                                        Visibility="{Binding BorrowerSummary.IsRestructuring, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="회생" FontSize="11" Foreground="#C62828"/>
+                                </Border>
+                                <Border Background="#FFF3E0" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
+                                        Visibility="{Binding BorrowerSummary.IsOpened, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="개회" FontSize="11" Foreground="#E65100"/>
+                                </Border>
+                                <Border Background="#EFEBE9" CornerRadius="3" Padding="6,2"
+                                        Visibility="{Binding BorrowerSummary.IsDeceased, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <TextBlock Text="사망" FontSize="11" Foreground="#4E342E"/>
+                                </Border>
+                                <TextBlock Text="정상" Foreground="{StaticResource SuccessBrush}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding BorrowerSummary.IsRestructuring}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding BorrowerSummary.IsOpened}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding BorrowerSummary.IsDeceased}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                            
+                            <!-- OPB -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="OPB" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding BorrowerSummary.OpbDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- XNPV 1안 -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="XNPV 1안" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="{Binding BorrowerSummary.XnpvScenario1, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding BorrowerSummary.XnpvRatio1Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
+                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            
+                            <!-- XNPV 2안 -->
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="XNPV 2안" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="{Binding BorrowerSummary.XnpvScenario2, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding BorrowerSummary.XnpvRatio2Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
+                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                 </Border>
                 
-                <!-- 최저입찰가 -->
-                <Border Grid.Column="2"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
+                <!-- Loan 요약 카드 -->
+                <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="최저입찰가" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Text="{Binding Property.MinimumBid, StringFormat={}{0:N0}원}" 
-                                   Style="{StaticResource H3TextStyle}"
-                                   FontWeight="Bold"/>
-                    </StackPanel>
-                </Border>
-                
-                <!-- 토지 면적 -->
-                <Border Grid.Column="4"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="토지 면적" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
-                            <Run Text="{Binding Property.LandArea, StringFormat={}{0:N2}}"/>
-                            <Run Text="㎡" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-                
-                <!-- 건물 면적 -->
-                <Border Grid.Column="6"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
-                    <StackPanel>
-                        <TextBlock Text="건물 면적" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   Margin="0,0,0,8"/>
-                        <TextBlock Style="{StaticResource H3TextStyle}" FontWeight="Bold">
-                            <Run Text="{Binding Property.BuildingArea, StringFormat={}{0:N2}}"/>
-                            <Run Text="㎡" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                        </TextBlock>
+                        <TextBlock Text="Loan 요약" Style="{StaticResource CardHeaderStyle}"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 대출 건수 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="대출 건수" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource ValueStyle}">
+                                <Run Text="{Binding LoanSummary.LoanCount, FallbackValue=0}"/>
+                                <Run Text="건" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </TextBlock>
+                            
+                            <!-- 대출원금잔액 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="대출원금잔액" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LoanSummary.TotalPrincipalBalanceDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- 채권액 합계 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="채권액 합계" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LoanSummary.TotalClaimAmountDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- Loan Cap 1안 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Loan Cap 1안" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LoanSummary.TotalLoanCap1Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- Loan Cap 2안 -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Loan Cap 2안" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding LoanSummary.TotalLoanCap2Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- 보증서 현황 -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="보증서 현황" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding LoanSummary.GuaranteeStatusDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
             </Grid>
             
-            <!-- ========== 상세 정보 그리드 ========== -->
-            <Grid Grid.Row="2" Margin="0,0,0,20">
+            <!-- ========== Row 2: 담보물건 + 선순위 ========== -->
+            <Grid Grid.Row="2" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="16"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <!-- 담보 정보 -->
-                <Border Grid.Column="0"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
-                    
-                    <controls:NPExpandableSection Header="담보 정보" IsExpanded="True">
+                <!-- 담보물건 카드 -->
+                <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="담보물건" Style="{StaticResource CardHeaderStyle}"/>
+                        
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 담보종류 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="담보종류" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CollateralSummary.PropertyType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 토지 면적 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="토지 면적" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CollateralSummary.LandAreaDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 건물 면적 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="건물 면적" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CollateralSummary.BuildingAreaDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 감정평가액 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="감정평가액" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CollateralSummary.AppraisalValueDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- 공장저당 -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="공장저당" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CollateralSummary.FactoryMortgageDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            
+                            <!-- 공단입주 -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="공단입주" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CollateralSummary.IndustrialComplexDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- 선순위 요약 카드 -->
+                <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="선순위 요약" Style="{StaticResource CardHeaderStyle}"/>
+                            <TextBlock Text=" (DD/반영)" 
+                                       FontSize="{StaticResource FontSizeSmall}" 
+                                       Foreground="{StaticResource TextTertiaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,12"/>
+                        </StackPanel>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- 선순위 근저당 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="선순위근저당" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorMortgageDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 유치권 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="유치권" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SeniorRightsSummary.LienDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 소액보증금 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="소액보증금" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SeniorRightsSummary.SmallDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 임차보증금 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="임차보증금" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SeniorRightsSummary.LeaseDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 임금채권 -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="임금채권" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SeniorRightsSummary.WageClaimDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 당해세 -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="당해세" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SeniorRightsSummary.CurrentTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 조세채권 -->
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="조세채권" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            
+                            <!-- 합계 -->
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="합계" Style="{StaticResource LabelStyle}" FontWeight="Bold"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding SeniorRightsSummary.TotalReflectedDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            
+            <!-- ========== Row 3: 평가 요약 + 경(공)매일정 ========== -->
+            <Grid Grid.Row="3" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- 평가 요약 카드 -->
+                <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="평가 요약" Style="{StaticResource CardHeaderStyle}"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -241,68 +460,51 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="담보물형태" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
-                                       Text="{Binding Property.PropertyType}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="SemiBold"
-                                       Margin="0,8"/>
+                            <!-- 평가유형 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="평가유형" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding EvaluationSummary.EvaluationType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
                             
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="토지 면적 (평)" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Text="{Binding LandAreaPyeong, StringFormat={}{0:N2}평}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 시나리오1 낙찰가 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="1안 낙찰가" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1BidRateDisplay, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
+                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
                             
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="건물 면적 (평)" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" 
-                                       Text="{Binding BuildingAreaPyeong, StringFormat={}{0:N2}평}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 시나리오2 낙찰가 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="2안 낙찰가" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2BidRateDisplay, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
+                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
                             
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="층수" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" 
-                                       Text="{Binding Property.Floors}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 적용 낙찰가율 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="적용 낙찰가율" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding EvaluationSummary.AppliedBidRateDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}" Foreground="{StaticResource PrimaryBrush}"/>
                             
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="공장저당여부" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
+                            <!-- 평가사유 -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="평가사유" Style="{StaticResource LabelStyle}"/>
                             <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Text="-" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                                       Text="{Binding EvaluationSummary.EvaluationReason, FallbackValue=-}" 
+                                       Style="{StaticResource ValueStyle}"
+                                       TextTrimming="CharacterEllipsis"
+                                       ToolTip="{Binding EvaluationSummary.EvaluationReason}"/>
                         </Grid>
-                    </controls:NPExpandableSection>
+                    </StackPanel>
                 </Border>
                 
-                <!-- 평가 요약 -->
-                <Border Grid.Column="2"
-                        Background="{StaticResource BackgroundBrush}"
-                        CornerRadius="8"
-                        Padding="20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                    </Border.Effect>
-                    
-                    <controls:NPExpandableSection Header="평가 요약" IsExpanded="True">
+                <!-- 경(공)매일정 카드 -->
+                <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="경(공)매일정" Style="{StaticResource CardHeaderStyle}"/>
+                        
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -311,71 +513,72 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="토지 감정평가액" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" 
-                                       Text="{Binding LandAppraisalValue, StringFormat={}{0:N0}원}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 경매개시여부 -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="경매개시" Style="{StaticResource LabelStyle}"/>
+                            <Border Grid.Row="0" Grid.Column="1" 
+                                    HorizontalAlignment="Left"
+                                    CornerRadius="3" 
+                                    Padding="8,3"
+                                    Margin="0,4">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="#E3F2FD"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding AuctionSummary.IsAuctionStarted}" Value="True">
+                                                <Setter Property="Background" Value="#E8F5E9"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=미개시}" FontSize="12">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#1565C0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding AuctionSummary.IsAuctionStarted}" Value="True">
+                                                    <Setter Property="Foreground" Value="#2E7D32"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
                             
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="건물 감정평가액" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
+                            <!-- 관할법원/사건번호 -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="법원/사건번호" Style="{StaticResource LabelStyle}"/>
                             <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Text="{Binding BuildingAppraisalValue, StringFormat={}{0:N0}원}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                                       Text="{Binding AuctionSummary.CourtCaseDisplay, FallbackValue=-}" 
+                                       Style="{StaticResource ValueStyle}"
+                                       TextTrimming="CharacterEllipsis"/>
                             
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="기계 감정평가액" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" 
-                                       Text="{Binding MachineAppraisalValue, StringFormat={}{0:N0}원}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 최종경매 -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="최종경매" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AuctionSummary.FinalAuctionDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
                             
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="감정평가액 합계" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       FontWeight="Bold"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" 
-                                       Text="{Binding Property.AppraisalValue, StringFormat={}{0:N0}원}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       FontWeight="Bold"
-                                       Foreground="{StaticResource PrimaryBrush}"
-                                       Margin="0,8"/>
+                            <!-- 차후예정일 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="차후예정일" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AuctionSummary.NextAuctionDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}" Foreground="{StaticResource WarningBrush}"/>
                             
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="매각가" 
-                                       Style="{StaticResource CaptionTextStyle}" 
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       Margin="0,8"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Text="{Binding Property.SalePrice, StringFormat={}{0:N0}원}" 
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Margin="0,8"/>
+                            <!-- 차후 최저입찰가 -->
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="최저입찰가" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AuctionSummary.NextMinimumBidDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            
+                            <!-- 낙찰금액 -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="낙찰금액" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AuctionSummary.WinningBidAmountDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
                         </Grid>
-                    </controls:NPExpandableSection>
+                    </StackPanel>
                 </Border>
             </Grid>
             
-            <!-- ========== 알림/진행상황 ========== -->
-            <Border Grid.Row="3"
-                    Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="20"
-                    Margin="0,0,0,20">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
-                
-                <controls:NPExpandableSection Header="진행 현황" IsExpanded="True">
+            <!-- ========== Row 4: QA 요약 ========== -->
+            <Border Grid.Row="4" Style="{StaticResource SummaryCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="QA 요약" Style="{StaticResource CardHeaderStyle}"/>
+                    
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -383,308 +586,125 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <!-- 등기부 진행 -->
-                        <Border Grid.Column="0" Margin="0,0,8,0" Padding="12" CornerRadius="6"
-                                Background="{StaticResource BlueGray50Brush}">
+                        <!-- 전체 QA -->
+                        <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="등기부" 
-                                           HorizontalAlignment="Center"
+                                <TextBlock Text="전체" 
                                            Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
-                                <Border Width="40" Height="40" CornerRadius="20" 
-                                        Background="{StaticResource SuccessBrush}"
-                                        HorizontalAlignment="Center">
-                                    <TextBlock Text="✓" Foreground="White" 
-                                               FontSize="18" FontWeight="Bold"
-                                               HorizontalAlignment="Center" 
-                                               VerticalAlignment="Center"/>
-                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding Property.QaUnansweredCount, FallbackValue=0}" 
+                                               FontWeight="Bold" FontSize="16"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" FontSize="14" Opacity="0.5" Margin="2,0" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="{Binding QaList.Count, FallbackValue=0}" 
+                                               FontSize="14" Opacity="0.7" VerticalAlignment="Bottom"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                         
-                        <!-- 비핵심 진행 -->
-                        <Border Grid.Column="1" Margin="0,0,8,0" Padding="12" CornerRadius="6"
-                                Background="{StaticResource BlueGray50Brush}">
+                        <!-- 론 QA -->
+                        <Border Grid.Column="1" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="비핵심" 
-                                           HorizontalAlignment="Center"
+                                <TextBlock Text="론" 
                                            Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
-                                <Border Width="40" Height="40" CornerRadius="20" 
-                                        Background="{StaticResource InfoBrush}"
-                                        HorizontalAlignment="Center">
-                                    <TextBlock Text="..." Foreground="White" 
-                                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold"
-                                               HorizontalAlignment="Center" 
-                                               VerticalAlignment="Center"/>
-                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding LoanQaPendingCount, FallbackValue=0}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                    <TextBlock Text="{Binding LoanQaTotalCount, FallbackValue=0}" 
+                                               Opacity="0.7"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                         
-                        <!-- 권리분석 진행 -->
-                        <Border Grid.Column="2" Margin="0,0,8,0" Padding="12" CornerRadius="6"
-                                Background="{StaticResource BlueGray50Brush}">
+                        <!-- 담보물건 QA -->
+                        <Border Grid.Column="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="권리분석" 
-                                           HorizontalAlignment="Center"
+                                <TextBlock Text="담보물건" 
                                            Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
-                                <Border Width="40" Height="40" CornerRadius="20" 
-                                        Background="{StaticResource BlueGray300Brush}"
-                                        HorizontalAlignment="Center">
-                                    <TextBlock Text="-" Foreground="White" 
-                                               FontSize="18" FontWeight="Bold"
-                                               HorizontalAlignment="Center" 
-                                               VerticalAlignment="Center"/>
-                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding CollateralQaPendingCount, FallbackValue=0}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                    <TextBlock Text="{Binding CollateralQaTotalCount, FallbackValue=0}" 
+                                               Opacity="0.7"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                         
-                        <!-- 마감 진행 -->
-                        <Border Grid.Column="3" Margin="0,0,8,0" Padding="12" CornerRadius="6"
-                                Background="{StaticResource BlueGray50Brush}">
+                        <!-- 선순위 QA -->
+                        <Border Grid.Column="3" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="마감" 
-                                           HorizontalAlignment="Center"
+                                <TextBlock Text="선순위" 
                                            Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
-                                <Border Width="40" Height="40" CornerRadius="20" 
-                                        Background="{StaticResource BlueGray300Brush}"
-                                        HorizontalAlignment="Center">
-                                    <TextBlock Text="-" Foreground="White" 
-                                               FontSize="18" FontWeight="Bold"
-                                               HorizontalAlignment="Center" 
-                                               VerticalAlignment="Center"/>
-                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding SeniorQaPendingCount, FallbackValue=0}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                    <TextBlock Text="{Binding SeniorQaTotalCount, FallbackValue=0}" 
+                                               Opacity="0.7"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                         
-                        <!-- QA 상태 -->
-                        <Border Grid.Column="4" Padding="12" CornerRadius="6"
-                                Background="{StaticResource BlueGray50Brush}">
+                        <!-- 평가 QA -->
+                        <Border Grid.Column="4" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12" Margin="0,0,8,0">
                             <StackPanel HorizontalAlignment="Center">
-                                <TextBlock Text="QA" 
-                                           HorizontalAlignment="Center"
+                                <TextBlock Text="평가" 
                                            Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
                                            Margin="0,0,0,4"/>
-                                <Border Width="40" Height="40" CornerRadius="20" 
-                                        HorizontalAlignment="Center">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Property.QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
-                                                    <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock Foreground="White" 
-                                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold"
-                                               HorizontalAlignment="Center" 
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="✓"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Property.QaUnansweredCount, Converter={StaticResource IntToVisibilityConverter}}" Value="Visible">
-                                                        <Setter Property="Text" Value="{Binding Property.QaUnansweredCount}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding EvalQaPendingCount, FallbackValue=0}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                    <TextBlock Text="{Binding EvalQaTotalCount, FallbackValue=0}" 
+                                               Opacity="0.7"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- 경공매 QA -->
+                        <Border Grid.Column="5" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="12">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="경공매" 
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding AuctionQaPendingCount, FallbackValue=0}" 
+                                               FontWeight="SemiBold"
+                                               Foreground="#E65100"/>
+                                    <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
+                                    <TextBlock Text="{Binding AuctionQaTotalCount, FallbackValue=0}" 
+                                               Opacity="0.7"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </Grid>
-                </controls:NPExpandableSection>
-            </Border>
-            
-            <!-- ========== QA 종합 현황 ========== -->
-            <Border Grid.Row="4"
-                    Background="{StaticResource BackgroundBrush}"
-                    CornerRadius="8"
-                    Padding="20">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="10" ShadowDepth="2"/>
-                </Border.Effect>
-                
-                <controls:NPExpandableSection Header="QA 종합 현황" IsExpanded="True">
-                    <StackPanel>
-                        <!-- QA 요약 통계 -->
-                        <Grid Margin="0,0,0,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- 전체 QA -->
-                            <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="6" Padding="16" Margin="0,0,8,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="전체 QA" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,8"/>
-                                    <TextBlock Text="{Binding TotalQaCount, FallbackValue=0}" 
-                                               Style="{StaticResource H2TextStyle}"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 미회신 -->
-                            <Border Grid.Column="1" Background="#FFF3E0" CornerRadius="6" Padding="16" Margin="0,0,8,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="미회신" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               Foreground="#E65100"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,8"/>
-                                    <TextBlock Text="{Binding Property.QaUnansweredCount, FallbackValue=0}" 
-                                               Style="{StaticResource H2TextStyle}"
-                                               FontWeight="Bold"
-                                               Foreground="#E65100"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 답변완료 -->
-                            <Border Grid.Column="2" Background="#E8F5E9" CornerRadius="6" Padding="16">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="답변완료" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               Foreground="#2E7D32"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,8"/>
-                                    <TextBlock Text="{Binding AnsweredQaCount, FallbackValue=0}" 
-                                               Style="{StaticResource H2TextStyle}"
-                                               FontWeight="Bold"
-                                               Foreground="#2E7D32"
-                                               HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                        
-                        <!-- 탭별 QA 현황 -->
-                        <TextBlock Text="탭별 QA 현황" 
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   FontWeight="SemiBold"
-                                   Margin="0,0,0,12"/>
-                        
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- 론 QA -->
-                            <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="론" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding LoanQaPendingCount, FallbackValue=0}" 
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#E65100"/>
-                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
-                                        <TextBlock Text="{Binding LoanQaTotalCount, FallbackValue=0}" 
-                                                   Opacity="0.7"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 담보물건 QA -->
-                            <Border Grid.Column="1" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="담보물건" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding CollateralQaPendingCount, FallbackValue=0}" 
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#E65100"/>
-                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
-                                        <TextBlock Text="{Binding CollateralQaTotalCount, FallbackValue=0}" 
-                                                   Opacity="0.7"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 선순위 QA -->
-                            <Border Grid.Column="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="선순위" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding SeniorQaPendingCount, FallbackValue=0}" 
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#E65100"/>
-                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
-                                        <TextBlock Text="{Binding SeniorQaTotalCount, FallbackValue=0}" 
-                                                   Opacity="0.7"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 평가 QA -->
-                            <Border Grid.Column="3" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,4,0">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="평가" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding EvalQaPendingCount, FallbackValue=0}" 
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#E65100"/>
-                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
-                                        <TextBlock Text="{Binding EvalQaTotalCount, FallbackValue=0}" 
-                                                   Opacity="0.7"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 경공매일정 QA -->
-                            <Border Grid.Column="4" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12">
-                                <StackPanel HorizontalAlignment="Center">
-                                    <TextBlock Text="경공매" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               HorizontalAlignment="Center"
-                                               Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding AuctionQaPendingCount, FallbackValue=0}" 
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#E65100"/>
-                                        <TextBlock Text="/" Opacity="0.5" Margin="2,0"/>
-                                        <TextBlock Text="{Binding AuctionQaTotalCount, FallbackValue=0}" 
-                                                   Opacity="0.7"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                        
-                        <!-- 안내 문구 -->
-                        <TextBlock Text="* 미회신/전체 형식으로 표시됩니다. 각 탭에서 QA를 관리할 수 있습니다."
-                                   Style="{StaticResource CaptionTextStyle}"
-                                   Foreground="{StaticResource TextTertiaryBrush}"
-                                   Margin="0,12,0,0"/>
-                    </StackPanel>
-                </controls:NPExpandableSection>
+                    
+                    <!-- 안내 문구 -->
+                    <TextBlock Text="* 미회신/전체 형식으로 표시됩니다. 각 탭에서 QA를 관리할 수 있습니다."
+                               Style="{StaticResource CaptionTextStyle}"
+                               Foreground="{StaticResource TextTertiaryBrush}"
+                               Margin="0,12,0,0"/>
+                </StackPanel>
             </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>
-

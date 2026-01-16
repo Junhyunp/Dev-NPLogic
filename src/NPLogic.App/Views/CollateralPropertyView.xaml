@@ -1,0 +1,496 @@
+<UserControl x:Class="NPLogic.Views.CollateralPropertyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}">
+    
+    <UserControl.Resources>
+        <!-- 테이블 헤더 스타일 -->
+        <Style x:Key="TableHeaderCell" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+        
+        <!-- 테이블 데이터 셀 스타일 -->
+        <Style x:Key="TableDataCell" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24">
+                
+                <!-- ========== 상단: 버튼 바 (위성도, 지적도, 로드뷰, 토지이용계획, 건축물대장) ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource PrimaryBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 버튼들 -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Padding="16,8"
+                                    Margin="0,0,8,0"
+                                    Click="OpenSatelliteMap_Click"
+                                    ToolTip="위성도 열기">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Satellite" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="위성도" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Padding="16,8"
+                                    Margin="0,0,8,0"
+                                    Click="OpenCadastralMap_Click"
+                                    ToolTip="지적도 열기">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Map" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="지적도" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Padding="16,8"
+                                    Margin="0,0,8,0"
+                                    Click="OpenRoadView_Click"
+                                    ToolTip="로드뷰 열기">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Walk" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="로드뷰" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Padding="16,8"
+                                    Margin="0,0,8,0"
+                                    Click="OpenLandUsePlan_Click"
+                                    ToolTip="토지이용계획 열기">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="FileDocument" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="토지이용계획" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            
+                            <Button Style="{StaticResource SecondaryButton}"
+                                    Padding="16,8"
+                                    Click="OpenBuildingRegister_Click"
+                                    ToolTip="건축물대장 열기">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="OfficeBuildingMarker" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="건축물대장" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        
+                        <!-- 등기부 탭으로 이동 버튼 -->
+                        <Button Grid.Column="1"
+                                Style="{StaticResource PrimaryButton}"
+                                Padding="16,8"
+                                Click="GoToRegistryTab_Click"
+                                ToolTip="등기부 탭으로 이동">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FileDocumentOutline" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="등기부 탭으로 이동" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+                
+                <!-- ========== 물건 기본 정보 테이블 ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <TextBlock Text="📍 물건 기본 정보" 
+                                       Foreground="White" 
+                                       FontWeight="SemiBold"
+                                       FontSize="14"/>
+                        </Border>
+                        
+                        <!-- 테이블 -->
+                        <Grid Margin="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- Row 1: 주소 + 토지면적 + 건물면적 + 층수 -->
+                            <Border Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="주소" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                <TextBlock Text="{Binding Property.AddressFull, FallbackValue='-'}" 
+                                           TextWrapping="Wrap"
+                                           FontWeight="SemiBold"/>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="토지 면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="3" Style="{StaticResource TableDataCell}">
+                                <TextBlock HorizontalAlignment="Right">
+                                    <Run Text="{Binding Property.LandArea, StringFormat=N2, FallbackValue='-'}"/>
+                                    <Run Text=" ㎡" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </TextBlock>
+                            </Border>
+                            <Border Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="건물 면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="5" Style="{StaticResource TableDataCell}">
+                                <TextBlock HorizontalAlignment="Right">
+                                    <Run Text="{Binding Property.BuildingArea, StringFormat=N2, FallbackValue='-'}"/>
+                                    <Run Text=" ㎡" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </TextBlock>
+                            </Border>
+                            <Border Grid.Column="6" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="층수" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                <TextBlock Text="{Binding Property.Floors, FallbackValue='-'}" HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- Row 2: 추가 정보 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="담보종류" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="{Binding Property.PropertyType, FallbackValue='-'}"/>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="공장저당" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="{Binding IsFactoryMortgageText, FallbackValue='-'}"/>
+                            </Border>
+                            <Border Grid.Column="4" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="준공년도" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
+                                <TextBlock Text="{Binding Property.CompletionDate, StringFormat=yyyy, FallbackValue='-'}"/>
+                            </Border>
+                            <Border Grid.Column="6" Grid.ColumnSpan="2" Style="{StaticResource TableDataCell}" BorderThickness="0">
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- ========== 등기부등본 정보 ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <TextBlock Text="📄 등기부등본 정보" 
+                                       Foreground="White" 
+                                       FontWeight="SemiBold"
+                                       FontSize="14"/>
+                        </Border>
+                        
+                        <!-- 3열 테이블 (표제부, 갑구, 을구) -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 표제부 -->
+                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                                <StackPanel>
+                                    <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                        <TextBlock Text="표제부" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Padding="12" MinHeight="100">
+                                        <TextBlock Text="{Binding RegistryTitleSummary, FallbackValue='등기부 탭에서 확인'}"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="13"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 갑구 (소유권) -->
+                            <Border Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                                <StackPanel>
+                                    <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                        <TextBlock Text="갑구 (소유권)" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Padding="12" MinHeight="100">
+                                        <TextBlock Text="{Binding RegistryOwnershipSummary, FallbackValue='등기부 탭에서 확인'}"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="13"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 을구 (근저당) -->
+                            <Border Grid.Column="2">
+                                <StackPanel>
+                                    <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                        <TextBlock Text="을구 (근저당)" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Padding="12" MinHeight="100">
+                                        <TextBlock Text="{Binding RegistryMortgageSummary, FallbackValue='등기부 탭에서 확인'}"
+                                                   TextWrapping="Wrap"
+                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                   FontSize="13"/>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- ========== 감정평가 정보 ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <TextBlock Text="💰 감정평가 정보" 
+                                       Foreground="White" 
+                                       FontWeight="SemiBold"
+                                       FontSize="14"/>
+                        </Border>
+                        
+                        <!-- 감정평가 기본 정보 -->
+                        <Grid Margin="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="감정평가구분" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                <TextBlock Text="{Binding AppraisalType, FallbackValue='-'}"/>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="감정평가기관" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="3" Style="{StaticResource TableDataCell}">
+                                <TextBlock Text="{Binding AppraisalAgency, FallbackValue='-'}"/>
+                            </Border>
+                            <Border Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                <TextBlock Text="감정평가일자" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </Border>
+                            <Border Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                <TextBlock Text="{Binding Property.AppraisalDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- 감정평가액 정보 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 토지 감정평가액 -->
+                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="토지 감정평가액" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold">
+                                        <Run Text="{Binding LandAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 건물 감정평가액 -->
+                            <Border Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="건물 감정평가액" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold">
+                                        <Run Text="{Binding BuildingAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 기계 감정평가액 -->
+                            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="기계 감정평가액" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold">
+                                        <Run Text="{Binding MachineAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 감정평가액 합계 -->
+                            <Border Grid.Column="3" Background="{StaticResource PrimaryBrush}" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="감정평가액 합계" 
+                                               FontSize="12" 
+                                               Foreground="#B0FFFFFF"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="18" FontWeight="Bold" Foreground="White">
+                                        <Run Text="{Binding Property.AppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- ========== 선순위 요약 정보 ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <TextBlock Text="⚖️ 선순위 요약" 
+                                       Foreground="White" 
+                                       FontWeight="SemiBold"
+                                       FontSize="14"/>
+                        </Border>
+                        
+                        <!-- 선순위 금액들 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <!-- 임차인 보증금 -->
+                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="임차인 보증금" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
+                                        <Run Text="{Binding TenantDeposit, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 당해세 -->
+                            <Border Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="당해세" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
+                                        <Run Text="{Binding LocalTax, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 기타 선순위 -->
+                            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="기타 선순위" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
+                                        <Run Text="{Binding OtherSeniorRights, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- 선순위 합계 -->
+                            <Border Grid.Column="3" Background="#FFEBEE" Padding="16,12">
+                                <StackPanel>
+                                    <TextBlock Text="선순위 합계" 
+                                               FontSize="12" 
+                                               Foreground="#C62828"
+                                               Margin="0,0,0,4"/>
+                                    <TextBlock FontSize="18" FontWeight="Bold" Foreground="#C62828">
+                                        <Run Text="{Binding SeniorRightsTotal, StringFormat=N0, FallbackValue='0'}"/>
+                                        <Run Text=" 원" FontSize="12" FontWeight="Normal"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -646,19 +646,16 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 상태 필터 버튼 더블클릭 - 상태별 필터링 (피드백 6번)
+        /// 상태 필터 버튼 클릭 - 상태별 필터링
         /// </summary>
         private void StatusFilter_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2) // 더블클릭 감지
+            if (sender is TextBlock textBlock && textBlock.Tag is string status)
             {
-                if (sender is TextBlock textBlock && textBlock.Tag is string status)
+                if (DataContext is DashboardViewModel viewModel)
                 {
-                    if (DataContext is DashboardViewModel viewModel)
-                    {
-                        viewModel.FilterByStatus(status);
-                        UpdateFilterButtonStyles(status);
-                    }
+                    viewModel.FilterByStatus(status);
+                    UpdateFilterButtonStyles(status);
                 }
             }
         }

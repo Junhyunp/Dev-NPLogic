@@ -724,7 +724,7 @@
                                                        Padding="8,4"
                                                        Cursor="Hand"
                                                        MouseLeftButtonDown="StatusFilter_MouseDown"
-                                                       ToolTip="더블클릭하여 전체 보기"/>
+                                                       ToolTip="전체 보기"/>
                                             <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
                                             <TextBlock x:Name="FilterPending"
                                                        Text="대기" 
@@ -734,7 +734,7 @@
                                                        Padding="8,4"
                                                        Cursor="Hand"
                                                        MouseLeftButtonDown="StatusFilter_MouseDown"
-                                                       ToolTip="더블클릭하여 대기 항목만 보기"/>
+                                                       ToolTip="대기 항목만 보기"/>
                                             <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
                                             <TextBlock x:Name="FilterProcessing"
                                                        Text="진행" 
@@ -744,7 +744,7 @@
                                                        Padding="8,4"
                                                        Cursor="Hand"
                                                        MouseLeftButtonDown="StatusFilter_MouseDown"
-                                                       ToolTip="더블클릭하여 진행 중 항목만 보기"/>
+                                                       ToolTip="진행 중 항목만 보기"/>
                                             <Rectangle Width="1" Fill="{StaticResource BorderBrush}" Margin="4,2"/>
                                             <TextBlock x:Name="FilterCompleted"
                                                        Text="완료" 
@@ -754,7 +754,7 @@
                                                        Padding="8,4"
                                                        Cursor="Hand"
                                                        MouseLeftButtonDown="StatusFilter_MouseDown"
-                                                       ToolTip="더블클릭하여 완료 항목만 보기"/>
+                                                       ToolTip="완료 항목만 보기"/>
                                         </StackPanel>
                                     </Border>
 

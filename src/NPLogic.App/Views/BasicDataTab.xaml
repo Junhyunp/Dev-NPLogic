@@ -16,7 +16,7 @@
     ============================================================
     -->
     
-    <Grid Background="{StaticResource PageBackgroundBrush}">
+    <Grid Background="{StaticResource BackgroundBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <Grid Margin="24">
                 <!-- 2열 그리드 레이아웃: 좌측 넓은 영역 + 우측 사이드 영역 -->

@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
     
-    <Grid Background="{StaticResource PageBackgroundBrush}">
+    <Grid Background="{StaticResource BackgroundBrush}">
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <materialDesign:PackIcon Kind="Construction" 
                                      Width="80" 

@@ -101,21 +101,18 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
-    /// E-002: 시나리오별 배당 요약 항목
+    /// 시나리오별 배당 요약 항목 (피드백 반영: 시나리오 3 제거)
     /// </summary>
     public class ScenarioSummaryItem : ObservableObject
     {
         /// <summary>항목명 (경매비용, 배당회수, 상계회수, 현금흐름)</summary>
         public string Label { get; set; } = "";
         
-        /// <summary>시나리오 1 금액</summary>
+        /// <summary>시나리오 1 (하한) 금액</summary>
         public decimal? Scenario1Value { get; set; }
         
-        /// <summary>시나리오 2 금액</summary>
+        /// <summary>시나리오 2 (상한) 금액</summary>
         public decimal? Scenario2Value { get; set; }
-        
-        /// <summary>시나리오 3 금액</summary>
-        public decimal? Scenario3Value { get; set; }
         
         /// <summary>합계</summary>
         public decimal? TotalValue { get; set; }
@@ -123,7 +120,6 @@ namespace NPLogic.ViewModels
         // 포맷된 표시 값
         public string Scenario1Display => Scenario1Value.HasValue ? $"{Scenario1Value:N0}" : "-";
         public string Scenario2Display => Scenario2Value.HasValue ? $"{Scenario2Value:N0}" : "-";
-        public string Scenario3Display => Scenario3Value.HasValue ? $"{Scenario3Value:N0}" : "-";
         public string TotalDisplay => TotalValue.HasValue ? $"{TotalValue:N0}" : "-";
     }
 
@@ -282,7 +278,7 @@ namespace NPLogic.ViewModels
         private decimal? _scenario1_Rate;
 
         [ObservableProperty]
-        private string? _scenario1_Reason = "낙찰사례 적용";
+        private string? _scenario1_Reason = "하한";
 
         // === 평가결과 시나리오 2 ===
         [ObservableProperty]
@@ -292,19 +288,9 @@ namespace NPLogic.ViewModels
         private decimal? _scenario2_Rate;
 
         [ObservableProperty]
-        private string? _scenario2_Reason = "실거래가 적용";
+        private string? _scenario2_Reason = "상한";
 
-        // === E-002: 평가결과 시나리오 3 ===
-        [ObservableProperty]
-        private decimal? _scenario3_Amount;
-
-        [ObservableProperty]
-        private decimal? _scenario3_Rate;
-
-        [ObservableProperty]
-        private string? _scenario3_Reason = "보수적 평가";
-
-        // === E-002: 차주별 배당 요약 ===
+        // === 차주별 배당 요약 (피드백 반영: 시나리오 3 제거) ===
         [ObservableProperty]
         private ObservableCollection<ScenarioSummaryItem> _scenarioSummaryItems = new();
 
@@ -427,27 +413,27 @@ namespace NPLogic.ViewModels
             // 물건 정보에서 기본값 설정
             if (_property != null)
             {
-                // 감정가 기반 시나리오 계산
+                // 감정가 기반 시나리오 계산 (피드백 반영: 시나리오 1=하한, 2=상한)
                 if (_property.AppraisalValue.HasValue && AppliedBidRate.HasValue)
                 {
-                    Scenario1_Amount = _property.AppraisalValue.Value * AppliedBidRate.Value;
-                    Scenario1_Rate = AppliedBidRate;
+                    // 시나리오 1 (하한): 적용 낙찰가율 - 5%
+                    var lowerRate = AppliedBidRate.Value - 0.05m;
+                    if (lowerRate < 0.3m) lowerRate = 0.3m; // 최소 30%
+                    Scenario1_Amount = _property.AppraisalValue.Value * lowerRate;
+                    Scenario1_Rate = lowerRate;
                     
+                    // 시나리오 2 (상한): 적용 낙찰가율 + 5%
                     Scenario2_Amount = _property.AppraisalValue.Value * (AppliedBidRate.Value + 0.05m);
                     Scenario2_Rate = AppliedBidRate + 0.05m;
-                    
-                    // E-002: 시나리오 3 초기화 (보수적: -5%)
-                    Scenario3_Amount = _property.AppraisalValue.Value * (AppliedBidRate.Value - 0.05m);
-                    Scenario3_Rate = AppliedBidRate - 0.05m;
                 }
             }
             
-            // E-002: 배당 요약 테이블 초기화
+            // 배당 요약 테이블 초기화
             InitializeScenarioSummary();
         }
 
         /// <summary>
-        /// E-002: 시나리오별 배당 요약 테이블 초기화
+        /// 시나리오별 배당 요약 테이블 초기화 (피드백 반영: 시나리오 3 제거)
         /// </summary>
         private void InitializeScenarioSummary()
         {
@@ -457,29 +443,25 @@ namespace NPLogic.ViewModels
                 { 
                     Label = "경매비용",
                     Scenario1Value = CalculateAuctionCost(Scenario1_Amount),
-                    Scenario2Value = CalculateAuctionCost(Scenario2_Amount),
-                    Scenario3Value = CalculateAuctionCost(Scenario3_Amount)
+                    Scenario2Value = CalculateAuctionCost(Scenario2_Amount)
                 },
                 new ScenarioSummaryItem 
                 { 
                     Label = "배당회수",
                     Scenario1Value = CalculateDistribution(Scenario1_Amount),
-                    Scenario2Value = CalculateDistribution(Scenario2_Amount),
-                    Scenario3Value = CalculateDistribution(Scenario3_Amount)
+                    Scenario2Value = CalculateDistribution(Scenario2_Amount)
                 },
                 new ScenarioSummaryItem 
                 { 
                     Label = "상계회수",
                     Scenario1Value = 0, // 인터림 파일에서 가져옴 (추후 구현)
-                    Scenario2Value = 0,
-                    Scenario3Value = 0
+                    Scenario2Value = 0
                 },
                 new ScenarioSummaryItem 
                 { 
                     Label = "현금흐름",
                     Scenario1Value = Scenario1_Amount,
-                    Scenario2Value = Scenario2_Amount,
-                    Scenario3Value = Scenario3_Amount
+                    Scenario2Value = Scenario2_Amount
                 }
             };
             
@@ -487,8 +469,7 @@ namespace NPLogic.ViewModels
             foreach (var item in ScenarioSummaryItems)
             {
                 item.TotalValue = (item.Scenario1Value ?? 0) + 
-                                  (item.Scenario2Value ?? 0) + 
-                                  (item.Scenario3Value ?? 0);
+                                  (item.Scenario2Value ?? 0);
             }
         }
 
@@ -552,27 +533,79 @@ namespace NPLogic.ViewModels
             // TODO: 실제 사례 데이터 매핑
         }
 
+        /// <summary>
+        /// 물건 유형에 따른 평가 유형 자동 선택 (피드백 반영: 산출화면 매핑 테이블 기준)
+        /// </summary>
+        /// <remarks>
+        /// 매핑 규칙:
+        /// - 아파트, 오피스텔 → 1. 아파트
+        /// - 다세대(빌라), 연립 → 2. 연립다세대
+        /// - 공장, 창고 → 3. 공장/창고
+        /// - 근린상가, 사무실, 아파트형공장 → 4. 상가/아파트형공장
+        /// - 주택, 근린시설, 토지, 다가구, 기타 → 5. 주택/근린시설/토지/기타
+        /// </remarks>
         private void AutoSelectEvaluationType(string? propertyType)
         {
+            // 모든 유형 초기화
+            IsApartmentType = false;
+            IsMultiFamilyType = false;
+            IsFactoryType = false;
+            IsCommercialType = false;
+            IsHouseLandType = false;
+            
             if (string.IsNullOrWhiteSpace(propertyType))
+            {
+                IsApartmentType = true; // 기본값: 아파트
+                return;
+            }
+
+            var type = propertyType.ToLower().Trim();
+            
+            // 1. 아파트 - 아파트, 오피스텔
+            if (type.Contains("아파트") && !type.Contains("아파트형공장"))
             {
                 IsApartmentType = true;
                 return;
             }
-
-            var type = propertyType.ToLower();
-            
-            IsApartmentType = type.Contains("아파트") || type.Contains("오피스텔");
-            IsMultiFamilyType = type.Contains("연립") || type.Contains("다세대") || type.Contains("빌라");
-            IsFactoryType = type.Contains("공장") || type.Contains("창고");
-            IsCommercialType = type.Contains("상가") || type.Contains("아파트형공장");
-            IsHouseLandType = type.Contains("주택") || type.Contains("토지") || type.Contains("근린");
-            
-            // 기본값
-            if (!IsApartmentType && !IsMultiFamilyType && !IsFactoryType && !IsCommercialType && !IsHouseLandType)
+            if (type.Contains("오피스텔") || type == "officetel")
             {
                 IsApartmentType = true;
+                return;
             }
+            
+            // 2. 연립다세대 - 다세대, 빌라, 연립
+            if (type.Contains("다세대") || type.Contains("빌라") || type.Contains("연립"))
+            {
+                IsMultiFamilyType = true;
+                return;
+            }
+            
+            // 3. 공장/창고 - 공장, 창고 (아파트형공장 제외)
+            if ((type.Contains("공장") && !type.Contains("아파트형")) || type.Contains("창고"))
+            {
+                IsFactoryType = true;
+                return;
+            }
+            
+            // 4. 상가/아파트형공장 - 근린상가, 상가, 사무실, 아파트형공장
+            if (type.Contains("상가") || type.Contains("사무실") || type.Contains("아파트형공장"))
+            {
+                IsCommercialType = true;
+                return;
+            }
+            
+            // 5. 주택/근린시설/토지/기타 - 주택, 근린시설, 토지, 다가구, 단독, 기타
+            if (type.Contains("주택") || type.Contains("단독") || type.Contains("다가구") ||
+                type.Contains("토지") || type.Contains("근린") || type.Contains("대지") ||
+                type.Contains("임야") || type.Contains("전") || type.Contains("답") ||
+                type.Contains("과수원") || type.Contains("도로") || type.Contains("묘지"))
+            {
+                IsHouseLandType = true;
+                return;
+            }
+            
+            // 기본값: 아파트
+            IsApartmentType = true;
         }
 
         private void SetEvaluationType(string? evaluationType)
@@ -1115,15 +1148,19 @@ namespace NPLogic.ViewModels
         #region 계산 메서드
 
         /// <summary>
-        /// 시나리오 1 계산 (낙찰사례 기반)
+        /// 시나리오 1 (하한) 계산 - 적용 낙찰가율 - 5%
         /// </summary>
         public void CalculateScenario1()
         {
             if (_property?.AppraisalValue == null || !AppliedBidRate.HasValue)
                 return;
 
-            Scenario1_Amount = _property.AppraisalValue.Value * AppliedBidRate.Value;
-            Scenario1_Rate = AppliedBidRate;
+            // 하한: 적용 낙찰가율 - 5%
+            var lowerRate = AppliedBidRate.Value - 0.05m;
+            if (lowerRate < 0.3m) lowerRate = 0.3m; // 최소 30%
+            
+            Scenario1_Amount = _property.AppraisalValue.Value * lowerRate;
+            Scenario1_Rate = lowerRate;
         }
 
         /// <summary>
@@ -1152,22 +1189,21 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// E-002: 시나리오 3 계산 (보수적 평가: 시나리오1 - 5%)
+        /// 시나리오 2 (상한) 계산 - 낙찰가율 기반 (피드백 반영)
         /// </summary>
-        public void CalculateScenario3()
+        public void CalculateScenario2FromBidRate()
         {
             if (_property?.AppraisalValue == null || !AppliedBidRate.HasValue)
                 return;
 
-            var conservativeRate = AppliedBidRate.Value - 0.05m;
-            if (conservativeRate < 0.3m) conservativeRate = 0.3m; // 최소 30%
-
-            Scenario3_Amount = _property.AppraisalValue.Value * conservativeRate;
-            Scenario3_Rate = conservativeRate;
+            // 상한: 적용 낙찰가율 + 5%
+            var upperRate = AppliedBidRate.Value + 0.05m;
+            Scenario2_Amount = _property.AppraisalValue.Value * upperRate;
+            Scenario2_Rate = upperRate;
         }
 
         /// <summary>
-        /// E-002: 배당 요약 테이블 업데이트
+        /// 배당 요약 테이블 업데이트 (피드백 반영: 시나리오 3 제거)
         /// </summary>
         public void UpdateScenarioSummary()
         {
@@ -1177,7 +1213,7 @@ namespace NPLogic.ViewModels
                 return;
             }
 
-            // 각 항목 업데이트
+            // 각 항목 업데이트 (피드백 반영: 시나리오 3 제거)
             foreach (var item in ScenarioSummaryItems)
             {
                 switch (item.Label)
@@ -1185,22 +1221,18 @@ namespace NPLogic.ViewModels
                     case "경매비용":
                         item.Scenario1Value = CalculateAuctionCost(Scenario1_Amount);
                         item.Scenario2Value = CalculateAuctionCost(Scenario2_Amount);
-                        item.Scenario3Value = CalculateAuctionCost(Scenario3_Amount);
                         break;
                     case "배당회수":
                         item.Scenario1Value = CalculateDistribution(Scenario1_Amount);
                         item.Scenario2Value = CalculateDistribution(Scenario2_Amount);
-                        item.Scenario3Value = CalculateDistribution(Scenario3_Amount);
                         break;
                     case "현금흐름":
                         item.Scenario1Value = Scenario1_Amount;
                         item.Scenario2Value = Scenario2_Amount;
-                        item.Scenario3Value = Scenario3_Amount;
                         break;
                 }
                 item.TotalValue = (item.Scenario1Value ?? 0) + 
-                                  (item.Scenario2Value ?? 0) + 
-                                  (item.Scenario3Value ?? 0);
+                                  (item.Scenario2Value ?? 0);
             }
         }
 
@@ -1211,8 +1243,8 @@ namespace NPLogic.ViewModels
         partial void OnAppliedBidRateChanged(decimal? value)
         {
             CalculateScenario1();
-            CalculateScenario3(); // E-002: 시나리오 3도 재계산
-            UpdateScenarioSummary(); // E-002: 배당 요약 업데이트
+            CalculateScenario2FromBidRate(); // 피드백 반영: 시나리오 2도 재계산
+            UpdateScenarioSummary();
             IsDirty = true;
         }
 
@@ -1243,18 +1275,6 @@ namespace NPLogic.ViewModels
         }
 
         partial void OnScenario2_ReasonChanged(string? value)
-        {
-            IsDirty = true;
-        }
-
-        // E-002: 시나리오 3 변경 핸들러
-        partial void OnScenario3_AmountChanged(decimal? value)
-        {
-            UpdateScenarioSummary();
-            IsDirty = true;
-        }
-
-        partial void OnScenario3_ReasonChanged(string? value)
         {
             IsDirty = true;
         }

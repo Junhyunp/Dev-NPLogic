@@ -23,6 +23,142 @@ namespace NPLogic.ViewModels
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
 
+        // ========== 경매사건 정보 (RightsAnalysisTab에서 이동) ==========
+        [ObservableProperty]
+        private string _auctionStatus = "not_opened"; // opened, not_opened
+
+        [ObservableProperty]
+        private bool _precedentAuction; // 선행
+
+        [ObservableProperty]
+        private bool _subsequentAuction; // 후행
+
+        [ObservableProperty]
+        private string _courtName = ""; // 관할법원
+
+        [ObservableProperty]
+        private string _caseNumber = ""; // 경매사건번호
+
+        [ObservableProperty]
+        private string _auctionApplicant = ""; // 경매신청기관
+
+        [ObservableProperty]
+        private DateTime? _auctionStartDate; // 경매개시일자
+
+        [ObservableProperty]
+        private DateTime? _claimDeadlineDate; // 배당요구종기일
+
+        [ObservableProperty]
+        private decimal _claimAmount; // 청구금액
+
+        [ObservableProperty]
+        private decimal _initialAppraisalValue; // 최초법사가 (감정가)
+
+        [ObservableProperty]
+        private DateTime? _initialAuctionDate; // 최초경매기일
+
+        [ObservableProperty]
+        private string _finalAuctionRound = ""; // 최종경매회차
+
+        [ObservableProperty]
+        private string _finalAuctionResult = ""; // 최종경매결과
+
+        [ObservableProperty]
+        private decimal _winningBidAmount; // 낙찰금액
+
+        [ObservableProperty]
+        private DateTime? _nextAuctionDate; // 차후예정경매일
+
+        [ObservableProperty]
+        private decimal _nextMinimumBid; // 차후최저입찰가
+
+        [ObservableProperty]
+        private bool _claimDeadlinePassed; // 배당요구종기일 경과
+
+        // ========== 전입/임차 현황 체크리스트 ==========
+        [ObservableProperty]
+        private bool _addressMatch; // 물건지, 소유주 주소지 일치
+
+        [ObservableProperty]
+        private bool _ownerRegistered; // 소유주 전입
+
+        [ObservableProperty]
+        private bool _hasTenant; // 임차인 존재
+
+        [ObservableProperty]
+        private bool _surveyReportSubmitted; // 현황조사서 제출
+
+        [ObservableProperty]
+        private bool _hasTenantRegistry; // 전입세대열람 보유
+
+        [ObservableProperty]
+        private bool _hasCommercialLease; // 상가임대차열람 보유
+
+        [ObservableProperty]
+        private bool _tenantDateBeforeMortgage; // 임차일 근저당설정일 이전
+
+        [ObservableProperty]
+        private bool _hasAuctionDocs; // 경매열람자료 보유
+
+        [ObservableProperty]
+        private string _debtorType = "individual"; // 채무자 유형: individual, business, corporation
+
+        [ObservableProperty]
+        private bool _hasWageClaim; // 임금채권 존재
+
+        [ObservableProperty]
+        private bool _wageClaimEstimatedSeizure; // 임금채권 추정가압류
+
+        [ObservableProperty]
+        private bool _hasTaxClaim; // 당해세 교부청구
+
+        [ObservableProperty]
+        private bool _hasSeniorTaxClaim; // 선순위조세 교부청구
+
+        [ObservableProperty]
+        private decimal _housingOfficialPrice; // 주택공시가격
+
+        // ========== 배당 시뮬레이션 ==========
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CapAppliedDividend))]
+        [NotifyPropertyChangedFor(nameof(RecoveryRate))]
+        private decimal _loanCap; // Loan Cap
+
+        /// <summary>
+        /// 선순위 공제 후 금액
+        /// </summary>
+        public decimal AmountAfterSenior => RemainingAmount > 0 ? RemainingAmount : 0;
+
+        /// <summary>
+        /// Cap 반영 배당액
+        /// </summary>
+        public decimal CapAppliedDividend => LoanCap > 0 
+            ? Math.Min(AmountAfterSenior, LoanCap) 
+            : AmountAfterSenior;
+
+        /// <summary>
+        /// 예상 회수율 (%)
+        /// </summary>
+        public decimal RecoveryRate => LoanCap > 0 
+            ? Math.Round(CapAppliedDividend / LoanCap * 100, 1) 
+            : 0;
+
+        // ========== 위험도 평가 ==========
+        [ObservableProperty]
+        private string _riskLevel = ""; // high, medium, low
+
+        [ObservableProperty]
+        private string _riskReason = "";
+
+        [ObservableProperty]
+        private string _recommendations = "";
+
+        [ObservableProperty]
+        private bool _isAnalysisCompleted;
+
+        [ObservableProperty]
+        private DateTime? _analyzedAt;
+
         [ObservableProperty]
         private ObservableCollection<RegistryRight> _rights = new();
 
@@ -212,11 +348,6 @@ namespace NPLogic.ViewModels
         /// </summary>
         public decimal RemainingAmount => DistributableAmount - SeniorRightsTotal;
 
-        /// <summary>
-        /// 롱캡 (Long Cap) - 원금+이자+연체이자
-        /// </summary>
-        [ObservableProperty]
-        private decimal _longCap;
 
         // ========== 당해세 처리 (P-005, P-006) ==========
         /// <summary>
@@ -463,7 +594,49 @@ namespace NPLogic.ViewModels
                     // 합계 섹션
                     ExpectedBidPrice = _currentRightAnalysis.ExpectedWinningBid ?? 0;
                     AuctionCost = _currentRightAnalysis.AuctionFees ?? 0;
-                    LongCap = _currentRightAnalysis.LoanCap ?? 0;
+                    LoanCap = _currentRightAnalysis.LoanCap ?? 0;
+
+                    // 경매사건 정보
+                    AuctionStatus = _currentRightAnalysis.AuctionStatus ?? "not_opened";
+                    PrecedentAuction = _currentRightAnalysis.PrecedentAuction;
+                    SubsequentAuction = _currentRightAnalysis.SubsequentAuction;
+                    CourtName = _currentRightAnalysis.CourtName ?? "";
+                    CaseNumber = _currentRightAnalysis.CaseNumber ?? "";
+                    AuctionApplicant = _currentRightAnalysis.AuctionApplicant ?? "";
+                    AuctionStartDate = _currentRightAnalysis.AuctionStartDate;
+                    ClaimDeadlineDate = _currentRightAnalysis.ClaimDeadlineDate;
+                    ClaimAmount = _currentRightAnalysis.ClaimAmount ?? 0;
+                    InitialAppraisalValue = _currentRightAnalysis.InitialAppraisalValue ?? 0;
+                    InitialAuctionDate = _currentRightAnalysis.InitialAuctionDate;
+                    FinalAuctionRound = _currentRightAnalysis.FinalAuctionRound?.ToString() ?? "";
+                    FinalAuctionResult = _currentRightAnalysis.FinalAuctionResult ?? "";
+                    WinningBidAmount = _currentRightAnalysis.WinningBidAmount ?? 0;
+                    NextAuctionDate = _currentRightAnalysis.NextAuctionDate;
+                    NextMinimumBid = _currentRightAnalysis.NextMinimumBid ?? 0;
+                    ClaimDeadlinePassed = _currentRightAnalysis.ClaimDeadlinePassed;
+
+                    // 전입/임차 현황
+                    AddressMatch = _currentRightAnalysis.AddressMatch ?? false;
+                    OwnerRegistered = _currentRightAnalysis.OwnerRegistered ?? false;
+                    HasTenant = _currentRightAnalysis.HasTenant ?? false;
+                    SurveyReportSubmitted = _currentRightAnalysis.SurveyReportSubmitted ?? false;
+                    HasTenantRegistry = _currentRightAnalysis.HasTenantRegistry;
+                    HasCommercialLease = _currentRightAnalysis.HasCommercialLease;
+                    TenantDateBeforeMortgage = _currentRightAnalysis.TenantDateBeforeMortgage ?? false;
+                    HasAuctionDocs = _currentRightAnalysis.HasAuctionDocs;
+                    DebtorType = _currentRightAnalysis.DebtorType ?? "individual";
+                    HasWageClaim = _currentRightAnalysis.HasWageClaim;
+                    WageClaimEstimatedSeizure = _currentRightAnalysis.WageClaimEstimatedSeizure;
+                    HasTaxClaim = _currentRightAnalysis.HasTaxClaim;
+                    HasSeniorTaxClaim = _currentRightAnalysis.HasSeniorTaxClaim;
+                    HousingOfficialPrice = _currentRightAnalysis.HousingOfficialPrice ?? 0;
+
+                    // 위험도 평가
+                    RiskLevel = _currentRightAnalysis.RiskLevel ?? "";
+                    RiskReason = _currentRightAnalysis.RiskReason ?? "";
+                    Recommendations = _currentRightAnalysis.Recommendations ?? "";
+                    IsAnalysisCompleted = _currentRightAnalysis.IsCompleted;
+                    AnalyzedAt = _currentRightAnalysis.AnalyzedAt;
                 }
                 else
                 {
@@ -482,6 +655,8 @@ namespace NPLogic.ViewModels
         private void ResetRightAnalysisFields()
         {
             _currentRightAnalysis = null;
+            
+            // 선순위 항목
             LienDd = 0;
             LienReflected = 0;
             LienReason = "";
@@ -501,7 +676,49 @@ namespace NPLogic.ViewModels
             CurrentTax = 0;
             ExpectedBidPrice = 0;
             AuctionCost = 0;
-            LongCap = 0;
+            LoanCap = 0;
+
+            // 경매사건 정보
+            AuctionStatus = "not_opened";
+            PrecedentAuction = false;
+            SubsequentAuction = false;
+            CourtName = "";
+            CaseNumber = "";
+            AuctionApplicant = "";
+            AuctionStartDate = null;
+            ClaimDeadlineDate = null;
+            ClaimAmount = 0;
+            InitialAppraisalValue = 0;
+            InitialAuctionDate = null;
+            FinalAuctionRound = "";
+            FinalAuctionResult = "";
+            WinningBidAmount = 0;
+            NextAuctionDate = null;
+            NextMinimumBid = 0;
+            ClaimDeadlinePassed = false;
+
+            // 전입/임차 현황
+            AddressMatch = false;
+            OwnerRegistered = false;
+            HasTenant = false;
+            SurveyReportSubmitted = false;
+            HasTenantRegistry = false;
+            HasCommercialLease = false;
+            TenantDateBeforeMortgage = false;
+            HasAuctionDocs = false;
+            DebtorType = "individual";
+            HasWageClaim = false;
+            WageClaimEstimatedSeizure = false;
+            HasTaxClaim = false;
+            HasSeniorTaxClaim = false;
+            HousingOfficialPrice = 0;
+
+            // 위험도 평가
+            RiskLevel = "";
+            RiskReason = "";
+            Recommendations = "";
+            IsAnalysisCompleted = false;
+            AnalyzedAt = null;
         }
 
         /// <summary>
@@ -847,10 +1064,58 @@ namespace NPLogic.ViewModels
                 // 합계 섹션
                 analysis.ExpectedWinningBid = ExpectedBidPrice;
                 analysis.AuctionFees = AuctionCost;
-                analysis.LoanCap = LongCap;
+                analysis.LoanCap = LoanCap;
                 analysis.SeniorRightsTotal = SeniorRightsTotal;
                 analysis.DistributableAmount = DistributableAmount;
                 analysis.AmountAfterSenior = RemainingAmount;
+                analysis.CapAppliedDividend = CapAppliedDividend;
+                analysis.RecoveryRate = RecoveryRate;
+
+                // 경매사건 정보
+                analysis.AuctionStatus = AuctionStatus;
+                analysis.PrecedentAuction = PrecedentAuction;
+                analysis.SubsequentAuction = SubsequentAuction;
+                analysis.CourtName = CourtName;
+                analysis.CaseNumber = CaseNumber;
+                analysis.AuctionApplicant = AuctionApplicant;
+                analysis.AuctionStartDate = AuctionStartDate;
+                analysis.ClaimDeadlineDate = ClaimDeadlineDate;
+                analysis.ClaimAmount = ClaimAmount;
+                analysis.InitialAppraisalValue = InitialAppraisalValue;
+                analysis.InitialAuctionDate = InitialAuctionDate;
+                analysis.FinalAuctionRound = int.TryParse(FinalAuctionRound, out var round) ? round : null;
+                analysis.FinalAuctionResult = FinalAuctionResult;
+                analysis.WinningBidAmount = WinningBidAmount;
+                analysis.NextAuctionDate = NextAuctionDate;
+                analysis.NextMinimumBid = NextMinimumBid;
+                analysis.ClaimDeadlinePassed = ClaimDeadlinePassed;
+
+                // 전입/임차 현황
+                analysis.AddressMatch = AddressMatch;
+                analysis.OwnerRegistered = OwnerRegistered;
+                analysis.HasTenant = HasTenant;
+                analysis.SurveyReportSubmitted = SurveyReportSubmitted;
+                analysis.HasTenantRegistry = HasTenantRegistry;
+                analysis.HasCommercialLease = HasCommercialLease;
+                analysis.TenantDateBeforeMortgage = TenantDateBeforeMortgage;
+                analysis.HasAuctionDocs = HasAuctionDocs;
+                analysis.DebtorType = DebtorType;
+                analysis.HasWageClaim = HasWageClaim;
+                analysis.WageClaimEstimatedSeizure = WageClaimEstimatedSeizure;
+                analysis.HasTaxClaim = HasTaxClaim;
+                analysis.HasSeniorTaxClaim = HasSeniorTaxClaim;
+                analysis.HousingOfficialPrice = HousingOfficialPrice;
+
+                // 위험도 평가
+                analysis.RiskLevel = RiskLevel;
+                analysis.RiskReason = RiskReason;
+                analysis.Recommendations = Recommendations;
+                analysis.IsCompleted = IsAnalysisCompleted;
+                if (IsAnalysisCompleted)
+                {
+                    analysis.AnalyzedAt = DateTime.UtcNow;
+                    AnalyzedAt = analysis.AnalyzedAt;
+                }
 
                 _currentRightAnalysis = await _rightAnalysisRepository.UpsertAsync(analysis);
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 분석이 저장되었습니다.");
@@ -900,6 +1165,102 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(SeniorMortgagesTotal));
             OnPropertyChanged(nameof(SeniorRightsTotal));
             OnPropertyChanged(nameof(RemainingAmount));
+            OnPropertyChanged(nameof(AmountAfterSenior));
+            OnPropertyChanged(nameof(CapAppliedDividend));
+            OnPropertyChanged(nameof(RecoveryRate));
+        }
+
+        /// <summary>
+        /// 위험도 자동 평가
+        /// </summary>
+        [RelayCommand]
+        private void EvaluateRisk()
+        {
+            var recoveryRate = RecoveryRate;
+            
+            if (recoveryRate >= 80)
+            {
+                RiskLevel = "low";
+                RiskReason = $"예상 회수율 {recoveryRate:N1}%로 양호한 수준입니다.";
+            }
+            else if (recoveryRate >= 50)
+            {
+                RiskLevel = "medium";
+                RiskReason = $"예상 회수율 {recoveryRate:N1}%로 주의가 필요합니다.";
+            }
+            else
+            {
+                RiskLevel = "high";
+                RiskReason = $"예상 회수율 {recoveryRate:N1}%로 손실 위험이 높습니다.";
+            }
+            
+            // 추가 위험 요인 체크
+            if (SeniorRightsTotal > ExpectedBidPrice * 0.5m)
+            {
+                RiskReason += " 선순위 금액이 낙찰가의 50%를 초과합니다.";
+            }
+
+            NPLogic.UI.Services.ToastService.Instance.ShowSuccess("위험도 평가가 완료되었습니다.");
+        }
+
+        /// <summary>
+        /// 경매사건검색 열기
+        /// </summary>
+        [RelayCommand]
+        private void OpenAuctionSearch()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.courtauction.go.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"경매사건검색 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 주택공시가격 조회
+        /// </summary>
+        [RelayCommand]
+        private void OpenHousingPrice()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.realtyprice.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"주택공시가격 조회 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 공시지가 조회
+        /// </summary>
+        [RelayCommand]
+        private void OpenLandPrice()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://kras.go.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"공시지가 조회 열기 실패: {ex.Message}";
+            }
         }
 
         /// <summary>

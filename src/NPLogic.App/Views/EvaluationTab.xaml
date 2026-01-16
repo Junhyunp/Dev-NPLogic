@@ -577,7 +577,7 @@
                         <StackPanel>
                             <TextBlock Text="✅ 평가결과" Style="{StaticResource SectionHeaderStyle}"/>
                             
-                            <!-- 시나리오 1 -->
+                            <!-- 시나리오 1 (하한) - 피드백 반영 -->
                             <Border Background="{StaticResource BlueGray50Brush}" 
                                     CornerRadius="4" 
                                     Padding="16"
@@ -596,7 +596,7 @@
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
-                                               Text="시나리오 1" 
+                                               Text="시나리오 1 (하한)" 
                                                FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                                Foreground="{StaticResource PrimaryBrush}"
                                                Margin="0,0,0,12"/>
@@ -621,7 +621,7 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 시나리오 2 -->
+                            <!-- 시나리오 2 (상한) - 피드백 반영 -->
                             <Border Background="{StaticResource BlueGray50Brush}" 
                                     CornerRadius="4" 
                                     Padding="16"
@@ -640,7 +640,7 @@
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
-                                               Text="시나리오 2" 
+                                               Text="시나리오 2 (상한)" 
                                                FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                                Foreground="{StaticResource SecondaryBrush}"
                                                Margin="0,0,0,12"/>
@@ -666,54 +666,11 @@
                                 </Grid>
                             </Border>
 
-                            <!-- E-002: 시나리오 3 -->
-                            <Border Background="{StaticResource BlueGray50Brush}" 
-                                    CornerRadius="4" 
-                                    Padding="16"
-                                    Margin="0,0,0,12">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-
-                                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
-                                               Text="시나리오 3 (보수적)" 
-                                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
-                                               Foreground="{StaticResource WarningBrush}"
-                                               Margin="0,0,0,12"/>
-
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="낙찰가액" Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="1" 
-                                               Text="{Binding Scenario3_Amount, StringFormat={}{0:N0}원}" 
-                                               Style="{StaticResource AmountStyle}"
-                                               Foreground="{StaticResource WarningBrush}"
-                                               Margin="8,0,24,0"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelStyle}"/>
-                                    <TextBlock Grid.Row="1" Grid.Column="3" 
-                                               Text="{Binding Scenario3_Rate, StringFormat={}{0:P1}}" 
-                                               Style="{StaticResource ValueStyle}"
-                                               Margin="8,0,0,0"/>
-
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="평가 사유" Style="{StaticResource LabelStyle}" Margin="0,8,0,0"/>
-                                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
-                                             Text="{Binding Scenario3_Reason, UpdateSourceTrigger=PropertyChanged}"
-                                             Margin="8,8,0,0"
-                                             Padding="8,4"
-                                             FontSize="{StaticResource FontSizeBody}"/>
-                                </Grid>
-                            </Border>
+                            <!-- 피드백 반영: 시나리오 3 제거됨 -->
                         </StackPanel>
                     </Border>
 
-                    <!-- E-002: 차주별 배당 요약 -->
+                    <!-- 차주별 배당 요약 (피드백 반영: 시나리오 3 컬럼 제거) -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <TextBlock Text="📊 시나리오별 배당 요약" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
@@ -738,7 +695,7 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="시나리오1" Binding="{Binding Scenario1Display}" Width="100">
+                                    <DataGridTextColumn Header="하한" Binding="{Binding Scenario1Display}" Width="120">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Padding" Value="8,4"/>
@@ -747,21 +704,12 @@
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
-                                    <DataGridTextColumn Header="시나리오2" Binding="{Binding Scenario2Display}" Width="100">
+                                    <DataGridTextColumn Header="상한" Binding="{Binding Scenario2Display}" Width="120">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Padding" Value="8,4"/>
                                                 <Setter Property="TextAlignment" Value="Right"/>
                                                 <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="시나리오3" Binding="{Binding Scenario3Display}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>

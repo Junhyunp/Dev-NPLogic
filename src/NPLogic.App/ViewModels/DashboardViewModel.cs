@@ -1210,7 +1210,31 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // 현재 선택된 프로그램 ID 저장 (필터 창 유지를 위해)
+                var selectedProgramId = SelectedProgram?.ProjectId;
+
                 await LoadProgramSummariesAsync();
+                
+                // 이전에 선택된 프로그램이 있으면 다시 선택 (필터 창 유지)
+                if (!string.IsNullOrEmpty(selectedProgramId))
+                {
+                    var previousProgram = ProgramSummaries.FirstOrDefault(p => p.ProjectId == selectedProgramId);
+                    if (previousProgram != null)
+                    {
+                        SelectedProgram = previousProgram;
+                    }
+                    else if (ProgramSummaries.Count > 0)
+                    {
+                        // 이전 프로그램이 더 이상 없으면 첫 번째 프로그램 선택
+                        SelectedProgram = ProgramSummaries[0];
+                    }
+                }
+                else if (ProgramSummaries.Count > 0 && SelectedProgram == null)
+                {
+                    // 선택된 프로그램이 없고 목록이 있으면 첫 번째 선택
+                    SelectedProgram = ProgramSummaries[0];
+                }
+
                 await LoadStatisticsAsync();
                 await LoadDashboardPropertiesAsync();
                 RecalculateColumnProgress();

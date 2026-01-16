@@ -153,6 +153,47 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<ProgramSheetMapping> _existingSheetMappings = new();
 
+        // ========== 재업로드 모드 ==========
+        [ObservableProperty]
+        private bool _isDataDiskReuploadMode;
+
+        [ObservableProperty]
+        private bool _isInterimReuploadMode;
+
+        /// <summary>
+        /// 데이터디스크 시트 매핑 (데이터디스크 관련 시트만 필터링)
+        /// </summary>
+        public IEnumerable<ProgramSheetMapping> DataDiskSheetMappings => 
+            ExistingSheetMappings.Where(m => !m.SheetType.StartsWith("Interim"));
+
+        /// <summary>
+        /// Interim 시트 매핑 (Interim 관련 시트만 필터링)
+        /// </summary>
+        public IEnumerable<ProgramSheetMapping> InterimSheetMappings => 
+            ExistingSheetMappings.Where(m => m.SheetType.StartsWith("Interim"));
+
+        /// <summary>
+        /// 데이터디스크 시트가 업로드되어 있는지 여부
+        /// </summary>
+        public bool HasUploadedDataDiskSheets => 
+            IsEditMode && ExistingSheetMappings.Any(m => !m.SheetType.StartsWith("Interim") && m.UploadedByName != null);
+
+        /// <summary>
+        /// Interim 시트가 업로드되어 있는지 여부
+        /// </summary>
+        public bool HasUploadedInterimSheets => 
+            IsEditMode && ExistingSheetMappings.Any(m => m.SheetType.StartsWith("Interim") && m.UploadedByName != null);
+
+        /// <summary>
+        /// 데이터디스크 시트 정보 표시 여부 (수정 모드이고 재업로드 모드가 아닐 때)
+        /// </summary>
+        public bool ShowDataDiskSheetInfo => IsEditMode && !IsDataDiskReuploadMode;
+
+        /// <summary>
+        /// Interim 시트 정보 표시 여부 (수정 모드이고 재업로드 모드가 아닐 때)
+        /// </summary>
+        public bool ShowInterimSheetInfo => IsEditMode && !IsInterimReuploadMode;
+
         /// <summary>
         /// 현재 사용자 이름
         /// </summary>
@@ -380,6 +421,14 @@ namespace NPLogic.ViewModels
                 });
             }
 
+            // 관련 속성 변경 알림
+            OnPropertyChanged(nameof(DataDiskSheetMappings));
+            OnPropertyChanged(nameof(InterimSheetMappings));
+            OnPropertyChanged(nameof(HasUploadedDataDiskSheets));
+            OnPropertyChanged(nameof(HasUploadedInterimSheets));
+            OnPropertyChanged(nameof(ShowDataDiskSheetInfo));
+            OnPropertyChanged(nameof(ShowInterimSheetInfo));
+
             await Task.CompletedTask;
         }
 
@@ -412,6 +461,14 @@ namespace NPLogic.ViewModels
             ExistingSheetMappings.Clear();
             ClearDataDiskFile();
             ClearInterimFile();
+            
+            // 재업로드 모드 초기화
+            IsDataDiskReuploadMode = false;
+            IsInterimReuploadMode = false;
+            OnPropertyChanged(nameof(ShowDataDiskSheetInfo));
+            OnPropertyChanged(nameof(ShowInterimSheetInfo));
+            OnPropertyChanged(nameof(DataDiskSheetMappings));
+            OnPropertyChanged(nameof(InterimSheetMappings));
         }
 
         /// <summary>
@@ -631,6 +688,50 @@ namespace NPLogic.ViewModels
         private void CancelInterimFile()
         {
             ClearInterimFile();
+        }
+
+        /// <summary>
+        /// 데이터디스크 재업로드 모드 활성화
+        /// </summary>
+        [RelayCommand]
+        private void EnableDataDiskReupload()
+        {
+            IsDataDiskReuploadMode = true;
+            ClearDataDiskFile();
+            OnPropertyChanged(nameof(ShowDataDiskSheetInfo));
+        }
+
+        /// <summary>
+        /// 데이터디스크 재업로드 모드 취소
+        /// </summary>
+        [RelayCommand]
+        private void CancelDataDiskReupload()
+        {
+            IsDataDiskReuploadMode = false;
+            ClearDataDiskFile();
+            OnPropertyChanged(nameof(ShowDataDiskSheetInfo));
+        }
+
+        /// <summary>
+        /// Interim 재업로드 모드 활성화
+        /// </summary>
+        [RelayCommand]
+        private void EnableInterimReupload()
+        {
+            IsInterimReuploadMode = true;
+            ClearInterimFile();
+            OnPropertyChanged(nameof(ShowInterimSheetInfo));
+        }
+
+        /// <summary>
+        /// Interim 재업로드 모드 취소
+        /// </summary>
+        [RelayCommand]
+        private void CancelInterimReupload()
+        {
+            IsInterimReuploadMode = false;
+            ClearInterimFile();
+            OnPropertyChanged(nameof(ShowInterimSheetInfo));
         }
 
         /// <summary>

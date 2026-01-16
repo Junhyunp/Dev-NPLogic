@@ -118,6 +118,9 @@ namespace NPLogic.ViewModels
         private readonly SupabaseService? _supabaseService;
         private readonly ProgramRepository? _programRepository;
         private readonly StaticMapService? _staticMapService;
+        private readonly BorrowerRepository? _borrowerRepository;
+        private readonly LoanRepository? _loanRepository;
+        private readonly AuctionScheduleRepository? _auctionScheduleRepository;
         
         // 프로그램 이름 캐시 (성능 최적화)
         private static readonly Dictionary<Guid, string> _programNameCache = new();
@@ -151,6 +154,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private EvaluationTabViewModel? _evaluationViewModel;
+
+        /// <summary>
+        /// 경(공)매 일정 상세 ViewModel
+        /// </summary>
+        [ObservableProperty]
+        private AuctionScheduleDetailViewModel? _auctionScheduleDetailViewModel;
 
         [ObservableProperty]
         private int _selectedTabIndex = 0;
@@ -620,6 +629,52 @@ namespace NPLogic.ViewModels
 
         #endregion
 
+        #region 전체 탭 요약 데이터 (비핵심)
+
+        /// <summary>
+        /// 차주 정보 요약
+        /// </summary>
+        [ObservableProperty]
+        private BorrowerSummaryModel _borrowerSummary = new();
+
+        /// <summary>
+        /// Loan 요약
+        /// </summary>
+        [ObservableProperty]
+        private LoanSummaryModel _loanSummary = new();
+
+        /// <summary>
+        /// 담보물건 요약
+        /// </summary>
+        [ObservableProperty]
+        private CollateralSummaryModel _collateralSummary = new();
+
+        /// <summary>
+        /// 선순위 요약
+        /// </summary>
+        [ObservableProperty]
+        private SeniorRightsSummaryModel _seniorRightsSummary = new();
+
+        /// <summary>
+        /// 평가 요약
+        /// </summary>
+        [ObservableProperty]
+        private EvaluationSummaryModel _evaluationSummary = new();
+
+        /// <summary>
+        /// 경매일정 요약
+        /// </summary>
+        [ObservableProperty]
+        private AuctionSummaryModel _auctionSummary = new();
+
+        /// <summary>
+        /// 요약 데이터 로드 완료 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _isSummaryLoaded;
+
+        #endregion
+
         #region ClosingTab 관련 속성
 
         [ObservableProperty]
@@ -696,7 +751,10 @@ namespace NPLogic.ViewModels
             PropertyQaRepository? propertyQaRepository = null,
             SupabaseService? supabaseService = null,
             ProgramRepository? programRepository = null,
-            StaticMapService? staticMapService = null)
+            StaticMapService? staticMapService = null,
+            BorrowerRepository? borrowerRepository = null,
+            LoanRepository? loanRepository = null,
+            AuctionScheduleRepository? auctionScheduleRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -708,6 +766,9 @@ namespace NPLogic.ViewModels
             _propertyQaRepository = propertyQaRepository;
             _supabaseService = supabaseService;
             _programRepository = programRepository;
+            _borrowerRepository = borrowerRepository;
+            _loanRepository = loanRepository;
+            _auctionScheduleRepository = auctionScheduleRepository;
             
             // 프로그램 이름 캐시가 비어있으면 미리 로드 (첫 ViewModel 생성 시)
             if (_programRepository != null && _programNameCache.Count == 0)
@@ -750,6 +811,15 @@ namespace NPLogic.ViewModels
                 Debug.WriteLine("[PropertyDetailViewModel] ERROR: EvaluationRepository is null! EvaluationViewModel will be null!");
                 Debug.WriteLine("[PropertyDetailViewModel] WARNING: EvaluationRepository is null, EvaluationViewModel not created");
             }
+
+            // 경(공)매 일정 상세 ViewModel 초기화
+            AuctionScheduleDetailViewModel = new AuctionScheduleDetailViewModel(
+                _supabaseService, 
+                _auctionScheduleRepository,
+                _propertyRepository,
+                _evaluationRepository,
+                _rightAnalysisRepository);
+            Debug.WriteLine($"[PropertyDetailViewModel] AuctionScheduleDetailViewModel created successfully");
         }
 
         /// <summary>
@@ -768,6 +838,9 @@ namespace NPLogic.ViewModels
 
             // 평가 탭 ViewModel에 물건 ID 설정
             EvaluationViewModel?.SetPropertyId(propertyId);
+
+            // 경(공)매 일정 상세 ViewModel에 물건 ID 설정
+            AuctionScheduleDetailViewModel?.SetPropertyId(propertyId);
         }
 
         /// <summary>
@@ -863,6 +936,9 @@ namespace NPLogic.ViewModels
             // 등기부 원본 파일 로드
             _ = LoadRegistryDocumentAsync(property);
 
+            // 전체 탭 요약 데이터 로드 (비핵심)
+            _ = LoadSummaryDataAsync();
+
             HasUnsavedChanges = false;
         }
 
@@ -940,6 +1016,9 @@ namespace NPLogic.ViewModels
 
                     // 등기부 원본 파일 로드
                     await LoadRegistryDocumentAsync(property);
+
+                    // 전체 탭 요약 데이터 로드 (비핵심)
+                    await LoadSummaryDataAsync();
                 }
                 else
                 {
@@ -1118,6 +1197,287 @@ namespace NPLogic.ViewModels
             {
                 Debug.WriteLine($"담보총괄 통계 로드 실패: {ex.Message}");
                 // 실패 시 기본값 유지
+            }
+        }
+
+        /// <summary>
+        /// 전체 탭 요약 데이터 로드 (비핵심)
+        /// </summary>
+        public async Task LoadSummaryDataAsync()
+        {
+            if (Property == null || Property.Id == Guid.Empty)
+            {
+                IsSummaryLoaded = false;
+                return;
+            }
+
+            try
+            {
+                // 1. 차주 정보 로드
+                await LoadBorrowerSummaryAsync();
+
+                // 2. Loan 요약 로드
+                await LoadLoanSummaryAsync();
+
+                // 3. 담보물건 요약 로드
+                LoadCollateralSummary();
+
+                // 4. 선순위 요약 로드
+                await LoadSeniorRightsSummaryAsync();
+
+                // 5. 평가 요약 로드
+                await LoadEvaluationSummaryAsync();
+
+                // 6. 경매일정 요약 로드
+                await LoadAuctionSummaryAsync();
+
+                IsSummaryLoaded = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"요약 데이터 로드 실패: {ex.Message}");
+                IsSummaryLoaded = false;
+            }
+        }
+
+        /// <summary>
+        /// 차주 정보 요약 로드
+        /// </summary>
+        private async Task LoadBorrowerSummaryAsync()
+        {
+            BorrowerSummary = new BorrowerSummaryModel();
+
+            if (_borrowerRepository == null || Property?.BorrowerId == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var borrower = await _borrowerRepository.GetByIdAsync(Property.BorrowerId.Value);
+                if (borrower != null)
+                {
+                    BorrowerSummary = new BorrowerSummaryModel
+                    {
+                        BorrowerNumber = borrower.BorrowerNumber,
+                        BorrowerName = borrower.BorrowerName,
+                        BorrowerType = borrower.BorrowerType,
+                        BusinessNumber = borrower.BusinessNumber,
+                        PropertyCount = borrower.PropertyCount,
+                        Opb = borrower.Opb,
+                        MortgageAmount = borrower.MortgageAmount,
+                        IsRestructuring = borrower.IsRestructuring,
+                        IsOpened = borrower.IsOpened,
+                        IsDeceased = borrower.IsDeceased,
+                        XnpvScenario1 = borrower.XnpvScenario1,
+                        XnpvRatio1 = borrower.XnpvRatio1,
+                        XnpvScenario2 = borrower.XnpvScenario2,
+                        XnpvRatio2 = borrower.XnpvRatio2
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"차주 요약 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Loan 요약 로드
+        /// </summary>
+        private async Task LoadLoanSummaryAsync()
+        {
+            LoanSummary = new LoanSummaryModel();
+
+            if (_loanRepository == null || Property?.BorrowerId == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var loans = await _loanRepository.GetByBorrowerIdAsync(Property.BorrowerId.Value);
+                if (loans.Any())
+                {
+                    LoanSummary = new LoanSummaryModel
+                    {
+                        LoanCount = loans.Count,
+                        TotalPrincipalBalance = loans.Sum(l => l.LoanPrincipalBalance ?? 0),
+                        TotalClaimAmount = loans.Sum(l => l.TotalClaimAmount ?? l.CalculateTotalClaim()),
+                        TotalLoanCap1 = loans.Sum(l => l.LoanCap1 ?? 0),
+                        TotalLoanCap2 = loans.Sum(l => l.LoanCap2 ?? 0),
+                        MciLoanCount = loans.Count(l => l.HasMciGuarantee),
+                        ValidGuaranteeCount = loans.Count(l => l.HasValidGuarantee)
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Loan 요약 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 담보물건 요약 로드 (Property에서 직접)
+        /// </summary>
+        private void LoadCollateralSummary()
+        {
+            if (Property == null)
+            {
+                CollateralSummary = new CollateralSummaryModel();
+                return;
+            }
+
+            CollateralSummary = new CollateralSummaryModel
+            {
+                PropertyType = Property.PropertyType,
+                LandArea = Property.LandArea,
+                BuildingArea = Property.BuildingArea,
+                MachineValue = MachineAppraisalValue,
+                AppraisalValue = Property.AppraisalValue,
+                IsFactoryMortgage = IsFactoryMortgage,
+                IsInIndustrialComplex = Property.PropertyType?.Contains("공단") == true || Property.PropertyType?.Contains("공장") == true
+            };
+        }
+
+        /// <summary>
+        /// 선순위 요약 로드
+        /// </summary>
+        private async Task LoadSeniorRightsSummaryAsync()
+        {
+            SeniorRightsSummary = new SeniorRightsSummaryModel();
+
+            if (_rightAnalysisRepository == null || Property == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var analysis = await _rightAnalysisRepository.GetByPropertyIdAsync(Property.Id);
+                if (analysis != null)
+                {
+                    SeniorRightsSummary = new SeniorRightsSummaryModel
+                    {
+                        SeniorMortgageDd = analysis.SeniorMortgageDd,
+                        SeniorMortgageReflected = analysis.SeniorMortgageReflected,
+                        LienDd = analysis.LienDd,
+                        LienReflected = analysis.LienReflected,
+                        SmallDepositDd = analysis.SmallDepositDd,
+                        SmallDepositReflected = analysis.SmallDepositReflected,
+                        LeaseDepositDd = analysis.LeaseDepositDd,
+                        LeaseDepositReflected = analysis.LeaseDepositReflected,
+                        WageClaimDd = analysis.WageClaimDd,
+                        WageClaimReflected = analysis.WageClaimReflected,
+                        CurrentTaxDd = analysis.CurrentTaxDd,
+                        CurrentTaxReflected = analysis.CurrentTaxReflected,
+                        SeniorTaxDd = analysis.SeniorTaxDd,
+                        SeniorTaxReflected = analysis.SeniorTaxReflected
+                    };
+
+                    // 경매정보도 함께 로드
+                    AuctionSummary = new AuctionSummaryModel
+                    {
+                        IsAuctionStarted = analysis.AuctionStatus == "opened",
+                        CourtName = analysis.CourtName,
+                        CaseNumber = analysis.CaseNumber,
+                        AuctionStartDate = analysis.AuctionStartDate,
+                        FinalAuctionRound = analysis.FinalAuctionRound,
+                        FinalAuctionResult = analysis.FinalAuctionResult,
+                        NextAuctionDate = analysis.NextAuctionDate,
+                        NextMinimumBid = analysis.NextMinimumBid,
+                        ClaimDeadlineDate = analysis.ClaimDeadlineDate,
+                        WinningBidAmount = analysis.WinningBidAmount
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"선순위 요약 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 평가 요약 로드
+        /// </summary>
+        private async Task LoadEvaluationSummaryAsync()
+        {
+            EvaluationSummary = new EvaluationSummaryModel();
+
+            if (_evaluationRepository == null || Property == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var evaluation = await _evaluationRepository.GetByPropertyIdAsync(Property.Id);
+                if (evaluation != null)
+                {
+                    var details = evaluation.EvaluationDetails;
+                    EvaluationSummary = new EvaluationSummaryModel
+                    {
+                        EvaluationType = evaluation.EvaluationType,
+                        Scenario1Value = details?.Scenario1?.EvaluatedValue,
+                        Scenario1BidRate = details?.Scenario1?.BidRate,
+                        Scenario2Value = details?.Scenario2?.EvaluatedValue,
+                        Scenario2BidRate = details?.Scenario2?.BidRate,
+                        AppliedBidRate = details?.AppliedBidRate,
+                        EvaluationReason = details?.Scenario1?.EvaluationReason ?? details?.Scenario2?.EvaluationReason,
+                        EvaluatedAt = evaluation.EvaluatedAt
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"평가 요약 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 경매일정 요약 로드
+        /// </summary>
+        private async Task LoadAuctionSummaryAsync()
+        {
+            // AuctionSummary는 LoadSeniorRightsSummaryAsync에서 이미 로드됨
+            // 추가로 auction_schedules에서 최신 일정 정보 보완
+
+            if (_auctionScheduleRepository == null || Property == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var schedules = await _auctionScheduleRepository.GetByPropertyIdAsync(Property.Id);
+                var latestSchedule = schedules.FirstOrDefault();
+
+                if (latestSchedule != null)
+                {
+                    // 기존 AuctionSummary에 추가 정보 보완
+                    if (AuctionSummary == null)
+                    {
+                        AuctionSummary = new AuctionSummaryModel();
+                    }
+
+                    // 일정 테이블의 정보로 보완
+                    if (latestSchedule.AuctionDate.HasValue)
+                    {
+                        AuctionSummary.NextAuctionDate = latestSchedule.AuctionDate;
+                    }
+                    if (latestSchedule.MinimumBid.HasValue)
+                    {
+                        AuctionSummary.NextMinimumBid = latestSchedule.MinimumBid;
+                    }
+                    if (latestSchedule.SalePrice.HasValue)
+                    {
+                        AuctionSummary.WinningBidAmount = latestSchedule.SalePrice;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"경매일정 요약 로드 실패: {ex.Message}");
             }
         }
 
