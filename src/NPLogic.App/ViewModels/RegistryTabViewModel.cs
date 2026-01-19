@@ -521,8 +521,11 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task CheckOcrServerStatusAsync()
         {
+            System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] CheckOcrServerStatusAsync 시작");
+            
             if (_ocrService == null)
             {
+                System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] _ocrService is null");
                 OcrServerStatus = "OCR 서비스 비활성화";
                 IsOcrServerReady = false;
                 return;
@@ -531,7 +534,10 @@ namespace NPLogic.ViewModels
             try
             {
                 OcrServerStatus = "서버 확인 중...";
+                System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] 서버 헬스체크 시작");
+                
                 var isHealthy = await _ocrService.CheckHealthAsync();
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 헬스체크 결과: {isHealthy}");
                 
                 if (isHealthy)
                 {
@@ -542,7 +548,9 @@ namespace NPLogic.ViewModels
                 {
                     // 서버 시작 시도
                     OcrServerStatus = "서버 시작 중...";
+                    System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] 서버 시작 시도");
                     var started = await _ocrService.StartServerAsync();
+                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 서버 시작 결과: {started}");
                     
                     if (started)
                     {
@@ -552,15 +560,32 @@ namespace NPLogic.ViewModels
                     else
                     {
                         IsOcrServerReady = false;
-                        OcrServerStatus = "서버 시작 실패";
+                        OcrServerStatus = "서버 시작 실패 - Python 확인 필요";
                     }
                 }
             }
+            catch (FileNotFoundException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] FileNotFoundException: {ex.Message}");
+                IsOcrServerReady = false;
+                OcrServerStatus = "서버 파일 없음";
+            }
+            catch (TimeoutException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] TimeoutException: {ex.Message}");
+                IsOcrServerReady = false;
+                OcrServerStatus = "서버 응답 없음 (타임아웃)";
+            }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Exception: {ex.GetType().Name} - {ex.Message}");
                 IsOcrServerReady = false;
-                OcrServerStatus = $"서버 오류: {ex.Message}";
+                // 에러 메시지 간략화
+                var msg = ex.Message.Length > 30 ? ex.Message.Substring(0, 30) + "..." : ex.Message;
+                OcrServerStatus = $"서버 오류: {msg}";
             }
+            
+            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 최종 상태: {OcrServerStatus}");
         }
 
         /// <summary>

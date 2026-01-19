@@ -144,53 +144,39 @@
                 </Border.Effect>
                 
                 <StackPanel>
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <TextBlock Text="📋 등기부등본 정보" 
-                                       Style="{StaticResource H4TextStyle}"/>
-                            <!-- 주소 일치 여부 뱃지 -->
-                            <Border CornerRadius="4"
-                                    Padding="8,2"
-                                    Margin="12,0,0,0"
-                                    VerticalAlignment="Center"
-                                    Visibility="{Binding HasRegistryData, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="📋 등기부등본 정보" 
+                                   Style="{StaticResource H4TextStyle}"/>
+                        <!-- 주소 일치 여부 뱃지 -->
+                        <Border CornerRadius="4"
+                                Padding="8,2"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding HasRegistryData, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsAddressMatched}" Value="False">
+                                            <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Foreground="White" FontSize="{StaticResource FontSizeSmall}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="✓ 주소 일치"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsAddressMatched}" Value="False">
-                                                <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                <Setter Property="Text" Value="⚠ 주소 불일치"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </Border.Style>
-                                <TextBlock Foreground="White" FontSize="{StaticResource FontSizeSmall}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="✓ 주소 일치"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsAddressMatched}" Value="False">
-                                                    <Setter Property="Text" Value="⚠ 주소 불일치"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Border>
-                        </StackPanel>
-                        
-                        <Button Grid.Column="1"
-                                Content="등기부 탭으로 이동"
-                                Command="{Binding GoToRegistryTabCommand}"
-                                Style="{StaticResource SecondaryButton}"
-                                Padding="12,4"
-                                FontSize="{StaticResource FontSizeSmall}"/>
-                    </Grid>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </StackPanel>
                     
                     <!-- 등기부 요약 정보 -->
                     <Grid>

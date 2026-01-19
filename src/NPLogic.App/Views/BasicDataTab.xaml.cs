@@ -1,5 +1,9 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
+using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
+using NPLogic.ViewModels;
 
 namespace NPLogic.Views
 {
@@ -10,15 +14,35 @@ namespace NPLogic.Views
     /// </summary>
     public partial class BasicDataTab : UserControl
     {
+        private BasicDataTabViewModel? _viewModel;
+        private Guid _programId;
+
         public BasicDataTab()
         {
             InitializeComponent();
         }
 
-        private void BasicDataTab_Loaded(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 프로그램 ID 설정 및 초기화
+        /// </summary>
+        public async void Initialize(Guid programId, SupabaseService supabaseService)
         {
-            // 화면 로드 시 초기화 로직
-            // ViewModel의 InitializeAsync() 호출 등
+            _programId = programId;
+
+            var programRepository = new ProgramRepository(supabaseService);
+            _viewModel = new BasicDataTabViewModel(programRepository);
+            DataContext = _viewModel;
+
+            await _viewModel.InitializeAsync(programId);
+        }
+
+        private async void BasicDataTab_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 이미 초기화된 경우 스킵
+            if (_viewModel != null && _programId != Guid.Empty)
+            {
+                await _viewModel.InitializeAsync(_programId);
+            }
         }
     }
 }

@@ -1,0 +1,21 @@
+<UserControl x:Class="NPLogic.Views.Loan.Sheets.BasicSheet"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sections="clr-namespace:NPLogic.Views.Loan.Sections"
+             mc:Ignorable="d" 
+             d:DesignHeight="800" d:DesignWidth="1400">
+    
+    <!-- 일반 시트: 채권정보 + Loan Cap 1 + MCI 보증 -->
+    <StackPanel>
+        <!-- 채권정보 섹션 -->
+        <sections:BondInfoSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- Loan Cap 1 섹션 -->
+        <sections:LoanCapSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- MCI 보증 섹션 -->
+        <sections:MciSection DataContext="{Binding}"/>
+    </StackPanel>
+</UserControl>

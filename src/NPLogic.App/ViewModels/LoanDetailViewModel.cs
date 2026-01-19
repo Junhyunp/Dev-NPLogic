@@ -136,6 +136,9 @@ namespace NPLogic.ViewModels
                 {
                     Borrowers.Add(matchingBorrower);
                     SelectedBorrower = matchingBorrower;
+                    
+                    // 즉시 대출 목록 로드 (OnSelectedBorrowerChanged 대기하지 않음)
+                    await LoadLoansAsync();
                 }
                 else
                 {
@@ -189,7 +192,7 @@ namespace NPLogic.ViewModels
         /// </summary>
         private async Task LoadLoansAsync()
         {
-            if (SelectedBorrower == null)
+            if (SelectedBorrower == null || SelectedBorrower.Id == Guid.Empty)
             {
                 Loans.Clear();
                 Statistics = null;
@@ -199,13 +202,20 @@ namespace NPLogic.ViewModels
             try
             {
                 IsLoading = true;
+                ErrorMessage = null;
 
+                // GetByBorrowerIdAsync 사용 (DB 레벨 필터링으로 효율적)
+                var loans = await _loanRepository.GetByBorrowerIdAsync(SelectedBorrower.Id);
+
+                // 검색어 필터링 (메모리에서)
                 var searchText = string.IsNullOrWhiteSpace(SearchText) ? null : SearchText.Trim();
-
-                var loans = await _loanRepository.GetFilteredAsync(
-                    borrowerId: SelectedBorrower.Id,
-                    searchText: searchText
-                );
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    loans = loans.Where(l =>
+                        (!string.IsNullOrEmpty(l.AccountSerial) && l.AccountSerial.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrEmpty(l.AccountNumber) && l.AccountNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                    ).ToList();
+                }
 
                 Loans.Clear();
                 foreach (var loan in loans)
@@ -225,6 +235,7 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"대출 목록 로드 실패: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[LoanDetailViewModel] LoadLoansAsync 오류: {ex}");
             }
             finally
             {

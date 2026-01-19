@@ -1,0 +1,267 @@
+<UserControl x:Class="NPLogic.Views.Loan.Sections.LoanCapSection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="1400">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
+        <SolidColorBrush x:Key="HeaderBg" Color="#E7E7E7"/>
+        <SolidColorBrush x:Key="GreenBg" Color="#92D050"/>
+        <SolidColorBrush x:Key="LightGreenBg" Color="#C6EFCE"/>
+        <SolidColorBrush x:Key="BlueBg" Color="#BDD7EE"/>
+        <SolidColorBrush x:Key="YellowBg" Color="#FFFF00"/>
+        
+        <Style x:Key="HeaderCellStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource HeaderBg}"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="4,4"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="CellStyle" TargetType="DataGridCell">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#CCEEFF"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
+        <StackPanel>
+            <!-- 섹션 헤더 -->
+            <Border Background="{StaticResource LightGreenBg}" Padding="8,4">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Loan Cap 1" FontWeight="Bold" FontSize="12"/>
+                    <TextBlock Text="  (유효보증서 N and 기대위변제N)" FontSize="10" Foreground="Gray" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Loan Cap DataGrid -->
+            <DataGrid ItemsSource="{Binding Loans}"
+                      SelectedItem="{Binding SelectedLoan}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MaxHeight="200"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.Columns>
+                    <!-- 계좌일련번호 (A) -->
+                    <DataGridTextColumn Header="계좌일련번호&#x0a;(A)" 
+                                        Binding="{Binding AccountSerial}" 
+                                        Width="80"
+                                        IsReadOnly="True"/>
+                    
+                    <!-- 대출원금잔액 (G) -->
+                    <DataGridTextColumn Header="대출원금잔액&#x0a;(G)" 
+                                        Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" 
+                                        Width="95"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 미수이자 (I) -->
+                    <DataGridTextColumn Header="미수이자&#x0a;(I)" 
+                                        Binding="{Binding AccruedInterest, StringFormat=N0}" 
+                                        Width="85"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 연체이자율 (M) -->
+                    <DataGridTextColumn Header="연체이자율&#x0a;(M)" 
+                                        Binding="{Binding OverdueInterestRate, StringFormat=P1}" 
+                                        Width="65"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 1안 예상배당일 (DD1) -->
+                    <DataGridTextColumn Header="1안 예상배당일&#x0a;(DD1)" 
+                                        Binding="{Binding ExpectedDividendDate1, StringFormat=yyyy-MM-dd}" 
+                                        Width="90">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="Background" Value="#FFF9C4"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 1안 연체이자 (V) -->
+                    <DataGridTextColumn Header="1안 연체이자&#x0a;(V)" 
+                                        Binding="{Binding OverdueInterest1, StringFormat=N0}" 
+                                        Width="90"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 2안 예상배당일 (DD2) -->
+                    <DataGridTextColumn Header="2안 예상배당일&#x0a;(DD2)" 
+                                        Binding="{Binding ExpectedDividendDate2, StringFormat=yyyy-MM-dd}" 
+                                        Width="90">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="Background" Value="#FFF9C4"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 2안 연체이자 (W) -->
+                    <DataGridTextColumn Header="2안 연체이자&#x0a;(W)" 
+                                        Binding="{Binding OverdueInterest2, StringFormat=N0}" 
+                                        Width="90"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 1안 Loan Cap (LC1) -->
+                    <DataGridTextColumn Header="1안 Loan Cap&#x0a;(LC1)" 
+                                        Binding="{Binding LoanCap1, StringFormat=N0}" 
+                                        Width="100"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 2안 Loan Cap (LC2) -->
+                    <DataGridTextColumn Header="2안 Loan Cap&#x0a;(LC2)" 
+                                        Binding="{Binding LoanCap2, StringFormat=N0}" 
+                                        Width="100"
+                                        IsReadOnly="True">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            
+            <!-- 합계 행 -->
+            <Border Background="#E8F5E9" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,1,0,0" Padding="8,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="85"/>
+                        <ColumnDefinition Width="65"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" FontSize="10"/>
+                    
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding Statistics.TotalPrincipalBalance, StringFormat=N0}" 
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"/>
+                    
+                    <TextBlock Grid.Column="2" 
+                               Text="{Binding Statistics.TotalAccruedInterest, StringFormat=N0, FallbackValue=0}" 
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"/>
+                    
+                    <TextBlock Grid.Column="5" 
+                               Text="{Binding Statistics.TotalOverdueInterest1, StringFormat=N0, FallbackValue=0}" 
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"
+                               Foreground="#1565C0"/>
+                    
+                    <TextBlock Grid.Column="7" 
+                               Text="{Binding Statistics.TotalOverdueInterest2, StringFormat=N0, FallbackValue=0}" 
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"
+                               Foreground="#1565C0"/>
+                    
+                    <TextBlock Grid.Column="8" 
+                               Text="{Binding Statistics.TotalLoanCap1, StringFormat=N0}" 
+                               HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"
+                               Foreground="#2E7D32"/>
+                    
+                    <TextBlock Grid.Column="9" 
+                               Text="{Binding Statistics.TotalLoanCap2, StringFormat=N0}" 
+                               HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"
+                               Foreground="#2E7D32"/>
+                </Grid>
+            </Border>
+            
+            <!-- 가정 정보 -->
+            <Border Background="#EEEEEE" Padding="8,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Column="0" FontSize="9" Foreground="#666666">
+                        <Run Text="Loan Cap = 대출원금잔액 + 미수이자 + 연체이자 - (원금상계 + 원금회수 + 이자상계 + 이자회수)"/>
+                    </TextBlock>
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <TextBlock Text="가정 | adate: " FontSize="9" Foreground="#666666"/>
+                        <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
+                        <TextBlock Text="  Cdate: " FontSize="9" Foreground="#666666"/>
+                        <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

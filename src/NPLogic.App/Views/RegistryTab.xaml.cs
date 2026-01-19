@@ -16,31 +16,58 @@ namespace NPLogic.Views
 
         private async void RegistryTab_Loaded(object sender, RoutedEventArgs e)
         {
+            System.Diagnostics.Debug.WriteLine($"[RegistryTab] Loaded, DataContext type: {DataContext?.GetType().Name ?? "null"}");
+            
+            RegistryTabViewModel? registryViewModel = null;
+            
             // DataContext가 PropertyDetailViewModel인 경우 (기존 방식)
-            if (DataContext is PropertyDetailViewModel viewModel && viewModel.RegistryViewModel != null)
+            if (DataContext is PropertyDetailViewModel viewModel)
             {
-                // 등기부 데이터 로드
-                await viewModel.RegistryViewModel.LoadDataAsync();
-                
-                // OCR 서버 상태 확인 (백그라운드에서)
-                _ = viewModel.RegistryViewModel.CheckOcrServerStatusAsync();
+                registryViewModel = viewModel.RegistryViewModel;
+                System.Diagnostics.Debug.WriteLine($"[RegistryTab] PropertyDetailViewModel found");
             }
             // DataContext가 동적 래퍼인 경우 (AdminHomeView에서 사용)
             else if (DataContext is System.Dynamic.ExpandoObject expando)
             {
                 var dict = (IDictionary<string, object?>)expando;
-                if (dict.TryGetValue("RegistryViewModel", out var vm) && vm is RegistryTabViewModel registryVm)
+                if (dict.TryGetValue("RegistryViewModel", out var vm) && vm is RegistryTabViewModel rvm)
                 {
-                    // 데이터 로드는 이미 AdminHomeView에서 호출됨
-                    // OCR 서버 상태 확인만 수행
-                    _ = registryVm.CheckOcrServerStatusAsync();
+                    registryViewModel = rvm;
+                    System.Diagnostics.Debug.WriteLine("[RegistryTab] ExpandoObject DataContext");
                 }
             }
             // DataContext가 RegistryTabViewModel인 경우 (직접 사용)
-            else if (DataContext is RegistryTabViewModel registryVm)
+            else if (DataContext is RegistryTabViewModel rvm)
             {
-                // 데이터 로드는 이미 호출됨
-                _ = registryVm.CheckOcrServerStatusAsync();
+                registryViewModel = rvm;
+                System.Diagnostics.Debug.WriteLine("[RegistryTab] RegistryTabViewModel DataContext");
+            }
+            // 익명 타입인 경우 (리플렉션으로 RegistryViewModel 속성 찾기)
+            else if (DataContext != null)
+            {
+                var dataContextType = DataContext.GetType();
+                var prop = dataContextType.GetProperty("RegistryViewModel");
+                if (prop != null)
+                {
+                    registryViewModel = prop.GetValue(DataContext) as RegistryTabViewModel;
+                    System.Diagnostics.Debug.WriteLine("[RegistryTab] Anonymous type - found RegistryViewModel via reflection");
+                }
+            }
+            
+            // RegistryViewModel을 찾았으면 초기화
+            if (registryViewModel != null)
+            {
+                System.Diagnostics.Debug.WriteLine("[RegistryTab] Initializing RegistryViewModel");
+                
+                // 등기부 데이터 로드
+                await registryViewModel.LoadDataAsync();
+                
+                // OCR 서버 상태 확인 (백그라운드에서)
+                _ = registryViewModel.CheckOcrServerStatusAsync();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[RegistryTab] RegistryViewModel not found!");
             }
         }
     }

@@ -38,81 +38,62 @@
                         CornerRadius="8"
                         Padding="16"
                         Margin="0,0,0,16">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <!-- 버튼들 -->
-                        <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <Button Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Click="OpenSatelliteMap_Click"
-                                    ToolTip="위성도 열기">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Satellite" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="위성도" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Click="OpenCadastralMap_Click"
-                                    ToolTip="지적도 열기">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Map" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="지적도" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Click="OpenRoadView_Click"
-                                    ToolTip="로드뷰 열기">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Walk" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="로드뷰" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Margin="0,0,8,0"
-                                    Click="OpenLandUsePlan_Click"
-                                    ToolTip="토지이용계획 열기">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="FileDocument" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="토지이용계획" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button Style="{StaticResource SecondaryButton}"
-                                    Padding="16,8"
-                                    Click="OpenBuildingRegister_Click"
-                                    ToolTip="건축물대장 열기">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="OfficeBuildingMarker" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="건축물대장" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Button>
-                        </StackPanel>
-                        
-                        <!-- 등기부 탭으로 이동 버튼 -->
-                        <Button Grid.Column="1"
-                                Style="{StaticResource PrimaryButton}"
+                    <!-- 버튼들 -->
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
-                                Click="GoToRegistryTab_Click"
-                                ToolTip="등기부 탭으로 이동">
+                                Margin="0,0,8,0"
+                                Click="OpenSatelliteMap_Click"
+                                ToolTip="위성도 열기">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="FileDocumentOutline" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="등기부 탭으로 이동" VerticalAlignment="Center"/>
+                                <materialDesign:PackIcon Kind="Satellite" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="위성도" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                    </Grid>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="16,8"
+                                Margin="0,0,8,0"
+                                Click="OpenCadastralMap_Click"
+                                ToolTip="지적도 열기">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Map" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="지적도" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="16,8"
+                                Margin="0,0,8,0"
+                                Click="OpenRoadView_Click"
+                                ToolTip="로드뷰 열기">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Walk" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="로드뷰" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="16,8"
+                                Margin="0,0,8,0"
+                                Click="OpenLandUsePlan_Click"
+                                ToolTip="토지이용계획 열기">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FileDocument" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="토지이용계획" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="16,8"
+                                Click="OpenBuildingRegister_Click"
+                                ToolTip="건축물대장 열기">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="OfficeBuildingMarker" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="건축물대장" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Border>
                 
                 <!-- ========== 물건 기본 정보 테이블 ========== -->
@@ -398,90 +379,6 @@
                                                Margin="0,0,0,4"/>
                                     <TextBlock FontSize="18" FontWeight="Bold" Foreground="White">
                                         <Run Text="{Binding Property.AppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
-                                        <Run Text=" 원" FontSize="12" FontWeight="Normal"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-                
-                <!-- ========== 선순위 요약 정보 ========== -->
-                <Border Background="{StaticResource SurfaceColor}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8">
-                    <StackPanel>
-                        <!-- 헤더 -->
-                        <Border Background="{StaticResource PrimaryBrush}"
-                                CornerRadius="8,8,0,0"
-                                Padding="16,10">
-                            <TextBlock Text="⚖️ 선순위 요약" 
-                                       Foreground="White" 
-                                       FontWeight="SemiBold"
-                                       FontSize="14"/>
-                        </Border>
-                        
-                        <!-- 선순위 금액들 -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- 임차인 보증금 -->
-                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="임차인 보증금" 
-                                               FontSize="12" 
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
-                                        <Run Text="{Binding TenantDeposit, StringFormat=N0, FallbackValue='0'}"/>
-                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 당해세 -->
-                            <Border Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="당해세" 
-                                               FontSize="12" 
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
-                                        <Run Text="{Binding LocalTax, StringFormat=N0, FallbackValue='0'}"/>
-                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 기타 선순위 -->
-                            <Border Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="기타 선순위" 
-                                               FontSize="12" 
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock FontSize="16" FontWeight="SemiBold" Foreground="#E57373">
-                                        <Run Text="{Binding OtherSeniorRights, StringFormat=N0, FallbackValue='0'}"/>
-                                        <Run Text=" 원" FontSize="12" FontWeight="Normal" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 선순위 합계 -->
-                            <Border Grid.Column="3" Background="#FFEBEE" Padding="16,12">
-                                <StackPanel>
-                                    <TextBlock Text="선순위 합계" 
-                                               FontSize="12" 
-                                               Foreground="#C62828"
-                                               Margin="0,0,0,4"/>
-                                    <TextBlock FontSize="18" FontWeight="Bold" Foreground="#C62828">
-                                        <Run Text="{Binding SeniorRightsTotal, StringFormat=N0, FallbackValue='0'}"/>
                                         <Run Text=" 원" FontSize="12" FontWeight="Normal"/>
                                     </TextBlock>
                                 </StackPanel>

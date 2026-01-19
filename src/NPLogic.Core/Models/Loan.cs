@@ -10,9 +10,12 @@ namespace NPLogic.Core.Models
         public Guid Id { get; set; }
         public Guid? BorrowerId { get; set; }
 
-        // ========== 채권정보 ==========
+        // ========== 채권정보 (기본) ==========
 
-        /// <summary>계좌일련번호 (A)</summary>
+        /// <summary>채권관리번호 (A)</summary>
+        public string? BondManagementNumber { get; set; }
+
+        /// <summary>계좌일련번호</summary>
         public string? AccountSerial { get; set; }
 
         /// <summary>대출과목 (B)</summary>
@@ -29,7 +32,10 @@ namespace NPLogic.Core.Models
         /// <summary>최초대출원금 (F)</summary>
         public decimal? InitialLoanAmount { get; set; }
 
-        /// <summary>대출원금잔액 (G)</summary>
+        /// <summary>최초대출금전액</summary>
+        public decimal? InitialLoanFullAmount { get; set; }
+
+        /// <summary>대출원금잔액 (G/S)</summary>
         public decimal? LoanPrincipalBalance { get; set; }
 
         /// <summary>가지급금 (H)</summary>
@@ -40,6 +46,12 @@ namespace NPLogic.Core.Models
 
         /// <summary>채권액 합계 (J)</summary>
         public decimal? TotalClaimAmount { get; set; }
+
+        /// <summary>20년 채권잔액 (N1)</summary>
+        public decimal? BondBalance20YearN1 { get; set; }
+
+        /// <summary>20년 채권잔액 (N2)</summary>
+        public decimal? BondBalance20YearN2 { get; set; }
 
         // ========== 날짜 ==========
 
@@ -57,6 +69,12 @@ namespace NPLogic.Core.Models
         /// <summary>연체이자율 (M)</summary>
         public decimal? OverdueInterestRate { get; set; }
 
+        /// <summary>담보이자율</summary>
+        public decimal? CollateralInterestRate { get; set; }
+
+        /// <summary>이자율적용 (적용할 이자율)</summary>
+        public decimal? AppliedInterestRate { get; set; }
+
         // ========== 담보 연결 ==========
 
         /// <summary>1순위 피담보 (N)</summary>
@@ -67,6 +85,26 @@ namespace NPLogic.Core.Models
 
         /// <summary>3순위 피담보 (N3)</summary>
         public Guid? Collateral3Id { get; set; }
+
+        // ========== 추가 정보 ==========
+
+        /// <summary>MO대상 여부</summary>
+        public bool IsMoTarget { get; set; }
+
+        /// <summary>추심상태 (H)</summary>
+        public string? CollectionStatus { get; set; }
+
+        /// <summary>부서/성명 (담당자)</summary>
+        public string? DepartmentPerson { get; set; }
+
+        /// <summary>의율/담보/담보이자 (O)</summary>
+        public string? RateCollateralInfo { get; set; }
+
+        /// <summary>기 대출비율/담보이자 (Q)</summary>
+        public decimal? PriorLoanRatio { get; set; }
+
+        /// <summary>채권담보/담보이자 (R)</summary>
+        public string? BondCollateralInfo { get; set; }
 
         // ========== 체크박스 상태 ==========
 
@@ -102,27 +140,89 @@ namespace NPLogic.Core.Models
         /// <summary>이자회수 (U)</summary>
         public decimal InterestRecovery { get; set; }
 
+        // ========== 보증서요약 ==========
+
+        /// <summary>보증기관 (B)</summary>
+        public string? GuaranteeOrganization { get; set; }
+
+        /// <summary>보증번호 (N)</summary>
+        public string? GuaranteeNumber { get; set; }
+
+        /// <summary>보증가기관 코드</summary>
+        public string? GuaranteeOrgCode { get; set; }
+
+        /// <summary>해지유 배당자(현) (O)</summary>
+        public string? TerminationDividendStatus { get; set; }
+
+        /// <summary>대위변제금액 수수액 산정 (AC)</summary>
+        public decimal? SubrogationAmountCalculation { get; set; }
+
+        /// <summary>대위변제액 (AB)</summary>
+        public decimal? SubrogationAmount { get; set; }
+
+        /// <summary>선임료 (L)</summary>
+        public decimal? AppointmentFee { get; set; }
+
+        /// <summary>대위변제/채권 (AD)</summary>
+        public decimal? SubrogationBondRatio { get; set; }
+
+        /// <summary>약정이자 (AD)</summary>
+        public decimal? AgreedInterest { get; set; }
+
+        /// <summary>대위변제/채권도이자 (AD)</summary>
+        public decimal? SubrogationBondInterest { get; set; }
+
+        /// <summary>보증가능 여부</summary>
+        public bool IsGuaranteeAvailable { get; set; }
+
+        /// <summary>Cash In 반영 여부</summary>
+        public bool IsCashInReflected { get; set; }
+
         // ========== Loan Cap 계산 (시나리오 1) ==========
 
         /// <summary>1안 예상배당일 (DD1)</summary>
         public DateTime? ExpectedDividendDate1 { get; set; }
 
-        /// <summary>1안 연체이자 (V)</summary>
+        /// <summary>1안 예상배당가 (AB)</summary>
+        public decimal? ExpectedDividendValue1 { get; set; }
+
+        /// <summary>1안 연체이자 (AN)</summary>
         public decimal? OverdueInterest1 { get; set; }
+
+        /// <summary>1안 채권이자</summary>
+        public decimal? BondInterest1 { get; set; }
 
         /// <summary>1안 Loan Cap (LC1)</summary>
         public decimal? LoanCap1 { get; set; }
+
+        /// <summary>1안 보증기준 Loan Cap (oLC1)</summary>
+        public decimal? GuaranteeLoanCap1 { get; set; }
+
+        /// <summary>1안 MO 필수 반영 여부</summary>
+        public bool IsMoRequired1 { get; set; }
 
         // ========== Loan Cap 계산 (시나리오 2) ==========
 
         /// <summary>2안 예상배당일 (DD2)</summary>
         public DateTime? ExpectedDividendDate2 { get; set; }
 
-        /// <summary>2안 연체이자 (W)</summary>
+        /// <summary>2안 예상배당가 수수료</summary>
+        public decimal? ExpectedDividendFee2 { get; set; }
+
+        /// <summary>2안 연체이자 (AN)</summary>
         public decimal? OverdueInterest2 { get; set; }
+
+        /// <summary>2안 채권이자 (DD)</summary>
+        public decimal? BondInterest2 { get; set; }
 
         /// <summary>2안 Loan Cap (LC2)</summary>
         public decimal? LoanCap2 { get; set; }
+
+        /// <summary>2안 보증기준 Loan Cap (oLC2)</summary>
+        public decimal? GuaranteeLoanCap2 { get; set; }
+
+        /// <summary>2안 MO 필수 반영 여부</summary>
+        public bool IsMoRequired2 { get; set; }
 
         // ========== MCI 보증 정보 ==========
 
@@ -137,6 +237,61 @@ namespace NPLogic.Core.Models
 
         /// <summary>채권번호</summary>
         public string? MciBondNumber { get; set; }
+
+        /// <summary>MCI대출거래업체</summary>
+        public string? MciLoanTrader { get; set; }
+
+        /// <summary>MCI대출번호</summary>
+        public string? MciLoanNumber { get; set; }
+
+        /// <summary>MCI주요상품분류</summary>
+        public string? MciProductCategory { get; set; }
+
+        /// <summary>MCI최초시작일수</summary>
+        public int? MciInitialDays { get; set; }
+
+        /// <summary>MCI정상여부</summary>
+        public bool IsMciNormal { get; set; }
+
+        /// <summary>MCI청구지급율 (%)</summary>
+        public decimal? MciClaimPaymentRate { get; set; }
+
+        /// <summary>MCI채권팀전액</summary>
+        public decimal? MciBondTeamAmount { get; set; }
+
+        /// <summary>MCI대상여부</summary>
+        public bool IsMciTarget { get; set; }
+
+        // ========== 배당/대상금액 단물 (해지부보증용) ==========
+
+        /// <summary>공제산정금액</summary>
+        public decimal? DeductionCalculationAmount { get; set; }
+
+        /// <summary>사례사건 회수</summary>
+        public int? CaseCount { get; set; }
+
+        /// <summary>1개월호 자보보증</summary>
+        public decimal? SelfGuaranteeMonth1 { get; set; }
+
+        /// <summary>2개월호 자보보증</summary>
+        public decimal? SelfGuaranteeMonth2 { get; set; }
+
+        /// <summary>3개월호 신규보증</summary>
+        public decimal? NewGuaranteeMonth3 { get; set; }
+
+        /// <summary>7개월호 신규보증</summary>
+        public decimal? NewGuaranteeMonth7 { get; set; }
+
+        // ========== 기타항목 및 변경 ==========
+
+        /// <summary>기타항목 구분</summary>
+        public string? OtherItemCategory { get; set; }
+
+        /// <summary>기타항목 지급</summary>
+        public decimal? OtherItemPayment { get; set; }
+
+        /// <summary>기타항목 회수</summary>
+        public decimal? OtherItemRecovery { get; set; }
 
         // ========== 기타 ==========
 

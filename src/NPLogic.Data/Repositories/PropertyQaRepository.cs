@@ -165,19 +165,98 @@ namespace NPLogic.Data.Repositories
             }
         }
 
+        /// <summary>
+        /// 전체 QA 목록 조회
+        /// </summary>
+        public async Task<List<PropertyQa>> GetAllAsync()
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<PropertyQaTable>()
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToModel).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"QA 목록 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 차주번호로 QA 목록 조회
+        /// </summary>
+        public async Task<List<PropertyQa>> GetByBorrowerNumberAsync(string borrowerNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<PropertyQaTable>()
+                    .Where(x => x.BorrowerNumber == borrowerNumber)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToModel).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"차주별 QA 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 차주별 QA 요약 정보 조회
+        /// </summary>
+        public async Task<List<BorrowerQaSummary>> GetBorrowerQaSummariesAsync()
+        {
+            try
+            {
+                var allQas = await GetAllAsync();
+
+                var summaries = allQas
+                    .Where(q => !string.IsNullOrEmpty(q.BorrowerNumber))
+                    .GroupBy(q => new { q.BorrowerNumber, q.BorrowerName })
+                    .Select(g => new BorrowerQaSummary
+                    {
+                        BorrowerNumber = g.Key.BorrowerNumber ?? "",
+                        BorrowerName = g.Key.BorrowerName ?? "",
+                        TotalCount = g.Count(),
+                        AnsweredCount = g.Count(q => q.IsAnswered),
+                        UnansweredCount = g.Count(q => !q.IsAnswered),
+                        LastQuestionAt = g.Max(q => q.CreatedAt),
+                        LastAnswerAt = g.Where(q => q.AnsweredAt.HasValue).Max(q => q.AnsweredAt)
+                    })
+                    .OrderBy(s => s.BorrowerNumber)
+                    .ToList();
+
+                return summaries;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"차주별 QA 요약 조회 실패: {ex.Message}", ex);
+            }
+        }
+
         private PropertyQa MapToModel(PropertyQaTable table)
         {
             return new PropertyQa
             {
                 Id = table.Id,
                 PropertyId = table.PropertyId,
-                Question = table.Question,
+                Question = table.Question ?? "",
                 Answer = table.Answer,
+                Part = table.Part,
+                BorrowerNumber = table.BorrowerNumber,
+                BorrowerName = table.BorrowerName,
                 CreatedBy = table.CreatedBy,
                 AnsweredBy = table.AnsweredBy,
-                CreatedAt = table.CreatedAt,
+                CreatedAt = table.CreatedAt ?? DateTime.UtcNow,
                 AnsweredAt = table.AnsweredAt,
-                UpdatedAt = table.UpdatedAt
+                UpdatedAt = table.UpdatedAt ?? DateTime.UtcNow
             };
         }
 
@@ -189,6 +268,9 @@ namespace NPLogic.Data.Repositories
                 PropertyId = model.PropertyId,
                 Question = model.Question,
                 Answer = model.Answer,
+                Part = model.Part,
+                BorrowerNumber = model.BorrowerNumber,
+                BorrowerName = model.BorrowerName,
                 CreatedBy = model.CreatedBy,
                 AnsweredBy = model.AnsweredBy,
                 CreatedAt = model.CreatedAt,
@@ -208,10 +290,19 @@ namespace NPLogic.Data.Repositories
         public Guid PropertyId { get; set; }
 
         [Postgrest.Attributes.Column("question")]
-        public string Question { get; set; } = "";
+        public string? Question { get; set; }
 
         [Postgrest.Attributes.Column("answer")]
         public string? Answer { get; set; }
+
+        [Postgrest.Attributes.Column("part")]
+        public string? Part { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_name")]
+        public string? BorrowerName { get; set; }
 
         [Postgrest.Attributes.Column("created_by")]
         public Guid? CreatedBy { get; set; }
@@ -220,13 +311,13 @@ namespace NPLogic.Data.Repositories
         public Guid? AnsweredBy { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         [Postgrest.Attributes.Column("answered_at")]
         public DateTime? AnsweredAt { get; set; }
 
         [Postgrest.Attributes.Column("updated_at")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 
     // QA 조인용 간소화된 Property 테이블
@@ -237,6 +328,187 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("borrower_id")] public Guid? BorrowerId { get; set; }
         [Postgrest.Attributes.Column("property_number")] public string? PropertyNumber { get; set; }
         [Postgrest.Attributes.Column("address_full")] public string? AddressFull { get; set; }
+    }
+
+    /// <summary>
+    /// QA 알림 Repository
+    /// 피드백 섹션 18: 알림 기능 - 답변 도착 시 팝업 알람
+    /// </summary>
+    public class QaNotificationRepository
+    {
+        private readonly Services.SupabaseService _supabaseService;
+
+        public QaNotificationRepository(Services.SupabaseService supabaseService)
+        {
+            _supabaseService = supabaseService ?? throw new ArgumentNullException(nameof(supabaseService));
+        }
+
+        /// <summary>
+        /// 사용자의 미읽은 알림 조회
+        /// </summary>
+        public async Task<List<QaNotification>> GetUnreadByUserIdAsync(Guid userId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<QaNotificationTable>()
+                    .Where(x => x.UserId == userId)
+                    .Where(x => x.IsRead == false)
+                    .Order(x => x.CreatedAt, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToNotification).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"알림 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 알림 생성
+        /// </summary>
+        public async Task<QaNotification> CreateAsync(QaNotification notification)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = MapToTable(notification);
+                table.Id = Guid.NewGuid();
+                table.CreatedAt = DateTime.UtcNow;
+
+                var response = await client
+                    .From<QaNotificationTable>()
+                    .Insert(table);
+
+                var created = response.Models.FirstOrDefault();
+                if (created == null)
+                    throw new Exception("알림 생성 후 데이터 조회 실패");
+
+                return MapToNotification(created);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"알림 생성 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 알림 읽음 처리
+        /// </summary>
+        public async Task MarkAsReadAsync(Guid notificationId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<QaNotificationTable>()
+                    .Where(x => x.Id == notificationId)
+                    .Set(x => x.IsRead, true)
+                    .Set(x => x.ReadAt!, DateTime.UtcNow)
+                    .Update();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"알림 읽음 처리 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 사용자의 모든 알림 읽음 처리
+        /// </summary>
+        public async Task MarkAllAsReadAsync(Guid userId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<QaNotificationTable>()
+                    .Where(x => x.UserId == userId)
+                    .Where(x => x.IsRead == false)
+                    .Set(x => x.IsRead, true)
+                    .Set(x => x.ReadAt!, DateTime.UtcNow)
+                    .Update();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"전체 알림 읽음 처리 실패: {ex.Message}", ex);
+            }
+        }
+
+        private static QaNotification MapToNotification(QaNotificationTable table)
+        {
+            return new QaNotification
+            {
+                Id = table.Id,
+                UserId = table.UserId,
+                QaId = table.QaId,
+                PropertyId = table.PropertyId,
+                BorrowerNumber = table.BorrowerNumber,
+                BorrowerName = table.BorrowerName,
+                NotificationType = table.NotificationType ?? "answer_received",
+                Message = table.Message,
+                IsRead = table.IsRead,
+                ReadAt = table.ReadAt,
+                CreatedAt = table.CreatedAt ?? DateTime.MinValue
+            };
+        }
+
+        private static QaNotificationTable MapToTable(QaNotification notification)
+        {
+            return new QaNotificationTable
+            {
+                Id = notification.Id,
+                UserId = notification.UserId,
+                QaId = notification.QaId,
+                PropertyId = notification.PropertyId,
+                BorrowerNumber = notification.BorrowerNumber,
+                BorrowerName = notification.BorrowerName,
+                NotificationType = notification.NotificationType,
+                Message = notification.Message,
+                IsRead = notification.IsRead,
+                ReadAt = notification.ReadAt,
+                CreatedAt = notification.CreatedAt
+            };
+        }
+    }
+
+    [Postgrest.Attributes.Table("qa_notifications")]
+    internal class QaNotificationTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("user_id")]
+        public Guid UserId { get; set; }
+
+        [Postgrest.Attributes.Column("qa_id")]
+        public Guid QaId { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_name")]
+        public string? BorrowerName { get; set; }
+
+        [Postgrest.Attributes.Column("notification_type")]
+        public string? NotificationType { get; set; }
+
+        [Postgrest.Attributes.Column("message")]
+        public string? Message { get; set; }
+
+        [Postgrest.Attributes.Column("is_read")]
+        public bool IsRead { get; set; }
+
+        [Postgrest.Attributes.Column("read_at")]
+        public DateTime? ReadAt { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime? CreatedAt { get; set; }
     }
 }
 

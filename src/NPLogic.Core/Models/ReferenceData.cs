@@ -178,5 +178,21 @@ namespace NPLogic.Core.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
+
+    /// <summary>
+    /// 공매비용 산정 기준 (C-006)
+    /// </summary>
+    public class PublicSaleCostStandard
+    {
+        public Guid Id { get; set; }
+        public string CostType { get; set; } = ""; // 온비드 수수료, 감정료 등
+        public string? CalculationMethod { get; set; } // 고정, 비율, 복합
+        public decimal? BaseAmount { get; set; }
+        public decimal? Rate { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }
 

@@ -363,10 +363,69 @@ namespace NPLogic.Core.Models
         public DateTime? AnsweredAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+        /// <summary>QA 카테고리/파트 (예: 등기부등본, 선순위, 평가 등)</summary>
+        public string? Part { get; set; }
+
+        /// <summary>차주번호 (빠른 조회용)</summary>
+        public string? BorrowerNumber { get; set; }
+
+        /// <summary>차주명 (빠른 조회용)</summary>
+        public string? BorrowerName { get; set; }
+
         // 조인용 확장 필드
         public string? PropertyNumber { get; set; }
+        public string? CollateralNumber { get; set; }
         public string? AddressFull { get; set; }
         public bool IsAnswered => !string.IsNullOrWhiteSpace(Answer);
+
+        /// <summary>생성자 이름 (조인용)</summary>
+        public string? CreatedByName { get; set; }
+
+        /// <summary>답변자 이름 (조인용)</summary>
+        public string? AnsweredByName { get; set; }
+    }
+
+    /// <summary>
+    /// QA 알림 모델
+    /// </summary>
+    public class QaNotification
+    {
+        public Guid Id { get; set; }
+        public Guid UserId { get; set; }
+        public Guid QaId { get; set; }
+        public Guid? PropertyId { get; set; }
+        public string? BorrowerNumber { get; set; }
+        public string? BorrowerName { get; set; }
+
+        /// <summary>알림 타입: answer_received, question_created 등</summary>
+        public string NotificationType { get; set; } = "answer_received";
+
+        public string? Message { get; set; }
+        public bool IsRead { get; set; }
+        public DateTime? ReadAt { get; set; }
+        public DateTime CreatedAt { get; set; }
+
+        // 조인용 확장 필드
+        public string? Question { get; set; }
+        public string? Answer { get; set; }
+        public string? PropertyNumber { get; set; }
+    }
+
+    /// <summary>
+    /// 차주별 QA 요약 모델 (QA 집계용)
+    /// </summary>
+    public class BorrowerQaSummary
+    {
+        public string BorrowerNumber { get; set; } = "";
+        public string BorrowerName { get; set; } = "";
+        public int TotalCount { get; set; }
+        public int AnsweredCount { get; set; }
+        public int UnansweredCount { get; set; }
+        public DateTime? LastQuestionAt { get; set; }
+        public DateTime? LastAnswerAt { get; set; }
+
+        /// <summary>답변 완료율</summary>
+        public double AnswerRate => TotalCount > 0 ? (double)AnsweredCount / TotalCount * 100 : 0;
     }
 }
 

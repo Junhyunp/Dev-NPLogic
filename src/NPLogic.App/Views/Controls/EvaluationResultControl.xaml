@@ -1,0 +1,167 @@
+<UserControl x:Class="NPLogic.Views.Controls.EvaluationResultControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="400" d:DesignWidth="600">
+    
+    <Border Style="{StaticResource CardBorder}" Padding="16">
+        <StackPanel>
+            <TextBlock Text="✅ 평가결과" Style="{StaticResource SectionHeader}" Margin="0,0,0,16"/>
+            
+            <!-- 시나리오 1 (하한) -->
+            <Border Background="{StaticResource BlueGray50Brush}" 
+                    CornerRadius="4" 
+                    Padding="16"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
+                               Text="시나리오 1 (하한)" 
+                               FontWeight="Bold" FontSize="14"
+                               Foreground="{StaticResource PrimaryBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="평가액" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                               x:Name="TxtScenario1Amount"
+                               Text="0원" 
+                               Style="{StaticResource AmountText}"
+                               FontSize="18"
+                               Margin="8,0,24,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="3" 
+                               x:Name="TxtScenario1Rate"
+                               Text="70.0%" 
+                               Style="{StaticResource ValueText}"
+                               FontWeight="Bold"
+                               Margin="8,0,0,0"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="평가 사유" Style="{StaticResource LabelText}" Margin="0,12,0,0" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                             x:Name="TxtScenario1Reason"
+                             Text="하한"
+                             Margin="8,12,0,0"
+                             Padding="8,4"/>
+
+                    <!-- 저감반영액 (공장/창고, 상가용) -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" 
+                               x:Name="LblScenario1Reduction"
+                               Text="저감반영액" 
+                               Style="{StaticResource LabelText}" 
+                               Margin="0,12,0,0"
+                               Visibility="Collapsed"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
+                             x:Name="TxtScenario1Reduction"
+                             Margin="8,12,0,0"
+                             Padding="8,4"
+                             Visibility="Collapsed"/>
+                </Grid>
+            </Border>
+
+            <!-- 시나리오 2 (상한) -->
+            <Border Background="{StaticResource BlueGray50Brush}" 
+                    CornerRadius="4" 
+                    Padding="16"
+                    Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
+                               Text="시나리오 2 (상한)" 
+                               FontWeight="Bold" FontSize="14"
+                               Foreground="{StaticResource SecondaryBrush}"
+                               Margin="0,0,0,12"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="평가액" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                               x:Name="TxtScenario2Amount"
+                               Text="0원" 
+                               Style="{StaticResource AmountText}"
+                               FontSize="18"
+                               Foreground="{StaticResource SecondaryBrush}"
+                               Margin="8,0,24,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="3" 
+                               x:Name="TxtScenario2Rate"
+                               Text="75.0%" 
+                               Style="{StaticResource ValueText}"
+                               FontWeight="Bold"
+                               Margin="8,0,0,0"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="평가 사유" Style="{StaticResource LabelText}" Margin="0,12,0,0" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                             x:Name="TxtScenario2Reason"
+                             Text="상한"
+                             Margin="8,12,0,0"
+                             Padding="8,4"/>
+
+                    <!-- 저감반영액 (공장/창고, 상가용) -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" 
+                               x:Name="LblScenario2Reduction"
+                               Text="저감반영액" 
+                               Style="{StaticResource LabelText}" 
+                               Margin="0,12,0,0"
+                               Visibility="Collapsed"/>
+                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
+                             x:Name="TxtScenario2Reduction"
+                             Margin="8,12,0,0"
+                             Padding="8,4"
+                             Visibility="Collapsed"/>
+                </Grid>
+            </Border>
+
+            <!-- 토지/건물/기계 구분 표시 (공장/창고용) -->
+            <Border x:Name="LandBuildingMachinerySection"
+                    Background="{StaticResource BlueGray50Brush}" 
+                    CornerRadius="4" 
+                    Padding="12"
+                    Visibility="Collapsed">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="토지 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock x:Name="TxtLandValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="건물 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock x:Name="TxtBuildingValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="기계 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock x:Name="TxtMachineryValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -5,7 +5,7 @@ using NPLogic.ViewModels;
 namespace NPLogic.Views
 {
     /// <summary>
-    /// 공매 일정 화면
+    /// 공매일정(Ⅷ) 화면 - 엑셀 산출화면 기반
     /// </summary>
     public partial class PublicSaleScheduleView : UserControl
     {
@@ -21,6 +21,13 @@ namespace NPLogic.Views
                 await viewModel.InitializeAsync();
             }
         }
+
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is PublicSaleScheduleViewModel viewModel)
+            {
+                await viewModel.SaveAsync();
+            }
+        }
     }
 }
-

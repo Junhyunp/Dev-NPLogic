@@ -144,164 +144,173 @@
         <Grid Margin="16,8,16,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 헤더 영역 (한 줄로 통합) -->
-            <Grid Grid.Row="0" Margin="0,0,0,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- 좌측: 타이틀 + 뱃지 + 담당자 (한 줄) -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="대시보드" 
-                               Style="{StaticResource H2TextStyle}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,12,0"/>
-                    <!-- 역할 뱃지 -->
-                    <Border Background="{StaticResource PrimaryBrush}"
-                            CornerRadius="4"
-                            Padding="6,3"
-                            VerticalAlignment="Center"
-                            Margin="0,0,16,0"
-                            Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
-                        <TextBlock Text="{Binding RoleBadgeText}" 
-                                   Foreground="White"
-                                   FontSize="{StaticResource FontSizeSmall}"
-                                   FontWeight="SemiBold"/>
-                    </Border>
-                    <TextBlock Style="{StaticResource BodyTextStyle}"
-                               VerticalAlignment="Center"
-                               Opacity="0.7"
-                               FontSize="{StaticResource FontSizeBody}">
-                        <Run Text="담당자:"/>
-                        <Run Text="{Binding CurrentUser.Name, FallbackValue='로그인 필요'}" FontWeight="SemiBold"/>
-                    </TextBlock>
-                </StackPanel>
-
-                <!-- 우측 버튼들 -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Command="{Binding RefreshDataCommand}"
-                            Style="{StaticResource IconButton}"
-                            Width="32" Height="32"
-                            Margin="0,0,4,0"
-                            ToolTip="새로고침 (Ctrl+R)">
-                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18"/>
-                    </Button>
-                    <Button Style="{StaticResource SecondaryButton}"
-                            Padding="6,4"
-                            Margin="0,0,6,0"
-                            Click="RollupButton_Click"
-                            ToolTip="전체 현황 창 열기 (비핵심 전체 데이터 한눈에 보기)">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="TableLarge" 
-                                                     Width="14" Height="14" 
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,4,0"/>
-                            <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ExportToExcelCommand}"
-                            Style="{StaticResource PrimaryButton}"
-                            Padding="6,4"
-                            ToolTip="현재 데이터를 Excel 파일로 내보내기">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="MicrosoftExcel" 
-                                                     Width="14" Height="14" 
-                                                     VerticalAlignment="Center"
-                                                     Margin="0,0,4,0"/>
-                            <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-            
-            <!-- 브레드크럼 영역 (간소화된 네비게이션: 대시보드 > 프로그램 > 물건 > 탭) -->
-            <Border Grid.Row="1" 
+            <!-- 헤더 영역 (한 줄로 통합: 타이틀 + 뱃지 + 브레드크럼 + 프로그램 건수 + 버튼) -->
+            <Border Grid.Row="0" 
                     Background="{StaticResource BlueGray50Brush}"
                     CornerRadius="4"
-                    Padding="10,6"
+                    Padding="12,8"
                     Margin="0,0,0,10">
-                <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="MapMarker" 
-                                             Width="14" Height="14" 
-                                             VerticalAlignment="Center"
-                                             Foreground="{StaticResource TextSecondaryBrush}"
-                                             Margin="0,0,6,0"/>
-                    <!-- 1. 대시보드 -->
-                    <TextBlock x:Name="BreadcrumbHome"
-                               Text="대시보드"
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               VerticalAlignment="Center"
-                               Cursor="Hand"
-                               MouseLeftButtonDown="Breadcrumb_Home_Click"
-                               ToolTip="프로그램 선택 화면으로 이동"/>
-                    
-                    <!-- 2. 프로그램명 (프로그램 선택 시 표시) -->
-                    <TextBlock Text=" › " 
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    <TextBlock x:Name="BreadcrumbProgram"
-                               Text="{Binding SelectedProgram.ProjectName}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource PrimaryBrush}"
-                               VerticalAlignment="Center"
-                               Cursor="Hand"
-                               MouseLeftButtonDown="Breadcrumb_Program_Click"
-                               ToolTip="물건 목록으로 이동"
-                               Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    
-                    <!-- 3. 물건번호 + 차주명 (물건 선택 시 = 상세 모드) -->
-                    <TextBlock x:Name="BreadcrumbPropertySeparator"
-                               Text=" › " 
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
-                    <StackPanel x:Name="BreadcrumbProperty"
-                                Orientation="Horizontal"
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 좌측: 패널 열기 버튼 + 대시보드 + 뱃지 + 담당자 + 브레드크럼 + 프로그램 건수 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- 좌측 패널 열기 버튼 (패널 접혔을 때만 표시) - 상단 헤더에 통합 -->
+                        <ToggleButton x:Name="LeftPanelOpenButton"
+                                      Style="{StaticResource PanelToggleButton}"
+                                      Visibility="Collapsed"
+                                      Click="LeftPanelOpen_Click"
+                                      ToolTip="물건 목록 열기"
+                                      Margin="0,0,8,0"
+                                      VerticalAlignment="Center">
+                            <materialDesign:PackIcon Kind="Menu" Width="18" Height="18"/>
+                        </ToggleButton>
+                        <TextBlock Text="대시보드" 
+                                   Style="{StaticResource H3TextStyle}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+                        <!-- 역할 뱃지 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="4"
+                                Padding="5,2"
                                 VerticalAlignment="Center"
-                                Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="{Binding SelectedProperty.CollateralNumber}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource PrimaryBrush}"
-                                   FontWeight="SemiBold"/>
-                        <TextBlock Text=" ("
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Text="{Binding SelectedProperty.DebtorName}"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                        <TextBlock Text=")"
-                                   FontSize="{StaticResource FontSizeBody}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"/>
+                                Margin="0,0,10,0"
+                                Visibility="{Binding CurrentUser, Converter={StaticResource NullToVisibilityConverter}}">
+                            <TextBlock Text="{Binding RoleBadgeText}" 
+                                       Foreground="White"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       FontWeight="SemiBold"/>
+                        </Border>
+                        <TextBlock Style="{StaticResource BodyTextStyle}"
+                                   VerticalAlignment="Center"
+                                   Opacity="0.7"
+                                   FontSize="{StaticResource FontSizeSmall}"
+                                   Margin="0,0,12,0">
+                            <Run Text="담당자:"/>
+                            <Run Text="{Binding CurrentUser.Name, FallbackValue='로그인 필요'}" FontWeight="SemiBold"/>
+                        </TextBlock>
+                        
+                        <!-- 구분선 -->
+                        <Rectangle Width="1" Height="16" Fill="{StaticResource BlueGray300Brush}" Margin="0,0,12,0"
+                                   Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}"/>
+                        
+                        <!-- 브레드크럼 (프로그램 선택 시만 표시) -->
+                        <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}">
+                            <materialDesign:PackIcon Kind="MapMarker" 
+                                                     Width="12" Height="12" 
+                                                     VerticalAlignment="Center"
+                                                     Foreground="{StaticResource TextSecondaryBrush}"
+                                                     Margin="0,0,4,0"/>
+                            <!-- 프로그램명 -->
+                            <TextBlock x:Name="BreadcrumbProgram"
+                                       Text="{Binding SelectedProgram.ProjectName}"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource PrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Cursor="Hand"
+                                       MouseLeftButtonDown="Breadcrumb_Program_Click"
+                                       ToolTip="물건 목록으로 이동"/>
+                            
+                            <!-- 물건번호 + 차주명 (물건 선택 시 = 상세 모드) -->
+                            <TextBlock x:Name="BreadcrumbPropertySeparator"
+                                       Text=" › " 
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <StackPanel x:Name="BreadcrumbProperty"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="{Binding SelectedProperty.CollateralNumber}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource PrimaryBrush}"
+                                           FontWeight="SemiBold"/>
+                                <TextBlock Text=" ("
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="{Binding SelectedProperty.DebtorName}"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text=")"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                            </StackPanel>
+                            
+                            <!-- 현재 탭명 (상세 모드에서 탭 선택 시) -->
+                            <TextBlock x:Name="BreadcrumbTabSeparator"
+                                       Text=" › " 
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            <TextBlock x:Name="BreadcrumbTab"
+                                       Text="{Binding CurrentTabName}"
+                                       FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            
+                            <!-- 프로그램 건수 (목록 모드에서만 표시) -->
+                            <TextBlock FontSize="{StaticResource FontSizeSmall}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0,0,0"
+                                       Visibility="{Binding IsDetailMode, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                <Run Text="("/>
+                                <Run Text="{Binding SelectedProgram.TotalCount}"/>
+                                <Run Text="건)"/>
+                            </TextBlock>
+                        </StackPanel>
                     </StackPanel>
-                    
-                    <!-- 4. 현재 탭명 (상세 모드에서 탭 선택 시) -->
-                    <TextBlock x:Name="BreadcrumbTabSeparator"
-                               Text=" › " 
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource TextSecondaryBrush}"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    <TextBlock x:Name="BreadcrumbTab"
-                               Text="{Binding CurrentTabName}"
-                               FontSize="{StaticResource FontSizeBody}"
-                               Foreground="{StaticResource TextPrimaryBrush}"
-                               VerticalAlignment="Center"
-                               Visibility="{Binding CurrentTabName, Converter={StaticResource NullToVisibilityConverter}}"/>
-                </StackPanel>
+
+                    <!-- 우측 버튼들 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Command="{Binding RefreshDataCommand}"
+                                Style="{StaticResource IconButton}"
+                                Width="28" Height="28"
+                                Margin="0,0,4,0"
+                                ToolTip="새로고침 (Ctrl+R)">
+                            <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16"/>
+                        </Button>
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="6,3"
+                                Margin="0,0,4,0"
+                                Click="RollupButton_Click"
+                                ToolTip="전체 현황 창 열기 (비핵심 전체 데이터 한눈에 보기)">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TableLarge" 
+                                                         Width="12" Height="12" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,3,0"/>
+                                <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="11"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ExportToExcelCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Padding="6,3"
+                                ToolTip="현재 데이터를 Excel 파일로 내보내기">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="MicrosoftExcel" 
+                                                         Width="12" Height="12" 
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,3,0"/>
+                                <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="11"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- 2영역 레이아웃 (Phase 2.2, 2.4) - GridSplitter 제거, 토글 버튼 방식만 사용 -->
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <!-- 좌측: 진행 중인 프로그램 (기본 펼친 상태) -->
                     <ColumnDefinition x:Name="LeftPanelColumn" Width="280" MinWidth="0"/>
@@ -310,12 +319,13 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- ========== 좌측: 진행 중인 프로그램 (일반 모드) / 물건 리스트 (상세 모드) ========== -->
+                <!-- 피드백 섹션 16: 네이비 테두리로 통일 (배경 + 네이비 테두리) -->
                 <Border x:Name="LeftPanel"
                         Grid.Column="0"
                         Background="{StaticResource SurfaceBrush}"
                         CornerRadius="8,0,0,8"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1,1,0,1"
+                        BorderBrush="{StaticResource PrimaryBrush}"
+                        BorderThickness="2,2,0,2"
                         Visibility="Visible">
                     <Border.Effect>
                         <DropShadowEffect Color="Black" Opacity="0.05" BlurRadius="8" ShadowDepth="2"/>
@@ -589,56 +599,12 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>  <!-- F-001: 고급 필터 패널 -->
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- 우측 패널 헤더 -->
-                        <Border Grid.Row="0" 
-                                Background="{StaticResource BlueGray50Brush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="0,0,0,1"
-                                Padding="16,10">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <!-- 좌측 패널 열기 버튼 (기본 숨김 - 펼쳐져 있을 때) -->
-                                <ToggleButton x:Name="LeftPanelOpenButton"
-                                              Grid.Column="0"
-                                              Style="{StaticResource PanelToggleButton}"
-                                              Visibility="Collapsed"
-                                              Click="LeftPanelOpen_Click"
-                                              ToolTip="프로그램 목록 열기"
-                                              Margin="0,0,12,0">
-                                    <materialDesign:PackIcon Kind="ChevronRight" Width="20" Height="20"/>
-                                </ToggleButton>
-
-                                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                    <TextBlock Text="{Binding SelectedProgram.ProjectName, FallbackValue='프로그램을 선택하세요'}" 
-                                               FontWeight="SemiBold"
-                                               FontSize="{StaticResource FontSizeH3}"
-                                               Foreground="{StaticResource TextPrimaryBrush}"
-                                               VerticalAlignment="Center"/>
-                                    <TextBlock Margin="12,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontSize="{StaticResource FontSizeBody}"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}">
-                                        <Run Text="("/>
-                                        <Run Text="{Binding SelectedProgram.TotalCount}"/>
-                                        <Run Text="건)"/>
-                                    </TextBlock>
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
                         <!-- 내부 탭 메뉴 (상세 모드에서만 표시) -->
-                        <Border Grid.Row="1"
+                        <Border Grid.Row="0"
                                 BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="0,0,0,1"
                                 Background="{StaticResource SurfaceBrush}"
@@ -687,6 +653,21 @@
                                                      Style="{StaticResource InnerTabButton}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabQASummary" 
+                                                     Content="QA집계" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabCashFlowSummary" 
+                                                     Content="현금흐름집계" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
+                                        <RadioButton x:Name="TabNPVComparison" 
+                                                     Content="NPV비교" 
+                                                     Style="{StaticResource InnerTabButton}"
+                                                     GroupName="InnerTabs"
+                                                     Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabClosing" 
                                                      Content="마감" 
                                                      Style="{StaticResource InnerTabButton}"
@@ -697,17 +678,26 @@
                             </Grid>
                         </Border>
 
-                        <!-- 컬럼별 진행률 표시 (Phase 2.6) -->
-                        <Border Grid.Row="2"
+                        <!-- 컬럼별 진행률 표시 (Phase 2.6) - 접기/펼치기 가능, 물건 상세 진입 시 숨김 -->
+                        <Border Grid.Row="1"
                                 Background="{StaticResource BlueGray50Brush}"
-                                Padding="16,10"
                                 BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="0,0,0,1"
-                                Visibility="{Binding SelectedProgram, Converter={StaticResource NullToVisibilityConverter}}">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" 
-                                          VerticalScrollBarVisibility="Disabled">
-                                <StackPanel Orientation="Horizontal">
-                                    <!-- 상태 필터 버튼 (전체/대기/진행/완료) - 더블클릭으로 필터링 -->
+                                Visibility="{Binding IsFilterBarAreaVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- 펼쳐진 상태: 전체 필터/진행률 표시 -->
+                                <ScrollViewer Grid.Column="0"
+                                              HorizontalScrollBarVisibility="Auto" 
+                                              VerticalScrollBarVisibility="Disabled"
+                                              Visibility="{Binding IsFilterBarExpanded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                              Margin="16,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <!-- 상태 필터 버튼 (전체/대기/진행/완료) - 더블클릭으로 필터링 -->
                                     <Border Background="{StaticResource SurfaceBrush}"
                                             CornerRadius="4"
                                             Padding="6,4"
@@ -851,20 +841,6 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <Border Background="{StaticResource SurfaceBrush}"
-                                            CornerRadius="4"
-                                            Padding="10,6"
-                                            Margin="0,0,8,0"
-                                            BorderBrush="{StaticResource BorderBrush}"
-                                            BorderThickness="1">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="평가확정" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                            <TextBlock Text="{Binding ColumnProgress.AppraisalConfirmedPercent, StringFormat={}{0}%}" 
-                                                       FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Margin="6,0,0,0"
-                                                       Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-
                                     <Border Background="{StaticResource SuccessBgBrush}"
                                             CornerRadius="4"
                                             Padding="10,6"
@@ -877,12 +853,58 @@
                                                        Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
+                                    </StackPanel>
+                                </ScrollViewer>
+                                
+                                <!-- 접힌 상태: 간략 표시 (전체 완료율만 표시) -->
+                                <StackPanel Grid.Column="0"
+                                            Orientation="Horizontal"
+                                            Margin="16,6"
+                                            Visibility="{Binding IsFilterBarExpanded, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                    <Border Background="{StaticResource SuccessBgBrush}"
+                                            CornerRadius="4"
+                                            Padding="10,4"
+                                            BorderBrush="{StaticResource SuccessBrush}"
+                                            BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="전체 완료" FontSize="{StaticResource FontSizeSmall}" Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding ColumnProgress.OverallPercent, StringFormat={}{0}%}" 
+                                                       FontSize="{StaticResource FontSizeSmall}" FontWeight="Bold" Margin="6,0,0,0"
+                                                       Foreground="{StaticResource SuccessTextBrush}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <TextBlock Text="필터 및 진행률 보기..." 
+                                               FontSize="{StaticResource FontSizeSmall}" 
+                                               Foreground="{StaticResource TextMutedBrush}" 
+                                               VerticalAlignment="Center"
+                                               Margin="12,0,0,0"/>
                                 </StackPanel>
-                            </ScrollViewer>
+                                
+                                <!-- 접기/펼치기 버튼 -->
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource IconButton}"
+                                        Width="28" Height="28"
+                                        Margin="8,0,12,0"
+                                        Click="FilterBarToggle_Click"
+                                        ToolTip="필터 바 접기/펼치기">
+                                    <materialDesign:PackIcon Width="16" Height="16">
+                                        <materialDesign:PackIcon.Style>
+                                            <Style TargetType="materialDesign:PackIcon">
+                                                <Setter Property="Kind" Value="ChevronUp"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsFilterBarExpanded}" Value="False">
+                                                        <Setter Property="Kind" Value="ChevronDown"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </materialDesign:PackIcon.Style>
+                                    </materialDesign:PackIcon>
+                                </Button>
+                            </Grid>
                         </Border>
 
                         <!-- F-001: 고급 필터 패널 -->
-                        <Border Grid.Row="3"
+                        <Border Grid.Row="2"
                                 Background="{StaticResource BlueGray50Brush}"
                                 Padding="16,12"
                                 BorderBrush="{StaticResource BorderBrush}"
@@ -972,7 +994,7 @@
                         </Border>
 
                         <!-- 탭별 컨텐츠 영역 (물건 목록 또는 상세 화면) -->
-                        <Grid Grid.Row="4">
+                        <Grid Grid.Row="3">
                             <!-- ========== 물건 목록 (서버 사이드 페이지네이션 + 무한 스크롤) ========== -->
                             <DataGrid x:Name="ProgressDataGrid"
                                       ItemsSource="{Binding DashboardProperties}"
@@ -1141,20 +1163,20 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
-                                <!-- 평가액확정 (체크박스) -->
-                                <DataGridTemplateColumn Header="평가확정" Width="70">
+                                <!-- 담보경가 -->
+                                <DataGridTemplateColumn Header="담보경가" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding AppraisalConfirmed, UpdateSourceTrigger=PropertyChanged}"
-                                                      HorizontalAlignment="Center"
-                                                      Click="ProgressCheckBox_Click"
-                                                      Tag="appraisal_confirmed"/>
+                                            <TextBlock Text="{Binding AppraisalValue, StringFormat=N0}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right"
+                                                       Padding="4,0"/>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
                                 <!-- 경(공)매일정 -->
-                                <DataGridTemplateColumn Header="경매일정" Width="100">
+                                <DataGridTemplateColumn Header="경(공)매일정" Width="100">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding AuctionScheduleDate, StringFormat=yyyy-MM-dd}"
@@ -1214,6 +1236,42 @@
                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding RightsAnalysisStatus}" Value="processing">
                                                                     <Setter Property="Text" Value="진행중"/>
+                                                                    <Setter Property="Foreground" Value="White"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                <!-- 인터림 상태 -->
+                                <DataGridTemplateColumn Header="인터림" Width="70">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="4"
+                                                    Padding="6,2"
+                                                    HorizontalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding InterimCompleted}" Value="True">
+                                                                <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="대기"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding InterimCompleted}" Value="True">
+                                                                    <Setter Property="Text" Value="완료"/>
                                                                     <Setter Property="Foreground" Value="White"/>
                                                                 </DataTrigger>
                                                             </Style.Triggers>

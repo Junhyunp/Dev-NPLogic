@@ -12,6 +12,7 @@ using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
 using NPLogic.Services;
+using NPLogic.Views;
 
 namespace NPLogic.ViewModels
 {
@@ -27,9 +28,12 @@ namespace NPLogic.ViewModels
         private readonly BorrowerRepository _borrowerRepository;
         private readonly LoanRepository _loanRepository;
         private readonly BorrowerRestructuringRepository _borrowerRestructuringRepository;
+        private readonly RightAnalysisRepository _rightAnalysisRepository;
         private readonly InterimRepository _interimRepository;
         private readonly AuthService _authService;
         private readonly ExcelService _excelService;
+        private readonly DataDiskUploadService _uploadService;
+        private readonly ProgramSheetMappingRepository _sheetMappingRepository;
 
         // ========== 프로그램 목록 ==========
         [ObservableProperty]
@@ -115,6 +119,27 @@ namespace NPLogic.ViewModels
         /// 선택된 시트가 있는지
         /// </summary>
         public bool HasSelectedSheets => AvailableSheets.Any(s => s.IsSelected);
+
+        // ========== 시트 매핑 (통합 모듈) ==========
+        /// <summary>
+        /// 시트 매핑 정보 목록 (DataDiskUploadService 사용)
+        /// </summary>
+        private List<SheetMappingInfo> _sheetMappingInfoList = new();
+
+        /// <summary>
+        /// 사용 가능한 시트 타입 목록 (드롭다운용)
+        /// </summary>
+        public List<SheetTypeOption> AvailableSheetTypes { get; } = new()
+        {
+            new SheetTypeOption { Value = DataDiskSheetType.Unknown, DisplayName = "(선택안함)" },
+            new SheetTypeOption { Value = DataDiskSheetType.BorrowerGeneral, DisplayName = "차주일반정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.BorrowerRestructuring, DisplayName = "회생차주정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Loan, DisplayName = "채권정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Property, DisplayName = "담보물건정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.RegistryDetail, DisplayName = "등기부등본정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.CollateralSetting, DisplayName = "담보설정정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Guarantee, DisplayName = "보증정보" }
+        };
 
         // ========== Interim 업로드 ==========
         [ObservableProperty]
@@ -254,9 +279,12 @@ namespace NPLogic.ViewModels
             BorrowerRepository borrowerRepository,
             LoanRepository loanRepository,
             BorrowerRestructuringRepository borrowerRestructuringRepository,
+            RightAnalysisRepository rightAnalysisRepository,
             InterimRepository interimRepository,
             AuthService authService,
-            ExcelService excelService)
+            ExcelService excelService,
+            DataDiskUploadService uploadService,
+            ProgramSheetMappingRepository sheetMappingRepository)
         {
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
@@ -265,9 +293,15 @@ namespace NPLogic.ViewModels
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
             _borrowerRestructuringRepository = borrowerRestructuringRepository ?? throw new ArgumentNullException(nameof(borrowerRestructuringRepository));
+            _rightAnalysisRepository = rightAnalysisRepository ?? throw new ArgumentNullException(nameof(rightAnalysisRepository));
             _interimRepository = interimRepository ?? throw new ArgumentNullException(nameof(interimRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
+            _uploadService = uploadService ?? throw new ArgumentNullException(nameof(uploadService));
+            _sheetMappingRepository = sheetMappingRepository ?? throw new ArgumentNullException(nameof(sheetMappingRepository));
+
+            // 업로드 서비스 진행 상황 콜백 설정
+            _uploadService.OnProgressUpdate = UpdateProgress;
         }
 
         /// <summary>
@@ -391,8 +425,11 @@ namespace NPLogic.ViewModels
         {
             ExistingSheetMappings.Clear();
 
-            // TODO: DB에서 실제 매핑 정보 로드
-            // 현재는 기본 시트 타입 목록으로 표시 (업로드 여부는 실제 데이터 확인 후 표시)
+            // DB에서 기존 매핑 정보 로드
+            var existingMappings = await _sheetMappingRepository.GetByProgramIdAsync(programId);
+            var existingDict = existingMappings.ToDictionary(m => m.SheetType, m => m);
+
+            // 기본 시트 타입 목록 (DB에 없어도 표시)
             var defaultSheetTypes = new[]
             {
                 ("SheetA", "차주일반정보"),
@@ -409,16 +446,23 @@ namespace NPLogic.ViewModels
 
             foreach (var (sheetType, displayName) in defaultSheetTypes)
             {
-                ExistingSheetMappings.Add(new ProgramSheetMapping
+                // DB에 저장된 매핑이 있으면 사용, 없으면 기본값
+                if (existingDict.TryGetValue(sheetType, out var existing))
                 {
-                    Id = Guid.NewGuid(),
-                    ProgramId = programId,
-                    SheetType = sheetType,
-                    SheetTypeDisplayName = displayName,
-                    // 업로드 정보는 실제 DB에서 로드 후 표시
-                    UploadedAt = DateTime.MinValue,
-                    UploadedByName = null
-                });
+                    ExistingSheetMappings.Add(existing);
+                }
+                else
+                {
+                    ExistingSheetMappings.Add(new ProgramSheetMapping
+                    {
+                        Id = Guid.NewGuid(),
+                        ProgramId = programId,
+                        SheetType = sheetType,
+                        SheetTypeDisplayName = displayName,
+                        UploadedAt = DateTime.MinValue,
+                        UploadedByName = null
+                    });
+                }
             }
 
             // 관련 속성 변경 알림
@@ -774,6 +818,7 @@ namespace NPLogic.ViewModels
                             RowCount = sheet.RowCount,
                             Headers = sheet.Headers,
                             SheetType = sheet.SheetType,
+                            HeaderRow = sheet.HeaderRow,  // 감지된 헤더 행 번호
                             IsSelected = true // Interim은 기본적으로 모두 선택
                         };
                         InterimAvailableSheets.Add(selectableSheet);
@@ -859,6 +904,7 @@ namespace NPLogic.ViewModels
                             RowCount = sheet.RowCount,
                             Headers = sheet.Headers,
                             SheetType = sheet.SheetType,
+                            HeaderRow = sheet.HeaderRow,  // 감지된 헤더 행 번호
                             IsSelected = sheet.SheetType != SheetType.Unknown // 감지된 시트는 기본 선택
                         };
                         AvailableSheets.Add(selectableSheet);
@@ -1080,8 +1126,7 @@ namespace NPLogic.ViewModels
             var headerRow = _excelService.DetectHeaderRow(filePath, sheet.Name);
             var (columns, data) = await _excelService.ReadExcelSheetAsync(filePath, sheet.Name, headerRow);
             
-            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 시트 '{sheet.Name}' ({sheet.SheetType}): {data.Count}행");
-            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 컬럼: {string.Join(", ", columns.Take(15))}");
+            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 시트 '{sheet.Name}' ({sheet.SheetType}): {data.Count}행, 헤더행={headerRow}");
             
             if (data.Count == 0)
                 return (0, 0, 0);
@@ -1204,7 +1249,7 @@ namespace NPLogic.ViewModels
                     break;
 
                 case SheetType.Property:
-                    // Sheet C-1: 담보물건정보 -> properties 테이블
+                    // Sheet C-1: 담보물건정보 -> properties 테이블 + 권리분석 데이터
                     // SheetMappingConfig 사용하여 중앙화된 매핑 적용
                     var mappingRules = SheetMappingConfig.GetMappingRules(SheetType.Property);
                     int rowIndex = 0;
@@ -1216,8 +1261,8 @@ namespace NPLogic.ViewModels
                         
                         try
                         {
-                            // 중앙화된 매핑 규칙 사용
-                            var property = MapRowToPropertyWithRules(row, columns, mappingRules, programId);
+                            // 중앙화된 매핑 규칙 사용 (권리분석 데이터 포함)
+                            var (property, rightData) = MapRowToPropertyWithRules(row, columns, mappingRules, programId);
                             if (property == null)
                             {
                                 failed++;
@@ -1246,7 +1291,23 @@ namespace NPLogic.ViewModels
                             
                             property.PropertyNumber = finalPropertyNumber;
                             
-                            await _propertyRepository.CreateAsync(property);
+                            // CreateAsync 반환값 사용 - DB에 저장된 실제 ID 사용
+                            var createdProperty = await _propertyRepository.CreateAsync(property);
+                            
+                            // 권리분석 데이터 저장 (createdProperty 사용)
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] Property '{createdProperty.CollateralNumber}' - rightData.Count = {rightData.Count}");
+                            if (rightData.Count > 0)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 권리분석 데이터 저장 시도: {string.Join(", ", rightData.Keys)}");
+                                await SaveRightAnalysisDataAsync(createdProperty, rightData);
+                            }
+                            else
+                            {
+                                // rightData가 비어있더라도 빈 권리분석 레코드 생성 (나중에 수동 입력 가능)
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 권리분석 데이터 없음, 빈 레코드 생성");
+                                await SaveRightAnalysisDataAsync(createdProperty, rightData);
+                            }
+                            
                             created++;
                         }
                         catch (Exception ex)
@@ -1268,9 +1329,9 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 매핑 규칙을 사용하여 Property 객체로 변환
+        /// 매핑 규칙을 사용하여 Property 객체로 변환 (권리분석 데이터 포함)
         /// </summary>
-        private Property? MapRowToPropertyWithRules(Dictionary<string, object> row, List<string> columns, List<ColumnMappingRule> rules, string programId)
+        private (Property? Property, Dictionary<string, object?> RightData) MapRowToPropertyWithRules(Dictionary<string, object> row, List<string> columns, List<ColumnMappingRule> rules, string programId)
         {
             var property = new Property
             {
@@ -1281,6 +1342,7 @@ namespace NPLogic.ViewModels
             };
 
             var addressParts = new Dictionary<string, string>();
+            var rightData = new Dictionary<string, object?>();
 
             foreach (var col in columns)
             {
@@ -1293,6 +1355,7 @@ namespace NPLogic.ViewModels
 
                 switch (rule.DbColumnName)
                 {
+                    // ========== Property 기본 필드 ==========
                     case "borrower_number":
                         property.BorrowerNumber = value?.ToString();
                         break;
@@ -1326,6 +1389,82 @@ namespace NPLogic.ViewModels
                     case "address_detail":
                         addressParts["detail"] = value?.ToString() ?? "";
                         break;
+
+                    // ========== 권리분석: 선순위 정보 ==========
+                    case "senior_small_deposit":
+                        rightData["small_deposit_dd"] = value;
+                        break;
+                    case "senior_lease_deposit":
+                        rightData["lease_deposit_dd"] = value;
+                        break;
+                    case "senior_wage_claim":
+                        rightData["wage_claim_dd"] = value;
+                        break;
+                    case "senior_current_tax":
+                        rightData["current_tax_dd"] = value;
+                        break;
+                    case "senior_tax_claim":
+                        rightData["senior_tax_dd"] = value;
+                        break;
+                    case "senior_other":
+                        rightData["etc_dd"] = value;
+                        break;
+                    case "senior_total":
+                        rightData["senior_total_dd"] = value;
+                        break;
+
+                    // ========== 권리분석: 감정평가 정보 ==========
+                    case "appraisal_type":
+                        rightData["appraisal_type"] = value;
+                        break;
+                    case "appraisal_date":
+                        rightData["appraisal_date"] = value;
+                        break;
+                    case "appraisal_agency":
+                        rightData["appraisal_agency"] = value;
+                        break;
+                    case "appraisal_value":
+                        rightData["appraisal_value"] = value;
+                        property.AppraisalValue = value as decimal?;
+                        break;
+
+                    // ========== 권리분석: 경매 정보 ==========
+                    case "auction_status":
+                        rightData["auction_status"] = value;
+                        break;
+                    case "court_name":
+                        rightData["court_name"] = value;
+                        break;
+                    case "auction_applicant_precedent":
+                        rightData["auction_applicant"] = value;
+                        break;
+                    case "auction_start_date_precedent":
+                        rightData["auction_start_date"] = value;
+                        break;
+                    case "case_number_precedent":
+                        rightData["case_number"] = value;
+                        if (!string.IsNullOrEmpty(value?.ToString()))
+                            property.PropertyNumber = value?.ToString();
+                        break;
+                    case "claim_deadline_precedent":
+                        rightData["claim_deadline"] = value;
+                        break;
+                    case "initial_appraisal_value":
+                        rightData["initial_appraisal"] = value;
+                        break;
+                    case "final_auction_round":
+                        rightData["auction_count"] = value;
+                        break;
+                    case "final_auction_date":
+                        rightData["final_auction_date"] = value;
+                        break;
+                    case "next_auction_date":
+                        rightData["next_auction_date"] = value;
+                        break;
+                    case "final_minimum_bid":
+                        rightData["final_min_bid"] = value;
+                        property.MinimumBid = value as decimal?;
+                        break;
                 }
             }
 
@@ -1345,7 +1484,73 @@ namespace NPLogic.ViewModels
                 property.AddressFull = string.Join(" ", addressComponents);
             }
 
-            return property;
+            return (property, rightData);
+        }
+
+        /// <summary>
+        /// 권리분석 데이터 저장 (rightData가 비어있어도 레코드 생성)
+        /// </summary>
+        private async Task SaveRightAnalysisDataAsync(Property property, Dictionary<string, object?> rightData)
+        {
+            // 빈 데이터라도 right_analysis 레코드는 생성 (나중에 수동 입력 가능)
+
+            try
+            {
+                var existing = await _rightAnalysisRepository.GetByPropertyIdAsync(property.Id);
+                var rightAnalysis = existing ?? new RightAnalysis
+                {
+                    Id = Guid.NewGuid(),
+                    PropertyId = property.Id,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // DD 선순위 금액 설정
+                if (rightData.TryGetValue("small_deposit_dd", out var smallDeposit) && smallDeposit is decimal sd)
+                    rightAnalysis.SmallDepositDd = sd;
+                if (rightData.TryGetValue("lease_deposit_dd", out var leaseDeposit) && leaseDeposit is decimal ld)
+                    rightAnalysis.LeaseDepositDd = ld;
+                if (rightData.TryGetValue("wage_claim_dd", out var wageClaim) && wageClaim is decimal wc)
+                    rightAnalysis.WageClaimDd = wc;
+                if (rightData.TryGetValue("current_tax_dd", out var currentTax) && currentTax is decimal ct)
+                    rightAnalysis.CurrentTaxDd = ct;
+                if (rightData.TryGetValue("senior_tax_dd", out var seniorTax) && seniorTax is decimal st)
+                    rightAnalysis.SeniorTaxDd = st;
+                if (rightData.TryGetValue("etc_dd", out var etcDd) && etcDd is decimal etc)
+                    rightAnalysis.EtcDd = etc;
+
+                // 감정평가 정보
+                if (rightData.TryGetValue("appraisal_value", out var appraisalValue) && appraisalValue is decimal av)
+                    rightAnalysis.AppraisalValue = av;
+                if (rightData.TryGetValue("appraisal_date", out var appraisalDate) && appraisalDate is DateTime ad)
+                    rightAnalysis.AppraisalDate = ad;
+
+                // 경매 정보
+                if (rightData.TryGetValue("court_name", out var courtName) && courtName != null)
+                    rightAnalysis.CourtName = courtName.ToString();
+                if (rightData.TryGetValue("case_number", out var caseNumber) && caseNumber != null)
+                    rightAnalysis.CaseNumber = caseNumber.ToString();
+                if (rightData.TryGetValue("auction_count", out var auctionCount) && auctionCount is int ac)
+                    rightAnalysis.AuctionCount = ac;
+                if (rightData.TryGetValue("final_min_bid", out var minBid) && minBid is decimal mb)
+                    rightAnalysis.MinimumBid = mb;
+
+                // 선순위 합계 자동 계산
+                rightAnalysis.SeniorTotalDd = 
+                    rightAnalysis.SmallDepositDd +
+                    rightAnalysis.LeaseDepositDd +
+                    rightAnalysis.WageClaimDd +
+                    rightAnalysis.CurrentTaxDd +
+                    rightAnalysis.SeniorTaxDd +
+                    rightAnalysis.EtcDd;
+
+                rightAnalysis.UpdatedAt = DateTime.UtcNow;
+
+                await _rightAnalysisRepository.UpsertAsync(rightAnalysis);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SaveRightAnalysisDataAsync] 에러 - Property '{property.PropertyNumber}': {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -1883,6 +2088,141 @@ namespace NPLogic.ViewModels
 
             return collection;
         }
+
+        /// <summary>
+        /// 컬럼 매핑 다이얼로그 열기
+        /// </summary>
+        public void OpenColumnMappingDialog(SelectableSheetInfo sheet)
+        {
+            if (sheet == null) return;
+
+            try
+            {
+                // Headers가 비어있으면 헤더 행을 감지해서 다시 읽어옴
+                var headers = sheet.Headers;
+                if ((headers == null || headers.Count == 0) && !string.IsNullOrEmpty(DataDiskFilePath))
+                {
+                    // HeaderRow가 설정되어 있으면 사용, 아니면 감지
+                    var headerRow = sheet.HeaderRow > 0 ? sheet.HeaderRow : _excelService.DetectHeaderRow(DataDiskFilePath, sheet.Name);
+                    
+                    // Task.Run을 사용해서 UI 스레드 데드락 방지
+                    var (columns, _) = Task.Run(async () => 
+                        await _excelService.ReadExcelSheetAsync(DataDiskFilePath, sheet.Name, headerRow)).GetAwaiter().GetResult();
+                    headers = columns.ToList();
+                    sheet.Headers = headers; // 캐시
+                    System.Diagnostics.Debug.WriteLine($"[OpenColumnMappingDialog] 헤더 재로드: {headers.Count}개 컬럼 감지됨 (헤더행: {headerRow})");
+                }
+
+                // SheetMappingInfo로 변환
+                var sheetMappingInfo = new SheetMappingInfo
+                {
+                    ExcelSheetName = sheet.Name,
+                    SheetIndex = sheet.Index,
+                    DetectedType = ConvertToDataDiskSheetType(sheet.SheetType),
+                    SelectedType = ConvertToDataDiskSheetType(sheet.SheetType),
+                    Headers = headers ?? new List<string>(),
+                    RowCount = sheet.RowCount,
+                    IsSelected = sheet.IsSelected
+                };
+
+                // 기존 컬럼 매핑이 있는지 확인
+                var existingInfo = _sheetMappingInfoList.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
+                if (existingInfo != null)
+                {
+                    sheetMappingInfo.ColumnMappings = existingInfo.ColumnMappings;
+                }
+
+                // 다이얼로그 열기
+                var dialog = new ColumnMappingDialog(_uploadService)
+                {
+                    Owner = Application.Current.MainWindow
+                };
+                dialog.SetSheetInfo(sheetMappingInfo);
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // 결과 저장
+                    sheetMappingInfo.ColumnMappings = dialog.ResultMappings;
+
+                    // 기존 목록에서 업데이트 또는 추가
+                    var existingIndex = _sheetMappingInfoList.FindIndex(m => m.ExcelSheetName == sheet.Name);
+                    if (existingIndex >= 0)
+                    {
+                        _sheetMappingInfoList[existingIndex] = sheetMappingInfo;
+                    }
+                    else
+                    {
+                        _sheetMappingInfoList.Add(sheetMappingInfo);
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[OpenColumnMappingDialog] 시트 '{sheet.Name}' 컬럼 매핑 저장: {dialog.ResultMappings.Count(m => m.IsMapped)}개 매핑됨");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[OpenColumnMappingDialog] 에러: {ex.Message}");
+                DataDiskErrorMessage = $"컬럼 매핑 설정 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// SheetType을 DataDiskSheetType으로 변환
+        /// </summary>
+        private DataDiskSheetType ConvertToDataDiskSheetType(SheetType sheetType)
+        {
+            return sheetType switch
+            {
+                SheetType.BorrowerGeneral => DataDiskSheetType.BorrowerGeneral,
+                SheetType.BorrowerRestructuring => DataDiskSheetType.BorrowerRestructuring,
+                SheetType.Loan => DataDiskSheetType.Loan,
+                SheetType.Property => DataDiskSheetType.Property,
+                SheetType.RegistryDetail => DataDiskSheetType.RegistryDetail,
+                SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
+                SheetType.Guarantee => DataDiskSheetType.Guarantee,
+                _ => DataDiskSheetType.Unknown
+            };
+        }
+
+        /// <summary>
+        /// 시트 타입 변경
+        /// </summary>
+        public void ChangeSheetType(SelectableSheetInfo sheet, DataDiskSheetType newType)
+        {
+            if (sheet == null) return;
+
+            // SelectableSheetInfo의 SheetType 변경
+            sheet.SheetType = newType switch
+            {
+                DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
+                DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
+                DataDiskSheetType.Loan => SheetType.Loan,
+                DataDiskSheetType.Property => SheetType.Property,
+                DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
+                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
+                DataDiskSheetType.Guarantee => SheetType.Guarantee,
+                _ => SheetType.Unknown
+            };
+
+            // _sheetMappingInfoList도 업데이트
+            var existingInfo = _sheetMappingInfoList.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
+            if (existingInfo != null)
+            {
+                existingInfo.SelectedType = newType;
+                // 시트 타입 변경 시 컬럼 매핑 초기화 (새 시트 타입의 기본 매핑 적용)
+                existingInfo.ColumnMappings = _uploadService.GetDefaultColumnMappings(newType, existingInfo.Headers);
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[ChangeSheetType] 시트 '{sheet.Name}' 타입 변경: {newType}");
+        }
+    }
+
+    /// <summary>
+    /// 시트 타입 옵션 (드롭다운용)
+    /// </summary>
+    public class SheetTypeOption
+    {
+        public DataDiskSheetType Value { get; set; }
+        public string DisplayName { get; set; } = "";
     }
 }
 

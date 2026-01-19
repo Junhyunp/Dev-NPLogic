@@ -310,5 +310,47 @@ namespace NPLogic.Converters
             return false;
         }
     }
+
+    /// <summary>
+    /// int를 bool로 변환 (0 = false, > 0 = true)
+    /// </summary>
+    public class IntToBoolConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is int intValue)
+            {
+                return intValue > 0;
+            }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// null 여부에 따라 다른 텍스트 반환
+    /// ConverterParameter에 "null일때|아닐때" 형식으로 전달
+    /// 예: ConverterParameter='QA 수정|새 QA 추가'
+    /// </summary>
+    public class NullToTextConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var texts = parameter?.ToString()?.Split('|') ?? new[] { "", "" };
+            var notNullText = texts.Length > 0 ? texts[0] : "";
+            var nullText = texts.Length > 1 ? texts[1] : "";
+            
+            return value != null ? notNullText : nullText;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 

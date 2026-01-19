@@ -1,0 +1,87 @@
+<UserControl x:Class="NPLogic.Views.Controls.CaseRoadViewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             d:DesignHeight="250" d:DesignWidth="400">
+    
+    <Border Style="{StaticResource CardBorder}" Padding="16">
+        <StackPanel>
+            <TextBlock Text="🏠 사례 로드뷰" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+            
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="8"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- 사례1 로드뷰 -->
+                <Border Grid.Row="0" Grid.Column="0" 
+                        x:Name="RoadView1Container"
+                        Background="{StaticResource BlueGray100Brush}" 
+                        CornerRadius="4" 
+                        Height="100"
+                        Cursor="Hand"
+                        MouseLeftButtonUp="RoadView1_Click">
+                    <Grid>
+                        <TextBlock Text="사례1" Style="{StaticResource LabelText}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image x:Name="RoadViewImage1" Stretch="UniformToFill" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 사례2 로드뷰 -->
+                <Border Grid.Row="0" Grid.Column="2" 
+                        x:Name="RoadView2Container"
+                        Background="{StaticResource BlueGray100Brush}" 
+                        CornerRadius="4" 
+                        Height="100"
+                        Cursor="Hand"
+                        MouseLeftButtonUp="RoadView2_Click">
+                    <Grid>
+                        <TextBlock Text="사례2" Style="{StaticResource LabelText}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image x:Name="RoadViewImage2" Stretch="UniformToFill" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 사례3 로드뷰 -->
+                <Border Grid.Row="2" Grid.Column="0" 
+                        x:Name="RoadView3Container"
+                        Background="{StaticResource BlueGray100Brush}" 
+                        CornerRadius="4" 
+                        Height="100"
+                        Cursor="Hand"
+                        MouseLeftButtonUp="RoadView3_Click">
+                    <Grid>
+                        <TextBlock Text="사례3" Style="{StaticResource LabelText}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image x:Name="RoadViewImage3" Stretch="UniformToFill" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+                
+                <!-- 사례4 로드뷰 -->
+                <Border Grid.Row="2" Grid.Column="2" 
+                        x:Name="RoadView4Container"
+                        Background="{StaticResource BlueGray100Brush}" 
+                        CornerRadius="4" 
+                        Height="100"
+                        Cursor="Hand"
+                        MouseLeftButtonUp="RoadView4_Click">
+                    <Grid>
+                        <TextBlock Text="사례4" Style="{StaticResource LabelText}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image x:Name="RoadViewImage4" Stretch="UniformToFill" Visibility="Collapsed"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -69,13 +69,14 @@
             </Grid.RowDefinitions>
             
             <!-- ========== Row 0: 물건 헤더 ========== -->
+            <!-- 피드백 섹션 16: 흰색 배경 + 네이비 테두리로 통일 -->
             <Border Grid.Row="0"
-                    Background="{StaticResource PrimaryLightBrush}"
+                    Background="{StaticResource SurfaceBrush}"
                     CornerRadius="12"
                     Padding="24"
                     Margin="0,0,0,20"
                     BorderBrush="{StaticResource PrimaryBrush}"
-                    BorderThickness="1">
+                    BorderThickness="2">
                 <Border.Effect>
                     <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="15" ShadowDepth="3"/>
                 </Border.Effect>

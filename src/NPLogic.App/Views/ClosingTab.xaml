@@ -245,37 +245,126 @@
                             </Grid>
                         </Border>
                         
-                        <!-- 비낙찰시 낙찰자 입찰가 -->
+                        <!-- 비낙찰시 낙찰가 엑셀 업로드 -->
                         <Border Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="16"
                                 Margin="0,0,0,8">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="180"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                        <TextBlock Text="비낙찰시 낙찰가 업로드" 
+                                                   Style="{StaticResource BodyTextStyle}"
+                                                   FontWeight="SemiBold"/>
+                                        <TextBlock Style="{StaticResource CaptionTextStyle}"
+                                                   Foreground="{StaticResource TextSecondaryBrush}">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat="{}여러 차주의 낙찰가를 엑셀로 업로드 ({0}건 업로드됨)">
+                                                    <Binding Path="WinnerBidList.Count"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
+                                    
+                                    <Button Grid.Column="1"
+                                            Content="템플릿 다운로드"
+                                            Command="{Binding DownloadWinnerBidTemplateCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,6"
+                                            FontSize="12"
+                                            Margin="0,0,8,0"/>
+                                    
+                                    <Button Grid.Column="2"
+                                            Content="엑셀 업로드"
+                                            Command="{Binding UploadWinnerBidExcelCommand}"
+                                            Style="{StaticResource PrimaryButton}"
+                                            Padding="12,6"
+                                            FontSize="12"
+                                            Margin="0,0,8,0"/>
+                                    
+                                    <Button Grid.Column="3"
+                                            Content="초기화"
+                                            Command="{Binding ClearWinnerBidListCommand}"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="12,6"
+                                            FontSize="12"
+                                            Visibility="{Binding HasNoWinnerBids, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+                                </Grid>
                                 
-                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                    <TextBlock Text="비낙찰시 낙찰자 입찰가" 
-                                               Style="{StaticResource BodyTextStyle}"
-                                               FontWeight="SemiBold"/>
-                                    <TextBlock Text="비낙찰시 낙찰자의 입찰가 입력" 
-                                               Style="{StaticResource CaptionTextStyle}"
-                                               Foreground="{StaticResource TextSecondaryBrush}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                                    <TextBox Text="{Binding ClosingChecklist.WinnerBidAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                             Width="180"
-                                             Padding="8,6"
-                                             HorizontalContentAlignment="Right"/>
-                                    <TextBlock Text="원" 
-                                               Style="{StaticResource BodyTextStyle}"
-                                               VerticalAlignment="Center"
-                                               Margin="8,0,0,0"/>
-                                </StackPanel>
-                            </Grid>
+                                <!-- 업로드된 파일명 표시 -->
+                                <TextBlock Text="{Binding WinnerBidExcelFileName, StringFormat='업로드된 파일: {0}'}"
+                                           Style="{StaticResource CaptionTextStyle}"
+                                           Foreground="{StaticResource PrimaryBrush}"
+                                           Margin="0,8,0,0"
+                                           Visibility="{Binding WinnerBidExcelFileName, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                
+                                <!-- 비낙찰시 낙찰가 목록 DataGrid -->
+                                <Border BorderBrush="{StaticResource BlueGray200Brush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Margin="0,12,0,0"
+                                        MaxHeight="250"
+                                        Visibility="{Binding HasNoWinnerBids, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                    <DataGrid ItemsSource="{Binding WinnerBidList}"
+                                              AutoGenerateColumns="False"
+                                              IsReadOnly="True"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              RowHeight="32"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              VerticalScrollBarVisibility="Auto"
+                                              Background="White">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="차주번호" Binding="{Binding BorrowerNo}" Width="100"/>
+                                            <DataGridTextColumn Header="차주명" Binding="{Binding BorrowerName}" Width="100"/>
+                                            <DataGridTextColumn Header="물건주소" Binding="{Binding PropertyAddress}" Width="*"/>
+                                            <DataGridTextColumn Header="낙찰가" Binding="{Binding BidAmount, StringFormat=N0}" Width="120">
+                                                <DataGridTextColumn.ElementStyle>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                        <Setter Property="Padding" Value="0,0,8,0"/>
+                                                    </Style>
+                                                </DataGridTextColumn.ElementStyle>
+                                            </DataGridTextColumn>
+                                            <DataGridTextColumn Header="낙찰일자" Binding="{Binding BidDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                                            <DataGridTextColumn Header="비고" Binding="{Binding Note}" Width="150"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Border>
+                                
+                                <!-- 합계 표시 -->
+                                <Border Background="{StaticResource PrimaryLightBrush}"
+                                        CornerRadius="4"
+                                        Padding="12,8"
+                                        Margin="0,8,0,0"
+                                        Visibility="{Binding HasNoWinnerBids, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" 
+                                                   Text="비낙찰시 낙찰가 합계"
+                                                   Style="{StaticResource BodyTextStyle}"
+                                                   FontWeight="SemiBold"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" 
+                                                   Text="{Binding TotalWinnerBidAmount, StringFormat='{}{0:N0}원'}"
+                                                   Style="{StaticResource BodyTextStyle}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
                         </Border>
                         
                         <!-- 입찰물건 지도표시 -->

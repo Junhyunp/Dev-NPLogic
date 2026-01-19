@@ -535,6 +535,76 @@ namespace NPLogic.Data.Repositories
             }
         }
 
+        // ========== Public Sale Cost Standards (C-006) ==========
+
+        public async Task<List<PublicSaleCostStandard>> GetPublicSaleCostStandardsAsync()
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<PublicSaleCostStandardTable>()
+                    .Order(x => x.CostType, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToPublicSaleCostStandard).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"공매비용 산정 기준 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<PublicSaleCostStandard> CreatePublicSaleCostStandardAsync(PublicSaleCostStandard standard)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = MapToPublicSaleCostStandardTable(standard);
+                table.CreatedAt = DateTime.UtcNow;
+                table.UpdatedAt = DateTime.UtcNow;
+
+                var response = await client.From<PublicSaleCostStandardTable>().Insert(table);
+                return MapToPublicSaleCostStandard(response.Models.First());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"공매비용 기준 생성 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<PublicSaleCostStandard> UpdatePublicSaleCostStandardAsync(PublicSaleCostStandard standard)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = MapToPublicSaleCostStandardTable(standard);
+                table.UpdatedAt = DateTime.UtcNow;
+
+                var response = await client.From<PublicSaleCostStandardTable>()
+                    .Where(x => x.Id == standard.Id)
+                    .Update(table);
+                return MapToPublicSaleCostStandard(response.Models.First());
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"공매비용 기준 수정 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task DeletePublicSaleCostStandardAsync(Guid id)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client.From<PublicSaleCostStandardTable>().Where(x => x.Id == id).Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"공매비용 기준 삭제 실패: {ex.Message}", ex);
+            }
+        }
+
         // ========== Mappers ==========
 
         private Court MapToCourt(CourtTable t) => new Court
@@ -638,6 +708,20 @@ namespace NPLogic.Data.Repositories
             BaseAmount = s.BaseAmount, Rate = s.Rate, Description = s.Description,
             IsActive = s.IsActive, CreatedAt = s.CreatedAt, UpdatedAt = s.UpdatedAt
         };
+
+        private PublicSaleCostStandard MapToPublicSaleCostStandard(PublicSaleCostStandardTable t) => new PublicSaleCostStandard
+        {
+            Id = t.Id, CostType = t.CostType ?? "", CalculationMethod = t.CalculationMethod,
+            BaseAmount = t.BaseAmount, Rate = t.Rate, Description = t.Description,
+            IsActive = t.IsActive, CreatedAt = t.CreatedAt, UpdatedAt = t.UpdatedAt
+        };
+
+        private PublicSaleCostStandardTable MapToPublicSaleCostStandardTable(PublicSaleCostStandard s) => new PublicSaleCostStandardTable
+        {
+            Id = s.Id, CostType = s.CostType, CalculationMethod = s.CalculationMethod,
+            BaseAmount = s.BaseAmount, Rate = s.Rate, Description = s.Description,
+            IsActive = s.IsActive, CreatedAt = s.CreatedAt, UpdatedAt = s.UpdatedAt
+        };
     }
 
     // ========== Table Classes ==========
@@ -735,6 +819,20 @@ namespace NPLogic.Data.Repositories
 
     [Postgrest.Attributes.Table("auction_cost_standards")]
     internal class AuctionCostStandardTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)] public Guid Id { get; set; }
+        [Postgrest.Attributes.Column("cost_type")] public string? CostType { get; set; }
+        [Postgrest.Attributes.Column("calculation_method")] public string? CalculationMethod { get; set; }
+        [Postgrest.Attributes.Column("base_amount")] public decimal? BaseAmount { get; set; }
+        [Postgrest.Attributes.Column("rate")] public decimal? Rate { get; set; }
+        [Postgrest.Attributes.Column("description")] public string? Description { get; set; }
+        [Postgrest.Attributes.Column("is_active")] public bool IsActive { get; set; }
+        [Postgrest.Attributes.Column("created_at")] public DateTime CreatedAt { get; set; }
+        [Postgrest.Attributes.Column("updated_at")] public DateTime UpdatedAt { get; set; }
+    }
+
+    [Postgrest.Attributes.Table("public_sale_cost_standards")]
+    internal class PublicSaleCostStandardTable : Postgrest.Models.BaseModel
     {
         [Postgrest.Attributes.PrimaryKey("id", false)] public Guid Id { get; set; }
         [Postgrest.Attributes.Column("cost_type")] public string? CostType { get; set; }

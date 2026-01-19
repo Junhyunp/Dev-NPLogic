@@ -174,22 +174,22 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- S-001, S-006: 현금흐름 상단 메뉴로 이동 (전체 집계 형태) -->
+                    <!-- S-001, S-006: 현금흐름 - 피드백 반영: 중간 탭으로 이동, 상단에서 제거 -->
                     <Button x:Name="CashFlowSummaryButton"
                             Click="CashFlowSummaryButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Visible">
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="현금흐름" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>
                         </StackPanel>
                     </Button>
 
-                    <!-- S-001: NPV비교 상단 메뉴 추가 -->
+                    <!-- S-001: NPV비교 - 피드백 반영: 중간 탭으로 이동, 상단에서 제거 -->
                     <Button x:Name="XnpvComparisonButton"
                             Click="XnpvComparisonButton_Click"
                             Style="{StaticResource TopMenuButton}"
-                            Visibility="Visible">
+                            Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Compare" Width="16" Height="16" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Text="NPV비교" Foreground="{StaticResource TextPrimaryBrush}" Margin="6,0,0,0" VerticalAlignment="Center" FontSize="{StaticResource FontSizeBody}"/>

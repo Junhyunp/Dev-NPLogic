@@ -1,0 +1,38 @@
+<UserControl x:Class="NPLogic.Views.Loan.Sheets.TerminatedGuaranteeSheet"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:sections="clr-namespace:NPLogic.Views.Loan.Sections"
+             mc:Ignorable="d" 
+             d:DesignHeight="1500" d:DesignWidth="1400">
+    
+    <!-- 해지부보증 시트: 일반보증 + 배분대상금액 안분 + 당해시설 외/당해시설 배당가능재원 -->
+    <StackPanel>
+        <!-- 채권정보 섹션 -->
+        <sections:BondInfoSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- 보증서요약 섹션 -->
+        <sections:GuaranteeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- Loan Cap 1 섹션 -->
+        <sections:LoanCapSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- 보증여부별 합계 섹션 -->
+        <sections:GuaranteeTypeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- 배분대상금액 안분 섹션 -->
+        <sections:AllocationSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- 배당가능재원 섹션 (해지부보증용 - 당해시설 외/당해시설 분리) -->
+        <sections:DividendFundSection DataContext="{Binding}" 
+                                       SheetType="Terminated" 
+                                       Margin="0,0,0,16"/>
+        
+        <!-- 안분비율/보증기관 안분액 섹션 -->
+        <sections:ProrationSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        
+        <!-- MCI 보증 섹션 -->
+        <sections:MciSection DataContext="{Binding}"/>
+    </StackPanel>
+</UserControl>

@@ -134,11 +134,37 @@ namespace NPLogic
 
                 // 대시보드(역할 기반)로 이동
                 NavigateToDashboard();
+
+                // 로그인 후 QA 알림 확인 및 팝업 표시
+                // 피드백 섹션 18: 답변이 오면 배정된 계정 로그인 시 팝업 알람
+                if (_currentUser != null)
+                {
+                    await CheckAndShowQaNotificationsAsync();
+                }
             }
             catch
             {
                 // 오류 시 기본 대시보드로
                 NavigateToDashboard();
+            }
+        }
+
+        /// <summary>
+        /// QA 알림 확인 및 팝업 표시
+        /// 피드백 섹션 18: 알림 기능 - 답변 도착 시 팝업 알람
+        /// </summary>
+        private async Task CheckAndShowQaNotificationsAsync()
+        {
+            if (_currentUser == null) return;
+
+            try
+            {
+                await Views.QaNotificationPopup.ShowIfHasNotificationsAsync(this, _currentUser.Id);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"QA 알림 확인 실패: {ex.Message}");
+                // 알림 확인 실패는 조용히 무시 (메인 기능에 영향 없음)
             }
         }
 

@@ -57,11 +57,17 @@ namespace NPLogic.Core.Models
         /// <summary>낙찰금액</summary>
         public decimal? WinningBidAmount { get; set; }
         
-        /// <summary>차후예정경매일의 최저입찰금액</summary>
+        /// <summary>차기경매기일</summary>
         public DateTime? NextAuctionDate { get; set; }
         
         /// <summary>차후예정경매 최저입찰금액</summary>
         public decimal? NextMinimumBid { get; set; }
+        
+        /// <summary>최저입찰가 (최종경매일 기준)</summary>
+        public decimal? MinimumBid { get; set; }
+        
+        /// <summary>경매회차</summary>
+        public int? AuctionCount { get; set; }
         
         /// <summary>배당요구종기일 경과여부</summary>
         public bool ClaimDeadlinePassed { get; set; }
@@ -199,6 +205,34 @@ namespace NPLogic.Core.Models
         
         /// <summary>선순위 조세채권 - 상세추정 근거</summary>
         public string? SeniorTaxReason { get; set; }
+
+        // 기타 선순위
+        /// <summary>기타 선순위 - DD금액</summary>
+        public decimal EtcDd { get; set; }
+        
+        /// <summary>기타 선순위 - 평가자 반영금액</summary>
+        public decimal EtcReflected { get; set; }
+        
+        /// <summary>기타 선순위 - 상세추정 근거</summary>
+        public string? EtcReason { get; set; }
+
+        // DD 합계
+        /// <summary>선순위 DD 금액 합계</summary>
+        public decimal? SeniorTotalDd { get; set; }
+
+        // ===== 감정평가 정보 =====
+        
+        /// <summary>감정평가일</summary>
+        public DateTime? AppraisalDate { get; set; }
+        
+        /// <summary>감정평가액 (합계)</summary>
+        public decimal? AppraisalValue { get; set; }
+        
+        /// <summary>감정평가 구분</summary>
+        public string? AppraisalType { get; set; }
+        
+        /// <summary>감정평가기관</summary>
+        public string? AppraisalAgency { get; set; }
 
         // ===== 배당 시뮬레이션 =====
         

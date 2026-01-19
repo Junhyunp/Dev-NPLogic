@@ -65,6 +65,20 @@ namespace NPLogic.Views
             }
             e.Handled = true;
         }
+
+        /// <summary>
+        /// 컬럼 매핑 버튼 클릭 핸들러
+        /// </summary>
+        private void ColumnMappingButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is SelectableSheetInfo sheet)
+            {
+                if (DataContext is DataUploadViewModel viewModel)
+                {
+                    viewModel.OpenColumnMappingDialog(sheet);
+                }
+            }
+        }
     }
 }
 

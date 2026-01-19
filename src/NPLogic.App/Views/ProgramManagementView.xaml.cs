@@ -149,6 +149,35 @@ namespace NPLogic.Views
                 }
             }
         }
+
+        /// <summary>
+        /// 시트 체크박스 클릭 핸들러
+        /// </summary>
+        private void SheetCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.DataContext is SelectableSheetInfo sheet)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    // 선택 상태가 이미 바인딩으로 변경되었으므로 알림만 전달
+                    viewModel.ToggleSheetSelection(sheet);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 컬럼 매핑 버튼 클릭 핸들러
+        /// </summary>
+        private void ColumnMappingButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is SelectableSheetInfo sheet)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    viewModel.OpenColumnMappingDialog(sheet);
+                }
+            }
+        }
     }
 }
 

@@ -160,13 +160,5 @@ namespace NPLogic.Views
             }
         }
 
-        /// <summary>
-        /// 등기부 탭으로 이동 안내
-        /// </summary>
-        private void GoToRegistryTab_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("등기부등본 상세 정보는 대시보드의 '등기부등본' 탭에서 확인할 수 있습니다.", 
-                "안내", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
     }
 }

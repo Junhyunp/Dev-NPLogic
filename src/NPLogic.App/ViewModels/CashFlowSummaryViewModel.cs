@@ -153,6 +153,15 @@ namespace NPLogic.ViewModels
         private bool _isLoading;
 
         [ObservableProperty]
+        private string _loadingMessage = "로딩 중...";
+
+        [ObservableProperty]
+        private int _loadingProgress;
+
+        [ObservableProperty]
+        private int _loadingTotal;
+
+        [ObservableProperty]
         private string? _errorMessage;
 
         // 기존 속성 (호환성)
@@ -277,8 +286,13 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                LoadingMessage = "차주 목록 불러오는 중...";
                 await LoadBorrowersAsync();
+                
+                LoadingMessage = "현금흐름 계산 중...";
                 await GenerateMonthlyCashFlowsAsync();
+                
+                LoadingMessage = "완료";
             }
             catch (Exception ex)
             {
@@ -370,16 +384,28 @@ namespace NPLogic.ViewModels
                     TotalXnpv = 0;
                     TotalInflow = 0;
                     TotalOutflow = 0;
+                    LoadingProgress = 0;
+                    LoadingTotal = 0;
                     return;
                 }
+
+                // 진행률 초기화
+                LoadingProgress = 0;
+                LoadingTotal = selectedBorrowers.Count;
 
                 decimal totalXnpv = 0;
                 decimal totalInflow = 0;
                 decimal totalOutflow = 0;
                 var totalRow = new MonthlyCashFlowRow { BorrowerName = "합계", IsTotal = true };
 
-                foreach (var borrowerItem in selectedBorrowers)
+                for (int i = 0; i < selectedBorrowers.Count; i++)
                 {
+                    var borrowerItem = selectedBorrowers[i];
+                    
+                    // 진행률 업데이트
+                    LoadingProgress = i + 1;
+                    LoadingMessage = $"현금흐름 계산 중... ({i + 1}/{selectedBorrowers.Count}) {borrowerItem.BorrowerName}";
+                    
                     // 대출 정보 조회
                     var loans = await _loanRepository.GetByBorrowerIdAsync(borrowerItem.BorrowerId);
                     

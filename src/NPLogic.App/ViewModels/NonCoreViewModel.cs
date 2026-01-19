@@ -404,7 +404,7 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 차주 선택
+        /// 차주 선택 (동기 - 내부 호출용)
         /// </summary>
         public void SelectBorrower(Guid borrowerId)
         {
@@ -420,6 +420,25 @@ namespace NPLogic.ViewModels
 
             // 선택된 차주의 물건 목록 로드
             _ = LoadPropertiesForBorrowerAsync(borrowerId);
+        }
+
+        /// <summary>
+        /// 차주 선택 (비동기 - 물건 로드 완료까지 대기)
+        /// </summary>
+        public async Task SelectBorrowerAsync(Guid borrowerId)
+        {
+            foreach (var item in BorrowerItems)
+            {
+                item.IsSelected = item.BorrowerId == borrowerId;
+            }
+
+            SelectedBorrower = BorrowerItems.FirstOrDefault(b => b.BorrowerId == borrowerId);
+
+            // 회생차주 여부 업데이트 (회생개요 탭 표시 조건)
+            IsRestructuringBorrower = SelectedBorrower?.IsRestructuring ?? false;
+
+            // 선택된 차주의 물건 목록 로드 (완료까지 대기)
+            await LoadPropertiesForBorrowerAsync(borrowerId);
         }
 
         /// <summary>
@@ -549,6 +568,10 @@ namespace NPLogic.ViewModels
         /// </summary>
         public void LoadProperty(Property property)
         {
+            // #region agent log
+            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="LoadProperty called",data=new{propertyNumber=property?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+            // #endregion
+            
             if (property == null) return;
 
             // 닫은 탭 상태 로드 (파일에서)
@@ -577,6 +600,10 @@ namespace NPLogic.ViewModels
             if (PropertyTabs.Any())
             {
                 SelectPropertyTab(property.Id);
+                
+                // #region agent log
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="SelectPropertyTab called - BUT NO TAB CONTENT REFRESH!",data=new{selectedPropertyTabNumber=SelectedPropertyTab?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+                // #endregion
             }
         }
 

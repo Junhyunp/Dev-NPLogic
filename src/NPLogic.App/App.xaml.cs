@@ -74,6 +74,21 @@ namespace NPLogic
                     // 자동 로그인 또는 이미 로그인된 경우 메인 윈도우 표시
                     var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
                     mainWindow.Show();
+                    
+                    // Python 백엔드 서버 미리 시작 (백그라운드)
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            System.Diagnostics.Debug.WriteLine("[App] Python 백엔드 서버 사전 시작...");
+                            await PythonBackendService.Instance.EnsureServerRunningAsync();
+                            System.Diagnostics.Debug.WriteLine("[App] Python 백엔드 서버 준비 완료");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[App] Python 백엔드 서버 시작 실패: {ex.Message}");
+                        }
+                    });
                 }
                 else
                 {
@@ -129,6 +144,10 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.PublicSaleScheduleRepository>();
             services.AddSingleton<Data.Repositories.PropertyQaRepository>();
             services.AddSingleton<Data.Repositories.InterimRepository>();
+            services.AddSingleton<Data.Repositories.ProgramSheetMappingRepository>();
+
+            // Upload Services (Singleton)
+            services.AddSingleton<Services.DataDiskUploadService>();
 
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
@@ -169,6 +188,7 @@ namespace NPLogic
             services.AddTransient<ViewModels.BorrowerOverviewViewModel>();
             services.AddTransient<ViewModels.CollateralSummaryViewModel>();
             services.AddTransient<ViewModels.LoanDetailViewModel>();
+            services.AddTransient<ViewModels.LoanSheetViewModel>();
             services.AddTransient<ViewModels.ToolBoxViewModel>();
             services.AddTransient<ViewModels.CashFlowSummaryViewModel>();
             services.AddTransient<ViewModels.XnpvComparisonViewModel>();
@@ -268,6 +288,13 @@ namespace NPLogic
                 return view;
             });
 
+            services.AddTransient<Views.Loan.LoanSheetView>(sp =>
+            {
+                var view = new Views.Loan.LoanSheetView();
+                view.DataContext = sp.GetRequiredService<ViewModels.LoanSheetViewModel>();
+                return view;
+            });
+
             services.AddTransient<Views.ToolBoxView>(sp =>
             {
                 var view = new Views.ToolBoxView();
@@ -354,6 +381,7 @@ namespace NPLogic
             services.AddTransient<Views.EvaluationTab>();
             services.AddTransient<Views.MapView>();
             services.AddTransient<Views.CollateralPropertyView>();
+            services.AddTransient<Views.QASummaryTab>();  // QA집계 탭 (플레이스홀더)
             services.AddTransient<Views.ProgramSettingsTab>(sp =>
             {
                 var view = new Views.ProgramSettingsTab();

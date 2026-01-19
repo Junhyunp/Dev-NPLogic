@@ -9,6 +9,7 @@ using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
 using NPLogic.Services;
+using EvaluationModel = NPLogic.Core.Models.Evaluation;
 
 namespace NPLogic.ViewModels
 {
@@ -132,7 +133,7 @@ namespace NPLogic.ViewModels
         private readonly RecommendService _recommendService;
         private Guid _propertyId;
         private Property? _property;
-        private Evaluation? _evaluation;
+        private EvaluationModel? _evaluation;
 
         // Supabase 설정 (App.xaml.cs에서 설정)
         public string? SupabaseUrl { get; set; }
@@ -491,7 +492,7 @@ namespace NPLogic.ViewModels
             return amount.Value - cost;
         }
 
-        private void LoadFromEvaluation(Evaluation evaluation)
+        private void LoadFromEvaluation(EvaluationModel evaluation)
         {
             // 평가 유형 설정
             SetEvaluationType(evaluation.EvaluationType);
@@ -664,7 +665,7 @@ namespace NPLogic.ViewModels
                 SuccessMessage = null;
 
                 // 평가 정보 생성/업데이트
-                var evaluation = _evaluation ?? new Evaluation();
+                var evaluation = _evaluation ?? new EvaluationModel();
                 evaluation.PropertyId = _propertyId;
                 evaluation.EvaluationType = GetSelectedEvaluationType();
                 evaluation.EvaluatedValue = Scenario1_Amount;

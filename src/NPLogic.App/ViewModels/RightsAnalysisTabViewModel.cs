@@ -95,7 +95,8 @@ namespace NPLogic.ViewModels
                 new SeniorRightItem { Category = "선순위 임차보증금", Field = "LeaseDeposit" },
                 new SeniorRightItem { Category = "선순위 임금채권", Field = "WageClaim" },
                 new SeniorRightItem { Category = "당해세", Field = "CurrentTax" },
-                new SeniorRightItem { Category = "선순위 조세채권", Field = "SeniorTax" }
+                new SeniorRightItem { Category = "선순위 조세채권", Field = "SeniorTax" },
+                new SeniorRightItem { Category = "기타 선순위", Field = "Etc" }
             };
         }
 
@@ -193,6 +194,11 @@ namespace NPLogic.ViewModels
                         item.ReflectedAmount = Analysis.SeniorTaxReflected;
                         item.Reason = Analysis.SeniorTaxReason;
                         break;
+                    case "Etc":
+                        item.DdAmount = Analysis.EtcDd;
+                        item.ReflectedAmount = Analysis.EtcReflected;
+                        item.Reason = Analysis.EtcReason;
+                        break;
                 }
             }
         }
@@ -241,6 +247,11 @@ namespace NPLogic.ViewModels
                         Analysis.SeniorTaxReflected = item.ReflectedAmount;
                         Analysis.SeniorTaxReason = item.Reason;
                         break;
+                    case "Etc":
+                        Analysis.EtcDd = item.DdAmount;
+                        Analysis.EtcReflected = item.ReflectedAmount;
+                        Analysis.EtcReason = item.Reason;
+                        break;
                 }
             }
         }
@@ -256,7 +267,8 @@ namespace NPLogic.ViewModels
             // DD 금액은 개별 항목 합산 (호환성 유지)
             TotalDdAmount = Analysis.SeniorMortgageDd + Analysis.LienDd + 
                            Analysis.SmallDepositDd + Analysis.LeaseDepositDd + 
-                           Analysis.WageClaimDd + Analysis.CurrentTaxDd + Analysis.SeniorTaxDd;
+                           Analysis.WageClaimDd + Analysis.CurrentTaxDd + Analysis.SeniorTaxDd +
+                           Analysis.EtcDd;
         }
 
         #region Commands

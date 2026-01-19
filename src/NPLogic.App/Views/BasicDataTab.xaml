@@ -377,13 +377,14 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
                                 <TextBlock Grid.Column="0" Text="⚙️ 기초정보관리" 
                                            Style="{StaticResource H4TextStyle}"
                                            FontWeight="Bold"/>
                                 
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                                     <TextBlock Text="{Binding BasicInfoUpdatedAt, StringFormat='업데이트: {0:yyyy-MM-dd}', FallbackValue='-'}" 
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextMutedBrush}"
@@ -392,6 +393,11 @@
                                                Style="{StaticResource CaptionTextStyle}"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
+                                
+                                <Button Grid.Column="2" Content="💾 저장" 
+                                        Command="{Binding SaveBasicInfoCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="16,8"/>
                             </Grid>
                             
                             <!-- 기초정보 필드들 -->
@@ -607,10 +613,21 @@
                         </Border.Effect>
                         
                         <StackPanel>
-                            <TextBlock Text="👤 사용인 설정" 
-                                       Style="{StaticResource H4TextStyle}"
-                                       FontWeight="Bold"
-                                       Margin="0,0,0,16"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" Text="👤 사용인 설정" 
+                                           Style="{StaticResource H4TextStyle}"
+                                           FontWeight="Bold"/>
+                                
+                                <Button Grid.Column="1" Content="💾 저장" 
+                                        Command="{Binding SaveAgentSettingsCommand}"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="16,8"/>
+                            </Grid>
                             
                             <!-- 사용인 정보 필드들 -->
                             <StackPanel>
@@ -657,7 +674,9 @@
                                     
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="굿옥션 PW" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                        <PasswordBox x:Name="GoodAuctionPwBox" Padding="8,6"/>
+                                        <TextBox Text="{Binding GoodAuctionPw, UpdateSourceTrigger=PropertyChanged}" 
+                                                 Padding="8,6"
+                                                 ToolTip="비밀번호를 입력하세요"/>
                                     </StackPanel>
                                 </Grid>
                             </StackPanel>

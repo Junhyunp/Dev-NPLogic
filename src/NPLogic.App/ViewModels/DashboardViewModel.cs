@@ -207,6 +207,16 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ColumnProgressInfo _columnProgress = new();
 
+        // ========== 필터 바 접기/펼치기 ==========
+        /// <summary>필터 바 펼침 여부 (기본값: true)</summary>
+        [ObservableProperty]
+        private bool _isFilterBarExpanded = true;
+
+        /// <summary>
+        /// 필터 바 영역 표시 여부 (리스트 모드이고 프로그램이 선택된 경우에만 표시)
+        /// </summary>
+        public bool IsFilterBarAreaVisible => !IsDetailMode && SelectedProgram != null;
+
         // ========== 데이터 ==========
         [ObservableProperty]
         private ObservableCollection<Property> _recentProperties = new();
@@ -1125,6 +1135,22 @@ namespace NPLogic.ViewModels
         partial void OnSelectedPropertyChanged(Property? value)
         {
             OnPropertyChanged(nameof(SelectedPropertyNumber));
+        }
+
+        /// <summary>
+        /// 상세 모드 변경 시 (필터 바 영역 표시/숨김)
+        /// </summary>
+        partial void OnIsDetailModeChanged(bool value)
+        {
+            OnPropertyChanged(nameof(IsFilterBarAreaVisible));
+        }
+
+        /// <summary>
+        /// 선택된 프로그램 변경 시 (필터 바 영역 표시/숨김)
+        /// </summary>
+        partial void OnSelectedProgramChanged(ProgramSummary? value)
+        {
+            OnPropertyChanged(nameof(IsFilterBarAreaVisible));
         }
 
         /// <summary>

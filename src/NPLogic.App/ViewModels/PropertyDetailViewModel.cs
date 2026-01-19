@@ -37,6 +37,30 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 비낙찰시 낙찰가 항목 모델 (차주별)
+    /// </summary>
+    public partial class WinnerBidItem : ObservableObject
+    {
+        [ObservableProperty]
+        private string _borrowerNo = "";  // 차주번호
+
+        [ObservableProperty]
+        private string _borrowerName = "";  // 차주명
+
+        [ObservableProperty]
+        private string _propertyAddress = "";  // 물건주소
+
+        [ObservableProperty]
+        private decimal _bidAmount;  // 낙찰가
+
+        [ObservableProperty]
+        private DateTime? _bidDate;  // 낙찰일자
+
+        [ObservableProperty]
+        private string _note = "";  // 비고
+    }
+
+    /// <summary>
     /// 권리분석 알림 모델
     /// </summary>
     public class RightsAnalysisAlert
@@ -697,6 +721,30 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _closingNote;
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 목록 (차주별)
+        /// </summary>
+        [ObservableProperty]
+        private ObservableCollection<WinnerBidItem> _winnerBidList = new();
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 목록이 비어있는지 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasNoWinnerBids = true;
+
+        /// <summary>
+        /// 업로드된 엑셀 파일명 (비낙찰시 낙찰가)
+        /// </summary>
+        [ObservableProperty]
+        private string? _winnerBidExcelFileName;
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 합계
+        /// </summary>
+        [ObservableProperty]
+        private decimal _totalWinnerBidAmount;
 
         #endregion
 
@@ -2765,6 +2813,212 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 엑셀 업로드 명령
+        /// </summary>
+        [RelayCommand]
+        private async Task UploadWinnerBidExcelAsync()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "비낙찰시 낙찰가 엑셀 파일 선택",
+                Filter = "Excel 파일|*.xlsx;*.xls|모든 파일|*.*",
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    IsLoading = true;
+                    ErrorMessage = null;
+
+                    WinnerBidExcelFileName = System.IO.Path.GetFileName(dialog.FileName);
+                    
+                    // 엑셀 파일 파싱
+                    await ParseWinnerBidExcelAsync(dialog.FileName);
+
+                    SuccessMessage = $"비낙찰시 낙찰가 {WinnerBidList.Count}건이 업로드되었습니다.";
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"엑셀 파일 읽기 실패: {ex.Message}";
+                }
+                finally
+                {
+                    IsLoading = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 엑셀 파싱
+        /// </summary>
+        private async Task ParseWinnerBidExcelAsync(string filePath)
+        {
+            var items = new List<WinnerBidItem>();
+
+            await Task.Run(() =>
+            {
+                using var workbook = new ClosedXML.Excel.XLWorkbook(filePath);
+                var worksheet = workbook.Worksheets.First();
+
+                // 헤더 행에서 컬럼 인덱스 찾기
+                var headerRow = worksheet.Row(1);
+                var lastColumn = worksheet.LastColumnUsed()?.ColumnNumber() ?? 1;
+                var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 1;
+
+                // 컬럼 인덱스 매핑 (유연한 컬럼명 지원)
+                int borrowerNoCol = -1, borrowerNameCol = -1, addressCol = -1, bidAmountCol = -1, bidDateCol = -1, noteCol = -1;
+
+                for (int col = 1; col <= lastColumn; col++)
+                {
+                    var colName = headerRow.Cell(col).GetString().Trim();
+                    var colNameLower = colName.ToLower();
+
+                    if (colNameLower.Contains("차주번호") || colNameLower.Contains("borrower") && colNameLower.Contains("no"))
+                        borrowerNoCol = col;
+                    else if (colNameLower.Contains("차주명") || colNameLower.Contains("borrower") && colNameLower.Contains("name"))
+                        borrowerNameCol = col;
+                    else if (colNameLower.Contains("주소") || colNameLower.Contains("address"))
+                        addressCol = col;
+                    else if (colNameLower.Contains("낙찰가") || colNameLower.Contains("금액") || colNameLower.Contains("bid") || colNameLower.Contains("amount"))
+                        bidAmountCol = col;
+                    else if (colNameLower.Contains("낙찰일") || colNameLower.Contains("일자") || colNameLower.Contains("date"))
+                        bidDateCol = col;
+                    else if (colNameLower.Contains("비고") || colNameLower.Contains("note") || colNameLower.Contains("remark"))
+                        noteCol = col;
+                }
+
+                // 데이터 행 파싱
+                for (int row = 2; row <= lastRow; row++)
+                {
+                    var item = new WinnerBidItem();
+
+                    if (borrowerNoCol > 0)
+                        item.BorrowerNo = worksheet.Cell(row, borrowerNoCol).GetString().Trim();
+                    if (borrowerNameCol > 0)
+                        item.BorrowerName = worksheet.Cell(row, borrowerNameCol).GetString().Trim();
+                    if (addressCol > 0)
+                        item.PropertyAddress = worksheet.Cell(row, addressCol).GetString().Trim();
+                    if (bidAmountCol > 0)
+                    {
+                        var amountCell = worksheet.Cell(row, bidAmountCol);
+                        if (amountCell.TryGetValue<decimal>(out var amount))
+                            item.BidAmount = amount;
+                        else if (decimal.TryParse(amountCell.GetString().Replace(",", ""), out var parsedAmount))
+                            item.BidAmount = parsedAmount;
+                    }
+                    if (bidDateCol > 0)
+                    {
+                        var dateCell = worksheet.Cell(row, bidDateCol);
+                        if (dateCell.TryGetValue<DateTime>(out var date))
+                            item.BidDate = date;
+                    }
+                    if (noteCol > 0)
+                        item.Note = worksheet.Cell(row, noteCol).GetString().Trim();
+
+                    // 차주번호나 낙찰가가 있으면 추가
+                    if (!string.IsNullOrWhiteSpace(item.BorrowerNo) || item.BidAmount > 0)
+                    {
+                        items.Add(item);
+                    }
+                }
+            });
+
+            // UI 업데이트
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                WinnerBidList.Clear();
+                foreach (var item in items)
+                {
+                    WinnerBidList.Add(item);
+                }
+                HasNoWinnerBids = WinnerBidList.Count == 0;
+                TotalWinnerBidAmount = WinnerBidList.Sum(x => x.BidAmount);
+            });
+        }
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 템플릿 다운로드 명령
+        /// </summary>
+        [RelayCommand]
+        private async Task DownloadWinnerBidTemplateAsync()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "비낙찰시 낙찰가 템플릿 저장",
+                Filter = "Excel 파일|*.xlsx",
+                FileName = "비낙찰시_낙찰가_템플릿.xlsx"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    await Task.Run(() =>
+                    {
+                        using var workbook = new ClosedXML.Excel.XLWorkbook();
+                        var worksheet = workbook.Worksheets.Add("비낙찰시 낙찰가");
+
+                        // 헤더 설정
+                        worksheet.Cell(1, 1).Value = "차주번호";
+                        worksheet.Cell(1, 2).Value = "차주명";
+                        worksheet.Cell(1, 3).Value = "물건주소";
+                        worksheet.Cell(1, 4).Value = "낙찰가";
+                        worksheet.Cell(1, 5).Value = "낙찰일자";
+                        worksheet.Cell(1, 6).Value = "비고";
+
+                        // 헤더 스타일
+                        var headerRange = worksheet.Range(1, 1, 1, 6);
+                        headerRange.Style.Font.Bold = true;
+                        headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightBlue;
+                        headerRange.Style.Border.OutsideBorder = ClosedXML.Excel.XLBorderStyleValues.Thin;
+
+                        // 컬럼 너비 조정
+                        worksheet.Column(1).Width = 15;
+                        worksheet.Column(2).Width = 15;
+                        worksheet.Column(3).Width = 40;
+                        worksheet.Column(4).Width = 20;
+                        worksheet.Column(5).Width = 15;
+                        worksheet.Column(6).Width = 30;
+
+                        // 샘플 데이터 (선택적)
+                        worksheet.Cell(2, 1).Value = "예) B001";
+                        worksheet.Cell(2, 2).Value = "예) 홍길동";
+                        worksheet.Cell(2, 3).Value = "예) 서울시 강남구 역삼동 123-45";
+                        worksheet.Cell(2, 4).Value = 100000000;
+                        worksheet.Cell(2, 5).Value = DateTime.Today;
+                        worksheet.Cell(2, 6).Value = "예) 1회차 낙찰";
+
+                        // 낙찰가 컬럼 형식 지정 (숫자 쉼표)
+                        worksheet.Column(4).Style.NumberFormat.Format = "#,##0";
+
+                        workbook.SaveAs(dialog.FileName);
+                    });
+
+                    SuccessMessage = "템플릿이 저장되었습니다.";
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = $"템플릿 다운로드 실패: {ex.Message}";
+                }
+            }
+        }
+
+        /// <summary>
+        /// 비낙찰시 낙찰가 목록 초기화 명령
+        /// </summary>
+        [RelayCommand]
+        private void ClearWinnerBidList()
+        {
+            WinnerBidList.Clear();
+            HasNoWinnerBids = true;
+            TotalWinnerBidAmount = 0;
+            WinnerBidExcelFileName = null;
+            SuccessMessage = "비낙찰시 낙찰가 목록이 초기화되었습니다.";
         }
 
         #endregion

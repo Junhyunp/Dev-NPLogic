@@ -212,12 +212,37 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                System.Diagnostics.Debug.WriteLine($"[BorrowerOverviewViewModel] LoadSingleBorrowerDataAsync - Property: {SelectedProperty.PropertyNumber}, BorrowerNumber: {SelectedProperty.BorrowerNumber}, DebtorName: {SelectedProperty.DebtorName}");
+
                 // 1. 선택된 물건의 차주 정보로 SelectedBorrower 설정
-                // DebtorName 또는 BorrowerNumber로 차주 찾기
+                // BorrowerNumber를 우선으로 매칭 (정확한 식별자), 없으면 DebtorName으로 매칭
                 var allBorrowers = await _borrowerRepository.GetAllAsync();
-                var matchingBorrower = allBorrowers.FirstOrDefault(b =>
-                    b.BorrowerName == SelectedProperty.DebtorName ||
-                    b.BorrowerNumber == SelectedProperty.BorrowerNumber);
+                
+                Borrower? matchingBorrower = null;
+                
+                // 1차: BorrowerNumber로 정확히 매칭 (우선)
+                if (!string.IsNullOrWhiteSpace(SelectedProperty.BorrowerNumber))
+                {
+                    matchingBorrower = allBorrowers.FirstOrDefault(b =>
+                        b.BorrowerNumber == SelectedProperty.BorrowerNumber);
+                    
+                    if (matchingBorrower != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[BorrowerOverviewViewModel] Matched by BorrowerNumber: {matchingBorrower.BorrowerNumber} - {matchingBorrower.BorrowerName}");
+                    }
+                }
+                
+                // 2차: BorrowerNumber로 못 찾으면 DebtorName으로 매칭
+                if (matchingBorrower == null && !string.IsNullOrWhiteSpace(SelectedProperty.DebtorName))
+                {
+                    matchingBorrower = allBorrowers.FirstOrDefault(b =>
+                        b.BorrowerName == SelectedProperty.DebtorName);
+                    
+                    if (matchingBorrower != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[BorrowerOverviewViewModel] Matched by DebtorName: {matchingBorrower.BorrowerNumber} - {matchingBorrower.BorrowerName}");
+                    }
+                }
 
                 if (matchingBorrower != null)
                 {
@@ -225,6 +250,8 @@ namespace NPLogic.ViewModels
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine($"[BorrowerOverviewViewModel] No matching borrower found, creating temporary");
+                    
                     // 차주가 없으면 물건 정보로 임시 차주 생성 (표시용)
                     SelectedBorrower = new Borrower
                     {

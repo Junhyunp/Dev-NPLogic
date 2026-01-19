@@ -31,6 +31,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <!-- ========== 헤더 ========== -->
@@ -159,6 +160,34 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button Content="저장" Command="{Binding DataContext.SaveAuctionCostStandardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </controls:NPExpandableSection>
+            </Border>
+            
+            <!-- ========== 6. 공매비용 산정 데이터 (C-006) ========== -->
+            <Border Grid.Row="5" Style="{StaticResource SettingCard}">
+                <controls:NPExpandableSection Header="🏷️ 공매비용 산정 데이터" IsExpanded="True">
+                    <DataGrid ItemsSource="{Binding PublicSaleCostStandards}"
+                              SelectedItem="{Binding SelectedPublicSaleCostStandard}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              HorizontalAlignment="Stretch"
+                              MinHeight="150"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="항목명" Binding="{Binding CostType}" Width="150"/>
+                            <DataGridTextColumn Header="계산방식" Binding="{Binding CalculationMethod}" Width="100"/>
+                            <DataGridTextColumn Header="기본금액" Binding="{Binding BaseAmount, StringFormat=N0}" Width="130"/>
+                            <DataGridTextColumn Header="요율(%)" Binding="{Binding Rate}" Width="80"/>
+                            <DataGridTextColumn Header="설명" Binding="{Binding Description}" Width="*" MinWidth="200"/>
+                            <DataGridTemplateColumn Header="작업" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="저장" Command="{Binding DataContext.SavePublicSaleCostStandardCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Style="{StaticResource PrimaryButton}" Padding="8,2" FontSize="11"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

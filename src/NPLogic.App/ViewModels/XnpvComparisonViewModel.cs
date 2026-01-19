@@ -32,6 +32,15 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        [ObservableProperty]
+        private string _loadingMessage = "분석 중...";
+
+        [ObservableProperty]
+        private int _loadingProgress;
+
+        [ObservableProperty]
+        private int _loadingTotal;
+
         // 합계
         [ObservableProperty]
         private decimal _totalXnpv1;
@@ -54,20 +63,24 @@ namespace NPLogic.ViewModels
 
         public async Task InitializeAsync()
         {
+            System.Diagnostics.Debug.WriteLine("[XnpvComparisonViewModel] InitializeAsync 시작");
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
 
                 await LoadComparisonDataAsync();
+                System.Diagnostics.Debug.WriteLine("[XnpvComparisonViewModel] LoadComparisonDataAsync 완료");
             }
             catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[XnpvComparisonViewModel] 초기화 실패: {ex.Message}");
                 ErrorMessage = $"초기화 실패: {ex.Message}";
             }
             finally
             {
                 IsLoading = false;
+                System.Diagnostics.Debug.WriteLine("[XnpvComparisonViewModel] IsLoading = false");
             }
         }
 
@@ -75,12 +88,20 @@ namespace NPLogic.ViewModels
         {
             try
             {
-                var borrowers = await _borrowerRepository.GetAllAsync();
+                LoadingMessage = "차주 목록 불러오는 중...";
+                System.Diagnostics.Debug.WriteLine("[XnpvComparisonViewModel] GetAllAsync 호출...");
+                var borrowers = (await _borrowerRepository.GetAllAsync()).ToList();
+                System.Diagnostics.Debug.WriteLine($"[XnpvComparisonViewModel] 차주 {borrowers.Count}개 로드됨");
                 
                 ComparisonItems.Clear();
+                LoadingTotal = borrowers.Count;
+                LoadingProgress = 0;
                 
                 foreach (var borrower in borrowers)
                 {
+                    LoadingProgress++;
+                    LoadingMessage = $"분석 중... ({LoadingProgress}/{LoadingTotal}) {borrower.BorrowerName}";
+                    
                     var loans = await _loanRepository.GetByBorrowerIdAsync(borrower.Id);
                     
                     var item = new XnpvComparisonItem

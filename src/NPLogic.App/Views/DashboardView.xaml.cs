@@ -20,8 +20,8 @@ namespace NPLogic.Views
     {
         private double _savedLeftPanelWidth = 280;
         
-        // 내부 탭 순서 배열 (홈 탭 제거)
-        private readonly string[] _innerTabs = { "noncore", "registry", "rights", "basicdata", "closing" };
+        // 내부 탭 순서 배열 (홈 탭 제거, 피드백 반영: QA집계/현금흐름집계/NPV비교 추가)
+        private readonly string[] _innerTabs = { "noncore", "registry", "rights", "basicdata", "qasummary", "cashflowsummary", "npvcomparison", "closing" };
         private int _currentTabIndex = 0;
 
         // 탭 View 캐싱 (탭 전환 시 상태 유지)
@@ -311,6 +311,9 @@ namespace NPLogic.Views
                 "registry" => TabRegistry,
                 "rights" => TabRights,
                 "basicdata" => TabBasicData,
+                "qasummary" => TabQASummary,
+                "cashflowsummary" => TabCashFlowSummary,
+                "npvcomparison" => TabNPVComparison,
                 "closing" => TabClosing,
                 _ => TabNonCore
             };
@@ -441,13 +444,21 @@ namespace NPLogic.Views
         /// </summary>
         private void LeftPanelToggle_Click(object sender, RoutedEventArgs e)
         {
-            if (LeftPanelToggle.IsChecked == false)
+            // sender의 IsChecked를 확인하여 어떤 토글 버튼이든 동작하도록 수정
+            var toggle = sender as ToggleButton;
+            if (toggle == null) return;
+            
+            if (toggle.IsChecked == false)
             {
                 // 패널 접기
                 _savedLeftPanelWidth = LeftPanelColumn.Width.Value;
                 LeftPanelColumn.Width = new GridLength(0);
                 LeftPanel.Visibility = Visibility.Collapsed;
                 LeftPanelOpenButton.Visibility = Visibility.Visible;
+                
+                // 양쪽 토글 버튼 상태 동기화
+                LeftPanelToggle.IsChecked = false;
+                PropertyListPanelToggle.IsChecked = false;
             }
             else
             {
@@ -455,6 +466,10 @@ namespace NPLogic.Views
                 LeftPanelColumn.Width = new GridLength(_savedLeftPanelWidth);
                 LeftPanel.Visibility = Visibility.Visible;
                 LeftPanelOpenButton.Visibility = Visibility.Collapsed;
+                
+                // 양쪽 토글 버튼 상태 동기화
+                LeftPanelToggle.IsChecked = true;
+                PropertyListPanelToggle.IsChecked = true;
             }
         }
 
@@ -466,7 +481,10 @@ namespace NPLogic.Views
             LeftPanelColumn.Width = new GridLength(_savedLeftPanelWidth);
             LeftPanel.Visibility = Visibility.Visible;
             LeftPanelOpenButton.Visibility = Visibility.Collapsed;
+            
+            // 양쪽 토글 버튼 상태 동기화
             LeftPanelToggle.IsChecked = true;
+            PropertyListPanelToggle.IsChecked = true;
         }
 
         /// <summary>
@@ -482,6 +500,9 @@ namespace NPLogic.Views
                     "TabRegistry" => "registry",
                     "TabRights" => "rights",
                     "TabBasicData" => "basicdata",
+                    "TabQASummary" => "qasummary",
+                    "TabCashFlowSummary" => "cashflowsummary",
+                    "TabNPVComparison" => "npvcomparison",
                     "TabClosing" => "closing",
                     _ => "noncore"
                 };
@@ -520,6 +541,10 @@ namespace NPLogic.Views
             switch (tabName)
             {
                 case "noncore":
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Loading noncore tab",data=new{propertyNumber=property.PropertyNumber,propertyId=property.Id.ToString()},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+                    // #endregion
+                    
                     // 비핵심 탭: NonCoreView를 대시보드 내에서 표시 (피드백 반영)
                     // 탭 상태 유지를 위해 캐싱된 인스턴스 재사용
                     if (_cachedNonCoreView == null)
@@ -530,6 +555,10 @@ namespace NPLogic.Views
                     
                     if (_cachedNonCoreView != null && _cachedNonCoreViewModel != null)
                     {
+                        // #region agent log
+                        System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Calling LoadProperty on NonCoreViewModel",data=new{activeTab=_cachedNonCoreViewModel.ActiveTab,selectedPropertyTab=_cachedNonCoreViewModel.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+                        // #endregion
+                        
                         // 프로그램 ID 설정 (물건 탭 로드를 위해 필수!)
                         if (property.ProgramId.HasValue)
                         {
@@ -538,6 +567,12 @@ namespace NPLogic.Views
                         _cachedNonCoreViewModel.LoadProperty(property);
                         _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
                         view = _cachedNonCoreView;
+                        
+                        // 현재 활성 탭 컨텐츠 새로고침 (물건 변경 시 UI 업데이트)
+                        // #region agent log
+                        System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Calling RefreshCurrentTabAsync",data=new{},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="FIX"})+"\n");
+                        // #endregion
+                        _ = _cachedNonCoreView.RefreshCurrentTabAsync();
                     }
                     break;
                     
@@ -585,6 +620,33 @@ namespace NPLogic.Views
                     }
                     break;
                     
+                case "qasummary":
+                    // QA집계 탭: QASummaryTab 로드 (플레이스홀더)
+                    var qaSummaryTab = serviceProvider.GetService<QASummaryTab>();
+                    if (qaSummaryTab != null)
+                    {
+                        view = qaSummaryTab;
+                    }
+                    break;
+                    
+                case "cashflowsummary":
+                    // 현금흐름집계 탭: CashFlowSummaryView 로드
+                    var cashFlowView = serviceProvider.GetService<CashFlowSummaryView>();
+                    if (cashFlowView != null)
+                    {
+                        view = cashFlowView;
+                    }
+                    break;
+                    
+                case "npvcomparison":
+                    // NPV비교 탭: XnpvComparisonView 로드
+                    var xnpvView = serviceProvider.GetService<XnpvComparisonView>();
+                    if (xnpvView != null)
+                    {
+                        view = xnpvView;
+                    }
+                    break;
+                    
                 case "closing":
                     // 마감 탭: ClosingTab 로드
                     var closingTab = serviceProvider.GetService<ClosingTab>();
@@ -627,7 +689,10 @@ namespace NPLogic.Views
                 LeftPanelColumn.Width = new GridLength(0);
                 LeftPanel.Visibility = Visibility.Collapsed;
                 LeftPanelOpenButton.Visibility = Visibility.Visible;
+                
+                // 양쪽 토글 버튼 상태 동기화
                 LeftPanelToggle.IsChecked = false;
+                PropertyListPanelToggle.IsChecked = false;
             }
         }
 
@@ -642,6 +707,17 @@ namespace NPLogic.Views
                 {
                     viewModel.FilterByStatus(status);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 필터 바 접기/펼치기 토글
+        /// </summary>
+        private void FilterBarToggle_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                viewModel.IsFilterBarExpanded = !viewModel.IsFilterBarExpanded;
             }
         }
 
@@ -828,6 +904,10 @@ namespace NPLogic.Views
         /// </summary>
         private void PropertySideListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // #region agent log
+            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="SelectionChanged fired",data=new{addedCount=e.AddedItems.Count,isRestoringState=_isRestoringState},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+            // #endregion
+            
             if (_isRestoringState) return;
 
             if (e.AddedItems.Count > 0 && 
@@ -835,11 +915,22 @@ namespace NPLogic.Views
                 DataContext is DashboardViewModel viewModel &&
                 viewModel.IsDetailMode)
             {
+                // #region agent log
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="Calling LoadTabView",data=new{propertyNumber=property.PropertyNumber,activeTab=viewModel.ActiveTab,isDetailMode=viewModel.IsDetailMode},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+                // #endregion
+                
                 // 이미 상세 모드이므로 선택된 물건만 변경
                 viewModel.SelectPropertyInDetailMode(property);
                 
                 // 탭 컨텐츠 업데이트
                 LoadTabView(viewModel.ActiveTab, property);
+            }
+            else
+            {
+                // #region agent log
+                var vm = DataContext as DashboardViewModel;
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="Condition NOT met - NOT calling LoadTabView",data=new{addedItemsCount=e.AddedItems.Count,isProperty=e.AddedItems.Count>0 && e.AddedItems[0] is Property,hasDashboardVM=vm!=null,isDetailMode=vm?.IsDetailMode},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="G"})+"\n");
+                // #endregion
             }
         }
 

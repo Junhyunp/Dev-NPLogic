@@ -10,7 +10,7 @@ using NPLogic.Data.Repositories;
 namespace NPLogic.ViewModels
 {
     /// <summary>
-    /// 프로그램 기초데이터 설정 ViewModel (C-001 ~ C-005)
+    /// 프로그램 기초데이터 설정 ViewModel (C-001 ~ C-006)
     /// </summary>
     public partial class ProgramSettingsViewModel : ObservableObject
     {
@@ -50,6 +50,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private AuctionCostStandard? _selectedAuctionCostStandard;
 
+        // ========== 6. 공매비용 산정 데이터 (C-006) ==========
+        [ObservableProperty]
+        private ObservableCollection<PublicSaleCostStandard> _publicSaleCostStandards = new();
+
+        [ObservableProperty]
+        private PublicSaleCostStandard? _selectedPublicSaleCostStandard;
+
         public ProgramSettingsViewModel(ReferenceDataRepository referenceDataRepository)
         {
             _referenceDataRepository = referenceDataRepository ?? throw new ArgumentNullException(nameof(referenceDataRepository));
@@ -66,7 +73,8 @@ namespace NPLogic.ViewModels
                     LoadCourtsAsync(),
                     LoadLegalRatesAsync(),
                     LoadLeaseStandardsAsync(),
-                    LoadAuctionCostStandardsAsync()
+                    LoadAuctionCostStandardsAsync(),
+                    LoadPublicSaleCostStandardsAsync()
                 );
             }
             catch (Exception ex)
@@ -109,6 +117,13 @@ namespace NPLogic.ViewModels
             foreach (var item in data) AuctionCostStandards.Add(item);
         }
 
+        private async Task LoadPublicSaleCostStandardsAsync()
+        {
+            var data = await _referenceDataRepository.GetPublicSaleCostStandardsAsync();
+            PublicSaleCostStandards.Clear();
+            foreach (var item in data) PublicSaleCostStandards.Add(item);
+        }
+
         // ========== 명령 (추가/저장/삭제) ==========
 
         [RelayCommand]
@@ -141,6 +156,14 @@ namespace NPLogic.ViewModels
             if (SelectedAuctionCostStandard == null) return;
             try { await _referenceDataRepository.UpdateAuctionCostStandardAsync(SelectedAuctionCostStandard); }
             catch (Exception ex) { ErrorMessage = $"경매비용 기준 저장 실패: {ex.Message}"; }
+        }
+
+        [RelayCommand]
+        private async Task SavePublicSaleCostStandardAsync()
+        {
+            if (SelectedPublicSaleCostStandard == null) return;
+            try { await _referenceDataRepository.UpdatePublicSaleCostStandardAsync(SelectedPublicSaleCostStandard); }
+            catch (Exception ex) { ErrorMessage = $"공매비용 기준 저장 실패: {ex.Message}"; }
         }
 
         [RelayCommand]

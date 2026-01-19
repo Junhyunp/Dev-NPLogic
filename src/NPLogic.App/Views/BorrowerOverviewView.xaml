@@ -12,17 +12,17 @@
              Loaded="BorrowerOverviewView_Loaded">
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <Grid Margin="32">
+    <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto" MinHeight="450"/>
+            <RowDefinition Height="Auto" MinHeight="300"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- 헤더 영역 -->
-        <Grid Grid.Row="0" Margin="0,0,0,24">
+        <Grid Grid.Row="0" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -30,8 +30,8 @@
 
             <StackPanel Grid.Column="0">
                 <TextBlock Text="차주 개요" 
-                           Style="{StaticResource H2TextStyle}"
-                           Margin="0,0,0,8"/>
+                           Style="{StaticResource H3TextStyle}"
+                           Margin="0,0,0,4"/>
                 <!-- 단일 차주 모드: 선택된 차주 정보 표시 -->
                 <TextBlock Style="{StaticResource BodyTextStyle}"
                            Opacity="0.7"
@@ -66,51 +66,53 @@
                 <Button Content="+ 차주 추가" 
                         Command="{Binding OpenAddBorrowerModalCommand}"
                         Style="{StaticResource PrimaryButton}"
-                        Padding="20,10"
-                        Margin="0,0,8,0"/>
+                        Padding="12,6"
+                        FontSize="12"
+                        Margin="0,0,6,0"/>
                 <Button Content="새로고침" 
                         Command="{Binding RefreshCommand}"
                         Style="{StaticResource SecondaryButton}"
-                        Padding="20,10"/>
+                        Padding="12,6"
+                        FontSize="12"/>
             </StackPanel>
         </Grid>
 
         <!-- 통계 카드 영역 -->
-        <Grid Grid.Row="1" Margin="0,0,0,24">
+        <Grid Grid.Row="1" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- 단일 차주 모드: 물건 수 -->
             <!-- 전체 모드: 총 차주 수 -->
-            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
+            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12,10">
                 <StackPanel>
                     <!-- 단일 차주 모드 -->
                     <StackPanel Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="물건수" Opacity="0.7" FontSize="13"/>
+                        <TextBlock Text="물건수" Opacity="0.7" FontSize="11"/>
                         <TextBlock Text="{Binding TotalCount, FallbackValue=0}" 
-                                   FontSize="28" FontWeight="Bold" Margin="0,8,0,0" Foreground="{StaticResource PrimaryBrush}"/>
+                                   FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource PrimaryBrush}"/>
                         <TextBlock Text="{Binding SelectedBorrower.BorrowerType, FallbackValue=-}" 
-                                   Opacity="0.6" FontSize="{StaticResource FontSizeBody}" Margin="0,8,0,0"/>
+                                   Opacity="0.6" FontSize="11" Margin="0,4,0,0"/>
                     </StackPanel>
                     <!-- 전체 모드 -->
                     <StackPanel Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <TextBlock Text="총 차주 수" Opacity="0.7" FontSize="13"/>
+                        <TextBlock Text="총 차주 수" Opacity="0.7" FontSize="11"/>
                         <TextBlock Text="{Binding Statistics.TotalCount, FallbackValue=0}" 
-                                   FontSize="28" FontWeight="Bold" Margin="0,8,0,0"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <TextBlock Text="개인: " Opacity="0.6" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text="{Binding Statistics.IndividualCount, FallbackValue=0}" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text=" | 사업자: " Opacity="0.6" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text="{Binding Statistics.SoleProprietorCount, FallbackValue=0}" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text=" | 법인: " Opacity="0.6" FontSize="{StaticResource FontSizeBody}"/>
-                            <TextBlock Text="{Binding Statistics.CorporationCount, FallbackValue=0}" FontSize="{StaticResource FontSizeBody}"/>
+                                   FontSize="20" FontWeight="Bold" Margin="0,4,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="개인: " Opacity="0.6" FontSize="11"/>
+                            <TextBlock Text="{Binding Statistics.IndividualCount, FallbackValue=0}" FontSize="11"/>
+                            <TextBlock Text=" | 사업자: " Opacity="0.6" FontSize="11"/>
+                            <TextBlock Text="{Binding Statistics.SoleProprietorCount, FallbackValue=0}" FontSize="11"/>
+                            <TextBlock Text=" | 법인: " Opacity="0.6" FontSize="11"/>
+                            <TextBlock Text="{Binding Statistics.CorporationCount, FallbackValue=0}" FontSize="11"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -118,12 +120,12 @@
 
             <!-- 단일 차주 모드: 회생 상태 -->
             <!-- 전체 모드: 회생 차주 -->
-            <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
+            <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12,10">
                 <StackPanel>
                     <!-- 단일 차주 모드 -->
                     <StackPanel Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <TextBlock Text="회생 차주" Opacity="0.7" FontSize="13"/>
-                        <TextBlock FontSize="28" FontWeight="Bold" Margin="0,8,0,0">
+                        <TextBlock Text="회생 차주" Opacity="0.7" FontSize="11"/>
+                        <TextBlock FontSize="20" FontWeight="Bold" Margin="0,4,0,0">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
@@ -137,26 +139,26 @@
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                        <TextBlock Text="회생 여부" Opacity="0.5" FontSize="11" Margin="0,8,0,0"/>
+                        <TextBlock Text="회생 여부" Opacity="0.5" FontSize="10" Margin="0,4,0,0"/>
                     </StackPanel>
                     <!-- 전체 모드 -->
                     <StackPanel Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <TextBlock Text="회생 차주" Opacity="0.7" FontSize="13"/>
-                        <TextBlock FontSize="28" FontWeight="Bold" Margin="0,8,0,0" Foreground="#E57373">
+                        <TextBlock Text="회생 차주" Opacity="0.7" FontSize="11"/>
+                        <TextBlock FontSize="20" FontWeight="Bold" Margin="0,4,0,0" Foreground="#E57373">
                             <Run Text="{Binding Statistics.RestructuringCount, FallbackValue=0}"/>
-                            <Run Text="건" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
+                            <Run Text="건" FontSize="13" FontWeight="Normal"/>
                         </TextBlock>
                         <CheckBox Content="회생만 표시" 
                                   IsChecked="{Binding ShowRestructuringOnly}"
-                                  Margin="0,8,0,0" FontSize="{StaticResource FontSizeBody}"/>
+                                  Margin="0,4,0,0" FontSize="11"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
 
             <!-- 총 OPB (차주 기준) -->
-            <Border Grid.Column="4" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
+            <Border Grid.Column="4" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12,10">
                 <StackPanel>
-                    <TextBlock Opacity="0.7" FontSize="13">
+                    <TextBlock Opacity="0.7" FontSize="11">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Text" Value="총 OPB"/>
@@ -168,18 +170,18 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,8,0,0">
+                    <TextBlock FontSize="16" FontWeight="Bold" Margin="0,4,0,0">
                         <Run Text="{Binding Statistics.TotalOpb, StringFormat=N0, FallbackValue=0}"/>
-                        <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
+                        <Run Text="원" FontSize="12" FontWeight="Normal"/>
                     </TextBlock>
-                    <TextBlock Text="Outstanding Principal Balance" Opacity="0.5" FontSize="11" Margin="0,4,0,0"/>
+                    <TextBlock Text="Outstanding Principal Balance" Opacity="0.5" FontSize="9" Margin="0,2,0,0"/>
                 </StackPanel>
             </Border>
 
             <!-- 총 근저당액 (차주 기준) -->
-            <Border Grid.Column="6" Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20">
+            <Border Grid.Column="6" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12,10">
                 <StackPanel>
-                    <TextBlock Opacity="0.7" FontSize="13">
+                    <TextBlock Opacity="0.7" FontSize="11">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Text" Value="총 근저당설정액"/>
@@ -191,24 +193,24 @@
                             </Style>
                         </TextBlock.Style>
                     </TextBlock>
-                    <TextBlock FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,8,0,0">
+                    <TextBlock FontSize="16" FontWeight="Bold" Margin="0,4,0,0">
                         <Run Text="{Binding Statistics.TotalMortgageAmount, StringFormat=N0, FallbackValue=0}"/>
-                        <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
+                        <Run Text="원" FontSize="12" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
         </Grid>
 
         <!-- 검색 및 필터 영역 (전체 모드에서만 표시) -->
-        <Grid Grid.Row="2" Margin="0,0,0,16"
+        <Grid Grid.Row="2" Margin="0,0,0,8"
               Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="16"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="6"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
@@ -216,15 +218,17 @@
             <Grid Grid.Column="0">
                 <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                          VerticalContentAlignment="Center"
-                         Padding="16,12">
+                         Padding="10,8"
+                         FontSize="12">
                     <TextBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
                     </TextBox.InputBindings>
                 </TextBox>
                 <TextBlock Text="차주번호 또는 차주명으로 검색..."
                           VerticalAlignment="Center"
-                          Margin="20,0"
+                          Margin="14,0"
                           Opacity="0.5"
+                          FontSize="12"
                           IsHitTestVisible="False">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -243,22 +247,25 @@
             <ComboBox Grid.Column="2"
                       ItemsSource="{Binding Programs}"
                       SelectedItem="{Binding SelectedProgramId}"
-                      Width="180"
-                      Padding="12,10"/>
+                      Width="150"
+                      Padding="8,6"
+                      FontSize="12"/>
 
             <!-- 차주유형 필터 -->
             <ComboBox Grid.Column="4"
                       ItemsSource="{Binding BorrowerTypes}"
                       SelectedItem="{Binding SelectedBorrowerType}"
-                      Width="120"
-                      Padding="12,10"/>
+                      Width="100"
+                      Padding="8,6"
+                      FontSize="12"/>
 
             <!-- 검색 버튼 -->
             <Button Grid.Column="6"
                     Content="검색" 
                     Command="{Binding SearchCommand}"
                     Style="{StaticResource PrimaryButton}"
-                    Padding="24,10"/>
+                    Padding="16,6"
+                    FontSize="12"/>
         </Grid>
 
         <!-- 메인 컨텐츠 -->
@@ -779,115 +786,114 @@
             </Grid>
 
             <!-- 단일 차주 모드: 선택된 차주 상세 정보만 표시 -->
-            <Border Background="{StaticResource SurfaceColor}" CornerRadius="12" Padding="20"
+            <Border Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12"
                     Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <!-- 기본 정보 섹션 -->
-                        <controls:NPExpandableSection Header="기본 정보" IsExpanded="True">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="16"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="12"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="12"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                <StackPanel>
+                    <!-- 기본 정보 섹션 -->
+                    <controls:NPExpandableSection Header="▼ 기본 정보" IsExpanded="True">
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="6"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
 
-                                <!-- 차주번호 -->
-                                <StackPanel Grid.Row="0" Grid.Column="0">
-                                    <TextBlock Text="차주번호" Opacity="0.6" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedBorrower.BorrowerNumber, UpdateSourceTrigger=PropertyChanged}" 
-                                             Padding="12,10" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}"/>
-                                </StackPanel>
-
-                                <!-- 차주명 -->
-                                <StackPanel Grid.Row="0" Grid.Column="2">
-                                    <TextBlock Text="차주명" Opacity="0.6" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedBorrower.BorrowerName, UpdateSourceTrigger=PropertyChanged}" 
-                                             Padding="12,10" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}"/>
-                                </StackPanel>
-
-                                <!-- 차주유형 -->
-                                <StackPanel Grid.Row="2" Grid.Column="0">
-                                    <TextBlock Text="차주유형" Opacity="0.6" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedBorrower.BorrowerType}" 
-                                             Padding="12,10" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}"/>
-                                </StackPanel>
-
-                                <!-- OPB -->
-                                <StackPanel Grid.Row="2" Grid.Column="2">
-                                    <TextBlock Text="OPB" Opacity="0.6" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,4"/>
-                                    <TextBox Text="{Binding SelectedBorrower.Opb, StringFormat=N0}" 
-                                             Padding="12,10" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Grid>
-                        </controls:NPExpandableSection>
-
-                        <!-- 상태 체크박스 -->
-                        <controls:NPExpandableSection Header="상태" IsExpanded="True">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox Content="회생 (S 차주)" 
-                                          IsChecked="{Binding SelectedBorrower.IsRestructuring}"
-                                          IsEnabled="False"
-                                          Margin="0,0,24,0"/>
-                                <CheckBox Content="개회" 
-                                          IsChecked="{Binding SelectedBorrower.IsOpened}"
-                                          IsEnabled="False"
-                                          Margin="0,0,24,0"/>
-                                <CheckBox Content="차주사망" 
-                                          IsChecked="{Binding SelectedBorrower.IsDeceased}"
-                                          IsEnabled="False"/>
+                            <!-- 차주번호 -->
+                            <StackPanel Grid.Row="0" Grid.Column="0">
+                                <TextBlock Text="차주번호" Opacity="0.6" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBox Text="{Binding SelectedBorrower.BorrowerNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="8,6" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}" FontSize="12"/>
                             </StackPanel>
-                        </controls:NPExpandableSection>
 
-                        <!-- 담보 물건 목록 -->
-                        <controls:NPExpandableSection Header="담보 물건 목록" IsExpanded="True">
-                            <DataGrid ItemsSource="{Binding BorrowerProperties}"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True"
-                                      SelectionMode="Single"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="All"
-                                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                      VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                      BorderThickness="1"
-                                      BorderBrush="{StaticResource BorderColor}"
-                                      Background="Transparent"
-                                      MaxHeight="300">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="물건번호" Binding="{Binding PropertyNumber}" Width="100"/>
-                                    <DataGridTextColumn Header="유형" Binding="{Binding PropertyType}" Width="70"/>
-                                    <DataGridTextColumn Header="주소" Binding="{Binding AddressFull}" Width="*"/>
-                                    <DataGridTextColumn Header="감정가" Binding="{Binding AppraisalValue, StringFormat=N0}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTemplateColumn Header="상세" Width="60">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="보기" 
-                                                        Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Style="{StaticResource SecondaryButton}"
-                                                        Padding="8,4"
-                                                        FontSize="11"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </controls:NPExpandableSection>
-                    </StackPanel>
-                </ScrollViewer>
+                            <!-- 차주명 -->
+                            <StackPanel Grid.Row="0" Grid.Column="2">
+                                <TextBlock Text="차주명" Opacity="0.6" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBox Text="{Binding SelectedBorrower.BorrowerName, UpdateSourceTrigger=PropertyChanged}" 
+                                         Padding="8,6" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}" FontSize="12"/>
+                            </StackPanel>
+
+                            <!-- 차주유형 -->
+                            <StackPanel Grid.Row="2" Grid.Column="0">
+                                <TextBlock Text="차주유형" Opacity="0.6" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBox Text="{Binding SelectedBorrower.BorrowerType}" 
+                                         Padding="8,6" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}" FontSize="12"/>
+                            </StackPanel>
+
+                            <!-- OPB -->
+                            <StackPanel Grid.Row="2" Grid.Column="2">
+                                <TextBlock Text="OPB" Opacity="0.6" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBox Text="{Binding SelectedBorrower.Opb, StringFormat=N0}" 
+                                         Padding="8,6" IsReadOnly="True" Background="{StaticResource BlueGray50Brush}" FontWeight="SemiBold" FontSize="12"/>
+                            </StackPanel>
+                        </Grid>
+                    </controls:NPExpandableSection>
+
+                    <!-- 상태 체크박스 -->
+                    <controls:NPExpandableSection Header="▼ 상태" IsExpanded="True">
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <CheckBox Content="회생 (S 차주)" 
+                                      IsChecked="{Binding SelectedBorrower.IsRestructuring}"
+                                      IsEnabled="False"
+                                      Margin="0,0,16,0" FontSize="12"/>
+                            <CheckBox Content="개회" 
+                                      IsChecked="{Binding SelectedBorrower.IsOpened}"
+                                      IsEnabled="False"
+                                      Margin="0,0,16,0" FontSize="12"/>
+                            <CheckBox Content="차주사망" 
+                                      IsChecked="{Binding SelectedBorrower.IsDeceased}"
+                                      IsEnabled="False" FontSize="12"/>
+                        </StackPanel>
+                    </controls:NPExpandableSection>
+
+                    <!-- 담보 물건 목록 -->
+                    <controls:NPExpandableSection Header="▼ 담보 물건 목록" IsExpanded="True">
+                        <DataGrid ItemsSource="{Binding BorrowerProperties}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="All"
+                                  HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                                  VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                                  BorderThickness="1"
+                                  BorderBrush="{StaticResource BorderColor}"
+                                  Background="Transparent"
+                                  MaxHeight="150"
+                                  RowHeight="24"
+                                  FontSize="11"
+                                  Margin="0,4,0,0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="물건번호" Binding="{Binding PropertyNumber}" Width="80"/>
+                                <DataGridTextColumn Header="유형" Binding="{Binding PropertyType}" Width="50"/>
+                                <DataGridTextColumn Header="주소" Binding="{Binding AddressFull}" Width="*"/>
+                                <DataGridTextColumn Header="감정가" Binding="{Binding AppraisalValue, StringFormat=N0}" Width="80">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="상세" Width="45">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="보기" 
+                                                    Command="{Binding DataContext.ViewPropertyDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Style="{StaticResource SecondaryButton}"
+                                                    Padding="4,2"
+                                                    FontSize="10"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </controls:NPExpandableSection>
+                </StackPanel>
             </Border>
         </Grid>
 

@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
@@ -23,7 +25,72 @@ namespace NPLogic.ViewModels
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
 
-        // ========== 경매사건 정보 (RightsAnalysisTab에서 이동) ==========
+        // ========== 선행 경매사건 정보 ==========
+        [ObservableProperty]
+        private string _precedentAuctionStatus = "not_opened";
+
+        [ObservableProperty]
+        private string _precedentCourtName = "";
+
+        [ObservableProperty]
+        private string _precedentCaseNumber = "";
+
+        [ObservableProperty]
+        private string _precedentAuctionApplicant = "";
+
+        [ObservableProperty]
+        private DateTime? _precedentAuctionStartDate;
+
+        [ObservableProperty]
+        private DateTime? _precedentClaimDeadlineDate;
+
+        [ObservableProperty]
+        private decimal _precedentClaimAmount;
+
+        [ObservableProperty]
+        private decimal _precedentInitialAppraisalValue;
+
+        [ObservableProperty]
+        private DateTime? _precedentInitialAuctionDate;
+
+        [ObservableProperty]
+        private string _precedentFinalAuctionRound = "";
+
+        [ObservableProperty]
+        private DateTime? _precedentFinalAuctionDate;
+
+        [ObservableProperty]
+        private string _precedentFinalAuctionResult = "";
+
+        // ========== 후행 경매사건 정보 ==========
+        [ObservableProperty]
+        private string _subsequentAuctionStatus = "not_opened";
+
+        [ObservableProperty]
+        private string _subsequentCourtName = "";
+
+        [ObservableProperty]
+        private string _subsequentCaseNumber = "";
+
+        [ObservableProperty]
+        private string _subsequentAuctionApplicant = "";
+
+        [ObservableProperty]
+        private DateTime? _subsequentAuctionStartDate;
+
+        [ObservableProperty]
+        private DateTime? _subsequentClaimDeadlineDate;
+
+        [ObservableProperty]
+        private decimal _subsequentWinningBidAmount;
+
+        [ObservableProperty]
+        private decimal _subsequentMinimumBid;
+
+        [ObservableProperty]
+        private decimal _subsequentNextMinimumBid;
+
+        // ========== 기존 경매사건 정보 (호환성 유지) ==========
         [ObservableProperty]
         private string _auctionStatus = "not_opened"; // opened, not_opened
 
@@ -74,6 +141,88 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _claimDeadlinePassed; // 배당요구종기일 경과
+
+        // ========== 등기부 항목 ==========
+        [ObservableProperty]
+        private ObservableCollection<RegistryRight> _registryEntries = new();
+
+        // ========== Tool Box: 주택임대차 ==========
+        [ObservableProperty]
+        private ObservableCollection<LeaseItem> _residentialLeases = new();
+
+        public decimal ResidentialLeasesTotalDeposit => ResidentialLeases.Sum(l => l.Deposit);
+
+        // ========== Tool Box: 상가임대차 ==========
+        [ObservableProperty]
+        private ObservableCollection<LeaseItem> _commercialLeases = new();
+
+        public decimal CommercialLeasesTotalDeposit => CommercialLeases.Sum(l => l.Deposit);
+
+        // ========== Tool Box: 임금채권 ==========
+        [ObservableProperty]
+        private ObservableCollection<WageClaimItem> _wageClaims = new();
+
+        public decimal WageClaimsTotalAmount => WageClaims.Sum(w => w.ReflectedAmount);
+
+        // ========== 열람 자료 이미지 ==========
+        [ObservableProperty]
+        private BitmapSource? _tenantRegistryImage;
+
+        [ObservableProperty]
+        private string _tenantRegistryImageInfo = "";
+
+        [ObservableProperty]
+        private BitmapSource? _commercialLeaseImage;
+
+        [ObservableProperty]
+        private string _commercialLeaseImageInfo = "";
+
+        [ObservableProperty]
+        private BitmapSource? _rightsAnalysisImage;
+
+        [ObservableProperty]
+        private string _rightsAnalysisImageInfo = "";
+
+        [ObservableProperty]
+        private BitmapSource? _wageDataImage;
+
+        [ObservableProperty]
+        private string _wageDataImageInfo = "";
+
+        // ========== 선순위 구분 상세 ==========
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        private decimal _seniorMortgageDd;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        private decimal _seniorMortgageReflected;
+
+        [ObservableProperty]
+        private string _seniorMortgageReason = "";
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        private decimal _currentTaxDd;
+
+        [ObservableProperty]
+        private string _currentTaxReason = "";
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        private decimal _seniorTaxClaimDd;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        private decimal _seniorTaxClaimReflected;
+
+        [ObservableProperty]
+        private string _seniorTaxClaimReason = "";
+
+        // ========== 선순위 요약 ==========
+        public decimal TotalLeaseDeposit => LeaseDepositReflected + SmallDepositReflected;
+        
+        public decimal OtherSeniorRights => LienReflected + WageClaimReflected + SeniorTaxClaimReflected;
 
         // ========== 전입/임차 현황 체크리스트 ==========
         [ObservableProperty]
@@ -1317,6 +1466,197 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        // ========== Tool Box 행 추가 Commands ==========
+        
+        /// <summary>
+        /// 주택임대차 행 추가
+        /// </summary>
+        [RelayCommand]
+        private void AddResidentialLeaseRow()
+        {
+            ResidentialLeases.Add(new LeaseItem
+            {
+                PropertyId = SelectedProperty?.Id,
+                LeaseType = "residential"
+            });
+            OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
+        }
+
+        /// <summary>
+        /// 상가임대차 행 추가
+        /// </summary>
+        [RelayCommand]
+        private void AddCommercialLeaseRow()
+        {
+            CommercialLeases.Add(new LeaseItem
+            {
+                PropertyId = SelectedProperty?.Id,
+                LeaseType = "commercial"
+            });
+            OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
+        }
+
+        /// <summary>
+        /// 임금채권 행 추가
+        /// </summary>
+        [RelayCommand]
+        private void AddWageClaimRow()
+        {
+            var sequenceNumber = WageClaims.Count > 0 ? WageClaims.Max(w => w.SequenceNumber) + 1 : 1;
+            WageClaims.Add(new WageClaimItem
+            {
+                PropertyId = SelectedProperty?.Id,
+                SequenceNumber = sequenceNumber
+            });
+            OnPropertyChanged(nameof(WageClaimsTotalAmount));
+        }
+
+        // ========== 열람 자료 이미지 붙여넣기 Commands ==========
+
+        /// <summary>
+        /// 전입세대열람 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteTenantRegistryImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                TenantRegistryImage = Clipboard.GetImage();
+                TenantRegistryImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입세대열람 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                ErrorMessage = "클립보드에 이미지가 없습니다.";
+            }
+        }
+
+        /// <summary>
+        /// 상가임대차열람 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteCommercialLeaseImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                CommercialLeaseImage = Clipboard.GetImage();
+                CommercialLeaseImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("상가임대차열람 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                ErrorMessage = "클립보드에 이미지가 없습니다.";
+            }
+        }
+
+        /// <summary>
+        /// 권리분석 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteRightsAnalysisImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                RightsAnalysisImage = Clipboard.GetImage();
+                RightsAnalysisImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("권리분석 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                ErrorMessage = "클립보드에 이미지가 없습니다.";
+            }
+        }
+
+        /// <summary>
+        /// 임금자료 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteWageDataImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                WageDataImage = Clipboard.GetImage();
+                WageDataImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("임금자료 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                ErrorMessage = "클립보드에 이미지가 없습니다.";
+            }
+        }
+
+        // ========== 링크 버튼 Commands ==========
+
+        /// <summary>
+        /// 당사자내역 팝업
+        /// </summary>
+        [RelayCommand]
+        private void OpenPartyDetails()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.courtauction.go.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"당사자내역 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 기일내역검색
+        /// </summary>
+        [RelayCommand]
+        private void OpenScheduleSearch()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.courtauction.go.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"기일내역검색 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 문건송달내역
+        /// </summary>
+        [RelayCommand]
+        private void OpenDocumentDelivery()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://www.courtauction.go.kr/",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"문건송달내역 열기 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Excel 내보내기
+        /// </summary>
+        [RelayCommand]
+        private async Task ExportToExcelAsync()
+        {
+            NPLogic.UI.Services.ToastService.Instance.ShowSuccess("Excel 내보내기 기능은 준비 중입니다.");
+            await Task.CompletedTask;
         }
     }
 }

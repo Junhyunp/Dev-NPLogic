@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -192,6 +193,42 @@ namespace NPLogic.Views
         }
 
         /// <summary>
+        /// 현재 활성 탭의 컨텐츠를 새로고침 (외부에서 호출 가능)
+        /// </summary>
+        public async Task RefreshCurrentTabAsync()
+        {
+            // RadioButton UI 상태를 기준으로 현재 선택된 탭 확인
+            var currentTab = GetCurrentSelectedTabFromUI();
+            
+            // #region agent log
+            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:RefreshCurrentTabAsync",message="RefreshCurrentTabAsync called",data=new{currentTabFromUI=currentTab,activeTabFromVM=_viewModel?.ActiveTab,selectedPropertyTab=_viewModel?.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="FIX"})+"\n");
+            // #endregion
+            
+            if (!string.IsNullOrEmpty(currentTab))
+            {
+                await LoadFunctionContentAsync(currentTab);
+            }
+        }
+
+        /// <summary>
+        /// 현재 UI에서 선택된 탭을 RadioButton 상태로 확인
+        /// </summary>
+        private string? GetCurrentSelectedTabFromUI()
+        {
+            if (TabHome.IsChecked == true) return "Home";
+            if (TabBorrowerOverview.IsChecked == true) return "BorrowerOverview";
+            if (TabLoan.IsChecked == true) return "Loan";
+            if (TabCollateralProperty.IsChecked == true) return "CollateralProperty";
+            if (TabSeniorRights.IsChecked == true) return "SeniorRights";
+            if (TabRestructuring.IsChecked == true) return "Restructuring";
+            if (TabEvaluation.IsChecked == true) return "Evaluation";
+            if (TabAuctionSchedule.IsChecked == true) return "AuctionSchedule";
+            if (TabCashFlow.IsChecked == true) return "CashFlow";
+            if (TabXnpvComparison.IsChecked == true) return "XnpvComparison";
+            return "Home"; // 기본값
+        }
+
+        /// <summary>
         /// 기능 탭 체크 이벤트
         /// </summary>
         private async void FunctionTab_Checked(object sender, RoutedEventArgs e)
@@ -218,14 +255,28 @@ namespace NPLogic.Views
             switch (tabName)
             {
                 case "Home":
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="Home tab loading",data=new{selectedPropertyId=selectedPropertyId?.ToString(),selectedPropertyTabNumber=_viewModel?.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
+                    // #endregion
+                    
                     content = serviceProvider.GetRequiredService<HomeTab>();
                     // PropertyDetailViewModel 항상 설정 (커맨드 바인딩을 위해)
                     {
                         var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
                         if (selectedPropertyId.HasValue)
                         {
+                            // #region agent log
+                            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="Setting PropertyId and initializing",data=new{propertyId=selectedPropertyId.Value.ToString()},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
+                            // #endregion
+                            
                             vm.SetPropertyId(selectedPropertyId.Value);
                             _ = vm.InitializeAsync();
+                        }
+                        else
+                        {
+                            // #region agent log
+                            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="selectedPropertyId is null - NOT initializing VM",data=new{},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
+                            // #endregion
                         }
                         content.DataContext = vm;
                     }
@@ -239,21 +290,32 @@ namespace NPLogic.Views
                         // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
                         if (_viewModel?.SelectedPropertyTab != null)
                         {
+                            Debug.WriteLine($"[NonCoreView] BorrowerOverview - SelectedPropertyTab: {_viewModel.SelectedPropertyTab.PropertyNumber}");
+                            
                             var property = await _viewModel.GetCurrentPropertyAsync();
                             if (property != null)
                             {
+                                Debug.WriteLine($"[NonCoreView] BorrowerOverview - Property: {property.PropertyNumber}, BorrowerNumber: {property.BorrowerNumber}, DebtorName: {property.DebtorName}");
                                 await borrowerVm.SetSelectedPropertyAsync(property);
                             }
+                            else
+                            {
+                                Debug.WriteLine("[NonCoreView] BorrowerOverview - Property is null!");
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine("[NonCoreView] BorrowerOverview - SelectedPropertyTab is null");
                         }
                         
                         content.DataContext = borrowerVm;
                     }
                     break;
                 case "Loan":
-                    // Loan 상세 탭 - 선택된 물건의 차주 대출 정보만 표시
-                    content = serviceProvider.GetRequiredService<LoanDetailView>();
+                    // Loan 시트 탭 - 4개 시트 (일반, 일반보증, 해지부보증, 일반+해지부보증)
+                    content = serviceProvider.GetRequiredService<Loan.LoanSheetView>();
                     {
-                        var loanVm = serviceProvider.GetRequiredService<LoanDetailViewModel>();
+                        var loanSheetVm = serviceProvider.GetRequiredService<LoanSheetViewModel>();
                         
                         // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
                         if (_viewModel?.SelectedPropertyTab != null)
@@ -261,11 +323,21 @@ namespace NPLogic.Views
                             var property = await _viewModel.GetCurrentPropertyAsync();
                             if (property != null)
                             {
-                                await loanVm.SetSelectedPropertyAsync(property);
+                                await loanSheetVm.SetSelectedPropertyAsync(property);
+                            }
+                            else
+                            {
+                                // 물건 정보 로드 실패 시에도 초기화
+                                await loanSheetVm.InitializeAsync();
                             }
                         }
+                        else
+                        {
+                            // 선택된 물건이 없으면 전체 차주 모드로 초기화
+                            await loanSheetVm.InitializeAsync();
+                        }
                         
-                        content.DataContext = loanVm;
+                        content.DataContext = loanSheetVm;
                     }
                     break;
                 case "CollateralProperty":
@@ -393,15 +465,51 @@ namespace NPLogic.Views
         /// </summary>
         private async void BorrowerListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // #region agent log
+            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="SelectionChanged fired",data=new{senderType=sender?.GetType().Name,addedCount=e.AddedItems.Count,removedCount=e.RemovedItems.Count},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="A"})+"\n");
+            // #endregion
+            
             if (sender is ListBox listBox && listBox.SelectedItem is BorrowerListItem selectedItem)
             {
-                _viewModel?.SelectBorrower(selectedItem.BorrowerId);
+                // #region agent log
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="BorrowerListItem selected",data=new{borrowerId=selectedItem.BorrowerId.ToString(),borrowerName=selectedItem.BorrowerName,activeTab=_viewModel?.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="B"})+"\n");
+                // #endregion
                 
-                // 현재 탭 컨텐츠 새로고침
+                // 비동기로 차주 선택 및 물건 목록 로드 완료까지 대기
+                if (_viewModel != null)
+                {
+                    await _viewModel.SelectBorrowerAsync(selectedItem.BorrowerId);
+                    
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="SelectBorrowerAsync completed",data=new{selectedPropertyTab=_viewModel.SelectedPropertyTab?.PropertyNumber,propertyTabsCount=_viewModel.PropertyTabs?.Count},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="C"})+"\n");
+                    // #endregion
+                }
+                
+                // 물건 목록 로드 완료 후 현재 탭 컨텐츠 새로고침
                 if (_viewModel?.ActiveTab != null)
                 {
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="Calling LoadFunctionContentAsync",data=new{activeTab=_viewModel.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="D"})+"\n");
+                    // #endregion
+                    
                     await LoadFunctionContentAsync(_viewModel.ActiveTab);
+                    
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="LoadFunctionContentAsync completed",data=new{contentAreaContent=ContentArea.Content?.GetType().Name},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
+                    // #endregion
                 }
+                else
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="ActiveTab is null, skipping LoadFunctionContentAsync",data=new{viewModelNull=_viewModel==null,activeTab=_viewModel?.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="D"})+"\n");
+                    // #endregion
+                }
+            }
+            else
+            {
+                // #region agent log
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="Not BorrowerListItem or no selection",data=new{selectedItemType=((sender as ListBox)?.SelectedItem)?.GetType().Name},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="B"})+"\n");
+                // #endregion
             }
         }
 
@@ -583,94 +691,95 @@ namespace NPLogic.Views
         // ========== 인쇄/Excel 이벤트 핸들러 ==========
 
         /// <summary>
-        /// 인쇄 버튼 클릭
+        /// 인쇄 버튼 클릭 - 차주 선택 다이얼로그 표시
         /// </summary>
-        private void PrintButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.ContextMenu != null)
-            {
-                button.ContextMenu.IsOpen = true;
-            }
-        }
-
-        /// <summary>
-        /// Excel 버튼 클릭
-        /// </summary>
-        private void ExcelButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button button && button.ContextMenu != null)
-            {
-                button.ContextMenu.IsOpen = true;
-            }
-        }
-
-        /// <summary>
-        /// 전체 인쇄
-        /// </summary>
-        private async void PrintAll_Click(object sender, RoutedEventArgs e)
+        private async void PrintWithSelectionButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Excel로 내보낸 후 인쇄
-                var tempPath = Path.Combine(Path.GetTempPath(), $"비핵심_전체_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
-                await ExportToExcelAll(tempPath);
-                
-                // Excel 파일 열기 (인쇄 대화상자)
-                Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
-                MessageBox.Show("Excel 파일이 열렸습니다.\nCtrl+P를 눌러 인쇄해주세요.", "인쇄", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"인쇄 준비 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// 차주별 인쇄
-        /// </summary>
-        private async void PrintByBorrower_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var tempPath = Path.Combine(Path.GetTempPath(), $"비핵심_차주별_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
-                await ExportToExcelByBorrower(tempPath);
-                
-                Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
-                MessageBox.Show("Excel 파일이 열렸습니다.\nCtrl+P를 눌러 인쇄해주세요.", "인쇄", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"인쇄 준비 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// 전체 Excel 내보내기
-        /// </summary>
-        private async void ExcelAll_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var dialog = new SaveFileDialog
+                if (_viewModel == null || !_viewModel.BorrowerItems.Any())
                 {
-                    Filter = "Excel Files (*.xlsx)|*.xlsx",
-                    FileName = $"비핵심_전체_{DateTime.Now:yyyyMMdd}.xlsx",
-                    Title = "전체 데이터 Excel 저장"
-                };
+                    MessageBox.Show("인쇄할 차주가 없습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 차주 선택 다이얼로그 표시
+                var dialog = BorrowerSelectionDialog.CreateForPrint(_viewModel.BorrowerItems);
+                dialog.Owner = Window.GetWindow(this);
 
                 if (dialog.ShowDialog() == true)
                 {
-                    await ExportToExcelAll(dialog.FileName);
-                    
-                    var result = MessageBox.Show(
-                        "Excel 파일이 저장되었습니다.\n파일을 열겠습니까?",
-                        "저장 완료",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Information);
-                    
-                    if (result == MessageBoxResult.Yes)
+                    var selectedBorrowers = dialog.SelectedBorrowers;
+                    if (selectedBorrowers.Count == 0)
                     {
-                        Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
+                        MessageBox.Show("선택된 차주가 없습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // 선택된 차주의 데이터를 Excel로 내보내고 인쇄
+                    var tempPath = Path.Combine(Path.GetTempPath(), $"비핵심_선택_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                    await ExportSelectedBorrowersToExcel(selectedBorrowers, tempPath);
+
+                    // Excel 파일 열기 (인쇄 대화상자)
+                    Process.Start(new ProcessStartInfo(tempPath) { UseShellExecute = true });
+                    MessageBox.Show($"Excel 파일이 열렸습니다.\n선택된 차주: {selectedBorrowers.Count}개\nCtrl+P를 눌러 인쇄해주세요.", 
+                        "인쇄", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"인쇄 준비 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Excel 버튼 클릭 - 차주 선택 다이얼로그 표시
+        /// </summary>
+        private async void ExcelWithSelectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_viewModel == null || !_viewModel.BorrowerItems.Any())
+                {
+                    MessageBox.Show("내보낼 차주가 없습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 차주 선택 다이얼로그 표시
+                var dialog = BorrowerSelectionDialog.CreateForExcel(_viewModel.BorrowerItems);
+                dialog.Owner = Window.GetWindow(this);
+
+                if (dialog.ShowDialog() == true)
+                {
+                    var selectedBorrowers = dialog.SelectedBorrowers;
+                    if (selectedBorrowers.Count == 0)
+                    {
+                        MessageBox.Show("선택된 차주가 없습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // 파일 저장 다이얼로그
+                    var saveDialog = new SaveFileDialog
+                    {
+                        Filter = "Excel Files (*.xlsx)|*.xlsx",
+                        FileName = $"비핵심_선택차주_{DateTime.Now:yyyyMMdd}.xlsx",
+                        Title = "선택한 차주 데이터 Excel 저장"
+                    };
+
+                    if (saveDialog.ShowDialog() == true)
+                    {
+                        await ExportSelectedBorrowersToExcel(selectedBorrowers, saveDialog.FileName);
+
+                        var result = MessageBox.Show(
+                            $"Excel 파일이 저장되었습니다.\n선택된 차주: {selectedBorrowers.Count}개\n\n파일을 열겠습니까?",
+                            "저장 완료",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Information);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            Process.Start(new ProcessStartInfo(saveDialog.FileName) { UseShellExecute = true });
+                        }
                     }
                 }
             }
@@ -681,39 +790,38 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 차주별 Excel 내보내기
+        /// 선택된 차주의 데이터를 Excel로 내보내기
         /// </summary>
-        private async void ExcelByBorrower_Click(object sender, RoutedEventArgs e)
+        private async System.Threading.Tasks.Task ExportSelectedBorrowersToExcel(List<SelectableBorrower> selectedBorrowers, string filePath)
         {
-            try
-            {
-                var dialog = new SaveFileDialog
-                {
-                    Filter = "Excel Files (*.xlsx)|*.xlsx",
-                    FileName = $"비핵심_차주별_{DateTime.Now:yyyyMMdd}.xlsx",
-                    Title = "차주별 데이터 Excel 저장 (시트 분리)"
-                };
+            if (_viewModel == null) return;
 
-                if (dialog.ShowDialog() == true)
-                {
-                    await ExportToExcelByBorrower(dialog.FileName);
-                    
-                    var result = MessageBox.Show(
-                        "Excel 파일이 저장되었습니다.\n각 차주별로 시트가 분리되어 있습니다.\n파일을 열겠습니까?",
-                        "저장 완료",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Information);
-                    
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        Process.Start(new ProcessStartInfo(dialog.FileName) { UseShellExecute = true });
-                    }
-                }
-            }
-            catch (Exception ex)
+            var excelService = App.ServiceProvider?.GetService<ExcelService>();
+            if (excelService == null)
             {
-                MessageBox.Show($"Excel 내보내기 실패: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Excel 서비스를 사용할 수 없습니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+
+            // 선택된 차주의 ID 목록
+            var selectedBorrowerIds = selectedBorrowers.Select(b => b.BorrowerId).ToHashSet();
+            var selectedBorrowerNumbers = selectedBorrowers.Select(b => b.BorrowerNumber).ToHashSet();
+            var selectedBorrowerNames = selectedBorrowers.Select(b => b.BorrowerName).ToHashSet();
+
+            // 전체 물건 중 선택된 차주의 물건만 필터링
+            var allProperties = await _viewModel.GetAllPropertiesAsync();
+            var filteredProperties = allProperties
+                .Where(p => selectedBorrowerNumbers.Contains(p.DebtorName) || selectedBorrowerNames.Contains(p.DebtorName))
+                .ToList();
+
+            // 차주별로 그룹화
+            var propertiesByBorrower = filteredProperties
+                .GroupBy(p => p.DebtorName ?? "기타")
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var programName = _viewModel.CurrentProjectName ?? "비핵심";
+
+            await excelService.ExportNonCoreByBorrowerToExcelAsync(propertiesByBorrower, programName, filePath);
         }
 
         /// <summary>
@@ -754,6 +862,41 @@ namespace NPLogic.Views
             var programName = _viewModel.CurrentProjectName ?? "비핵심";
             
             await excelService.ExportNonCoreByBorrowerToExcelAsync(propertiesByBorrower, programName, filePath);
+        }
+
+        // ========== QA 이벤트 핸들러 (Phase 7: 피드백 #14) ==========
+
+        /// <summary>
+        /// QA 버튼 클릭 - QA 입력 다이얼로그 표시
+        /// </summary>
+        private void QAButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 현재 활성 탭을 기본 선택으로 설정
+                var currentTab = _viewModel?.ActiveTab ?? "Home";
+                
+                // QA 입력 다이얼로그 표시
+                var dialog = new QAInputDialog(currentTab);
+                dialog.Owner = Window.GetWindow(this);
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // QA 질문이 저장되었음을 알림
+                    var selectedMenu = dialog.SelectedMenu;
+                    var question = dialog.Question;
+                    
+                    MessageBox.Show(
+                        $"QA 질문이 등록되었습니다.\n\n메뉴: {selectedMenu}\n질문: {question}",
+                        "QA 등록 완료",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"QA 다이얼로그를 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
     }

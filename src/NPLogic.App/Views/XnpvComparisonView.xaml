@@ -169,8 +169,8 @@
         <Border Grid.RowSpan="3" Background="#80000000" CornerRadius="8"
                 Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                <ProgressBar IsIndeterminate="True" Width="200"/>
-                <TextBlock Text="분석 중..." Foreground="White" Margin="0,16,0,0"/>
+                <ProgressBar Value="{Binding LoadingProgress}" Maximum="{Binding LoadingTotal}" Width="200" Height="8"/>
+                <TextBlock Text="{Binding LoadingMessage}" Foreground="White" Margin="0,16,0,0" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

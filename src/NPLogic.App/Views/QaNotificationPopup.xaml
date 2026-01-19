@@ -1,0 +1,169 @@
+<Window x:Class="NPLogic.Views.QaNotificationPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="QA 답변 알림"
+        Width="450"
+        Height="400"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStartupLocation="CenterOwner"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize">
+    
+    <Border Background="{StaticResource SurfaceBrush}"
+            CornerRadius="12"
+            BorderBrush="{StaticResource PrimaryBrush}"
+            BorderThickness="2">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="20" ShadowDepth="8"/>
+        </Border.Effect>
+        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- 헤더 -->
+            <Border Grid.Row="0" 
+                    Background="{StaticResource HeaderNavyBrush}"
+                    CornerRadius="10,10,0,0"
+                    Padding="20,16">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="White"
+                                CornerRadius="20"
+                                Width="40" Height="40"
+                                Margin="0,0,12,0">
+                            <materialDesign:PackIcon Kind="BellRing" 
+                                                     Width="24" Height="24" 
+                                                     Foreground="{StaticResource PrimaryBrush}"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="QA 답변 알림" 
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="White"/>
+                            <TextBlock x:Name="NotificationCountText"
+                                       Text="새로운 답변이 있습니다"
+                                       FontSize="12"
+                                       Foreground="#B0BEC5"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- 알림 목록 -->
+            <ScrollViewer Grid.Row="1" 
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="16">
+                <ItemsControl x:Name="NotificationList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="{StaticResource BlueGray50Brush}"
+                                    CornerRadius="8"
+                                    Padding="16"
+                                    Margin="0,0,0,12"
+                                    BorderBrush="{StaticResource BlueGray200Brush}"
+                                    BorderThickness="1">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- 차주 정보 -->
+                                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                                        <Border Background="{StaticResource PrimaryBrush}"
+                                                CornerRadius="4"
+                                                Padding="8,2"
+                                                Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding BorrowerNumber}"
+                                                       Foreground="White"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding BorrowerName}"
+                                                   FontSize="13"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    
+                                    <!-- 메시지 -->
+                                    <TextBlock Grid.Row="1" 
+                                               Text="{Binding Message}"
+                                               FontSize="13"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,8"/>
+                                    
+                                    <!-- 시간 -->
+                                    <TextBlock Grid.Row="2" 
+                                               Text="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}"
+                                               FontSize="11"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <!-- 빈 목록 메시지 -->
+            <StackPanel x:Name="EmptyMessage"
+                        Grid.Row="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Visibility="Collapsed">
+                <materialDesign:PackIcon Kind="CheckCircle" 
+                                         Width="48" Height="48" 
+                                         Foreground="{StaticResource SuccessBrush}"
+                                         HorizontalAlignment="Center"
+                                         Margin="0,0,0,12"/>
+                <TextBlock Text="새로운 알림이 없습니다"
+                           FontSize="14"
+                           Foreground="{StaticResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+            
+            <!-- 하단 버튼 -->
+            <Border Grid.Row="2" 
+                    Background="{StaticResource BlueGray50Brush}"
+                    CornerRadius="0,0,10,10"
+                    Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <CheckBox x:Name="MarkAllReadCheckBox"
+                              Grid.Column="0"
+                              Content="모두 읽음으로 표시"
+                              FontSize="12"
+                              VerticalAlignment="Center"
+                              IsChecked="True"/>
+                    
+                    <Button x:Name="CloseButton"
+                            Grid.Column="1"
+                            Content="확인"
+                            Click="CloseButton_Click"
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="24,8"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

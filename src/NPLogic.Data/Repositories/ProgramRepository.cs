@@ -254,7 +254,30 @@ namespace NPLogic.Data.Repositories
                 Status = table.Status ?? "active",
                 CreatedBy = table.CreatedBy,
                 CreatedAt = table.CreatedAt,
-                UpdatedAt = table.UpdatedAt
+                UpdatedAt = table.UpdatedAt,
+                ExchangeRateUsd = table.ExchangeRateUsd,
+                ExchangeRateJpy = table.ExchangeRateJpy,
+                BankName = table.BankName,
+                Pool = table.Pool,
+                ActionDate = table.ActionDate,
+                // 기초정보관리
+                Irr = table.Irr,
+                CreditGuaranteeRecoveryRate = table.CreditGuaranteeRecoveryRate,
+                InterimRecoveryRate = table.InterimRecoveryRate,
+                AuctionFirstLeadTimeMonths = table.AuctionFirstLeadTimeMonths,
+                RoundLeadTime = table.RoundLeadTime,
+                DistributionLeadTime = table.DistributionLeadTime,
+                OpeningToAuctionLeadTime = table.OpeningToAuctionLeadTime,
+                SubrogationToAuctionLeadTime = table.SubrogationToAuctionLeadTime,
+                CombinedLeadTime = table.CombinedLeadTime,
+                // 사용인 설정
+                AgentAffiliation = table.AgentAffiliation,
+                AgentName = table.AgentName,
+                AgentGrade = table.AgentGrade ?? "A",
+                AgentContact = table.AgentContact,
+                AgentKakaoId = table.AgentKakaoId,
+                GoodAuctionId = table.GoodAuctionId,
+                GoodAuctionPw = table.GoodAuctionPw
             };
         }
 
@@ -273,7 +296,30 @@ namespace NPLogic.Data.Repositories
                 Status = program.Status,
                 CreatedBy = program.CreatedBy,
                 CreatedAt = program.CreatedAt,
-                UpdatedAt = program.UpdatedAt
+                UpdatedAt = program.UpdatedAt,
+                ExchangeRateUsd = program.ExchangeRateUsd,
+                ExchangeRateJpy = program.ExchangeRateJpy,
+                BankName = program.BankName,
+                Pool = program.Pool,
+                ActionDate = program.ActionDate,
+                // 기초정보관리
+                Irr = program.Irr,
+                CreditGuaranteeRecoveryRate = program.CreditGuaranteeRecoveryRate,
+                InterimRecoveryRate = program.InterimRecoveryRate,
+                AuctionFirstLeadTimeMonths = program.AuctionFirstLeadTimeMonths,
+                RoundLeadTime = program.RoundLeadTime,
+                DistributionLeadTime = program.DistributionLeadTime,
+                OpeningToAuctionLeadTime = program.OpeningToAuctionLeadTime,
+                SubrogationToAuctionLeadTime = program.SubrogationToAuctionLeadTime,
+                CombinedLeadTime = program.CombinedLeadTime,
+                // 사용인 설정
+                AgentAffiliation = program.AgentAffiliation,
+                AgentName = program.AgentName,
+                AgentGrade = program.AgentGrade,
+                AgentContact = program.AgentContact,
+                AgentKakaoId = program.AgentKakaoId,
+                GoodAuctionId = program.GoodAuctionId,
+                GoodAuctionPw = program.GoodAuctionPw
             };
         }
     }
@@ -319,6 +365,73 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("exchange_rate_usd")]
+        public decimal? ExchangeRateUsd { get; set; }
+
+        [Postgrest.Attributes.Column("exchange_rate_jpy")]
+        public decimal? ExchangeRateJpy { get; set; }
+
+        [Postgrest.Attributes.Column("bank_name")]
+        public string? BankName { get; set; }
+
+        [Postgrest.Attributes.Column("pool")]
+        public string? Pool { get; set; }
+
+        [Postgrest.Attributes.Column("action_date")]
+        public DateTime? ActionDate { get; set; }
+
+        // ========== 기초정보관리 ==========
+
+        [Postgrest.Attributes.Column("irr")]
+        public decimal Irr { get; set; }
+
+        [Postgrest.Attributes.Column("credit_guarantee_recovery_rate")]
+        public decimal CreditGuaranteeRecoveryRate { get; set; }
+
+        [Postgrest.Attributes.Column("interim_recovery_rate")]
+        public decimal InterimRecoveryRate { get; set; }
+
+        [Postgrest.Attributes.Column("auction_first_lead_time_months")]
+        public int AuctionFirstLeadTimeMonths { get; set; }
+
+        [Postgrest.Attributes.Column("round_lead_time")]
+        public int RoundLeadTime { get; set; }
+
+        [Postgrest.Attributes.Column("distribution_lead_time")]
+        public int DistributionLeadTime { get; set; }
+
+        [Postgrest.Attributes.Column("opening_to_auction_lead_time")]
+        public int OpeningToAuctionLeadTime { get; set; }
+
+        [Postgrest.Attributes.Column("subrogation_to_auction_lead_time")]
+        public int SubrogationToAuctionLeadTime { get; set; }
+
+        [Postgrest.Attributes.Column("combined_lead_time")]
+        public int CombinedLeadTime { get; set; }
+
+        // ========== 사용인 설정 ==========
+
+        [Postgrest.Attributes.Column("agent_affiliation")]
+        public string? AgentAffiliation { get; set; }
+
+        [Postgrest.Attributes.Column("agent_name")]
+        public string? AgentName { get; set; }
+
+        [Postgrest.Attributes.Column("agent_grade")]
+        public string? AgentGrade { get; set; }
+
+        [Postgrest.Attributes.Column("agent_contact")]
+        public string? AgentContact { get; set; }
+
+        [Postgrest.Attributes.Column("agent_kakao_id")]
+        public string? AgentKakaoId { get; set; }
+
+        [Postgrest.Attributes.Column("good_auction_id")]
+        public string? GoodAuctionId { get; set; }
+
+        [Postgrest.Attributes.Column("good_auction_pw")]
+        public string? GoodAuctionPw { get; set; }
     }
 }
 

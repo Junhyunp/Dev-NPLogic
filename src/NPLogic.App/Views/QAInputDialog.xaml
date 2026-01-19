@@ -1,0 +1,107 @@
+<Window x:Class="NPLogic.Views.QAInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="QA 질문 작성"
+        Height="400" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}">
+    
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 제목 -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <materialDesign:PackIcon Kind="CommentQuestion" 
+                                     Width="24" Height="24" 
+                                     VerticalAlignment="Center"
+                                     Foreground="#FF9800"
+                                     Margin="0,0,8,0"/>
+            <TextBlock Text="QA 질문 작성" 
+                       FontSize="20" 
+                       FontWeight="Bold"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <!-- 메뉴 선택 -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,16">
+            <TextBlock Text="관련 메뉴" 
+                       FontSize="13" 
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       Margin="0,0,0,8"/>
+            <ComboBox x:Name="MenuComboBox"
+                      SelectedIndex="0"
+                      FontSize="14"
+                      Padding="12,10"
+                      materialDesign:HintAssist.Hint="메뉴 선택">
+                <ComboBoxItem Content="전체" Tag="Home"/>
+                <ComboBoxItem Content="차주개요" Tag="BorrowerOverview"/>
+                <ComboBoxItem Content="Loan" Tag="Loan"/>
+                <ComboBoxItem Content="담보물건" Tag="CollateralProperty"/>
+                <ComboBoxItem Content="선순위" Tag="SeniorRights"/>
+                <ComboBoxItem Content="평가" Tag="Evaluation"/>
+                <ComboBoxItem Content="경(공)매일정" Tag="AuctionSchedule"/>
+            </ComboBox>
+        </StackPanel>
+        
+        <!-- 질문 입력 -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,8">
+            <TextBlock Text="질문 내용" 
+                       FontSize="13" 
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimaryBrush}"
+                       Margin="0,0,0,8"/>
+        </StackPanel>
+        
+        <Border Grid.Row="3" 
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Background="{StaticResource SurfaceBrush}"
+                Margin="0,0,0,20">
+            <TextBox x:Name="QuestionTextBox"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     FontSize="14"
+                     Padding="12"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     materialDesign:HintAssist.Hint="질문 내용을 입력해주세요..."/>
+        </Border>
+        
+        <!-- 버튼 -->
+        <StackPanel Grid.Row="4" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right">
+            <Button Content="취소" 
+                    Click="Cancel_Click"
+                    Style="{StaticResource SecondaryButton}"
+                    Padding="24,10"
+                    Margin="0,0,8,0"/>
+            <Button Content="등록" 
+                    Click="Submit_Click"
+                    Padding="24,10">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=QuestionTextBox, Path=Text.Length}" Value="0">
+                                <Setter Property="Opacity" Value="0.5"/>
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.5" />
+    <PackageReference Include="postgrest-csharp" Version="3.5.1" />
+    <PackageReference Include="supabase-csharp" Version="0.16.2" />
   </ItemGroup>
 
 </Project>

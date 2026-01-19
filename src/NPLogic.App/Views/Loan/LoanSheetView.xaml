@@ -1,0 +1,252 @@
+<UserControl x:Class="NPLogic.Views.Loan.LoanSheetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NPLogic.Views.Loan"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="900" d:DesignWidth="1600"
+             Loaded="LoanSheetView_Loaded">
+    
+    <UserControl.Resources>
+        <!-- 테이블 보더 브러시 -->
+        <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
+        
+        <!-- 엑셀 스타일 색상 -->
+        <SolidColorBrush x:Key="ExcelHeaderBg" Color="#E7E7E7"/>
+        <SolidColorBrush x:Key="ExcelYellowBg" Color="#FFFF00"/>
+        <SolidColorBrush x:Key="ExcelGreenBg" Color="#92D050"/>
+        <SolidColorBrush x:Key="ExcelBlueBg" Color="#00B0F0"/>
+        <SolidColorBrush x:Key="ExcelOrangeBg" Color="#FFC000"/>
+        <SolidColorBrush x:Key="ExcelLightGreenBg" Color="#C6EFCE"/>
+        <SolidColorBrush x:Key="ExcelLightBlueBg" Color="#BDD7EE"/>
+        <SolidColorBrush x:Key="ExcelLightYellowBg" Color="#FFFF99"/>
+        
+        <!-- 섹션 헤더 스타일 -->
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        
+        <!-- 서브 섹션 헤더 스타일 -->
+        <Style x:Key="SubSectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        
+        <!-- 라벨 스타일 (헤더 셀) -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        
+        <!-- 값 스타일 -->
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        
+        <!-- 금액 스타일 -->
+        <Style x:Key="AmountStyle" TargetType="TextBlock" BasedOn="{StaticResource ValueStyle}">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+        </Style>
+        
+        <!-- 테이블 셀 스타일 (데이터) -->
+        <Style x:Key="TableCellStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="4,3"/>
+            <Setter Property="Background" Value="White"/>
+        </Style>
+        
+        <!-- 테이블 헤더 셀 스타일 -->
+        <Style x:Key="TableHeaderCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
+            <Setter Property="Background" Value="{StaticResource ExcelHeaderBg}"/>
+        </Style>
+        
+        <!-- 노란색 입력 셀 스타일 -->
+        <Style x:Key="InputCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
+            <Setter Property="Background" Value="{StaticResource ExcelYellowBg}"/>
+        </Style>
+        
+        <!-- 초록색 결과 셀 스타일 -->
+        <Style x:Key="ResultCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
+            <Setter Property="Background" Value="{StaticResource ExcelGreenBg}"/>
+        </Style>
+        
+        <!-- 파란색 계산 셀 스타일 -->
+        <Style x:Key="CalcCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
+            <Setter Property="Background" Value="{StaticResource ExcelLightBlueBg}"/>
+        </Style>
+        
+        <!-- 입력 TextBox 스타일 -->
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        
+        <!-- 읽기 전용 TextBox 스타일 -->
+        <Style x:Key="ReadOnlyTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource InputTextBoxStyle}">
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+        
+        <!-- 컴팩트 CheckBox -->
+        <Style x:Key="CompactCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        
+        <!-- 컴팩트 DatePicker -->
+        <Style x:Key="CompactDatePickerStyle" TargetType="DatePicker">
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Height" Value="22"/>
+        </Style>
+        
+        <!-- 탭 스타일 -->
+        <Style x:Key="SheetTabStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" 
+                                Background="#E7E7E7"
+                                BorderBrush="#ABABAB"
+                                BorderThickness="1,1,1,0"
+                                CornerRadius="4,4,0,0"
+                                Padding="16,8"
+                                Margin="0,0,2,0"
+                                Cursor="Hand">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="White"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#ABABAB"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <Grid Background="{StaticResource BackgroundColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- ========== 기준일 및 시나리오 날짜 설정 + 버튼 ========== -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" Margin="12,8,12,4" Padding="10" CornerRadius="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="24"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="기준일 (Cdate):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding CDate}" Width="120" FontSize="11"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="1안 예상배당일 (DD1):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario1Date}" Width="120" FontSize="11"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <TextBlock Text="2안 예상배당일 (DD2):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario2Date}" Width="120" FontSize="11"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="6" Orientation="Horizontal">
+                    <Button Content="전체 재계산" 
+                            Command="{Binding RecalculateAllCommand}"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="10,5"
+                            FontSize="11"
+                            Margin="0,0,8,0"/>
+                    <Button Content="Excel" 
+                            Command="{Binding ExportToExcelCommand}"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="10,5"
+                            FontSize="11"
+                            Margin="0,0,8,0"/>
+                    <Button Content="저장" 
+                            Command="{Binding SaveCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            Padding="12,5"
+                            FontSize="11"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- ========== 시트 탭 ========== -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="12,0,12,0">
+            <RadioButton x:Name="TabBasic" Content="일반" 
+                         Style="{StaticResource SheetTabStyle}" 
+                         IsChecked="True"
+                         Checked="SheetTab_Checked"
+                         Tag="Basic"/>
+            <RadioButton x:Name="TabGuarantee" Content="일반보증" 
+                         Style="{StaticResource SheetTabStyle}"
+                         Checked="SheetTab_Checked"
+                         Tag="Guarantee"/>
+            <RadioButton x:Name="TabTerminated" Content="해지부보증" 
+                         Style="{StaticResource SheetTabStyle}"
+                         Checked="SheetTab_Checked"
+                         Tag="Terminated"/>
+            <RadioButton x:Name="TabCombined" Content="일반+해지부보증" 
+                         Style="{StaticResource SheetTabStyle}"
+                         Checked="SheetTab_Checked"
+                         Tag="Combined"/>
+        </StackPanel>
+        
+        <!-- ========== 시트 컨텐츠 영역 ========== -->
+        <Border Grid.Row="2" Background="White" Margin="12,0,12,8" 
+                BorderBrush="#ABABAB" BorderThickness="1" CornerRadius="0,4,4,4">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <Grid x:Name="SheetContentGrid" Margin="12">
+                    <!-- 동적으로 각 시트 컨텐츠가 로드됨 -->
+                </Grid>
+            </ScrollViewer>
+        </Border>
+        
+        <!-- ========== 로딩 오버레이 ========== -->
+        <Border Grid.RowSpan="3" Background="#80000000" CornerRadius="8"
+                Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200"/>
+                <TextBlock Text="로딩 중..." Foreground="White" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

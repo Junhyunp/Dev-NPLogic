@@ -1,0 +1,255 @@
+<UserControl x:Class="NPLogic.Views.Loan.Sections.GuaranteeSummarySection"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="1600">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
+        <SolidColorBrush x:Key="HeaderBg" Color="#E7E7E7"/>
+        <SolidColorBrush x:Key="YellowBg" Color="#FFFF00"/>
+        <SolidColorBrush x:Key="OrangeBg" Color="#FFC000"/>
+        <SolidColorBrush x:Key="BlueBg" Color="#BDD7EE"/>
+        <SolidColorBrush x:Key="GreenBg" Color="#92D050"/>
+        
+        <Style x:Key="HeaderCellStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource HeaderBg}"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="4,4"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="CellStyle" TargetType="DataGridCell">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#CCEEFF"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    
+    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
+        <StackPanel>
+            <!-- 섹션 헤더 -->
+            <Border Background="{StaticResource OrangeBg}" Padding="8,4">
+                <TextBlock Text="보증서요약" FontWeight="Bold" FontSize="12"/>
+            </Border>
+            
+            <!-- DataGrid -->
+            <DataGrid ItemsSource="{Binding GuaranteeSummaryItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MaxHeight="200"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.Columns>
+                    <!-- 계좌일련번호 (A) -->
+                    <DataGridTextColumn Header="계좌일련번호&#x0a;(A)" 
+                                        Binding="{Binding AccountSerial}" 
+                                        Width="75"
+                                        IsReadOnly="True"/>
+                    
+                    <!-- 보증기관 (X) -->
+                    <DataGridTextColumn Header="보증기관&#x0a;(X)" 
+                                        Binding="{Binding GuaranteeOrganization}" 
+                                        Width="70"/>
+                    
+                    <!-- 보증잔액 (Y) -->
+                    <DataGridTextColumn Header="보증잔액&#x0a;(Y)" 
+                                        Binding="{Binding GuaranteeBalance, StringFormat=N0}" 
+                                        Width="85">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 해지부 해지채권 (Z) -->
+                    <DataGridTextColumn Header="해지부 해지채권&#x0a;(Z)" 
+                                        Binding="{Binding TerminatedBondAmount, StringFormat=N0}" 
+                                        Width="85">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 보증비율 (AA) -->
+                    <DataGridTextColumn Header="보증비율&#x0a;(AA)" 
+                                        Binding="{Binding GuaranteeRatio, StringFormat=P0}" 
+                                        Width="55">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 대위변제여부 (AB) -->
+                    <DataGridCheckBoxColumn Header="대위변제&#x0a;여부(AB)" 
+                                            Binding="{Binding HasSubrogation, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="55"/>
+                    
+                    <!-- 대위변제금 수령 예상일 (AC) -->
+                    <DataGridTextColumn Header="대위변제금&#x0a;수령 예상일(AC)" 
+                                        Binding="{Binding SubrogationExpectedDate, StringFormat=yyyy-MM-dd}" 
+                                        Width="85">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="Background" Value="{StaticResource YellowBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 연체이자율 (M) -->
+                    <DataGridTextColumn Header="연체이자율&#x0a;(M)" 
+                                        Binding="{Binding OverdueInterestRate, StringFormat=P1}" 
+                                        Width="55">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 정상이자율 (L) -->
+                    <DataGridTextColumn Header="정상이자율&#x0a;(L)" 
+                                        Binding="{Binding NormalInterestRate, StringFormat=P2}" 
+                                        Width="55">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 대위변제원금 (AD) -->
+                    <DataGridTextColumn Header="대위변제원금&#x0a;(AD)" 
+                                        Binding="{Binding SubrogationPrincipal, StringFormat=N0}" 
+                                        Width="85">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 이자계산일수 (AE) -->
+                    <DataGridTextColumn Header="이자계산&#x0a;일수(AE)" 
+                                        Binding="{Binding InterestDays}" 
+                                        Width="55">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 약정이자 (AF) -->
+                    <DataGridTextColumn Header="약정이자&#x0a;(AF)" 
+                                        Binding="{Binding AgreedInterest, StringFormat=N0}" 
+                                        Width="80">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 대위변제금액 (AG) -->
+                    <DataGridTextColumn Header="대위변제금액&#x0a;(AG)" 
+                                        Binding="{Binding SubrogationAmount, StringFormat=N0}" 
+                                        Width="85">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 연체이자, 약정이자 차이 (AH) -->
+                    <DataGridTextColumn Header="연체이자-약정이자&#x0a;차이(AH)" 
+                                        Binding="{Binding InterestDifference, StringFormat=N0}" 
+                                        Width="90">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 1안 보증기관 Loan Cap (XLC1) -->
+                    <DataGridTextColumn Header="1안 보증기관&#x0a;Loan Cap(XLC1)" 
+                                        Binding="{Binding GuaranteeLoanCap1, StringFormat=N0}" 
+                                        Width="95">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    
+                    <!-- 2안 보증기관 Loan Cap (XLC2) -->
+                    <DataGridTextColumn Header="2안 보증기관&#x0a;Loan Cap(XLC2)" 
+                                        Binding="{Binding GuaranteeLoanCap2, StringFormat=N0}" 
+                                        Width="95">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Padding" Value="4,0"/>
+                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+            
+            <!-- 설명 -->
+            <Border Background="#FFF3E0" Padding="8,4">
+                <TextBlock FontSize="9" Foreground="#666666" TextWrapping="Wrap">
+                    <Run Text="• 대위변제원금(AD) = min(채권잔액×보증비율, 보증잔액)"/>
+                    <LineBreak/>
+                    <Run Text="• 대위변제금액(AG) = 약정이자(AF) + 대위변제원금(AD)"/>
+                    <LineBreak/>
+                    <Run Text="• 연체이자-약정이자 차이(AH) = 3%×대위변제원금(AD)×이자계산일수(AE)/365"/>
+                </TextBlock>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

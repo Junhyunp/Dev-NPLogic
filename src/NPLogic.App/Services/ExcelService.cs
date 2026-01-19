@@ -803,19 +803,32 @@ namespace NPLogic.Services
                 foreach (var worksheet in package.Workbook.Worksheets)
                 {
                     var headers = new List<string>();
+                    int detectedHeaderRow = 1;
                     
-                    // 헤더 읽기 (첫 번째 행)
                     if (worksheet.Dimension != null)
                     {
                         int colCount = worksheet.Dimension.End.Column;
+                        int rowCount = worksheet.Dimension.End.Row;
+                        
+                        // 헤더 행 자동 감지 (상위 20행에서 검색)
+                        detectedHeaderRow = DetectHeaderRowInWorksheet(worksheet, Math.Min(20, rowCount), Math.Min(30, colCount));
+                        
+                        // 감지된 헤더 행에서 컬럼명 읽기
                         for (int col = 1; col <= colCount; col++)
                         {
-                            var cellValue = worksheet.Cells[1, col].Value;
+                            var cellValue = worksheet.Cells[detectedHeaderRow, col].Value;
                             if (cellValue != null)
                             {
-                                headers.Add(cellValue.ToString() ?? "");
+                                var headerText = cellValue.ToString() ?? "";
+                                // 빈 문자열이 아닌 경우에만 추가
+                                if (!string.IsNullOrWhiteSpace(headerText))
+                                {
+                                    headers.Add(headerText);
+                                }
                             }
                         }
+                        
+                        System.Diagnostics.Debug.WriteLine($"[GetSheetNames] '{worksheet.Name}': 헤더행={detectedHeaderRow}, 컬럼수={headers.Count}");
                     }
 
                     var sheetInfo = new ExcelSheetInfo
@@ -824,7 +837,8 @@ namespace NPLogic.Services
                         Index = worksheet.Index,
                         RowCount = worksheet.Dimension?.End.Row ?? 0,
                         Headers = headers,
-                        SheetType = DetectSheetType(worksheet.Name, headers)
+                        SheetType = DetectSheetType(worksheet.Name, headers),
+                        HeaderRow = detectedHeaderRow  // 감지된 헤더 행 저장
                     };
 
                     sheets.Add(sheetInfo);
@@ -832,6 +846,52 @@ namespace NPLogic.Services
             }
 
             return sheets;
+        }
+
+        /// <summary>
+        /// 워크시트 내에서 헤더 행 감지 (이미 열린 워크시트 사용)
+        /// </summary>
+        private int DetectHeaderRowInWorksheet(ExcelWorksheet worksheet, int maxRows, int maxCols)
+        {
+            for (int row = 1; row <= maxRows; row++)
+            {
+                // Field 패턴 찾기
+                bool hasFieldPattern = false;
+                for (int col = 1; col <= maxCols; col++)
+                {
+                    var cellValue = worksheet.Cells[row, col].Value?.ToString() ?? "";
+                    if (cellValue.Contains("Field"))
+                    {
+                        hasFieldPattern = true;
+                        break;
+                    }
+                }
+
+                if (hasFieldPattern)
+                {
+                    // Field 패턴 발견 - 다음 행이 실제 헤더
+                    return row + 1;
+                }
+
+                // 헤더 키워드 카운트
+                int headerKeywordCount = 0;
+                for (int col = 1; col <= maxCols; col++)
+                {
+                    var cellValue = worksheet.Cells[row, col].Value?.ToString() ?? "";
+                    if (IsHeaderKeyword(cellValue))
+                    {
+                        headerKeywordCount++;
+                    }
+                }
+
+                // 헤더 키워드가 3개 이상이면 헤더 행으로 인식
+                if (headerKeywordCount >= 3)
+                {
+                    return row;
+                }
+            }
+
+            return 1; // 기본값: 첫 번째 행
         }
 
         /// <summary>
@@ -976,7 +1036,7 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// IBK Excel 헤더 행 자동 감지 (Field 1, Field 2... 패턴 찾기)
+        /// IBK Excel 헤더 행 자동 감지 (Field 패턴 또는 키워드 기반)
         /// </summary>
         public int DetectHeaderRow(string filePath, string sheetName)
         {
@@ -986,37 +1046,44 @@ namespace NPLogic.Services
                 if (worksheet?.Dimension == null) return 1;
 
                 int rowCount = Math.Min(20, worksheet.Dimension.End.Row); // 상위 20행에서 찾기
-                int colCount = worksheet.Dimension.End.Column;
+                int colCount = Math.Min(30, worksheet.Dimension.End.Column); // 최대 30개 컬럼 확인
 
                 for (int row = 1; row <= rowCount; row++)
                 {
-                    // Col 1이 비어있을 수 있으므로 Col 1~3 확인
-                    var cell1 = worksheet.Cells[row, 1].Value?.ToString() ?? "";
-                    var cell2 = worksheet.Cells[row, 2].Value?.ToString() ?? "";
-                    var cell3 = worksheet.Cells[row, 3].Value?.ToString() ?? "";
-
-                    // "Field 1", "Field 2" 패턴 찾기 (Col 1 또는 Col 2에서)
-                    bool hasFieldPattern = cell1.Contains("Field") || cell2.Contains("Field");
-                    
-                    // "일련번호", "Pool 구분" 패턴 찾기 (Col 1~3에서)
-                    bool hasHeaderPattern = 
-                        cell1.Contains("일련번호") || cell2.Contains("일련번호") ||
-                        (cell2.Contains("Pool") || cell3.Contains("Pool"));
+                    // 전체 행에서 Field 패턴 찾기
+                    bool hasFieldPattern = false;
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var cellValue = worksheet.Cells[row, col].Value?.ToString() ?? "";
+                        if (cellValue.Contains("Field"))
+                        {
+                            hasFieldPattern = true;
+                            break;
+                        }
+                    }
 
                     if (hasFieldPattern)
                     {
                         // Field 패턴 발견 - 다음 행이 실제 헤더
-                        var nextCell1 = worksheet.Cells[row + 1, 1].Value?.ToString() ?? "";
-                        var nextCell2 = worksheet.Cells[row + 1, 2].Value?.ToString() ?? "";
-                        if (nextCell1.Contains("일련번호") || nextCell2.Contains("일련번호"))
+                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': Field 패턴 발견 (row {row}), 헤더는 row {row + 1}");
+                        return row + 1;
+                    }
+
+                    // 실제 헤더 키워드 찾기 (전체 행 스캔)
+                    int headerKeywordCount = 0;
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var cellValue = worksheet.Cells[row, col].Value?.ToString() ?? "";
+                        if (IsHeaderKeyword(cellValue))
                         {
-                            System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': Field 패턴 발견 (row {row}), 헤더는 row {row + 1}");
-                            return row + 1;
+                            headerKeywordCount++;
                         }
                     }
-                    else if (hasHeaderPattern)
+
+                    // 헤더 키워드가 3개 이상이면 헤더 행으로 인식
+                    if (headerKeywordCount >= 3)
                     {
-                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 패턴 발견 (row {row})");
+                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 키워드 {headerKeywordCount}개 발견 (row {row})");
                         return row;
                     }
                 }
@@ -1024,6 +1091,30 @@ namespace NPLogic.Services
                 System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 감지 실패, 기본값 1");
                 return 1; // 기본값: 첫 번째 행
             }
+        }
+
+        /// <summary>
+        /// 헤더 키워드 판별
+        /// </summary>
+        private bool IsHeaderKeyword(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return false;
+            
+            // 데이터디스크에서 사용되는 헤더 키워드
+            string[] keywords = new[]
+            {
+                "일련번호", "차주번호", "차주명", "물건번호", "지번번호",
+                "담보", "소재지", "대지면적", "건물면적", "감정평가",
+                "Pool", "대출", "계좌", "이자율", "원금", "잔액",
+                "채권", "근저당", "설정액", "등기", "Property"
+            };
+
+            foreach (var keyword in keywords)
+            {
+                if (value.Contains(keyword))
+                    return true;
+            }
+            return false;
         }
     }
 
@@ -1038,6 +1129,11 @@ namespace NPLogic.Services
         public List<string> Headers { get; set; } = new();
         public SheetType SheetType { get; set; }
         public bool IsSelected { get; set; }
+        
+        /// <summary>
+        /// 감지된 헤더 행 번호 (1부터 시작)
+        /// </summary>
+        public int HeaderRow { get; set; } = 1;
 
         /// <summary>
         /// 시트 유형 표시명

@@ -258,12 +258,12 @@
                                                     <Border Background="White"
                                                             CornerRadius="6"
                                                             Padding="12,10"
-                                                            Margin="0,0,0,8"
-                                                            Cursor="Hand">
+                                                            Margin="0,0,0,8">
                                                         <Grid>
                                                             <Grid.ColumnDefinitions>
                                                                 <ColumnDefinition Width="Auto"/>
                                                                 <ColumnDefinition Width="*"/>
+                                                                <ColumnDefinition Width="Auto"/>
                                                                 <ColumnDefinition Width="Auto"/>
                                                             </Grid.ColumnDefinitions>
                                                             
@@ -288,6 +288,7 @@
                                                                     Background="{StaticResource PrimaryBrush}"
                                                                     CornerRadius="4"
                                                                     Padding="8,4"
+                                                                    Margin="0,0,8,0"
                                                                     VerticalAlignment="Center"
                                                                     Opacity="0.8">
                                                                 <TextBlock Text="{Binding SheetTypeDisplay}" 
@@ -295,6 +296,17 @@
                                                                            FontSize="10"
                                                                            FontWeight="SemiBold"/>
                                                             </Border>
+                                                            
+                                                            <!-- 컬럼 매핑 버튼 -->
+                                                            <Button Grid.Column="3"
+                                                                    Content="컬럼매핑"
+                                                                    Style="{StaticResource SecondaryButton}"
+                                                                    Padding="8,4"
+                                                                    FontSize="10"
+                                                                    VerticalAlignment="Center"
+                                                                    Click="ColumnMappingButton_Click"
+                                                                    Tag="{Binding}"
+                                                                    ToolTip="Excel 컬럼을 DB 컬럼에 매핑합니다"/>
                                                         </Grid>
                                                     </Border>
                                                 </DataTemplate>

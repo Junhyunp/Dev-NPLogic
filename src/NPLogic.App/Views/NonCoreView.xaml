@@ -81,7 +81,7 @@
                          SelectionChanged="BorrowerListBox_SelectionChanged">
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
-                            <Setter Property="Padding" Value="8,6"/>
+                            <Setter Property="Padding" Value="12,8"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Setter Property="Template">
                                 <Setter.Value>
@@ -89,7 +89,7 @@
                                         <Border x:Name="ItemBorder"
                                                 Background="Transparent"
                                                 BorderBrush="Transparent"
-                                                BorderThickness="0,0,0,1"
+                                                BorderThickness="4,0,0,1"
                                                 Padding="{TemplateBinding Padding}">
                                             <ContentPresenter/>
                                         </Border>
@@ -98,7 +98,9 @@
                                                 <Setter TargetName="ItemBorder" Property="Background" Value="#3F4E6B"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="#1E3A5F"/>
+                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#FFD700"/>
+                                                <Setter TargetName="ItemBorder" Property="BorderThickness" Value="4,0,0,1"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
@@ -260,19 +262,30 @@
                     
                     <!-- 버튼 영역 -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0,16,0">
-                        <!-- 인쇄 버튼 -->
+                        <!-- QA 버튼 -->
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="10,6"
                                 FontSize="{StaticResource FontSizeBody}"
                                 Margin="0,0,4,0"
-                                ToolTip="인쇄 (전체/차주별)"
-                                Click="PrintButton_Click">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="전체 인쇄" Click="PrintAll_Click"/>
-                                    <MenuItem Header="차주별 인쇄" Click="PrintByBorrower_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
+                                ToolTip="QA 질문 작성"
+                                Click="QAButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CommentQuestion" 
+                                                         Width="14" Height="14" 
+                                                         VerticalAlignment="Center"
+                                                         Foreground="#FF9800"
+                                                         Margin="0,0,4,0"/>
+                                <TextBlock Text="QA" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- 인쇄 버튼 (차주 선택 다이얼로그) -->
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Padding="10,6"
+                                FontSize="{StaticResource FontSizeBody}"
+                                Margin="0,0,4,0"
+                                ToolTip="인쇄할 차주 선택"
+                                Click="PrintWithSelectionButton_Click">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="Printer" 
                                                          Width="14" Height="14" 
@@ -282,19 +295,13 @@
                             </StackPanel>
                         </Button>
                         
-                        <!-- Excel 버튼 -->
+                        <!-- Excel 버튼 (차주 선택 다이얼로그) -->
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="10,6"
                                 FontSize="{StaticResource FontSizeBody}"
                                 Margin="0,0,4,0"
-                                ToolTip="Excel 내려받기"
-                                Click="ExcelButton_Click">
-                            <Button.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="전체 Excel" Click="ExcelAll_Click"/>
-                                    <MenuItem Header="차주별 Excel" Click="ExcelByBorrower_Click"/>
-                                </ContextMenu>
-                            </Button.ContextMenu>
+                                ToolTip="Excel로 내보낼 차주 선택"
+                                Click="ExcelWithSelectionButton_Click">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="MicrosoftExcel" 
                                                          Width="14" Height="14" 

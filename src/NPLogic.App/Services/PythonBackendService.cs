@@ -211,34 +211,25 @@ namespace NPLogic.Services
         /// </summary>
         private string? FindPythonScriptPath()
         {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            // 프로젝트 루트를 찾아서 manager/client/Auction-Certificate/server.py 경로 반환
+            // DirectoryInfo.Parent를 사용하여 상위 디렉토리로 이동하면서 찾음
+            var current = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             
-            // 개발 환경 경로 계산
-            // baseDir 예: C:\Users\pwm89\dev\nplogic\src\NPLogic.App\bin\Debug\net10.0-windows\win-x64\
-            // 필요 경로: C:\Users\pwm89\dev\nplogic\manager\client\Auction-Certificate\server.py
-            // baseDir에서 6단계 상위로 이동하면 프로젝트 루트 (nplogic)
-            
-            var searchPaths = new[]
+            while (current != null)
             {
-                // src/NPLogic.App/bin/Debug/net10.0-windows/win-x64/ -> nplogic/ (6 levels up)
-                Path.Combine(baseDir, "..", "..", "..", "..", "..", "..",
-                    "manager", "client", "Auction-Certificate", PythonServerScript),
-                // src/NPLogic.App/bin/Debug/net8.0-windows/ -> nplogic/ (5 levels up, 이전 버전 호환)
-                Path.Combine(baseDir, "..", "..", "..", "..", "..", 
-                    "manager", "client", "Auction-Certificate", PythonServerScript),
-            };
-
-            foreach (var path in searchPaths)
-            {
-                var fullPath = Path.GetFullPath(path);
-                Debug.WriteLine($"[PythonBackendService] Checking python script at: {fullPath}");
-                if (File.Exists(fullPath))
+                var serverPath = Path.Combine(current.FullName, "manager", "client", "Auction-Certificate", PythonServerScript);
+                Debug.WriteLine($"[PythonBackendService] Checking python script at: {serverPath}");
+                
+                if (File.Exists(serverPath))
                 {
-                    Debug.WriteLine($"[PythonBackendService] Found python script at: {fullPath}");
-                    return fullPath;
+                    Debug.WriteLine($"[PythonBackendService] Found python script at: {serverPath}");
+                    return serverPath;
                 }
+                
+                current = current.Parent;
             }
 
+            Debug.WriteLine("[PythonBackendService] Python script not found");
             return null;
         }
 
