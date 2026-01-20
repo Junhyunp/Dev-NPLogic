@@ -347,6 +347,21 @@ namespace NPLogic.ViewModels
         private RegistrySummaryModel _registrySummary = new();
 
         /// <summary>
+        /// 등기부 표제부 요약 (담보물건 탭 표시용)
+        /// </summary>
+        public string RegistryTitleSummary => RegistrySummary?.TitleSummary ?? "등기부 탭에서 확인";
+
+        /// <summary>
+        /// 등기부 갑구(소유권) 요약 (담보물건 탭 표시용)
+        /// </summary>
+        public string RegistryOwnershipSummary => RegistrySummary?.Section1Summary ?? "등기부 탭에서 확인";
+
+        /// <summary>
+        /// 등기부 을구(근저당) 요약 (담보물건 탭 표시용)
+        /// </summary>
+        public string RegistryMortgageSummary => RegistrySummary?.Section2Summary ?? "등기부 탭에서 확인";
+
+        /// <summary>
         /// 등기부 데이터 존재 여부
         /// </summary>
         [ObservableProperty]
@@ -387,6 +402,18 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private string _buildingRegisterStatus = "클릭하여 조회";
+
+        /// <summary>
+        /// 건축물대장 총괄표제부 요약
+        /// </summary>
+        [ObservableProperty]
+        private string _buildingRegisterGeneralSummary = "건축물대장 조회 필요";
+
+        /// <summary>
+        /// 건축물대장 표제부 요약
+        /// </summary>
+        [ObservableProperty]
+        private string _buildingRegisterTitleSummary = "건축물대장 조회 필요";
 
         #endregion
 
@@ -596,6 +623,11 @@ namespace NPLogic.ViewModels
         // 담보 물건
         [ObservableProperty]
         private bool _isFactoryMortgage;
+
+        /// <summary>
+        /// 공장저당 여부 텍스트 (Y/N)
+        /// </summary>
+        public string IsFactoryMortgageText => IsFactoryMortgage ? "Y" : "N";
 
         // 선순위 평가
         [ObservableProperty]

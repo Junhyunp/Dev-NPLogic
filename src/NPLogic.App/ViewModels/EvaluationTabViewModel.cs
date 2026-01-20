@@ -279,7 +279,7 @@ namespace NPLogic.ViewModels
         private decimal? _scenario1_Rate;
 
         [ObservableProperty]
-        private string? _scenario1_Reason = "하한";
+        private string? _scenario1_Reason = "";
 
         // === 평가결과 시나리오 2 ===
         [ObservableProperty]
@@ -289,7 +289,51 @@ namespace NPLogic.ViewModels
         private decimal? _scenario2_Rate;
 
         [ObservableProperty]
-        private string? _scenario2_Reason = "상한";
+        private string? _scenario2_Reason = "";
+
+        // === 평가결과: 토지/건물 평당 낙찰가 (피드백 반영) ===
+        [ObservableProperty]
+        private decimal? _scenario1_LandPerPyung;
+
+        [ObservableProperty]
+        private decimal? _scenario1_BuildingPerPyung;
+
+        [ObservableProperty]
+        private decimal? _scenario2_LandPerPyung;
+
+        [ObservableProperty]
+        private decimal? _scenario2_BuildingPerPyung;
+
+        // === 회수 전략 요약 (신규 추가) ===
+        [ObservableProperty]
+        private DateTime? _recovery1_CFDate;
+
+        [ObservableProperty]
+        private decimal? _recovery1_CollateralAmount;
+
+        [ObservableProperty]
+        private decimal? _recovery1_AuctionCost;
+
+        [ObservableProperty]
+        private decimal? _recovery1_GuaranteeAmount;
+
+        [ObservableProperty]
+        private decimal? _recovery1_Ratio;
+
+        [ObservableProperty]
+        private DateTime? _recovery2_CFDate;
+
+        [ObservableProperty]
+        private decimal? _recovery2_CollateralAmount;
+
+        [ObservableProperty]
+        private decimal? _recovery2_AuctionCost;
+
+        [ObservableProperty]
+        private decimal? _recovery2_GuaranteeAmount;
+
+        [ObservableProperty]
+        private decimal? _recovery2_Ratio;
 
         // === 차주별 배당 요약 (피드백 반영: 시나리오 3 제거) ===
         [ObservableProperty]
@@ -313,6 +357,19 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private RecommendCaseItem? _selectedRecommendCase;
+
+        // === 유사물건 추천 페이지네이션 (피드백 반영: 5개씩 보여주기) ===
+        private ObservableCollection<RecommendCaseItem> _allRecommendedCases = new();
+        private const int PageSize = 5;
+        private int _currentPage = 1;
+
+        [ObservableProperty]
+        private int _displayedCasesCount;
+
+        [ObservableProperty]
+        private int _totalCasesCount;
+
+        public bool HasMoreCases => DisplayedCasesCount < TotalCasesCount;
 
         // === 사례 적용 슬롯 관리 ===
         private int _nextCaseSlot = 1; // 다음에 사용할 사례 슬롯 (1~4)
@@ -803,6 +860,8 @@ namespace NPLogic.ViewModels
 
                 if (result.Success)
                 {
+                    // 피드백 반영: 전체 결과 저장 후 페이지네이션
+                    _allRecommendedCases.Clear();
                     RecommendedCases.Clear();
                     
                     // E-005: 본건 좌표 추출 (거리 계산용)
@@ -826,7 +885,7 @@ namespace NPLogic.ViewModels
                                         caseItem.Latitude.Value, caseItem.Longitude.Value);
                                 }
                                 
-                                RecommendedCases.Add(new RecommendCaseItem
+                                _allRecommendedCases.Add(new RecommendCaseItem
                                 {
                                     CaseNo = caseItem.CaseNo,
                                     Address = caseItem.Address,
@@ -845,8 +904,13 @@ namespace NPLogic.ViewModels
                         }
                     }
 
-                    RecommendStatusMessage = $"추천 결과: {RecommendedCases.Count}건";
-                    if (RecommendedCases.Count == 0)
+                    // 피드백 반영: 5개씩 페이지네이션
+                    TotalCasesCount = _allRecommendedCases.Count;
+                    _currentPage = 1;
+                    LoadPage();
+                    
+                    RecommendStatusMessage = $"추천 결과: {TotalCasesCount}건";
+                    if (TotalCasesCount == 0)
                     {
                         RecommendStatusMessage = "조건에 맞는 유사물건이 없습니다.";
                     }
@@ -865,6 +929,34 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsRecommendLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 페이지네이션: 현재 페이지 로드
+        /// </summary>
+        private void LoadPage()
+        {
+            var itemsToShow = _allRecommendedCases.Take(_currentPage * PageSize).ToList();
+            RecommendedCases.Clear();
+            foreach (var item in itemsToShow)
+            {
+                RecommendedCases.Add(item);
+            }
+            DisplayedCasesCount = RecommendedCases.Count;
+            OnPropertyChanged(nameof(HasMoreCases));
+        }
+
+        /// <summary>
+        /// 피드백 반영: 더보기 (+5)
+        /// </summary>
+        [RelayCommand]
+        private void LoadMoreCases()
+        {
+            if (HasMoreCases)
+            {
+                _currentPage++;
+                LoadPage();
             }
         }
 
@@ -1299,6 +1391,148 @@ namespace NPLogic.ViewModels
         }
 
         private static double ToRad(double deg) => deg * Math.PI / 180;
+
+        #endregion
+
+        #region 인터림 데이터 연동
+
+        // === 인터림 데이터 (차주별 합산) ===
+        [ObservableProperty]
+        private decimal _interimPrincipalRecovery;
+
+        [ObservableProperty]
+        private decimal _interimInterestRecovery;
+
+        [ObservableProperty]
+        private decimal _interimAuctionCost;
+
+        [ObservableProperty]
+        private decimal _interimTotalRecovery;
+
+        [ObservableProperty]
+        private decimal _interimTotalAdvance;
+
+        [ObservableProperty]
+        private decimal _interimNetAmount;
+
+        [ObservableProperty]
+        private bool _isFirstPropertyInBorrower;
+
+        /// <summary>
+        /// 인터림 데이터 설정 (외부에서 호출)
+        /// </summary>
+        public void SetInterimData(Services.InterimRecoveryData? interimData, bool isFirstProperty = true)
+        {
+            IsFirstPropertyInBorrower = isFirstProperty;
+
+            if (interimData == null)
+            {
+                InterimPrincipalRecovery = 0;
+                InterimInterestRecovery = 0;
+                InterimAuctionCost = 0;
+                InterimTotalRecovery = 0;
+                InterimTotalAdvance = 0;
+                InterimNetAmount = 0;
+                return;
+            }
+
+            InterimPrincipalRecovery = interimData.PrincipalRecovery;
+            InterimInterestRecovery = interimData.InterestRecovery;
+            InterimAuctionCost = interimData.AuctionCost;
+            InterimTotalRecovery = interimData.TotalRecovery;
+            InterimTotalAdvance = interimData.AuctionCost + interimData.Subrogation;
+            InterimNetAmount = interimData.TotalRecovery - InterimTotalAdvance;
+
+            // 회수 전략 요약에 인터림 데이터 반영
+            UpdateRecoveryStrategyWithInterim(interimData);
+        }
+
+        /// <summary>
+        /// 회수 전략 요약에 인터림 데이터 반영
+        /// </summary>
+        private void UpdateRecoveryStrategyWithInterim(Services.InterimRecoveryData interimData)
+        {
+            // 시나리오 1 회수 전략 업데이트
+            if (Scenario1_Amount.HasValue)
+            {
+                var auctionCost1 = CalculateAuctionCost(Scenario1_Amount);
+                var distribution1 = CalculateDistribution(Scenario1_Amount);
+                
+                Recovery1_AuctionCost = (auctionCost1 ?? 0) + interimData.AuctionCost;
+                Recovery1_CollateralAmount = (distribution1 ?? 0) + interimData.TotalOffset;
+                
+                if (_property?.Opb > 0)
+                {
+                    Recovery1_Ratio = Recovery1_CollateralAmount / _property.Opb * 100;
+                }
+            }
+
+            // 시나리오 2 회수 전략 업데이트
+            if (Scenario2_Amount.HasValue)
+            {
+                var auctionCost2 = CalculateAuctionCost(Scenario2_Amount);
+                var distribution2 = CalculateDistribution(Scenario2_Amount);
+                
+                Recovery2_AuctionCost = (auctionCost2 ?? 0) + interimData.AuctionCost;
+                Recovery2_CollateralAmount = (distribution2 ?? 0) + interimData.TotalOffset;
+                
+                if (_property?.Opb > 0)
+                {
+                    Recovery2_Ratio = Recovery2_CollateralAmount / _property.Opb * 100;
+                }
+            }
+
+            // 시나리오 요약 업데이트 (상계회수 항목 추가)
+            UpdateScenarioSummaryWithInterim(interimData);
+        }
+
+        /// <summary>
+        /// 시나리오 요약에 인터림 상계회수 반영
+        /// </summary>
+        private void UpdateScenarioSummaryWithInterim(Services.InterimRecoveryData interimData)
+        {
+            // 상계회수 항목 찾기 또는 추가
+            var offsetItem = ScenarioSummaryItems.FirstOrDefault(i => i.Label == "상계회수");
+            if (offsetItem == null)
+            {
+                offsetItem = new ScenarioSummaryItem { Label = "상계회수" };
+                
+                // 배당회수 다음에 삽입
+                var distributionIndex = ScenarioSummaryItems.ToList().FindIndex(i => i.Label == "배당회수");
+                if (distributionIndex >= 0 && distributionIndex < ScenarioSummaryItems.Count - 1)
+                {
+                    ScenarioSummaryItems.Insert(distributionIndex + 1, offsetItem);
+                }
+                else
+                {
+                    ScenarioSummaryItems.Add(offsetItem);
+                }
+            }
+
+            // 상계회수 값 설정 (인터림 파일에서)
+            offsetItem.Scenario1Value = interimData.TotalOffset;
+            offsetItem.Scenario2Value = interimData.TotalOffset;
+            offsetItem.TotalValue = interimData.TotalOffset * 2;
+
+            // 현금흐름 업데이트 (배당회수 + 상계회수)
+            var cashFlowItem = ScenarioSummaryItems.FirstOrDefault(i => i.Label == "현금흐름");
+            if (cashFlowItem != null)
+            {
+                var distribution1 = CalculateDistribution(Scenario1_Amount) ?? 0;
+                var distribution2 = CalculateDistribution(Scenario2_Amount) ?? 0;
+                
+                cashFlowItem.Scenario1Value = distribution1 + interimData.TotalOffset;
+                cashFlowItem.Scenario2Value = distribution2 + interimData.TotalOffset;
+                cashFlowItem.TotalValue = cashFlowItem.Scenario1Value + cashFlowItem.Scenario2Value;
+            }
+        }
+
+        /// <summary>
+        /// 인터림 표시 문자열
+        /// </summary>
+        public string InterimSummaryDisplay => IsFirstPropertyInBorrower && InterimNetAmount != 0
+            ? $"인터림: 회수 {InterimTotalRecovery:N0}원 / 지출 {InterimTotalAdvance:N0}원 = 순 {InterimNetAmount:N0}원"
+            : "";
 
         #endregion
     }

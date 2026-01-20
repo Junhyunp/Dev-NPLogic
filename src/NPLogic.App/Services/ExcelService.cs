@@ -967,6 +967,21 @@ namespace NPLogic.Services
             string sheetName,
             int headerRow = 1)
         {
+            // 시작 컬럼 자동 감지
+            var (_, startColumn) = DetectHeaderRowAndColumn(filePath, sheetName);
+            return await ReadExcelSheetAsync(filePath, sheetName, headerRow, startColumn);
+        }
+
+        /// <summary>
+        /// 특정 시트의 데이터 읽기 (시작 컬럼 지정)
+        /// 상대방 요청: "일련번호" 기준 좌측 열 제거
+        /// </summary>
+        public async Task<(List<string> Columns, List<Dictionary<string, object>> Data)> ReadExcelSheetAsync(
+            string filePath, 
+            string sheetName,
+            int headerRow,
+            int startColumn)
+        {
             return await Task.Run(() =>
             {
                 var columns = new List<string>();
@@ -989,38 +1004,60 @@ namespace NPLogic.Services
                     int colCount = worksheet.Dimension.End.Column;
                     int rowCount = worksheet.Dimension.End.Row;
 
-                    // 헤더 행에서 컬럼명 읽기
-                    for (int col = 1; col <= colCount; col++)
+                    System.Diagnostics.Debug.WriteLine($"[ReadExcelSheetAsync] '{sheetName}': 헤더행={headerRow}, 시작컬럼={startColumn}, 총컬럼={colCount}, 총행={rowCount}");
+
+                    // 헤더 행에서 컬럼명 읽기 (시작 컬럼부터)
+                    for (int col = startColumn; col <= colCount; col++)
                     {
                         var cellValue = worksheet.Cells[headerRow, col].Value;
                         var columnName = cellValue?.ToString()?.Trim() ?? $"Column{col}";
                         
-                        // 중복 컬럼명 처리
-                        if (columns.Contains(columnName))
+                        // 빈 컬럼명은 건너뛰기
+                        if (string.IsNullOrWhiteSpace(columnName))
                         {
-                            columnName = $"{columnName}_{col}";
+                            columnName = $"Column{col}";
                         }
-                        columns.Add(columnName);
+                        
+                        // 컬럼명 공백 제거 (상대방 요청)
+                        var normalizedColumnName = columnName
+                            .Replace("\r\n", " ")
+                            .Replace("\n", " ")
+                            .Replace("\r", " ")
+                            .Trim();
+                        
+                        // 중복 컬럼명 처리
+                        var finalColumnName = normalizedColumnName;
+                        if (columns.Contains(finalColumnName))
+                        {
+                            finalColumnName = $"{finalColumnName}_{col}";
+                        }
+                        columns.Add(finalColumnName);
                     }
 
-                    // 데이터 읽기 (헤더 행 다음부터)
+                    // 데이터 읽기 (헤더 행 다음부터, 시작 컬럼부터)
                     for (int row = headerRow + 1; row <= rowCount; row++)
                     {
                         var rowData = new Dictionary<string, object>();
                         bool hasData = false;
+                        int columnIndex = 0;
 
-                        for (int col = 1; col <= colCount; col++)
+                        for (int col = startColumn; col <= colCount; col++)
                         {
+                            if (columnIndex >= columns.Count) break;
+                            
                             var cellValue = worksheet.Cells[row, col].Value;
+                            var columnName = columns[columnIndex];
+                            
                             if (cellValue != null)
                             {
-                                rowData[columns[col - 1]] = cellValue;
+                                rowData[columnName] = cellValue;
                                 hasData = true;
                             }
                             else
                             {
-                                rowData[columns[col - 1]] = "";
+                                rowData[columnName] = "";
                             }
+                            columnIndex++;
                         }
 
                         // 빈 행은 제외
@@ -1036,7 +1073,8 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// IBK Excel 헤더 행 자동 감지 (Field 패턴 또는 키워드 기반)
+        /// 헤더 행 자동 감지 (일련번호 기준)
+        /// 상대방 요청: 시트별로 "일련번호" 셀을 기준으로 좌측 열, 위측 행들 모두 제거
         /// </summary>
         public int DetectHeaderRow(string filePath, string sheetName)
         {
@@ -1045,12 +1083,30 @@ namespace NPLogic.Services
                 var worksheet = package.Workbook.Worksheets[sheetName];
                 if (worksheet?.Dimension == null) return 1;
 
-                int rowCount = Math.Min(20, worksheet.Dimension.End.Row); // 상위 20행에서 찾기
-                int colCount = Math.Min(30, worksheet.Dimension.End.Column); // 최대 30개 컬럼 확인
+                int rowCount = Math.Min(30, worksheet.Dimension.End.Row); // 상위 30행에서 찾기
+                int colCount = Math.Min(50, worksheet.Dimension.End.Column); // 최대 50개 컬럼 확인
 
+                // 1. "일련번호" 또는 "차주일련번호" 셀 찾기 (최우선)
                 for (int row = 1; row <= rowCount; row++)
                 {
-                    // 전체 행에서 Field 패턴 찾기
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var cellValue = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
+                        var normalizedValue = cellValue.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+                        
+                        // "일련번호"를 포함하는 셀 찾기 (차주일련번호 제외하고 정확한 "일련번호" 우선)
+                        if (normalizedValue == "일련번호" || 
+                            (normalizedValue.Contains("일련번호") && !normalizedValue.Contains("차주") && !normalizedValue.Contains("대출") && !normalizedValue.Contains("계좌")))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': '일련번호' 발견 (row {row}, col {col})");
+                            return row;
+                        }
+                    }
+                }
+
+                // 2. Field 패턴 찾기 (fallback)
+                for (int row = 1; row <= rowCount; row++)
+                {
                     bool hasFieldPattern = false;
                     for (int col = 1; col <= colCount; col++)
                     {
@@ -1064,12 +1120,14 @@ namespace NPLogic.Services
 
                     if (hasFieldPattern)
                     {
-                        // Field 패턴 발견 - 다음 행이 실제 헤더
                         System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': Field 패턴 발견 (row {row}), 헤더는 row {row + 1}");
                         return row + 1;
                     }
+                }
 
-                    // 실제 헤더 키워드 찾기 (전체 행 스캔)
+                // 3. 헤더 키워드 기반 감지 (최종 fallback)
+                for (int row = 1; row <= rowCount; row++)
+                {
                     int headerKeywordCount = 0;
                     for (int col = 1; col <= colCount; col++)
                     {
@@ -1080,7 +1138,6 @@ namespace NPLogic.Services
                         }
                     }
 
-                    // 헤더 키워드가 3개 이상이면 헤더 행으로 인식
                     if (headerKeywordCount >= 3)
                     {
                         System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 키워드 {headerKeywordCount}개 발견 (row {row})");
@@ -1089,7 +1146,43 @@ namespace NPLogic.Services
                 }
 
                 System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': 헤더 감지 실패, 기본값 1");
-                return 1; // 기본값: 첫 번째 행
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// 헤더 행과 시작 컬럼 감지 (일련번호 기준)
+        /// </summary>
+        /// <returns>(헤더 행 번호, 시작 컬럼 번호)</returns>
+        public (int HeaderRow, int StartColumn) DetectHeaderRowAndColumn(string filePath, string sheetName)
+        {
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            {
+                var worksheet = package.Workbook.Worksheets[sheetName];
+                if (worksheet?.Dimension == null) return (1, 1);
+
+                int rowCount = Math.Min(30, worksheet.Dimension.End.Row);
+                int colCount = Math.Min(50, worksheet.Dimension.End.Column);
+
+                // "일련번호" 셀 찾기
+                for (int row = 1; row <= rowCount; row++)
+                {
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var cellValue = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
+                        var normalizedValue = cellValue.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+                        
+                        if (normalizedValue == "일련번호" || 
+                            (normalizedValue.Contains("일련번호") && !normalizedValue.Contains("차주") && !normalizedValue.Contains("대출") && !normalizedValue.Contains("계좌")))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[DetectHeaderRowAndColumn] '{sheetName}': '일련번호' 발견 (row {row}, col {col})");
+                            return (row, col);
+                        }
+                    }
+                }
+
+                // 기본값
+                return (DetectHeaderRow(filePath, sheetName), 1);
             }
         }
 
@@ -1115,6 +1208,67 @@ namespace NPLogic.Services
                     return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// 시트의 처음 N행 미리보기 데이터 가져오기 (제목행 확인용)
+        /// </summary>
+        /// <param name="filePath">엑셀 파일 경로</param>
+        /// <param name="sheetName">시트 이름</param>
+        /// <param name="previewRowCount">미리보기할 행 수 (기본 10행)</param>
+        /// <returns>행 데이터 리스트 (각 행은 셀 값 리스트)</returns>
+        public List<List<object?>> GetSheetPreviewRows(string filePath, string sheetName, int previewRowCount = 10)
+        {
+            var result = new List<List<object?>>();
+
+            try
+            {
+                using (var package = new ExcelPackage(new FileInfo(filePath)))
+                {
+                    var worksheet = package.Workbook.Worksheets[sheetName];
+                    if (worksheet?.Dimension == null) return result;
+
+                    int rowCount = Math.Min(previewRowCount, worksheet.Dimension.End.Row);
+                    int colCount = Math.Min(30, worksheet.Dimension.End.Column); // 최대 30열까지만
+
+                    for (int row = 1; row <= rowCount; row++)
+                    {
+                        var rowData = new List<object?>();
+                        for (int col = 1; col <= colCount; col++)
+                        {
+                            var cellValue = worksheet.Cells[row, col].Value;
+                            rowData.Add(cellValue);
+                        }
+                        result.Add(rowData);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[GetSheetPreviewRows] Error: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 시트의 전체 행 수 가져오기
+        /// </summary>
+        public int GetSheetTotalRowCount(string filePath, string sheetName)
+        {
+            try
+            {
+                using (var package = new ExcelPackage(new FileInfo(filePath)))
+                {
+                    var worksheet = package.Workbook.Worksheets[sheetName];
+                    if (worksheet?.Dimension == null) return 0;
+                    return worksheet.Dimension.End.Row;
+                }
+            }
+            catch
+            {
+                return 0;
+            }
         }
     }
 

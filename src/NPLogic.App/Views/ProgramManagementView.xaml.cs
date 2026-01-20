@@ -178,6 +178,21 @@ namespace NPLogic.Views
                 }
             }
         }
+
+        /// <summary>
+        /// 제목행 확인 버튼 클릭 핸들러
+        /// 피드백 6번: 차주 일반 정보, 회생 차주 정보, 인테림 제목행 확인 기능
+        /// </summary>
+        private void HeaderRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is SelectableSheetInfo sheet)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    viewModel.OpenHeaderRowPreviewDialog(sheet);
+                }
+            }
+        }
     }
 }
 

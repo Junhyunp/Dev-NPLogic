@@ -11,8 +11,24 @@
              Loaded="SeniorRightsView_Loaded">
     
     <UserControl.Resources>
-        <!-- 테이블 스타일 (LoanDetailView와 동일) -->
+        <!-- 테이블 스타일 (CollateralPropertyView와 동일) -->
         <SolidColorBrush x:Key="TableBorderBrush" Color="#E0E0E0"/>
+        
+        <!-- 테이블 헤더 스타일 (CollateralPropertyView와 동일) -->
+        <Style x:Key="TableHeaderCell" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
+        
+        <!-- 테이블 데이터 셀 스타일 (CollateralPropertyView와 동일) -->
+        <Style x:Key="TableDataCell" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="12,8"/>
+        </Style>
         
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
@@ -130,17 +146,7 @@
                 </TextBlock>
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Content="Excel 내보내기" 
-                        Command="{Binding ExportToExcelCommand}"
-                        Style="{StaticResource SecondaryButton}"
-                        Padding="16,8"
-                        Margin="0,0,8,0"/>
-                <Button Content="새로고침" 
-                        Command="{Binding RefreshCommand}"
-                        Style="{StaticResource SecondaryButton}"
-                        Padding="16,8"/>
-            </StackPanel>
+            <!-- 버튼 제거됨 (피드백 #26) -->
         </Grid>
 
         <!-- 메인 컨텐츠 - 수평 스크롤 지원 -->
@@ -149,9 +155,21 @@
                 <StackPanel MinWidth="1400">
                     
                     <!-- ========== 1. 경매사건 및 선순위 상단 정보 ========== -->
-                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="경매사건 및 선순위" Style="{StaticResource SectionHeaderStyle}" Margin="8,8,8,4"/>
+                            <!-- 섹션 헤더 (CollateralPropertyView 스타일) -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📋 경매사건 및 선순위" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                            </Border>
                             
                             <!-- 선행/후행 동시 표시 (피드백 #28) -->
                             <Grid>
@@ -161,9 +179,11 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <!-- 선행 정보 -->
-                                <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,0">
+                                <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
                                     <StackPanel>
-                                        <TextBlock Text="선행" FontWeight="SemiBold" FontSize="12" Padding="8,4" Background="#E3F2FD"/>
+                                        <Border Background="{StaticResource PrimaryBrush}" Padding="8,6">
+                                            <TextBlock Text="선행" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                        </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
@@ -269,7 +289,9 @@
                                 <!-- 후행 정보 -->
                                 <Border Grid.Column="1">
                                     <StackPanel>
-                                        <TextBlock Text="후행" FontWeight="SemiBold" FontSize="12" Padding="8,4" Background="#FFF3E0"/>
+                                        <Border Background="#FF7043" Padding="8,6">
+                                            <TextBlock Text="후행" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                        </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="100"/>
@@ -366,17 +388,31 @@
                     </Border>
 
                     <!-- ========== 2. 체크박스 섹션 + 등기부 정보 ========== -->
-                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Margin="0,0,0,16">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="350"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📝 전입/임차 현황 및 등기부 정보" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                            </Border>
                             
-                            <!-- 좌측: 체크박스 섹션 -->
-                            <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,0">
-                                <StackPanel Margin="8">
-                                    <TextBlock Text="전입/임차 현황" Style="{StaticResource SectionHeaderStyle}"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="350"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- 좌측: 체크박스 섹션 -->
+                                <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                                    <StackPanel Margin="12">
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -428,6 +464,8 @@
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="주택공시가격" Style="{StaticResource LabelStyle}"/>
                                                 <Button Content="조회" Command="{Binding OpenHousingPriceCommand}" Style="{StaticResource LinkButtonStyle}" Margin="4,0,0,0"/>
+                                                <TextBlock Text="|" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,4,0" VerticalAlignment="Center"/>
+                                                <Button Content="당해세 조회" Command="{Binding OpenEtaxCommand}" Style="{StaticResource LinkButtonStyle}" ToolTip="위택스에서 당해세 조회"/>
                                             </StackPanel>
                                         </Border>
                                         <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}">
@@ -496,13 +534,26 @@
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </StackPanel>
-                        </Grid>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
                     <!-- ========== 3. 열람 자료 섹션 (피드백 #29) ========== -->
-                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="열람 자료" Style="{StaticResource SectionHeaderStyle}" Margin="8,8,8,4"/>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📂 열람 자료" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                            </Border>
                             
                             <Grid Margin="8">
                                 <Grid.ColumnDefinitions>
@@ -726,9 +777,21 @@
                     </Border>
 
                     <!-- ========== 7. 선순위 구분 테이블 ========== -->
-                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Margin="0,0,0,16">
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="선순위 구분" Style="{StaticResource SectionHeaderStyle}" Margin="8,8,8,4"/>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📊 선순위 구분" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                            </Border>
                             
                             <Grid Margin="8">
                                 <Grid.ColumnDefinitions>
@@ -867,7 +930,11 @@
                     </Border>
 
                     <!-- ========== 8. 선순위 요약 + 배당 시뮬레이션 (하단 - 피드백 #27, #31) ========== -->
-                    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Background="#F5F5F5">
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -875,9 +942,9 @@
                             </Grid.ColumnDefinitions>
                             
                             <!-- 선순위 요약 -->
-                            <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,0" Padding="16">
+                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="선순위 요약" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <TextBlock Text="💰 선순위 요약" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -925,7 +992,7 @@
                             <!-- 배당 시뮬레이션 -->
                             <Border Grid.Column="1" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="배당 시뮬레이션" Style="{StaticResource SectionHeaderStyle}"/>
+                                    <TextBlock Text="📈 배당 시뮬레이션" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -983,22 +1050,79 @@
                         </Grid>
                     </Border>
 
-                    <!-- 저장 버튼 -->
-                    <Border Background="#F5F5F5" Padding="12" CornerRadius="4" Margin="0,16,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                    <!-- 저장 버튼 제거됨 (피드백 #26) -->
+                    
+                    <!-- ========== 9. 하단 참고 문구 (피드백 #30) ========== -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="#607D8B"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📖 선순위 참고 사항" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="14"/>
+                            </Border>
                             
-                            <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <Button Content="저장" 
-                                        Command="{Binding SaveRightAnalysisCommand}"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Padding="24,8"
-                                        FontSize="12"/>
+                            <StackPanel Margin="16">
+                                <!-- 주택임대차보호법 참고 -->
+                                <TextBlock Text="[주택임대차보호법]" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,8"/>
+                                <Border Background="#F5F5F5" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="• 최우선 변제요건: 전입일자와 주거(점유)가 확인된 자 (확정일자는 없어도 됨)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 미전입, 미주거일 경우 등기부등본상 주택임차권자로 등기 완료한 자 (전세권 설정자는 제외)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 최우선 변제액은 경매 낙찰가의 1/2 한도 내 (경매비용을 제외한 낙찰가)" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- 상가임대차보호법 참고 -->
+                                <TextBlock Text="[상가임대차보호법]" FontWeight="Bold" FontSize="12" Foreground="#FF7043" Margin="0,0,0,8"/>
+                                <Border Background="#FFF3E0" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="• 보증금환산: 보증금 + (월세 × 100) = 대상금액" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 상가임대차 최우선변제액의 합계액은 경매 낙찰가의 1/2 한도 내 (2014.1.1부터)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 2013.8.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 계약갱신요구권 발생" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 2015.5.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 대항력 적용" FontSize="11" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <!-- 당해세 참고 -->
+                                <TextBlock Text="[당해세]" FontWeight="Bold" FontSize="12" Foreground="#43A047" Margin="0,0,0,8"/>
+                                <Border Background="#E8F5E9" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="국세" FontWeight="SemiBold" FontSize="11"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="상속세, 증여세, 종합부동산세" FontSize="11"/>
+                                        
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="지방세" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="재산세, 자동차세, 도시계획세, 공동시설세, 지방교육세(재산세와 자동차세분에 한함)" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                    </Grid>
+                                </Border>
+                                
+                                <!-- 임금채권 참고 -->
+                                <TextBlock Text="[임금채권]" FontWeight="Bold" FontSize="12" Foreground="#E91E63" Margin="0,0,0,8"/>
+                                <Border Background="#FCE4EC" CornerRadius="4" Padding="12">
+                                    <StackPanel>
+                                        <TextBlock Text="• 1987.11.27 이전: 저당권이 우선" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 1987.11.28 ~ 1989.03.28: 임금만 저당권에 우선" FontSize="11" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 1989.03.29 이후: 임금 및 퇴직금 모두 저당권에 우선" FontSize="11"/>
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
-                        </Grid>
+                        </StackPanel>
                     </Border>
                 </StackPanel>
             </ScrollViewer>

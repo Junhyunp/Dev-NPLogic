@@ -24,12 +24,12 @@ namespace NPLogic.Views
     {
         private NonCoreViewModel? _viewModel;
         
-        // 기능 탭 순서 배열 - 피드백 반영: 10개 탭
+        // 기능 탭 순서 배열 - 피드백 반영: 11개 탭 (인터림 추가)
         private readonly string[] _functionTabs = 
         { 
             "Home", "BorrowerOverview", "Loan", "CollateralProperty", 
             "SeniorRights", "Restructuring", "Evaluation", "AuctionSchedule", 
-            "CashFlow", "XnpvComparison" 
+            "Interim", "CashFlow", "XnpvComparison" 
         };
         private int _currentFunctionTabIndex = 0;
         
@@ -230,6 +230,7 @@ namespace NPLogic.Views
             if (TabRestructuring.IsChecked == true) return "Restructuring";
             if (TabEvaluation.IsChecked == true) return "Evaluation";
             if (TabAuctionSchedule.IsChecked == true) return "AuctionSchedule";
+            if (TabInterim.IsChecked == true) return "Interim";
             if (TabCashFlow.IsChecked == true) return "CashFlow";
             if (TabXnpvComparison.IsChecked == true) return "XnpvComparison";
             return "Home"; // 기본값
@@ -489,6 +490,26 @@ namespace NPLogic.Views
                     }
                     break;
                     
+                case "Interim":
+                    content = serviceProvider.GetRequiredService<InterimTab>();
+                    {
+                        var interimVm = serviceProvider.GetRequiredService<InterimTabViewModel>();
+                        
+                        // 프로그램 ID 가져오기
+                        var programId = _viewModel?.SelectedPropertyTab?.ProgramId ?? Guid.Empty;
+                        var borrowerNumber = _viewModel?.SelectedPropertyTab?.BorrowerNumber;
+                        
+                        if (programId != Guid.Empty)
+                        {
+                            token.ThrowIfCancellationRequested();
+                            await interimVm.InitializeAsync(programId, borrowerNumber);
+                        }
+                        
+                        content.DataContext = interimVm;
+                        viewModel = interimVm;
+                    }
+                    break;
+                    
                 case "CashFlow":
                     content = serviceProvider.GetRequiredService<CashFlowSummaryView>();
                     break;
@@ -571,6 +592,20 @@ namespace NPLogic.Views
                         auctionVm.SetPropertyId(selectedPropertyId.Value);
                         token.ThrowIfCancellationRequested();
                         await auctionVm.InitializeAsync();
+                    }
+                    break;
+                    
+                case "Interim":
+                    if (viewModel is InterimTabViewModel interimVm)
+                    {
+                        var programId = _viewModel?.SelectedPropertyTab?.ProgramId ?? Guid.Empty;
+                        var borrowerNumber = _viewModel?.SelectedPropertyTab?.BorrowerNumber;
+                        
+                        if (programId != Guid.Empty)
+                        {
+                            token.ThrowIfCancellationRequested();
+                            await interimVm.InitializeAsync(programId, borrowerNumber);
+                        }
                     }
                     break;
             }

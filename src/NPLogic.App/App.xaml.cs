@@ -148,6 +148,7 @@ namespace NPLogic
 
             // Upload Services (Singleton)
             services.AddSingleton<Services.DataDiskUploadService>();
+            services.AddSingleton<Services.InterimUploadService>();
 
             // Permission Service (Singleton) - 권한 관리
             services.AddSingleton<Services.PermissionService>();
@@ -295,6 +296,14 @@ namespace NPLogic
                 return new ViewModels.RightsAnalysisTabViewModel(
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.RegistryRepository>()
+                );
+            });
+            services.AddTransient<ViewModels.InterimTabViewModel>(sp =>
+            {
+                return new ViewModels.InterimTabViewModel(
+                    sp.GetRequiredService<Data.Repositories.InterimRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<ExcelService>()
                 );
             });
 
@@ -460,6 +469,12 @@ namespace NPLogic
             services.AddTransient<Views.MapView>();
             services.AddTransient<Views.CollateralPropertyView>();
             services.AddTransient<Views.QASummaryTab>();  // QA집계 탭 (플레이스홀더)
+            services.AddTransient<Views.InterimTab>(sp =>
+            {
+                var view = new Views.InterimTab();
+                view.DataContext = sp.GetRequiredService<ViewModels.InterimTabViewModel>();
+                return view;
+            });
             services.AddTransient<Views.ProgramSettingsTab>(sp =>
             {
                 var view = new Views.ProgramSettingsTab();

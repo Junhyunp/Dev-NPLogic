@@ -1,0 +1,297 @@
+<UserControl x:Class="NPLogic.Views.InterimTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:NPLogic.Views"
+             xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1200"
+             d:DataContext="{d:DesignInstance Type=vm:InterimTabViewModel}">
+
+    <UserControl.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource SectionHeader}">
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style x:Key="CardStyle" TargetType="Border" BasedOn="{StaticResource CardBorder}">
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- 로딩 오버레이 -->
+        <Border Background="{StaticResource OverlaySemiLightBrush}" 
+                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+                Panel.ZIndex="100">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
+                <TextBlock Text="로딩 중..." Margin="0,12,0,0" 
+                           HorizontalAlignment="Center"
+                           Style="{StaticResource BodyTextStyle}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 헤더 영역 -->
+            <Border Grid.Row="0" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 제목 및 통계 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="💰 인터림 관리" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,24,0"/>
+                        
+                        <Border Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="차주: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalBorrowerCount}" FontWeight="SemiBold" FontSize="12"/>
+                                <TextBlock Text="개" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border Background="{StaticResource WarningLightBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="가지급금: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalAdvance, StringFormat=N0}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource WarningBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="회수총액: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalCollection, StringFormat=N0}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource SuccessBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="4" Padding="12,6">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="순수익: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="{Binding TotalNet, StringFormat=N0}" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- 버튼 영역 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Style="{StaticResource PrimaryButton}"
+                                Command="{Binding UploadInterimFileCommand}"
+                                Padding="12,8"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="인터림 파일 업로드" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Command="{Binding ExportToExcelCommand}"
+                                Padding="12,8"
+                                Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="MicrosoftExcel" Width="16" Height="16" VerticalAlignment="Center" Foreground="#217346" Margin="0,0,6,0"/>
+                                <TextBlock Text="Excel 다운로드" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Button Style="{StaticResource SecondaryButton}"
+                                Command="{Binding LoadDataCommand}"
+                                Padding="12,8">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <TextBlock Text="새로고침" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 메인 컨텐츠: 좌측 차주목록 + 우측 상세 -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="350"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 좌측: 차주 목록 -->
+                <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="📋 차주별 인터림 현황" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
+
+                        <DataGrid Grid.Row="1"
+                                  ItemsSource="{Binding BorrowerSummaries}"
+                                  SelectedItem="{Binding SelectedBorrower}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  SelectionMode="Single"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  BorderThickness="1"
+                                  BorderBrush="{StaticResource BorderBrush}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="차주번호" Binding="{Binding BorrowerNumber}" Width="90"/>
+                                <DataGridTextColumn Header="차주명" Binding="{Binding BorrowerName}" Width="80"/>
+                                <DataGridTextColumn Header="가지급금" Binding="{Binding AdvanceTotalDisplay}" Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="회수총액" Binding="{Binding CollectionTotalDisplay}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+
+                <!-- 우측: 선택된 차주 상세 -->
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- 가지급금 (InterimAdvance) -->
+                    <Border Grid.Row="0" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="📤 가지급금 (발생액)" Style="{StaticResource SectionHeaderStyle}"/>
+                                <Border Background="{StaticResource WarningLightBrush}" CornerRadius="4" Padding="8,2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock FontSize="11">
+                                        <Run Text="{Binding Advances.Count, Mode=OneWay}"/>
+                                        <Run Text="건"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Advances}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      BorderThickness="1"
+                                      BorderBrush="{StaticResource BorderBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="비용종류" Binding="{Binding ExpenseType}" Width="100"/>
+                                    <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                                    <DataGridTextColumn Header="계좌번호" Binding="{Binding AccountNumber}" Width="120"/>
+                                    <DataGridTextColumn Header="금액" Binding="{Binding Amount, StringFormat=N0}" Width="120">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+
+                    <!-- 회수정보 (InterimCollection) -->
+                    <Border Grid.Row="2" Style="{StaticResource CardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                                <TextBlock Text="📥 회수정보" Style="{StaticResource SectionHeaderStyle}"/>
+                                <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="4" Padding="8,2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock FontSize="11">
+                                        <Run Text="{Binding Collections.Count, Mode=OneWay}"/>
+                                        <Run Text="건"/>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
+
+                            <DataGrid Grid.Row="1"
+                                      ItemsSource="{Binding Collections}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="Horizontal"
+                                      BorderThickness="1"
+                                      BorderBrush="{StaticResource BorderBrush}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="회수일자" Binding="{Binding CollectionDate, StringFormat=yyyy-MM-dd}" Width="100"/>
+                                    <DataGridTextColumn Header="계좌번호" Binding="{Binding AccountNumber}" Width="120"/>
+                                    <DataGridTextColumn Header="회수원금" Binding="{Binding PrincipalAmount, StringFormat=N0}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="회수이자" Binding="{Binding InterestAmount, StringFormat=N0}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="총회수액" Binding="{Binding TotalAmount, StringFormat=N0}" Width="120">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- 하단 상태 표시 -->
+            <Border Grid.Row="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12,8" Margin="0,16,0,0">
+                <TextBlock Text="{Binding StatusMessage}" 
+                           FontSize="12" 
+                           Foreground="{StaticResource TextMutedBrush}"/>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

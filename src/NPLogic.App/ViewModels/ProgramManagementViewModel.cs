@@ -124,6 +124,27 @@ namespace NPLogic.ViewModels
         /// </summary>
         public bool HasSelectedSheets => AvailableSheets.Any(s => s.IsSelected);
 
+        // ========== 은행 감지 ==========
+        [ObservableProperty]
+        private BankType _detectedBankType = BankType.Unknown;
+
+        /// <summary>
+        /// 감지된 은행 표시명
+        /// </summary>
+        public string DetectedBankDisplay => DetectedBankType switch
+        {
+            BankType.KB => "KB국민은행",
+            BankType.IBK => "IBK기업은행",
+            BankType.NH => "NH농협은행",
+            BankType.SHB => "SH수협은행",
+            _ => "미감지"
+        };
+
+        /// <summary>
+        /// 은행이 감지되었는지 여부
+        /// </summary>
+        public bool IsBankDetected => DetectedBankType != BankType.Unknown;
+
         // ========== 시트 매핑 (통합 모듈) ==========
         /// <summary>
         /// 시트 매핑 정보 목록 (DataDiskUploadService 사용)
@@ -905,34 +926,54 @@ namespace NPLogic.ViewModels
                 DataDiskFilePath = filePath;
                 DataDiskFileName = Path.GetFileName(filePath);
 
-                // 시트 목록 감지
+                // 은행별 매핑 템플릿을 사용한 시트 로드
+                var sheetMappings = _uploadService.LoadExcelSheets(filePath);
+                
+                // 감지된 은행 타입 저장
+                DetectedBankType = _uploadService.DetectedBankType;
+                OnPropertyChanged(nameof(DetectedBankDisplay));
+                OnPropertyChanged(nameof(IsBankDetected));
+                
+                System.Diagnostics.Debug.WriteLine($"[HandleDataDiskFileDrop] 감지된 은행: {DetectedBankType} ({DetectedBankDisplay})");
+
+                // 시트 목록 가져오기 (기존 ExcelService도 함께 사용)
                 var sheets = _excelService.GetSheetNames(filePath);
 
                 if (sheets.Count > 1)
                 {
                     // 여러 시트가 있으면 시트 선택 UI 표시
                     AvailableSheets.Clear();
+                    
                     foreach (var sheet in sheets)
                     {
+                        // 은행별 매핑에서 시트 타입 찾기
+                        var mappingInfo = sheetMappings.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
+                        var sheetType = mappingInfo?.DetectedType != DataDiskSheetType.Unknown 
+                            ? ConvertDataDiskTypeToSheetType(mappingInfo.DetectedType) 
+                            : sheet.SheetType;
+
                         var selectableSheet = new SelectableSheetInfo
                         {
                             Name = sheet.Name,
                             Index = sheet.Index,
                             RowCount = sheet.RowCount,
                             Headers = sheet.Headers,
-                            SheetType = sheet.SheetType,
-                            HeaderRow = sheet.HeaderRow,  // 감지된 헤더 행 번호
-                            IsSelected = sheet.SheetType != SheetType.Unknown // 감지된 시트는 기본 선택
+                            SheetType = sheetType,
+                            HeaderRow = sheet.HeaderRow,
+                            IsSelected = sheetType != SheetType.Unknown
                         };
                         AvailableSheets.Add(selectableSheet);
                     }
+                    
+                    // 시트 매핑 정보 저장 (나중에 업로드 시 사용)
+                    _sheetMappingInfoList = sheetMappings;
                     
                     ShowSheetSelection = true;
                     HasDataDiskFile = true;
                     OnPropertyChanged(nameof(HasSelectedSheets));
                     
                     // 총 행 수 계산 (선택된 시트들)
-                    DataDiskTotalRows = sheets.Where(s => s.SheetType != SheetType.Unknown).Sum(s => s.RowCount);
+                    DataDiskTotalRows = AvailableSheets.Where(s => s.IsSelected).Sum(s => s.RowCount);
                 }
                 else
                 {
@@ -956,6 +997,24 @@ namespace NPLogic.ViewModels
                 DataDiskErrorMessage = $"Excel 파일 읽기 실패: {ex.Message}";
                 HasDataDiskFile = false;
             }
+        }
+
+        /// <summary>
+        /// DataDiskSheetType → SheetType 변환
+        /// </summary>
+        private SheetType ConvertDataDiskTypeToSheetType(DataDiskSheetType dataDiskType)
+        {
+            return dataDiskType switch
+            {
+                DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
+                DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
+                DataDiskSheetType.Loan => SheetType.Loan,
+                DataDiskSheetType.Property => SheetType.Property,
+                DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
+                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
+                DataDiskSheetType.Guarantee => SheetType.Guarantee,
+                _ => SheetType.Unknown
+            };
         }
 
         /// <summary>
@@ -1386,7 +1445,7 @@ namespace NPLogic.ViewModels
                         property.CollateralNumber = value?.ToString();
                         break;
                     case "property_type":
-                        property.PropertyType = value?.ToString();
+                        property.PropertyType = NormalizePropertyType(value?.ToString());
                         break;
                     case "land_area":
                         if (value is decimal la) property.LandArea = la;
@@ -1599,7 +1658,7 @@ namespace NPLogic.ViewModels
                 // 물건유형
                 else if (colName.Contains("유형") || colName.Contains("종류") || colName.Contains("propertytype") || colName.Contains("담보물형태"))
                 {
-                    property.PropertyType = value.ToString();
+                    property.PropertyType = NormalizePropertyType(value.ToString());
                 }
                 // 전체주소
                 else if (colName.Contains("전체주소") || colName.Contains("addressfull") || colName.Contains("물건지"))
@@ -2183,6 +2242,64 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
+        /// 제목행(헤더행) 확인 다이얼로그 열기
+        /// 피드백 6번: 차주 일반 정보, 회생 차주 정보, 인테림 제목행 확인 기능
+        /// </summary>
+        public void OpenHeaderRowPreviewDialog(SelectableSheetInfo sheet)
+        {
+            if (sheet == null) return;
+
+            try
+            {
+                string filePath = DataDiskFilePath;
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    DataDiskErrorMessage = "파일이 선택되지 않았습니다.";
+                    return;
+                }
+
+                // 미리보기 데이터 가져오기 (처음 10행)
+                var previewRows = _excelService.GetSheetPreviewRows(filePath, sheet.Name, 10);
+                var totalRows = _excelService.GetSheetTotalRowCount(filePath, sheet.Name);
+
+                if (previewRows.Count == 0)
+                {
+                    DataDiskErrorMessage = "시트 데이터를 읽을 수 없습니다.";
+                    return;
+                }
+
+                // 현재 헤더행 (없으면 감지)
+                int currentHeaderRow = sheet.HeaderRow > 0 ? sheet.HeaderRow : _excelService.DetectHeaderRow(filePath, sheet.Name);
+
+                // 다이얼로그 열기
+                var dialog = new HeaderRowPreviewDialog
+                {
+                    Owner = Application.Current.MainWindow
+                };
+                dialog.SetPreviewData(sheet.Name, previewRows, currentHeaderRow, totalRows);
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // 선택된 헤더행 저장
+                    int selectedRow = dialog.SelectedHeaderRow;
+                    sheet.HeaderRow = selectedRow;
+                    
+                    // 헤더 다시 읽기
+                    var (columns, _) = Task.Run(async () => 
+                        await _excelService.ReadExcelSheetAsync(filePath, sheet.Name, selectedRow)).GetAwaiter().GetResult();
+                    sheet.Headers = columns.ToList();
+                    
+                    System.Diagnostics.Debug.WriteLine($"[OpenHeaderRowPreviewDialog] 시트 '{sheet.Name}' 헤더행 변경: {selectedRow}행, 컬럼 {columns.Count}개");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[OpenHeaderRowPreviewDialog] 에러: {ex.Message}");
+                DataDiskErrorMessage = $"제목행 확인 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
         /// SheetType을 DataDiskSheetType으로 변환
         /// </summary>
         private DataDiskSheetType ConvertToDataDiskSheetType(SheetType sheetType)
@@ -2197,6 +2314,33 @@ namespace NPLogic.ViewModels
                 SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
                 SheetType.Guarantee => DataDiskSheetType.Guarantee,
                 _ => DataDiskSheetType.Unknown
+            };
+        }
+
+        /// <summary>
+        /// 물건종류(담보종류) 값 정규화
+        /// 피드백 9번: 물건종류 인식 오류 수정
+        /// </summary>
+        private static string NormalizePropertyType(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "기타";
+
+            // 공백 제거 및 소문자 변환
+            var normalized = value.Trim().ToLower();
+
+            // 알려진 유형으로 매핑
+            return normalized switch
+            {
+                "아파트" or "apartment" or "apt" => "아파트",
+                "상가" or "store" or "commercial" or "상업" or "근생" or "근린상가" or "근린생활시설" => "상가",
+                "토지" or "land" or "대지" or "임야" or "전" or "답" or "잡종지" => "토지",
+                "빌라" or "villa" or "연립" or "연립주택" or "다세대" or "다세대주택" => "빌라",
+                "오피스텔" or "officetel" or "오피" => "오피스텔",
+                "단독주택" or "house" or "단독" or "주택" => "단독주택",
+                "다가구주택" or "multi-family" or "다가구" => "다가구주택",
+                "공장" or "factory" or "창고" or "warehouse" or "공장창고" => "공장",
+                _ => string.IsNullOrWhiteSpace(value) ? "기타" : value.Trim() // 알 수 없는 값은 원본 유지
             };
         }
 

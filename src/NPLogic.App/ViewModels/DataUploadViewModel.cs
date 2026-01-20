@@ -130,6 +130,27 @@ namespace NPLogic.ViewModels
         /// </summary>
         public bool HasSelectedSheets => AvailableSheets.Any(s => s.IsSelected);
 
+        // ========== 은행 감지 ==========
+        [ObservableProperty]
+        private BankType _detectedBankType = BankType.Unknown;
+
+        /// <summary>
+        /// 감지된 은행 표시명
+        /// </summary>
+        public string DetectedBankDisplay => DetectedBankType switch
+        {
+            BankType.KB => "KB국민은행",
+            BankType.IBK => "IBK기업은행",
+            BankType.NH => "NH농협은행",
+            BankType.SHB => "SH수협은행",
+            _ => "미감지"
+        };
+
+        /// <summary>
+        /// 은행이 감지되었는지 여부
+        /// </summary>
+        public bool IsBankDetected => DetectedBankType != BankType.Unknown;
+
         // ========== 시트 매핑 (통합 모듈) ==========
         /// <summary>
         /// 시트 매핑 정보 목록 (DataDiskUploadService 사용)
@@ -350,26 +371,55 @@ namespace NPLogic.ViewModels
                 SelectedExcelFile = Path.GetFileName(filePath);
                 _currentFilePath = filePath;
 
-                // 시트 목록 조회 (IBK Multi-Sheet 지원)
+                // 은행별 매핑 템플릿을 사용한 시트 로드 (가능한 경우)
+                List<SheetMappingInfo>? sheetMappings = null;
+                if (_uploadService != null)
+                {
+                    sheetMappings = _uploadService.LoadExcelSheets(filePath);
+                    DetectedBankType = _uploadService.DetectedBankType;
+                    OnPropertyChanged(nameof(DetectedBankDisplay));
+                    OnPropertyChanged(nameof(IsBankDetected));
+                    
+                    System.Diagnostics.Debug.WriteLine($"[HandleExcelFileDrop] 감지된 은행: {DetectedBankType} ({DetectedBankDisplay})");
+                }
+
+                // 시트 목록 조회
                 var sheets = _excelService.GetSheetNames(filePath);
                 
-                // 여러 시트가 있거나 IBK 형식이면 시트 선택 UI 표시
+                // 여러 시트가 있거나 시트 타입이 감지된 경우 시트 선택 UI 표시
                 if (sheets.Count > 1 || sheets.Any(s => s.SheetType != SheetType.Unknown))
                 {
                     AvailableSheets.Clear();
                     foreach (var sheet in sheets)
                     {
+                        // 은행별 매핑에서 시트 타입 찾기 (가능한 경우)
+                        var sheetType = sheet.SheetType;
+                        if (sheetMappings != null)
+                        {
+                            var mappingInfo = sheetMappings.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
+                            if (mappingInfo?.DetectedType != DataDiskSheetType.Unknown)
+                            {
+                                sheetType = ConvertDataDiskTypeToSheetType(mappingInfo.DetectedType);
+                            }
+                        }
+
                         var selectableSheet = new SelectableSheetInfo
                         {
                             Name = sheet.Name,
                             Index = sheet.Index,
                             RowCount = sheet.RowCount,
                             Headers = sheet.Headers,
-                            SheetType = sheet.SheetType,
-                            HeaderRow = sheet.HeaderRow,  // 감지된 헤더 행 번호
-                            IsSelected = sheet.SheetType != SheetType.Unknown // 감지된 시트는 기본 선택
+                            SheetType = sheetType,
+                            HeaderRow = sheet.HeaderRow,
+                            IsSelected = sheetType != SheetType.Unknown
                         };
                         AvailableSheets.Add(selectableSheet);
+                    }
+                    
+                    // 시트 매핑 정보 저장
+                    if (sheetMappings != null)
+                    {
+                        _sheetMappingInfoList = sheetMappings;
                     }
                     
                     ShowSheetSelection = true;
@@ -389,6 +439,24 @@ namespace NPLogic.ViewModels
                 ShowMappingSection = false;
                 ShowSheetSelection = false;
             }
+        }
+
+        /// <summary>
+        /// DataDiskSheetType → SheetType 변환
+        /// </summary>
+        private SheetType ConvertDataDiskTypeToSheetType(DataDiskSheetType dataDiskType)
+        {
+            return dataDiskType switch
+            {
+                DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
+                DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
+                DataDiskSheetType.Loan => SheetType.Loan,
+                DataDiskSheetType.Property => SheetType.Property,
+                DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
+                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
+                DataDiskSheetType.Guarantee => SheetType.Guarantee,
+                _ => SheetType.Unknown
+            };
         }
 
         /// <summary>
@@ -600,7 +668,7 @@ namespace NPLogic.ViewModels
                         property.PropertyNumber = value?.ToString();
                         break;
                     case "PropertyType":
-                        property.PropertyType = value?.ToString();
+                        property.PropertyType = NormalizePropertyType(value?.ToString());
                         break;
                     case "AddressFull":
                         property.AddressFull = value?.ToString();
@@ -1698,6 +1766,33 @@ namespace NPLogic.ViewModels
                 SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
                 SheetType.Guarantee => DataDiskSheetType.Guarantee,
                 _ => DataDiskSheetType.Unknown
+            };
+        }
+
+        /// <summary>
+        /// 물건종류(담보종류) 값 정규화
+        /// 피드백 9번: 물건종류 인식 오류 수정
+        /// </summary>
+        private static string NormalizePropertyType(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "기타";
+
+            // 공백 제거 및 소문자 변환
+            var normalized = value.Trim().ToLower();
+
+            // 알려진 유형으로 매핑
+            return normalized switch
+            {
+                "아파트" or "apartment" or "apt" => "아파트",
+                "상가" or "store" or "commercial" or "상업" or "근생" or "근린상가" or "근린생활시설" => "상가",
+                "토지" or "land" or "대지" or "임야" or "전" or "답" or "잡종지" => "토지",
+                "빌라" or "villa" or "연립" or "연립주택" or "다세대" or "다세대주택" => "빌라",
+                "오피스텔" or "officetel" or "오피" => "오피스텔",
+                "단독주택" or "house" or "단독" or "주택" => "단독주택",
+                "다가구주택" or "multi-family" or "다가구" => "다가구주택",
+                "공장" or "factory" or "창고" or "warehouse" or "공장창고" => "공장",
+                _ => string.IsNullOrWhiteSpace(value) ? "기타" : value.Trim() // 알 수 없는 값은 원본 유지
             };
         }
     }

@@ -20,6 +20,9 @@ namespace NPLogic.ViewModels
         private Guid _propertyId;
 
         [ObservableProperty]
+        private Guid _programId;
+
+        [ObservableProperty]
         private string _propertyNumber = "";
 
         [ObservableProperty]

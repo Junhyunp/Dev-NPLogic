@@ -51,6 +51,11 @@ namespace NPLogic.Services
         #region 시트 로드 및 매핑
 
         /// <summary>
+        /// 현재 감지된 은행 타입
+        /// </summary>
+        public BankType DetectedBankType { get; private set; } = BankType.Unknown;
+
+        /// <summary>
         /// Excel 파일에서 시트 목록 로드 (자동 타입 감지 포함)
         /// </summary>
         public List<SheetMappingInfo> LoadExcelSheets(string filePath)
@@ -58,9 +63,27 @@ namespace NPLogic.Services
             var sheets = _excelService.GetSheetNames(filePath);
             var result = new List<SheetMappingInfo>();
 
+            // 은행 자동 감지
+            var sheetNames = sheets.Select(s => s.Name).ToList();
+            var (detectedBank, confidence) = BankMappingConfig.DetectBank(sheetNames);
+            DetectedBankType = detectedBank;
+            
+            System.Diagnostics.Debug.WriteLine($"[LoadExcelSheets] 은행 감지: {detectedBank} (신뢰도: {confidence:P0})");
+
             foreach (var sheet in sheets)
             {
-                var detectedType = ConvertSheetType(sheet.SheetType);
+                DataDiskSheetType detectedType;
+                
+                // 은행이 감지된 경우 은행별 매핑 템플릿 사용
+                if (detectedBank != BankType.Unknown)
+                {
+                    var standardSheetType = BankMappingConfig.DetectStandardSheetType(detectedBank, sheet.Name);
+                    detectedType = ConvertStandardSheetTypeToDataDiskType(standardSheetType);
+                }
+                else
+                {
+                    detectedType = ConvertSheetType(sheet.SheetType);
+                }
                 
                 result.Add(new SheetMappingInfo
                 {
@@ -78,32 +101,167 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// 시트의 기본 컬럼 매핑 가져오기
+        /// Excel 파일에서 시트 목록 로드 (은행 타입 지정)
         /// </summary>
-        public List<ColumnMappingInfo> GetDefaultColumnMappings(DataDiskSheetType sheetType, List<string> headers)
+        public List<SheetMappingInfo> LoadExcelSheets(string filePath, BankType bankType)
         {
-            var mappingRules = SheetMappingConfig.GetMappingRules(ConvertToExcelSheetType(sheetType));
-            var result = new List<ColumnMappingInfo>();
+            DetectedBankType = bankType;
+            var sheets = _excelService.GetSheetNames(filePath);
+            var result = new List<SheetMappingInfo>();
 
-            foreach (var header in headers)
+            foreach (var sheet in sheets)
             {
-                if (string.IsNullOrWhiteSpace(header))
-                    continue;
-
-                var normalizedHeader = header.Replace("\n", " ").Replace("\r", "").Trim();
-                var rule = SheetMappingConfig.FindMappingRule(mappingRules, normalizedHeader);
-
-                result.Add(new ColumnMappingInfo
+                DataDiskSheetType detectedType;
+                
+                if (bankType != BankType.Unknown)
                 {
-                    ExcelColumn = header,
-                    DbColumn = rule?.DbColumnName,
-                    DbColumnDisplay = rule != null ? GetDbColumnDisplayName(rule.DbColumnName) : null,
-                    IsAutoMatched = rule != null,
-                    IsRequired = rule?.IsRequired ?? false
+                    var standardSheetType = BankMappingConfig.DetectStandardSheetType(bankType, sheet.Name);
+                    detectedType = ConvertStandardSheetTypeToDataDiskType(standardSheetType);
+                }
+                else
+                {
+                    detectedType = ConvertSheetType(sheet.SheetType);
+                }
+                
+                result.Add(new SheetMappingInfo
+                {
+                    ExcelSheetName = sheet.Name,
+                    SheetIndex = sheet.Index,
+                    DetectedType = detectedType,
+                    SelectedType = detectedType,
+                    Headers = sheet.Headers,
+                    RowCount = Math.Max(0, sheet.RowCount - 1),
+                    IsSelected = detectedType != DataDiskSheetType.Unknown
                 });
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 시트의 기본 컬럼 매핑 가져오기 (은행별 매핑 템플릿 사용)
+        /// </summary>
+        public List<ColumnMappingInfo> GetDefaultColumnMappings(DataDiskSheetType sheetType, List<string> headers)
+        {
+            return GetDefaultColumnMappings(sheetType, headers, DetectedBankType);
+        }
+
+        /// <summary>
+        /// 시트의 기본 컬럼 매핑 가져오기 (은행 타입 지정)
+        /// </summary>
+        public List<ColumnMappingInfo> GetDefaultColumnMappings(DataDiskSheetType sheetType, List<string> headers, BankType bankType)
+        {
+            var result = new List<ColumnMappingInfo>();
+
+            // 은행이 감지된 경우 매핑 템플릿 사용
+            if (bankType != BankType.Unknown)
+            {
+                var standardSheetName = ConvertDataDiskTypeToStandardSheetName(sheetType);
+                var reverseMapping = BankMappingConfig.BuildReverseColumnMapping(bankType, standardSheetName);
+                
+                System.Diagnostics.Debug.WriteLine($"[GetDefaultColumnMappings] 은행: {bankType}, 시트: {standardSheetName}, 역매핑 규칙: {reverseMapping.Count}개");
+
+                foreach (var header in headers)
+                {
+                    if (string.IsNullOrWhiteSpace(header))
+                        continue;
+
+                    // 컬럼명 정규화 (공백 제거)
+                    var normalizedHeader = BankMappingConfig.NormalizeColumnName(header);
+                    
+                    // 은행별 매핑 템플릿에서 대표컬럼명 찾기
+                    string? standardColumnName = null;
+                    if (reverseMapping.TryGetValue(normalizedHeader, out var standardCol))
+                    {
+                        standardColumnName = standardCol;
+                    }
+
+                    // 기존 SheetMappingConfig에서 DB 컬럼 찾기
+                    var mappingRules = SheetMappingConfig.GetMappingRules(ConvertToExcelSheetType(sheetType));
+                    ColumnMappingRule? rule = null;
+                    
+                    if (standardColumnName != null)
+                    {
+                        // 대표컬럼명으로 DB 컬럼 찾기
+                        rule = SheetMappingConfig.FindMappingRule(mappingRules, standardColumnName);
+                    }
+                    
+                    if (rule == null)
+                    {
+                        // 원본 컬럼명으로 직접 찾기
+                        rule = SheetMappingConfig.FindMappingRule(mappingRules, header);
+                    }
+
+                    result.Add(new ColumnMappingInfo
+                    {
+                        ExcelColumn = header,
+                        DbColumn = rule?.DbColumnName,
+                        DbColumnDisplay = rule != null ? GetDbColumnDisplayName(rule.DbColumnName) : null,
+                        IsAutoMatched = rule != null,
+                        IsRequired = rule?.IsRequired ?? false,
+                        StandardColumnName = standardColumnName // 대표컬럼명 저장
+                    });
+                }
+            }
+            else
+            {
+                // 기존 로직 (은행 미감지 시)
+                var mappingRules = SheetMappingConfig.GetMappingRules(ConvertToExcelSheetType(sheetType));
+
+                foreach (var header in headers)
+                {
+                    if (string.IsNullOrWhiteSpace(header))
+                        continue;
+
+                    var normalizedHeader = header.Replace("\n", " ").Replace("\r", "").Trim();
+                    var rule = SheetMappingConfig.FindMappingRule(mappingRules, normalizedHeader);
+
+                    result.Add(new ColumnMappingInfo
+                    {
+                        ExcelColumn = header,
+                        DbColumn = rule?.DbColumnName,
+                        DbColumnDisplay = rule != null ? GetDbColumnDisplayName(rule.DbColumnName) : null,
+                        IsAutoMatched = rule != null,
+                        IsRequired = rule?.IsRequired ?? false
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 대표시트타입 → DataDiskSheetType 변환
+        /// </summary>
+        private DataDiskSheetType ConvertStandardSheetTypeToDataDiskType(string? standardSheetType)
+        {
+            return standardSheetType switch
+            {
+                "차주일반정보" => DataDiskSheetType.BorrowerGeneral,
+                "회생차주정보" => DataDiskSheetType.BorrowerRestructuring,
+                "채권일반정보" => DataDiskSheetType.Loan,
+                "물건정보" => DataDiskSheetType.Property,
+                "등기부등본정보" => DataDiskSheetType.RegistryDetail,
+                "신용보증서" => DataDiskSheetType.Guarantee,
+                _ => DataDiskSheetType.Unknown
+            };
+        }
+
+        /// <summary>
+        /// DataDiskSheetType → 대표시트명 변환
+        /// </summary>
+        private string ConvertDataDiskTypeToStandardSheetName(DataDiskSheetType sheetType)
+        {
+            return sheetType switch
+            {
+                DataDiskSheetType.BorrowerGeneral => "차주일반정보",
+                DataDiskSheetType.BorrowerRestructuring => "회생차주정보",
+                DataDiskSheetType.Loan => "채권일반정보",
+                DataDiskSheetType.Property => "물건정보",
+                DataDiskSheetType.RegistryDetail => "등기부등본정보",
+                DataDiskSheetType.Guarantee => "신용보증서",
+                _ => ""
+            };
         }
 
         /// <summary>
@@ -208,6 +366,13 @@ namespace NPLogic.Services
                 var columnMappings = sheet.ColumnMappings.Count > 0
                     ? sheet.ToColumnMappingsDictionary()
                     : GetDefaultColumnMappingsDictionary(sheet.SelectedType, columns);
+
+                // 데이터 변환 규칙 적용
+                var sheetTypeName = ConvertDataDiskTypeToStandardSheetName(sheet.SelectedType);
+                foreach (var row in data)
+                {
+                    DataTransformService.ApplyAllTransformations(row, DetectedBankType, sheetTypeName);
+                }
 
                 // 차주번호 -> 차주ID 캐시 (Loan, Restructuring 저장 시 사용)
                 var borrowerCache = new Dictionary<string, Guid>();
@@ -587,7 +752,7 @@ namespace NPLogic.Services
                     property.CollateralNumber = value?.ToString();
                     break;
                 case "property_type":
-                    property.PropertyType = value?.ToString();
+                    property.PropertyType = NormalizePropertyType(value?.ToString());
                     break;
 
                 // 주소
@@ -955,6 +1120,33 @@ namespace NPLogic.Services
             }
 
             return rawValue.ToString()?.Trim();
+        }
+
+        /// <summary>
+        /// 물건종류(담보종류) 값 정규화
+        /// 피드백 9번: 물건종류 인식 오류 수정
+        /// </summary>
+        private static string NormalizePropertyType(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "기타";
+
+            // 공백 제거 및 소문자 변환
+            var normalized = value.Trim().ToLower();
+
+            // 알려진 유형으로 매핑
+            return normalized switch
+            {
+                "아파트" or "apartment" or "apt" => "아파트",
+                "상가" or "store" or "commercial" or "상업" or "근생" or "근린상가" or "근린생활시설" => "상가",
+                "토지" or "land" or "대지" or "임야" or "전" or "답" or "잡종지" => "토지",
+                "빌라" or "villa" or "연립" or "연립주택" or "다세대" or "다세대주택" => "빌라",
+                "오피스텔" or "officetel" or "오피" => "오피스텔",
+                "단독주택" or "house" or "단독" or "주택" => "단독주택",
+                "다가구주택" or "multi-family" or "다가구" => "다가구주택",
+                "공장" or "factory" or "창고" or "warehouse" or "공장창고" => "공장",
+                _ => string.IsNullOrWhiteSpace(value) ? "기타" : value.Trim() // 알 수 없는 값은 원본 유지
+            };
         }
 
         #endregion

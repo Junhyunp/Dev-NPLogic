@@ -241,6 +241,13 @@
                                      Checked="FunctionTab_Checked"
                                      Tag="AuctionSchedule"/>
                         
+                        <!-- 9. 인터림 (가지급금/회수정보) -->
+                        <RadioButton x:Name="TabInterim"
+                                     Content="인터림"
+                                     Style="{StaticResource NonCoreTabStyle}"
+                                     Checked="FunctionTab_Checked"
+                                     Tag="Interim"/>
+                        
                         <!-- S-002: 현금흐름, XNPV 비교는 상단 메뉴로 이동 (Collapsed) -->
                         <!-- 9. 현금흐름 - 상단 메뉴로 이동 -->
                         <RadioButton x:Name="TabCashFlow"

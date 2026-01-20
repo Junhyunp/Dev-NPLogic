@@ -269,6 +269,11 @@ namespace NPLogic.Core.Models
         public bool IsRequired { get; set; }
 
         /// <summary>
+        /// 대표 컬럼명 (은행별 매핑 템플릿에서 변환된 표준 컬럼명)
+        /// </summary>
+        public string? StandardColumnName { get; set; }
+
+        /// <summary>
         /// 매핑됨 여부
         /// </summary>
         public bool IsMapped => !string.IsNullOrEmpty(DbColumn) && DbColumn != "(선택안함)";

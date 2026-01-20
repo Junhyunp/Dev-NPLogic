@@ -635,7 +635,12 @@ namespace NPLogic.ViewModels
                     filteredItems = ApplyAdvancedFilters(items);
                 }
 
-                foreach (var property in filteredItems)
+                // 기본 정렬: 차주번호 -> 담보번호 순
+                var sortedItems = filteredItems
+                    .OrderBy(p => p.BorrowerNumber ?? "")
+                    .ThenBy(p => p.CollateralNumber ?? "");
+
+                foreach (var property in sortedItems)
                 {
                     DashboardProperties.Add(property);
                 }
@@ -701,7 +706,12 @@ namespace NPLogic.ViewModels
                     filteredItems = ApplyAdvancedFilters(items);
                 }
 
-                foreach (var property in filteredItems)
+                // 정렬: 차주번호 -> 담보번호 순
+                var sortedItems = filteredItems
+                    .OrderBy(p => p.BorrowerNumber ?? "")
+                    .ThenBy(p => p.CollateralNumber ?? "");
+
+                foreach (var property in sortedItems)
                 {
                     DashboardProperties.Add(property);
                 }

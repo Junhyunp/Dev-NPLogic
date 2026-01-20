@@ -53,7 +53,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 지적도 열기 (일사편리)
+        /// 지적도 열기 (국가공간정보포털 지적도)
         /// </summary>
         private void OpenCadastralMap_Click(object sender, RoutedEventArgs e)
         {
@@ -66,9 +66,20 @@ namespace NPLogic.Views
 
             try
             {
-                // 일사편리 토지정보 (지적도) - 지번주소 사용
-                var address = Uri.EscapeDataString(vm.Property.DisplayAddress ?? "");
-                var url = $"https://www.eum.go.kr/web/ar/lu/luLandDet.jsp?is498&selAdd={address}";
+                // 국가공간정보포털 지적도 (지번주소 기반 검색)
+                // 또는 네이버 지도 지적편집도 사용
+                string url;
+                if (vm.Property.Latitude.HasValue && vm.Property.Longitude.HasValue)
+                {
+                    // 좌표가 있으면 네이버 지도 지적편집도로 이동
+                    url = $"https://map.naver.com/p/search/{Uri.EscapeDataString(vm.Property.DisplayAddress ?? "")}?c=15.00,0,0,2,dh&isCorrectAnswer=true";
+                }
+                else
+                {
+                    // 주소 기반 검색
+                    var address = Uri.EscapeDataString(vm.Property.DisplayAddress ?? "");
+                    url = $"https://map.naver.com/p/search/{address}?c=15.00,0,0,2,dh&isCorrectAnswer=true";
+                }
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             }
             catch (Exception ex)
@@ -91,16 +102,18 @@ namespace NPLogic.Views
 
             try
             {
-                // 카카오맵 로드뷰 URL
+                // 카카오맵 로드뷰 URL - 주소 검색 후 로드뷰 모드로 열기
+                var address = Uri.EscapeDataString(vm.Property.DisplayAddress ?? "");
                 string url;
                 if (vm.Property.Latitude.HasValue && vm.Property.Longitude.HasValue)
                 {
-                    url = $"https://map.kakao.com/?map_type=TYPE_MAP&panoid=1&rv=on&rvlat={vm.Property.Latitude}&rvlng={vm.Property.Longitude}";
+                    // 좌표가 있으면 직접 로드뷰 위치 지정
+                    url = $"https://map.kakao.com/?urlLevel=3&urlX={vm.Property.Longitude}&urlY={vm.Property.Latitude}&rv=1";
                 }
                 else
                 {
-                    var address = Uri.EscapeDataString(vm.Property.DisplayAddress ?? "");
-                    url = $"https://map.kakao.com/?q={address}";
+                    // 주소로 검색 후 로드뷰 모드
+                    url = $"https://map.kakao.com/?q={address}&rv=1";
                 }
                 
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
@@ -125,10 +138,23 @@ namespace NPLogic.Views
 
             try
             {
-                // 토지이음 URL - 지번주소 사용
-                var address = Uri.EscapeDataString(vm.Property.DisplayAddress ?? "");
-                var url = $"https://www.eum.go.kr/web/ar/lu/luLandDet.jsp?isLu498&selAdd={address}";
+                // 토지이음 토지이용계획확인원 - 직접 검색 페이지로 이동
+                // 주소를 복사해서 검색할 수 있도록 주소를 클립보드에 복사
+                var address = vm.Property.DisplayAddress ?? "";
+                if (!string.IsNullOrEmpty(address))
+                {
+                    System.Windows.Clipboard.SetText(address);
+                }
+                
+                // 토지이음 토지이용계획 검색 페이지
+                var url = "https://www.eum.go.kr/web/ar/lu/luLandSrch.jsp";
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                
+                if (!string.IsNullOrEmpty(address))
+                {
+                    MessageBox.Show($"주소가 클립보드에 복사되었습니다.\n검색창에 붙여넣기(Ctrl+V) 하세요.\n\n주소: {address}", 
+                        "안내", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
@@ -137,7 +163,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 건축물대장 열기 (세움터)
+        /// 건축물대장 열기 (정부24 건축물대장 열람)
         /// </summary>
         private void OpenBuildingRegister_Click(object sender, RoutedEventArgs e)
         {
@@ -150,9 +176,23 @@ namespace NPLogic.Views
 
             try
             {
-                // 세움터 건축물대장 URL
-                var url = "https://cloud.eais.go.kr/";
+                // 정부24 건축물대장 열람 페이지로 직접 이동
+                // 주소를 클립보드에 복사하여 검색 편의 제공
+                var address = vm.Property.DisplayAddress ?? "";
+                if (!string.IsNullOrEmpty(address))
+                {
+                    System.Windows.Clipboard.SetText(address);
+                }
+                
+                // 정부24 건축물대장 열람/발급 페이지 (로그인 불필요 열람 가능)
+                var url = "https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09002&CappBizCD=13100000015";
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                
+                if (!string.IsNullOrEmpty(address))
+                {
+                    MessageBox.Show($"주소가 클립보드에 복사되었습니다.\n검색창에 붙여넣기(Ctrl+V) 하세요.\n\n주소: {address}", 
+                        "안내", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {

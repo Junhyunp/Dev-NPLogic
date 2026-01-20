@@ -742,9 +742,9 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
 
                 // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
-                if (BorrowerToDelete.ProgramId.HasValue)
+                if (!string.IsNullOrEmpty(BorrowerToDelete.ProgramId) && Guid.TryParse(BorrowerToDelete.ProgramId, out var programGuid))
                 {
-                    var canDelete = await _permissionService.CanDeleteAsync(BorrowerToDelete.ProgramId.Value, CurrentUser);
+                    var canDelete = await _permissionService.CanDeleteAsync(programGuid, CurrentUser);
                     if (!canDelete)
                     {
                         ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
@@ -795,9 +795,9 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
 
                 // 권한 체크: 해당 프로그램의 PM 또는 Admin만 수정 가능
-                if (SelectedBorrower.ProgramId.HasValue)
+                if (!string.IsNullOrEmpty(SelectedBorrower.ProgramId) && Guid.TryParse(SelectedBorrower.ProgramId, out var programGuid))
                 {
-                    var canEdit = await _permissionService.CanEditAsync(SelectedBorrower.ProgramId.Value, CurrentUser);
+                    var canEdit = await _permissionService.CanEditAsync(programGuid, CurrentUser);
                     if (!canEdit)
                     {
                         ErrorMessage = PermissionService.GetNoPermissionMessage("edit");

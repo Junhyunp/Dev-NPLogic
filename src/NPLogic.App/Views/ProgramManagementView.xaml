@@ -46,7 +46,7 @@
                                Foreground="White"
                                FontSize="20"
                                FontWeight="Bold"/>
-                    <TextBlock Text="프로그램 생성, 수정, PM 배정" 
+                    <TextBlock Text="프로그램 생성, 업데이트, PM 배정" 
                                Foreground="#B0FFFFFF"
                                FontSize="12"
                                Margin="0,4,0,0"/>
@@ -194,7 +194,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="Update"
+                                        <Button Content="업데이트"
                                                 Command="{Binding DataContext.ShowEditFormCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
                                                 Style="{StaticResource PrimaryButton}"
@@ -265,8 +265,8 @@
                   Background="#80000000">
                 <Border Background="White"
                         CornerRadius="8"
-                        Padding="32"
-                        Margin="40"
+                        Padding="24"
+                        Margin="20"
                         VerticalAlignment="Stretch"
                         HorizontalAlignment="Stretch">
                     <Border.Effect>
@@ -297,8 +297,8 @@
                         <!-- 메인 컨텐츠: 2열 레이아웃 -->
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="400"/>
-                                <ColumnDefinition Width="32"/>
+                                <ColumnDefinition Width="450"/>
+                                <ColumnDefinition Width="24"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
@@ -416,8 +416,42 @@
 
                             <!-- 우측: 파일 업로드 영역 -->
                             <Grid Grid.Column="2">
-                                <!-- 파일 업로드 탭 -->
+                                <!-- 파일 업로드 탭 - 피드백: 탭 크기 축소 (다른 화면과 동일) -->
                                 <TabControl>
+                                    <TabControl.Resources>
+                                        <Style TargetType="TabItem">
+                                            <Setter Property="Padding" Value="12,6"/>
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="FontWeight" Value="Normal"/>
+                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TabItem">
+                                                        <Border x:Name="Border" 
+                                                                Background="Transparent" 
+                                                                BorderThickness="0,0,0,2" 
+                                                                BorderBrush="Transparent"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter x:Name="ContentSite"
+                                                                              ContentSource="Header"
+                                                                              HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Border" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </TabControl.Resources>
                                 <!-- 데이터디스크 탭 -->
                                 <TabItem Header="데이터디스크">
                                     <Grid Margin="0,16,0,0">
@@ -712,6 +746,7 @@
                                                                                     <ColumnDefinition Width="Auto"/>
                                                                                     <ColumnDefinition Width="Auto"/>
                                                                                     <ColumnDefinition Width="Auto"/>
+                                                                                    <ColumnDefinition Width="Auto"/>
                                                                                 </Grid.ColumnDefinitions>
                                                                                 
                                                                                 <!-- 체크박스 -->
@@ -726,10 +761,17 @@
                                                                                     <TextBlock Text="{Binding Name}" 
                                                                                                FontWeight="SemiBold"
                                                                                                FontSize="12"/>
-                                                                                    <TextBlock FontSize="10" Opacity="0.7">
-                                                                                        <Run Text="{Binding DataRowCount, Mode=OneWay}"/>
-                                                                                        <Run Text="행"/>
-                                                                                    </TextBlock>
+                                                                                    <StackPanel Orientation="Horizontal">
+                                                                                        <TextBlock FontSize="10" Opacity="0.7">
+                                                                                            <Run Text="{Binding DataRowCount, Mode=OneWay}"/>
+                                                                                            <Run Text="행"/>
+                                                                                        </TextBlock>
+                                                                                        <TextBlock FontSize="10" Opacity="0.7" Margin="8,0,0,0">
+                                                                                            <Run Text="헤더:"/>
+                                                                                            <Run Text="{Binding HeaderRow, Mode=OneWay}"/>
+                                                                                            <Run Text="행"/>
+                                                                                        </TextBlock>
+                                                                                    </StackPanel>
                                                                                 </StackPanel>
                                                                                 
                                                                                 <!-- 시트 타입 표시 (자동 감지된 타입) -->
@@ -746,11 +788,23 @@
                                                                                                FontWeight="SemiBold"/>
                                                                                 </Border>
                                                                                 
-                                                                                <!-- 컬럼 매핑 버튼 -->
+                                                                                <!-- 제목행 확인 버튼 - 피드백 6번 -->
                                                                                 <Button Grid.Column="3"
+                                                                                        Content="제목행"
+                                                                                        Style="{StaticResource SecondaryButton}"
+                                                                                        Padding="6,4"
+                                                                                        FontSize="10"
+                                                                                        Margin="4,0"
+                                                                                        VerticalAlignment="Center"
+                                                                                        Click="HeaderRowButton_Click"
+                                                                                        Tag="{Binding}"
+                                                                                        ToolTip="제목행(헤더행)을 확인하고 변경합니다"/>
+                                                                                
+                                                                                <!-- 컬럼 매핑 버튼 -->
+                                                                                <Button Grid.Column="4"
                                                                                         Content="컬럼매핑"
                                                                                         Style="{StaticResource SecondaryButton}"
-                                                                                        Padding="8,4"
+                                                                                        Padding="6,4"
                                                                                         FontSize="10"
                                                                                         Margin="4,0"
                                                                                         VerticalAlignment="Center"
