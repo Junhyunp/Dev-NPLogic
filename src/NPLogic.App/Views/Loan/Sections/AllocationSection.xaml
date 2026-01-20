@@ -53,9 +53,9 @@
     
     <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
         <StackPanel>
-            <!-- 섹션 헤더 -->
+            <!-- 섹션 헤더 (원본 엑셀과 동일) -->
             <Border Background="{StaticResource PurpleBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock Text="배분대상금액 안분 (해지부보증 / 일반+해지부보증)" FontWeight="Bold" FontSize="12"/>
+                <TextBlock Text="배분대상금액 안분" FontWeight="Bold" FontSize="12"/>
             </Border>
             
             <!-- 헤더 행 -->
@@ -273,14 +273,6 @@
                 </Border>
             </Grid>
             
-            <!-- 설명 -->
-            <Border Background="#F3E5F5" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock FontSize="9" Foreground="#666666" TextWrapping="Wrap">
-                    <Run Text="• 배당가능재원 = 감정평가금액 × (총 배당가능재원 / 총 감정평가금액)"/>
-                    <LineBreak/>
-                    <Run Text="• 당해시설: 해지부보증에 해당하는 시설만 별도로 집계"/>
-                </TextBlock>
-            </Border>
         </StackPanel>
     </Border>
 </UserControl>

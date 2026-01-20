@@ -568,9 +568,10 @@ namespace NPLogic.ViewModels
         /// </summary>
         public void LoadProperty(Property property)
         {
-            // #region agent log
+#if DEBUG
+            // 디버그 로깅 (릴리스 빌드에서 제외)
             System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="LoadProperty called",data=new{propertyNumber=property?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-            // #endregion
+#endif
             
             if (property == null) return;
 
@@ -601,9 +602,9 @@ namespace NPLogic.ViewModels
             {
                 SelectPropertyTab(property.Id);
                 
-                // #region agent log
+#if DEBUG
                 System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="SelectPropertyTab called - BUT NO TAB CONTENT REFRESH!",data=new{selectedPropertyTabNumber=SelectedPropertyTab?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-                // #endregion
+#endif
             }
         }
 
@@ -937,6 +938,45 @@ namespace NPLogic.ViewModels
                 return null;
 
             return await _propertyRepository.GetByIdAsync(SelectedPropertyTab.PropertyId);
+        }
+        
+        // ========== 물건 데이터 캐싱 (성능 최적화) ==========
+        private Property? _cachedProperty;
+        private DateTime _cacheTime;
+        private readonly TimeSpan _cacheExpiry = TimeSpan.FromMinutes(5);
+        
+        /// <summary>
+        /// 현재 선택된 물건을 캐시에서 가져오기 (성능 최적화)
+        /// 동일 물건에 대한 중복 DB 조회 방지
+        /// </summary>
+        public async Task<Property?> GetCurrentPropertyCachedAsync()
+        {
+            if (SelectedPropertyTab == null || _propertyRepository == null)
+                return null;
+            
+            var currentPropertyId = SelectedPropertyTab.PropertyId;
+            
+            // 캐시가 유효한지 확인
+            if (_cachedProperty != null && 
+                _cachedProperty.Id == currentPropertyId &&
+                DateTime.Now - _cacheTime < _cacheExpiry)
+            {
+                return _cachedProperty;
+            }
+            
+            // 캐시 갱신
+            _cachedProperty = await _propertyRepository.GetByIdAsync(currentPropertyId);
+            _cacheTime = DateTime.Now;
+            
+            return _cachedProperty;
+        }
+        
+        /// <summary>
+        /// 물건 캐시 무효화 (데이터 수정 후 호출)
+        /// </summary>
+        public void InvalidatePropertyCache()
+        {
+            _cachedProperty = null;
         }
 
         // ========== 검색 및 필터 기능 메서드 (신규) ==========

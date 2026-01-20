@@ -7,6 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="1500" d:DesignWidth="1400">
     
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
+    </UserControl.Resources>
+    
     <!-- 해지부보증 시트: 일반보증 + 배분대상금액 안분 + 당해시설 외/당해시설 배당가능재원 -->
     <StackPanel>
         <!-- 채권정보 섹션 -->
@@ -15,10 +19,44 @@
         <!-- 보증서요약 섹션 -->
         <sections:GuaranteeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
         
-        <!-- Loan Cap 1 섹션 -->
-        <sections:LoanCapSection DataContext="{Binding}" Margin="0,0,0,16"/>
+        <!-- 이미지 업로드 영역 -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+            <!-- 보증서 등 -->
+            <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Width="180" Margin="0,0,8,0">
+                <StackPanel>
+                    <Border Background="#E8F5E9" Padding="8,4">
+                        <TextBlock Text="보증서 등" FontWeight="SemiBold" FontSize="11"/>
+                    </Border>
+                    <Border Padding="8" MinHeight="180">
+                        <StackPanel VerticalAlignment="Top">
+                            <Button Content="이미지 붙여넣기" Command="{Binding PasteGuaranteeImageCommand}" Padding="8,4" FontSize="10" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                            <Button Content="파일 선택" Command="{Binding SelectGuaranteeImageCommand}" Padding="8,4" FontSize="10" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                            <Image Source="{Binding GuaranteeImage}" MaxHeight="100" Stretch="Uniform" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding GuaranteeImageInfo}" FontSize="9" Opacity="0.7" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- 기타항목 및 전송 -->
+            <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Width="180">
+                <StackPanel>
+                    <Border Background="#FFF3E0" Padding="8,4">
+                        <TextBlock Text="기타항목 및 전송" FontWeight="SemiBold" FontSize="11"/>
+                    </Border>
+                    <Border Padding="8" MinHeight="180">
+                        <StackPanel VerticalAlignment="Top">
+                            <Button Content="이미지 붙여넣기" Command="{Binding PasteOtherItemsImageCommand}" Padding="8,4" FontSize="10" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                            <Button Content="파일 선택" Command="{Binding SelectOtherItemsImageCommand}" Padding="8,4" FontSize="10" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                            <Image Source="{Binding OtherItemsImage}" MaxHeight="100" Stretch="Uniform" Margin="0,4,0,0"/>
+                            <TextBlock Text="{Binding OtherItemsImageInfo}" FontSize="9" Opacity="0.7" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+        </StackPanel>
         
-        <!-- 보증여부별 합계 섹션 -->
+        <!-- 보증여부 요약 섹션 -->
         <sections:GuaranteeTypeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
         
         <!-- 배분대상금액 안분 섹션 -->

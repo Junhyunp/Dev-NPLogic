@@ -79,6 +79,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <!-- ========== 헤더 + 저장 버튼 ========== -->
@@ -204,6 +205,8 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="70"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -221,6 +224,12 @@
                                 <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCellStyle}">
                                     <TextBlock Text="감정평가금액" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
                                 </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="1안배당가능재원(AK)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="10"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
+                                    <TextBlock Text="2안배당가능재원(AL)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="10"/>
+                                </Border>
                                 
                                 <!-- 토지 -->
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -229,6 +238,12 @@
                                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InputCellStyle}">
                                     <TextBox Text="{Binding LandAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding LandDistributableScenario1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding LandDistributableScenario2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 
                                 <!-- 건물 -->
@@ -239,6 +254,12 @@
                                     <TextBox Text="{Binding BuildingAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
+                                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding BuildingDistributableScenario1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding BuildingDistributableScenario2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
                                 
                                 <!-- 기계 -->
                                 <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -247,6 +268,12 @@
                                 <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource InputCellStyle}">
                                     <TextBox Text="{Binding MachineryAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding MachineryDistributableScenario1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding MachineryDistributableScenario2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 
                                 <!-- 타행선순위 -->
@@ -257,6 +284,12 @@
                                     <TextBox Text="{Binding OtherBankSeniorValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
+                                <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding OtherBankDistributableScenario1, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableCellStyle}">
+                                    <TextBlock Text="{Binding OtherBankDistributableScenario2, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
+                                </Border>
                                 
                                 <!-- Total -->
                                 <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource ResultCellStyle}">
@@ -264,6 +297,12 @@
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource ResultCellStyle}">
                                     <TextBlock Text="{Binding TotalAppraisalValue, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource ResultCellStyle}">
+                                    <TextBlock Text="{Binding TotalDistributableScenario1, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource ResultCellStyle}">
+                                    <TextBlock Text="{Binding TotalDistributableScenario2, StringFormat=N0}" Style="{StaticResource AmountStyle}" FontWeight="SemiBold"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -274,9 +313,13 @@
             <!-- ========== 2. 경매일정 섹션 ========== -->
             <Border Grid.Row="2" Background="{StaticResource SurfaceColor}" CornerRadius="4" Padding="12" Margin="0,0,0,12">
                 <StackPanel>
-                    <!-- 경/공매 선택 및 경매신청여부 -->
+                    <!-- 경/공매 선택 및 경매신청여부 + 경매신청금액 -->
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
@@ -288,8 +331,8 @@
                         
                         <TextBlock Grid.Column="1" Text="경,공매선택" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,24,0">
-                            <RadioButton Content="경" GroupName="AuctionType" IsChecked="{Binding IsAuction}" Margin="0,0,8,0"/>
-                            <RadioButton Content="공" GroupName="AuctionType"/>
+                            <RadioButton Content="경" GroupName="AuctionType" IsChecked="{Binding IsAuction, Mode=TwoWay}" Margin="0,0,8,0"/>
+                            <RadioButton Content="공" GroupName="AuctionType" IsChecked="{Binding IsAuction, Mode=TwoWay, Converter={StaticResource InverseBooleanConverter}}"/>
                         </StackPanel>
                         
                         <TextBlock Grid.Column="3" Text="경매신청여부" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
@@ -299,6 +342,14 @@
                             <ComboBoxItem Content="*3 3자경매신청" Tag="*3"/>
                             <ComboBoxItem Content="*4 중복경매신청" Tag="*4"/>
                         </ComboBox>
+                        <TextBlock Grid.Column="5" Text="(*1)" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="8,0,16,0" Opacity="0.6"/>
+                        
+                        <TextBlock Grid.Column="6" Text="경매신청금액" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <Border Grid.Column="7" Background="#FFFDE7" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Padding="4,2">
+                            <TextBox Text="{Binding AuctionRequestAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource TransparentTextBoxStyle}" Width="150" HorizontalContentAlignment="Right"/>
+                        </Border>
+                        <TextBlock Grid.Column="8" Text="(*2)" Style="{StaticResource LabelStyle}" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.6"/>
                     </Grid>
                     
                     <!-- 차주사항 테이블 -->
@@ -1225,8 +1276,200 @@
                 </Grid>
             </Border>
             
-            <!-- ========== 6. 회수가능액 요약 ========== -->
-            <Border Grid.Row="6" Background="{StaticResource PrimaryBrush}" CornerRadius="8" Padding="20">
+            <!-- ========== 6. 경매일정 기본 세팅 ========== -->
+            <Border Grid.Row="6" Background="{StaticResource SurfaceColor}" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="&lt; 경매일정 기본 세팅 &gt;" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,16,0"/>
+                        <TextBlock Text="{Binding BaseSettingDate, StringFormat='{}{0:yyyy.MM.dd} 기준'}" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- 매각수수료 테이블 -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="3. 매각수수료 : 매각대금기준 (통상 청구금액기준)" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- 헤더 -->
+                                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="과표범위" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="비율" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="기본누적금액" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    
+                                    <!-- 데이터 행들 -->
+                                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="0" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="100,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="-" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="5,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="100,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="2.0%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="5,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="50,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="1.5%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="203,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="50,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="100,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="1.0%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="803,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="100,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="300,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="0.5%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,303,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="300,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="500,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="0.3%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="2,303,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="500,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="0.2%" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="2,903,000" Style="{StaticResource AmountStyle}"/></Border>
+                                </Grid>
+                            </Border>
+                            
+                            <TextBlock Text="1. 신문공고료 : 220,000원" Style="{StaticResource LabelStyle}" Margin="0,12,0,4"/>
+                            <TextBlock Text="5. 송달수수료 : (신청서상 이해관계인수 + 3) × 10회분 (1회분 3,020원)" Style="{StaticResource LabelStyle}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- 감정수수료 테이블 -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="4. 감정수수료 : 평가금액기준 (토지, 일반건물)" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                            <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="80"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- 헤더 -->
+                                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="과표범위" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="감정평가수수료" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="실비" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="5" Style="{StaticResource TableHeaderCellStyle}">
+                                        <TextBlock Text="부가가치세" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    
+                                    <!-- 데이터 행들 -->
+                                    <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="0" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="197,727,272" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="290,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="48,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="1" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="33,800" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="197,727,272" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="200,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,610,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="48,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,065,800" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="200,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="500,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,610,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="88,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="3" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,069,800" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="500,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="8,782,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="88,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="4" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="887,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="1,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="5,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="7,908,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="88,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="5" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="799,600" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="5,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="7,354,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="88,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="744,200" Style="{StaticResource AmountStyle}"/></Border>
+                                    
+                                    <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableCellStyle}"><TextBlock Text="10,000,000,000" Style="{StaticResource LabelStyle}" HorizontalAlignment="Right"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableCellStyle}"><TextBlock Text="~" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableCellStyle}"><TextBlock Text="" Style="{StaticResource LabelStyle}"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableCellStyle}"><TextBlock Text="7,200,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableCellStyle}"><TextBlock Text="88,000" Style="{StaticResource AmountStyle}"/></Border>
+                                    <Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TableCellStyle}"><TextBlock Text="728,800" Style="{StaticResource AmountStyle}"/></Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- ========== 7. 회수가능액 요약 ========== -->
+            <Border Grid.Row="7" Background="{StaticResource PrimaryBrush}" CornerRadius="8" Padding="20">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

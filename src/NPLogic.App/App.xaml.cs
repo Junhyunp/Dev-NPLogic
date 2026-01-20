@@ -198,6 +198,27 @@ namespace NPLogic
             services.AddTransient<ViewModels.AuditLogsViewModel>();
             services.AddTransient<ViewModels.SeniorRightsViewModel>();
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
+            services.AddTransient<ViewModels.AuctionScheduleDetailViewModel>(sp =>
+            {
+                return new ViewModels.AuctionScheduleDetailViewModel(
+                    sp.GetRequiredService<SupabaseService>(),
+                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>()
+                );
+            });
+            services.AddTransient<ViewModels.AuctionPublicSaleViewModel>(sp =>
+            {
+                return new ViewModels.AuctionPublicSaleViewModel(
+                    sp.GetRequiredService<SupabaseService>(),
+                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PublicSaleScheduleRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.EvaluationRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>()
+                );
+            });
             services.AddTransient<ViewModels.ProgramManagementViewModel>();
             services.AddTransient<ViewModels.ProgramSettingsViewModel>();
             services.AddTransient<ViewModels.NonCoreViewModel>(sp =>
@@ -355,6 +376,15 @@ namespace NPLogic
             {
                 var view = new Views.PublicSaleScheduleView();
                 view.DataContext = sp.GetRequiredService<ViewModels.PublicSaleScheduleViewModel>();
+                return view;
+            });
+
+            services.AddTransient<Views.AuctionPublicSaleView>(sp =>
+            {
+                var view = new Views.AuctionPublicSaleView();
+                var auctionVm = sp.GetRequiredService<ViewModels.AuctionScheduleDetailViewModel>();
+                var publicSaleVm = sp.GetRequiredService<ViewModels.PublicSaleScheduleViewModel>();
+                view.SetViewModels(auctionVm, publicSaleVm);
                 return view;
             });
 

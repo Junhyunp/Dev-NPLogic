@@ -1,4 +1,4 @@
-<Window x:Class="NPLogic.Views.RollupWindow"
+﻿<Window x:Class="NPLogic.Views.RollupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -251,18 +251,11 @@
                 </DataGridTemplateColumn>
                 
                 <!-- 경개1 -->
-                <DataGridTextColumn Header="경개1" 
+                <DataGridTextColumn Header="경매개시" 
                                     Binding="{Binding AuctionStart1}" 
                                     Width="50"
                                     IsReadOnly="True"/>
                 
-                <!-- 경개2 -->
-                <DataGridTextColumn Header="경개2" 
-                                    Binding="{Binding AuctionStart2}" 
-                                    Width="50"
-                                    IsReadOnly="True"/>
-                
-                <!-- 경매열람 -->
                 <DataGridTemplateColumn Header="경매열람" Width="55">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

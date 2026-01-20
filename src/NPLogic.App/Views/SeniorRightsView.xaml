@@ -125,7 +125,7 @@
                            Margin="0,0,0,4"/>
                 <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
                     <Run Text="경매사건 및 선순위 분석 | 선순위 합계:"/>
-                    <Run Text="{Binding SeniorRightsTotal, StringFormat=N0, FallbackValue=0}" FontWeight="SemiBold"/>
+                    <Run Text="{Binding SeniorRightsTotal, StringFormat=N0, FallbackValue=0, Mode=OneWay}" FontWeight="SemiBold"/>
                     <Run Text="원"/>
                 </TextBlock>
             </StackPanel>
@@ -973,7 +973,7 @@
                                         </Border>
                                         <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}" Background="#E8F5E9">
                                             <TextBlock Style="{StaticResource AmountStyle}" FontWeight="Bold">
-                                                <Run Text="{Binding RecoveryRate, StringFormat=N1}"/>
+                                                <Run Text="{Binding RecoveryRate, StringFormat=N1, Mode=OneWay}"/>
                                                 <Run Text="%"/>
                                             </TextBlock>
                                         </Border>

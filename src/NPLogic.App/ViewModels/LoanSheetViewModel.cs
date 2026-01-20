@@ -1,9 +1,14 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
@@ -277,6 +282,9 @@ namespace NPLogic.ViewModels
                     Loans.Add(loan);
                 }
 
+                // 데이터가 없으면 빈 행 1개 추가 (체크박스 표시용)
+                EnsureEmptyRowIfNeeded();
+
                 Statistics = await _loanRepository.GetStatisticsByBorrowerIdAsync(SelectedBorrower.Id);
             }
             catch (Exception ex)
@@ -293,6 +301,30 @@ namespace NPLogic.ViewModels
         {
             SelectedLoan = null;
             _ = LoadLoansAsync();
+        }
+
+        /// <summary>
+        /// 데이터가 없으면 빈 행 추가 (체크박스 컬럼 표시용)
+        /// </summary>
+        private void EnsureEmptyRowIfNeeded()
+        {
+            // Loans가 비어있으면 빈 Loan 객체 추가
+            if (Loans.Count == 0)
+            {
+                Loans.Add(new Loan { IsEmptyRow = true });
+            }
+
+            // 보증서 요약이 비어있으면 빈 항목 추가
+            if (GuaranteeSummaryItems.Count == 0)
+            {
+                GuaranteeSummaryItems.Add(new GuaranteeSummaryItem());
+            }
+
+            // 안분비율이 비어있으면 빈 항목 추가
+            if (ProrationItems.Count == 0)
+            {
+                ProrationItems.Add(new ProrationItem());
+            }
         }
 
         /// <summary>
@@ -552,6 +584,144 @@ namespace NPLogic.ViewModels
         {
             await InitializeAsync();
         }
+
+        // ========== 이미지 업로드 관련 ==========
+
+        [ObservableProperty]
+        private ImageSource? _guaranteeImage;
+
+        [ObservableProperty]
+        private string? _guaranteeImageInfo;
+
+        [ObservableProperty]
+        private ImageSource? _otherItemsImage;
+
+        [ObservableProperty]
+        private string? _otherItemsImageInfo;
+
+        /// <summary>
+        /// 보증서 등 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteGuaranteeImage()
+        {
+            try
+            {
+                if (Clipboard.ContainsImage())
+                {
+                    var image = Clipboard.GetImage();
+                    if (image != null)
+                    {
+                        GuaranteeImage = image;
+                        GuaranteeImageInfo = $"붙여넣기 완료 ({image.PixelWidth}x{image.PixelHeight})";
+                        NPLogic.UI.Services.ToastService.Instance.ShowSuccess("이미지가 붙여넣기 되었습니다.");
+                    }
+                }
+                else
+                {
+                    NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"이미지 붙여넣기 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 보증서 등 이미지 파일 선택
+        /// </summary>
+        [RelayCommand]
+        private void SelectGuaranteeImage()
+        {
+            try
+            {
+                var dialog = new OpenFileDialog
+                {
+                    Title = "보증서 이미지 선택",
+                    Filter = "이미지 파일|*.png;*.jpg;*.jpeg;*.bmp;*.gif|모든 파일|*.*"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(dialog.FileName);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+
+                    GuaranteeImage = bitmap;
+                    GuaranteeImageInfo = Path.GetFileName(dialog.FileName);
+                    NPLogic.UI.Services.ToastService.Instance.ShowSuccess("이미지가 선택되었습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"이미지 선택 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 기타항목 및 전송 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PasteOtherItemsImage()
+        {
+            try
+            {
+                if (Clipboard.ContainsImage())
+                {
+                    var image = Clipboard.GetImage();
+                    if (image != null)
+                    {
+                        OtherItemsImage = image;
+                        OtherItemsImageInfo = $"붙여넣기 완료 ({image.PixelWidth}x{image.PixelHeight})";
+                        NPLogic.UI.Services.ToastService.Instance.ShowSuccess("이미지가 붙여넣기 되었습니다.");
+                    }
+                }
+                else
+                {
+                    NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"이미지 붙여넣기 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 기타항목 및 전송 이미지 파일 선택
+        /// </summary>
+        [RelayCommand]
+        private void SelectOtherItemsImage()
+        {
+            try
+            {
+                var dialog = new OpenFileDialog
+                {
+                    Title = "기타항목 이미지 선택",
+                    Filter = "이미지 파일|*.png;*.jpg;*.jpeg;*.bmp;*.gif|모든 파일|*.*"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(dialog.FileName);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+
+                    OtherItemsImage = bitmap;
+                    OtherItemsImageInfo = Path.GetFileName(dialog.FileName);
+                    NPLogic.UI.Services.ToastService.Instance.ShowSuccess("이미지가 선택되었습니다.");
+                }
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"이미지 선택 실패: {ex.Message}");
+            }
+        }
     }
 
     // ========== 보조 모델 클래스 ==========
@@ -764,6 +934,21 @@ namespace NPLogic.ViewModels
         
         [ObservableProperty]
         private decimal _validCollateralDividend;  // 유효담보가 배당액
+        
+        [ObservableProperty]
+        private decimal _bondBalance;  // 채권잔액
+        
+        [ObservableProperty]
+        private decimal _targetPrincipalMinusMci;  // 인수대상원금-MCI 가입잔액
+        
+        [ObservableProperty]
+        private decimal _accruedPlusOverdue;  // 미수이자+연체이자
+        
+        [ObservableProperty]
+        private decimal _validCollateral20Percent;  // 유효담보가의 20%
+        
+        [ObservableProperty]
+        private decimal _validCollateralPlusInterestMax;  // 유효담보가+유효담보가의 이자(Max 한도)
         
         [ObservableProperty]
         private decimal _expectedDividend;  // 예상배당금

@@ -436,10 +436,11 @@
                                     
                                     <StackPanel Grid.Row="0" Grid.Column="0">
                                         <TextBlock Text="선순위 합계" Style="{StaticResource CaptionTextStyle}" Margin="0,0,0,4"/>
-                                        <TextBox Text="{Binding SeniorRightsTotal, StringFormat=N0}" 
+                                        <TextBox Text="{Binding SeniorRightsTotal, StringFormat=N0, Mode=OneWay}" 
                                                  Padding="8,6"
                                                  Background="{StaticResource BlueGray50Brush}"
-                                                 FontWeight="Bold"/>
+                                                 FontWeight="Bold"
+                                                 IsReadOnly="True"/>
                                     </StackPanel>
                                     
                                     <StackPanel Grid.Row="0" Grid.Column="2">

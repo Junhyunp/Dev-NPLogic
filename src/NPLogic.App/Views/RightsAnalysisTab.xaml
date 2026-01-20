@@ -421,7 +421,7 @@
                                            Style="{StaticResource FieldLabelStyle}"
                                            Margin="0,0,0,4"/>
                                 <TextBlock FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}">
-                                    <Run Text="{Binding TotalReflectedAmount, StringFormat=N0}"/>
+                                    <Run Text="{Binding TotalReflectedAmount, StringFormat=N0, Mode=OneWay}"/>
                                     <Run Text="원" FontSize="14" FontWeight="Normal"/>
                                 </TextBlock>
                                 <TextBlock Text="선순위 관리에서 상세 내역을 확인하세요" 
@@ -560,7 +560,7 @@
                                                FontSize="{StaticResource FontSizeH4}" 
                                                FontWeight="SemiBold"/>
                                     <TextBlock HorizontalAlignment="Right">
-                                        <Run Text="{Binding Analysis.RecoveryRate, StringFormat=N1}" 
+                                        <Run Text="{Binding Analysis.RecoveryRate, StringFormat=N1, Mode=OneWay}" 
                                              FontSize="28"
                                              FontWeight="Bold"
                                              Foreground="{StaticResource PrimaryBrush}"/>

@@ -31,6 +31,11 @@ namespace NPLogic.Views
             "CashFlow", "XnpvComparison" 
         };
         private int _currentFunctionTabIndex = 0;
+        
+        // ========== 탭별 View/ViewModel 캐시 (성능 최적화) ==========
+        private readonly Dictionary<string, UserControl> _tabViewCache = new();
+        private readonly Dictionary<string, object> _tabViewModelCache = new();
+        private Guid? _lastPropertyId; // 마지막으로 로드한 물건 ID (캐시 무효화용)
 
         public NonCoreView()
         {
@@ -200,10 +205,6 @@ namespace NPLogic.Views
             // RadioButton UI 상태를 기준으로 현재 선택된 탭 확인
             var currentTab = GetCurrentSelectedTabFromUI();
             
-            // #region agent log
-            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:RefreshCurrentTabAsync",message="RefreshCurrentTabAsync called",data=new{currentTabFromUI=currentTab,activeTabFromVM=_viewModel?.ActiveTab,selectedPropertyTab=_viewModel?.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="FIX"})+"\n");
-            // #endregion
-            
             if (!string.IsNullOrEmpty(currentTab))
             {
                 await LoadFunctionContentAsync(currentTab);
@@ -240,109 +241,116 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 기능별 컨텐츠 로드 - 피드백 반영: 10개 탭 구조
+        /// 기능별 컨텐츠 로드 - 성능 최적화: View 캐싱 적용
         /// </summary>
         private async Task LoadFunctionContentAsync(string tabName)
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
 
-            UserControl? content = null;
-            
             // 현재 선택된 물건 ID 가져오기
             var selectedPropertyId = _viewModel?.SelectedPropertyTab?.PropertyId;
+            
+            // 물건이 변경되었는지 확인 (캐시 데이터 갱신 필요 여부)
+            var propertyChanged = selectedPropertyId != _lastPropertyId;
+            _lastPropertyId = selectedPropertyId;
+            
+            UserControl? content;
+            
+            // 캐시에서 View 조회
+            if (_tabViewCache.TryGetValue(tabName, out var cachedView))
+            {
+                content = cachedView;
+                
+                // 물건이 변경된 경우에만 데이터 갱신
+                if (propertyChanged)
+                {
+                    await RefreshTabDataAsync(tabName, selectedPropertyId);
+                }
+            }
+            else
+            {
+                // 최초 접근 시 View 생성 후 캐시에 저장
+                content = await CreateAndCacheTabViewAsync(tabName, selectedPropertyId, serviceProvider);
+            }
 
+            ContentArea.Content = content;
+            
+            // ViewModel에 현재 탭 알림
+            _viewModel?.SetActiveTab(tabName);
+        }
+        
+        /// <summary>
+        /// 탭 View 생성 및 캐시에 저장
+        /// </summary>
+        private async Task<UserControl> CreateAndCacheTabViewAsync(string tabName, Guid? selectedPropertyId, IServiceProvider serviceProvider)
+        {
+            UserControl content;
+            object? viewModel = null;
+            
             switch (tabName)
             {
                 case "Home":
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="Home tab loading",data=new{selectedPropertyId=selectedPropertyId?.ToString(),selectedPropertyTabNumber=_viewModel?.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
-                    // #endregion
-                    
                     content = serviceProvider.GetRequiredService<HomeTab>();
-                    // PropertyDetailViewModel 항상 설정 (커맨드 바인딩을 위해)
                     {
                         var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
                         if (selectedPropertyId.HasValue)
                         {
-                            // #region agent log
-                            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="Setting PropertyId and initializing",data=new{propertyId=selectedPropertyId.Value.ToString()},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
-                            // #endregion
-                            
                             vm.SetPropertyId(selectedPropertyId.Value);
-                            _ = vm.InitializeAsync();
-                        }
-                        else
-                        {
-                            // #region agent log
-                            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:LoadFunctionContentAsync:Home",message="selectedPropertyId is null - NOT initializing VM",data=new{},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
-                            // #endregion
+                            await vm.InitializeAsync();
                         }
                         content.DataContext = vm;
+                        viewModel = vm;
                     }
                     break;
+                    
                 case "BorrowerOverview":
-                    // 차주개요 탭 - 선택된 물건의 차주 정보만 표시
                     content = serviceProvider.GetRequiredService<BorrowerOverviewView>();
                     {
                         var borrowerVm = serviceProvider.GetRequiredService<BorrowerOverviewViewModel>();
                         
-                        // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
                         if (_viewModel?.SelectedPropertyTab != null)
                         {
-                            Debug.WriteLine($"[NonCoreView] BorrowerOverview - SelectedPropertyTab: {_viewModel.SelectedPropertyTab.PropertyNumber}");
-                            
-                            var property = await _viewModel.GetCurrentPropertyAsync();
+                            var property = await _viewModel.GetCurrentPropertyCachedAsync();
                             if (property != null)
                             {
-                                Debug.WriteLine($"[NonCoreView] BorrowerOverview - Property: {property.PropertyNumber}, BorrowerNumber: {property.BorrowerNumber}, DebtorName: {property.DebtorName}");
                                 await borrowerVm.SetSelectedPropertyAsync(property);
                             }
-                            else
-                            {
-                                Debug.WriteLine("[NonCoreView] BorrowerOverview - Property is null!");
-                            }
-                        }
-                        else
-                        {
-                            Debug.WriteLine("[NonCoreView] BorrowerOverview - SelectedPropertyTab is null");
                         }
                         
                         content.DataContext = borrowerVm;
+                        viewModel = borrowerVm;
                     }
                     break;
+                    
                 case "Loan":
-                    // Loan 시트 탭 - 4개 시트 (일반, 일반보증, 해지부보증, 일반+해지부보증)
                     content = serviceProvider.GetRequiredService<Loan.LoanSheetView>();
                     {
                         var loanSheetVm = serviceProvider.GetRequiredService<LoanSheetViewModel>();
                         
-                        // 선택된 물건 정보가 있으면 단일 차주 모드로 설정
                         if (_viewModel?.SelectedPropertyTab != null)
                         {
-                            var property = await _viewModel.GetCurrentPropertyAsync();
+                            var property = await _viewModel.GetCurrentPropertyCachedAsync();
                             if (property != null)
                             {
                                 await loanSheetVm.SetSelectedPropertyAsync(property);
                             }
                             else
                             {
-                                // 물건 정보 로드 실패 시에도 초기화
                                 await loanSheetVm.InitializeAsync();
                             }
                         }
                         else
                         {
-                            // 선택된 물건이 없으면 전체 차주 모드로 초기화
                             await loanSheetVm.InitializeAsync();
                         }
                         
                         content.DataContext = loanSheetVm;
+                        viewModel = loanSheetVm;
                     }
                     break;
+                    
                 case "CollateralProperty":
-                    // 담보물건 탭 - 물건 기본 정보, 등기부등본 정보, 감정평가 정보를 테이블 형태로 표시
-                    // 피드백 반영: 위성도/지적도/로드뷰/토지이용계획/건축물대장 버튼을 한 행에 배치
                     content = serviceProvider.GetRequiredService<CollateralPropertyView>();
                     {
                         var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
@@ -352,95 +360,166 @@ namespace NPLogic.Views
                             await vm.InitializeAsync();
                         }
                         content.DataContext = vm;
+                        viewModel = vm;
                     }
                     break;
+                    
                 case "SeniorRights":
                     content = serviceProvider.GetRequiredService<SeniorRightsView>();
                     break;
+                    
                 case "Restructuring":
-                    // 회생개요 탭 - 회생차주인 경우에만 표시
                     content = serviceProvider.GetRequiredService<RestructuringOverviewView>();
                     break;
+                    
                 case "Evaluation":
-                    // 평가 탭 - 추천 시스템 포함
                     content = serviceProvider.GetRequiredService<EvaluationTab>();
-                    // EvaluationViewModel을 DataContext로 설정 (EvaluationTab.xaml의 바인딩에 맞춤)
                     {
                         var parentVm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
-                        // 먼저 PropertyDetailViewModel 초기화 (EvaluationViewModel 생성을 위해)
                         if (selectedPropertyId.HasValue)
                         {
                             parentVm.SetPropertyId(selectedPropertyId.Value);
-                            _ = parentVm.InitializeAsync();
+                            await parentVm.InitializeAsync();
                         }
                         
                         if (parentVm.EvaluationViewModel != null)
                         {
-                            // 선택된 물건 ID 및 Property 정보 설정
                             if (selectedPropertyId.HasValue)
                             {
                                 parentVm.EvaluationViewModel.SetPropertyId(selectedPropertyId.Value);
-                                // Property 정보도 설정 (지역명 추출 등에 필요)
                                 if (parentVm.Property != null)
                                 {
                                     parentVm.EvaluationViewModel.SetProperty(parentVm.Property);
                                 }
                             }
                             content.DataContext = parentVm.EvaluationViewModel;
-                            // 데이터 로드 (백그라운드에서)
-                            _ = parentVm.EvaluationViewModel.LoadAsync();
+                            await parentVm.EvaluationViewModel.LoadAsync();
+                            viewModel = parentVm.EvaluationViewModel;
                         }
                         else
                         {
-                            Debug.WriteLine("[NonCoreView] EvaluationViewModel is null! PropertyDetailViewModel may not be initialized.");
                             content.DataContext = null;
                         }
                     }
                     break;
+                    
                 case "AuctionSchedule":
-                    // 경(공)매일정 상세 화면 (산출화면 기반)
-                    content = new AuctionScheduleDetailView();
+                    // 경매/공매 일정 통합 뷰 사용
+                    try
                     {
-                        var auctionParentVm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
-                        // 먼저 PropertyDetailViewModel 초기화 (AuctionScheduleDetailViewModel 생성을 위해)
+                        var auctionPublicSaleView = new AuctionPublicSaleView();
+                        
+                        // ViewModel들 가져오기
+                        var auctionVm = serviceProvider.GetRequiredService<AuctionScheduleDetailViewModel>();
+                        var publicSaleVm = serviceProvider.GetRequiredService<PublicSaleScheduleViewModel>();
+                        
+                        // PropertyId 설정
                         if (selectedPropertyId.HasValue)
                         {
-                            auctionParentVm.SetPropertyId(selectedPropertyId.Value);
-                            _ = auctionParentVm.InitializeAsync();
+                            auctionVm.SetPropertyId(selectedPropertyId.Value);
+                            publicSaleVm.SetPropertyId(selectedPropertyId.Value);
                         }
                         
-                        if (auctionParentVm.AuctionScheduleDetailViewModel != null)
-                        {
-                            // 선택된 물건 ID 설정
-                            if (selectedPropertyId.HasValue)
-                            {
-                                auctionParentVm.AuctionScheduleDetailViewModel.SetPropertyId(selectedPropertyId.Value);
-                            }
-                            content.DataContext = auctionParentVm.AuctionScheduleDetailViewModel;
-                        }
-                        else
-                        {
-                            Debug.WriteLine("[NonCoreView] AuctionScheduleDetailViewModel is null!");
-                            content.DataContext = null;
-                        }
+                        // ViewModels 연결
+                        auctionPublicSaleView.SetViewModels(auctionVm, publicSaleVm);
+                        viewModel = auctionVm;
+                        content = auctionPublicSaleView;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"AuctionSchedule 탭 로드 실패: {ex.Message}");
+                        content = CreatePlaceholder("AuctionSchedule");
                     }
                     break;
+                    
                 case "CashFlow":
                     content = serviceProvider.GetRequiredService<CashFlowSummaryView>();
                     break;
+                    
                 case "XnpvComparison":
-                    // XNPV 비교 탭
                     content = serviceProvider.GetRequiredService<XnpvComparisonView>();
                     break;
+                    
                 default:
                     content = CreatePlaceholder(tabName);
                     break;
             }
-
-            ContentArea.Content = content;
             
-            // ViewModel에 현재 탭 알림
-            _viewModel?.SetActiveTab(tabName);
+            // 캐시에 저장
+            _tabViewCache[tabName] = content;
+            if (viewModel != null)
+            {
+                _tabViewModelCache[tabName] = viewModel;
+            }
+            
+            return content;
+        }
+        
+        /// <summary>
+        /// 캐시된 탭의 데이터만 갱신 (View 재생성 없이)
+        /// </summary>
+        private async Task RefreshTabDataAsync(string tabName, Guid? selectedPropertyId)
+        {
+            if (!_tabViewModelCache.TryGetValue(tabName, out var viewModel))
+                return;
+                
+            var property = await _viewModel?.GetCurrentPropertyCachedAsync()!;
+            
+            switch (tabName)
+            {
+                case "Home":
+                case "CollateralProperty":
+                    if (viewModel is PropertyDetailViewModel propVm && selectedPropertyId.HasValue)
+                    {
+                        propVm.SetPropertyId(selectedPropertyId.Value);
+                        await propVm.InitializeAsync();
+                    }
+                    break;
+                    
+                case "BorrowerOverview":
+                    if (viewModel is BorrowerOverviewViewModel borrowerVm && property != null)
+                    {
+                        await borrowerVm.SetSelectedPropertyAsync(property);
+                    }
+                    break;
+                    
+                case "Loan":
+                    if (viewModel is LoanSheetViewModel loanVm && property != null)
+                    {
+                        await loanVm.SetSelectedPropertyAsync(property);
+                    }
+                    break;
+                    
+                case "Evaluation":
+                    if (viewModel is EvaluationTabViewModel evalVm && selectedPropertyId.HasValue)
+                    {
+                        evalVm.SetPropertyId(selectedPropertyId.Value);
+                        if (property != null)
+                        {
+                            evalVm.SetProperty(property);
+                        }
+                        await evalVm.LoadAsync();
+                    }
+                    break;
+                    
+                case "AuctionSchedule":
+                    if (viewModel is AuctionScheduleDetailViewModel auctionVm && selectedPropertyId.HasValue)
+                    {
+                        auctionVm.SetPropertyId(selectedPropertyId.Value);
+                        await auctionVm.InitializeAsync();
+                    }
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// 탭 캐시 초기화 (프로그램 전환 시 호출)
+        /// </summary>
+        public void ClearTabCache()
+        {
+            _tabViewCache.Clear();
+            _tabViewModelCache.Clear();
+            _lastPropertyId = null;
         }
 
         /// <summary>
@@ -465,51 +544,19 @@ namespace NPLogic.Views
         /// </summary>
         private async void BorrowerListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // #region agent log
-            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="SelectionChanged fired",data=new{senderType=sender?.GetType().Name,addedCount=e.AddedItems.Count,removedCount=e.RemovedItems.Count},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="A"})+"\n");
-            // #endregion
-            
             if (sender is ListBox listBox && listBox.SelectedItem is BorrowerListItem selectedItem)
             {
-                // #region agent log
-                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="BorrowerListItem selected",data=new{borrowerId=selectedItem.BorrowerId.ToString(),borrowerName=selectedItem.BorrowerName,activeTab=_viewModel?.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="B"})+"\n");
-                // #endregion
-                
                 // 비동기로 차주 선택 및 물건 목록 로드 완료까지 대기
                 if (_viewModel != null)
                 {
                     await _viewModel.SelectBorrowerAsync(selectedItem.BorrowerId);
-                    
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="SelectBorrowerAsync completed",data=new{selectedPropertyTab=_viewModel.SelectedPropertyTab?.PropertyNumber,propertyTabsCount=_viewModel.PropertyTabs?.Count},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="C"})+"\n");
-                    // #endregion
                 }
                 
                 // 물건 목록 로드 완료 후 현재 탭 컨텐츠 새로고침
                 if (_viewModel?.ActiveTab != null)
                 {
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="Calling LoadFunctionContentAsync",data=new{activeTab=_viewModel.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="D"})+"\n");
-                    // #endregion
-                    
                     await LoadFunctionContentAsync(_viewModel.ActiveTab);
-                    
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="LoadFunctionContentAsync completed",data=new{contentAreaContent=ContentArea.Content?.GetType().Name},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="E"})+"\n");
-                    // #endregion
                 }
-                else
-                {
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="ActiveTab is null, skipping LoadFunctionContentAsync",data=new{viewModelNull=_viewModel==null,activeTab=_viewModel?.ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="D"})+"\n");
-                    // #endregion
-                }
-            }
-            else
-            {
-                // #region agent log
-                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreView.xaml.cs:BorrowerListBox_SelectionChanged",message="Not BorrowerListItem or no selection",data=new{selectedItemType=((sender as ListBox)?.SelectedItem)?.GetType().Name},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="B"})+"\n");
-                // #endregion
             }
         }
 

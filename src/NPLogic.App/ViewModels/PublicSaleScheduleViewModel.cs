@@ -78,6 +78,35 @@ namespace NPLogic.ViewModels
         private decimal _otherBankSeniorValue;
 
         public decimal TotalAppraisalValue => LandAppraisalValue + BuildingAppraisalValue + MachineryAppraisalValue + OtherBankSeniorValue;
+        
+        // ========== 배당가능재원(AK/AL) ==========
+        
+        [ObservableProperty]
+        private decimal _landDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _landDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _buildingDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _buildingDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _machineryDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _machineryDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _otherBankDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _otherBankDistributableScenario2;
+        
+        public decimal TotalDistributableScenario1 => LandDistributableScenario1 + BuildingDistributableScenario1 + MachineryDistributableScenario1 + OtherBankDistributableScenario1;
+        public decimal TotalDistributableScenario2 => LandDistributableScenario2 + BuildingDistributableScenario2 + MachineryDistributableScenario2 + OtherBankDistributableScenario2;
 
         // ========== 공매일정 상세 (1안/2안) ==========
         
@@ -185,15 +214,27 @@ namespace NPLogic.ViewModels
         private decimal _onbidFee2;
         
         [ObservableProperty]
+        private decimal _onBidFee;
+        
+        [ObservableProperty]
         private decimal _appraisalFee;
+        
+        [ObservableProperty]
+        private decimal _publicSaleAppraisalFee;
 
         public decimal TotalSaleCost1 => OnbidFee1 + AppraisalFee;
         public decimal TotalSaleCost2 => OnbidFee2 + AppraisalFee;
+        public decimal TotalPublicSaleCost => OnBidFee + PublicSaleAppraisalFee;
 
         // ========== 환가처분보수 ==========
         
         public decimal DisposalFeeAmount1 => CalculateDisposalFee(Scenario1WinningBid);
         public decimal DisposalFeeAmount2 => CalculateDisposalFee(Scenario2WinningBid);
+        
+        public decimal Scenario1EstimatedSalePrice => Scenario1WinningBid;
+        public decimal Scenario2EstimatedSalePrice => Scenario2WinningBid;
+        public decimal Scenario1DisposalFeeCalc => DisposalFeeAmount1;
+        public decimal Scenario2DisposalFeeCalc => DisposalFeeAmount2;
 
         // ========== 타채권자 배분 ==========
         
@@ -224,6 +265,23 @@ namespace NPLogic.ViewModels
         public decimal TotalCreditorRatio => Creditor1Ratio + Creditor2Ratio;
         public decimal TotalCreditorAmount1 => Creditor1Amount1 + Creditor2Amount1;
         public decimal TotalCreditorAmount2 => Creditor1Amount2 + Creditor2Amount2;
+        
+        // ========== 우선수익자 ==========
+        
+        [ObservableProperty]
+        private string? _priorBeneficiaryName;
+        
+        [ObservableProperty]
+        private string? _priorBeneficiaryBasis;
+        
+        [ObservableProperty]
+        private decimal _priorBeneficiaryRate;
+        
+        public decimal Scenario1PriorBeneficiaryAmount => CalculatePriorBeneficiaryAmount(Scenario1WinningBid);
+        public decimal Scenario2PriorBeneficiaryAmount => CalculatePriorBeneficiaryAmount(Scenario2WinningBid);
+        
+        public decimal Scenario1TotalPriorDistribution => Scenario1PriorBeneficiaryAmount;
+        public decimal Scenario2TotalPriorDistribution => Scenario2PriorBeneficiaryAmount;
 
         // ========== Lead time 설정 ==========
         
@@ -241,6 +299,9 @@ namespace NPLogic.ViewModels
         
         [ObservableProperty]
         private ObservableCollection<LeadTimeScheduleItem> _leadTimeSchedules = new();
+        
+        [ObservableProperty]
+        private ObservableCollection<LeadTimeScheduleItem> _saleScheduleItems = new();
 
         public PublicSaleScheduleViewModel()
         {
@@ -432,10 +493,24 @@ namespace NPLogic.ViewModels
             if (salePrice <= 0) return 0;
             return salePrice * 0.01m; // 1%
         }
+        
+        private decimal CalculatePriorBeneficiaryAmount(decimal baseAmount)
+        {
+            if (PriorBeneficiaryRate <= 0) return 0;
+            
+            decimal basisValue = baseAmount;
+            if (PriorBeneficiaryBasis == "감정평가액")
+            {
+                basisValue = TotalAppraisalValue > 0 ? TotalAppraisalValue : AppraisalValue;
+            }
+            
+            return basisValue * PriorBeneficiaryRate;
+        }
 
         private void GenerateLeadTimeSchedules()
         {
             LeadTimeSchedules.Clear();
+            SaleScheduleItems.Clear();
             
             var startDate = DateTime.Today;
             var currentBid = InitialAppraisalValue > 0 ? InitialAppraisalValue : (AppraisalValue > 0 ? AppraisalValue : 1000000000m);
@@ -445,12 +520,15 @@ namespace NPLogic.ViewModels
                 var scheduleDate = startDate.AddDays((i - 1) * LeadTimeDays);
                 var minimumBid = currentBid * (decimal)Math.Pow((double)(1 - DiscountRate), i - 1);
                 
-                LeadTimeSchedules.Add(new LeadTimeScheduleItem
+                var item = new LeadTimeScheduleItem
                 {
                     Round = i,
                     Date = scheduleDate,
                     MinimumBid = minimumBid
-                });
+                };
+                
+                LeadTimeSchedules.Add(item);
+                SaleScheduleItems.Add(item);
             }
         }
 
@@ -558,6 +636,8 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(Scenario1BuildingPricePerPyeong));
             OnPropertyChanged(nameof(Scenario2BuildingPricePerPyeong));
             OnPropertyChanged(nameof(TotalAppraisalValue));
+            OnPropertyChanged(nameof(TotalDistributableScenario1));
+            OnPropertyChanged(nameof(TotalDistributableScenario2));
             OnPropertyChanged(nameof(Scenario1EstimatedWinningBid));
             OnPropertyChanged(nameof(Scenario2EstimatedWinningBid));
             OnPropertyChanged(nameof(Scenario1SaleCost));
@@ -572,8 +652,13 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(Scenario2RecoverableAmount));
             OnPropertyChanged(nameof(TotalSaleCost1));
             OnPropertyChanged(nameof(TotalSaleCost2));
+            OnPropertyChanged(nameof(TotalPublicSaleCost));
             OnPropertyChanged(nameof(DisposalFeeAmount1));
             OnPropertyChanged(nameof(DisposalFeeAmount2));
+            OnPropertyChanged(nameof(Scenario1EstimatedSalePrice));
+            OnPropertyChanged(nameof(Scenario2EstimatedSalePrice));
+            OnPropertyChanged(nameof(Scenario1DisposalFeeCalc));
+            OnPropertyChanged(nameof(Scenario2DisposalFeeCalc));
             OnPropertyChanged(nameof(Creditor1Amount1));
             OnPropertyChanged(nameof(Creditor1Amount2));
             OnPropertyChanged(nameof(Creditor2Amount1));
@@ -581,6 +666,10 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(TotalCreditorRatio));
             OnPropertyChanged(nameof(TotalCreditorAmount1));
             OnPropertyChanged(nameof(TotalCreditorAmount2));
+            OnPropertyChanged(nameof(Scenario1PriorBeneficiaryAmount));
+            OnPropertyChanged(nameof(Scenario2PriorBeneficiaryAmount));
+            OnPropertyChanged(nameof(Scenario1TotalPriorDistribution));
+            OnPropertyChanged(nameof(Scenario2TotalPriorDistribution));
         }
 
         partial void OnScenario1WinningBidChanged(decimal value)

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="250" d:DesignWidth="600">
+             d:DesignHeight="300" d:DesignWidth="800">
     
     <UserControl.Resources>
         <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
@@ -33,116 +33,180 @@
         </Style>
     </UserControl.Resources>
     
-    <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
-        <StackPanel>
-            <!-- 섹션 헤더 -->
-            <Border Background="{StaticResource TealBg}" Padding="8,4">
-                <TextBlock x:Name="SectionHeader" Text="안분비율 / 보증기관 안분액" FontWeight="Bold" FontSize="12"/>
-            </Border>
-            
-            <!-- DataGrid -->
-            <DataGrid ItemsSource="{Binding ProrationItems}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      RowHeaderWidth="0"
-                      GridLinesVisibility="All"
-                      HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                      VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                      Background="White"
-                      BorderThickness="0"
-                      MaxHeight="150"
-                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
-                      CellStyle="{StaticResource CellStyle}">
-                <DataGrid.Columns>
-                    <!-- 보증기관 -->
-                    <DataGridTextColumn Header="보증기관&#x0a;(AW)" 
-                                        Binding="{Binding GuaranteeOrganization}" 
-                                        Width="80"
-                                        IsReadOnly="True"/>
-                    
-                    <!-- 대위변제원금 -->
-                    <DataGridTextColumn Header="대위변제원금&#x0a;(AX)" 
-                                        Binding="{Binding SubrogationPrincipal, StringFormat=N0}" 
-                                        Width="100"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Padding" Value="4,0"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    
-                    <!-- 안분비율 (AR) -->
-                    <DataGridTextColumn Header="안분비율&#x0a;(AR)" 
-                                        Binding="{Binding ProrationRatio, StringFormat=P2}" 
-                                        Width="80"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <Setter Property="Background" Value="{StaticResource BlueBg}"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    
-                    <!-- 1안 안분액 (XD1) -->
-                    <DataGridTextColumn Header="1안 안분액&#x0a;(XD1)" 
-                                        Binding="{Binding AllocationAmount1, StringFormat=N0}" 
-                                        Width="100"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Padding" Value="4,0"/>
-                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    
-                    <!-- 2안 안분액 (XD2) -->
-                    <DataGridTextColumn Header="2안 안분액&#x0a;(XD2)" 
-                                        Binding="{Binding AllocationAmount2, StringFormat=N0}" 
-                                        Width="100"
-                                        IsReadOnly="True">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Padding" Value="4,0"/>
-                                <Setter Property="Background" Value="{StaticResource GreenBg}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                </DataGrid.Columns>
-            </DataGrid>
-            
-            <!-- 합계 행 -->
-            <Border Background="{StaticResource LightGreenBg}" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,1,0,0" Padding="8,4">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" FontSize="10"/>
-                </Grid>
-            </Border>
-            
-            <!-- 설명 -->
-            <Border Background="#E0F2F1" Padding="8,4">
-                <TextBlock FontSize="9" Foreground="#666666" TextWrapping="Wrap">
-                    <Run Text="• 안분비율(AR) = 대위변제원금 / Σ대위변제원금"/>
-                    <LineBreak/>
-                    <Run Text="• 안분액(XD) = 안분대상금액 × 안분비율"/>
-                </TextBlock>
-            </Border>
-        </StackPanel>
-    </Border>
+    <!-- 두 테이블을 나란히 배치 -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- 안분비율(AR) 테이블 -->
+        <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
+            <StackPanel>
+                <Border Background="{StaticResource TealBg}" Padding="8,4">
+                    <TextBlock Text="안분비율(AR)" FontWeight="Bold" FontSize="11"/>
+                </Border>
+                
+                <DataGrid ItemsSource="{Binding ProrationRatioItems}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          RowHeaderWidth="0"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          Background="White"
+                          BorderThickness="0"
+                          MinHeight="60"
+                          MaxHeight="180"
+                          ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                          CellStyle="{StaticResource CellStyle}">
+                    <DataGrid.Columns>
+                        <!-- 보증기관(X) -->
+                        <DataGridTextColumn Header="보증기관&#x0a;(X)" 
+                                            Binding="{Binding GuaranteeOrganization}" 
+                                            Width="90"
+                                            IsReadOnly="True"/>
+                        
+                        <!-- 대위변제원금(AD) -->
+                        <DataGridTextColumn Header="대위변제원금&#x0a;(AD)" 
+                                            Binding="{Binding SubrogationPrincipal, StringFormat=N0}" 
+                                            Width="110"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="Padding" Value="4,0"/>
+                                    <Setter Property="Background" Value="{StaticResource BlueBg}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        
+                        <!-- 안분비율(AR) -->
+                        <DataGridTextColumn Header="안분비율&#x0a;(AR)" 
+                                            Binding="{Binding ProrationRatio, StringFormat=P2}" 
+                                            Width="80"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- 합계 행 -->
+                <Border Background="{StaticResource LightGreenBg}" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,1,0,0" Padding="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="80"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Total" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="1" Text="{Binding TotalSubrogationPrincipal, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="2" Text="1" HorizontalAlignment="Center" FontWeight="Bold" FontSize="10"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+        
+        <!-- 보증기관 안분액(XD) 테이블 -->
+        <Border Grid.Column="2" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
+            <StackPanel>
+                <Border Background="{StaticResource TealBg}" Padding="8,4">
+                    <TextBlock Text="보증기관 안분액(XD)" FontWeight="Bold" FontSize="11"/>
+                </Border>
+                
+                <DataGrid ItemsSource="{Binding GuaranteeAllocationItems}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          RowHeaderWidth="0"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
+                          Background="White"
+                          BorderThickness="0"
+                          MinHeight="60"
+                          MaxHeight="180"
+                          ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                          CellStyle="{StaticResource CellStyle}">
+                    <DataGrid.Columns>
+                        <!-- 보증기관(S) -->
+                        <DataGridTextColumn Header="보증기관&#x0a;(S)" 
+                                            Binding="{Binding GuaranteeOrganization}" 
+                                            Width="90"
+                                            IsReadOnly="True"/>
+                        
+                        <!-- 1안 -->
+                        <DataGridTextColumn Header="1안" 
+                                            Binding="{Binding AllocationAmount1, StringFormat=N0}" 
+                                            Width="100"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="Padding" Value="4,0"/>
+                                    <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        
+                        <!-- 2안 -->
+                        <DataGridTextColumn Header="2안" 
+                                            Binding="{Binding AllocationAmount2, StringFormat=N0}" 
+                                            Width="100"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Right"/>
+                                    <Setter Property="Padding" Value="4,0"/>
+                                    <Setter Property="Background" Value="{StaticResource GreenBg}"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <!-- 합계 행 -->
+                <Border Background="{StaticResource LightGreenBg}" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,1,0,0" Padding="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Total" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="1" Text="{Binding TotalAllocationAmount1, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="2" Text="{Binding TotalAllocationAmount2, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"/>
+                    </Grid>
+                </Border>
+                
+                <!-- Loan Cap 2 행 -->
+                <Border Background="{StaticResource BlueBg}" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,1,0,0" Padding="4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Loan cap2" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="1" Text="{Binding LoanCap2Scenario1, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Grid.Column="2" Text="{Binding LoanCap2Scenario2, StringFormat=N0}" 
+                                   HorizontalAlignment="Right" FontWeight="Bold" FontSize="10"/>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>

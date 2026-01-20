@@ -42,12 +42,10 @@
     <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
         <StackPanel>
             <!-- 섹션 헤더 -->
-            <Border Background="{StaticResource LightGreenBg}" Padding="8,4">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Loan Cap 1" FontWeight="Bold" FontSize="12"/>
-                    <TextBlock Text="  (유효보증서 N and 기대위변제N)" FontSize="10" Foreground="Gray" VerticalAlignment="Center"/>
-                </StackPanel>
+            <Border Background="{StaticResource HeaderBg}" Padding="8,4">
+                <TextBlock Text="Loan Cap 1" FontWeight="Bold" FontSize="12"/>
             </Border>
+            
             
             <!-- Loan Cap DataGrid -->
             <DataGrid ItemsSource="{Binding Loans}"
@@ -61,6 +59,7 @@
                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                       Background="White"
                       BorderThickness="0"
+                      MinHeight="60"
                       MaxHeight="200"
                       ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
                       CellStyle="{StaticResource CellStyle}">
@@ -242,25 +241,14 @@
                 </Grid>
             </Border>
             
-            <!-- 가정 정보 -->
+            <!-- 가정 정보 (날짜만 표시) -->
             <Border Background="#EEEEEE" Padding="8,4">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" FontSize="9" Foreground="#666666">
-                        <Run Text="Loan Cap = 대출원금잔액 + 미수이자 + 연체이자 - (원금상계 + 원금회수 + 이자상계 + 이자회수)"/>
-                    </TextBlock>
-                    
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <TextBlock Text="가정 | adate: " FontSize="9" Foreground="#666666"/>
-                        <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
-                        <TextBlock Text="  Cdate: " FontSize="9" Foreground="#666666"/>
-                        <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
-                    </StackPanel>
-                </Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="가정 | adate: " FontSize="9" Foreground="#666666"/>
+                    <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
+                    <TextBlock Text="  Cdate: " FontSize="9" Foreground="#666666"/>
+                    <TextBlock Text="{Binding CDate, StringFormat=yyyy-MM-dd}" FontSize="9" FontWeight="SemiBold"/>
+                </StackPanel>
             </Border>
         </StackPanel>
     </Border>

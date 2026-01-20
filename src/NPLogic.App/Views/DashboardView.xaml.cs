@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -332,7 +333,7 @@ namespace NPLogic.Views
         /// <summary>
         /// 상세 모드로 전환
         /// </summary>
-        private void SwitchToDetailMode(Property property)
+        private async void SwitchToDetailMode(Property property)
         {
             if (DataContext is DashboardViewModel viewModel)
             {
@@ -343,7 +344,7 @@ namespace NPLogic.Views
             // 기본 탭(비핵심) 선택 및 컨텐츠 로드
             TabNonCore.IsChecked = true;
             _currentTabIndex = 0;
-            LoadTabView("noncore", property);
+            await LoadTabViewAsync("noncore", property);
         }
         
         /// <summary>
@@ -490,7 +491,7 @@ namespace NPLogic.Views
         /// <summary>
         /// 내부 탭 변경 (상세 모드에서만 동작)
         /// </summary>
-        private void InnerTab_Checked(object sender, RoutedEventArgs e)
+        private async void InnerTab_Checked(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton radioButton && DataContext is DashboardViewModel viewModel)
             {
@@ -513,10 +514,10 @@ namespace NPLogic.Views
 
                 viewModel.SetActiveTab(tabName);
                 
-                // 상세 모드에서만 탭 컨텐츠 전환
+                // 상세 모드에서만 탭 컨텐츠 전환 - await로 완료 대기
                 if (viewModel.IsDetailMode && viewModel.SelectedProperty != null)
                 {
-                    LoadTabView(tabName, viewModel.SelectedProperty);
+                    await LoadTabViewAsync(tabName, viewModel.SelectedProperty);
                 }
                 
                 // 상태 저장 (상태 복원 중이 아닐 때만)
@@ -529,9 +530,9 @@ namespace NPLogic.Views
         
         
         /// <summary>
-        /// 탭에 맞는 View 로드 (상세 모드)
+        /// 탭에 맞는 View 로드 (상세 모드) - 성능 최적화: await 패턴 적용
         /// </summary>
-        private void LoadTabView(string tabName, Property property)
+        private async Task LoadTabViewAsync(string tabName, Property property)
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
@@ -541,10 +542,6 @@ namespace NPLogic.Views
             switch (tabName)
             {
                 case "noncore":
-                    // #region agent log
-                    System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Loading noncore tab",data=new{propertyNumber=property.PropertyNumber,propertyId=property.Id.ToString()},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-                    // #endregion
-                    
                     // 비핵심 탭: NonCoreView를 대시보드 내에서 표시 (피드백 반영)
                     // 탭 상태 유지를 위해 캐싱된 인스턴스 재사용
                     if (_cachedNonCoreView == null)
@@ -555,10 +552,6 @@ namespace NPLogic.Views
                     
                     if (_cachedNonCoreView != null && _cachedNonCoreViewModel != null)
                     {
-                        // #region agent log
-                        System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Calling LoadProperty on NonCoreViewModel",data=new{activeTab=_cachedNonCoreViewModel.ActiveTab,selectedPropertyTab=_cachedNonCoreViewModel.SelectedPropertyTab?.PropertyNumber},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-                        // #endregion
-                        
                         // 프로그램 ID 설정 (물건 탭 로드를 위해 필수!)
                         if (property.ProgramId.HasValue)
                         {
@@ -568,11 +561,8 @@ namespace NPLogic.Views
                         _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
                         view = _cachedNonCoreView;
                         
-                        // 현재 활성 탭 컨텐츠 새로고침 (물건 변경 시 UI 업데이트)
-                        // #region agent log
-                        System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:LoadTabView:noncore",message="Calling RefreshCurrentTabAsync",data=new{},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="FIX"})+"\n");
-                        // #endregion
-                        _ = _cachedNonCoreView.RefreshCurrentTabAsync();
+                        // 현재 활성 탭 컨텐츠 새로고침 (물건 변경 시 UI 업데이트) - await로 완료 대기
+                        await _cachedNonCoreView.RefreshCurrentTabAsync();
                     }
                     break;
                     
@@ -586,7 +576,7 @@ namespace NPLogic.Views
                         {
                             registryViewModel.SetPropertyId(property.Id);
                             registryViewModel.SetPropertyInfo(property);
-                            _ = registryViewModel.LoadDataAsync();
+                            await registryViewModel.LoadDataAsync();
                             registryTab.DataContext = new { RegistryViewModel = registryViewModel };
                         }
                         view = registryTab;
@@ -603,7 +593,7 @@ namespace NPLogic.Views
                         {
                             rightsViewModel.SetPropertyId(property.Id);
                             rightsViewModel.SetProperty(property);
-                            _ = rightsViewModel.LoadDataAsync();
+                            await rightsViewModel.LoadDataAsync();
                             rightsTab.DataContext = rightsViewModel;
                         }
                         view = rightsTab;
@@ -902,12 +892,8 @@ namespace NPLogic.Views
         /// <summary>
         /// 좌측 패널 물건 리스트 선택 변경 - 상세 화면 전환
         /// </summary>
-        private void PropertySideListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void PropertySideListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // #region agent log
-            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="SelectionChanged fired",data=new{addedCount=e.AddedItems.Count,isRestoringState=_isRestoringState},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-            // #endregion
-            
             if (_isRestoringState) return;
 
             if (e.AddedItems.Count > 0 && 
@@ -915,22 +901,11 @@ namespace NPLogic.Views
                 DataContext is DashboardViewModel viewModel &&
                 viewModel.IsDetailMode)
             {
-                // #region agent log
-                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="Calling LoadTabView",data=new{propertyNumber=property.PropertyNumber,activeTab=viewModel.ActiveTab,isDetailMode=viewModel.IsDetailMode},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
-                // #endregion
-                
                 // 이미 상세 모드이므로 선택된 물건만 변경
                 viewModel.SelectPropertyInDetailMode(property);
                 
-                // 탭 컨텐츠 업데이트
-                LoadTabView(viewModel.ActiveTab, property);
-            }
-            else
-            {
-                // #region agent log
-                var vm = DataContext as DashboardViewModel;
-                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="DashboardView.xaml.cs:PropertySideListBox_SelectionChanged",message="Condition NOT met - NOT calling LoadTabView",data=new{addedItemsCount=e.AddedItems.Count,isProperty=e.AddedItems.Count>0 && e.AddedItems[0] is Property,hasDashboardVM=vm!=null,isDetailMode=vm?.IsDetailMode},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="G"})+"\n");
-                // #endregion
+                // 탭 컨텐츠 업데이트 - await로 완료 대기
+                await LoadTabViewAsync(viewModel.ActiveTab, property);
             }
         }
 

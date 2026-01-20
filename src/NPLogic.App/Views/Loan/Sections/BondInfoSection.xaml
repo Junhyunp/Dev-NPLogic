@@ -60,6 +60,7 @@
                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                       Background="White"
                       BorderThickness="0"
+                      MinHeight="60"
                       MaxHeight="250"
                       ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
                       CellStyle="{StaticResource CellStyle}">
@@ -179,6 +180,36 @@
                                             Binding="{Binding HasAgreementDoc, UpdateSourceTrigger=PropertyChanged}" 
                                             Width="50"/>
                     
+                    <!-- 경매신청서 -->
+                    <DataGridCheckBoxColumn Header="경매&#x0a;신청서" 
+                                            Binding="{Binding HasAuctionApplication, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="50"/>
+                    
+                    <!-- 경매비용 -->
+                    <DataGridCheckBoxColumn Header="경매&#x0a;비용" 
+                                            Binding="{Binding HasAuctionCost, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="50"/>
+                    
+                    <!-- 대위등기비용 -->
+                    <DataGridCheckBoxColumn Header="대위등기&#x0a;비용" 
+                                            Binding="{Binding HasSubrogationRegistrationCost, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="55"/>
+                    
+                    <!-- 1순위 피담보(N) -->
+                    <DataGridCheckBoxColumn Header="1순위&#x0a;피담보(N)" 
+                                            Binding="{Binding HasCollateralPriority1, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="60"/>
+                    
+                    <!-- 2순위 피담보(N2) -->
+                    <DataGridCheckBoxColumn Header="2순위&#x0a;피담보(N2)" 
+                                            Binding="{Binding HasCollateralPriority2, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="60"/>
+                    
+                    <!-- 3순위 피담보(N3) -->
+                    <DataGridCheckBoxColumn Header="3순위&#x0a;피담보(N3)" 
+                                            Binding="{Binding HasCollateralPriority3, UpdateSourceTrigger=PropertyChanged}" 
+                                            Width="60"/>
+                    
                     <!-- 유효보증서여부 (O) -->
                     <DataGridCheckBoxColumn Header="유효보증서&#x0a;여부(O)" 
                                             Binding="{Binding HasValidGuarantee, UpdateSourceTrigger=PropertyChanged}" 
@@ -274,11 +305,6 @@
                 </Grid>
             </Border>
             
-            <!-- Interim 정보 레이블 -->
-            <Border Background="#FFF9C4" Padding="8,4">
-                <TextBlock Text="Interim 정보: 원금상계, 원금회수, 이자상계, 이자회수 → Cash In 반영" 
-                           FontSize="9" Foreground="#666666"/>
-            </Border>
         </StackPanel>
     </Border>
 </UserControl>

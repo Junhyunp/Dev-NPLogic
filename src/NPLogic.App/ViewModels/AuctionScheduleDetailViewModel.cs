@@ -30,6 +30,24 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _isAuction = true;
         
+        public bool IsPublicSale
+        {
+            get => !IsAuction;
+            set
+            {
+                if (IsAuction == value)
+                {
+                    IsAuction = !value;
+                    OnPropertyChanged(nameof(IsPublicSale));
+                }
+            }
+        }
+        
+        partial void OnIsAuctionChanged(bool value)
+        {
+            OnPropertyChanged(nameof(IsPublicSale));
+        }
+        
         [ObservableProperty]
         private bool _isLoading;
         
@@ -81,6 +99,35 @@ namespace NPLogic.ViewModels
         private decimal _otherBankSeniorValue;
         
         public decimal TotalAppraisalValue => LandAppraisalValue + BuildingAppraisalValue + MachineryAppraisalValue + OtherBankSeniorValue;
+        
+        // ========== 배당가능재원(AK/AL) ==========
+        
+        [ObservableProperty]
+        private decimal _landDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _landDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _buildingDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _buildingDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _machineryDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _machineryDistributableScenario2;
+        
+        [ObservableProperty]
+        private decimal _otherBankDistributableScenario1;
+        
+        [ObservableProperty]
+        private decimal _otherBankDistributableScenario2;
+        
+        public decimal TotalDistributableScenario1 => LandDistributableScenario1 + BuildingDistributableScenario1 + MachineryDistributableScenario1 + OtherBankDistributableScenario1;
+        public decimal TotalDistributableScenario2 => LandDistributableScenario2 + BuildingDistributableScenario2 + MachineryDistributableScenario2 + OtherBankDistributableScenario2;
 
         // ========== 차주사항 관련 ==========
         
@@ -119,6 +166,14 @@ namespace NPLogic.ViewModels
         
         [ObservableProperty]
         private string _auctionRequestType = "*1";
+        
+        [ObservableProperty]
+        private decimal _auctionRequestAmount;
+        
+        // ========== 기본 세팅 ==========
+        
+        [ObservableProperty]
+        private DateTime _baseSettingDate = new DateTime(2025, 9, 15);
 
         // ========== 시나리오별 일정 상세 ==========
         
@@ -702,6 +757,8 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(Scenario1BuildingPricePerPyeong));
             OnPropertyChanged(nameof(Scenario2BuildingPricePerPyeong));
             OnPropertyChanged(nameof(TotalAppraisalValue));
+            OnPropertyChanged(nameof(TotalDistributableScenario1));
+            OnPropertyChanged(nameof(TotalDistributableScenario2));
             OnPropertyChanged(nameof(TotalAuctionCost));
             OnPropertyChanged(nameof(TotalCostWithAdditional));
             OnPropertyChanged(nameof(Scenario1LegalPrice));

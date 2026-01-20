@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="350" d:DesignWidth="1000">
+             d:DesignHeight="250" d:DesignWidth="2200">
     
     <UserControl.Resources>
         <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
@@ -14,11 +14,12 @@
         <SolidColorBrush x:Key="IndigoBg" Color="#C5CAE9"/>
         <SolidColorBrush x:Key="GreenBg" Color="#92D050"/>
         <SolidColorBrush x:Key="LightGreenBg" Color="#C6EFCE"/>
+        <SolidColorBrush x:Key="RedText" Color="#FF0000"/>
         
         <Style x:Key="CellBorder" TargetType="Border">
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
-            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Padding" Value="4,2"/>
         </Style>
         
         <Style x:Key="HeaderCell" TargetType="Border" BasedOn="{StaticResource CellBorder}">
@@ -26,20 +27,32 @@
         </Style>
         
         <Style x:Key="HeaderText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="9"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
         
-        <Style x:Key="LabelText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+        <Style x:Key="SubHeaderText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="TextAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="AmountText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="9"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="CenterText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
@@ -48,207 +61,348 @@
         <StackPanel>
             <!-- 섹션 헤더 -->
             <Border Background="{StaticResource IndigoBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock Text="MCI 보증" FontWeight="Bold" FontSize="12"/>
+                <TextBlock Text="MCI 보증 *" FontWeight="Bold" FontSize="12"/>
             </Border>
             
-            <!-- 1안 / 2안 헤더 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource HeaderCell}">
-                    <TextBlock Text="구분" Style="{StaticResource HeaderText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource HeaderCell}">
-                    <TextBlock Text="1안 (AZ)" Style="{StaticResource HeaderText}"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource HeaderCell}">
-                    <TextBlock Text="2안 (BA)" Style="{StaticResource HeaderText}"/>
-                </Border>
-            </Grid>
-            
-            <!-- MCI최초가입금액 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="MCI최초가입금액" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData1.MciInitialAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData2.MciInitialAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-            </Grid>
-            
-            <!-- MCI가입잔액 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="MCI가입잔액" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData1.MciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData2.MciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-            </Grid>
-            
-            <!-- 최종이수일 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="최종이수일" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData1.LastInterestDate, StringFormat=yyyy-MM-dd}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData2.LastInterestDate, StringFormat=yyyy-MM-dd}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-            </Grid>
-            
-            <!-- 예상배당일 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="예상배당일" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource YellowBg}">
-                    <TextBlock Text="{Binding MciData1.ExpectedDividendDate, StringFormat=yyyy-MM-dd}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="{StaticResource YellowBg}">
-                    <TextBlock Text="{Binding MciData2.ExpectedDividendDate, StringFormat=yyyy-MM-dd}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-            </Grid>
-            
-            <!-- 일수 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="일수" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData1.Days}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData2.Days}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-            </Grid>
-            
-            <!-- 정상이자율 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="정상이자율" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData1.NormalInterestRate, StringFormat=P2}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="{Binding MciData2.NormalInterestRate, StringFormat=P2}" HorizontalAlignment="Center" FontSize="10"/>
-                </Border>
-            </Grid>
-            
-            <!-- 유효담보가 배당액 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="유효담보가 배당액" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData1.ValidCollateralDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData2.ValidCollateralDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-            </Grid>
-            
-            <!-- 배당후 손실액 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White">
-                    <TextBlock Text="배당후 손실액" Style="{StaticResource LabelText}"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData1.PostDividendLoss, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}">
-                    <TextBlock Text="{Binding MciData2.PostDividendLoss, StringFormat=N0}" Style="{StaticResource AmountText}"/>
-                </Border>
-            </Grid>
-            
-            <!-- MCI 청구액 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="100"/>
-                </Grid.ColumnDefinitions>
-                
-                <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="{StaticResource LightGreenBg}">
-                    <TextBlock Text="MCI 청구액" Style="{StaticResource LabelText}" FontWeight="SemiBold"/>
-                </Border>
-                <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource GreenBg}">
-                    <TextBlock Text="{Binding MciData1.MciClaimAmount, StringFormat=N0}" Style="{StaticResource AmountText}" FontWeight="Bold"/>
-                </Border>
-                <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="{StaticResource GreenBg}">
-                    <TextBlock Text="{Binding MciData2.MciClaimAmount, StringFormat=N0}" Style="{StaticResource AmountText}" FontWeight="Bold"/>
-                </Border>
-            </Grid>
-            
-            <!-- 설명 -->
-            <Border Background="#E8EAF6" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock FontSize="9" Foreground="#666666" TextWrapping="Wrap">
-                    <Run Text="• MCI 청구액 = min(배당후 손실액, MCI가입잔액 × 청구지급율%)"/>
-                    <LineBreak/>
-                    <Run Text="• 유효담보가 배당액 = min(유효담보가, 예상배당금)"/>
-                </TextBlock>
-            </Border>
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <!-- 1안 -->
+                    <TextBlock Text="1안" FontWeight="Bold" FontSize="10" Margin="4,4,0,2"/>
+                    
+                    <!-- 1안 헤더 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI최초&#x0a;가입금액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource HeaderCell}"><TextBlock Text="채권번호" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI가입잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource HeaderCell}"><TextBlock Text="최종이수일" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource HeaderCell}" Background="{StaticResource YellowBg}"><TextBlock Text="예상배당일" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="일수" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource HeaderCell}"><TextBlock Text="정상이자율" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource HeaderCell}"><TextBlock Text="인수대상&#x0a;원금" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;이자" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;이자한도" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="유효담보가&#x0a;배당액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource HeaderCell}"><TextBlock Text="채권잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource HeaderCell}"><TextBlock Text="인수대상원금&#x0a;-MCI 가입잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource HeaderCell}"><TextBlock Text="(미수이자+&#x0a;1안연체이자)" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;20%" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가+유효담보가&#x0a;의 이자(Max 한도)" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource HeaderCell}"><TextBlock Text="예상배당금" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI 정상이자" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource HeaderCell}"><TextBlock Text="배당으로 충당되지&#x0a;않은 MCI 잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource HeaderCell}"><TextBlock Text="청구가능금액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="배당후 손실액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource HeaderCell}" Background="{StaticResource GreenBg}"><TextBlock Text="MCI 청구액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource HeaderCell}" Background="{StaticResource GreenBg}"><TextBlock Text=">> 1안 배당일에 MCI 회수 반영" Style="{StaticResource HeaderText}" Foreground="Red"/></Border>
+                    </Grid>
+                    
+                    <!-- 1안 서브헤더 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD sheetD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD sheetD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="계좌의 최종이수일" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="1안 예상배당" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="예상배당일-최종이수일" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="계좌정상이자율" Style="{StaticResource SubHeaderText}" Foreground="Red"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가*일수*정상이자율/365" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가*20%" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="인수대상원금-MCI 가입잔액" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="(미수이자+1안연체이자)" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가의 20%" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="max(MCI가입잔액+MCI..." Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="min(MCI최초가입금액, 예상배당금-Loan cap1" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="min(청구가능금액, 배당후 손실액)" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                    </Grid>
+                    
+                    <!-- 1안 데이터 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.MciInitialAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.BondNumber}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.MciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.LastInterestDate, StringFormat=yyyy-MM-dd}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource CellBorder}" Background="{StaticResource YellowBg}"><TextBlock Text="{Binding MciData1.ExpectedDividendDate, StringFormat=yyyy-MM-dd}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData1.Days}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.NormalInterestRate, StringFormat=P2}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.TargetPrincipal, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ValidCollateralValue, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ValidCollateralInterest, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ValidCollateralInterestLimit, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData1.ValidCollateralDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.BondBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.TargetPrincipalMinusMci, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.AccruedPlusOverdue, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ValidCollateral20Percent, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ValidCollateralPlusInterestMax, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ExpectedDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.MciNormalInterest, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.RemainingMciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData1.ClaimableAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData1.PostDividendLoss, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource CellBorder}" Background="{StaticResource GreenBg}"><TextBlock Text="{Binding MciData1.MciClaimAmount, StringFormat=N0}" Style="{StaticResource AmountText}" FontWeight="Bold"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource CellBorder}" Background="{StaticResource LightGreenBg}"><TextBlock Text="" Style="{StaticResource CenterText}"/></Border>
+                    </Grid>
+                    
+                    <!-- 2안 -->
+                    <TextBlock Text="2안" FontWeight="Bold" FontSize="10" Margin="4,8,0,2"/>
+                    
+                    <!-- 2안 헤더 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI최초&#x0a;가입금액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource HeaderCell}"><TextBlock Text="채권번호" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI가입잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource HeaderCell}"><TextBlock Text="최종이수일" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource HeaderCell}" Background="{StaticResource YellowBg}"><TextBlock Text="예상배당일" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="일수" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource HeaderCell}"><TextBlock Text="정상이자율" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource HeaderCell}"><TextBlock Text="인수대상&#x0a;원금" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;이자" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;이자한도" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="유효담보가&#x0a;배당액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource HeaderCell}"><TextBlock Text="채권잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource HeaderCell}"><TextBlock Text="인수대상원금&#x0a;-MCI 가입잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource HeaderCell}"><TextBlock Text="(미수이자+&#x0a;2안연체이자)" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가의&#x0a;20%" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource HeaderCell}"><TextBlock Text="유효담보가+유효담보가&#x0a;의 이자(Max 한도)" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource HeaderCell}"><TextBlock Text="예상배당금" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource HeaderCell}"><TextBlock Text="MCI 정상이자" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource HeaderCell}"><TextBlock Text="배당으로 충당되지&#x0a;않은 MCI 잔액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource HeaderCell}"><TextBlock Text="청구가능금액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource HeaderCell}" Background="{StaticResource BlueBg}"><TextBlock Text="배당후 손실액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource HeaderCell}" Background="{StaticResource GreenBg}"><TextBlock Text="MCI 청구액" Style="{StaticResource HeaderText}"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource HeaderCell}" Background="{StaticResource GreenBg}"><TextBlock Text=">> 2안 배당일에 MCI 회수 반영" Style="{StaticResource HeaderText}" Foreground="Red"/></Border>
+                    </Grid>
+                    
+                    <!-- 2안 서브헤더 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD sheetD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD sheetD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="DD" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="계좌의 최종이수일" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="2안 예상배당" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="예상배당일-최종이수일" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="계좌정상이자율" Style="{StaticResource SubHeaderText}" Foreground="Red"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가*일수*정상이자율/365" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가*20%" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="인수대상원금-MCI 가입잔액" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="(미수이자+2안연체이자)" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="유효담보가의 20%" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="max(MCI가입잔액+MCI..." Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="min(MCI최초가입금액, 예상배당금-Loan cap1" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="min(청구가능금액, 배당후 손실액)" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource CellBorder}" Background="#F5F5F5"><TextBlock Text="" Style="{StaticResource SubHeaderText}"/></Border>
+                    </Grid>
+                    
+                    <!-- 2안 데이터 행 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="65"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="95"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="85"/>
+                            <ColumnDefinition Width="115"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="75"/>
+                            <ColumnDefinition Width="150"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.MciInitialAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.BondNumber}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="2" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.MciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="3" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.LastInterestDate, StringFormat=yyyy-MM-dd}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="4" Style="{StaticResource CellBorder}" Background="{StaticResource YellowBg}"><TextBlock Text="{Binding MciData2.ExpectedDividendDate, StringFormat=yyyy-MM-dd}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="5" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData2.Days}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="6" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.NormalInterestRate, StringFormat=P2}" Style="{StaticResource CenterText}"/></Border>
+                        <Border Grid.Column="7" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.TargetPrincipal, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="8" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ValidCollateralValue, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="9" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ValidCollateralInterest, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="10" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ValidCollateralInterestLimit, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="11" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData2.ValidCollateralDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="12" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.BondBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="13" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.TargetPrincipalMinusMci, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="14" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.AccruedPlusOverdue, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="15" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ValidCollateral20Percent, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="16" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ValidCollateralPlusInterestMax, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="17" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ExpectedDividend, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="18" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.MciNormalInterest, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="19" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.RemainingMciBalance, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="20" Style="{StaticResource CellBorder}" Background="White"><TextBlock Text="{Binding MciData2.ClaimableAmount, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="21" Style="{StaticResource CellBorder}" Background="{StaticResource BlueBg}"><TextBlock Text="{Binding MciData2.PostDividendLoss, StringFormat=N0}" Style="{StaticResource AmountText}"/></Border>
+                        <Border Grid.Column="22" Style="{StaticResource CellBorder}" Background="{StaticResource GreenBg}"><TextBlock Text="{Binding MciData2.MciClaimAmount, StringFormat=N0}" Style="{StaticResource AmountText}" FontWeight="Bold"/></Border>
+                        <Border Grid.Column="23" Style="{StaticResource CellBorder}" Background="{StaticResource LightGreenBg}"><TextBlock Text="" Style="{StaticResource CenterText}"/></Border>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
         </StackPanel>
     </Border>
 </UserControl>

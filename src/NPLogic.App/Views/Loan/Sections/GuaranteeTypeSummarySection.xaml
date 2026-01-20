@@ -51,10 +51,7 @@
     
     <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
         <StackPanel>
-            <!-- 섹션 헤더 -->
-            <Border Background="{StaticResource GreenBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock Text="보증여부별 합계" FontWeight="Bold" FontSize="12"/>
-            </Border>
+            <!-- 원본 엑셀과 동일하게 섹션 제목 없이 바로 테이블 표시 -->
             
             <!-- 헤더 행 -->
             <Grid>

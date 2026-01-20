@@ -106,13 +106,33 @@ namespace NPLogic.Core.Models
         /// <summary>채권담보/담보이자 (R)</summary>
         public string? BondCollateralInfo { get; set; }
 
+        // ========== UI 상태 (DB 저장 안함) ==========
+
+        /// <summary>빈 행 여부 (UI 표시용, DB에 저장되지 않음)</summary>
+        public bool IsEmptyRow { get; set; }
+
         // ========== 체크박스 상태 ==========
 
         /// <summary>약정서 확인</summary>
         public bool HasAgreementDoc { get; set; }
 
-        /// <summary>경매비용, 대위등기비용</summary>
+        /// <summary>경매신청서</summary>
+        public bool HasAuctionApplication { get; set; }
+
+        /// <summary>경매비용</summary>
         public bool HasAuctionCost { get; set; }
+
+        /// <summary>대위등기비용</summary>
+        public bool HasSubrogationRegistrationCost { get; set; }
+
+        /// <summary>1순위 피담보(N)</summary>
+        public bool HasCollateralPriority1 { get; set; }
+
+        /// <summary>2순위 피담보(N2)</summary>
+        public bool HasCollateralPriority2 { get; set; }
+
+        /// <summary>3순위 피담보(N3)</summary>
+        public bool HasCollateralPriority3 { get; set; }
 
         /// <summary>유효보증서여부 (O)</summary>
         public bool HasValidGuarantee { get; set; }

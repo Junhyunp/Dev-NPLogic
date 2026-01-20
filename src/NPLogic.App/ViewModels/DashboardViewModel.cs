@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -1339,7 +1339,7 @@ namespace NPLogic.ViewModels
 
                     // 헤더 (순서 변경: 차주번호, 물건번호 앞으로)
                     var headers = new[] { "차주번호", "물건번호", "차주명", "물건종류", "약정서", "보증서", 
-                                         "경개1", "경개2", "경매열람", "전입열람", "선순위", "평가확정", 
+                                         "경매개시", "경매열람", "전입열람", "선순위", "평가확정", 
                                          "경매일정", "QA", "권리분석", "경매사건번호", "상태" };
                     for (int i = 0; i < headers.Length; i++)
                     {

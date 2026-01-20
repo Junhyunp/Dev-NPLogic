@@ -153,12 +153,6 @@
                 </Border>
             </Grid>
             
-            <!-- 설명 -->
-            <Border Background="#E3F2FD" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock FontSize="9" Foreground="#666666">
-                    <Run Text="• 안분대상금액 = 배당가능재원 - 비보증부대출 합계 + 연체이자, 약정이자 차이"/>
-                </TextBlock>
-            </Border>
         </StackPanel>
     </Border>
 </UserControl>
