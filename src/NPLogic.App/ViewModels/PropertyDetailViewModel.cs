@@ -145,6 +145,10 @@ namespace NPLogic.ViewModels
         private readonly BorrowerRepository? _borrowerRepository;
         private readonly LoanRepository? _loanRepository;
         private readonly AuctionScheduleRepository? _auctionScheduleRepository;
+        private readonly PermissionService? _permissionService;
+
+        [ObservableProperty]
+        private User? _currentUser;
         
         // 프로그램 이름 캐시 (성능 최적화)
         private static readonly Dictionary<Guid, string> _programNameCache = new();
@@ -802,7 +806,8 @@ namespace NPLogic.ViewModels
             StaticMapService? staticMapService = null,
             BorrowerRepository? borrowerRepository = null,
             LoanRepository? loanRepository = null,
-            AuctionScheduleRepository? auctionScheduleRepository = null)
+            AuctionScheduleRepository? auctionScheduleRepository = null,
+            PermissionService? permissionService = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -817,6 +822,7 @@ namespace NPLogic.ViewModels
             _borrowerRepository = borrowerRepository;
             _loanRepository = loanRepository;
             _auctionScheduleRepository = auctionScheduleRepository;
+            _permissionService = permissionService;
             
             // 프로그램 이름 캐시가 비어있으면 미리 로드 (첫 ViewModel 생성 시)
             if (_programRepository != null && _programNameCache.Count == 0)
@@ -1020,7 +1026,7 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 초기화
+        /// 초기화 - 성능 최적화: 병렬 로드 적용
         /// </summary>
         public async Task InitializeAsync()
         {
@@ -1032,6 +1038,13 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // 현재 사용자 정보 로드
+                if (_permissionService != null)
+                {
+                    CurrentUser = await _permissionService.GetCurrentUserAsync();
+                }
+
+                // 1단계: 물건 정보 로드 (필수, 먼저 실행)
                 var property = await _propertyRepository.GetByIdAsync(_propertyId.Value);
                 if (property != null)
                 {
@@ -1041,32 +1054,24 @@ namespace NPLogic.ViewModels
                     
                     CopyPropertyToOriginal(property);
 
-                    // QA, 첨부파일 로드
-                    await LoadAttachmentsAsync();
-                    await LoadQAListAsync();
-
-                    // 등기부 요약 정보 로드 (D-002, D-009, D-010)
-                    await LoadRegistrySummaryAsync(property.Id);
-
-                    // 담보총괄 통계 로드 (프로그램 레벨)
-                    await LoadCollateralStatisticsAsync(property.ProgramId);
-
-                    // 프로그램 이름 설정 (캐시 우선, 동기적)
+                    // 동기 작업 먼저 실행
                     SetProgramNameFromCache(property.ProgramId, property.ProjectId);
-                    // 캐시에 없으면 비동기로 로드
-                    await LoadProgramNameAsync(property.ProgramId, property.ProjectId);
-
-                    // 물건 유형별 속성 초기화 (분양정보 등)
                     InitializePropertyTypeAttributes(property);
 
-                    // 지적도/위치도 이미지 로드
-                    await LoadMapImagesAsync(property);
+                    // 2단계: 독립적인 비동기 작업들을 병렬로 실행 (성능 최적화)
+                    var parallelTasks = new List<Task>
+                    {
+                        LoadAttachmentsAsync(),
+                        LoadQAListAsync(),
+                        LoadRegistrySummaryAsync(property.Id),
+                        LoadCollateralStatisticsAsync(property.ProgramId),
+                        LoadProgramNameAsync(property.ProgramId, property.ProjectId),
+                        LoadMapImagesAsync(property),
+                        LoadRegistryDocumentAsync(property),
+                        LoadSummaryDataAsync()
+                    };
 
-                    // 등기부 원본 파일 로드
-                    await LoadRegistryDocumentAsync(property);
-
-                    // 전체 탭 요약 데이터 로드 (비핵심)
-                    await LoadSummaryDataAsync();
+                    await Task.WhenAll(parallelTasks);
                 }
                 else
                 {
@@ -3034,6 +3039,17 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
                 SuccessMessage = null;
+
+                // 권한 체크: 해당 프로그램의 PM 또는 Admin만 수정 가능
+                if (_permissionService != null && Property?.ProgramId.HasValue == true)
+                {
+                    var canEdit = await _permissionService.CanEditAsync(Property.ProgramId.Value, CurrentUser);
+                    if (!canEdit)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("edit");
+                        return;
+                    }
+                }
 
                 // 저장 전 스냅샷 저장 (Undo용)
                 if (Property != null && Property.Id != Guid.Empty)

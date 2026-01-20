@@ -941,9 +941,21 @@ namespace NPLogic.ViewModels
         }
         
         // ========== 물건 데이터 캐싱 (성능 최적화) ==========
-        private Property? _cachedProperty;
-        private DateTime _cacheTime;
-        private readonly TimeSpan _cacheExpiry = TimeSpan.FromMinutes(5);
+        
+        /// <summary>
+        /// 물건 ID별 캐시 딕셔너리 (여러 물건 동시 캐싱)
+        /// </summary>
+        private readonly Dictionary<Guid, (Property Property, DateTime CacheTime)> _propertyCache = new();
+        
+        /// <summary>
+        /// 캐시 만료 시간 (탭 전환 최적화를 위해 1분으로 단축)
+        /// </summary>
+        private readonly TimeSpan _cacheExpiry = TimeSpan.FromMinutes(1);
+        
+        /// <summary>
+        /// 최대 캐시 항목 수 (메모리 관리)
+        /// </summary>
+        private const int MaxCacheSize = 20;
         
         /// <summary>
         /// 현재 선택된 물건을 캐시에서 가져오기 (성능 최적화)
@@ -957,18 +969,77 @@ namespace NPLogic.ViewModels
             var currentPropertyId = SelectedPropertyTab.PropertyId;
             
             // 캐시가 유효한지 확인
-            if (_cachedProperty != null && 
-                _cachedProperty.Id == currentPropertyId &&
-                DateTime.Now - _cacheTime < _cacheExpiry)
+            if (_propertyCache.TryGetValue(currentPropertyId, out var cached) &&
+                DateTime.Now - cached.CacheTime < _cacheExpiry)
             {
-                return _cachedProperty;
+                return cached.Property;
             }
             
             // 캐시 갱신
-            _cachedProperty = await _propertyRepository.GetByIdAsync(currentPropertyId);
-            _cacheTime = DateTime.Now;
+            var property = await _propertyRepository.GetByIdAsync(currentPropertyId);
+            if (property != null)
+            {
+                // 캐시 크기 관리
+                CleanupCacheIfNeeded();
+                _propertyCache[currentPropertyId] = (property, DateTime.Now);
+            }
             
-            return _cachedProperty;
+            return property;
+        }
+        
+        /// <summary>
+        /// 특정 물건을 캐시에서 가져오기 (ID 지정)
+        /// </summary>
+        public async Task<Property?> GetPropertyCachedAsync(Guid propertyId)
+        {
+            if (_propertyRepository == null)
+                return null;
+            
+            // 캐시가 유효한지 확인
+            if (_propertyCache.TryGetValue(propertyId, out var cached) &&
+                DateTime.Now - cached.CacheTime < _cacheExpiry)
+            {
+                return cached.Property;
+            }
+            
+            // 캐시 갱신
+            var property = await _propertyRepository.GetByIdAsync(propertyId);
+            if (property != null)
+            {
+                CleanupCacheIfNeeded();
+                _propertyCache[propertyId] = (property, DateTime.Now);
+            }
+            
+            return property;
+        }
+        
+        /// <summary>
+        /// 캐시 크기 관리 - 오래된 항목 제거
+        /// </summary>
+        private void CleanupCacheIfNeeded()
+        {
+            if (_propertyCache.Count >= MaxCacheSize)
+            {
+                // 만료된 캐시 먼저 제거
+                var expiredKeys = _propertyCache
+                    .Where(kvp => DateTime.Now - kvp.Value.CacheTime >= _cacheExpiry)
+                    .Select(kvp => kvp.Key)
+                    .ToList();
+                
+                foreach (var key in expiredKeys)
+                {
+                    _propertyCache.Remove(key);
+                }
+                
+                // 여전히 크면 가장 오래된 항목 제거
+                if (_propertyCache.Count >= MaxCacheSize)
+                {
+                    var oldestKey = _propertyCache
+                        .OrderBy(kvp => kvp.Value.CacheTime)
+                        .First().Key;
+                    _propertyCache.Remove(oldestKey);
+                }
+            }
         }
         
         /// <summary>
@@ -976,7 +1047,15 @@ namespace NPLogic.ViewModels
         /// </summary>
         public void InvalidatePropertyCache()
         {
-            _cachedProperty = null;
+            _propertyCache.Clear();
+        }
+        
+        /// <summary>
+        /// 특정 물건 캐시 무효화
+        /// </summary>
+        public void InvalidatePropertyCache(Guid propertyId)
+        {
+            _propertyCache.Remove(propertyId);
         }
 
         // ========== 검색 및 필터 기능 메서드 (신규) ==========

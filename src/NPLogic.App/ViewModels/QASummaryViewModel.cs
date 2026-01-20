@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -25,7 +26,9 @@ namespace NPLogic.ViewModels
     {
         private readonly PropertyQaRepository _qaRepository;
         private readonly QaNotificationRepository _notificationRepository;
+        private readonly PropertyRepository _propertyRepository;
         private readonly AuthService _authService;
+        private readonly PermissionService _permissionService;
 
         // ========== 차주 목록 (좌측 패널) ==========
         [ObservableProperty]
@@ -97,11 +100,15 @@ namespace NPLogic.ViewModels
         public QASummaryViewModel(
             PropertyQaRepository qaRepository,
             QaNotificationRepository notificationRepository,
-            AuthService authService)
+            PropertyRepository propertyRepository,
+            AuthService authService,
+            PermissionService permissionService)
         {
             _qaRepository = qaRepository ?? throw new ArgumentNullException(nameof(qaRepository));
             _notificationRepository = notificationRepository ?? throw new ArgumentNullException(nameof(notificationRepository));
+            _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
         /// <summary>
@@ -403,19 +410,32 @@ namespace NPLogic.ViewModels
         {
             if (SelectedQa == null) return;
 
-            var result = MessageBox.Show(
-                "선택한 QA를 삭제하시겠습니까?",
-                "삭제 확인",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes) return;
-
             try
             {
+                // 권한 체크: Property를 통해 ProgramId 확인
+                var property = await _propertyRepository.GetByIdAsync(SelectedQa.PropertyId);
+                if (property?.ProgramId.HasValue == true)
+                {
+                    var canDelete = await _permissionService.CanDeleteAsync(property.ProgramId.Value, CurrentUser);
+                    if (!canDelete)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                        return;
+                    }
+                }
+
+                var result = MessageBox.Show(
+                    "선택한 QA를 삭제하시겠습니까?",
+                    "삭제 확인",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes) return;
+
                 IsLoading = true;
                 await _qaRepository.DeleteAsync(SelectedQa.Id);
                 await RefreshAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("QA가 삭제되었습니다.");
             }
             catch (Exception ex)
             {

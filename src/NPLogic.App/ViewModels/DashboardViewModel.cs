@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -418,9 +418,33 @@ namespace NPLogic.ViewModels
                 // 프로그램 목록을 먼저 로드하여 이름 캐시 구성
                 var programs = await _programRepository.GetAllAsync();
                 _programNameCache.Clear();
+                
+                // 회계법인 기반 필터링을 위한 프로그램 ID 목록
+                var accountingFirmProgramIds = new List<Guid>();
+                
                 foreach (var program in programs)
                 {
                     _programNameCache[program.Id] = program.ProgramName;
+                    
+                    // 회계법인 기반 필터링: Admin이 아닌 경우 본인 소속 회계법인 프로그램만 포함
+                    if (CurrentUser?.IsAdmin == true)
+                    {
+                        // Admin은 모든 프로그램 접근 가능
+                        accountingFirmProgramIds.Add(program.Id);
+                    }
+                    else if (!string.IsNullOrEmpty(CurrentUser?.AccountingFirm))
+                    {
+                        // 회계법인이 설정된 경우: 동일한 회계법인 프로그램만
+                        if (string.Equals(program.AccountingFirm, CurrentUser.AccountingFirm, StringComparison.OrdinalIgnoreCase))
+                        {
+                            accountingFirmProgramIds.Add(program.Id);
+                        }
+                    }
+                    else
+                    {
+                        // 회계법인이 설정되지 않은 경우: 모든 프로그램 접근 가능
+                        accountingFirmProgramIds.Add(program.Id);
+                    }
                 }
 
                 // 권한별 필터 설정
@@ -433,14 +457,21 @@ namespace NPLogic.ViewModels
                 }
                 else if (CurrentUser?.IsPM == true)
                 {
-                    // PM: 담당 프로그램만 보임
+                    // PM: 담당 프로그램 + 회계법인 필터 교집합
                     if (_pmProgramIds.Count > 0)
                     {
-                        filterProgramIds = _pmProgramIds;
+                        // PM 담당 프로그램과 회계법인 프로그램의 교집합
+                        filterProgramIds = _pmProgramIds.Intersect(accountingFirmProgramIds).ToList();
                     }
                     else
                     {
-                        // PM이지만 담당 프로그램이 없으면 빈 목록
+                        // PM이지만 담당 프로그램이 없으면 회계법인 기준으로만 필터
+                        filterProgramIds = accountingFirmProgramIds;
+                    }
+                    
+                    if (filterProgramIds.Count == 0)
+                    {
+                        // 필터링 결과가 없으면 빈 목록
                         ProgramSummaries.Clear();
                         Projects.Clear();
                         Projects.Add("전체");
@@ -449,8 +480,9 @@ namespace NPLogic.ViewModels
                 }
                 else if (CurrentUser?.IsEvaluator == true)
                 {
-                    // 평가자: 자기에게 할당된 물건만 보임
+                    // 평가자: 자기에게 할당된 물건 + 회계법인 필터
                     assignedTo = CurrentUser.Id;
+                    filterProgramIds = accountingFirmProgramIds.Count > 0 ? accountingFirmProgramIds : null;
                 }
 
                 // 서버 사이드 통계 조회 (전체 물건 로드 없이)
@@ -1359,16 +1391,15 @@ namespace NPLogic.ViewModels
                         worksheet.Cell(row, 5).Value = p.AgreementDoc ? "O" : "";
                         worksheet.Cell(row, 6).Value = p.GuaranteeDoc ? "O" : "";
                         worksheet.Cell(row, 7).Value = p.AuctionStart1;
-                        worksheet.Cell(row, 8).Value = p.AuctionStart2;
-                        worksheet.Cell(row, 9).Value = p.AuctionDocs ? "O" : "";
-                        worksheet.Cell(row, 10).Value = p.TenantDocs ? "O" : "";
-                        worksheet.Cell(row, 11).Value = p.SeniorRightsReview ? "O" : "";
-                        worksheet.Cell(row, 12).Value = p.AppraisalConfirmed ? "O" : "";
-                        worksheet.Cell(row, 13).Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
-                        worksheet.Cell(row, 14).Value = p.QaUnansweredCount;
-                        worksheet.Cell(row, 15).Value = p.RightsAnalysisStatus;
-                        worksheet.Cell(row, 16).Value = p.PropertyNumber;
-                        worksheet.Cell(row, 17).Value = p.Status;
+                        worksheet.Cell(row, 8).Value = p.AuctionDocs ? "O" : "";
+                        worksheet.Cell(row, 9).Value = p.TenantDocs ? "O" : "";
+                        worksheet.Cell(row, 10).Value = p.SeniorRightsReview ? "O" : "";
+                        worksheet.Cell(row, 11).Value = p.AppraisalConfirmed ? "O" : "";
+                        worksheet.Cell(row, 12).Value = p.AuctionScheduleDate?.ToString("yyyy-MM-dd");
+                        worksheet.Cell(row, 13).Value = p.QaUnansweredCount;
+                        worksheet.Cell(row, 14).Value = p.RightsAnalysisStatus;
+                        worksheet.Cell(row, 15).Value = p.PropertyNumber;
+                        worksheet.Cell(row, 16).Value = p.Status;
                         row++;
                     }
 

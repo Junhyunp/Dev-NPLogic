@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
+using NPLogic.Services;
 using NPLogic.ViewModels;
 
 namespace NPLogic.Views
@@ -48,9 +49,11 @@ namespace NPLogic.Views
                 var supabaseService = serviceProvider.GetRequiredService<SupabaseService>();
                 var qaRepository = new PropertyQaRepository(supabaseService);
                 var notificationRepository = new QaNotificationRepository(supabaseService);
+                var propertyRepository = serviceProvider.GetRequiredService<PropertyRepository>();
                 var authService = serviceProvider.GetRequiredService<AuthService>();
+                var permissionService = serviceProvider.GetRequiredService<PermissionService>();
 
-                _viewModel = new QASummaryViewModel(qaRepository, notificationRepository, authService);
+                _viewModel = new QASummaryViewModel(qaRepository, notificationRepository, propertyRepository, authService, permissionService);
                 DataContext = _viewModel;
 
                 await _viewModel.InitializeAsync();

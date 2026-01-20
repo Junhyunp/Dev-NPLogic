@@ -34,6 +34,10 @@ namespace NPLogic.ViewModels
         private readonly ExcelService _excelService;
         private readonly DataDiskUploadService _uploadService;
         private readonly ProgramSheetMappingRepository _sheetMappingRepository;
+        private readonly PermissionService _permissionService;
+
+        [ObservableProperty]
+        private User? _currentUser;
 
         // ========== 프로그램 목록 ==========
         [ObservableProperty]
@@ -284,7 +288,8 @@ namespace NPLogic.ViewModels
             AuthService authService,
             ExcelService excelService,
             DataDiskUploadService uploadService,
-            ProgramSheetMappingRepository sheetMappingRepository)
+            ProgramSheetMappingRepository sheetMappingRepository,
+            PermissionService permissionService)
         {
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
@@ -299,6 +304,7 @@ namespace NPLogic.ViewModels
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
             _uploadService = uploadService ?? throw new ArgumentNullException(nameof(uploadService));
             _sheetMappingRepository = sheetMappingRepository ?? throw new ArgumentNullException(nameof(sheetMappingRepository));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
 
             // 업로드 서비스 진행 상황 콜백 설정
             _uploadService.OnProgressUpdate = UpdateProgress;
@@ -313,6 +319,9 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = true;
                 ErrorMessage = null;
+
+                // 현재 사용자 정보 로드
+                CurrentUser = await _permissionService.GetCurrentUserAsync();
 
                 await LoadPMUsersAsync();
                 await LoadProgramsAsync();
@@ -629,6 +638,14 @@ namespace NPLogic.ViewModels
         private async Task DeleteProgram(Program program)
         {
             if (program == null) return;
+
+            // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
+            var canDelete = await _permissionService.CanDeleteAsync(program.Id, CurrentUser);
+            if (!canDelete)
+            {
+                ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                return;
+            }
 
             var result = MessageBox.Show(
                 $"'{program.ProgramName}' 프로그램을 삭제하시겠습니까?\n\n주의: 프로그램에 연결된 물건이 있으면 삭제할 수 없습니다.",

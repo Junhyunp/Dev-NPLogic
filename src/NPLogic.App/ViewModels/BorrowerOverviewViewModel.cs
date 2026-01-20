@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -19,6 +20,7 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository _propertyRepository;
         private readonly PropertyQaRepository _qaRepository;
         private readonly AuthService _authService;
+        private readonly PermissionService _permissionService;
 
         [ObservableProperty]
         private User? _currentUser;
@@ -126,12 +128,14 @@ namespace NPLogic.ViewModels
             BorrowerRepository borrowerRepository,
             PropertyRepository propertyRepository,
             PropertyQaRepository qaRepository,
-            AuthService authService)
+            AuthService authService,
+            PermissionService permissionService)
         {
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _qaRepository = qaRepository ?? throw new ArgumentNullException(nameof(qaRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
 
             InitializeFilterOptions();
         }
@@ -736,6 +740,20 @@ namespace NPLogic.ViewModels
             try
             {
                 IsLoading = true;
+
+                // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
+                if (BorrowerToDelete.ProgramId.HasValue)
+                {
+                    var canDelete = await _permissionService.CanDeleteAsync(BorrowerToDelete.ProgramId.Value, CurrentUser);
+                    if (!canDelete)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                        IsConfirmDeleteModalOpen = false;
+                        BorrowerToDelete = null;
+                        return;
+                    }
+                }
+
                 await _borrowerRepository.DeleteAsync(BorrowerToDelete.Id);
                 IsConfirmDeleteModalOpen = false;
                 BorrowerToDelete = null;
@@ -775,8 +793,21 @@ namespace NPLogic.ViewModels
             try
             {
                 IsLoading = true;
+
+                // 권한 체크: 해당 프로그램의 PM 또는 Admin만 수정 가능
+                if (SelectedBorrower.ProgramId.HasValue)
+                {
+                    var canEdit = await _permissionService.CanEditAsync(SelectedBorrower.ProgramId.Value, CurrentUser);
+                    if (!canEdit)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("edit");
+                        return;
+                    }
+                }
+
                 await _borrowerRepository.UpdateAsync(SelectedBorrower);
                 await LoadBorrowersAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("차주 정보가 저장되었습니다.");
             }
             catch (Exception ex)
             {

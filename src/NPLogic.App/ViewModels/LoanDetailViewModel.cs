@@ -20,6 +20,10 @@ namespace NPLogic.ViewModels
         private readonly BorrowerRepository _borrowerRepository;
         private readonly AuthService _authService;
         private readonly ExcelService _excelService;
+        private readonly PermissionService _permissionService;
+
+        [ObservableProperty]
+        private User? _currentUser;
 
         [ObservableProperty]
         private ObservableCollection<Borrower> _borrowers = new();
@@ -66,12 +70,14 @@ namespace NPLogic.ViewModels
             LoanRepository loanRepository,
             BorrowerRepository borrowerRepository,
             AuthService authService,
-            ExcelService excelService)
+            ExcelService excelService,
+            PermissionService permissionService)
         {
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
         /// <summary>
@@ -378,8 +384,21 @@ namespace NPLogic.ViewModels
 
             try
             {
+                // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
+                var borrower = Borrowers.FirstOrDefault(b => b.Id == loan.BorrowerId);
+                if (borrower?.ProgramId.HasValue == true)
+                {
+                    var canDelete = await _permissionService.CanDeleteAsync(borrower.ProgramId.Value, CurrentUser);
+                    if (!canDelete)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                        return;
+                    }
+                }
+
                 await _loanRepository.DeleteAsync(loan.Id);
                 await LoadLoansAsync();
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("대출이 삭제되었습니다.");
             }
             catch (Exception ex)
             {
@@ -398,6 +417,18 @@ namespace NPLogic.ViewModels
             try
             {
                 IsLoading = true;
+
+                // 권한 체크: 해당 프로그램의 PM 또는 Admin만 수정 가능
+                var borrower = Borrowers.FirstOrDefault(b => b.Id == SelectedLoan.BorrowerId);
+                if (borrower?.ProgramId.HasValue == true)
+                {
+                    var canEdit = await _permissionService.CanEditAsync(borrower.ProgramId.Value, CurrentUser);
+                    if (!canEdit)
+                    {
+                        ErrorMessage = PermissionService.GetNoPermissionMessage("edit");
+                        return;
+                    }
+                }
 
                 // 채권액 합계 계산
                 SelectedLoan.TotalClaimAmount = SelectedLoan.CalculateTotalClaim();

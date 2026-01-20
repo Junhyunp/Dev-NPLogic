@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,6 +37,11 @@ namespace NPLogic.Views
         private readonly Dictionary<string, UserControl> _tabViewCache = new();
         private readonly Dictionary<string, object> _tabViewModelCache = new();
         private Guid? _lastPropertyId; // 마지막으로 로드한 물건 ID (캐시 무효화용)
+        
+        // ========== 탭 전환 성능 최적화 (Race Condition 방지) ==========
+        private CancellationTokenSource? _tabLoadCts; // 탭 전환 취소용
+        private bool _isLoadingTab = false; // 로딩 중 여부 (중복 실행 방지)
+        private string? _pendingTabName = null; // 대기 중인 탭 이름
 
         public NonCoreView()
         {
@@ -241,49 +247,90 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 기능별 컨텐츠 로드 - 성능 최적화: View 캐싱 적용
+        /// 기능별 컨텐츠 로드 - 성능 최적화: View 캐싱, CancellationToken, 로딩 Lock 적용
         /// </summary>
         private async Task LoadFunctionContentAsync(string tabName)
         {
-            var serviceProvider = App.ServiceProvider;
-            if (serviceProvider == null) return;
-
-            // 현재 선택된 물건 ID 가져오기
-            var selectedPropertyId = _viewModel?.SelectedPropertyTab?.PropertyId;
-            
-            // 물건이 변경되었는지 확인 (캐시 데이터 갱신 필요 여부)
-            var propertyChanged = selectedPropertyId != _lastPropertyId;
-            _lastPropertyId = selectedPropertyId;
-            
-            UserControl? content;
-            
-            // 캐시에서 View 조회
-            if (_tabViewCache.TryGetValue(tabName, out var cachedView))
+            // 로딩 중이면 대기 탭으로 저장하고 리턴 (중복 실행 방지)
+            if (_isLoadingTab)
             {
-                content = cachedView;
+                _pendingTabName = tabName;
+                return;
+            }
+            
+            // 이전 로드 작업 취소
+            _tabLoadCts?.Cancel();
+            _tabLoadCts = new CancellationTokenSource();
+            var token = _tabLoadCts.Token;
+            
+            _isLoadingTab = true;
+            
+            try
+            {
+                var serviceProvider = App.ServiceProvider;
+                if (serviceProvider == null) return;
+
+                // 취소 확인
+                token.ThrowIfCancellationRequested();
+
+                // 현재 선택된 물건 ID 가져오기
+                var selectedPropertyId = _viewModel?.SelectedPropertyTab?.PropertyId;
                 
-                // 물건이 변경된 경우에만 데이터 갱신
-                if (propertyChanged)
+                // 물건이 변경되었는지 확인 (캐시 데이터 갱신 필요 여부)
+                var propertyChanged = selectedPropertyId != _lastPropertyId;
+                _lastPropertyId = selectedPropertyId;
+                
+                UserControl? content;
+                
+                // 캐시에서 View 조회
+                if (_tabViewCache.TryGetValue(tabName, out var cachedView))
                 {
-                    await RefreshTabDataAsync(tabName, selectedPropertyId);
+                    content = cachedView;
+                    
+                    // 물건이 변경된 경우에만 데이터 갱신
+                    if (propertyChanged)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        await RefreshTabDataAsync(tabName, selectedPropertyId, token);
+                    }
+                }
+                else
+                {
+                    // 최초 접근 시 View 생성 후 캐시에 저장
+                    token.ThrowIfCancellationRequested();
+                    content = await CreateAndCacheTabViewAsync(tabName, selectedPropertyId, serviceProvider, token);
+                }
+
+                // 취소되지 않은 경우에만 UI 업데이트
+                token.ThrowIfCancellationRequested();
+                ContentArea.Content = content;
+                
+                // ViewModel에 현재 탭 알림
+                _viewModel?.SetActiveTab(tabName);
+            }
+            catch (OperationCanceledException)
+            {
+                // 취소된 경우 무시 - 새로운 탭 로드가 진행 중
+                Debug.WriteLine($"탭 로드 취소됨: {tabName}");
+            }
+            finally
+            {
+                _isLoadingTab = false;
+                
+                // 대기 중인 탭이 있으면 로드
+                if (_pendingTabName != null && _pendingTabName != tabName)
+                {
+                    var pending = _pendingTabName;
+                    _pendingTabName = null;
+                    await LoadFunctionContentAsync(pending);
                 }
             }
-            else
-            {
-                // 최초 접근 시 View 생성 후 캐시에 저장
-                content = await CreateAndCacheTabViewAsync(tabName, selectedPropertyId, serviceProvider);
-            }
-
-            ContentArea.Content = content;
-            
-            // ViewModel에 현재 탭 알림
-            _viewModel?.SetActiveTab(tabName);
         }
         
         /// <summary>
         /// 탭 View 생성 및 캐시에 저장
         /// </summary>
-        private async Task<UserControl> CreateAndCacheTabViewAsync(string tabName, Guid? selectedPropertyId, IServiceProvider serviceProvider)
+        private async Task<UserControl> CreateAndCacheTabViewAsync(string tabName, Guid? selectedPropertyId, IServiceProvider serviceProvider, CancellationToken token = default)
         {
             UserControl content;
             object? viewModel = null;
@@ -297,6 +344,7 @@ namespace NPLogic.Views
                         if (selectedPropertyId.HasValue)
                         {
                             vm.SetPropertyId(selectedPropertyId.Value);
+                            token.ThrowIfCancellationRequested();
                             await vm.InitializeAsync();
                         }
                         content.DataContext = vm;
@@ -311,9 +359,11 @@ namespace NPLogic.Views
                         
                         if (_viewModel?.SelectedPropertyTab != null)
                         {
+                            token.ThrowIfCancellationRequested();
                             var property = await _viewModel.GetCurrentPropertyCachedAsync();
                             if (property != null)
                             {
+                                token.ThrowIfCancellationRequested();
                                 await borrowerVm.SetSelectedPropertyAsync(property);
                             }
                         }
@@ -330,18 +380,22 @@ namespace NPLogic.Views
                         
                         if (_viewModel?.SelectedPropertyTab != null)
                         {
+                            token.ThrowIfCancellationRequested();
                             var property = await _viewModel.GetCurrentPropertyCachedAsync();
                             if (property != null)
                             {
+                                token.ThrowIfCancellationRequested();
                                 await loanSheetVm.SetSelectedPropertyAsync(property);
                             }
                             else
                             {
+                                token.ThrowIfCancellationRequested();
                                 await loanSheetVm.InitializeAsync();
                             }
                         }
                         else
                         {
+                            token.ThrowIfCancellationRequested();
                             await loanSheetVm.InitializeAsync();
                         }
                         
@@ -357,6 +411,7 @@ namespace NPLogic.Views
                         if (selectedPropertyId.HasValue)
                         {
                             vm.SetPropertyId(selectedPropertyId.Value);
+                            token.ThrowIfCancellationRequested();
                             await vm.InitializeAsync();
                         }
                         content.DataContext = vm;
@@ -379,6 +434,7 @@ namespace NPLogic.Views
                         if (selectedPropertyId.HasValue)
                         {
                             parentVm.SetPropertyId(selectedPropertyId.Value);
+                            token.ThrowIfCancellationRequested();
                             await parentVm.InitializeAsync();
                         }
                         
@@ -393,6 +449,7 @@ namespace NPLogic.Views
                                 }
                             }
                             content.DataContext = parentVm.EvaluationViewModel;
+                            token.ThrowIfCancellationRequested();
                             await parentVm.EvaluationViewModel.LoadAsync();
                             viewModel = parentVm.EvaluationViewModel;
                         }
@@ -445,7 +502,8 @@ namespace NPLogic.Views
                     break;
             }
             
-            // 캐시에 저장
+            // 취소 확인 후 캐시에 저장
+            token.ThrowIfCancellationRequested();
             _tabViewCache[tabName] = content;
             if (viewModel != null)
             {
@@ -458,11 +516,12 @@ namespace NPLogic.Views
         /// <summary>
         /// 캐시된 탭의 데이터만 갱신 (View 재생성 없이)
         /// </summary>
-        private async Task RefreshTabDataAsync(string tabName, Guid? selectedPropertyId)
+        private async Task RefreshTabDataAsync(string tabName, Guid? selectedPropertyId, CancellationToken token = default)
         {
             if (!_tabViewModelCache.TryGetValue(tabName, out var viewModel))
                 return;
-                
+            
+            token.ThrowIfCancellationRequested();
             var property = await _viewModel?.GetCurrentPropertyCachedAsync()!;
             
             switch (tabName)
@@ -472,6 +531,7 @@ namespace NPLogic.Views
                     if (viewModel is PropertyDetailViewModel propVm && selectedPropertyId.HasValue)
                     {
                         propVm.SetPropertyId(selectedPropertyId.Value);
+                        token.ThrowIfCancellationRequested();
                         await propVm.InitializeAsync();
                     }
                     break;
@@ -479,6 +539,7 @@ namespace NPLogic.Views
                 case "BorrowerOverview":
                     if (viewModel is BorrowerOverviewViewModel borrowerVm && property != null)
                     {
+                        token.ThrowIfCancellationRequested();
                         await borrowerVm.SetSelectedPropertyAsync(property);
                     }
                     break;
@@ -486,6 +547,7 @@ namespace NPLogic.Views
                 case "Loan":
                     if (viewModel is LoanSheetViewModel loanVm && property != null)
                     {
+                        token.ThrowIfCancellationRequested();
                         await loanVm.SetSelectedPropertyAsync(property);
                     }
                     break;
@@ -498,6 +560,7 @@ namespace NPLogic.Views
                         {
                             evalVm.SetProperty(property);
                         }
+                        token.ThrowIfCancellationRequested();
                         await evalVm.LoadAsync();
                     }
                     break;
@@ -506,6 +569,7 @@ namespace NPLogic.Views
                     if (viewModel is AuctionScheduleDetailViewModel auctionVm && selectedPropertyId.HasValue)
                     {
                         auctionVm.SetPropertyId(selectedPropertyId.Value);
+                        token.ThrowIfCancellationRequested();
                         await auctionVm.InitializeAsync();
                     }
                     break;

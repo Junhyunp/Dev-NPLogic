@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
+using NPLogic.Services;
 
 namespace NPLogic.ViewModels
 {
@@ -20,6 +21,7 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository _propertyRepository;
         private readonly UserRepository _userRepository;
         private readonly AuthService _authService;
+        private readonly PermissionService _permissionService;
 
         [ObservableProperty]
         private User? _currentUser;
@@ -80,11 +82,13 @@ namespace NPLogic.ViewModels
         public PropertyListViewModel(
             PropertyRepository propertyRepository,
             UserRepository userRepository,
-            AuthService authService)
+            AuthService authService,
+            PermissionService permissionService)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
 
             // 필터 옵션 초기화
             InitializeFilterOptions();
@@ -454,6 +458,17 @@ namespace NPLogic.ViewModels
         private async Task DeletePropertyAsync(Property property)
         {
             if (property == null) return;
+
+            // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
+            if (property.ProgramId.HasValue)
+            {
+                var canDelete = await _permissionService.CanDeleteAsync(property.ProgramId.Value, CurrentUser);
+                if (!canDelete)
+                {
+                    ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                    return;
+                }
+            }
 
             var result = System.Windows.MessageBox.Show(
                 $"정말로 물건 '{property.PropertyNumber}'을(를) 삭제하시겠습니까?\n삭제된 데이터는 복구할 수 없습니다.",

@@ -149,6 +149,9 @@ namespace NPLogic
             // Upload Services (Singleton)
             services.AddSingleton<Services.DataDiskUploadService>();
 
+            // Permission Service (Singleton) - 권한 관리
+            services.AddSingleton<Services.PermissionService>();
+
             // ViewModels (Transient)
             services.AddTransient<LoginViewModel>();
             services.AddTransient<ViewModels.DashboardViewModel>(sp =>
@@ -163,7 +166,15 @@ namespace NPLogic
                 );
             });
             // AdminHomeViewModel, PMHomeViewModel, EvaluatorHomeViewModel: DashboardView로 통합됨 (삭제)
-            services.AddTransient<ViewModels.PropertyListViewModel>();
+            services.AddTransient<ViewModels.PropertyListViewModel>(sp =>
+            {
+                return new ViewModels.PropertyListViewModel(
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.UserRepository>(),
+                    sp.GetRequiredService<AuthService>(),
+                    sp.GetRequiredService<Services.PermissionService>()
+                );
+            });
             services.AddTransient<ViewModels.PropertyFormViewModel>();
             services.AddTransient<ViewModels.PropertyDetailViewModel>(sp =>
             {
@@ -180,14 +191,33 @@ namespace NPLogic
                     null, // StaticMapService - default
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
                     sp.GetRequiredService<Data.Repositories.LoanRepository>(),
-                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>()
+                    sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
+                    sp.GetRequiredService<Services.PermissionService>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
             services.AddTransient<ViewModels.StatisticsViewModel>();
-            services.AddTransient<ViewModels.BorrowerOverviewViewModel>();
+            services.AddTransient<ViewModels.BorrowerOverviewViewModel>(sp =>
+            {
+                return new ViewModels.BorrowerOverviewViewModel(
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyQaRepository>(),
+                    sp.GetRequiredService<AuthService>(),
+                    sp.GetRequiredService<Services.PermissionService>()
+                );
+            });
             services.AddTransient<ViewModels.CollateralSummaryViewModel>();
-            services.AddTransient<ViewModels.LoanDetailViewModel>();
+            services.AddTransient<ViewModels.LoanDetailViewModel>(sp =>
+            {
+                return new ViewModels.LoanDetailViewModel(
+                    sp.GetRequiredService<Data.Repositories.LoanRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<AuthService>(),
+                    sp.GetRequiredService<ExcelService>(),
+                    sp.GetRequiredService<Services.PermissionService>()
+                );
+            });
             services.AddTransient<ViewModels.LoanSheetViewModel>();
             services.AddTransient<ViewModels.ToolBoxViewModel>();
             services.AddTransient<ViewModels.CashFlowSummaryViewModel>();
@@ -219,7 +249,25 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>()
                 );
             });
-            services.AddTransient<ViewModels.ProgramManagementViewModel>();
+            services.AddTransient<ViewModels.ProgramManagementViewModel>(sp =>
+            {
+                return new ViewModels.ProgramManagementViewModel(
+                    sp.GetRequiredService<Data.Repositories.ProgramRepository>(),
+                    sp.GetRequiredService<Data.Repositories.ProgramUserRepository>(),
+                    sp.GetRequiredService<Data.Repositories.UserRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<Data.Repositories.LoanRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRestructuringRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
+                    sp.GetRequiredService<Data.Repositories.InterimRepository>(),
+                    sp.GetRequiredService<AuthService>(),
+                    sp.GetRequiredService<ExcelService>(),
+                    sp.GetRequiredService<Services.DataDiskUploadService>(),
+                    sp.GetRequiredService<Data.Repositories.ProgramSheetMappingRepository>(),
+                    sp.GetRequiredService<Services.PermissionService>()
+                );
+            });
             services.AddTransient<ViewModels.ProgramSettingsViewModel>();
             services.AddTransient<ViewModels.NonCoreViewModel>(sp =>
             {
