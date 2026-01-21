@@ -50,9 +50,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToProperty(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToProperty(model);
             }
             catch (Exception ex)
             {
@@ -562,9 +563,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<PropertyTable>()
                     .Where(x => x.PropertyNumber == propertyNumber)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToProperty(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToProperty(model);
             }
             catch (Exception ex)
             {

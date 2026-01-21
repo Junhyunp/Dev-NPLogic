@@ -55,9 +55,10 @@ namespace NPLogic.Data.Repositories
                     .From<ProgramSheetMappingTable>()
                     .Where(x => x.ProgramId == programId)
                     .Where(x => x.SheetType == sheetType)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToModel(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToModel(model);
             }
             catch (Exception ex)
             {

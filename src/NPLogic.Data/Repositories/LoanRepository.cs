@@ -50,9 +50,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToLoan(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToLoan(model);
             }
             catch (Exception ex)
             {
@@ -93,9 +94,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<LoanTable>()
                     .Where(x => x.AccountSerial == accountSerial)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToLoan(response);
+                var model = response.Models.FirstOrDefault();
+                return model != null ? MapToLoan(model) : null;
             }
             catch (Exception ex)
             {

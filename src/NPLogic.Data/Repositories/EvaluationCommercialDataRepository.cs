@@ -25,9 +25,9 @@ namespace NPLogic.Data.Repositories
             var response = await _supabase
                 .From<EvaluationCommercialData>()
                 .Filter("evaluation_id", Postgrest.Constants.Operator.Equals, evaluationId.ToString())
-                .Single();
+                .Get();
             
-            return response;
+            return response.Models.FirstOrDefault();
         }
         
         /// <summary>

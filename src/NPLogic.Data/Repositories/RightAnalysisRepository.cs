@@ -30,9 +30,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.PropertyId == propertyId)
-                    .Single();
+                    .Get();
 
-                return response != null ? MapToRightAnalysis(response) : null;
+                var model = response.Models.FirstOrDefault();
+                return model != null ? MapToRightAnalysis(model) : null;
             }
             catch (Exception ex)
             {
@@ -51,9 +52,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<RightAnalysisTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response != null ? MapToRightAnalysis(response) : null;
+                var model = response.Models.FirstOrDefault();
+                return model != null ? MapToRightAnalysis(model) : null;
             }
             catch (Exception ex)
             {
@@ -269,6 +271,18 @@ namespace NPLogic.Data.Repositories
                 SeniorTaxDd = table.SeniorTaxDd,
                 SeniorTaxReflected = table.SeniorTaxReflected,
                 SeniorTaxReason = table.SeniorTaxReason,
+                EtcDd = table.EtcDd,
+                EtcReflected = table.EtcReflected,
+                EtcReason = table.EtcReason,
+                SeniorTotalDd = table.SeniorTotalDd,
+
+                // 감정평가 정보
+                AppraisalDate = table.AppraisalDate,
+                AppraisalValue = table.AppraisalValue,
+                AppraisalType = table.AppraisalType,
+                AppraisalAgency = table.AppraisalAgency,
+                MinimumBid = table.MinimumBid,
+                AuctionCount = table.AuctionCount,
 
                 // 배당 시뮬레이션
                 SeniorRightsTotal = table.SeniorRightsTotal,
@@ -369,6 +383,18 @@ namespace NPLogic.Data.Repositories
                 SeniorTaxDd = model.SeniorTaxDd,
                 SeniorTaxReflected = model.SeniorTaxReflected,
                 SeniorTaxReason = model.SeniorTaxReason,
+                EtcDd = model.EtcDd,
+                EtcReflected = model.EtcReflected,
+                EtcReason = model.EtcReason,
+                SeniorTotalDd = model.SeniorTotalDd,
+
+                // 감정평가 정보
+                AppraisalDate = model.AppraisalDate,
+                AppraisalValue = model.AppraisalValue,
+                AppraisalType = model.AppraisalType,
+                AppraisalAgency = model.AppraisalAgency,
+                MinimumBid = model.MinimumBid,
+                AuctionCount = model.AuctionCount,
 
                 // 배당 시뮬레이션
                 SeniorRightsTotal = model.SeniorRightsTotal,
@@ -594,6 +620,37 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("senior_tax_reason")]
         public string? SeniorTaxReason { get; set; }
+
+        [Postgrest.Attributes.Column("etc_dd")]
+        public decimal EtcDd { get; set; }
+
+        [Postgrest.Attributes.Column("etc_reflected")]
+        public decimal EtcReflected { get; set; }
+
+        [Postgrest.Attributes.Column("etc_reason")]
+        public string? EtcReason { get; set; }
+
+        [Postgrest.Attributes.Column("senior_total_dd")]
+        public decimal? SeniorTotalDd { get; set; }
+
+        // 감정평가 정보
+        [Postgrest.Attributes.Column("appraisal_date")]
+        public DateTime? AppraisalDate { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_value")]
+        public decimal? AppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_type")]
+        public string? AppraisalType { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_agency")]
+        public string? AppraisalAgency { get; set; }
+
+        [Postgrest.Attributes.Column("minimum_bid")]
+        public decimal? MinimumBid { get; set; }
+
+        [Postgrest.Attributes.Column("auction_count")]
+        public int? AuctionCount { get; set; }
 
         // 배당 시뮬레이션
         [Postgrest.Attributes.Column("senior_rights_total")]

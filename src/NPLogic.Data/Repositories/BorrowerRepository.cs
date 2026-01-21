@@ -50,9 +50,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToBorrower(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToBorrower(model);
             }
             catch (Exception ex)
             {
@@ -71,9 +72,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.BorrowerNumber == borrowerNumber)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToBorrower(response);
+                var model = response.Models.FirstOrDefault();
+                return model != null ? MapToBorrower(model) : null;
             }
             catch (Exception ex)
             {

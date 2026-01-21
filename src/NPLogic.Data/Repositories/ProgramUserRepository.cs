@@ -71,9 +71,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<ProgramUserTable>()
                     .Where(x => x.ProgramId == programId && x.Role == "pm")
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToProgramUser(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToProgramUser(model);
             }
             catch (Exception ex)
             {

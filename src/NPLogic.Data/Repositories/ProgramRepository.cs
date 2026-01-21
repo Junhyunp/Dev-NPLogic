@@ -72,9 +72,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<ProgramTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToProgram(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToProgram(model);
             }
             catch (Exception ex)
             {
@@ -93,9 +94,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<ProgramTable>()
                     .Where(x => x.ProgramName == programName)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToProgram(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToProgram(model);
             }
             catch (Exception ex)
             {

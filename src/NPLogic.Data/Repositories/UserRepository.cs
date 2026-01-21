@@ -49,9 +49,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Id == id)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToUser(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToUser(model);
             }
             catch (Exception ex)
             {
@@ -70,9 +71,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.AuthUserId == authUserId)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToUser(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToUser(model);
             }
             catch (Exception ex)
             {
@@ -91,9 +93,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<UserTable>()
                     .Where(x => x.Email == email)
-                    .Single();
+                    .Get();
 
-                return response == null ? null : MapToUser(response);
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToUser(model);
             }
             catch (Exception ex)
             {

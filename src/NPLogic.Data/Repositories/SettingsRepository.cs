@@ -207,9 +207,10 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<SystemSettingsTable>()
                     .Where(x => x.SettingKey == key)
-                    .Single();
+                    .Get();
 
-                return response != null ? MapToSystemSetting(response) : null;
+                var model = response.Models.FirstOrDefault();
+                return model != null ? MapToSystemSetting(model) : null;
             }
             catch
             {

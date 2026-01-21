@@ -894,11 +894,11 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// Interim 시트 선택 토글
+        /// Interim 시트 선택 토글 - 바인딩에 의해 IsSelected가 이미 변경됨, 알림만 전달
         /// </summary>
         public void ToggleInterimSheetSelection(SelectableSheetInfo sheet)
         {
-            sheet.IsSelected = !sheet.IsSelected;
+            // 바인딩에 의해 IsSelected가 이미 변경되었으므로 알림만 전달
             OnPropertyChanged(nameof(HasSelectedInterimSheets));
         }
 
@@ -1018,11 +1018,11 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 시트 선택 토글
+        /// 시트 선택 토글 - 바인딩에 의해 IsSelected가 이미 변경됨, 알림만 전달
         /// </summary>
         public void ToggleSheetSelection(SelectableSheetInfo sheet)
         {
-            sheet.IsSelected = !sheet.IsSelected;
+            // 바인딩에 의해 IsSelected가 이미 변경되었으므로 알림만 전달
             OnPropertyChanged(nameof(HasSelectedSheets));
         }
 
