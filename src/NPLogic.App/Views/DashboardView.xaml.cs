@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using NPLogic.Core.Models;
 using NPLogic.Services;
 using NPLogic.ViewModels;
+using System.IO;
+using System.Text.Json;
 
 namespace NPLogic.Views
 {
@@ -31,6 +33,19 @@ namespace NPLogic.Views
 
         // 상태 복원 중 플래그 (이벤트 중복 방지)
         private bool _isRestoringState = false;
+
+        // #region agent log
+        private static void DebugLog(string hypothesisId, string location, string message, object? data = null)
+        {
+            try
+            {
+                var logEntry = new { hypothesisId, location, message, data, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), sessionId = "debug-session" };
+                var json = System.Text.Json.JsonSerializer.Serialize(logEntry);
+                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", json + "\n");
+            }
+            catch { }
+        }
+        // #endregion
 
         public DashboardView()
         {

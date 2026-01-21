@@ -38,10 +38,9 @@ namespace NPLogic.Views
         private readonly Dictionary<string, object> _tabViewModelCache = new();
         private Guid? _lastPropertyId; // 마지막으로 로드한 물건 ID (캐시 무효화용)
         
-        // ========== 탭 전환 성능 최적화 (Race Condition 방지) ==========
+        // ========== 탭 전환 성능 최적화 (버전 기반 동기화) ==========
         private CancellationTokenSource? _tabLoadCts; // 탭 전환 취소용
-        private bool _isLoadingTab = false; // 로딩 중 여부 (중복 실행 방지)
-        private string? _pendingTabName = null; // 대기 중인 탭 이름
+        private int _tabLoadRequestVersion = 0; // 요청 버전 (최신 요청만 UI 업데이트)
 
         public NonCoreView()
         {
@@ -248,23 +247,17 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 기능별 컨텐츠 로드 - 성능 최적화: View 캐싱, CancellationToken, 로딩 Lock 적용
+        /// 기능별 컨텐츠 로드 - 버전 기반 동기화로 Race Condition 방지
         /// </summary>
         private async Task LoadFunctionContentAsync(string tabName)
         {
-            // 로딩 중이면 대기 탭으로 저장하고 리턴 (중복 실행 방지)
-            if (_isLoadingTab)
-            {
-                _pendingTabName = tabName;
-                return;
-            }
+            // 1. 요청 버전 증가 (원자적) - 이 요청이 최신인지 나중에 확인할 때 사용
+            var currentVersion = Interlocked.Increment(ref _tabLoadRequestVersion);
             
-            // 이전 로드 작업 취소
+            // 2. 이전 로드 작업 취소
             _tabLoadCts?.Cancel();
             _tabLoadCts = new CancellationTokenSource();
             var token = _tabLoadCts.Token;
-            
-            _isLoadingTab = true;
             
             try
             {
@@ -302,6 +295,14 @@ namespace NPLogic.Views
                     content = await CreateAndCacheTabViewAsync(tabName, selectedPropertyId, serviceProvider, token);
                 }
 
+                // 3. UI 업데이트 직전: 최신 버전인지 확인
+                // 빠른 탭 전환 시 나중에 요청된 탭만 UI에 반영됨
+                if (currentVersion != _tabLoadRequestVersion)
+                {
+                    Debug.WriteLine($"탭 로드 무시됨 (구버전): {tabName}, version={currentVersion}, latest={_tabLoadRequestVersion}");
+                    return;
+                }
+                
                 // 취소되지 않은 경우에만 UI 업데이트
                 token.ThrowIfCancellationRequested();
                 ContentArea.Content = content;
@@ -313,18 +314,6 @@ namespace NPLogic.Views
             {
                 // 취소된 경우 무시 - 새로운 탭 로드가 진행 중
                 Debug.WriteLine($"탭 로드 취소됨: {tabName}");
-            }
-            finally
-            {
-                _isLoadingTab = false;
-                
-                // 대기 중인 탭이 있으면 로드
-                if (_pendingTabName != null && _pendingTabName != tabName)
-                {
-                    var pending = _pendingTabName;
-                    _pendingTabName = null;
-                    await LoadFunctionContentAsync(pending);
-                }
             }
         }
         
