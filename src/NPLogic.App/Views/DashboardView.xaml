@@ -118,6 +118,7 @@
 
         <!-- 에러 메시지 오버레이 -->
         <Grid Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}"
+              d:Visibility="Collapsed"
               Background="{StaticResource OverlayBrush}"
               Panel.ZIndex="100">
             <Border Background="{StaticResource ErrorBrush}"

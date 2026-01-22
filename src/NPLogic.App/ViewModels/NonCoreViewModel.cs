@@ -573,7 +573,7 @@ namespace NPLogic.ViewModels
         {
 #if DEBUG
             // 디버그 로깅 (릴리스 빌드에서 제외)
-            System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="LoadProperty called",data=new{propertyNumber=property?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+            // System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="LoadProperty called",data=new{propertyNumber=property?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
 #endif
             
             if (property == null) return;

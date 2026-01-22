@@ -21,8 +21,8 @@ namespace NPLogic
         private ServiceProvider? _serviceProvider;
 
         // Supabase 설정 (환경 변수 또는 설정 파일에서 로드하는 것이 좋습니다)
-        private const string SupabaseUrl = "https://vuepmhwrizaabswlgiiy.supabase.co";
-        private const string SupabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1ZXBtaHdyaXphYWJzd2xnaWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2NDA2MzUsImV4cCI6MjA3OTIxNjYzNX0.VJ6CG3alGGVK7HYfZabHd47q2RDR6EgGMPD1GS8YNu4";
+        private const string SupabaseUrl = "https://nlddampvgxamaukflqhd.supabase.co";
+        private const string SupabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sZGRhbXB2Z3hhbWF1a2ZscWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NjI0ODYsImV4cCI6MjA4NDUzODQ4Nn0.w3GunSwV2ip9Q9376L3kePRtVhtwYeH_WUXQT3gxvzs";
 
         protected override async void OnStartup(StartupEventArgs e)
         {
