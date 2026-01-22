@@ -8,9 +8,18 @@ namespace NPLogic.Core.Models
     public class BorrowerRestructuring
     {
         public Guid Id { get; set; }
-        
-        /// <summary>차주 ID (FK)</summary>
-        public Guid BorrowerId { get; set; }
+
+        /// <summary>차주 ID (FK, optional)</summary>
+        public Guid? BorrowerId { get; set; }
+
+        /// <summary>자산유형</summary>
+        public string? AssetType { get; set; }
+
+        /// <summary>차주일련번호</summary>
+        public string? BorrowerNumber { get; set; }
+
+        /// <summary>차주명</summary>
+        public string? BorrowerName { get; set; }
 
         /// <summary>인가/미인가</summary>
         public string? ApprovalStatus { get; set; }
@@ -41,6 +50,20 @@ namespace NPLogic.Core.Models
 
         /// <summary>회생탈락권</summary>
         public string? ExcludedClaim { get; set; }
+
+        // ========== 회생차주 추가 정보 ==========
+
+        /// <summary>업종</summary>
+        public string? Industry { get; set; }
+
+        /// <summary>상장/비상장</summary>
+        public string? ListingStatus { get; set; }
+
+        /// <summary>종업원수</summary>
+        public int? EmployeeCount { get; set; }
+
+        /// <summary>설립일</summary>
+        public DateTime? EstablishmentDate { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

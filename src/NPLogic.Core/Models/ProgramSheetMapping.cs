@@ -12,10 +12,9 @@ namespace NPLogic.Core.Models
         BorrowerGeneral,       // Sheet A: 차주일반정보
         BorrowerRestructuring, // Sheet A-1: 회생차주정보
         Loan,                  // Sheet B: 채권일반정보
-        Property,              // Sheet C-1: 담보물건정보
+        Property,              // Sheet C-1: 물건정보
         RegistryDetail,        // Sheet C-2: 등기부등본정보
-        CollateralSetting,     // Sheet C-3: 담보설정정보
-        Guarantee,             // Sheet D: 보증정보
+        Guarantee,             // Sheet D: 신용보증서
         InterimAdvance,        // Interim: 가지급금
         InterimCollection      // Interim: 회수정보
     }
@@ -125,7 +124,6 @@ namespace NPLogic.Core.Models
                 DataDiskSheetType.Loan => "SheetB",
                 DataDiskSheetType.Property => "SheetC1",
                 DataDiskSheetType.RegistryDetail => "SheetC2",
-                DataDiskSheetType.CollateralSetting => "SheetC3",
                 DataDiskSheetType.Guarantee => "SheetD",
                 DataDiskSheetType.InterimAdvance => "Interim_Advance",
                 DataDiskSheetType.InterimCollection => "Interim_Collection",
@@ -145,7 +143,6 @@ namespace NPLogic.Core.Models
                 "SheetB" => DataDiskSheetType.Loan,
                 "SheetC1" => DataDiskSheetType.Property,
                 "SheetC2" => DataDiskSheetType.RegistryDetail,
-                "SheetC3" => DataDiskSheetType.CollateralSetting,
                 "SheetD" => DataDiskSheetType.Guarantee,
                 "Interim_Advance" => DataDiskSheetType.InterimAdvance,
                 "Interim_Collection" => DataDiskSheetType.InterimCollection,
@@ -206,11 +203,10 @@ namespace NPLogic.Core.Models
         {
             DataDiskSheetType.BorrowerGeneral => "차주일반정보",
             DataDiskSheetType.BorrowerRestructuring => "회생차주정보",
-            DataDiskSheetType.Loan => "채권정보",
-            DataDiskSheetType.Property => "담보물건정보",
+            DataDiskSheetType.Loan => "채권일반정보",
+            DataDiskSheetType.Property => "물건정보",
             DataDiskSheetType.RegistryDetail => "등기부등본정보",
-            DataDiskSheetType.CollateralSetting => "담보설정정보",
-            DataDiskSheetType.Guarantee => "보증정보",
+            DataDiskSheetType.Guarantee => "신용보증서",
             DataDiskSheetType.InterimAdvance => "가지급금",
             DataDiskSheetType.InterimCollection => "회수정보",
             _ => "알 수 없음"

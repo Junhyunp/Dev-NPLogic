@@ -21,6 +21,12 @@ namespace NPLogic.Core.Models
         /// <summary>사업자번호</summary>
         public string? BusinessNumber { get; set; }
 
+        /// <summary>자산유형</summary>
+        public string? AssetType { get; set; }
+
+        /// <summary>관련차주</summary>
+        public string? RelatedBorrower { get; set; }
+
         // ========== 요약 통계 ==========
 
         /// <summary>물건갯수</summary>
@@ -31,6 +37,15 @@ namespace NPLogic.Core.Models
 
         /// <summary>근저당설정액</summary>
         public decimal MortgageAmount { get; set; }
+
+        /// <summary>미상환원금잔액</summary>
+        public decimal? UnpaidPrincipal { get; set; }
+
+        /// <summary>미수이자</summary>
+        public decimal? AccruedInterest { get; set; }
+
+        /// <summary>비고</summary>
+        public string? Notes { get; set; }
 
         // ========== 상태 체크 ==========
 

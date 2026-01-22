@@ -265,19 +265,145 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// 시트 타입별 사용 가능한 DB 컬럼 목록 가져오기
+        /// 시트 타입별 사용 가능한 DB 컬럼 목록 가져오기 (대표컬럼만 반환)
         /// </summary>
         public List<(string DbColumn, string DisplayName)> GetAvailableDbColumns(DataDiskSheetType sheetType)
         {
-            var mappingRules = SheetMappingConfig.GetMappingRules(ConvertToExcelSheetType(sheetType));
-            
-            // 중복 제거하여 DB 컬럼 목록 반환
-            return mappingRules
-                .Select(r => r.DbColumnName)
-                .Distinct()
+            // 시트 타입별 대표컬럼만 반환
+            var representativeColumns = GetRepresentativeColumns(sheetType);
+
+            return representativeColumns
                 .Select(col => (col, GetDbColumnDisplayName(col)))
-                .OrderBy(x => x.Item2)
                 .ToList();
+        }
+
+        /// <summary>
+        /// 시트 타입별 대표컬럼 목록
+        /// </summary>
+        private List<string> GetRepresentativeColumns(DataDiskSheetType sheetType)
+        {
+            return sheetType switch
+            {
+                DataDiskSheetType.BorrowerGeneral => new List<string>
+                {
+                    "asset_type",           // 자산유형
+                    "borrower_number",      // 차주일련번호
+                    "borrower_name",        // 차주명
+                    "related_borrower",     // 관련차주
+                    "borrower_type",        // 차주형태
+                    "unpaid_principal",     // 미상환원금잔액
+                    "accrued_interest",     // 미수이자
+                    "mortgage_amount",      // 근저당권설정액
+                    "notes"                 // 비고
+                },
+                DataDiskSheetType.Property => new List<string>
+                {
+                    // 기본 정보
+                    "asset_type",                   // 자산유형
+                    "borrower_number",              // 차주일련번호
+                    "borrower_name",                // 차주명
+                    "collateral_number",            // 물건 일련번호
+                    "address_province",             // 담보소재지 1
+                    "address_city",                 // 담보소재지 2
+                    "address_district",             // 담보소재지 3
+                    "address_detail",               // 담보소재지 4
+                    "property_type",                // 물건 종류
+                    "land_area",                    // 물건 대지면적
+                    "building_area",                // 물건 건물면적
+                    "machinery_value",              // 물건 기타 (기계기구 등)
+                    "joint_collateral_amount",      // 공담 물건 금액
+
+                    // 선순위 정보
+                    "senior_mortgage_amount",       // 물건별 선순위 설정액
+                    "senior_housing_small_deposit", // 선순위 주택 소액보증금
+                    "senior_commercial_small_deposit", // 선순위 상가 소액보증금
+                    "senior_small_deposit",         // 선순위 소액보증금
+                    "senior_housing_lease_deposit", // 선순위 주택 임차보증금
+                    "senior_commercial_lease_deposit", // 선순위 상가 임차보증금
+                    "senior_lease_deposit",         // 선순위 임차보증금
+                    "senior_wage_claim",            // 선순위 임금채권
+                    "senior_current_tax",           // 선순위 당해세
+                    "senior_tax_claim",             // 선순위 조세채권
+                    "senior_etc",                   // 선순위 기타
+                    "senior_total",                 // 선순위 합계
+
+                    // 감정평가 정보
+                    "appraisal_type",               // 감정평가구분
+                    "appraisal_date",               // 감정평가일자
+                    "appraisal_agency",             // 감정평가기관
+                    "land_appraisal_value",         // 토지감정평가액
+                    "building_appraisal_value",     // 건물감정평가액
+                    "machinery_appraisal_value",    // 기계평가액
+                    "excluded_appraisal",           // 제시외
+                    "appraisal_value",              // 감정평가액합계
+                    "kb_price",                     // KB아파트시세
+
+                    // 경매 기본 정보
+                    "auction_started",              // 경매개시여부
+                    "auction_court",                // 경매 관할법원
+
+                    // 경매 선행 정보
+                    "precedent_auction_applicant",  // 경매신청기관(선행)
+                    "precedent_auction_start_date", // 경매개시일자(선행)
+                    "precedent_case_number",        // 경매사건번호(선행)
+                    "precedent_claim_deadline",     // 배당요구종기일(선행)
+                    "precedent_claim_amount",       // 청구금액(선행)
+
+                    // 경매 후행 정보
+                    "subsequent_auction_applicant", // 경매신청기관(후행)
+                    "subsequent_auction_start_date",// 경매개시일자(후행)
+                    "subsequent_case_number",       // 경매사건번호(후행)
+                    "subsequent_claim_deadline",    // 배당요구종기일(후행)
+                    "subsequent_claim_amount",      // 청구금액(후행)
+
+                    // 경매 기일/결과 정보
+                    "initial_court_value",          // 최초법사가
+                    "first_auction_date",           // 최초경매기일
+                    "final_auction_round",          // 최종경매회차
+                    "final_auction_result",         // 최종경매결과
+                    "final_auction_date",           // 최종경매기일
+                    "next_auction_date",            // 차기경매기일
+                    "winning_bid_amount",           // 낙찰금액
+                    "final_minimum_bid",            // 최종경매일의 최저입찰금액
+                    "next_minimum_bid",             // 차후최종경매일의 최저입찰금액
+                    "notes"                         // 비고
+                },
+                DataDiskSheetType.BorrowerRestructuring => new List<string>
+                {
+                    "asset_type",               // 자산유형 (borrowers 참조)
+                    "borrower_number",          // 차주일련번호 (borrowers 참조)
+                    "borrower_name",            // 차주명 (borrowers 참조)
+                    "progress_stage",           // 세부진행단계
+                    "court_name",               // 관할법원
+                    "case_number",              // 회생사건번호
+                    "preservation_date",        // 보전처분일
+                    "commencement_date",        // 개시결정일
+                    "claim_filing_date",        // 채권신고일
+                    "approval_dismissal_date",  // 인가/폐지결정일
+                    "industry",                 // 업종
+                    "listing_status",           // 상장/비상장
+                    "employee_count",           // 종업원수
+                    "establishment_date"        // 설립일
+                },
+                DataDiskSheetType.Loan => new List<string>
+                {
+                    "borrower_number",          // 차주일련번호
+                    "borrower_name",            // 차주명
+                    "account_serial",           // 대출일련번호
+                    "loan_type",                // 대출과목
+                    "account_number",           // 계좌번호
+                    "normal_interest_rate",     // 정상이자율
+                    "overdue_interest_rate",    // 연체이자율
+                    "initial_loan_date",        // 최초대출일
+                    "initial_loan_amount",      // 최초대출원금
+                    "converted_loan_balance",   // 환산된 대출잔액
+                    "advance_payment",          // 가지급금
+                    "unpaid_principal",         // 미상환원금잔액
+                    "accrued_interest",         // 미수이자
+                    "total_claim_amount"        // 채권액 합계
+                },
+                _ => new List<string>()
+            };
         }
 
         /// <summary>
@@ -670,19 +796,65 @@ namespace NPLogic.Services
 
         private Loan MapRowToLoan(Dictionary<string, object> row, Guid? borrowerId, Dictionary<string, string> columnMappings)
         {
+            // 기본 값 추출
+            var borrowerNumber = GetMappedValue<string>(row, "borrower_number", columnMappings);
+            var borrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings);
+            var accountSerial = GetMappedValue<string>(row, "account_serial", columnMappings);
+            var normalRate = GetMappedValue<decimal?>(row, "normal_interest_rate", columnMappings);
+            var overdueRate = GetMappedValue<decimal?>(row, "overdue_interest_rate", columnMappings);
+            var convertedLoanBalance = GetMappedValue<decimal?>(row, "converted_loan_balance", columnMappings);
+            var unpaidPrincipal = GetMappedValue<decimal?>(row, "unpaid_principal", columnMappings);
+            var advancePayment = GetMappedValue<decimal?>(row, "advance_payment", columnMappings) ?? 0;
+            var accruedInterest = GetMappedValue<decimal?>(row, "accrued_interest", columnMappings) ?? 0;
+            var totalClaimAmount = GetMappedValue<decimal?>(row, "total_claim_amount", columnMappings);
+
+            // [규칙1] 대출일련번호가 숫자인 경우 -> "차주일련번호-대출일련번호" 형식으로 변환
+            if (!string.IsNullOrEmpty(accountSerial) && !string.IsNullOrEmpty(borrowerNumber))
+            {
+                // 숫자만 있는지 확인
+                if (accountSerial.All(char.IsDigit))
+                {
+                    accountSerial = $"{borrowerNumber}-{accountSerial}";
+                }
+            }
+
+            // [규칙2] 정상이자율만 있고 연체이자율 없으면 -> 연체이자율 = 정상이자율 + 3%
+            // [규칙3] 연체이자율만 있고 정상이자율 없으면 -> 정상이자율 = 연체이자율 - 3%
+            if (normalRate.HasValue && !overdueRate.HasValue)
+            {
+                overdueRate = normalRate.Value + 0.03m;
+            }
+            else if (overdueRate.HasValue && !normalRate.HasValue)
+            {
+                normalRate = overdueRate.Value - 0.03m;
+            }
+
+            // [규칙4] 채권액 합계 없으면 -> 환산된 대출잔액(또는 미상환원금잔액) + 가지급금 + 미수이자
+            if (!totalClaimAmount.HasValue)
+            {
+                var balanceForCalc = convertedLoanBalance ?? unpaidPrincipal ?? 0;
+                totalClaimAmount = balanceForCalc + advancePayment + accruedInterest;
+            }
+
             return new Loan
             {
                 Id = Guid.NewGuid(),
                 BorrowerId = borrowerId,
-                AccountSerial = GetMappedValue<string>(row, "account_serial", columnMappings),
+                BorrowerNumber = borrowerNumber,
+                BorrowerName = borrowerName,
+                AccountSerial = accountSerial,
                 LoanType = GetMappedValue<string>(row, "loan_type", columnMappings),
                 AccountNumber = GetMappedValue<string>(row, "account_number", columnMappings),
-                NormalInterestRate = GetMappedValue<decimal?>(row, "normal_interest_rate", columnMappings),
+                NormalInterestRate = normalRate,
+                OverdueInterestRate = overdueRate,
                 InitialLoanDate = GetMappedValue<DateTime?>(row, "initial_loan_date", columnMappings),
                 LastInterestDate = GetMappedValue<DateTime?>(row, "last_interest_date", columnMappings),
                 InitialLoanAmount = GetMappedValue<decimal?>(row, "initial_loan_amount", columnMappings),
-                LoanPrincipalBalance = GetMappedValue<decimal?>(row, "loan_principal_balance", columnMappings),
-                AccruedInterest = GetMappedValue<decimal?>(row, "accrued_interest", columnMappings) ?? 0
+                ConvertedLoanBalance = convertedLoanBalance,
+                UnpaidPrincipal = unpaidPrincipal,
+                AdvancePayment = advancePayment,
+                AccruedInterest = accruedInterest,
+                TotalClaimAmount = totalClaimAmount
             };
         }
 
@@ -736,12 +908,15 @@ namespace NPLogic.Services
             return (property, rightData);
         }
 
-        private void MapPropertyField(Property property, string dbColumn, object? value, 
+        private void MapPropertyField(Property property, string dbColumn, object? value,
             Dictionary<string, string> addressParts, Dictionary<string, object?> rightData)
         {
             switch (dbColumn)
             {
-                // 기본 정보
+                // ========== 기본 정보 ==========
+                case "asset_type":
+                    property.AssetType = value?.ToString();
+                    break;
                 case "borrower_number":
                     property.BorrowerNumber = value?.ToString();
                     break;
@@ -754,22 +929,29 @@ namespace NPLogic.Services
                 case "property_type":
                     property.PropertyType = NormalizePropertyType(value?.ToString());
                     break;
+                case "property_number":
+                    if (!string.IsNullOrEmpty(value?.ToString()))
+                        property.PropertyNumber = value?.ToString();
+                    break;
 
-                // 주소
+                // ========== 주소 ==========
                 case "address_province":
+                    property.AddressProvince = value?.ToString();
                     if (value != null) addressParts["province"] = value.ToString()!;
                     break;
                 case "address_city":
+                    property.AddressCity = value?.ToString();
                     if (value != null) addressParts["city"] = value.ToString()!;
                     break;
                 case "address_district":
+                    property.AddressDistrict = value?.ToString();
                     if (value != null) addressParts["district"] = value.ToString()!;
                     break;
                 case "address_detail":
                     if (value != null) addressParts["detail"] = value.ToString()!;
                     break;
 
-                // 면적
+                // ========== 면적/금액 ==========
                 case "land_area":
                     property.LandArea = value as decimal?;
                     break;
@@ -779,44 +961,168 @@ namespace NPLogic.Services
                 case "machinery_value":
                     property.MachineryValue = value as decimal?;
                     break;
+                case "joint_collateral_amount":
+                    property.JointCollateralAmount = value as decimal?;
+                    break;
 
-                // 감정평가
+                // ========== 선순위 정보 ==========
+                case "senior_mortgage_amount":
+                    property.SeniorMortgageAmount = value as decimal?;
+                    break;
+                case "senior_housing_small_deposit":
+                    property.SeniorHousingSmallDeposit = value as decimal?;
+                    break;
+                case "senior_commercial_small_deposit":
+                    property.SeniorCommercialSmallDeposit = value as decimal?;
+                    break;
+                case "senior_small_deposit":
+                    property.SeniorSmallDeposit = value as decimal?;
+                    rightData["small_deposit_dd"] = value;
+                    break;
+                case "senior_housing_lease_deposit":
+                    property.SeniorHousingLeaseDeposit = value as decimal?;
+                    break;
+                case "senior_commercial_lease_deposit":
+                    property.SeniorCommercialLeaseDeposit = value as decimal?;
+                    break;
+                case "senior_lease_deposit":
+                    property.SeniorLeaseDeposit = value as decimal?;
+                    rightData["lease_deposit_dd"] = value;
+                    break;
+                case "senior_wage_claim":
+                    property.SeniorWageClaim = value as decimal?;
+                    rightData["wage_claim_dd"] = value;
+                    break;
+                case "senior_current_tax":
+                    property.SeniorCurrentTax = value as decimal?;
+                    rightData["current_tax_dd"] = value;
+                    break;
+                case "senior_tax_claim":
+                    property.SeniorTaxClaim = value as decimal?;
+                    rightData["senior_tax_dd"] = value;
+                    break;
+                case "senior_etc":
+                    property.SeniorEtc = value as decimal?;
+                    rightData["etc_dd"] = value;
+                    break;
+                case "senior_total":
+                    property.SeniorTotal = value as decimal?;
+                    break;
+
+                // ========== 감정평가 정보 ==========
+                case "appraisal_type":
+                    property.AppraisalType = value?.ToString();
+                    break;
+                case "appraisal_date":
+                    property.AppraisalDate = value as DateTime?;
+                    break;
+                case "appraisal_agency":
+                    property.AppraisalAgency = value?.ToString();
+                    break;
+                case "land_appraisal_value":
+                    property.LandAppraisalValue = value as decimal?;
+                    break;
+                case "building_appraisal_value":
+                    property.BuildingAppraisalValue = value as decimal?;
+                    break;
+                case "machinery_appraisal_value":
+                    property.MachineryAppraisalValue = value as decimal?;
+                    break;
+                case "excluded_appraisal":
+                    property.ExcludedAppraisal = value as decimal?;
+                    break;
                 case "appraisal_value":
                     property.AppraisalValue = value as decimal?;
                     rightData["appraisal_value"] = value;
                     break;
+                case "kb_price":
+                    property.KbPrice = value as decimal?;
+                    break;
 
-                // 경매 정보
-                case "court_name":
+                // ========== 경매 기본 정보 ==========
+                case "auction_started":
+                    if (value is bool boolVal)
+                        property.AuctionStarted = boolVal;
+                    else if (value != null)
+                    {
+                        var strVal = value.ToString()?.Trim().ToLower();
+                        property.AuctionStarted = strVal == "y" || strVal == "yes" || strVal == "true" || strVal == "1" || strVal == "예" || strVal == "개시";
+                    }
+                    break;
+                case "auction_court":
+                    property.AuctionCourt = value?.ToString();
                     rightData["court_name"] = value;
                     break;
-                case "property_number":
-                    if (!string.IsNullOrEmpty(value?.ToString()))
-                        property.PropertyNumber = value?.ToString();
+
+                // ========== 경매 선행 정보 ==========
+                case "precedent_auction_applicant":
+                    property.PrecedentAuctionApplicant = value?.ToString();
+                    break;
+                case "precedent_auction_start_date":
+                    property.PrecedentAuctionStartDate = value as DateTime?;
+                    break;
+                case "precedent_case_number":
+                    property.PrecedentCaseNumber = value?.ToString();
+                    break;
+                case "precedent_claim_deadline":
+                    property.PrecedentClaimDeadline = value as DateTime?;
+                    break;
+                case "precedent_claim_amount":
+                    property.PrecedentClaimAmount = value as decimal?;
+                    break;
+
+                // ========== 경매 후행 정보 ==========
+                case "subsequent_auction_applicant":
+                    property.SubsequentAuctionApplicant = value?.ToString();
+                    break;
+                case "subsequent_auction_start_date":
+                    property.SubsequentAuctionStartDate = value as DateTime?;
+                    break;
+                case "subsequent_case_number":
+                    property.SubsequentCaseNumber = value?.ToString();
+                    break;
+                case "subsequent_claim_deadline":
+                    property.SubsequentClaimDeadline = value as DateTime?;
+                    break;
+                case "subsequent_claim_amount":
+                    property.SubsequentClaimAmount = value as decimal?;
+                    break;
+
+                // ========== 경매 기일/결과 정보 ==========
+                case "initial_court_value":
+                    property.InitialCourtValue = value as decimal?;
+                    break;
+                case "first_auction_date":
+                    property.FirstAuctionDate = value as DateTime?;
+                    break;
+                case "final_auction_round":
+                    if (value is int intVal)
+                        property.FinalAuctionRound = intVal;
+                    else if (int.TryParse(value?.ToString(), out var parsed))
+                        property.FinalAuctionRound = parsed;
+                    break;
+                case "final_auction_result":
+                    property.FinalAuctionResult = value?.ToString();
+                    break;
+                case "final_auction_date":
+                    property.FinalAuctionDate = value as DateTime?;
+                    break;
+                case "next_auction_date":
+                    property.NextAuctionDate = value as DateTime?;
+                    break;
+                case "winning_bid_amount":
+                    property.WinningBidAmount = value as decimal?;
                     break;
                 case "final_minimum_bid":
+                    property.FinalMinimumBid = value as decimal?;
                     property.MinimumBid = value as decimal?;
                     rightData["final_min_bid"] = value;
                     break;
-
-                // 선순위 정보 (DD)
-                case "senior_small_deposit":
-                    rightData["small_deposit_dd"] = value;
+                case "next_minimum_bid":
+                    property.NextMinimumBid = value as decimal?;
                     break;
-                case "senior_lease_deposit":
-                    rightData["lease_deposit_dd"] = value;
-                    break;
-                case "senior_wage_claim":
-                    rightData["wage_claim_dd"] = value;
-                    break;
-                case "senior_current_tax":
-                    rightData["current_tax_dd"] = value;
-                    break;
-                case "senior_tax_claim":
-                    rightData["senior_tax_dd"] = value;
-                    break;
-                case "senior_other":
-                    rightData["etc_dd"] = value;
+                case "notes":
+                    property.Notes = value?.ToString();
                     break;
             }
         }
@@ -923,7 +1229,6 @@ namespace NPLogic.Services
                 SheetType.Loan => DataDiskSheetType.Loan,
                 SheetType.Property => DataDiskSheetType.Property,
                 SheetType.RegistryDetail => DataDiskSheetType.RegistryDetail,
-                SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
                 SheetType.Guarantee => DataDiskSheetType.Guarantee,
                 _ => DataDiskSheetType.Unknown
             };
@@ -941,7 +1246,6 @@ namespace NPLogic.Services
                 DataDiskSheetType.Loan => SheetType.Loan,
                 DataDiskSheetType.Property => SheetType.Property,
                 DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
-                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
                 DataDiskSheetType.Guarantee => SheetType.Guarantee,
                 _ => SheetType.Unknown
             };
@@ -973,36 +1277,112 @@ namespace NPLogic.Services
         {
             return dbColumn switch
             {
-                "borrower_number" => "차주번호",
+                // 차주일반정보 대표컬럼
+                "asset_type" => "자산유형",
+                "borrower_number" => "차주일련번호",
                 "borrower_name" => "차주명",
+                "related_borrower" => "관련차주",
                 "borrower_type" => "차주형태",
-                "opb" => "대출원금잔액",
-                "mortgage_amount" => "근저당설정액",
-                "address_province" => "담보소재지1 (시/도)",
-                "address_city" => "담보소재지2 (시/군/구)",
-                "address_district" => "담보소재지3 (동/읍/면)",
-                "address_detail" => "담보소재지4 (상세)",
-                "property_type" => "물건유형",
-                "land_area" => "대지면적",
-                "building_area" => "건물면적",
-                "machinery_value" => "기계기구",
-                "appraisal_value" => "감정평가액",
-                "court_name" => "관할법원",
-                "case_number" => "사건번호",
-                "property_number" => "물건번호",
-                "collateral_number" => "담보번호",
-                "account_serial" => "대출일련번호",
-                "loan_type" => "대출과목",
-                "account_number" => "계좌번호",
-                "normal_interest_rate" => "이자율",
-                "initial_loan_date" => "최초대출일",
-                "initial_loan_amount" => "최초대출금액",
-                "loan_principal_balance" => "대출금잔액",
+                "unpaid_principal" => "미상환원금잔액",
+                "accrued_interest" => "미수이자",
+                "mortgage_amount" => "근저당권설정액",
+                "notes" => "비고",
+
+                // 물건정보 기본 대표컬럼
+                "address_province" => "담보소재지1",
+                "address_city" => "담보소재지2",
+                "address_district" => "담보소재지3",
+                "address_detail" => "담보소재지4",
+                "property_type" => "물건종류",
+                "land_area" => "물건 대지면적",
+                "building_area" => "물건 건물면적",
+                "machinery_value" => "물건 기타(기계기구 등)",
+                "collateral_number" => "물건 일련번호",
+                "joint_collateral_amount" => "공담 물건 금액",
+
+                // 물건정보 선순위 대표컬럼
+                "senior_mortgage_amount" => "물건별 선순위 설정액",
+                "senior_housing_small_deposit" => "선순위 주택 소액보증금",
+                "senior_commercial_small_deposit" => "선순위 상가 소액보증금",
                 "senior_small_deposit" => "선순위 소액보증금",
+                "senior_housing_lease_deposit" => "선순위 주택 임차보증금",
+                "senior_commercial_lease_deposit" => "선순위 상가 임차보증금",
                 "senior_lease_deposit" => "선순위 임차보증금",
                 "senior_wage_claim" => "선순위 임금채권",
                 "senior_current_tax" => "선순위 당해세",
                 "senior_tax_claim" => "선순위 조세채권",
+                "senior_etc" => "선순위 기타",
+                "senior_total" => "선순위 합계",
+
+                // 물건정보 감정평가 대표컬럼
+                "appraisal_type" => "감정평가구분",
+                "appraisal_date" => "감정평가일자",
+                "appraisal_agency" => "감정평가기관",
+                "land_appraisal_value" => "토지감정평가액",
+                "building_appraisal_value" => "건물감정평가액",
+                "machinery_appraisal_value" => "기계평가액",
+                "excluded_appraisal" => "제시외",
+                "appraisal_value" => "감정평가액합계",
+                "kb_price" => "KB아파트시세",
+
+                // 물건정보 경매 기본 대표컬럼
+                "auction_started" => "경매개시여부",
+                "auction_court" => "경매 관할법원",
+
+                // 물건정보 경매 선행 대표컬럼
+                "precedent_auction_applicant" => "경매신청기관(선행)",
+                "precedent_auction_start_date" => "경매개시일자(선행)",
+                "precedent_case_number" => "경매사건번호(선행)",
+                "precedent_claim_deadline" => "배당요구종기일(선행)",
+                "precedent_claim_amount" => "청구금액(선행)",
+
+                // 물건정보 경매 후행 대표컬럼
+                "subsequent_auction_applicant" => "경매신청기관(후행)",
+                "subsequent_auction_start_date" => "경매개시일자(후행)",
+                "subsequent_case_number" => "경매사건번호(후행)",
+                "subsequent_claim_deadline" => "배당요구종기일(후행)",
+                "subsequent_claim_amount" => "청구금액(후행)",
+
+                // 물건정보 경매 기일/결과 대표컬럼
+                "initial_court_value" => "최초법사가",
+                "first_auction_date" => "최초경매기일",
+                "final_auction_round" => "최종경매회차",
+                "final_auction_result" => "최종경매결과",
+                "final_auction_date" => "최종경매기일",
+                "next_auction_date" => "차기경매기일",
+                "winning_bid_amount" => "낙찰금액",
+                "final_minimum_bid" => "최종경매일의 최저입찰금액",
+                "next_minimum_bid" => "차후최종경매일의 최저입찰금액",
+
+                // 채권일반정보 대표컬럼
+                "account_serial" => "대출일련번호",
+                "loan_type" => "대출과목",
+                "account_number" => "계좌번호",
+                "normal_interest_rate" => "정상이자율",
+                "overdue_interest_rate" => "연체이자율",
+                "initial_loan_date" => "최초대출일",
+                "initial_loan_amount" => "최초대출원금",
+                "converted_loan_balance" => "환산된 대출잔액",
+                "loan_principal_balance" => "대출금잔액",
+                "advance_payment" => "가지급금",
+                "total_claim_amount" => "채권액 합계",
+
+                // 회생차주정보 대표컬럼
+                "progress_stage" => "세부진행단계",
+                "court_name" => "관할법원",
+                "case_number" => "회생사건번호",
+                "preservation_date" => "보전처분일",
+                "commencement_date" => "개시결정일",
+                "claim_filing_date" => "채권신고일",
+                "approval_dismissal_date" => "인가/폐지결정일",
+                "industry" => "업종",
+                "listing_status" => "상장/비상장",
+                "employee_count" => "종업원수",
+                "establishment_date" => "설립일",
+
+                // 기타 (자동매칭용)
+                "opb" => "대출원금잔액",
+                "property_number" => "물건번호",
                 "senior_other" => "기타 선순위",
                 _ => dbColumn
             };

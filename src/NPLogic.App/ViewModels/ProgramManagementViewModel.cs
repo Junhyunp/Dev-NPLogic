@@ -159,11 +159,10 @@ namespace NPLogic.ViewModels
             new SheetTypeOption { Value = DataDiskSheetType.Unknown, DisplayName = "(선택안함)" },
             new SheetTypeOption { Value = DataDiskSheetType.BorrowerGeneral, DisplayName = "차주일반정보" },
             new SheetTypeOption { Value = DataDiskSheetType.BorrowerRestructuring, DisplayName = "회생차주정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Loan, DisplayName = "채권정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Property, DisplayName = "담보물건정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Loan, DisplayName = "채권일반정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Property, DisplayName = "물건정보" },
             new SheetTypeOption { Value = DataDiskSheetType.RegistryDetail, DisplayName = "등기부등본정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.CollateralSetting, DisplayName = "담보설정정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Guarantee, DisplayName = "보증정보" }
+            new SheetTypeOption { Value = DataDiskSheetType.Guarantee, DisplayName = "신용보증서" }
         };
 
         // ========== Interim 업로드 ==========
@@ -943,14 +942,35 @@ namespace NPLogic.ViewModels
                 {
                     // 여러 시트가 있으면 시트 선택 UI 표시
                     AvailableSheets.Clear();
-                    
+
+                    // 이미 할당된 시트 타입 추적 (중복 방지)
+                    var assignedTypes = new HashSet<SheetType>();
+
                     foreach (var sheet in sheets)
                     {
                         // 은행별 매핑에서 시트 타입 찾기
                         var mappingInfo = sheetMappings.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
-                        var sheetType = mappingInfo?.DetectedType != DataDiskSheetType.Unknown 
-                            ? ConvertDataDiskTypeToSheetType(mappingInfo.DetectedType) 
+                        var sheetType = mappingInfo?.DetectedType != DataDiskSheetType.Unknown
+                            ? ConvertDataDiskTypeToSheetType(mappingInfo.DetectedType)
                             : sheet.SheetType;
+
+                        // 중복 검사: Unknown이 아니고 이미 할당된 타입이면 Unknown으로 변경
+                        if (sheetType != SheetType.Unknown && assignedTypes.Contains(sheetType))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[LoadDataDiskFile] 시트 '{sheet.Name}'의 타입 '{sheetType}'이 이미 사용 중이므로 Unknown으로 변경");
+                            sheetType = SheetType.Unknown;
+
+                            // sheetMappings에서도 업데이트
+                            if (mappingInfo != null)
+                            {
+                                mappingInfo.DetectedType = DataDiskSheetType.Unknown;
+                                mappingInfo.SelectedType = DataDiskSheetType.Unknown;
+                            }
+                        }
+                        else if (sheetType != SheetType.Unknown)
+                        {
+                            assignedTypes.Add(sheetType);
+                        }
 
                         var selectableSheet = new SelectableSheetInfo
                         {
@@ -964,7 +984,7 @@ namespace NPLogic.ViewModels
                         };
                         AvailableSheets.Add(selectableSheet);
                     }
-                    
+
                     // 시트 매핑 정보 저장 (나중에 업로드 시 사용)
                     _sheetMappingInfoList = sheetMappings;
                     
@@ -1011,7 +1031,6 @@ namespace NPLogic.ViewModels
                 DataDiskSheetType.Loan => SheetType.Loan,
                 DataDiskSheetType.Property => SheetType.Property,
                 DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
-                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
                 DataDiskSheetType.Guarantee => SheetType.Guarantee,
                 _ => SheetType.Unknown
             };
@@ -2311,7 +2330,6 @@ namespace NPLogic.ViewModels
                 SheetType.Loan => DataDiskSheetType.Loan,
                 SheetType.Property => DataDiskSheetType.Property,
                 SheetType.RegistryDetail => DataDiskSheetType.RegistryDetail,
-                SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
                 SheetType.Guarantee => DataDiskSheetType.Guarantee,
                 _ => DataDiskSheetType.Unknown
             };
@@ -2351,18 +2369,36 @@ namespace NPLogic.ViewModels
         {
             if (sheet == null) return;
 
-            // SelectableSheetInfo의 SheetType 변경
-            sheet.SheetType = newType switch
+            // Unknown이 아닌 타입으로 변경 시 중복 검사
+            if (newType != DataDiskSheetType.Unknown)
             {
-                DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
-                DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
-                DataDiskSheetType.Loan => SheetType.Loan,
-                DataDiskSheetType.Property => SheetType.Property,
-                DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
-                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
-                DataDiskSheetType.Guarantee => SheetType.Guarantee,
-                _ => SheetType.Unknown
-            };
+                // 같은 타입이 이미 다른 시트에 할당되어 있는지 확인
+                var existingSheetWithSameType = AvailableSheets.FirstOrDefault(s =>
+                    s != sheet &&
+                    s.SheetType == ConvertDataDiskToSheetType(newType));
+
+                if (existingSheetWithSameType != null)
+                {
+                    // 기존 시트의 타입을 Unknown으로 변경하고 선택 해제
+                    existingSheetWithSameType.SheetType = SheetType.Unknown;
+                    existingSheetWithSameType.IsSelected = false;
+
+                    var existingMappingInfo = _sheetMappingInfoList.FirstOrDefault(m => m.ExcelSheetName == existingSheetWithSameType.Name);
+                    if (existingMappingInfo != null)
+                    {
+                        existingMappingInfo.SelectedType = DataDiskSheetType.Unknown;
+                        existingMappingInfo.ColumnMappings = new List<NPLogic.Core.Models.ColumnMappingInfo>();
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[ChangeSheetType] 기존 시트 '{existingSheetWithSameType.Name}'의 타입을 Unknown으로 변경 (중복 방지)");
+                }
+            }
+
+            // SelectableSheetInfo의 SheetType 변경
+            sheet.SheetType = ConvertDataDiskToSheetType(newType);
+
+            // 시트 타입이 Unknown이 아니면 자동 선택, Unknown이면 선택 해제
+            sheet.IsSelected = newType != DataDiskSheetType.Unknown;
 
             // _sheetMappingInfoList도 업데이트
             var existingInfo = _sheetMappingInfoList.FirstOrDefault(m => m.ExcelSheetName == sheet.Name);
@@ -2373,7 +2409,27 @@ namespace NPLogic.ViewModels
                 existingInfo.ColumnMappings = _uploadService.GetDefaultColumnMappings(newType, existingInfo.Headers);
             }
 
-            System.Diagnostics.Debug.WriteLine($"[ChangeSheetType] 시트 '{sheet.Name}' 타입 변경: {newType}");
+            // 선택 상태 변경 알림
+            OnPropertyChanged(nameof(HasSelectedSheets));
+
+            System.Diagnostics.Debug.WriteLine($"[ChangeSheetType] 시트 '{sheet.Name}' 타입 변경: {newType}, 선택: {sheet.IsSelected}");
+        }
+
+        /// <summary>
+        /// DataDiskSheetType → SheetType 변환
+        /// </summary>
+        private SheetType ConvertDataDiskToSheetType(DataDiskSheetType type)
+        {
+            return type switch
+            {
+                DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
+                DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
+                DataDiskSheetType.Loan => SheetType.Loan,
+                DataDiskSheetType.Property => SheetType.Property,
+                DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
+                DataDiskSheetType.Guarantee => SheetType.Guarantee,
+                _ => SheetType.Unknown
+            };
         }
     }
 

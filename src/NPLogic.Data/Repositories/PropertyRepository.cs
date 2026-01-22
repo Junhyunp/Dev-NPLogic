@@ -907,6 +907,60 @@ namespace NPLogic.Data.Repositories
                 AuctionScheduleDate = table.AuctionScheduleDate,
                 QaUnansweredCount = table.QaUnansweredCount,
                 RightsAnalysisStatus = table.RightsAnalysisStatus ?? "pending",
+                // 물건정보 시트 대표컬럼
+                AssetType = table.AssetType,
+                AddressProvince = table.AddressProvince,
+                AddressCity = table.AddressCity,
+                AddressDistrict = table.AddressDistrict,
+                JointCollateralAmount = table.JointCollateralAmount,
+                // 선순위 정보
+                SeniorMortgageAmount = table.SeniorMortgageAmount,
+                SeniorHousingSmallDeposit = table.SeniorHousingSmallDeposit,
+                SeniorCommercialSmallDeposit = table.SeniorCommercialSmallDeposit,
+                SeniorSmallDeposit = table.SeniorSmallDeposit,
+                SeniorHousingLeaseDeposit = table.SeniorHousingLeaseDeposit,
+                SeniorCommercialLeaseDeposit = table.SeniorCommercialLeaseDeposit,
+                SeniorLeaseDeposit = table.SeniorLeaseDeposit,
+                SeniorWageClaim = table.SeniorWageClaim,
+                SeniorCurrentTax = table.SeniorCurrentTax,
+                SeniorTaxClaim = table.SeniorTaxClaim,
+                SeniorEtc = table.SeniorEtc,
+                SeniorTotal = table.SeniorTotal,
+                // 감정평가 정보
+                AppraisalType = table.AppraisalType,
+                AppraisalDate = table.AppraisalDate,
+                AppraisalAgency = table.AppraisalAgency,
+                LandAppraisalValue = table.LandAppraisalValue,
+                BuildingAppraisalValue = table.BuildingAppraisalValue,
+                MachineryAppraisalValue = table.MachineryAppraisalValue,
+                ExcludedAppraisal = table.ExcludedAppraisal,
+                KbPrice = table.KbPrice,
+                // 경매 기본 정보
+                AuctionStarted = table.AuctionStarted,
+                AuctionCourt = table.AuctionCourt,
+                // 경매 선행 정보
+                PrecedentAuctionApplicant = table.PrecedentAuctionApplicant,
+                PrecedentAuctionStartDate = table.PrecedentAuctionStartDate,
+                PrecedentCaseNumber = table.PrecedentCaseNumber,
+                PrecedentClaimDeadline = table.PrecedentClaimDeadline,
+                PrecedentClaimAmount = table.PrecedentClaimAmount,
+                // 경매 후행 정보
+                SubsequentAuctionApplicant = table.SubsequentAuctionApplicant,
+                SubsequentAuctionStartDate = table.SubsequentAuctionStartDate,
+                SubsequentCaseNumber = table.SubsequentCaseNumber,
+                SubsequentClaimDeadline = table.SubsequentClaimDeadline,
+                SubsequentClaimAmount = table.SubsequentClaimAmount,
+                // 경매 기일/결과 정보
+                InitialCourtValue = table.InitialCourtValue,
+                FirstAuctionDate = table.FirstAuctionDate,
+                FinalAuctionRound = table.FinalAuctionRound,
+                FinalAuctionResult = table.FinalAuctionResult,
+                FinalAuctionDate = table.FinalAuctionDate,
+                NextAuctionDate = table.NextAuctionDate,
+                WinningBidAmount = table.WinningBidAmount,
+                FinalMinimumBid = table.FinalMinimumBid,
+                NextMinimumBid = table.NextMinimumBid,
+                Notes = table.Notes,
                 CreatedBy = table.CreatedBy,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
@@ -961,6 +1015,60 @@ namespace NPLogic.Data.Repositories
                 AuctionScheduleDate = property.AuctionScheduleDate,
                 QaUnansweredCount = property.QaUnansweredCount,
                 RightsAnalysisStatus = property.RightsAnalysisStatus,
+                // 물건정보 시트 대표컬럼
+                AssetType = property.AssetType,
+                AddressProvince = property.AddressProvince,
+                AddressCity = property.AddressCity,
+                AddressDistrict = property.AddressDistrict,
+                JointCollateralAmount = property.JointCollateralAmount,
+                // 선순위 정보
+                SeniorMortgageAmount = property.SeniorMortgageAmount,
+                SeniorHousingSmallDeposit = property.SeniorHousingSmallDeposit,
+                SeniorCommercialSmallDeposit = property.SeniorCommercialSmallDeposit,
+                SeniorSmallDeposit = property.SeniorSmallDeposit,
+                SeniorHousingLeaseDeposit = property.SeniorHousingLeaseDeposit,
+                SeniorCommercialLeaseDeposit = property.SeniorCommercialLeaseDeposit,
+                SeniorLeaseDeposit = property.SeniorLeaseDeposit,
+                SeniorWageClaim = property.SeniorWageClaim,
+                SeniorCurrentTax = property.SeniorCurrentTax,
+                SeniorTaxClaim = property.SeniorTaxClaim,
+                SeniorEtc = property.SeniorEtc,
+                SeniorTotal = property.SeniorTotal,
+                // 감정평가 정보
+                AppraisalType = property.AppraisalType,
+                AppraisalDate = property.AppraisalDate,
+                AppraisalAgency = property.AppraisalAgency,
+                LandAppraisalValue = property.LandAppraisalValue,
+                BuildingAppraisalValue = property.BuildingAppraisalValue,
+                MachineryAppraisalValue = property.MachineryAppraisalValue,
+                ExcludedAppraisal = property.ExcludedAppraisal,
+                KbPrice = property.KbPrice,
+                // 경매 기본 정보
+                AuctionStarted = property.AuctionStarted,
+                AuctionCourt = property.AuctionCourt,
+                // 경매 선행 정보
+                PrecedentAuctionApplicant = property.PrecedentAuctionApplicant,
+                PrecedentAuctionStartDate = property.PrecedentAuctionStartDate,
+                PrecedentCaseNumber = property.PrecedentCaseNumber,
+                PrecedentClaimDeadline = property.PrecedentClaimDeadline,
+                PrecedentClaimAmount = property.PrecedentClaimAmount,
+                // 경매 후행 정보
+                SubsequentAuctionApplicant = property.SubsequentAuctionApplicant,
+                SubsequentAuctionStartDate = property.SubsequentAuctionStartDate,
+                SubsequentCaseNumber = property.SubsequentCaseNumber,
+                SubsequentClaimDeadline = property.SubsequentClaimDeadline,
+                SubsequentClaimAmount = property.SubsequentClaimAmount,
+                // 경매 기일/결과 정보
+                InitialCourtValue = property.InitialCourtValue,
+                FirstAuctionDate = property.FirstAuctionDate,
+                FinalAuctionRound = property.FinalAuctionRound,
+                FinalAuctionResult = property.FinalAuctionResult,
+                FinalAuctionDate = property.FinalAuctionDate,
+                NextAuctionDate = property.NextAuctionDate,
+                WinningBidAmount = property.WinningBidAmount,
+                FinalMinimumBid = property.FinalMinimumBid,
+                NextMinimumBid = property.NextMinimumBid,
+                Notes = property.Notes,
                 CreatedBy = property.CreatedBy,
                 CreatedAt = property.CreatedAt,
                 UpdatedAt = property.UpdatedAt
@@ -1184,6 +1292,161 @@ namespace NPLogic.Data.Repositories
         /// </summary>
         [Postgrest.Attributes.Column("borrower_residing")]
         public bool BorrowerResiding { get; set; }
+
+        // ========== 물건정보 시트 대표컬럼 ==========
+
+        [Postgrest.Attributes.Column("asset_type")]
+        public string? AssetType { get; set; }
+
+        [Postgrest.Attributes.Column("address_province")]
+        public string? AddressProvince { get; set; }
+
+        [Postgrest.Attributes.Column("address_city")]
+        public string? AddressCity { get; set; }
+
+        [Postgrest.Attributes.Column("address_district")]
+        public string? AddressDistrict { get; set; }
+
+        [Postgrest.Attributes.Column("joint_collateral_amount")]
+        public decimal? JointCollateralAmount { get; set; }
+
+        // ========== 선순위 정보 ==========
+
+        [Postgrest.Attributes.Column("senior_mortgage_amount")]
+        public decimal? SeniorMortgageAmount { get; set; }
+
+        [Postgrest.Attributes.Column("senior_housing_small_deposit")]
+        public decimal? SeniorHousingSmallDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_commercial_small_deposit")]
+        public decimal? SeniorCommercialSmallDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_small_deposit")]
+        public decimal? SeniorSmallDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_housing_lease_deposit")]
+        public decimal? SeniorHousingLeaseDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_commercial_lease_deposit")]
+        public decimal? SeniorCommercialLeaseDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_lease_deposit")]
+        public decimal? SeniorLeaseDeposit { get; set; }
+
+        [Postgrest.Attributes.Column("senior_wage_claim")]
+        public decimal? SeniorWageClaim { get; set; }
+
+        [Postgrest.Attributes.Column("senior_current_tax")]
+        public decimal? SeniorCurrentTax { get; set; }
+
+        [Postgrest.Attributes.Column("senior_tax_claim")]
+        public decimal? SeniorTaxClaim { get; set; }
+
+        [Postgrest.Attributes.Column("senior_etc")]
+        public decimal? SeniorEtc { get; set; }
+
+        [Postgrest.Attributes.Column("senior_total")]
+        public decimal? SeniorTotal { get; set; }
+
+        // ========== 감정평가 정보 ==========
+
+        [Postgrest.Attributes.Column("appraisal_type")]
+        public string? AppraisalType { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_date")]
+        public DateTime? AppraisalDate { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_agency")]
+        public string? AppraisalAgency { get; set; }
+
+        [Postgrest.Attributes.Column("land_appraisal_value")]
+        public decimal? LandAppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("building_appraisal_value")]
+        public decimal? BuildingAppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("machinery_appraisal_value")]
+        public decimal? MachineryAppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("excluded_appraisal")]
+        public decimal? ExcludedAppraisal { get; set; }
+
+        [Postgrest.Attributes.Column("kb_price")]
+        public decimal? KbPrice { get; set; }
+
+        // ========== 경매 기본 정보 ==========
+
+        [Postgrest.Attributes.Column("auction_started")]
+        public bool AuctionStarted { get; set; }
+
+        [Postgrest.Attributes.Column("auction_court")]
+        public string? AuctionCourt { get; set; }
+
+        // ========== 경매 선행 정보 ==========
+
+        [Postgrest.Attributes.Column("precedent_auction_applicant")]
+        public string? PrecedentAuctionApplicant { get; set; }
+
+        [Postgrest.Attributes.Column("precedent_auction_start_date")]
+        public DateTime? PrecedentAuctionStartDate { get; set; }
+
+        [Postgrest.Attributes.Column("precedent_case_number")]
+        public string? PrecedentCaseNumber { get; set; }
+
+        [Postgrest.Attributes.Column("precedent_claim_deadline")]
+        public DateTime? PrecedentClaimDeadline { get; set; }
+
+        [Postgrest.Attributes.Column("precedent_claim_amount")]
+        public decimal? PrecedentClaimAmount { get; set; }
+
+        // ========== 경매 후행 정보 ==========
+
+        [Postgrest.Attributes.Column("subsequent_auction_applicant")]
+        public string? SubsequentAuctionApplicant { get; set; }
+
+        [Postgrest.Attributes.Column("subsequent_auction_start_date")]
+        public DateTime? SubsequentAuctionStartDate { get; set; }
+
+        [Postgrest.Attributes.Column("subsequent_case_number")]
+        public string? SubsequentCaseNumber { get; set; }
+
+        [Postgrest.Attributes.Column("subsequent_claim_deadline")]
+        public DateTime? SubsequentClaimDeadline { get; set; }
+
+        [Postgrest.Attributes.Column("subsequent_claim_amount")]
+        public decimal? SubsequentClaimAmount { get; set; }
+
+        // ========== 경매 기일/결과 정보 ==========
+
+        [Postgrest.Attributes.Column("initial_court_value")]
+        public decimal? InitialCourtValue { get; set; }
+
+        [Postgrest.Attributes.Column("first_auction_date")]
+        public DateTime? FirstAuctionDate { get; set; }
+
+        [Postgrest.Attributes.Column("final_auction_round")]
+        public int? FinalAuctionRound { get; set; }
+
+        [Postgrest.Attributes.Column("final_auction_result")]
+        public string? FinalAuctionResult { get; set; }
+
+        [Postgrest.Attributes.Column("final_auction_date")]
+        public DateTime? FinalAuctionDate { get; set; }
+
+        [Postgrest.Attributes.Column("next_auction_date")]
+        public DateTime? NextAuctionDate { get; set; }
+
+        [Postgrest.Attributes.Column("winning_bid_amount")]
+        public decimal? WinningBidAmount { get; set; }
+
+        [Postgrest.Attributes.Column("final_minimum_bid")]
+        public decimal? FinalMinimumBid { get; set; }
+
+        [Postgrest.Attributes.Column("next_minimum_bid")]
+        public decimal? NextMinimumBid { get; set; }
+
+        [Postgrest.Attributes.Column("notes")]
+        public string? Notes { get; set; }
 
         [Postgrest.Attributes.Column("auction_schedule_date")]
         public DateTime? AuctionScheduleDate { get; set; }

@@ -10,6 +10,12 @@ namespace NPLogic.Core.Models
         public Guid Id { get; set; }
         public Guid? BorrowerId { get; set; }
 
+        /// <summary>차주일련번호</summary>
+        public string? BorrowerNumber { get; set; }
+
+        /// <summary>차주명</summary>
+        public string? BorrowerName { get; set; }
+
         // ========== 채권정보 (기본) ==========
 
         /// <summary>채권관리번호 (A)</summary>
@@ -37,6 +43,12 @@ namespace NPLogic.Core.Models
 
         /// <summary>대출원금잔액 (G/S)</summary>
         public decimal? LoanPrincipalBalance { get; set; }
+
+        /// <summary>환산된 대출잔액</summary>
+        public decimal? ConvertedLoanBalance { get; set; }
+
+        /// <summary>미상환원금잔액</summary>
+        public decimal? UnpaidPrincipal { get; set; }
 
         /// <summary>가지급금 (H)</summary>
         public decimal AdvancePayment { get; set; }

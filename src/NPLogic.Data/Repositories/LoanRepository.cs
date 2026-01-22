@@ -345,12 +345,16 @@ namespace NPLogic.Data.Repositories
             {
                 Id = table.Id,
                 BorrowerId = table.BorrowerId,
+                BorrowerNumber = table.BorrowerNumber,
+                BorrowerName = table.BorrowerName,
                 AccountSerial = table.AccountSerial,
                 LoanType = table.LoanType,
                 LoanCategory = table.LoanCategory,
                 AccountNumber = table.AccountNumber,
                 InitialLoanAmount = table.InitialLoanAmount,
                 LoanPrincipalBalance = table.LoanPrincipalBalance,
+                ConvertedLoanBalance = table.ConvertedLoanBalance,
+                UnpaidPrincipal = table.UnpaidPrincipal,
                 AdvancePayment = table.AdvancePayment,
                 AccruedInterest = table.AccruedInterest,
                 TotalClaimAmount = table.TotalClaimAmount,
@@ -397,12 +401,16 @@ namespace NPLogic.Data.Repositories
             {
                 Id = loan.Id,
                 BorrowerId = loan.BorrowerId,
+                BorrowerNumber = loan.BorrowerNumber,
+                BorrowerName = loan.BorrowerName,
                 AccountSerial = loan.AccountSerial,
                 LoanType = loan.LoanType,
                 LoanCategory = loan.LoanCategory,
                 AccountNumber = loan.AccountNumber,
                 InitialLoanAmount = loan.InitialLoanAmount,
                 LoanPrincipalBalance = loan.LoanPrincipalBalance,
+                ConvertedLoanBalance = loan.ConvertedLoanBalance,
+                UnpaidPrincipal = loan.UnpaidPrincipal,
                 AdvancePayment = loan.AdvancePayment,
                 AccruedInterest = loan.AccruedInterest,
                 TotalClaimAmount = loan.TotalClaimAmount,
@@ -466,6 +474,12 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("borrower_id")]
         public Guid? BorrowerId { get; set; }
 
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_name")]
+        public string? BorrowerName { get; set; }
+
         [Postgrest.Attributes.Column("account_serial")]
         public string? AccountSerial { get; set; }
 
@@ -483,6 +497,12 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("loan_principal_balance")]
         public decimal? LoanPrincipalBalance { get; set; }
+
+        [Postgrest.Attributes.Column("converted_loan_balance")]
+        public decimal? ConvertedLoanBalance { get; set; }
+
+        [Postgrest.Attributes.Column("unpaid_principal")]
+        public decimal? UnpaidPrincipal { get; set; }
 
         [Postgrest.Attributes.Column("advance_payment")]
         public decimal AdvancePayment { get; set; }

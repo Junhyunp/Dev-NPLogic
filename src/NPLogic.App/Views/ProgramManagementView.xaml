@@ -262,6 +262,7 @@
 
             <!-- 폼 오버레이 -->
             <Grid Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                  d:Visibility="Visible"
                   Background="#80000000">
                 <Border Background="White"
                         CornerRadius="8"
@@ -661,10 +662,16 @@
                                                 </StackPanel>
 
                                                 <!-- 파일 선택됨 상태 -->
-                                                <StackPanel Margin="16"
-                                                            Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Grid Margin="16"
+                                                      Visibility="{Binding HasDataDiskFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
                                                     <!-- 파일 정보 -->
-                                                    <Border Background="{StaticResource SuccessBrush}"
+                                                    <Border Grid.Row="0"
+                                                            Background="{StaticResource SuccessBrush}"
                                                             CornerRadius="6"
                                                             Padding="12"
                                                             Margin="0,0,0,12">
@@ -721,12 +728,17 @@
                                                     </Border>
 
                                                     <!-- 시트 선택 모드 (시트 매핑 UI) -->
-                                                    <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="📋 시트 매핑 및 선택" 
+                                                    <Grid Grid.Row="1" Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="*"/>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0"
+                                                                   Text="📋 시트 매핑 및 선택"
                                                                    Style="{StaticResource CaptionTextStyle}"
                                                                    FontWeight="SemiBold"
                                                                    Margin="0,0,0,8"/>
-                                                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                                             <ItemsControl ItemsSource="{Binding AvailableSheets}">
                                                                 <ItemsControl.ItemsPanel>
                                                                     <ItemsPanelTemplate>
@@ -774,19 +786,19 @@
                                                                                     </StackPanel>
                                                                                 </StackPanel>
                                                                                 
-                                                                                <!-- 시트 타입 표시 (자동 감지된 타입) -->
-                                                                                <Border Grid.Column="2"
-                                                                                        Background="{StaticResource PrimaryBrush}"
-                                                                                        CornerRadius="3"
-                                                                                        Padding="6,2"
-                                                                                        Margin="4,0"
-                                                                                        VerticalAlignment="Center"
-                                                                                        Visibility="{Binding SheetTypeDisplay, Converter={StaticResource NullToVisibilityConverter}}">
-                                                                                    <TextBlock Text="{Binding SheetTypeDisplay}" 
-                                                                                               Foreground="White"
-                                                                                               FontSize="9"
-                                                                                               FontWeight="SemiBold"/>
-                                                                                </Border>
+                                                                                <!-- 시트 타입 선택 (드롭다운) -->
+                                                                                <ComboBox Grid.Column="2"
+                                                                                          ItemsSource="{Binding DataContext.AvailableSheetTypes, RelativeSource={RelativeSource AncestorType=local:ProgramManagementView}}"
+                                                                                          SelectedValue="{Binding SelectedSheetType, Mode=OneWay}"
+                                                                                          SelectedValuePath="Value"
+                                                                                          DisplayMemberPath="DisplayName"
+                                                                                          FontSize="9"
+                                                                                          MinWidth="90"
+                                                                                          Margin="4,0"
+                                                                                          VerticalAlignment="Center"
+                                                                                          SelectionChanged="SheetTypeComboBox_SelectionChanged"
+                                                                                          Tag="{Binding}"
+                                                                                          ToolTip="시트 타입을 변경하려면 클릭하세요"/>
                                                                                 
                                                                                 <!-- 제목행 확인 버튼 - 피드백 6번 -->
                                                                                 <Button Grid.Column="3"
@@ -817,10 +829,10 @@
                                                                 </ItemsControl.ItemTemplate>
                                                             </ItemsControl>
                                                         </ScrollViewer>
-                                                    </StackPanel>
+                                                    </Grid>
 
                                                     <!-- 단일 시트 모드 -->
-                                                    <StackPanel Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                    <StackPanel Grid.Row="1" Visibility="{Binding ShowSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                         <!-- 데이터 요약 -->
                                                         <Border Background="White"
                                                                 CornerRadius="6"
@@ -849,7 +861,7 @@
                                                                    Style="{StaticResource CaptionTextStyle}"
                                                                    FontWeight="SemiBold"
                                                                    Margin="0,0,0,6"/>
-                                                        <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
                                                             <ItemsControl ItemsSource="{Binding DataDiskColumns}">
                                                                 <ItemsControl.ItemsPanel>
                                                                     <ItemsPanelTemplate>
@@ -871,14 +883,15 @@
                                                     </StackPanel>
 
                                                     <!-- 다른 파일 선택 -->
-                                                    <Button Content="다른 파일 선택"
+                                                    <Button Grid.Row="2"
+                                                            Content="다른 파일 선택"
                                                             Command="{Binding SelectDataDiskFileCommand}"
                                                             Style="{StaticResource SecondaryButton}"
                                                             Padding="12,6"
                                                             FontSize="11"
                                                             Margin="0,12,0,0"
                                                             HorizontalAlignment="Center"/>
-                                                </StackPanel>
+                                                </Grid>
                                             </Grid>
                                         </Border>
                                         </Grid>
@@ -1094,10 +1107,16 @@
                                                 </StackPanel>
 
                                                 <!-- 파일 선택됨 상태 -->
-                                                <StackPanel Margin="16"
-                                                            Visibility="{Binding HasInterimFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <Grid Margin="16"
+                                                      Visibility="{Binding HasInterimFile, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto"/>
+                                                        <RowDefinition Height="*"/>
+                                                        <RowDefinition Height="Auto"/>
+                                                    </Grid.RowDefinitions>
                                                     <!-- 파일 정보 -->
-                                                    <Border Background="{StaticResource InfoBrush}"
+                                                    <Border Grid.Row="0"
+                                                            Background="{StaticResource InfoBrush}"
                                                             CornerRadius="6"
                                                             Padding="12"
                                                             Margin="0,0,0,12">
@@ -1154,12 +1173,17 @@
                                                     </Border>
 
                                                     <!-- 시트 선택 모드 -->
-                                                    <StackPanel Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
-                                                        <TextBlock Text="📋 업로드할 시트 선택" 
+                                                    <Grid Grid.Row="1" Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="*"/>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0"
+                                                                   Text="📋 업로드할 시트 선택"
                                                                    Style="{StaticResource CaptionTextStyle}"
                                                                    FontWeight="SemiBold"
                                                                    Margin="0,0,0,8"/>
-                                                        <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                                                             <ItemsControl ItemsSource="{Binding InterimAvailableSheets}">
                                                                 <ItemsControl.ItemsPanel>
                                                                     <ItemsPanelTemplate>
@@ -1199,10 +1223,10 @@
                                                                 </ItemsControl.ItemTemplate>
                                                             </ItemsControl>
                                                         </ScrollViewer>
-                                                    </StackPanel>
+                                                    </Grid>
 
                                                     <!-- 단일 시트 모드 -->
-                                                    <StackPanel Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                                    <StackPanel Grid.Row="1" Visibility="{Binding ShowInterimSheetSelection, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                         <!-- 데이터 요약 -->
                                                         <Border Background="White"
                                                                 CornerRadius="6"
@@ -1228,14 +1252,15 @@
                                                     </StackPanel>
 
                                                     <!-- 다른 파일 선택 -->
-                                                    <Button Content="다른 파일 선택"
+                                                    <Button Grid.Row="2"
+                                                            Content="다른 파일 선택"
                                                             Command="{Binding SelectInterimFileCommand}"
                                                             Style="{StaticResource SecondaryButton}"
                                                             Padding="12,6"
                                                             FontSize="11"
                                                             Margin="0,12,0,0"
                                                             HorizontalAlignment="Center"/>
-                                                </StackPanel>
+                                                </Grid>
                                             </Grid>
                                         </Border>
                                         </Grid>
@@ -1278,6 +1303,7 @@
 
             <!-- 로딩 오버레이 -->
             <Grid Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
+                  d:Visibility="Collapsed"
                   Background="#80FFFFFF">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>

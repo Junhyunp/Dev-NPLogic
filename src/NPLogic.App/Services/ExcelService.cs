@@ -899,62 +899,43 @@ namespace NPLogic.Services
         /// </summary>
         public SheetType DetectSheetType(string sheetName, List<string> headers)
         {
-            // 1. 시트명 기반 감지 (더 구체적인 매칭 먼저)
-            
-            // Sheet A-1: 회생차주정보 (A-1이 A보다 먼저 매칭되어야 함)
-            if (sheetName.Contains("회생") || sheetName.Contains("Sheet A-1") || sheetName.Contains("A-1"))
-                return SheetType.BorrowerRestructuring;
-            
-            // Sheet A: 차주일반정보
-            if (sheetName.Contains("차주일반") || sheetName.Contains("Sheet A"))
-                return SheetType.BorrowerGeneral;
-            
-            // Sheet B: 채권정보
-            if (sheetName.Contains("채권") || sheetName.Contains("Sheet B"))
-                return SheetType.Loan;
-            
-            // Sheet C-2: 등기부등본정보 (C-2가 C보다 먼저 매칭되어야 함)
-            if (sheetName.Contains("등기부등본") || sheetName.Contains("Sheet C-2") || sheetName.Contains("C-2"))
-                return SheetType.RegistryDetail;
-            
-            // Sheet C-3: 담보설정정보 (C-3이 C보다 먼저 매칭되어야 함)
-            if (sheetName.Contains("담보설정") || sheetName.Contains("Sheet C-3") || sheetName.Contains("C-3"))
-                return SheetType.CollateralSetting;
-            
-            // Sheet C-1: 담보물건정보 (C-1만, C 전체가 아님)
-            if (sheetName.Contains("물건정보") || sheetName.Contains("Sheet C-1") || sheetName.Contains("C-1"))
-                return SheetType.Property;
-            
-            // Sheet C (번호 없음): 담보물건정보로 간주 (하위호환)
-            if ((sheetName.Contains("담보") || sheetName.Contains("물건")) && 
-                !sheetName.Contains("C-2") && !sheetName.Contains("C-3"))
-                return SheetType.Property;
-            
-            // Sheet D: 보증정보
-            if (sheetName.Contains("보증") || sheetName.Contains("Sheet D"))
-                return SheetType.Guarantee;
+            // 데이터 시트 제외: "_YYMMDD" 패턴으로 끝나는 시트 (예: "신용보증서_220523")
+            if (System.Text.RegularExpressions.Regex.IsMatch(sheetName, @"_\d{6}$"))
+                return SheetType.Unknown;
 
-            // 2. 헤더 패턴 fallback
-            if (headers.Any(h => h.Contains("회생사건번호") || h.Contains("관할법원")))
+            // Sheet A-1, Sheet F: 회생차주정보 (A-1이 A보다 먼저 매칭되어야 함)
+            // KB: null, IBK: Sheet A-1, NH: Sheet F, SHB: 4.회생차주 추가정보
+            if (sheetName.Contains("Sheet A-1") || sheetName.Contains("A-1") ||
+                sheetName.Contains("Sheet F") || sheetName.Contains("회생차주"))
                 return SheetType.BorrowerRestructuring;
-            
-            if (headers.Any(h => h.Contains("대출일련번호") || h.Contains("대출과목")))
-                return SheetType.Loan;
-            
-            if (headers.Any(h => h.Contains("등기부등본") || h.Contains("등기사항")))
-                return SheetType.RegistryDetail;
-            
-            if (headers.Any(h => h.Contains("근저당설정") || h.Contains("담보권설정")))
-                return SheetType.CollateralSetting;
-            
-            if (headers.Any(h => h.Contains("Property") || h.Contains("담보소재지") || h.Contains("경매사건번호")))
-                return SheetType.Property;
-            
-            if (headers.Any(h => h.Contains("보증인") || h.Contains("보증금액")))
-                return SheetType.Guarantee;
-            
-            if (headers.Any(h => h.Contains("차주일련번호") || h.Contains("차주명")))
+
+            // Sheet A: 차주일반정보
+            // KB: Sheet A(차주일반정보), IBK: Sheet A, NH: Sheet A, SHB: 1.차주일반
+            if (sheetName.Contains("Sheet A") || sheetName.Contains("차주일반"))
                 return SheetType.BorrowerGeneral;
+
+            // Sheet B, Sheet B-1: 채권일반정보
+            // KB: Sheet B(채권일반정보), IBK: Sheet B, NH: Sheet B-1, SHB: 2.매각대상채권
+            if (sheetName.Contains("Sheet B") || sheetName.Contains("채권정보") ||
+                sheetName.Contains("채권일반정보") || sheetName.Contains("매각대상채권"))
+                return SheetType.Loan;
+
+            // Sheet C-2: 등기부등본정보 (C-2가 C-1보다 먼저 매칭되어야 함)
+            // KB: Sheet C-2(등기부등본정보), IBK: Sheet C-2, NH: Sheet C-2, SHB: 3-1.담보지번
+            if (sheetName.Contains("Sheet C-2") || sheetName.Contains("C-2") ||
+                sheetName.Contains("등기부등본정보") || sheetName.Contains("담보지번"))
+                return SheetType.RegistryDetail;
+
+            // Sheet C-1: 물건정보
+            // KB: Sheet C-1(물건정보), IBK: Sheet C-1, NH: Sheet C-1, SHB: 3.담보물건
+            if (sheetName.Contains("Sheet C-1") || sheetName.Contains("C-1") ||
+                sheetName.Contains("물건정보") || sheetName.Contains("담보물건"))
+                return SheetType.Property;
+
+            // Sheet D: 신용보증서
+            // KB: Sheet D(신용보증서정보), IBK: Sheet D, NH: Sheet D, SHB: 5.신용보증서
+            if (sheetName.Contains("Sheet D") || sheetName.Contains("신용보증서"))
+                return SheetType.Guarantee;
 
             return SheetType.Unknown;
         }
@@ -1296,11 +1277,10 @@ namespace NPLogic.Services
         {
             SheetType.BorrowerGeneral => "차주일반정보",
             SheetType.BorrowerRestructuring => "회생차주정보",
-            SheetType.Loan => "채권정보",
-            SheetType.Property => "담보물건정보",
+            SheetType.Loan => "채권일반정보",
+            SheetType.Property => "물건정보",
             SheetType.RegistryDetail => "등기부등본정보",
-            SheetType.CollateralSetting => "담보설정정보",
-            SheetType.Guarantee => "보증정보",
+            SheetType.Guarantee => "신용보증서",
             _ => "알 수 없음"
         };
 
@@ -1319,10 +1299,9 @@ namespace NPLogic.Services
         BorrowerGeneral,       // Sheet A: 차주일반정보
         BorrowerRestructuring, // Sheet A-1: 회생차주정보
         Loan,                  // Sheet B: 채권일반정보
-        Property,              // Sheet C-1: 담보물건정보
+        Property,              // Sheet C-1: 물건정보
         RegistryDetail,        // Sheet C-2: 등기부등본정보
-        CollateralSetting,     // Sheet C-3: 담보설정정보
-        Guarantee              // Sheet D: 보증정보
+        Guarantee              // Sheet D: 신용보증서
     }
 }
 

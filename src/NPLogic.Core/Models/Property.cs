@@ -173,6 +173,161 @@ namespace NPLogic.Core.Models
         /// <summary>차주 거주 여부</summary>
         public bool BorrowerResiding { get; set; }
 
+        // ========== 물건정보 시트 대표컬럼 (데이터디스크 업로드용) ==========
+
+        /// <summary>자산유형</summary>
+        public string? AssetType { get; set; }
+
+        /// <summary>담보소재지1 (시/도)</summary>
+        public string? AddressProvince { get; set; }
+
+        /// <summary>담보소재지2 (시/군/구)</summary>
+        public string? AddressCity { get; set; }
+
+        /// <summary>담보소재지3 (동/읍/면)</summary>
+        public string? AddressDistrict { get; set; }
+
+        /// <summary>공담 물건금액</summary>
+        public decimal? JointCollateralAmount { get; set; }
+
+        // ========== 선순위 정보 ==========
+
+        /// <summary>물건별 선순위 설정액</summary>
+        public decimal? SeniorMortgageAmount { get; set; }
+
+        /// <summary>선순위 주택 소액보증금</summary>
+        public decimal? SeniorHousingSmallDeposit { get; set; }
+
+        /// <summary>선순위 상가 소액보증금</summary>
+        public decimal? SeniorCommercialSmallDeposit { get; set; }
+
+        /// <summary>선순위 소액보증금</summary>
+        public decimal? SeniorSmallDeposit { get; set; }
+
+        /// <summary>선순위 주택 임차보증금</summary>
+        public decimal? SeniorHousingLeaseDeposit { get; set; }
+
+        /// <summary>선순위 상가 임차보증금</summary>
+        public decimal? SeniorCommercialLeaseDeposit { get; set; }
+
+        /// <summary>선순위 임차보증금</summary>
+        public decimal? SeniorLeaseDeposit { get; set; }
+
+        /// <summary>선순위 임금채권</summary>
+        public decimal? SeniorWageClaim { get; set; }
+
+        /// <summary>선순위 당해세</summary>
+        public decimal? SeniorCurrentTax { get; set; }
+
+        /// <summary>선순위 조세채권</summary>
+        public decimal? SeniorTaxClaim { get; set; }
+
+        /// <summary>선순위 기타</summary>
+        public decimal? SeniorEtc { get; set; }
+
+        /// <summary>선순위 합계</summary>
+        public decimal? SeniorTotal { get; set; }
+
+        // ========== 감정평가 정보 ==========
+
+        /// <summary>감정평가구분</summary>
+        public string? AppraisalType { get; set; }
+
+        /// <summary>감정평가일자</summary>
+        public DateTime? AppraisalDate { get; set; }
+
+        /// <summary>감정평가기관</summary>
+        public string? AppraisalAgency { get; set; }
+
+        /// <summary>토지감정평가액</summary>
+        public decimal? LandAppraisalValue { get; set; }
+
+        /// <summary>건물감정평가액</summary>
+        public decimal? BuildingAppraisalValue { get; set; }
+
+        /// <summary>기계평가액</summary>
+        public decimal? MachineryAppraisalValue { get; set; }
+
+        /// <summary>제시외</summary>
+        public decimal? ExcludedAppraisal { get; set; }
+
+        /// <summary>KB아파트시세</summary>
+        public decimal? KbPrice { get; set; }
+
+        // ========== 경매 기본 정보 ==========
+
+        /// <summary>경매개시여부</summary>
+        public bool AuctionStarted { get; set; }
+
+        /// <summary>경매 관할법원</summary>
+        public string? AuctionCourt { get; set; }
+
+        // ========== 경매 선행 정보 ==========
+
+        /// <summary>경매신청기관(선행)</summary>
+        public string? PrecedentAuctionApplicant { get; set; }
+
+        /// <summary>경매개시일자(선행)</summary>
+        public DateTime? PrecedentAuctionStartDate { get; set; }
+
+        /// <summary>경매사건번호(선행)</summary>
+        public string? PrecedentCaseNumber { get; set; }
+
+        /// <summary>배당요구종기일(선행)</summary>
+        public DateTime? PrecedentClaimDeadline { get; set; }
+
+        /// <summary>청구금액(선행)</summary>
+        public decimal? PrecedentClaimAmount { get; set; }
+
+        // ========== 경매 후행 정보 ==========
+
+        /// <summary>경매신청기관(후행)</summary>
+        public string? SubsequentAuctionApplicant { get; set; }
+
+        /// <summary>경매개시일자(후행)</summary>
+        public DateTime? SubsequentAuctionStartDate { get; set; }
+
+        /// <summary>경매사건번호(후행)</summary>
+        public string? SubsequentCaseNumber { get; set; }
+
+        /// <summary>배당요구종기일(후행)</summary>
+        public DateTime? SubsequentClaimDeadline { get; set; }
+
+        /// <summary>청구금액(후행)</summary>
+        public decimal? SubsequentClaimAmount { get; set; }
+
+        // ========== 경매 기일/결과 정보 ==========
+
+        /// <summary>최초법사가</summary>
+        public decimal? InitialCourtValue { get; set; }
+
+        /// <summary>최초경매기일</summary>
+        public DateTime? FirstAuctionDate { get; set; }
+
+        /// <summary>최종경매회차</summary>
+        public int? FinalAuctionRound { get; set; }
+
+        /// <summary>최종경매결과</summary>
+        public string? FinalAuctionResult { get; set; }
+
+        /// <summary>최종경매기일</summary>
+        public DateTime? FinalAuctionDate { get; set; }
+
+        /// <summary>차기경매기일</summary>
+        public DateTime? NextAuctionDate { get; set; }
+
+        /// <summary>낙찰금액</summary>
+        public decimal? WinningBidAmount { get; set; }
+
+        /// <summary>최종경매일의 최저입찰금액</summary>
+        public decimal? FinalMinimumBid { get; set; }
+
+        /// <summary>차후최종경매일의 최저입찰금액</summary>
+        public decimal? NextMinimumBid { get; set; }
+
+        /// <summary>비고</summary>
+        public string? Notes { get; set; }
+
         // ========== Borrower 조인용 확장 필드 (런타임 전용, DB 저장 안 함) ==========
 
         /// <summary>차주 회생 여부 (Borrower 테이블에서 조인)</summary>

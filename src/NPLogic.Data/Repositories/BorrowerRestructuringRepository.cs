@@ -130,15 +130,25 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
-        /// Upsert (있으면 업데이트, 없으면 생성) - borrower_id 기준
+        /// Upsert (있으면 업데이트, 없으면 생성) - borrower_id 또는 borrower_number 기준
         /// </summary>
         public async Task<BorrowerRestructuring> UpsertAsync(BorrowerRestructuring restructuring)
         {
             try
             {
-                // 기존 데이터 확인
-                var existing = await GetByBorrowerIdAsync(restructuring.BorrowerId);
-                
+                BorrowerRestructuring? existing = null;
+
+                // BorrowerId가 있으면 해당 기준으로 조회
+                if (restructuring.BorrowerId.HasValue)
+                {
+                    existing = await GetByBorrowerIdAsync(restructuring.BorrowerId.Value);
+                }
+                // BorrowerNumber가 있으면 해당 기준으로 조회
+                else if (!string.IsNullOrEmpty(restructuring.BorrowerNumber))
+                {
+                    existing = await GetByBorrowerNumberAsync(restructuring.BorrowerNumber);
+                }
+
                 if (existing != null)
                 {
                     // 업데이트
@@ -154,6 +164,27 @@ namespace NPLogic.Data.Repositories
             catch (Exception ex)
             {
                 throw new Exception($"회생 정보 Upsert 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 차주일련번호로 조회
+        /// </summary>
+        public async Task<BorrowerRestructuring?> GetByBorrowerNumberAsync(string borrowerNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<BorrowerRestructuringTable>()
+                    .Where(x => x.BorrowerNumber == borrowerNumber)
+                    .Single();
+
+                return response == null ? null : MapToModel(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"회생 정보 조회 실패: {ex.Message}", ex);
             }
         }
 
@@ -184,6 +215,9 @@ namespace NPLogic.Data.Repositories
             {
                 Id = table.Id,
                 BorrowerId = table.BorrowerId,
+                AssetType = table.AssetType,
+                BorrowerNumber = table.BorrowerNumber,
+                BorrowerName = table.BorrowerName,
                 ApprovalStatus = table.ApprovalStatus,
                 ProgressStage = table.ProgressStage,
                 CourtName = table.CourtName,
@@ -194,6 +228,10 @@ namespace NPLogic.Data.Repositories
                 ClaimFilingDate = table.ClaimFilingDate,
                 ApprovalDismissalDate = table.ApprovalDismissalDate,
                 ExcludedClaim = table.ExcludedClaim,
+                Industry = table.Industry,
+                ListingStatus = table.ListingStatus,
+                EmployeeCount = table.EmployeeCount,
+                EstablishmentDate = table.EstablishmentDate,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             };
@@ -205,6 +243,9 @@ namespace NPLogic.Data.Repositories
             {
                 Id = model.Id,
                 BorrowerId = model.BorrowerId,
+                AssetType = model.AssetType,
+                BorrowerNumber = model.BorrowerNumber,
+                BorrowerName = model.BorrowerName,
                 ApprovalStatus = model.ApprovalStatus,
                 ProgressStage = model.ProgressStage,
                 CourtName = model.CourtName,
@@ -215,6 +256,10 @@ namespace NPLogic.Data.Repositories
                 ClaimFilingDate = model.ClaimFilingDate,
                 ApprovalDismissalDate = model.ApprovalDismissalDate,
                 ExcludedClaim = model.ExcludedClaim,
+                Industry = model.Industry,
+                ListingStatus = model.ListingStatus,
+                EmployeeCount = model.EmployeeCount,
+                EstablishmentDate = model.EstablishmentDate,
                 CreatedAt = model.CreatedAt,
                 UpdatedAt = model.UpdatedAt
             };
@@ -231,7 +276,16 @@ namespace NPLogic.Data.Repositories
         public Guid Id { get; set; }
 
         [Postgrest.Attributes.Column("borrower_id")]
-        public Guid BorrowerId { get; set; }
+        public Guid? BorrowerId { get; set; }
+
+        [Postgrest.Attributes.Column("asset_type")]
+        public string? AssetType { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_name")]
+        public string? BorrowerName { get; set; }
 
         [Postgrest.Attributes.Column("approval_status")]
         public string? ApprovalStatus { get; set; }
@@ -262,6 +316,19 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("excluded_claim")]
         public string? ExcludedClaim { get; set; }
+
+        // 회사 정보
+        [Postgrest.Attributes.Column("industry")]
+        public string? Industry { get; set; }
+
+        [Postgrest.Attributes.Column("listing_status")]
+        public string? ListingStatus { get; set; }
+
+        [Postgrest.Attributes.Column("employee_count")]
+        public int? EmployeeCount { get; set; }
+
+        [Postgrest.Attributes.Column("establishment_date")]
+        public DateTime? EstablishmentDate { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

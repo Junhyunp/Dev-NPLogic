@@ -29,11 +29,10 @@ namespace NPLogic.Views
         {
             DataDiskSheetType.BorrowerGeneral => "차주일반정보",
             DataDiskSheetType.BorrowerRestructuring => "회생차주정보",
-            DataDiskSheetType.Loan => "채권정보",
-            DataDiskSheetType.Property => "담보물건정보",
+            DataDiskSheetType.Loan => "채권일반정보",
+            DataDiskSheetType.Property => "물건정보",
             DataDiskSheetType.RegistryDetail => "등기부등본정보",
-            DataDiskSheetType.CollateralSetting => "담보설정정보",
-            DataDiskSheetType.Guarantee => "보증정보",
+            DataDiskSheetType.Guarantee => "신용보증서",
             DataDiskSheetType.InterimAdvance => "가지급금",
             DataDiskSheetType.InterimCollection => "회수정보",
             _ => "알 수 없음"
@@ -158,11 +157,17 @@ namespace NPLogic.Views
                 var defaultMappings = _uploadService.GetDefaultColumnMappings(_sheetType, headers);
                 foreach (var mapping in defaultMappings)
                 {
+                    // DbColumn이 AvailableDbColumns에 존재하는지 확인
+                    // 존재하지 않으면 "" (선택안함)으로 설정
+                    var dbColumn = mapping.DbColumn;
+                    var isValidDbColumn = !string.IsNullOrEmpty(dbColumn) &&
+                                          AvailableDbColumns.Any(c => c.DbColumn == dbColumn);
+
                     var editableMapping = new EditableColumnMapping
                     {
                         ExcelColumn = mapping.ExcelColumn,
-                        DbColumn = mapping.DbColumn ?? "",
-                        IsAutoMatched = mapping.IsAutoMatched,
+                        DbColumn = isValidDbColumn ? dbColumn! : "",
+                        IsAutoMatched = isValidDbColumn && mapping.IsAutoMatched,
                         IsRequired = mapping.IsRequired
                     };
                     editableMapping.PropertyChanged += Mapping_PropertyChanged;
@@ -203,11 +208,18 @@ namespace NPLogic.Views
                     continue;
 
                 var existing = existingMappings.FirstOrDefault(m => m.ExcelColumn == header);
+
+                // DbColumn이 AvailableDbColumns에 존재하는지 확인
+                // 존재하지 않으면 "" (선택안함)으로 설정
+                var dbColumn = existing?.DbColumn;
+                var isValidDbColumn = !string.IsNullOrEmpty(dbColumn) &&
+                                      AvailableDbColumns.Any(c => c.DbColumn == dbColumn);
+
                 var editableMapping = new EditableColumnMapping
                 {
                     ExcelColumn = header,
-                    DbColumn = existing?.DbColumn ?? "",
-                    IsAutoMatched = existing?.IsAutoMatched ?? false,
+                    DbColumn = isValidDbColumn ? dbColumn! : "",
+                    IsAutoMatched = isValidDbColumn && (existing?.IsAutoMatched ?? false),
                     IsRequired = existing?.IsRequired ?? false
                 };
                 editableMapping.PropertyChanged += Mapping_PropertyChanged;
@@ -244,8 +256,13 @@ namespace NPLogic.Views
                     var defaultMapping = defaultMappings.FirstOrDefault(m => m.ExcelColumn == mapping.ExcelColumn);
                     if (defaultMapping != null)
                     {
-                        mapping.DbColumn = defaultMapping.DbColumn ?? "";
-                        mapping.IsAutoMatched = defaultMapping.IsAutoMatched;
+                        // DbColumn이 AvailableDbColumns에 존재하는지 확인
+                        var dbColumn = defaultMapping.DbColumn;
+                        var isValidDbColumn = !string.IsNullOrEmpty(dbColumn) &&
+                                              AvailableDbColumns.Any(c => c.DbColumn == dbColumn);
+
+                        mapping.DbColumn = isValidDbColumn ? dbColumn! : "";
+                        mapping.IsAutoMatched = isValidDbColumn && defaultMapping.IsAutoMatched;
                     }
                 }
             }
@@ -301,15 +318,19 @@ namespace NPLogic.Views
             {
                 DataDiskSheetType.BorrowerGeneral => new List<(string, string)>
                 {
-                    ("borrower_number", "차주번호"),
+                    ("asset_type", "자산유형"),
+                    ("borrower_number", "차주일련번호"),
                     ("borrower_name", "차주명"),
+                    ("related_borrower", "관련차주"),
                     ("borrower_type", "차주형태"),
-                    ("opb", "대출원금잔액"),
-                    ("mortgage_amount", "근저당설정액")
+                    ("unpaid_principal", "미상환원금잔액"),
+                    ("accrued_interest", "미수이자"),
+                    ("mortgage_amount", "근저당권설정액"),
+                    ("notes", "비고")
                 },
                 DataDiskSheetType.Property => new List<(string, string)>
                 {
-                    ("borrower_number", "차주번호"),
+                    ("borrower_number", "차주일련번호"),
                     ("borrower_name", "차주명"),
                     ("collateral_number", "담보번호"),
                     ("property_type", "물건유형"),
@@ -323,13 +344,37 @@ namespace NPLogic.Views
                 },
                 DataDiskSheetType.Loan => new List<(string, string)>
                 {
-                    ("borrower_number", "차주번호"),
+                    ("borrower_number", "차주일련번호"),
+                    ("borrower_name", "차주명"),
                     ("account_serial", "대출일련번호"),
                     ("loan_type", "대출과목"),
                     ("account_number", "계좌번호"),
-                    ("normal_interest_rate", "이자율"),
-                    ("initial_loan_amount", "최초대출금액"),
-                    ("loan_principal_balance", "대출금잔액")
+                    ("normal_interest_rate", "정상이자율"),
+                    ("overdue_interest_rate", "연체이자율"),
+                    ("initial_loan_date", "최초대출일"),
+                    ("initial_loan_amount", "최초대출원금"),
+                    ("converted_loan_balance", "환산된 대출잔액"),
+                    ("advance_payment", "가지급금"),
+                    ("unpaid_principal", "미상환원금잔액"),
+                    ("accrued_interest", "미수이자"),
+                    ("total_claim_amount", "채권액 합계")
+                },
+                DataDiskSheetType.BorrowerRestructuring => new List<(string, string)>
+                {
+                    ("asset_type", "자산유형"),
+                    ("borrower_number", "차주일련번호"),
+                    ("borrower_name", "차주명"),
+                    ("progress_stage", "세부진행단계"),
+                    ("court_name", "관할법원"),
+                    ("case_number", "회생사건번호"),
+                    ("preservation_date", "보전처분일"),
+                    ("commencement_date", "개시결정일"),
+                    ("claim_filing_date", "채권신고일"),
+                    ("approval_dismissal_date", "인가/폐지결정일"),
+                    ("industry", "업종"),
+                    ("listing_status", "상장/비상장"),
+                    ("employee_count", "종업원수"),
+                    ("establishment_date", "설립일")
                 },
                 _ => new List<(string, string)>()
             };

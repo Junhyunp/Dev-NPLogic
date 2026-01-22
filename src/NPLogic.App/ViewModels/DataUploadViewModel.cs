@@ -165,11 +165,10 @@ namespace NPLogic.ViewModels
             new SheetTypeOption { Value = DataDiskSheetType.Unknown, DisplayName = "(선택안함)" },
             new SheetTypeOption { Value = DataDiskSheetType.BorrowerGeneral, DisplayName = "차주일반정보" },
             new SheetTypeOption { Value = DataDiskSheetType.BorrowerRestructuring, DisplayName = "회생차주정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Loan, DisplayName = "채권정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Property, DisplayName = "담보물건정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Loan, DisplayName = "채권일반정보" },
+            new SheetTypeOption { Value = DataDiskSheetType.Property, DisplayName = "물건정보" },
             new SheetTypeOption { Value = DataDiskSheetType.RegistryDetail, DisplayName = "등기부등본정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.CollateralSetting, DisplayName = "담보설정정보" },
-            new SheetTypeOption { Value = DataDiskSheetType.Guarantee, DisplayName = "보증정보" }
+            new SheetTypeOption { Value = DataDiskSheetType.Guarantee, DisplayName = "신용보증서" }
         };
 
         public DataUploadViewModel(
@@ -453,7 +452,6 @@ namespace NPLogic.ViewModels
                 DataDiskSheetType.Loan => SheetType.Loan,
                 DataDiskSheetType.Property => SheetType.Property,
                 DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
-                DataDiskSheetType.CollateralSetting => SheetType.CollateralSetting,
                 DataDiskSheetType.Guarantee => SheetType.Guarantee,
                 _ => SheetType.Unknown
             };
@@ -857,15 +855,9 @@ namespace NPLogic.ViewModels
                     result.Success = true;
                     return result;
 
-                case SheetType.CollateralSetting:
-                    // Sheet C-3: 담보설정정보 - 향후 구현 예정
-                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet C-3 (담보설정정보) 스킵 - 향후 구현 예정");
-                    result.Success = true;
-                    return result;
-
                 case SheetType.Guarantee:
-                    // Sheet D: 보증정보 - 향후 구현 예정
-                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet D (보증정보) 스킵 - 향후 구현 예정");
+                    // Sheet D: 신용보증서 - 향후 구현 예정
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetAsync] Sheet D (신용보증서) 스킵 - 향후 구현 예정");
                     result.Success = true;
                     return result;
 
@@ -1763,7 +1755,6 @@ namespace NPLogic.ViewModels
                 SheetType.Loan => DataDiskSheetType.Loan,
                 SheetType.Property => DataDiskSheetType.Property,
                 SheetType.RegistryDetail => DataDiskSheetType.RegistryDetail,
-                SheetType.CollateralSetting => DataDiskSheetType.CollateralSetting,
                 SheetType.Guarantee => DataDiskSheetType.Guarantee,
                 _ => DataDiskSheetType.Unknown
             };
@@ -1852,8 +1843,21 @@ namespace NPLogic.ViewModels
         public int Index { get; set; }
         public int RowCount { get; set; }
         public List<string> Headers { get; set; } = new();
-        public SheetType SheetType { get; set; }
-        
+
+        private SheetType _sheetType;
+        public SheetType SheetType
+        {
+            get => _sheetType;
+            set
+            {
+                if (SetProperty(ref _sheetType, value))
+                {
+                    OnPropertyChanged(nameof(SheetTypeDisplay));
+                    OnPropertyChanged(nameof(SelectedSheetType));
+                }
+            }
+        }
+
         /// <summary>
         /// 감지된 헤더 행 번호 (1부터 시작)
         /// </summary>
@@ -1863,17 +1867,47 @@ namespace NPLogic.ViewModels
         private bool _isSelected;
 
         /// <summary>
+        /// ComboBox 바인딩용 DataDiskSheetType 프로퍼티
+        /// </summary>
+        public DataDiskSheetType SelectedSheetType
+        {
+            get => SheetType switch
+            {
+                SheetType.BorrowerGeneral => DataDiskSheetType.BorrowerGeneral,
+                SheetType.BorrowerRestructuring => DataDiskSheetType.BorrowerRestructuring,
+                SheetType.Loan => DataDiskSheetType.Loan,
+                SheetType.Property => DataDiskSheetType.Property,
+                SheetType.RegistryDetail => DataDiskSheetType.RegistryDetail,
+                SheetType.Guarantee => DataDiskSheetType.Guarantee,
+                _ => DataDiskSheetType.Unknown
+            };
+            set
+            {
+                var newSheetType = value switch
+                {
+                    DataDiskSheetType.BorrowerGeneral => SheetType.BorrowerGeneral,
+                    DataDiskSheetType.BorrowerRestructuring => SheetType.BorrowerRestructuring,
+                    DataDiskSheetType.Loan => SheetType.Loan,
+                    DataDiskSheetType.Property => SheetType.Property,
+                    DataDiskSheetType.RegistryDetail => SheetType.RegistryDetail,
+                    DataDiskSheetType.Guarantee => SheetType.Guarantee,
+                    _ => SheetType.Unknown
+                };
+                SheetType = newSheetType;
+            }
+        }
+
+        /// <summary>
         /// 시트 유형 표시명
         /// </summary>
         public string SheetTypeDisplay => SheetType switch
         {
             SheetType.BorrowerGeneral => "차주일반정보",
             SheetType.BorrowerRestructuring => "회생차주정보",
-            SheetType.Loan => "채권정보",
-            SheetType.Property => "담보물건정보",
+            SheetType.Loan => "채권일반정보",
+            SheetType.Property => "물건정보",
             SheetType.RegistryDetail => "등기부등본정보",
-            SheetType.CollateralSetting => "담보설정정보",
-            SheetType.Guarantee => "보증정보",
+            SheetType.Guarantee => "신용보증서",
             _ => "알 수 없음"
         };
 

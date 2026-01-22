@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using NPLogic.Core.Models;
 using NPLogic.ViewModels;
 
 namespace NPLogic.Views
@@ -190,6 +191,23 @@ namespace NPLogic.Views
                 if (DataContext is ProgramManagementViewModel viewModel)
                 {
                     viewModel.OpenHeaderRowPreviewDialog(sheet);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 시트 타입 ComboBox 변경 핸들러
+        /// 중복 체크 로직을 포함한 ChangeSheetType 메서드를 호출
+        /// </summary>
+        private void SheetTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox comboBox &&
+                comboBox.Tag is SelectableSheetInfo sheet &&
+                comboBox.SelectedValue is DataDiskSheetType newType)
+            {
+                if (DataContext is ProgramManagementViewModel viewModel)
+                {
+                    viewModel.ChangeSheetType(sheet, newType);
                 }
             }
         }
