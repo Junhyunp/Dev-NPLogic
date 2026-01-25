@@ -30,7 +30,7 @@
                     <TextBlock Text="현금흐름 집계" 
                                Style="{StaticResource H2TextStyle}"
                                Margin="0,0,0,4"/>
-                    <TextBlock Style="{StaticResource BodyTextStyle}" Opacity="0.7">
+                    <TextBlock Style="{StaticResource MutedTextStyle}">
                         <Run Text="액션데이트 기준 120개월(10년) 월별 현금흐름"/>
                         <Run Text=" | "/>
                         <Run Text="기준일:"/>
@@ -42,7 +42,8 @@
                     <!-- 액션데이트 설정 -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
                         <TextBlock Text="액션데이트:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker SelectedDate="{Binding ActionDate}" Width="120"/>
+                        <DatePicker SelectedDate="{Binding ActionDate}" Width="120"
+                                    Style="{StaticResource DateInputDatePicker}"/>
                     </StackPanel>
                     
                     <Button Content="Excel 내보내기" 
@@ -71,7 +72,7 @@
                 <!-- 선택된 차주 수 -->
                 <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
                     <StackPanel>
-                        <TextBlock Text="선택 차주" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="선택 차주" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextMutedBrush}"/>
                         <TextBlock FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0">
                             <Run Text="{Binding SelectedBorrowersCount, FallbackValue=0}"/>
                             <Run Text=" / " FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
@@ -83,7 +84,7 @@
                 <!-- 총 XNPV -->
                 <Border Grid.Column="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
                     <StackPanel>
-                        <TextBlock Text="총 XNPV" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="총 XNPV" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextMutedBrush}"/>
                         <TextBlock Text="{Binding TotalXnpv, StringFormat=N0, FallbackValue=-}" 
                                    FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialGreenBrush}"/>
                     </StackPanel>
@@ -92,7 +93,7 @@
                 <!-- 총 유입 -->
                 <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16" Margin="0,0,8,0">
                     <StackPanel>
-                        <TextBlock Text="총 유입" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="총 유입" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextMutedBrush}"/>
                         <TextBlock Text="{Binding TotalInflow, StringFormat=N0, FallbackValue=-}" 
                                    FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialBlueBrush}"/>
                     </StackPanel>
@@ -101,7 +102,7 @@
                 <!-- 총 유출 -->
                 <Border Grid.Column="3" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="16">
                     <StackPanel>
-                        <TextBlock Text="총 유출" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
+                        <TextBlock Text="총 유출" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextMutedBrush}"/>
                         <TextBlock Text="{Binding TotalOutflow, StringFormat=N0, FallbackValue=-}" 
                                    FontSize="{StaticResource FontSizeH1}" FontWeight="Bold" Margin="0,4,0,0" Foreground="{StaticResource MaterialRedBrush}"/>
                     </StackPanel>
@@ -110,7 +111,7 @@
         </Border>
 
         <!-- 메인 영역: 좌측 차주 리스트 + 우측 월별 테이블 -->
-        <Grid Grid.Row="2" Margin="24,12,24,24">
+        <Grid Grid.Row="2" Margin="12,8,12,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280" MinWidth="200"/>
                 <ColumnDefinition Width="Auto"/>
@@ -179,9 +180,9 @@
                                                        FontSize="{StaticResource FontSizeBody}" 
                                                        FontWeight="SemiBold"
                                                        TextTrimming="CharacterEllipsis"/>
-                                            <TextBlock Text="{Binding BorrowerNumber}" 
-                                                       FontSize="{StaticResource FontSizeSmall}" 
-                                                       Opacity="0.6"
+                                            <TextBlock Text="{Binding BorrowerNumber}"
+                                                       FontSize="{StaticResource FontSizeSmall}"
+                                                       Foreground="{StaticResource TextMutedBrush}"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
                                     </Grid>
@@ -238,7 +239,7 @@
                                 <Run Text=" (120개월)" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="Normal"/>
                             </TextBlock>
                             
-                            <TextBlock Grid.Column="1" FontSize="{StaticResource FontSizeBody}" Opacity="0.7">
+                            <TextBlock Grid.Column="1" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextMutedBrush}">
                                 <Run Text="단위: 원"/>
                             </TextBlock>
                         </Grid>

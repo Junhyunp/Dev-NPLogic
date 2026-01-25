@@ -33,14 +33,14 @@
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
         
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -49,7 +49,7 @@
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -86,7 +86,7 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
             <Setter Property="Padding" Value="2,2"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         
@@ -99,30 +99,78 @@
         
         <!-- 컴팩트 CheckBox -->
         <Style x:Key="CompactCheckBoxStyle" TargetType="CheckBox">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0"/>
         </Style>
         
         <!-- 컴팩트 DatePicker -->
         <Style x:Key="CompactDatePickerStyle" TargetType="DatePicker">
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
+            <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Grid.Column="0"
+                                                   Background="Transparent"
+                                                   BorderThickness="0"
+                                                   Padding="{TemplateBinding Padding}"
+                                                   VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Focusable="{TemplateBinding Focusable}"/>
+                                <Button x:Name="PART_Button"
+                                        Grid.Column="1"
+                                        Width="18"
+                                        Focusable="False"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Padding="1">
+                                    <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                          Fill="#666666"
+                                          Width="9"
+                                          Height="9"
+                                          Stretch="Uniform"/>
+                                </Button>
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                       StaysOpen="False"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
-        
+
         <!-- 링크 버튼 스타일 -->
         <Style x:Key="LinkButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Padding" Value="4,2"/>
         </Style>
     </UserControl.Resources>
     
-    <Grid Margin="16">
+    <Grid Margin="12,8,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -168,7 +216,7 @@
                                 <TextBlock Text="📋 경매사건 및 선순위" 
                                            Foreground="White" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
                             
                             <!-- 선행/후행 동시 표시 (피드백 #28) -->
@@ -182,7 +230,7 @@
                                 <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
                                     <StackPanel>
                                         <Border Background="{StaticResource PrimaryBrush}" Padding="8,6">
-                                            <TextBlock Text="선행" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                            <TextBlock Text="선행" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Foreground="White"/>
                                         </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -205,7 +253,7 @@
                                                 <TextBlock Text="경매개시여부" Style="{StaticResource LabelStyle}"/>
                                             </Border>
                                             <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                                <ComboBox SelectedValue="{Binding PrecedentAuctionStatus}" SelectedValuePath="Tag" FontSize="11">
+                                                <ComboBox SelectedValue="{Binding PrecedentAuctionStatus}" SelectedValuePath="Tag" FontSize="{StaticResource FontSizeSmall}">
                                                     <ComboBoxItem Content="경매개시" Tag="opened"/>
                                                     <ComboBoxItem Content="경매미개시" Tag="not_opened"/>
                                                 </ComboBox>
@@ -290,7 +338,7 @@
                                 <Border Grid.Column="1">
                                     <StackPanel>
                                         <Border Background="#FF7043" Padding="8,6">
-                                            <TextBlock Text="후행" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                            <TextBlock Text="후행" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Foreground="White"/>
                                         </Border>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -313,7 +361,7 @@
                                                 <TextBlock Text="경매개시여부" Style="{StaticResource LabelStyle}"/>
                                             </Border>
                                             <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                                <ComboBox SelectedValue="{Binding SubsequentAuctionStatus}" SelectedValuePath="Tag" FontSize="11">
+                                                <ComboBox SelectedValue="{Binding SubsequentAuctionStatus}" SelectedValuePath="Tag" FontSize="{StaticResource FontSizeSmall}">
                                                     <ComboBoxItem Content="경매개시" Tag="opened"/>
                                                     <ComboBoxItem Content="경매미개시" Tag="not_opened"/>
                                                 </ComboBox>
@@ -401,7 +449,7 @@
                                 <TextBlock Text="📝 전입/임차 현황 및 등기부 정보" 
                                            Foreground="White" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
                             
                             <Grid>
@@ -526,7 +574,7 @@
                                           VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                           MaxHeight="200"
                                           RowHeight="32"
-                                          FontSize="11">
+                                          FontSize="{StaticResource FontSizeSmall}">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="100"/>
                                         <DataGridTextColumn Header="근저당권자" Binding="{Binding RightHolder}" Width="180"/>
@@ -552,7 +600,7 @@
                                 <TextBlock Text="📂 열람 자료" 
                                            Foreground="White" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
                             
                             <Grid Margin="8">
@@ -568,15 +616,15 @@
                                     <StackPanel>
                                         <Border Background="#E8F5E9" Padding="8,4">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="전입세대열람" FontWeight="SemiBold" FontSize="12"/>
-                                                <TextBlock Text="(주택)" FontSize="10" Opacity="0.7" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="전입세대열람" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                                <TextBlock Text="(주택)" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Border>
                                         <Border Padding="8" MinHeight="100">
                                             <StackPanel>
-                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteTenantRegistryImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10" Margin="0,0,0,8"/>
+                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteTenantRegistryImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}" Margin="0,0,0,8"/>
                                                 <Image Source="{Binding TenantRegistryImage}" MaxHeight="80" Stretch="Uniform"/>
-                                                <TextBlock Text="{Binding TenantRegistryImageInfo}" FontSize="10" Opacity="0.7" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding TenantRegistryImageInfo}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -587,15 +635,15 @@
                                     <StackPanel>
                                         <Border Background="#FFF3E0" Padding="8,4">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="상가임대차열람" FontWeight="SemiBold" FontSize="12"/>
-                                                <TextBlock Text="(상가)" FontSize="10" Opacity="0.7" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="상가임대차열람" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                                <TextBlock Text="(상가)" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Border>
                                         <Border Padding="8" MinHeight="100">
                                             <StackPanel>
-                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteCommercialLeaseImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10" Margin="0,0,0,8"/>
+                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteCommercialLeaseImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}" Margin="0,0,0,8"/>
                                                 <Image Source="{Binding CommercialLeaseImage}" MaxHeight="80" Stretch="Uniform"/>
-                                                <TextBlock Text="{Binding CommercialLeaseImageInfo}" FontSize="10" Opacity="0.7" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding CommercialLeaseImageInfo}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -605,13 +653,13 @@
                                 <Border Grid.Column="2" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1" Margin="0,0,4,0">
                                     <StackPanel>
                                         <Border Background="#E3F2FD" Padding="8,4">
-                                            <TextBlock Text="권리분석" FontWeight="SemiBold" FontSize="12"/>
+                                            <TextBlock Text="권리분석" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                         </Border>
                                         <Border Padding="8" MinHeight="100">
                                             <StackPanel>
-                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteRightsAnalysisImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10" Margin="0,0,0,8"/>
+                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteRightsAnalysisImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}" Margin="0,0,0,8"/>
                                                 <Image Source="{Binding RightsAnalysisImage}" MaxHeight="80" Stretch="Uniform"/>
-                                                <TextBlock Text="{Binding RightsAnalysisImageInfo}" FontSize="10" Opacity="0.7" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding RightsAnalysisImageInfo}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -621,13 +669,13 @@
                                 <Border Grid.Column="3" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1">
                                     <StackPanel>
                                         <Border Background="#FCE4EC" Padding="8,4">
-                                            <TextBlock Text="임금자료" FontWeight="SemiBold" FontSize="12"/>
+                                            <TextBlock Text="임금자료" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                         </Border>
                                         <Border Padding="8" MinHeight="100">
                                             <StackPanel>
-                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteWageDataImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10" Margin="0,0,0,8"/>
+                                                <Button Content="이미지 붙여넣기" Command="{Binding PasteWageDataImageCommand}" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}" Margin="0,0,0,8"/>
                                                 <Image Source="{Binding WageDataImage}" MaxHeight="80" Stretch="Uniform"/>
-                                                <TextBlock Text="{Binding WageDataImageInfo}" FontSize="10" Opacity="0.7" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding WageDataImageInfo}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -641,7 +689,7 @@
                         <StackPanel>
                             <Border Background="#E8F5E9" Padding="8,4">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Tool Box > 주택임대차" FontWeight="SemiBold" FontSize="12"/>
+                                    <TextBlock Text="Tool Box > 주택임대차" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                     <Button Content="+ 행 추가" Command="{Binding AddResidentialLeaseRowCommand}" Style="{StaticResource LinkButtonStyle}" Margin="16,0,0,0"/>
                                 </StackPanel>
                             </Border>
@@ -655,7 +703,7 @@
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       RowHeight="32"
-                                      FontSize="11"
+                                      FontSize="{StaticResource FontSizeSmall}"
                                       MaxHeight="200">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="60"/>
@@ -673,9 +721,9 @@
                             
                             <Border Background="#F5F5F5" Padding="8,4">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="11" Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding ResidentialLeasesTotalDeposit, StringFormat=N0}" FontWeight="Bold" FontSize="11"/>
-                                    <TextBlock Text="원" FontSize="11" Margin="2,0,0,0"/>
+                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding ResidentialLeasesTotalDeposit, StringFormat=N0}" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Margin="2,0,0,0"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -686,7 +734,7 @@
                         <StackPanel>
                             <Border Background="#FFF3E0" Padding="8,4">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Tool Box > 상가임대차" FontWeight="SemiBold" FontSize="12"/>
+                                    <TextBlock Text="Tool Box > 상가임대차" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                     <Button Content="+ 행 추가" Command="{Binding AddCommercialLeaseRowCommand}" Style="{StaticResource LinkButtonStyle}" Margin="16,0,0,0"/>
                                 </StackPanel>
                             </Border>
@@ -700,7 +748,7 @@
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       RowHeight="32"
-                                      FontSize="11"
+                                      FontSize="{StaticResource FontSizeSmall}"
                                       MaxHeight="200">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="60"/>
@@ -718,9 +766,9 @@
                             
                             <Border Background="#F5F5F5" Padding="8,4">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="11" Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding CommercialLeasesTotalDeposit, StringFormat=N0}" FontWeight="Bold" FontSize="11"/>
-                                    <TextBlock Text="원" FontSize="11" Margin="2,0,0,0"/>
+                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding CommercialLeasesTotalDeposit, StringFormat=N0}" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Margin="2,0,0,0"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -731,7 +779,7 @@
                         <StackPanel>
                             <Border Background="#FCE4EC" Padding="8,4">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Tool Box > 임금채권" FontWeight="SemiBold" FontSize="12"/>
+                                    <TextBlock Text="Tool Box > 임금채권" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                     <Button Content="+ 행 추가" Command="{Binding AddWageClaimRowCommand}" Style="{StaticResource LinkButtonStyle}" Margin="16,0,0,0"/>
                                 </StackPanel>
                             </Border>
@@ -745,7 +793,7 @@
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       RowHeight="32"
-                                      FontSize="11"
+                                      FontSize="{StaticResource FontSizeSmall}"
                                       MaxHeight="200">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="순번" Binding="{Binding SequenceNumber}" Width="50"/>
@@ -768,9 +816,9 @@
                             
                             <Border Background="#F5F5F5" Padding="8,4">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="11" Margin="0,0,8,0"/>
-                                    <TextBlock Text="{Binding WageClaimsTotalAmount, StringFormat=N0}" FontWeight="Bold" FontSize="11"/>
-                                    <TextBlock Text="원" FontSize="11" Margin="2,0,0,0"/>
+                                    <TextBlock Text="합계:" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="{Binding WageClaimsTotalAmount, StringFormat=N0}" FontWeight="Bold" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Margin="2,0,0,0"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -790,7 +838,7 @@
                                 <TextBlock Text="📊 선순위 구분" 
                                            Foreground="White" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
                             
                             <Grid Margin="8">
@@ -944,7 +992,7 @@
                             <!-- 선순위 요약 -->
                             <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="💰 선순위 요약" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
+                                    <TextBlock Text="💰 선순위 요약" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -992,7 +1040,7 @@
                             <!-- 배당 시뮬레이션 -->
                             <Border Grid.Column="1" Padding="16">
                                 <StackPanel>
-                                    <TextBlock Text="📈 배당 시뮬레이션" FontWeight="SemiBold" FontSize="14" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
+                                    <TextBlock Text="📈 배당 시뮬레이션" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,12"/>
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -1066,33 +1114,33 @@
                                 <TextBlock Text="📖 선순위 참고 사항" 
                                            Foreground="White" 
                                            FontWeight="SemiBold"
-                                           FontSize="14"/>
+                                           FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
                             
                             <StackPanel Margin="16">
                                 <!-- 주택임대차보호법 참고 -->
-                                <TextBlock Text="[주택임대차보호법]" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,8"/>
+                                <TextBlock Text="[주택임대차보호법]" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource PrimaryBrush}" Margin="0,0,0,8"/>
                                 <Border Background="#F5F5F5" CornerRadius="4" Padding="12" Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="• 최우선 변제요건: 전입일자와 주거(점유)가 확인된 자 (확정일자는 없어도 됨)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 미전입, 미주거일 경우 등기부등본상 주택임차권자로 등기 완료한 자 (전세권 설정자는 제외)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 최우선 변제액은 경매 낙찰가의 1/2 한도 내 (경매비용을 제외한 낙찰가)" FontSize="11" TextWrapping="Wrap"/>
+                                        <TextBlock Text="• 최우선 변제요건: 전입일자와 주거(점유)가 확인된 자 (확정일자는 없어도 됨)" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 미전입, 미주거일 경우 등기부등본상 주택임차권자로 등기 완료한 자 (전세권 설정자는 제외)" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 최우선 변제액은 경매 낙찰가의 1/2 한도 내 (경매비용을 제외한 낙찰가)" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                                 
                                 <!-- 상가임대차보호법 참고 -->
-                                <TextBlock Text="[상가임대차보호법]" FontWeight="Bold" FontSize="12" Foreground="#FF7043" Margin="0,0,0,8"/>
+                                <TextBlock Text="[상가임대차보호법]" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="#FF7043" Margin="0,0,0,8"/>
                                 <Border Background="#FFF3E0" CornerRadius="4" Padding="12" Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="• 보증금환산: 보증금 + (월세 × 100) = 대상금액" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 상가임대차 최우선변제액의 합계액은 경매 낙찰가의 1/2 한도 내 (2014.1.1부터)" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 2013.8.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 계약갱신요구권 발생" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 2015.5.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 대항력 적용" FontSize="11" TextWrapping="Wrap"/>
+                                        <TextBlock Text="• 보증금환산: 보증금 + (월세 × 100) = 대상금액" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 상가임대차 최우선변제액의 합계액은 경매 낙찰가의 1/2 한도 내 (2014.1.1부터)" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 2013.8.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 계약갱신요구권 발생" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 2015.5.13 이후 계약 및 갱신된 상가임대차는 임대차보호한도를 초과하더라도 대항력 적용" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                                 
                                 <!-- 당해세 참고 -->
-                                <TextBlock Text="[당해세]" FontWeight="Bold" FontSize="12" Foreground="#43A047" Margin="0,0,0,8"/>
+                                <TextBlock Text="[당해세]" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="#43A047" Margin="0,0,0,8"/>
                                 <Border Background="#E8F5E9" CornerRadius="4" Padding="12" Margin="0,0,0,12">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -1104,21 +1152,21 @@
                                             <RowDefinition Height="Auto"/>
                                         </Grid.RowDefinitions>
                                         
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="국세" FontWeight="SemiBold" FontSize="11"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="상속세, 증여세, 종합부동산세" FontSize="11"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="국세" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="상속세, 증여세, 종합부동산세" FontSize="{StaticResource FontSizeSmall}"/>
                                         
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="지방세" FontWeight="SemiBold" FontSize="11" Margin="0,4,0,0"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="재산세, 자동차세, 도시계획세, 공동시설세, 지방교육세(재산세와 자동차세분에 한함)" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="지방세" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="재산세, 자동차세, 도시계획세, 공동시설세, 지방교육세(재산세와 자동차세분에 한함)" FontSize="{StaticResource FontSizeSmall}" TextWrapping="Wrap" Margin="0,4,0,0"/>
                                     </Grid>
                                 </Border>
                                 
                                 <!-- 임금채권 참고 -->
-                                <TextBlock Text="[임금채권]" FontWeight="Bold" FontSize="12" Foreground="#E91E63" Margin="0,0,0,8"/>
+                                <TextBlock Text="[임금채권]" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="#E91E63" Margin="0,0,0,8"/>
                                 <Border Background="#FCE4EC" CornerRadius="4" Padding="12">
                                     <StackPanel>
-                                        <TextBlock Text="• 1987.11.27 이전: 저당권이 우선" FontSize="11" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 1987.11.28 ~ 1989.03.28: 임금만 저당권에 우선" FontSize="11" Margin="0,0,0,4"/>
-                                        <TextBlock Text="• 1989.03.29 이후: 임금 및 퇴직금 모두 저당권에 우선" FontSize="11"/>
+                                        <TextBlock Text="• 1987.11.27 이전: 저당권이 우선" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 1987.11.28 ~ 1989.03.28: 임금만 저당권에 우선" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,0,4"/>
+                                        <TextBlock Text="• 1989.03.29 이후: 임금 및 퇴직금 모두 저당권에 우선" FontSize="{StaticResource FontSizeSmall}"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

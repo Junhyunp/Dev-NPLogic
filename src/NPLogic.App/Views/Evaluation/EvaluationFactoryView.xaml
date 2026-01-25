@@ -85,7 +85,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="180"
-                                  FontSize="11"
+                                  FontSize="{StaticResource FontSizeSmall}"
                                   Margin="0,0,0,16">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="지번번호" Binding="{Binding ParcelNumber}" Width="80"/>
@@ -111,7 +111,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="180"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="지번번호" Binding="{Binding ParcelNumber}" Width="80"/>
                                 <DataGridTextColumn Header="지번주소" Binding="{Binding Address}" Width="*"/>
@@ -134,18 +134,18 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="토지+건물 감정가 합계" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding TotalLandBuildingAppraisal, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="토지+건물 감정가 합계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding TotalLandBuildingAppraisal, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="1안 평가액 합계" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding TotalScenario1Value, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="1안 평가액 합계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding TotalScenario1Value, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="2안 평가액 합계" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding TotalScenario2Value, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="2안 평가액 합계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding TotalScenario2Value, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                             </Grid>
@@ -165,9 +165,9 @@
                                         Margin="12,0,0,0"
                                         VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="기계인정율:" Foreground="White" FontSize="11"/>
-                                        <TextBlock Text="{Binding MachineryRecognitionRate, StringFormat={}{0:P0}}" 
-                                                   Foreground="White" FontSize="11" FontWeight="Bold" Margin="4,0,0,0"/>
+                                        <TextBlock Text="기계인정율:" Foreground="White" FontSize="{StaticResource FontSizeSmall}"/>
+                                        <TextBlock Text="{Binding MachineryRecognitionRate, StringFormat={}{0:P0}}"
+                                                   Foreground="White" FontSize="{StaticResource FontSizeSmall}" FontWeight="Bold" Margin="4,0,0,0"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -194,7 +194,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="250"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="번호" Binding="{Binding ItemNumber}" Width="50" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="기계기구명" Binding="{Binding MachineryName}" Width="*"/>
@@ -219,18 +219,18 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="기계 감정가 합계" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding TotalMachineryAppraisal, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="기계 감정가 합계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding TotalMachineryAppraisal, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="인정 기계 감정가" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding RecognizedMachineryValue, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="인정 기계 감정가" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding RecognizedMachineryValue, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="기계 평가액 (인정율 적용)" Style="{StaticResource LabelText}" FontSize="11"/>
-                                    <TextBlock Text="{Binding MachineryEvaluationValue, StringFormat=\{0:N0\}}" 
+                                    <TextBlock Text="기계 평가액 (인정율 적용)" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
+                                    <TextBlock Text="{Binding MachineryEvaluationValue, StringFormat=\{0:N0\}}"
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                             </Grid>
@@ -273,9 +273,9 @@
                     <StackPanel>
                         <Grid Margin="0,0,0,12">
                             <TextBlock Text="📈 낙찰통계" Style="{StaticResource SectionHeader}" Margin="0"/>
-                            <TextBlock Text="적용낙찰가율" 
+                            <TextBlock Text="적용낙찰가율"
                                        HorizontalAlignment="Right"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="Bold"
                                        Foreground="{StaticResource PrimaryBrush}"/>
                         </Grid>
@@ -354,13 +354,13 @@
                                     Margin="12,0,0,0"
                                     VerticalAlignment="Center">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                               FontSize="20"
+                                    <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}"
+                                               FontSize="{StaticResource FontSizeLarge}"
                                                FontWeight="Bold"
                                                Foreground="White"
                                                HorizontalAlignment="Center"/>
-                                    <TextBlock Text="{Binding AppliedBidRateDescription}" 
-                                               FontSize="11"
+                                    <TextBlock Text="{Binding AppliedBidRateDescription}"
+                                               FontSize="{StaticResource FontSizeSmall}"
                                                Foreground="White"
                                                Opacity="0.9"
                                                HorizontalAlignment="Center"
@@ -395,7 +395,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="300"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="100" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, Mode=TwoWay}" Width="90"/>

@@ -25,7 +25,7 @@
                                      Foreground="#FF9800"
                                      Margin="0,0,8,0"/>
             <TextBlock Text="QA 질문 작성" 
-                       FontSize="20" 
+                       FontSize="{StaticResource FontSizeLarge}" 
                        FontWeight="Bold"
                        Foreground="{StaticResource PrimaryBrush}"
                        VerticalAlignment="Center"/>
@@ -34,13 +34,13 @@
         <!-- 메뉴 선택 -->
         <StackPanel Grid.Row="1" Margin="0,0,0,16">
             <TextBlock Text="관련 메뉴" 
-                       FontSize="13" 
+                       FontSize="{StaticResource FontSizeBody}" 
                        FontWeight="SemiBold"
                        Foreground="{StaticResource TextPrimaryBrush}"
                        Margin="0,0,0,8"/>
             <ComboBox x:Name="MenuComboBox"
                       SelectedIndex="0"
-                      FontSize="14"
+                      FontSize="{StaticResource FontSizeH4}"
                       Padding="12,10"
                       materialDesign:HintAssist.Hint="메뉴 선택">
                 <ComboBoxItem Content="전체" Tag="Home"/>
@@ -56,7 +56,7 @@
         <!-- 질문 입력 -->
         <StackPanel Grid.Row="2" Margin="0,0,0,8">
             <TextBlock Text="질문 내용" 
-                       FontSize="13" 
+                       FontSize="{StaticResource FontSizeBody}" 
                        FontWeight="SemiBold"
                        Foreground="{StaticResource TextPrimaryBrush}"
                        Margin="0,0,0,8"/>
@@ -72,7 +72,7 @@
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"
-                     FontSize="14"
+                     FontSize="{StaticResource FontSizeH4}"
                      Padding="12"
                      BorderThickness="0"
                      Background="Transparent"

@@ -128,7 +128,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="차주 목록" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12"/>
+                    <TextBlock Grid.Row="0" Text="차주 목록" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}" Margin="0,0,0,12"/>
 
                     <ListBox Grid.Row="1"
                              ItemsSource="{Binding Borrowers}"
@@ -207,12 +207,12 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock FontWeight="SemiBold" FontSize="16">
+                                <TextBlock FontWeight="SemiBold" FontSize="{StaticResource FontSizeH3}">
                                     <Run Text="담보 물건 목록"/>
                                     <Run Text=" - "/>
                                     <Run Text="{Binding SelectedBorrower.BorrowerName, FallbackValue='차주 선택'}"/>
                                 </TextBlock>
-                                <TextBlock FontSize="13" Opacity="0.7" Margin="0,4,0,0">
+                                <TextBlock FontSize="{StaticResource FontSizeBody}" Opacity="0.7" Margin="0,4,0,0">
                                     <Run Text="프로그램: "/>
                                     <Run Text="{Binding SelectedBorrower.ProgramId, FallbackValue='-'}"/>
                                 </TextBlock>
@@ -374,33 +374,33 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="감정평가액 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding TotalAppraisalValue, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="평가액 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding TotalEstimatedValue, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="선순위 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#E57373">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#E57373">
                                     <Run Text="{Binding TotalSeniorRights, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
 
                             <StackPanel Grid.Column="3">
                                 <TextBlock Text="배당가능재원 합계" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#81C784">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#81C784">
                                     <Run Text="{Binding TotalRecoverable, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
                         </Grid>
@@ -417,17 +417,17 @@
 
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Loan Cap" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding LoanCap, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1">
                                 <TextBlock Text="Cap 반영 후" FontSize="{StaticResource FontSizeBody}" Opacity="0.7"/>
-                                <TextBlock FontSize="16" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#64B5F6">
+                                <TextBlock FontSize="{StaticResource FontSizeH3}" FontWeight="SemiBold" Margin="0,4,0,0" Foreground="#64B5F6">
                                     <Run Text="{Binding CapAdjustedAmount, StringFormat=N0}"/>
-                                    <Run Text="원" FontSize="11" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeSmall}" FontWeight="Normal"/>
                                 </TextBlock>
                             </StackPanel>
 

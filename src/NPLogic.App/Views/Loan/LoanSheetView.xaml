@@ -26,7 +26,7 @@
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
@@ -34,14 +34,14 @@
         <!-- 서브 섹션 헤더 스타일 -->
         <Style x:Key="SubSectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="#333333"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         
         <!-- 라벨 스타일 (헤더 셀) -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="Foreground" Value="#333333"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
@@ -50,7 +50,7 @@
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -94,7 +94,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         
@@ -106,17 +106,120 @@
         
         <!-- 컴팩트 CheckBox -->
         <Style x:Key="CompactCheckBoxStyle" TargetType="CheckBox">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0"/>
         </Style>
         
         <!-- 컴팩트 DatePicker -->
         <Style x:Key="CompactDatePickerStyle" TargetType="DatePicker">
-            <Setter Property="FontSize" Value="9"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
+            <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Height" Value="22"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Grid.Column="0"
+                                                   Background="Transparent"
+                                                   BorderThickness="0"
+                                                   Padding="{TemplateBinding Padding}"
+                                                   VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Focusable="{TemplateBinding Focusable}"/>
+                                <Button x:Name="PART_Button"
+                                        Grid.Column="1"
+                                        Width="18"
+                                        Focusable="False"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Padding="1">
+                                    <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                          Fill="#666666"
+                                          Width="9"
+                                          Height="9"
+                                          Stretch="Uniform"/>
+                                </Button>
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                       StaysOpen="False"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 날짜 입력 DatePicker 스타일 (보라색 계열 배경) -->
+        <Style x:Key="DateInputPickerStyle" TargetType="DatePicker">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="2,1"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Grid.Column="0"
+                                                   Background="Transparent"
+                                                   BorderThickness="0"
+                                                   Padding="{TemplateBinding Padding}"
+                                                   VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Focusable="{TemplateBinding Focusable}"/>
+                                <Button x:Name="PART_Button"
+                                        Grid.Column="1"
+                                        Width="20"
+                                        Focusable="False"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Padding="2">
+                                    <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                          Fill="#666666"
+                                          Width="10"
+                                          Height="10"
+                                          Stretch="Uniform"/>
+                                </Button>
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                       StaysOpen="False"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         
         <!-- 탭 스타일 -->
@@ -147,7 +250,7 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="#333333"/>
         </Style>
     </UserControl.Resources>
@@ -173,18 +276,18 @@
                 </Grid.ColumnDefinitions>
                 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="기준일 (Cdate):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <DatePicker SelectedDate="{Binding CDate}" Width="120" FontSize="11"/>
+                    <TextBlock Text="기준일 (Cdate):" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding CDate}" Width="100" Style="{StaticResource DateInputPickerStyle}"/>
                 </StackPanel>
-                
+
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <TextBlock Text="1안 예상배당일 (DD1):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <DatePicker SelectedDate="{Binding Scenario1Date}" Width="120" FontSize="11"/>
+                    <TextBlock Text="1안 예상배당일 (DD1):" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario1Date}" Width="100" Style="{StaticResource DateInputPickerStyle}"/>
                 </StackPanel>
-                
+
                 <StackPanel Grid.Column="4" Orientation="Horizontal">
-                    <TextBlock Text="2안 예상배당일 (DD2):" FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <DatePicker SelectedDate="{Binding Scenario2Date}" Width="120" FontSize="11"/>
+                    <TextBlock Text="2안 예상배당일 (DD2):" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario2Date}" Width="100" Style="{StaticResource DateInputPickerStyle}"/>
                 </StackPanel>
                 
                 <StackPanel Grid.Column="6" Orientation="Horizontal">
@@ -192,19 +295,19 @@
                             Command="{Binding RecalculateAllCommand}"
                             Style="{StaticResource SecondaryButton}"
                             Padding="10,5"
-                            FontSize="11"
+                            FontSize="{StaticResource FontSizeSmall}"
                             Margin="0,0,8,0"/>
                     <Button Content="Excel" 
                             Command="{Binding ExportToExcelCommand}"
                             Style="{StaticResource SecondaryButton}"
                             Padding="10,5"
-                            FontSize="11"
+                            FontSize="{StaticResource FontSizeSmall}"
                             Margin="0,0,8,0"/>
                     <Button Content="저장" 
                             Command="{Binding SaveCommand}"
                             Style="{StaticResource PrimaryButton}"
                             Padding="12,5"
-                            FontSize="11"/>
+                            FontSize="{StaticResource FontSizeSmall}"/>
                 </StackPanel>
             </Grid>
         </Border>

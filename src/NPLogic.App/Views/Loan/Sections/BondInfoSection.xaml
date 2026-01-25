@@ -16,7 +16,7 @@
         <Style x:Key="HeaderCellStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{StaticResource HeaderBg}"/>
             <Setter Property="Foreground" Value="#333333"/>
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="4,4"/>
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
@@ -25,7 +25,7 @@
         </Style>
         
         <Style x:Key="CellStyle" TargetType="DataGridCell">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="Padding" Value="4,2"/>
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
@@ -43,8 +43,8 @@
             <!-- 섹션 헤더 -->
             <Border Background="{StaticResource HeaderBg}" Padding="8,4">
                 <StackPanel>
-                    <TextBlock Text="채권정보" FontWeight="Bold" FontSize="12"/>
-                    <TextBlock Text="피담보채무범위" FontSize="10" Foreground="Gray"/>
+                    <TextBlock Text="채권정보" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}"/>
+                    <TextBlock Text="피담보채무범위" FontSize="{StaticResource FontSizeTiny}" Foreground="Gray"/>
                 </StackPanel>
             </Border>
             
@@ -296,11 +296,11 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     
-                    <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" FontSize="10"/>
+                    <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" FontSize="{StaticResource FontSizeTiny}"/>
                     <TextBlock Grid.Column="5" Text="{Binding Statistics.TotalPrincipalBalance, StringFormat=N0}" 
-                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"/>
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="{StaticResource FontSizeTiny}"/>
                     <TextBlock Grid.Column="8" Text="{Binding Statistics.TotalLoanCap1, StringFormat=N0}" 
-                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="10"
+                               HorizontalAlignment="Right" FontWeight="SemiBold" FontSize="{StaticResource FontSizeTiny}"
                                Foreground="#2E7D32"/>
                 </Grid>
             </Border>

@@ -14,7 +14,7 @@
         <!-- 탭 헤더 스타일 -->
         <Style x:Key="SheetTabStyle" TargetType="TabItem">
             <Setter Property="Padding" Value="16,8"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         
@@ -23,7 +23,7 @@
             <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Padding" Value="8,6"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
@@ -51,7 +51,7 @@
                            Margin="0,0,0,4"/>
                 <TextBlock x:Name="PropertyInfoText"
                            Text="물건 정보가 로드되지 않았습니다."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSizeBody}"
                            Foreground="{StaticResource TextSecondaryBrush}"/>
             </StackPanel>
             
@@ -149,7 +149,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock FontSize="11">
+                                            <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="유효"/>
@@ -252,7 +252,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock FontSize="11">
+                                            <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="유효"/>
@@ -286,7 +286,7 @@
                                        Text="0원" 
                                        HorizontalAlignment="Right"
                                        FontWeight="Bold"
-                                       FontSize="16"
+                                       FontSize="{StaticResource FontSizeH3}"
                                        Foreground="{StaticResource PrimaryBrush}"/>
                         </Grid>
                     </Border>

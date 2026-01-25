@@ -112,7 +112,7 @@
                                    HorizontalAlignment="Center"
                                    Margin="0,0,0,16"/>
                         <TextBlock Text="API 키가 필요합니다"
-                                   FontSize="18"
+                                   FontSize="{StaticResource FontSizeH2}"
                                    Foreground="White"
                                    FontWeight="SemiBold"
                                    HorizontalAlignment="Center"
@@ -159,7 +159,7 @@
                                 Content="Excel 내보내기"
                                 Style="{StaticResource SecondaryButton}"
                                 Padding="8,4"
-                                FontSize="11"
+                                FontSize="{StaticResource FontSizeSmall}"
                                 Click="BtnExportExcel_Click"/>
                     </Grid>
                 </Border>
@@ -181,7 +181,7 @@
                             <StackPanel>
                                 <TextBlock Text="상권 요약"
                                            FontWeight="SemiBold"
-                                           FontSize="13"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            Margin="0,0,0,12"/>
 
                                 <Grid>
@@ -202,7 +202,7 @@
                                             Margin="0,0,6,6">
                                         <StackPanel>
                                             <TextBlock Text="총 점포 수"
-                                                       FontSize="11"
+                                                       FontSize="{StaticResource FontSizeSmall}"
                                                        Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtTotalStores"
                                                        Text="-"
@@ -220,7 +220,7 @@
                                             Margin="6,0,0,6">
                                         <StackPanel>
                                             <TextBlock Text="업종 수"
-                                                       FontSize="11"
+                                                       FontSize="{StaticResource FontSizeSmall}"
                                                        Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtIndustryCount"
                                                        Text="-"
@@ -238,7 +238,7 @@
                                             Margin="0,6,0,0">
                                         <StackPanel>
                                             <TextBlock Text="상권명"
-                                                       FontSize="11"
+                                                       FontSize="{StaticResource FontSizeSmall}"
                                                        Foreground="{StaticResource TextMutedBrush}"/>
                                             <TextBlock x:Name="TxtDistrictName"
                                                        Text="-"
@@ -264,7 +264,7 @@
                             <StackPanel>
                                 <TextBlock Text="업종별 점포 현황"
                                            FontWeight="SemiBold"
-                                           FontSize="13"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            Margin="0,0,0,12"/>
 
                                 <ItemsControl x:Name="IndustryStatsList">
@@ -326,11 +326,11 @@
                                     <TextBlock Grid.Column="0"
                                                Text="주변 점포 목록"
                                                FontWeight="SemiBold"
-                                               FontSize="13"/>
+                                               FontSize="{StaticResource FontSizeBody}"/>
                                     <TextBlock Grid.Column="1"
                                                x:Name="TxtStoreListCount"
                                                Text=""
-                                               FontSize="11"
+                                               FontSize="{StaticResource FontSizeSmall}"
                                                Foreground="{StaticResource TextMutedBrush}"
                                                VerticalAlignment="Center"/>
                                 </Grid>
@@ -368,7 +368,7 @@
                                            Foreground="#92400E"
                                            Margin="0,0,0,8"/>
                                 <TextBlock Text="상권 데이터를 사용하려면 data.go.kr에서 소상공인 상권정보 API 키를 발급받아 appsettings.json에 설정해주세요."
-                                           FontSize="11"
+                                           FontSize="{StaticResource FontSizeSmall}"
                                            Foreground="#92400E"
                                            TextWrapping="Wrap"
                                            LineHeight="18"/>

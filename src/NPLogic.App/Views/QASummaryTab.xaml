@@ -45,7 +45,7 @@
         <Style x:Key="FilterButton" TargetType="RadioButton">
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -149,7 +149,7 @@
                                                          Margin="0,0,8,0"/>
                                 <TextBlock Text="차주 목록" 
                                            FontWeight="SemiBold"
-                                           FontSize="15"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            Foreground="White"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
@@ -177,30 +177,30 @@
                             
                             <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding TotalQaCount}" 
-                                           FontSize="18" FontWeight="Bold"
+                                           FontSize="{StaticResource FontSizeH2}" FontWeight="Bold"
                                            Foreground="{StaticResource PrimaryBrush}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="전체" FontSize="11" 
+                                <TextBlock Text="전체" FontSize="{StaticResource FontSizeSmall}" 
                                            Foreground="{StaticResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding UnansweredCount}" 
-                                           FontSize="18" FontWeight="Bold"
+                                           FontSize="{StaticResource FontSizeH2}" FontWeight="Bold"
                                            Foreground="{StaticResource ErrorBrush}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="미답변" FontSize="11" 
+                                <TextBlock Text="미답변" FontSize="{StaticResource FontSizeSmall}" 
                                            Foreground="{StaticResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Column="2" HorizontalAlignment="Center">
                                 <TextBlock Text="{Binding AnsweredCount}" 
-                                           FontSize="18" FontWeight="Bold"
+                                           FontSize="{StaticResource FontSizeH2}" FontWeight="Bold"
                                            Foreground="{StaticResource SuccessBrush}"
                                            HorizontalAlignment="Center"/>
-                                <TextBlock Text="답변완료" FontSize="11" 
+                                <TextBlock Text="답변완료" FontSize="{StaticResource FontSizeSmall}" 
                                            Foreground="{StaticResource TextSecondaryBrush}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
@@ -228,12 +228,12 @@
                                     <StackPanel Grid.Row="0" Orientation="Horizontal">
                                         <TextBlock Text="{Binding BorrowerNumber}"
                                                    FontWeight="SemiBold"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource PrimaryBrush}"/>
                                         <TextBlock Text=" - "
                                                    Foreground="{StaticResource TextSecondaryBrush}"/>
                                         <TextBlock Text="{Binding BorrowerName}"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource TextPrimaryBrush}"
                                                    TextTrimming="CharacterEllipsis"
                                                    MaxWidth="150"/>
@@ -241,12 +241,12 @@
 
                                     <!-- QA 건수 -->
                                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
-                                        <TextBlock Text="QA " FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding TotalCount}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock Text="건" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text=" | " FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="미답변 " FontSize="12" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                        <TextBlock Text="{Binding UnansweredCount}" FontSize="12" FontWeight="SemiBold">
+                                        <TextBlock Text="QA " FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding TotalCount}" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="건" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text=" | " FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="미답변 " FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock Text="{Binding UnansweredCount}" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
@@ -324,11 +324,11 @@
                                                          Margin="0,0,8,0"/>
                                 <TextBlock Text="QA 집계" 
                                            FontWeight="SemiBold"
-                                           FontSize="16"
+                                           FontSize="{StaticResource FontSizeH3}"
                                            Foreground="{StaticResource TextPrimaryBrush}"
                                            VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding SelectedBorrower.BorrowerNumber, StringFormat=' - {0}'}"
-                                           FontSize="14"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            Foreground="{StaticResource TextSecondaryBrush}"
                                            VerticalAlignment="Center"
                                            Visibility="{Binding SelectedBorrower, Converter={StaticResource NullToVisibilityConverter}}"/>
@@ -495,7 +495,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock FontSize="11" HorizontalAlignment="Center">
+                                            <TextBlock FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="미답변"/>
@@ -548,7 +548,7 @@
                                 <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
                                 <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="FontSize" Value="12"/>
+                                <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
                                 <Setter Property="Padding" Value="8,10"/>
                                 <Setter Property="BorderThickness" Value="0,0,1,1"/>
                                 <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
@@ -572,7 +572,7 @@
                             <TextBlock Grid.Column="0" 
                                        VerticalAlignment="Center"
                                        Foreground="{StaticResource TextSecondaryBrush}"
-                                       FontSize="12">
+                                       FontSize="{StaticResource FontSizeBody}">
                                 <Run Text="총 "/>
                                 <Run Text="{Binding QaList.Count, Mode=OneWay}" FontWeight="SemiBold"/>
                                 <Run Text="건"/>
@@ -632,7 +632,7 @@
                     <!-- 제목 -->
                     <TextBlock Grid.Row="0" 
                                Text="{Binding SelectedQa, Converter={StaticResource NullToTextConverter}, ConverterParameter='QA 수정|새 QA 추가'}"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSizeH2}"
                                FontWeight="Bold"
                                Foreground="{StaticResource TextPrimaryBrush}"
                                Margin="0,0,0,20"/>

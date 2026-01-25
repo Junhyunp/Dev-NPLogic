@@ -21,12 +21,12 @@
         </Style>
         
         <Style x:Key="LabelText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="AmountText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -36,7 +36,7 @@
         <StackPanel>
             <!-- 섹션 헤더 - SheetType과 Phase에 따라 동적으로 표시 -->
             <Border Background="{StaticResource LightBlueBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock x:Name="SectionHeader" Text="배당가능재원" FontWeight="Bold" FontSize="12"/>
+                <TextBlock x:Name="SectionHeader" Text="배당가능재원" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}"/>
             </Border>
             
             <!-- 1안 / 2안 -->

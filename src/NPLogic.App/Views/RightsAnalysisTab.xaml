@@ -37,21 +37,77 @@
         <!-- 체크박스 스타일 -->
         <Style x:Key="AnalysisCheckBoxStyle" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
             <Setter Property="Margin" Value="0,6"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         </Style>
         
         <!-- 필드 라벨 스타일 -->
         <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,4"/>
         </Style>
         
         <!-- 필드 값 스타일 -->
         <Style x:Key="FieldValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <!-- 날짜 입력 DatePicker 스타일 (보라색 계열 배경) -->
+        <Style x:Key="DateInputPickerStyle" TargetType="DatePicker">
+            <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="Padding" Value="2,1"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Grid.Column="0"
+                                                   Background="Transparent"
+                                                   BorderThickness="0"
+                                                   Padding="{TemplateBinding Padding}"
+                                                   VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Focusable="{TemplateBinding Focusable}"/>
+                                <Button x:Name="PART_Button"
+                                        Grid.Column="1"
+                                        Width="20"
+                                        Focusable="False"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Padding="2">
+                                    <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                          Fill="#666666"
+                                          Width="10"
+                                          Height="10"
+                                          Stretch="Uniform"/>
+                                </Button>
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                       StaysOpen="False"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     
@@ -97,7 +153,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="📊" FontSize="16" Margin="0,0,8,0"/>
+                                    <TextBlock Text="📊" FontSize="{StaticResource FontSizeH3}" Margin="0,0,8,0"/>
                                     <TextBlock Text="경매사건 정보" Style="{StaticResource H4TextStyle}"/>
                                 </StackPanel>
                                 <Button Grid.Column="1" 
@@ -105,7 +161,7 @@
                                         Command="{Binding OpenAuctionSearchCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="12,4"
-                                        FontSize="12"/>
+                                        FontSize="{StaticResource FontSizeBody}"/>
                             </Grid>
                         </Border>
                         
@@ -168,12 +224,12 @@
                             
                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,16,16">
                                 <TextBlock Text="경매개시일자" Style="{StaticResource FieldLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding Analysis.AuctionStartDate, Mode=TwoWay}"/>
+                                <DatePicker SelectedDate="{Binding Analysis.AuctionStartDate, Mode=TwoWay}" Style="{StaticResource DateInputPickerStyle}"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,16,16">
                                 <TextBlock Text="배당요구종기일" Style="{StaticResource FieldLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding Analysis.ClaimDeadlineDate, Mode=TwoWay}"/>
+                                <DatePicker SelectedDate="{Binding Analysis.ClaimDeadlineDate, Mode=TwoWay}" Style="{StaticResource DateInputPickerStyle}"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Row="1" Grid.Column="3" Margin="0,0,0,16">
@@ -191,7 +247,7 @@
                             
                             <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,0,16,16">
                                 <TextBlock Text="최초경매기일" Style="{StaticResource FieldLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding Analysis.InitialAuctionDate, Mode=TwoWay}"/>
+                                <DatePicker SelectedDate="{Binding Analysis.InitialAuctionDate, Mode=TwoWay}" Style="{StaticResource DateInputPickerStyle}"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,16,16">
@@ -215,7 +271,7 @@
                             
                             <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,0,16,0">
                                 <TextBlock Text="차후예정경매일" Style="{StaticResource FieldLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding Analysis.NextAuctionDate, Mode=TwoWay}"/>
+                                <DatePicker SelectedDate="{Binding Analysis.NextAuctionDate, Mode=TwoWay}" Style="{StaticResource DateInputPickerStyle}"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,0,16,0">
@@ -244,7 +300,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="🏠" FontSize="16" Margin="0,0,8,0"/>
+                                    <TextBlock Text="🏠" FontSize="{StaticResource FontSizeH3}" Margin="0,0,8,0"/>
                                     <TextBlock Text="전입/임차 현황" Style="{StaticResource H4TextStyle}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -252,13 +308,13 @@
                                             Command="{Binding OpenHousingPriceCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"
+                                            FontSize="{StaticResource FontSizeBody}"
                                             Margin="0,0,8,0"/>
                                     <Button Content="공시지가 조회" 
                                             Command="{Binding OpenLandPriceCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="12,4"
-                                            FontSize="12"/>
+                                            FontSize="{StaticResource FontSizeBody}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -327,7 +383,7 @@
                             
                             <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,12,16,0">
                                 <TextBlock Text="전입일(임차시작일)" Style="{StaticResource FieldLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding Analysis.TenantMoveInDate, Mode=TwoWay}"/>
+                                <DatePicker SelectedDate="{Binding Analysis.TenantMoveInDate, Mode=TwoWay}" Style="{StaticResource DateInputPickerStyle}"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Row="3" Grid.Column="2" Margin="0,12,0,0">
@@ -396,7 +452,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
+                                    <TextBlock Text="📋" FontSize="{StaticResource FontSizeH3}" Margin="0,0,8,0"/>
                                     <TextBlock Text="선순위 분석" Style="{StaticResource H4TextStyle}"/>
                                 </StackPanel>
                                 <Button Grid.Column="1"
@@ -404,7 +460,7 @@
                                         Command="{Binding OpenSeniorRightsCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="16,8"
-                                        FontSize="13"
+                                        FontSize="{StaticResource FontSizeBody}"
                                         ToolTip="선순위 관리 화면을 열어 세부 분석을 진행합니다"/>
                             </Grid>
                         </Border>
@@ -420,12 +476,12 @@
                                 <TextBlock Text="선순위 합계" 
                                            Style="{StaticResource FieldLabelStyle}"
                                            Margin="0,0,0,4"/>
-                                <TextBlock FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}">
+                                <TextBlock FontSize="{StaticResource FontSizeXLarge}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}">
                                     <Run Text="{Binding TotalReflectedAmount, StringFormat=N0, Mode=OneWay}"/>
-                                    <Run Text="원" FontSize="14" FontWeight="Normal"/>
+                                    <Run Text="원" FontSize="{StaticResource FontSizeH4}" FontWeight="Normal"/>
                                 </TextBlock>
-                                <TextBlock Text="선순위 관리에서 상세 내역을 확인하세요" 
-                                           FontSize="12" 
+                                <TextBlock Text="선순위 관리에서 상세 내역을 확인하세요"
+                                           FontSize="{StaticResource FontSizeBody}"
                                            Opacity="0.6"
                                            Margin="0,4,0,0"/>
                             </StackPanel>
@@ -464,7 +520,7 @@
                     <StackPanel>
                         <Border Style="{StaticResource SectionHeaderStyle}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="💰" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Text="💰" FontSize="{StaticResource FontSizeH3}" Margin="0,0,8,0"/>
                                 <TextBlock Text="배당 시뮬레이션" Style="{StaticResource H4TextStyle}"/>
                             </StackPanel>
                         </Border>
@@ -476,8 +532,8 @@
                                     Padding="12" 
                                     Margin="0,0,0,12">
                                 <StackPanel>
-                                    <TextBlock Text="예상낙찰가" 
-                                               FontSize="12" 
+                                    <TextBlock Text="예상낙찰가"
+                                               FontSize="{StaticResource FontSizeBody}"
                                                Foreground="{StaticResource TextSecondaryBrush}"/>
                                     <TextBox Text="{Binding Analysis.ExpectedWinningBid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}"
                                              FontSize="{StaticResource FontSizeLarge}"
@@ -521,7 +577,7 @@
                                         <TextBlock Text="{Binding Analysis.AmountAfterSenior, StringFormat=N0}" 
                                                    HorizontalAlignment="Right"
                                                    FontWeight="Bold"
-                                                   FontSize="16"/>
+                                                   FontSize="{StaticResource FontSizeH3}"/>
                                     </Grid>
                                     
                                     <Grid Margin="0,8">
@@ -537,8 +593,8 @@
                                             Padding="12" 
                                             Margin="0,8,0,0">
                                         <StackPanel>
-                                            <TextBlock Text="Cap 반영 배당액" 
-                                                       FontSize="12" 
+                                            <TextBlock Text="Cap 반영 배당액"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        Foreground="{StaticResource TextSecondaryBrush}"/>
                                             <TextBlock Text="{Binding Analysis.CapAppliedDividend, StringFormat=N0}" 
                                                        FontSize="{StaticResource FontSizeH1}"
@@ -560,12 +616,12 @@
                                                FontSize="{StaticResource FontSizeH4}" 
                                                FontWeight="SemiBold"/>
                                     <TextBlock HorizontalAlignment="Right">
-                                        <Run Text="{Binding Analysis.RecoveryRate, StringFormat=N1, Mode=OneWay}" 
-                                             FontSize="28"
+                                        <Run Text="{Binding Analysis.RecoveryRate, StringFormat=N1, Mode=OneWay}"
+                                             FontSize="{StaticResource FontSizeXXLarge}"
                                              FontWeight="Bold"
                                              Foreground="{StaticResource PrimaryBrush}"/>
-                                        <Run Text="%" 
-                                             FontSize="16"
+                                        <Run Text="%"
+                                             FontSize="{StaticResource FontSizeH3}"
                                              Foreground="{StaticResource PrimaryBrush}"/>
                                     </TextBlock>
                                 </Grid>
@@ -579,7 +635,7 @@
                     <StackPanel>
                         <Border Style="{StaticResource SectionHeaderStyle}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⚠️" FontSize="16" Margin="0,0,8,0"/>
+                                <TextBlock Text="⚠️" FontSize="{StaticResource FontSizeH3}" Margin="0,0,8,0"/>
                                 <TextBlock Text="위험도 평가" Style="{StaticResource H4TextStyle}"/>
                             </StackPanel>
                         </Border>
@@ -590,8 +646,8 @@
                                     CornerRadius="4" 
                                     Padding="10" 
                                     Margin="0,0,0,12">
-                                <TextBlock TextWrapping="Wrap" 
-                                           FontSize="11" 
+                                <TextBlock TextWrapping="Wrap"
+                                           FontSize="{StaticResource FontSizeSmall}"
                                            Foreground="{StaticResource TextSecondaryBrush}">
                                     <Run FontWeight="SemiBold">위험도 평가란?</Run>
                                     <LineBreak/>
@@ -647,8 +703,8 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBlock FontSize="18" 
-                                               FontWeight="Bold" 
+                                    <TextBlock FontSize="{StaticResource FontSizeH2}"
+                                               FontWeight="Bold"
                                                HorizontalAlignment="Center"
                                                Margin="0,8,0,0">
                                         <TextBlock.Style>
@@ -718,7 +774,7 @@
                         <TextBlock Text="{Binding Analysis.AnalyzedAt, StringFormat='yyyy-MM-dd HH:mm'}" 
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"
-                                   FontSize="12"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    Visibility="{Binding Analysis.AnalyzedAt, Converter={StaticResource NullToVisibilityConverter}}"/>
                     </Grid>

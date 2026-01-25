@@ -150,7 +150,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <TextBlock Foreground="White" FontSize="11" FontWeight="SemiBold">
+                                            <TextBlock Foreground="White" FontSize="{StaticResource FontSizeSmall}" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="평가자"/>
@@ -290,7 +290,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="18">
+                            <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH2}">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="사용자 정보 편집"/>
@@ -389,7 +389,7 @@
                             <TextBlock Text="임시 비밀번호 *" FontSize="{StaticResource FontSizeBody}" Opacity="0.6" Margin="0,0,0,4"/>
                             <PasswordBox x:Name="PasswordBox" Padding="12,10"/>
                             <TextBlock Text="최초 로그인 시 비밀번호 변경 권장" 
-                                       FontSize="11" Opacity="0.5" Margin="0,4,0,0"/>
+                                       FontSize="{StaticResource FontSizeSmall}" Opacity="0.5" Margin="0,4,0,0"/>
                         </StackPanel>
 
                         <!-- 정보 표시 (기존 사용자) -->
@@ -401,14 +401,14 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="생성일" FontSize="11" Opacity="0.5"/>
+                                    <TextBlock Text="생성일" FontSize="{StaticResource FontSizeSmall}" Opacity="0.5"/>
                                     <TextBlock Text="{Binding EditingUser.CreatedAt, StringFormat=yyyy-MM-dd HH:mm}" 
-                                               FontSize="13" Margin="0,2,0,0"/>
+                                               FontSize="{StaticResource FontSizeBody}" Margin="0,2,0,0"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="수정일" FontSize="11" Opacity="0.5"/>
+                                    <TextBlock Text="수정일" FontSize="{StaticResource FontSizeSmall}" Opacity="0.5"/>
                                     <TextBlock Text="{Binding EditingUser.UpdatedAt, StringFormat=yyyy-MM-dd HH:mm}" 
-                                               FontSize="13" Margin="0,2,0,0"/>
+                                               FontSize="{StaticResource FontSizeBody}" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>

@@ -42,7 +42,7 @@
                         Style="{StaticResource SecondaryButton}"
                         Padding="8,4"
                         ToolTip="이전 물건 (Ctrl+←)">
-                    <TextBlock Text="◀" FontSize="10"/>
+                    <TextBlock Text="◀" FontSize="{StaticResource FontSizeTiny}"/>
                 </Button>
                 
                 <Border Background="{StaticResource SurfaceColor}" 
@@ -61,7 +61,7 @@
                         Style="{StaticResource SecondaryButton}"
                         Padding="8,4"
                         ToolTip="다음 물건 (Ctrl+→)">
-                    <TextBlock Text="▶" FontSize="10"/>
+                    <TextBlock Text="▶" FontSize="{StaticResource FontSizeTiny}"/>
                 </Button>
             </StackPanel>
 
@@ -155,7 +155,7 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
-                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
                     <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
                 </Style>

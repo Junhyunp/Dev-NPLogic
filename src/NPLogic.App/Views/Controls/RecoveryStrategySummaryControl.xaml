@@ -12,7 +12,7 @@
                 <TextBlock Text="💰 회수전략 요약" Style="{StaticResource SectionHeader}" Margin="0"/>
                 <TextBlock Text="(물건1에만 표시)" 
                            Style="{StaticResource LabelText}"
-                           FontSize="11"
+                           FontSize="{StaticResource FontSizeSmall}"
                            Opacity="0.6"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Center"/>
@@ -29,19 +29,19 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Cap 적용" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Cap 적용" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtCapApplied" Text="Y" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Loan Cap" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Loan Cap" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtLoanCap" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Loan Cap 2" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Loan Cap 2" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtLoanCap2" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="3">
-                        <TextBlock Text="Mortgage Cap" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Mortgage Cap" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtMortgageCap" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>
@@ -57,15 +57,15 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="CF in date" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="CF in date" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtCfInDate" Text="-" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Cash in" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Cash in" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtCashIn" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold" Foreground="{StaticResource MaterialGreenDarkBrush}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Cash out" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="Cash out" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtCashOut" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold" Foreground="{StaticResource MaterialRedDarkBrush}"/>
                     </StackPanel>
                 </Grid>
@@ -81,22 +81,22 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Ratio" Foreground="White" FontSize="11" Opacity="0.9"/>
-                        <TextBlock x:Name="TxtRatio" Text="0.0%" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="Ratio" Foreground="White" FontSize="{StaticResource FontSizeSmall}" Opacity="0.9"/>
+                        <TextBlock x:Name="TxtRatio" Text="0.0%" Foreground="White" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="XNPV" Foreground="White" FontSize="11" Opacity="0.9"/>
-                        <TextBlock x:Name="TxtXnpv" Text="0" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="XNPV" Foreground="White" FontSize="{StaticResource FontSizeSmall}" Opacity="0.9"/>
+                        <TextBlock x:Name="TxtXnpv" Text="0" Foreground="White" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="OPB" Foreground="White" FontSize="11" Opacity="0.9"/>
-                        <TextBlock x:Name="TxtOpb" Text="0" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="OPB" Foreground="White" FontSize="{StaticResource FontSizeSmall}" Opacity="0.9"/>
+                        <TextBlock x:Name="TxtOpb" Text="0" Foreground="White" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}"/>
                     </StackPanel>
                 </Grid>
             </Border>
             
             <!-- Interim 상계/회수 연동 -->
-            <TextBlock Text="Interim 상계/회수 연동" Style="{StaticResource SectionHeader}" Margin="0,16,0,8" FontSize="13"/>
+            <TextBlock Text="Interim 상계/회수 연동" Style="{StaticResource SectionHeader}" Margin="0,16,0,8" FontSize="{StaticResource FontSizeBody}"/>
             <Border Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -110,28 +110,28 @@
                     </Grid.RowDefinitions>
                     
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,8">
-                        <TextBlock Text="원금회수" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="원금회수" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtPrincipalRecovery" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,0,8">
-                        <TextBlock Text="원금상계" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="원금상계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtPrincipalOffset" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,0,8">
-                        <TextBlock Text="이자회수" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="이자회수" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtInterestRecovery" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     
                     <StackPanel Grid.Row="1" Grid.Column="0">
-                        <TextBlock Text="이자상계" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="이자상계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtInterestOffset" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Grid.Column="1">
-                        <TextBlock Text="대위변제" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="대위변제" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtSubrogation" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Row="1" Grid.Column="2">
-                        <TextBlock Text="경매비용" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="경매비용" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtAuctionCost" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>

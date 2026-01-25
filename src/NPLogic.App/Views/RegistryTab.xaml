@@ -134,7 +134,7 @@
                                             Background="Transparent"
                                             BorderThickness="0"
                                             Foreground="{StaticResource TextSecondaryBrush}"
-                                            FontSize="11"
+                                            FontSize="{StaticResource FontSizeSmall}"
                                             Padding="4,2"
                                             Cursor="Hand"/>
                                 </Grid>
@@ -155,14 +155,14 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
                                                         
-                                                        <TextBlock Text="📄" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                                         
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <TextBlock Text="{Binding FileName}" 
                                                                        FontSize="{StaticResource FontSizeBody}"
                                                                        TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Text="{Binding FileSizeFormatted}" 
-                                                                       FontSize="10"
+                                                                       FontSize="{StaticResource FontSizeTiny}"
                                                                        Opacity="0.6"/>
                                                         </StackPanel>
                                                         
@@ -187,7 +187,7 @@
                                                                     </Style.Triggers>
                                                                 </Style>
                                                             </Border.Style>
-                                                            <TextBlock Text="{Binding Status}" FontSize="10">
+                                                            <TextBlock Text="{Binding Status}" FontSize="{StaticResource FontSizeTiny}">
                                                                 <TextBlock.Style>
                                                                     <Style TargetType="TextBlock">
                                                                         <Style.Triggers>
@@ -241,7 +241,7 @@
                                            Style="{StaticResource CaptionTextStyle}"
                                            HorizontalAlignment="Center"
                                            Opacity="0.5"
-                                           FontSize="11"/>
+                                           FontSize="{StaticResource FontSizeSmall}"/>
                             </StackPanel>
                         </Border>
                         
@@ -324,21 +324,21 @@
                                 <!-- 요약 정보 -->
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                     <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
-                                        <TextBlock FontSize="11">
+                                        <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                             <Run Text="소유자"/>
                                             <Run Text="{Binding RegistryViewModel.OcrPreviewOwners.Count, Mode=OneWay}" FontWeight="Bold"/>
                                             <Run Text="건"/>
                                         </TextBlock>
                                     </Border>
                                     <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
-                                        <TextBlock FontSize="11">
+                                        <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                             <Run Text="갑구"/>
                                             <Run Text="{Binding RegistryViewModel.OcrPreviewGapgu.Count, Mode=OneWay}" FontWeight="Bold"/>
                                             <Run Text="건"/>
                                         </TextBlock>
                                     </Border>
                                     <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="8,4">
-                                        <TextBlock FontSize="11">
+                                        <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                             <Run Text="을구"/>
                                             <Run Text="{Binding RegistryViewModel.OcrPreviewEulgu.Count, Mode=OneWay}" FontWeight="Bold"/>
                                             <Run Text="건"/>
@@ -349,7 +349,7 @@
                                 <TextBlock Text="※ '결과 저장' 버튼을 클릭하면 담보물건 탭에서 확인하실 수 있습니다." 
                                            Style="{StaticResource CaptionTextStyle}"
                                            Opacity="0.6"
-                                           FontSize="11"/>
+                                           FontSize="{StaticResource FontSizeSmall}"/>
                             </StackPanel>
                         </Border>
                     </Grid>

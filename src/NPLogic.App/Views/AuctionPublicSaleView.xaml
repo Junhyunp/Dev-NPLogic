@@ -13,21 +13,21 @@
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
         
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -64,14 +64,14 @@
         <Style x:Key="TransparentTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         
         <!-- 탭 헤더 스타일 -->
         <Style x:Key="ScheduleTabItemStyle" TargetType="TabItem">
             <Setter Property="Padding" Value="20,10"/>
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
@@ -104,44 +104,58 @@
         </Style>
     </UserControl.Resources>
     
-    <Grid>
-        <!-- 탭 + 저장 버튼 한 줄 배치 -->
-        <Grid Margin="16,8,16,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- 탭 컨트롤 -->
-            <TabControl Grid.Column="0" 
-                        x:Name="ScheduleTabControl"
+    <Grid Background="{StaticResource BackgroundColor}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 영역 (저장 버튼 포함) -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" Margin="12,8,12,4" Padding="10" CornerRadius="4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="경(공)매일정"
+                           FontSize="{StaticResource FontSizeH4}"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource TextPrimaryBrush}"/>
+
+                <Button Grid.Column="1"
+                        Content="저장"
+                        Click="SaveButton_Click"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="12,5"
+                        FontSize="{StaticResource FontSizeSmall}"/>
+            </Grid>
+        </Border>
+
+        <!-- 탭 컨트롤 영역 -->
+        <Border Grid.Row="1" Background="White" Margin="12,0,12,8"
+                BorderBrush="#ABABAB" BorderThickness="1" CornerRadius="4">
+            <TabControl x:Name="ScheduleTabControl"
                         Background="Transparent"
                         BorderThickness="0"
                         SelectionChanged="ScheduleTabControl_SelectionChanged">
-                
+
                 <!-- 경매일정(Ⅶ) 탭 -->
                 <TabItem Header="경매일정(Ⅶ)" Style="{StaticResource ScheduleTabItemStyle}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="8">
                         <local:AuctionScheduleContentControl x:Name="AuctionContent"/>
                     </ScrollViewer>
                 </TabItem>
-                
+
                 <!-- 공매일정(Ⅷ) 탭 -->
                 <TabItem Header="공매일정(Ⅷ)" Style="{StaticResource ScheduleTabItemStyle}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="8">
                         <local:PublicSaleScheduleContentControl x:Name="PublicSaleContent"/>
                     </ScrollViewer>
                 </TabItem>
             </TabControl>
-            
-            <!-- 저장 버튼 (탭 헤더 라인에 맞춤) -->
-            <Button Grid.Column="1" 
-                    Content="저장" 
-                    Click="SaveButton_Click"
-                    Style="{StaticResource PrimaryButton}"
-                    Padding="24,8"
-                    VerticalAlignment="Top"
-                    Margin="16,0,0,0"/>
-        </Grid>
+        </Border>
     </Grid>
 </UserControl>

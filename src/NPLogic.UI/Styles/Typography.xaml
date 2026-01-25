@@ -195,10 +195,14 @@
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
-    <!-- 탭 스타일 (NonCore용) -->
+    <!-- =============================================== -->
+    <!-- 탭/메뉴 스타일 (피드백 반영: 전체 통일) -->
+    <!-- =============================================== -->
+
+    <!-- 기본 탭 스타일 (밑줄 인디케이터) - NonCore, 서브탭 등에 사용 -->
     <Style x:Key="NonCoreTabStyle" TargetType="RadioButton">
         <Setter Property="Padding" Value="16,10"/>
-        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         <Setter Property="FontWeight" Value="Normal"/>
@@ -206,7 +210,104 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Bd" 
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0,0,0,2"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 필(Pill) 탭 스타일 - 업로드 페이지 등에 사용 -->
+    <Style x:Key="PillTabStyle" TargetType="RadioButton">
+        <Setter Property="Padding" Value="16,8"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bd"
+                            Background="{StaticResource BlueGray100Brush}"
+                            CornerRadius="6"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 서브 섹션 탭 스타일 (더 작은 크기) -->
+    <Style x:Key="SubTabStyle" TargetType="RadioButton">
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="0,0,0,2"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 내부 탭 버튼 스타일 - 대시보드, 차주개요 등 패널 내부 탭용 -->
+    <Style x:Key="InnerTabStyle" TargetType="RadioButton">
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bd"
                             Background="Transparent"
                             BorderBrush="Transparent"
                             BorderThickness="0,0,0,2"
@@ -300,6 +401,157 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="12,8"/>
+    </Style>
+
+    <!-- =============================================== -->
+    <!-- 탭 내부 제목행/헤더 통일 스타일 -->
+    <!-- =============================================== -->
+
+    <!-- 탭 헤더 영역 스타일 (제목 + 저장버튼 포함 영역) -->
+    <Style x:Key="TabHeaderBorder" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+
+    <!-- 탭 제목 스타일 -->
+    <Style x:Key="TabTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
+        <Setter Property="FontWeight" Value="{StaticResource FontWeightSemiBold}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- 탭 설명 텍스트 스타일 -->
+    <Style x:Key="TabDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Margin" Value="8,0,0,0"/>
+    </Style>
+
+    <!-- =============================================== -->
+    <!-- 입력 필드 셀 스타일 (피드백 반영: 컬러 구분) -->
+    <!-- =============================================== -->
+
+    <!-- 기본 테이블 셀 스타일 -->
+    <Style x:Key="TableCellBorder" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="Padding" Value="6,4"/>
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <!-- 테이블 헤더 셀 스타일 -->
+    <Style x:Key="TableHeaderCellBorder" TargetType="Border" BasedOn="{StaticResource TableCellBorder}">
+        <Setter Property="Background" Value="{StaticResource TableHeaderBrush}"/>
+    </Style>
+
+    <!-- 수기 입력 필드 셀 스타일 (노란색 - 사용자가 직접 입력) -->
+    <Style x:Key="ManualInputCellBorder" TargetType="Border" BasedOn="{StaticResource TableCellBorder}">
+        <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
+    </Style>
+
+    <!-- 날짜 입력 필드 셀 스타일 (보라색 계열 - 날짜가 들어가는 곳) -->
+    <Style x:Key="DateInputCellBorder" TargetType="Border" BasedOn="{StaticResource TableCellBorder}">
+        <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+    </Style>
+
+    <!-- 계산 결과 셀 스타일 (파란색 - 자동 계산 결과) -->
+    <Style x:Key="ResultCellBorder" TargetType="Border" BasedOn="{StaticResource TableCellBorder}">
+        <Setter Property="Background" Value="{StaticResource ResultFieldBgBrush}"/>
+    </Style>
+
+    <!-- 읽기 전용 셀 스타일 (회색 - 변경 불가) -->
+    <Style x:Key="ReadOnlyCellBorder" TargetType="Border" BasedOn="{StaticResource TableCellBorder}">
+        <Setter Property="Background" Value="{StaticResource ReadOnlyFieldBgBrush}"/>
+    </Style>
+
+    <!-- =============================================== -->
+    <!-- 입력 필드 TextBox 스타일 -->
+    <!-- =============================================== -->
+
+    <!-- 투명 TextBox 기본 스타일 (셀 내부용) -->
+    <Style x:Key="TransparentTextBox" TargetType="TextBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <!-- 수기 입력 TextBox 스타일 -->
+    <Style x:Key="ManualInputTextBox" TargetType="TextBox" BasedOn="{StaticResource TransparentTextBox}">
+        <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
+    </Style>
+
+    <!-- 날짜 입력 TextBox 스타일 -->
+    <Style x:Key="DateInputTextBox" TargetType="TextBox" BasedOn="{StaticResource TransparentTextBox}">
+        <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+    </Style>
+
+    <!-- 날짜 선택기(DatePicker) 스타일 -->
+    <Style x:Key="DateInputDatePicker" TargetType="DatePicker">
+        <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontPrimary}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+        <Setter Property="Padding" Value="2,1"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DatePicker">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="2">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <DatePickerTextBox x:Name="PART_TextBox"
+                                               Grid.Column="0"
+                                               Background="Transparent"
+                                               BorderThickness="0"
+                                               Padding="{TemplateBinding Padding}"
+                                               VerticalAlignment="Center"
+                                               HorizontalContentAlignment="Stretch"
+                                               VerticalContentAlignment="Center"
+                                               Focusable="{TemplateBinding Focusable}"/>
+                            <Button x:Name="PART_Button"
+                                    Grid.Column="1"
+                                    Width="20"
+                                    Focusable="False"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Padding="2">
+                                <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                      Fill="#666666"
+                                      Width="10"
+                                      Height="10"
+                                      Stretch="Uniform"/>
+                            </Button>
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                   StaysOpen="False"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

@@ -69,37 +69,6 @@
             </Setter>
         </Style>
 
-        <!-- 내부 탭 버튼 스타일 - 피드백 반영: 크기 축소 -->
-        <Style x:Key="InnerTabButton" TargetType="RadioButton">
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="Bd" 
-                                Background="Transparent"
-                                BorderBrush="Transparent"
-                                BorderThickness="0,0,0,2"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -109,10 +78,9 @@
             <Border Background="{StaticResource OverlaySemiLightBrush}"/>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,0,0,16"/>
-                <TextBlock Text="데이터 로드 중..." 
-                           Style="{StaticResource BodyTextStyle}"
-                           HorizontalAlignment="Center"
-                           Opacity="0.7"/>
+                <TextBlock Text="데이터 로드 중..."
+                           Style="{StaticResource MutedTextStyle}"
+                           HorizontalAlignment="Center"/>
             </StackPanel>
         </Grid>
 
@@ -188,9 +156,8 @@
                                        FontSize="{StaticResource FontSizeSmall}"
                                        FontWeight="SemiBold"/>
                         </Border>
-                        <TextBlock Style="{StaticResource BodyTextStyle}"
+                        <TextBlock Style="{StaticResource MutedTextStyle}"
                                    VerticalAlignment="Center"
-                                   Opacity="0.7"
                                    FontSize="{StaticResource FontSizeSmall}"
                                    Margin="0,0,12,0">
                             <Run Text="담당자:"/>
@@ -291,7 +258,7 @@
                                                          Width="12" Height="12" 
                                                          VerticalAlignment="Center"
                                                          Margin="0,0,3,0"/>
-                                <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="11"/>
+                                <TextBlock Text="롤업" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding ExportToExcelCommand}"
@@ -303,7 +270,7 @@
                                                          Width="12" Height="12" 
                                                          VerticalAlignment="Center"
                                                          Margin="0,0,3,0"/>
-                                <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="11"/>
+                                <TextBlock Text="Excel" VerticalAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -366,7 +333,7 @@
                                             Command="{Binding AddProgramCommand}"
                                             Style="{StaticResource SecondaryButton}"
                                             Padding="6,2"
-                                            FontSize="14"
+                                            FontSize="{StaticResource FontSizeH4}"
                                             FontWeight="Bold"
                                             Margin="0,0,8,0"
                                             ToolTip="새 프로그램 등록"/>
@@ -635,43 +602,43 @@
                                     <StackPanel Orientation="Horizontal" Margin="8,0">
                                         <RadioButton x:Name="TabNonCore" 
                                                      Content="비핵심" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      IsChecked="True"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabRegistry" 
                                                      Content="등기부등본" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabRights" 
                                                      Content="권리분석" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabBasicData" 
                                                      Content="기초데이터" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabQASummary" 
                                                      Content="QA집계" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabCashFlowSummary" 
                                                      Content="현금흐름집계" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabNPVComparison" 
                                                      Content="NPV비교" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                         <RadioButton x:Name="TabClosing" 
                                                      Content="마감" 
-                                                     Style="{StaticResource InnerTabButton}"
+                                                     Style="{StaticResource InnerTabStyle}"
                                                      GroupName="InnerTabs"
                                                      Checked="InnerTab_Checked"/>
                                     </StackPanel>
@@ -765,7 +732,7 @@
                                                     Visibility="{Binding ActiveFilterCount, Converter={StaticResource IntToVisibilityConverter}}">
                                                 <TextBlock Text="{Binding ActiveFilterCount}" 
                                                            Foreground="White" 
-                                                           FontSize="10" 
+                                                           FontSize="{StaticResource FontSizeTiny}" 
                                                            FontWeight="Bold"/>
                                             </Border>
                                         </StackPanel>
@@ -1323,7 +1290,7 @@
                                     <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
                                     <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
-                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
                                     <Setter Property="Padding" Value="8,10"/>
                                     <Setter Property="BorderThickness" Value="0,0,1,1"/>
                                     <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>

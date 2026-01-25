@@ -50,12 +50,12 @@
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="QA 답변 알림" 
-                                       FontSize="18"
+                                       FontSize="{StaticResource FontSizeH2}"
                                        FontWeight="Bold"
                                        Foreground="White"/>
                             <TextBlock x:Name="NotificationCountText"
                                        Text="새로운 답변이 있습니다"
-                                       FontSize="12"
+                                       FontSize="{StaticResource FontSizeBody}"
                                        Foreground="#B0BEC5"
                                        Margin="0,4,0,0"/>
                         </StackPanel>
@@ -91,11 +91,11 @@
                                                 Margin="0,0,8,0">
                                             <TextBlock Text="{Binding BorrowerNumber}"
                                                        Foreground="White"
-                                                       FontSize="11"
+                                                       FontSize="{StaticResource FontSizeSmall}"
                                                        FontWeight="SemiBold"/>
                                         </Border>
                                         <TextBlock Text="{Binding BorrowerName}"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    FontWeight="SemiBold"
                                                    Foreground="{StaticResource TextPrimaryBrush}"
                                                    VerticalAlignment="Center"/>
@@ -104,7 +104,7 @@
                                     <!-- 메시지 -->
                                     <TextBlock Grid.Row="1" 
                                                Text="{Binding Message}"
-                                               FontSize="13"
+                                               FontSize="{StaticResource FontSizeBody}"
                                                Foreground="{StaticResource TextSecondaryBrush}"
                                                TextWrapping="Wrap"
                                                Margin="0,0,0,8"/>
@@ -112,7 +112,7 @@
                                     <!-- 시간 -->
                                     <TextBlock Grid.Row="2" 
                                                Text="{Binding CreatedAt, StringFormat=yyyy-MM-dd HH:mm}"
-                                               FontSize="11"
+                                               FontSize="{StaticResource FontSizeSmall}"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </Grid>
                             </Border>
@@ -133,7 +133,7 @@
                                          HorizontalAlignment="Center"
                                          Margin="0,0,0,12"/>
                 <TextBlock Text="새로운 알림이 없습니다"
-                           FontSize="14"
+                           FontSize="{StaticResource FontSizeH4}"
                            Foreground="{StaticResource TextSecondaryBrush}"
                            HorizontalAlignment="Center"/>
             </StackPanel>
@@ -152,7 +152,7 @@
                     <CheckBox x:Name="MarkAllReadCheckBox"
                               Grid.Column="0"
                               Content="모두 읽음으로 표시"
-                              FontSize="12"
+                              FontSize="{StaticResource FontSizeBody}"
                               VerticalAlignment="Center"
                               IsChecked="True"/>
                     

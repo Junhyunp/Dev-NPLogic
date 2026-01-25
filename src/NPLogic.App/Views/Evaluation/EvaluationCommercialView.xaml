@@ -98,21 +98,21 @@
                             
                             <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="소득수익률" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="소득수익률" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding IncomeYieldRate, StringFormat={}{0:P2}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="1" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="자본수익률" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="자본수익률" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding CapitalYieldRate, StringFormat={}{0:P2}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12">
                                 <StackPanel>
-                                    <TextBlock Text="투자수익률" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="투자수익률" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding InvestmentYieldRate, StringFormat={}{0:P2}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
                                 </StackPanel>
@@ -130,7 +130,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="150"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="분기" Binding="{Binding Quarter}" Width="80" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="임대가격지수" Binding="{Binding RentalPriceIndex, StringFormat=N2}" Width="100" IsReadOnly="True"/>
@@ -236,7 +236,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="180"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="호가" Binding="{Binding QuoteNumber}" Width="50" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="분양(평)" Binding="{Binding SupplyAreaPyeong, StringFormat=N2}" Width="70"/>
@@ -300,21 +300,21 @@
                             
                             <Border Grid.Column="0" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="5.5%" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="5.5%" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding IncomeValue55, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="1" Background="{StaticResource PrimaryBrush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
                                 <StackPanel>
-                                    <TextBlock Text="6.0%" Foreground="White" FontSize="11" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="6.0%" Foreground="White" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding IncomeValue60, StringFormat=\{0:N0\}}" 
                                                Foreground="White" FontWeight="Bold" HorizontalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             <Border Grid.Column="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12">
                                 <StackPanel>
-                                    <TextBlock Text="6.5%" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="6.5%" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding IncomeValue65, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold" HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -328,12 +328,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="수익가치" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="수익가치" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding IncomeValue, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="평당가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="평당가액" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding UnitIncomeValue, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
@@ -361,40 +361,40 @@
                             </Grid.RowDefinitions>
 
                             <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
-                                <TextBlock Text="1년차" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                <TextBlock Text="1년차" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
-                                <TextBlock Text="2년차" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                <TextBlock Text="2년차" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
-                                <TextBlock Text="3년차" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                <TextBlock Text="3년차" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,1,1">
-                                <TextBlock Text="4년차" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                <TextBlock Text="4년차" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" Padding="8,6" Margin="0,0,0,1">
-                                <TextBlock Text="5년차" Style="{StaticResource LabelText}" FontSize="11" HorizontalAlignment="Center"/>
+                                <TextBlock Text="5년차" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center"/>
                             </Border>
 
                             <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4">
                                 <TextBox Text="{Binding FreeRentMonths1, UpdateSourceTrigger=PropertyChanged}" 
-                                         HorizontalContentAlignment="Center" FontSize="11"/>
+                                         HorizontalContentAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4">
                                 <TextBox Text="{Binding FreeRentMonths2, UpdateSourceTrigger=PropertyChanged}" 
-                                         HorizontalContentAlignment="Center" FontSize="11"/>
+                                         HorizontalContentAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4">
                                 <TextBox Text="{Binding FreeRentMonths3, UpdateSourceTrigger=PropertyChanged}" 
-                                         HorizontalContentAlignment="Center" FontSize="11"/>
+                                         HorizontalContentAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4">
                                 <TextBox Text="{Binding FreeRentMonths4, UpdateSourceTrigger=PropertyChanged}" 
-                                         HorizontalContentAlignment="Center" FontSize="11"/>
+                                         HorizontalContentAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4">
                                 <TextBox Text="{Binding FreeRentMonths5, UpdateSourceTrigger=PropertyChanged}" 
-                                         HorizontalContentAlignment="Center" FontSize="11"/>
+                                         HorizontalContentAlignment="Center" FontSize="{StaticResource FontSizeSmall}"/>
                             </Border>
                         </Grid>
 
@@ -405,12 +405,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="IRR" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="IRR" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding IrrValue, StringFormat={}{0:P2}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="TV (Total Value)" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="TV (Total Value)" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding TotalValue, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
@@ -501,7 +501,7 @@
                                     VerticalAlignment="Center">
                                 <StackPanel>
                                     <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                               FontSize="18"
+                                               FontSize="{StaticResource FontSizeH2}"
                                                FontWeight="Bold"
                                                Foreground="White"
                                                HorizontalAlignment="Center"/>
@@ -544,12 +544,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="1안 추정관리비" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="1안 추정관리비" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding Scenario1EstimatedFee, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="2안 추정관리비" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="2안 추정관리비" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding Scenario2EstimatedFee, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>

@@ -52,7 +52,7 @@
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="📍 본건 + 사례1~4 마커 표시"
                                    Style="{StaticResource BodyTextStyle}"
-                                   FontSize="11"
+                                   FontSize="{StaticResource FontSizeSmall}"
                                    Opacity="0.4"
                                    HorizontalAlignment="Center"
                                    Margin="0,8,0,0"/>
@@ -69,15 +69,15 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                 <Ellipse Width="10" Height="10" Fill="#E53935" Margin="0,0,6,0"/>
-                                <TextBlock Text="본건" FontSize="10"/>
+                                <TextBlock Text="본건" FontSize="{StaticResource FontSizeTiny}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                 <Ellipse Width="10" Height="10" Fill="#1E88E5" Margin="0,0,6,0"/>
-                                <TextBlock Text="사례 (낙찰)" FontSize="10"/>
+                                <TextBlock Text="사례 (낙찰)" FontSize="{StaticResource FontSizeTiny}"/>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Ellipse Width="10" Height="10" Fill="#43A047" Margin="0,0,6,0"/>
-                                <TextBlock Text="사례 (매매)" FontSize="10"/>
+                                <TextBlock Text="사례 (매매)" FontSize="{StaticResource FontSizeTiny}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -85,7 +85,7 @@
                     <!-- 확대 안내 -->
                     <TextBlock Text="🔍 클릭하여 확대"
                                Style="{StaticResource BodyTextStyle}"
-                               FontSize="11"
+                               FontSize="{StaticResource FontSizeSmall}"
                                Opacity="0.5"
                                HorizontalAlignment="Right"
                                VerticalAlignment="Bottom"

@@ -11,7 +11,7 @@
     <Window.Resources>
         <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignCheckBox}">
             <Setter Property="Margin" Value="8,6"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
         </Style>
     </Window.Resources>
     
@@ -27,7 +27,7 @@
         <!-- 제목 -->
         <TextBlock Grid.Row="0" 
                    Text="{Binding Title}" 
-                   FontSize="18" 
+                   FontSize="{StaticResource FontSizeH2}" 
                    FontWeight="Bold"
                    Foreground="{StaticResource PrimaryBrush}"
                    Margin="0,0,0,16"/>
@@ -45,7 +45,7 @@
                     Padding="16,8"
                     Margin="0,0,16,0"/>
             <TextBlock VerticalAlignment="Center" 
-                       FontSize="13"
+                       FontSize="{StaticResource FontSizeBody}"
                        Foreground="{StaticResource SecondaryTextBrush}">
                 <Run Text="선택된 차주:"/>
                 <Run Text="{Binding SelectedCount, Mode=OneWay}" FontWeight="SemiBold"/>
@@ -91,7 +91,7 @@
         <!-- 설명 -->
         <TextBlock Grid.Row="3" 
                    Margin="0,12,0,16"
-                   FontSize="12"
+                   FontSize="{StaticResource FontSizeBody}"
                    Foreground="{StaticResource SecondaryTextBrush}"
                    TextWrapping="Wrap">
             <Run Text="※"/>

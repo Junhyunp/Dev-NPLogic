@@ -59,7 +59,7 @@
     </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="24">
+        <Grid Margin="12,8,12,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -212,15 +212,15 @@
                             <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
                                 <Border Background="#FFEBEE" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
                                         Visibility="{Binding BorrowerSummary.IsRestructuring, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Text="회생" FontSize="11" Foreground="#C62828"/>
+                                    <TextBlock Text="회생" FontSize="{StaticResource FontSizeSmall}" Foreground="#C62828"/>
                                 </Border>
                                 <Border Background="#FFF3E0" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
                                         Visibility="{Binding BorrowerSummary.IsOpened, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Text="개회" FontSize="11" Foreground="#E65100"/>
+                                    <TextBlock Text="개회" FontSize="{StaticResource FontSizeSmall}" Foreground="#E65100"/>
                                 </Border>
                                 <Border Background="#EFEBE9" CornerRadius="3" Padding="6,2"
                                         Visibility="{Binding BorrowerSummary.IsDeceased, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Text="사망" FontSize="11" Foreground="#4E342E"/>
+                                    <TextBlock Text="사망" FontSize="{StaticResource FontSizeSmall}" Foreground="#4E342E"/>
                                 </Border>
                                 <TextBlock Text="정상" Foreground="{StaticResource SuccessBrush}">
                                     <TextBlock.Style>
@@ -401,31 +401,31 @@
                             
                             <!-- 선순위 근저당 -->
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="선순위근저당" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorMortgageDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorMortgageDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 유치권 -->
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="유치권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SeniorRightsSummary.LienDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SeniorRightsSummary.LienDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 소액보증금 -->
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="소액보증금" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SeniorRightsSummary.SmallDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SeniorRightsSummary.SmallDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 임차보증금 -->
                             <TextBlock Grid.Row="3" Grid.Column="0" Text="임차보증금" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SeniorRightsSummary.LeaseDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SeniorRightsSummary.LeaseDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 임금채권 -->
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="임금채권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SeniorRightsSummary.WageClaimDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SeniorRightsSummary.WageClaimDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 당해세 -->
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="당해세" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SeniorRightsSummary.CurrentTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SeniorRightsSummary.CurrentTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 조세채권 -->
                             <TextBlock Grid.Row="6" Grid.Column="0" Text="조세채권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="12"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
                             
                             <!-- 합계 -->
                             <TextBlock Grid.Row="7" Grid.Column="0" Text="합계" Style="{StaticResource LabelStyle}" FontWeight="Bold"/>
@@ -534,7 +534,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=미개시}" FontSize="12">
+                                <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=미개시}" FontSize="{StaticResource FontSizeBody}">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Foreground" Value="#1565C0"/>
@@ -599,11 +599,11 @@
                                            Margin="0,0,0,4"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock Text="{Binding Property.QaUnansweredCount, FallbackValue=0}" 
-                                               FontWeight="Bold" FontSize="16"
+                                               FontWeight="Bold" FontSize="{StaticResource FontSizeH3}"
                                                Foreground="#E65100"/>
-                                    <TextBlock Text="/" FontSize="14" Opacity="0.5" Margin="2,0" VerticalAlignment="Bottom"/>
+                                    <TextBlock Text="/" FontSize="{StaticResource FontSizeH4}" Opacity="0.5" Margin="2,0" VerticalAlignment="Bottom"/>
                                     <TextBlock Text="{Binding QaList.Count, FallbackValue=0}" 
-                                               FontSize="14" Opacity="0.7" VerticalAlignment="Bottom"/>
+                                               FontSize="{StaticResource FontSizeH4}" Opacity="0.7" VerticalAlignment="Bottom"/>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

@@ -25,7 +25,7 @@
         <SolidColorBrush x:Key="LocalBlueGray100Brush" Color="#CFD8DC"/>
         
         <Style x:Key="MappingComboBox" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="MinWidth" Value="180"/>
         </Style>
@@ -78,14 +78,14 @@
         
         <!-- 헤더 -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="20" 
+            <TextBlock FontSize="{StaticResource FontSizeLarge}" 
                        FontWeight="Bold"
                        Foreground="{StaticResource LocalPrimaryBrush}">
                 <Run Text="컬럼 매핑 -"/>
                 <Run Text="{Binding SheetTypeDisplay, Mode=OneWay}"/>
             </TextBlock>
             <TextBlock Text="{Binding ExcelSheetName, StringFormat='Excel 시트: {0}'}" 
-                       FontSize="13"
+                       FontSize="{StaticResource FontSizeBody}"
                        Foreground="{StaticResource LocalSecondaryTextBrush}"
                        Margin="0,4,0,0"/>
         </StackPanel>
@@ -114,7 +114,7 @@
             
             <TextBlock Grid.Column="2" 
                        VerticalAlignment="Center" 
-                       FontSize="13"
+                       FontSize="{StaticResource FontSizeBody}"
                        Foreground="{StaticResource LocalSecondaryTextBrush}">
                 <Run Text="매핑됨:"/>
                 <Run Text="{Binding MappedCount, Mode=OneWay}" FontWeight="SemiBold"/>
@@ -149,11 +149,11 @@
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
                         
-                        <TextBlock Grid.Column="0" Text="#" FontWeight="SemiBold" FontSize="12"/>
-                        <TextBlock Grid.Column="1" Text="Excel 컬럼명" FontWeight="SemiBold" FontSize="12"/>
-                        <TextBlock Grid.Column="2" Text="" FontSize="12"/>
-                        <TextBlock Grid.Column="3" Text="DB 컬럼" FontWeight="SemiBold" FontSize="12"/>
-                        <TextBlock Grid.Column="4" Text="상태" FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="0" Text="#" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                        <TextBlock Grid.Column="1" Text="Excel 컬럼명" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                        <TextBlock Grid.Column="2" Text="" FontSize="{StaticResource FontSizeBody}"/>
+                        <TextBlock Grid.Column="3" Text="DB 컬럼" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                        <TextBlock Grid.Column="4" Text="상태" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                     </Grid>
                 </Border>
                 
@@ -182,7 +182,7 @@
                                         <TextBlock Grid.Column="0" 
                                                    Text="•"
                                                    VerticalAlignment="Center"
-                                                   FontSize="11"
+                                                   FontSize="{StaticResource FontSizeSmall}"
                                                    HorizontalAlignment="Center"
                                                    Foreground="{StaticResource LocalSecondaryTextBrush}"/>
                                         
@@ -191,12 +191,12 @@
                                                     Orientation="Horizontal" 
                                                     VerticalAlignment="Center">
                                             <TextBlock Text="{Binding ExcelColumn}" 
-                                                       FontSize="13"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        TextTrimming="CharacterEllipsis"
                                                        MaxWidth="250"
                                                        ToolTip="{Binding ExcelColumn}"/>
                                             <Border Style="{StaticResource AutoMatchedBadge}">
-                                                <TextBlock Text="자동" FontSize="9" Foreground="White"/>
+                                                <TextBlock Text="자동" FontSize="{StaticResource FontSizeTiny}" Foreground="White"/>
                                             </Border>
                                             <TextBlock Text="*" 
                                                        Foreground="{StaticResource LocalErrorBrush}"
@@ -241,7 +241,7 @@
         <!-- 안내문 -->
         <TextBlock Grid.Row="3" 
                    Margin="0,12,0,16"
-                   FontSize="12"
+                   FontSize="{StaticResource FontSizeBody}"
                    Foreground="{StaticResource LocalSecondaryTextBrush}"
                    TextWrapping="Wrap">
             <Run Text="※ 기본값 적용 버튼을 클릭하면 시스템의 자동 매핑 규칙이 적용됩니다."/>

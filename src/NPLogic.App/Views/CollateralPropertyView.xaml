@@ -30,7 +30,7 @@
     
     <Grid Background="{StaticResource BackgroundBrush}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Margin="24">
+            <StackPanel Margin="12,8,12,12">
                 
                 <!-- ========== 상단: 버튼 바 / WebView2 패널 (토글) ========== -->
                 <!-- 버튼 바 (WebView2 닫혔을 때 표시) -->
@@ -138,7 +138,7 @@
                                            Text="지도"
                                            Foreground="White"
                                            FontWeight="SemiBold"
-                                           FontSize="14"
+                                           FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
 
                                 <Button Grid.Column="2"
@@ -176,7 +176,7 @@
                             <TextBlock Text="📍 물건 기본 정보" 
                                        Foreground="White" 
                                        FontWeight="SemiBold"
-                                       FontSize="14"/>
+                                       FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
                         
                         <!-- 테이블 (1줄: 주소, 담보종류, 토지면적, 건물면적, 공장저당) -->
@@ -261,7 +261,7 @@
                             <TextBlock Text="📄 등기부등본 정보" 
                                        Foreground="White" 
                                        FontWeight="SemiBold"
-                                       FontSize="14"/>
+                                       FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
                         
                         <!-- 3열 테이블 (표제부, 갑구, 을구) -->
@@ -282,7 +282,7 @@
                                         <TextBlock Text="{Binding RegistryTitleSummary, FallbackValue='등기부 탭에서 확인'}"
                                                    TextWrapping="Wrap"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                                   FontSize="13"/>
+                                                   FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -297,7 +297,7 @@
                                         <TextBlock Text="{Binding RegistryOwnershipSummary, FallbackValue='등기부 탭에서 확인'}"
                                                    TextWrapping="Wrap"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                                   FontSize="13"/>
+                                                   FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -312,7 +312,7 @@
                                         <TextBlock Text="{Binding RegistryMortgageSummary, FallbackValue='등기부 탭에서 확인'}"
                                                    TextWrapping="Wrap"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                                   FontSize="13"/>
+                                                   FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
                                 </StackPanel>
                             </Border>
@@ -334,7 +334,7 @@
                             <TextBlock Text="🏢 건축물대장 정보" 
                                        Foreground="White" 
                                        FontWeight="SemiBold"
-                                       FontSize="14"/>
+                                       FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
                         
                         <!-- 2열 테이블 (총괄표제부, 표제부) -->
@@ -355,7 +355,7 @@
                                             <TextBlock Text="{Binding BuildingRegisterGeneralSummary, FallbackValue='건축물대장 조회 필요'}"
                                                        TextWrapping="Wrap"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
-                                                       FontSize="13"/>
+                                                       FontSize="{StaticResource FontSizeBody}"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -372,7 +372,7 @@
                                             <TextBlock Text="{Binding BuildingRegisterTitleSummary, FallbackValue='건축물대장 조회 필요'}"
                                                        TextWrapping="Wrap"
                                                        Foreground="{StaticResource TextSecondaryBrush}"
-                                                       FontSize="13"/>
+                                                       FontSize="{StaticResource FontSizeBody}"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -395,7 +395,7 @@
                             <TextBlock Text="💰 감정평가 정보" 
                                        Foreground="White" 
                                        FontWeight="SemiBold"
-                                       FontSize="14"/>
+                                       FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
                         
                         <!-- 감정평가 정보 한 줄 테이블 -->
@@ -480,7 +480,7 @@
                             <Border Grid.Column="13" Background="{StaticResource PrimaryBrush}" BorderThickness="0">
                                 <TextBlock Margin="8,0" HorizontalAlignment="Right" VerticalAlignment="Center">
                                     <Run Text="{Binding Property.AppraisalValue, StringFormat=N0, FallbackValue='0'}" FontWeight="Bold" Foreground="White"/>
-                                    <Run Text=" 원" FontSize="11" Foreground="#B0FFFFFF"/>
+                                    <Run Text=" 원" FontSize="{StaticResource FontSizeSmall}" Foreground="#B0FFFFFF"/>
                                 </TextBlock>
                             </Border>
                         </Grid>

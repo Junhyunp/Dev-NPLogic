@@ -31,7 +31,7 @@
 
                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
                                Text="시나리오 1 (하한)" 
-                               FontWeight="Bold" FontSize="14"
+                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                Foreground="{StaticResource PrimaryBrush}"
                                Margin="0,0,0,12"/>
 
@@ -40,7 +40,7 @@
                                x:Name="TxtScenario1Amount"
                                Text="0원" 
                                Style="{StaticResource AmountText}"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSizeH2}"
                                Margin="8,0,24,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
                     <TextBlock Grid.Row="1" Grid.Column="3" 
@@ -93,7 +93,7 @@
 
                     <TextBlock Grid.Row="0" Grid.ColumnSpan="4" 
                                Text="시나리오 2 (상한)" 
-                               FontWeight="Bold" FontSize="14"
+                               FontWeight="Bold" FontSize="{StaticResource FontSizeH4}"
                                Foreground="{StaticResource SecondaryBrush}"
                                Margin="0,0,0,12"/>
 
@@ -102,7 +102,7 @@
                                x:Name="TxtScenario2Amount"
                                Text="0원" 
                                Style="{StaticResource AmountText}"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSizeH2}"
                                Foreground="{StaticResource SecondaryBrush}"
                                Margin="8,0,24,0"/>
                     <TextBlock Grid.Row="1" Grid.Column="2" Text="낙찰가율" Style="{StaticResource LabelText}" VerticalAlignment="Center"/>
@@ -149,15 +149,15 @@
                     </Grid.ColumnDefinitions>
                     
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="토지 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="토지 평가액" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtLandValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="건물 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="건물 평가액" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtBuildingValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="기계 평가액" Style="{StaticResource LabelText}" FontSize="11"/>
+                        <TextBlock Text="기계 평가액" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock x:Name="TxtMachineryValue" Text="0" Style="{StaticResource ValueText}" FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>

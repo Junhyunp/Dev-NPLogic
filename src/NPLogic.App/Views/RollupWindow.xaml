@@ -26,7 +26,7 @@
         <Style x:Key="RollupHeaderText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -64,7 +64,7 @@
                                              VerticalAlignment="Center"/>
                     <TextBlock Text="비핵심 전체 현황 (롤업)" 
                                Foreground="White"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSizeH2}"
                                FontWeight="SemiBold"
                                Margin="12,0,0,0"
                                VerticalAlignment="Center"/>
@@ -179,7 +179,7 @@
                 <!-- 마지막 업데이트 -->
                 <TextBlock x:Name="LastUpdateText"
                            Text="마지막 업데이트: -"
-                           FontSize="11"
+                           FontSize="{StaticResource FontSizeSmall}"
                            Foreground="{StaticResource TextSecondaryBrush}"
                            VerticalAlignment="Center"
                            Margin="16,0,0,0"/>
@@ -335,7 +335,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock FontSize="10" HorizontalAlignment="Center">
+                                <TextBlock FontSize="{StaticResource FontSizeTiny}" HorizontalAlignment="Center">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Text" Value="대기"/>
@@ -378,7 +378,7 @@
                     <Setter Property="Background" Value="{StaticResource HeaderNavyBrush}"/>
                     <Setter Property="Foreground" Value="White"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                     <Setter Property="Padding" Value="6,8"/>
                     <Setter Property="BorderThickness" Value="0,0,1,1"/>
                     <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkBrush}"/>
@@ -390,7 +390,7 @@
                 <Style TargetType="DataGridCell">
                     <Setter Property="BorderThickness" Value="0"/>
                     <Setter Property="Padding" Value="4"/>
-                    <Setter Property="FontSize" Value="11"/>
+                    <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                     <Style.Triggers>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter Property="Background" Value="Transparent"/>
@@ -409,12 +409,12 @@
                 Padding="12,6">
             <Grid>
                 <TextBlock Text="이 창은 수정 작업 중에도 열어둘 수 있습니다. 데이터는 실시간으로 반영됩니다."
-                           FontSize="11"
+                           FontSize="{StaticResource FontSizeSmall}"
                            Foreground="{StaticResource TextSecondaryBrush}"
                            VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBlock Text="자동 새로고침:"
-                               FontSize="11"
+                               FontSize="{StaticResource FontSizeSmall}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Margin="0,0,6,0"/>
@@ -424,7 +424,7 @@
                                   Width="40" Height="20"/>
                     <TextBlock x:Name="AutoRefreshIntervalText"
                                Text="5초"
-                               FontSize="11"
+                               FontSize="{StaticResource FontSizeSmall}"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                VerticalAlignment="Center"
                                Margin="6,0,0,0"/>

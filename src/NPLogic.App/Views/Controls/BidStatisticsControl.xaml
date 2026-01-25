@@ -12,7 +12,7 @@
                 <TextBlock Text="📈 낙찰통계" Style="{StaticResource SectionHeader}" Margin="0"/>
                 <TextBlock Text="적용낙찰가율" 
                            HorizontalAlignment="Right"
-                           FontSize="14"
+                           FontSize="{StaticResource FontSizeH4}"
                            FontWeight="Bold"
                            Foreground="{StaticResource PrimaryBrush}"/>
             </Grid>
@@ -98,13 +98,13 @@
                     <StackPanel>
                         <TextBlock x:Name="TxtAppliedRate" 
                                    Text="70.0%" 
-                                   FontSize="20"
+                                   FontSize="{StaticResource FontSizeLarge}"
                                    FontWeight="Bold"
                                    Foreground="White"
                                    HorizontalAlignment="Center"/>
                         <TextBlock x:Name="TxtAppliedDesc" 
                                    Text="3개월 평균" 
-                                   FontSize="11"
+                                   FontSize="{StaticResource FontSizeSmall}"
                                    Foreground="White"
                                    Opacity="0.9"
                                    HorizontalAlignment="Center"

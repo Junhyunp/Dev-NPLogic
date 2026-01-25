@@ -10,7 +10,7 @@
              d:DataContext="{d:DesignInstance Type=vm:RestructuringOverviewViewModel}"
              Loaded="RestructuringOverviewView_Loaded">
     
-    <Grid Margin="32">
+    <Grid Margin="12,8,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -50,7 +50,7 @@
                     <TextBlock Text="회생 차주 수" FontSize="{StaticResource FontSizeH4}" Foreground="White" Opacity="0.9"/>
                     <TextBlock FontSize="{StaticResource FontSizeXXLarge}" FontWeight="Bold" Foreground="White" Margin="0,8,0,0">
                         <Run Text="{Binding TotalRestructuringCount}"/>
-                        <Run Text="건" FontSize="16" FontWeight="Normal"/>
+                        <Run Text="건" FontSize="{StaticResource FontSizeH3}" FontWeight="Normal"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
@@ -82,7 +82,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="회생 차주 목록" FontWeight="SemiBold" FontSize="15" Margin="0,0,0,12"/>
+                    <TextBlock Grid.Row="0" Text="회생 차주 목록" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}" Margin="0,0,0,12"/>
 
                     <ListBox Grid.Row="1" 
                              ItemsSource="{Binding RestructuringBorrowers}" 
@@ -130,7 +130,7 @@
                         </StackPanel.Style>
 
                         <!-- 차주 정보 -->
-                        <TextBlock Text="차주 정보" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,16"/>
+                        <TextBlock Text="차주 정보" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH3}" Margin="0,0,0,16"/>
                         <Grid Margin="0,0,0,24">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -144,22 +144,22 @@
                             </Grid.RowDefinitions>
 
                             <StackPanel Grid.Row="0" Grid.Column="0">
-                                <TextBlock Text="차주번호" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="차주번호" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock Text="{Binding SelectedBorrower.BorrowerNumber}" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="1">
-                                <TextBlock Text="차주명" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="차주명" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock Text="{Binding SelectedBorrower.BorrowerName}" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="2">
-                                <TextBlock Text="차주유형" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="차주유형" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock Text="{Binding SelectedBorrower.BorrowerType}" FontWeight="SemiBold" Margin="0,4,0,0"/>
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="0">
-                                <TextBlock Text="물건 수" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="물건 수" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding SelectedBorrower.PropertyCount}"/>
                                     <Run Text="건"/>
@@ -167,7 +167,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="1">
-                                <TextBlock Text="OPB" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="OPB" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock FontWeight="SemiBold" Margin="0,4,0,0" Foreground="{StaticResource MaterialRedBrush}">
                                     <Run Text="{Binding SelectedBorrower.Opb, StringFormat=N0}"/>
                                     <Run Text="원"/>
@@ -175,7 +175,7 @@
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="2">
-                                <TextBlock Text="근저당설정액" FontSize="11" Opacity="0.6"/>
+                                <TextBlock Text="근저당설정액" FontSize="{StaticResource FontSizeSmall}" Opacity="0.6"/>
                                 <TextBlock FontWeight="SemiBold" Margin="0,4,0,0">
                                     <Run Text="{Binding SelectedBorrower.MortgageAmount, StringFormat=N0}"/>
                                     <Run Text="원"/>
@@ -184,7 +184,7 @@
                         </Grid>
 
                         <!-- 상태 표시 -->
-                        <TextBlock Text="회생 상태" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,12"/>
+                        <TextBlock Text="회생 상태" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH3}" Margin="0,0,0,12"/>
                         <WrapPanel Margin="0,0,0,24">
                             <Border Background="#E57373" CornerRadius="4" Padding="12,6" Margin="0,0,8,0">
                                 <TextBlock Text="회생 진행 중" Foreground="White" FontWeight="SemiBold"/>
@@ -196,7 +196,7 @@
                         </WrapPanel>
 
                         <!-- 대출 정보 -->
-                        <TextBlock FontWeight="SemiBold" FontSize="16" Margin="0,0,0,12">
+                        <TextBlock FontWeight="SemiBold" FontSize="{StaticResource FontSizeH3}" Margin="0,0,0,12">
                             <Run Text="채권 정보 ("/>
                             <Run Text="{Binding BorrowerLoans.Count, Mode=OneWay}"/>
                             <Run Text="건)"/>

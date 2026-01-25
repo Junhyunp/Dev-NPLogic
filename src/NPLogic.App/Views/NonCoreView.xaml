@@ -50,10 +50,10 @@
                                                  Foreground="White"
                                                  VerticalAlignment="Center"
                                                  Margin="0,0,8,0"/>
-                        <TextBlock Text="차주 목록" 
+                        <TextBlock Text="차주 목록"
                                    Foreground="White"
                                    FontWeight="SemiBold"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSizeH4}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
                 </Border>
@@ -95,11 +95,11 @@
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ItemBorder" Property="Background" Value="#3F4E6B"/>
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource DarkPanelHoverBrush}"/>
                                             </Trigger>
                                             <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="ItemBorder" Property="Background" Value="#1E3A5F"/>
-                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#FFD700"/>
+                                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource AccentOnDarkBrush}"/>
                                                 <Setter TargetName="ItemBorder" Property="BorderThickness" Value="4,0,0,1"/>
                                             </Trigger>
                                         </ControlTemplate.Triggers>
@@ -128,14 +128,14 @@
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding BorrowerName}"
                                                FontSize="{StaticResource FontSizeSmall}"
-                                               Foreground="#B0BEC5"
+                                               Foreground="{StaticResource TextOnDarkBrush}"
                                                TextTrimming="CharacterEllipsis"
                                                MaxWidth="100"/>
                                     <TextBlock Text=" | "
                                                FontSize="{StaticResource FontSizeSmall}"
-                                               Foreground="#B0BEC5"/>
+                                               Foreground="{StaticResource TextOnDarkBrush}"/>
                                     <TextBlock FontSize="{StaticResource FontSizeSmall}"
-                                               Foreground="#B0BEC5">
+                                               Foreground="{StaticResource TextOnDarkBrush}">
                                         <Run Text="{Binding PropertyCount, Mode=OneWay}"/>
                                         <Run Text="건"/>
                                     </TextBlock>
@@ -147,10 +147,10 @@
                 
                 <!-- 하단 정보 -->
                 <Border Grid.Row="3" 
-                        Background="#263238"
+                        Background="{StaticResource DarkPanelBrush}"
                         Padding="8">
                     <TextBlock FontSize="{StaticResource FontSizeSmall}" 
-                               Foreground="#B0BEC5"
+                               Foreground="{StaticResource TextOnDarkBrush}"
                                HorizontalAlignment="Center">
                         <Run Text="{Binding FilteredCount, Mode=OneWay}"/>
                         <Run Text=" / "/>
@@ -280,7 +280,7 @@
                                 <materialDesign:PackIcon Kind="CommentQuestion" 
                                                          Width="14" Height="14" 
                                                          VerticalAlignment="Center"
-                                                         Foreground="#FF9800"
+                                                         Foreground="{StaticResource MaterialOrangeBrush}"
                                                          Margin="0,0,4,0"/>
                                 <TextBlock Text="QA" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -313,7 +313,7 @@
                                 <materialDesign:PackIcon Kind="MicrosoftExcel" 
                                                          Width="14" Height="14" 
                                                          VerticalAlignment="Center"
-                                                         Foreground="#217346"
+                                                         Foreground="{StaticResource MaterialGreenDarkBrush}"
                                                          Margin="0,0,4,0"/>
                                 <TextBlock Text="Excel" VerticalAlignment="Center"/>
                             </StackPanel>

@@ -109,7 +109,7 @@
                                Opacity="0.7"
                                Margin="0,0,0,8"/>
                     <TextBlock Text="{Binding TotalCount}" 
-                               FontSize="36"
+                               FontSize="{StaticResource FontSizeHero}"
                                FontWeight="Bold"
                                Foreground="{StaticResource PrimaryBrush}"/>
                     <TextBlock Text="건" 
@@ -133,7 +133,7 @@
                                Opacity="0.7"
                                Margin="0,0,0,8"/>
                     <TextBlock Text="{Binding AverageAppraisalValue}" 
-                               FontSize="36"
+                               FontSize="{StaticResource FontSizeHero}"
                                FontWeight="Bold"
                                Foreground="#3B82F6"/>
                     <TextBlock Text="원" 
@@ -157,7 +157,7 @@
                                Opacity="0.7"
                                Margin="0,0,0,8"/>
                     <TextBlock Text="{Binding AverageRecoveryRate}" 
-                               FontSize="36"
+                               FontSize="{StaticResource FontSizeHero}"
                                FontWeight="Bold"
                                Foreground="#10B981"/>
                 </StackPanel>
@@ -177,7 +177,7 @@
                                Opacity="0.7"
                                Margin="0,0,0,8"/>
                     <TextBlock Text="{Binding CompletionRate}" 
-                               FontSize="36"
+                               FontSize="{StaticResource FontSizeHero}"
                                FontWeight="Bold"
                                Foreground="#F59E0B"/>
                 </StackPanel>

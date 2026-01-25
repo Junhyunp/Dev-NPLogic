@@ -12,7 +12,7 @@
 
     <UserControl.Resources>
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource SectionHeader}">
-            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
         </Style>
         <Style x:Key="CardStyle" TargetType="Border" BasedOn="{StaticResource CardBorder}">
             <Setter Property="Padding" Value="16"/>
@@ -32,7 +32,7 @@
             </StackPanel>
         </Border>
 
-        <Grid Margin="24">
+        <Grid Margin="12,8,12,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -53,33 +53,33 @@
                         
                         <Border Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="차주: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalBorrowerCount}" FontWeight="SemiBold" FontSize="12"/>
-                                <TextBlock Text="개" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="차주: " Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock Text="{Binding TotalBorrowerCount}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock Text="개" Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Border>
                         
                         <Border Background="{StaticResource WarningLightBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="가지급금: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalAdvance, StringFormat=N0}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource WarningBrush}"/>
-                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="가지급금: " Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock Text="{Binding TotalAdvance, StringFormat=N0}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource WarningBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Border>
                         
                         <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="4" Padding="12,6" Margin="0,0,12,0">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="회수총액: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalCollection, StringFormat=N0}" FontWeight="SemiBold" FontSize="12" Foreground="{StaticResource SuccessBrush}"/>
-                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="회수총액: " Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock Text="{Binding TotalCollection, StringFormat=N0}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource SuccessBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Border>
                         
                         <Border Background="{StaticResource PrimaryLightBrush}" CornerRadius="4" Padding="12,6">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="순수익: " Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
-                                <TextBlock Text="{Binding TotalNet, StringFormat=N0}" FontWeight="Bold" FontSize="12" Foreground="{StaticResource PrimaryBrush}"/>
-                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="12"/>
+                                <TextBlock Text="순수익: " Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
+                                <TextBlock Text="{Binding TotalNet, StringFormat=N0}" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}" Foreground="{StaticResource PrimaryBrush}"/>
+                                <TextBlock Text="원" Foreground="{StaticResource TextMutedBrush}" FontSize="{StaticResource FontSizeBody}"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -191,7 +191,7 @@
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
                                 <TextBlock Text="📤 가지급금 (발생액)" Style="{StaticResource SectionHeaderStyle}"/>
                                 <Border Background="{StaticResource WarningLightBrush}" CornerRadius="4" Padding="8,2" Margin="12,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock FontSize="11">
+                                    <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                         <Run Text="{Binding Advances.Count, Mode=OneWay}"/>
                                         <Run Text="건"/>
                                     </TextBlock>
@@ -236,7 +236,7 @@
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
                                 <TextBlock Text="📥 회수정보" Style="{StaticResource SectionHeaderStyle}"/>
                                 <Border Background="{StaticResource SuccessLightBrush}" CornerRadius="4" Padding="8,2" Margin="12,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock FontSize="11">
+                                    <TextBlock FontSize="{StaticResource FontSizeSmall}">
                                         <Run Text="{Binding Collections.Count, Mode=OneWay}"/>
                                         <Run Text="건"/>
                                     </TextBlock>
@@ -288,8 +288,8 @@
 
             <!-- 하단 상태 표시 -->
             <Border Grid.Row="2" Background="{StaticResource BlueGray50Brush}" CornerRadius="4" Padding="12,8" Margin="0,16,0,0">
-                <TextBlock Text="{Binding StatusMessage}" 
-                           FontSize="12" 
+                <TextBlock Text="{Binding StatusMessage}"
+                           FontSize="{StaticResource FontSizeBody}"
                            Foreground="{StaticResource TextMutedBrush}"/>
             </Border>
         </Grid>

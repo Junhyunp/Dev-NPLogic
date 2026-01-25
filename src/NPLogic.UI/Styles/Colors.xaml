@@ -52,11 +52,11 @@
     <SolidColorBrush x:Key="BorderColor" Color="{StaticResource Border}"/>
     <SolidColorBrush x:Key="DividerBrush" Color="{StaticResource Divider}"/>
 
-    <!-- Text Colors -->
+    <!-- Text Colors (피드백 반영: 회색 텍스트 가독성 개선 - 더 진한 색상) -->
     <Color x:Key="TextPrimary">#1F2937</Color>
-    <Color x:Key="TextSecondary">#6B7280</Color>
-    <Color x:Key="TextMuted">#64748B</Color>
-    <Color x:Key="TextTertiary">#94A3B8</Color>
+    <Color x:Key="TextSecondary">#4B5563</Color>
+    <Color x:Key="TextMuted">#475569</Color>
+    <Color x:Key="TextTertiary">#64748B</Color>
     <Color x:Key="TextDisabled">#9CA3AF</Color>
     
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimary}"/>
@@ -149,6 +149,39 @@
     <SolidColorBrush x:Key="TextWhite70Brush" Color="{StaticResource TextWhite70}"/>
     <SolidColorBrush x:Key="TextWhite80Brush" Color="{StaticResource TextWhite80}"/>
     <SolidColorBrush x:Key="TextWhite50Brush" Color="{StaticResource TextWhite50}"/>
+
+    <!-- Dark Panel Colors (어두운 패널용 - 사이드바 등) -->
+    <Color x:Key="DarkPanel">#263238</Color>
+    <Color x:Key="DarkPanelHover">#3F4E6B</Color>
+    <Color x:Key="TextOnDark">#B0BEC5</Color>
+    <Color x:Key="AccentOnDark">#FFD700</Color>
+    <SolidColorBrush x:Key="DarkPanelBrush" Color="{StaticResource DarkPanel}"/>
+    <SolidColorBrush x:Key="DarkPanelHoverBrush" Color="{StaticResource DarkPanelHover}"/>
+    <SolidColorBrush x:Key="TextOnDarkBrush" Color="{StaticResource TextOnDark}"/>
+    <SolidColorBrush x:Key="AccentOnDarkBrush" Color="{StaticResource AccentOnDark}"/>
+
+    <!-- Input Field Colors (입력 필드 구분용) -->
+    <!-- 수기 입력 필드 - 노란색 계열 (사용자가 직접 입력해야 하는 곳) -->
+    <Color x:Key="ManualInputBg">#FFF9C4</Color>
+    <Color x:Key="ManualInputBorder">#FBC02D</Color>
+    <SolidColorBrush x:Key="ManualInputBgBrush" Color="{StaticResource ManualInputBg}"/>
+    <SolidColorBrush x:Key="ManualInputBorderBrush" Color="{StaticResource ManualInputBorder}"/>
+
+    <!-- 날짜 입력 필드 - 연한 보라색 계열 (날짜가 들어가는 곳) -->
+    <Color x:Key="DateInputBg">#EDE7F6</Color>
+    <Color x:Key="DateInputBorder">#9575CD</Color>
+    <SolidColorBrush x:Key="DateInputBgBrush" Color="{StaticResource DateInputBg}"/>
+    <SolidColorBrush x:Key="DateInputBorderBrush" Color="{StaticResource DateInputBorder}"/>
+
+    <!-- 계산 결과 필드 - 연한 파란색 계열 (자동 계산 결과) -->
+    <Color x:Key="ResultFieldBg">#E3F2FD</Color>
+    <Color x:Key="ResultFieldBorder">#64B5F6</Color>
+    <SolidColorBrush x:Key="ResultFieldBgBrush" Color="{StaticResource ResultFieldBg}"/>
+    <SolidColorBrush x:Key="ResultFieldBorderBrush" Color="{StaticResource ResultFieldBorder}"/>
+
+    <!-- 읽기 전용 필드 - 회색 계열 -->
+    <Color x:Key="ReadOnlyFieldBg">#F5F5F5</Color>
+    <SolidColorBrush x:Key="ReadOnlyFieldBgBrush" Color="{StaticResource ReadOnlyFieldBg}"/>
 
 </ResourceDictionary>
 

@@ -24,25 +24,25 @@
         </Style>
         
         <Style x:Key="HeaderText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="LabelText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="AmountText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="InputTextBox" TargetType="TextBox">
-            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="Background" Value="{StaticResource YellowBg}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="2"/>
@@ -55,7 +55,7 @@
         <StackPanel>
             <!-- 섹션 헤더 (원본 엑셀과 동일) -->
             <Border Background="{StaticResource PurpleBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock Text="배분대상금액 안분" FontWeight="Bold" FontSize="12"/>
+                <TextBlock Text="배분대상금액 안분" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}"/>
             </Border>
             
             <!-- 헤더 행 -->
@@ -250,7 +250,7 @@
                 </Grid.ColumnDefinitions>
                 
                 <Border Grid.Column="0" Style="{StaticResource CellBorder}" Background="#FFE0B2">
-                    <TextBlock Text="당해시설 (일부인경우 평가자입력)" Style="{StaticResource LabelText}" FontWeight="SemiBold" FontSize="9"/>
+                    <TextBlock Text="당해시설 (일부인경우 평가자입력)" Style="{StaticResource LabelText}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeTiny}"/>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource CellBorder}" Background="{StaticResource YellowBg}">
                     <TextBox Text="{Binding AllocationItems[4].AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" 

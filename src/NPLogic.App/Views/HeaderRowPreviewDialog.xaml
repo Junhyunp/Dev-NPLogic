@@ -43,14 +43,14 @@
         
         <!-- 헤더 -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock FontSize="20" 
+            <TextBlock FontSize="{StaticResource FontSizeLarge}" 
                        FontWeight="Bold"
                        Foreground="{StaticResource LocalPrimaryBrush}">
                 <Run Text="제목행 확인 -"/>
                 <Run Text="{Binding SheetName, Mode=OneWay}"/>
             </TextBlock>
             <TextBlock Text="아래 미리보기에서 제목행(헤더)으로 사용할 행을 선택하세요" 
-                       FontSize="13"
+                       FontSize="{StaticResource FontSizeBody}"
                        Foreground="{StaticResource LocalSecondaryTextBrush}"
                        Margin="0,4,0,0"/>
         </StackPanel>
@@ -85,7 +85,7 @@
                 
                 <TextBlock Grid.Column="2"
                            Text="행을 클릭하여 제목행으로 선택"
-                           FontSize="12"
+                           FontSize="{StaticResource FontSizeBody}"
                            Foreground="{StaticResource LocalSecondaryTextBrush}"
                            VerticalAlignment="Center"/>
             </Grid>
@@ -109,10 +109,10 @@
                         CornerRadius="8,8,0,0"
                         Padding="16,10">
                     <Grid>
-                        <TextBlock Text="시트 미리보기 (처음 10행)" FontWeight="SemiBold" FontSize="13"/>
+                        <TextBlock Text="시트 미리보기 (처음 10행)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                         <TextBlock Text="{Binding TotalRowsText}" 
                                    HorizontalAlignment="Right"
-                                   FontSize="12"
+                                   FontSize="{StaticResource FontSizeBody}"
                                    Foreground="{StaticResource LocalSecondaryTextBrush}"/>
                     </Grid>
                 </Border>
@@ -155,7 +155,7 @@
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="Background" Value="{StaticResource LocalBlueGray100Brush}"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                             <Setter Property="Padding" Value="8,6"/>
                             <Setter Property="BorderThickness" Value="0,0,1,1"/>
                             <Setter Property="BorderBrush" Value="{StaticResource LocalBlueGray100Brush}"/>
@@ -167,7 +167,7 @@
                             <Setter Property="BorderThickness" Value="0,0,1,0"/>
                             <Setter Property="BorderBrush" Value="{StaticResource LocalBlueGray100Brush}"/>
                             <Setter Property="Padding" Value="6"/>
-                            <Setter Property="FontSize" Value="11"/>
+                            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                             <Style.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="Transparent"/>
@@ -183,7 +183,7 @@
         <!-- 안내문 -->
         <TextBlock Grid.Row="3" 
                    Margin="0,12,0,16"
-                   FontSize="12"
+                   FontSize="{StaticResource FontSizeBody}"
                    Foreground="{StaticResource LocalSecondaryTextBrush}"
                    TextWrapping="Wrap">
             <Run Text="※ 선택한 행이 컬럼 헤더(제목행)로 사용됩니다."/>

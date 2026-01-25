@@ -12,19 +12,19 @@
     <UserControl.Resources>
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
         
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -55,7 +55,7 @@
         <Style x:Key="TransparentTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
@@ -320,21 +320,21 @@
                                 <TextBlock Text="수익자변경비용" Style="{StaticResource LabelStyle}"/>
                             </Border>
                             <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource InputCellStyle}">
-                                <DatePicker SelectedDate="{Binding Scenario1StartDate}" BorderThickness="0"/>
+                                <DatePicker SelectedDate="{Binding Scenario1StartDate}" Style="{StaticResource DateInputDatePicker}"/>
                             </Border>
                             <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource InputCellStyle}">
                                 <TextBox Text="{Binding Scenario1BeneficiaryChangeCost, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                             </Border>
                             <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource InputCellStyle}">
-                                <DatePicker SelectedDate="{Binding Scenario2StartDate}" BorderThickness="0"/>
+                                <DatePicker SelectedDate="{Binding Scenario2StartDate}" Style="{StaticResource DateInputDatePicker}"/>
                             </Border>
                             <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource InputCellStyle}">
                                 <TextBox Text="{Binding Scenario2BeneficiaryChangeCost, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                             </Border>
                             <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableCellStyle}">
-                                <TextBlock Text="신탁계약 특약확인" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                <TextBlock Text="신탁계약 특약확인" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                             </Border>
                             
                             <!-- 추정낙찰액 -->
@@ -819,24 +819,24 @@
                     
                     <TextBlock Grid.Column="0" 
                                Text="회수가능액" 
-                               FontSize="16" 
+                               FontSize="{StaticResource FontSizeH3}" 
                                FontWeight="SemiBold" 
                                Foreground="White"
                                VerticalAlignment="Center"/>
                     
                     <StackPanel Grid.Column="1" Margin="0,0,40,0">
-                        <TextBlock Text="1안" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="1안" Foreground="White" Opacity="0.8" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock Text="{Binding Scenario1RecoverableAmount, StringFormat=N0}" 
                                    Foreground="White" 
-                                   FontSize="20" 
+                                   FontSize="{StaticResource FontSizeLarge}" 
                                    FontWeight="Bold"/>
                     </StackPanel>
                     
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="2안" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="2안" Foreground="White" Opacity="0.8" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock Text="{Binding Scenario2RecoverableAmount, StringFormat=N0}" 
                                    Foreground="White" 
-                                   FontSize="20" 
+                                   FontSize="{StaticResource FontSizeLarge}" 
                                    FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>

@@ -10,7 +10,7 @@
              d:DataContext="{d:DesignInstance Type=vm:PropertyListViewModel}"
              Loaded="PropertyListView_Loaded">
     
-    <Grid Margin="32">
+    <Grid Margin="12,8,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -209,7 +209,7 @@
                             <TextBlock Text="{Binding ErrorMessage}" 
                                       Foreground="White"
                                       TextWrapping="Wrap"
-                                      FontSize="16"
+                                      FontSize="{StaticResource FontSizeH3}"
                                       LineHeight="24"/>
                         </ScrollViewer>
                     </Border>

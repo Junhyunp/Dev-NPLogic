@@ -35,7 +35,7 @@
                             
                             <TextBlock Grid.Row="0"
                                        Text="지적도"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center"
@@ -60,7 +60,7 @@
                                                      Height="3"
                                                      Margin="0,0,0,8"/>
                                         <TextBlock Text="로딩 중..."
-                                                   FontSize="12"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                     </StackPanel>
@@ -71,11 +71,11 @@
                                                 HorizontalAlignment="Center"
                                                 Visibility="Collapsed">
                                         <TextBlock Text="🗺️"
-                                                   FontSize="36"
+                                                   FontSize="{StaticResource FontSizeHero}"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,0,0,8"/>
                                         <TextBlock Text="지도를 불러올 수 없습니다"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                         <Button x:Name="BtnRetryMap"
@@ -83,7 +83,7 @@
                                                 Click="RetryMap_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="20,6"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,12,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -105,7 +105,7 @@
                             
                             <TextBlock Grid.Row="0"
                                        Text="위치도"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center"
@@ -130,7 +130,7 @@
                                                      Height="3"
                                                      Margin="0,0,0,8"/>
                                         <TextBlock Text="로딩 중..."
-                                                   FontSize="12"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                     </StackPanel>
@@ -141,11 +141,11 @@
                                                 HorizontalAlignment="Center"
                                                 Visibility="Collapsed">
                                         <TextBlock Text="📍"
-                                                   FontSize="36"
+                                                   FontSize="{StaticResource FontSizeHero}"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,0,0,8"/>
                                         <TextBlock Text="위치도를 불러올 수 없습니다"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                         <Button x:Name="BtnRetryLocationMap"
@@ -153,7 +153,7 @@
                                                 Click="RetryLocationMap_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="20,6"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,12,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -176,7 +176,7 @@
                         
                         <TextBlock Grid.Row="0"
                                    Text="토지이용계획확인원"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSizeH4}"
                                    FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    HorizontalAlignment="Center"
@@ -201,7 +201,7 @@
                                                  Height="3"
                                                  Margin="0,0,0,8"/>
                                     <TextBlock Text="토지이음 조회 중..."
-                                               FontSize="12"
+                                               FontSize="{StaticResource FontSizeBody}"
                                                Foreground="{StaticResource BlueGray400Brush}"
                                                HorizontalAlignment="Center"/>
                                 </StackPanel>
@@ -212,12 +212,12 @@
                                             HorizontalAlignment="Center"
                                             Visibility="Collapsed">
                                     <TextBlock Text="📋"
-                                               FontSize="36"
+                                               FontSize="{StaticResource FontSizeHero}"
                                                HorizontalAlignment="Center"
                                                Margin="0,0,0,8"/>
                                     <TextBlock x:Name="LandUsePlanStatusText"
                                                Text="주소 정보가 필요합니다"
-                                               FontSize="13"
+                                               FontSize="{StaticResource FontSizeBody}"
                                                Foreground="{StaticResource BlueGray400Brush}"
                                                HorizontalAlignment="Center"/>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0">
@@ -226,14 +226,14 @@
                                                 Click="RetryLandUsePlan_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="16,6"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,0,8,0"/>
                                         <Button x:Name="BtnUploadLandUsePlan"
                                                 Content="직접 업로드"
                                                 Click="UploadLandUsePlan_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="16,6"
-                                                FontSize="12"/>
+                                                FontSize="{StaticResource FontSizeBody}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Grid>
@@ -263,7 +263,7 @@
                             
                             <TextBlock Grid.Row="0"
                                        Text="요약건축물대장"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center"
@@ -284,11 +284,11 @@
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Center">
                                         <TextBlock Text="🏢"
-                                                   FontSize="36"
+                                                   FontSize="{StaticResource FontSizeHero}"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,0,0,8"/>
                                         <TextBlock Text="업로드 필요"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                         <Button x:Name="BtnUploadBuildingRegister"
@@ -296,7 +296,7 @@
                                                 Click="UploadBuildingRegister_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="20,6"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,12,0,0"/>
                                     </StackPanel>
                                 </Grid>
@@ -318,7 +318,7 @@
                             
                             <TextBlock Grid.Row="0"
                                        Text="건축물대장 세부"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="SemiBold"
                                        Foreground="{StaticResource TextPrimaryBrush}"
                                        HorizontalAlignment="Center"
@@ -339,11 +339,11 @@
                                                 VerticalAlignment="Center"
                                                 HorizontalAlignment="Center">
                                         <TextBlock Text="🏗️"
-                                                   FontSize="36"
+                                                   FontSize="{StaticResource FontSizeHero}"
                                                    HorizontalAlignment="Center"
                                                    Margin="0,0,0,8"/>
                                         <TextBlock Text="업로드 필요"
-                                                   FontSize="13"
+                                                   FontSize="{StaticResource FontSizeBody}"
                                                    Foreground="{StaticResource BlueGray400Brush}"
                                                    HorizontalAlignment="Center"/>
                                         <Button x:Name="BtnUploadBuildingDetail"
@@ -351,7 +351,7 @@
                                                 Click="UploadBuildingDetail_Click"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="20,6"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,12,0,0"/>
                                     </StackPanel>
                                 </Grid>

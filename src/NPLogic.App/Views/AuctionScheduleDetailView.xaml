@@ -13,21 +13,21 @@
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
         </Style>
         
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -64,7 +64,7 @@
         <Style x:Key="TransparentTextBoxStyle" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
     </UserControl.Resources>
@@ -225,10 +225,10 @@
                                     <TextBlock Text="감정평가금액" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCellStyle}">
-                                    <TextBlock Text="1안배당가능재원(AK)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="10"/>
+                                    <TextBlock Text="1안배당가능재원(AK)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCellStyle}">
-                                    <TextBlock Text="2안배당가능재원(AL)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="10"/>
+                                    <TextBlock Text="2안배당가능재원(AL)" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <!-- 토지 -->
@@ -513,7 +513,7 @@
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource InputCellStyle}">
-                                    <DatePicker SelectedDate="{Binding Scenario1AuctionRequestDate}" BorderThickness="0"/>
+                                    <DatePicker SelectedDate="{Binding Scenario1AuctionRequestDate}" Style="{StaticResource DateInputDatePicker}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}">
                                     <TextBlock Text="0 개월" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
@@ -739,7 +739,7 @@
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource InputCellStyle}">
-                                    <DatePicker SelectedDate="{Binding Scenario2AuctionRequestDate}" BorderThickness="0"/>
+                                    <DatePicker SelectedDate="{Binding Scenario2AuctionRequestDate}" Style="{StaticResource DateInputDatePicker}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableCellStyle}">
                                     <TextBlock Text="0 개월" Style="{StaticResource LabelStyle}" HorizontalAlignment="Center"/>
@@ -938,7 +938,7 @@
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="경매회수 * 단가" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="경매회수 * 단가" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -948,7 +948,7 @@
                                     <TextBlock Text="{Binding SurveyFee, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="자동계산 물건수 key-in" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="자동계산 물건수 key-in" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -958,7 +958,7 @@
                                     <TextBlock Text="{Binding AuctionSaleFee, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="낙찰액기준, 산식" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="낙찰액기준, 산식" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -968,7 +968,7 @@
                                     <TextBlock Text="{Binding AppraisalFee, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="산식, 감정액기준" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="산식, 감정액기준" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -979,7 +979,7 @@
                                              Style="{StaticResource TransparentTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="채권자수 key-in" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="채권자수 key-in" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -989,7 +989,7 @@
                                     <TextBlock Text="{Binding RegistrationEducationFee, StringFormat=N0}" Style="{StaticResource AmountStyle}"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableCellStyle}">
-                                    <TextBlock Text="산식, 경매신청액" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="10"/>
+                                    <TextBlock Text="산식, 경매신청액" Style="{StaticResource LabelStyle}" Opacity="0.6" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Border>
                                 
                                 <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableCellStyle}">
@@ -1479,24 +1479,24 @@
                     
                     <TextBlock Grid.Column="0" 
                                Text="회수가능액" 
-                               FontSize="16" 
+                               FontSize="{StaticResource FontSizeH3}" 
                                FontWeight="SemiBold" 
                                Foreground="White"
                                VerticalAlignment="Center"/>
                     
                     <StackPanel Grid.Column="1" Margin="0,0,40,0">
-                        <TextBlock Text="시나리오1 (하한)" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="시나리오1 (하한)" Foreground="White" Opacity="0.8" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock Text="{Binding Scenario1DividendRecoverable, StringFormat=N0}" 
                                    Foreground="White" 
-                                   FontSize="20" 
+                                   FontSize="{StaticResource FontSizeLarge}" 
                                    FontWeight="Bold"/>
                     </StackPanel>
                     
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="시나리오2 (상한)" Foreground="White" Opacity="0.8" FontSize="11"/>
+                        <TextBlock Text="시나리오2 (상한)" Foreground="White" Opacity="0.8" FontSize="{StaticResource FontSizeSmall}"/>
                         <TextBlock Text="{Binding Scenario2DividendRecoverable, StringFormat=N0}" 
                                    Foreground="White" 
-                                   FontSize="20" 
+                                   FontSize="{StaticResource FontSizeLarge}" 
                                    FontWeight="Bold"/>
                     </StackPanel>
                 </Grid>

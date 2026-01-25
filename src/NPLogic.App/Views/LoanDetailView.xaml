@@ -18,14 +18,14 @@
         <!-- 섹션 헤더 스타일 -->
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
         
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -34,7 +34,7 @@
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -66,7 +66,7 @@
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
             <Setter Property="Padding" Value="2,2"/>
-            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         
@@ -79,16 +79,64 @@
         
         <!-- 컴팩트 CheckBox -->
         <Style x:Key="CompactCheckBoxStyle" TargetType="CheckBox">
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,0,16,0"/>
         </Style>
         
         <!-- 컴팩트 DatePicker -->
         <Style x:Key="CompactDatePickerStyle" TargetType="DatePicker">
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Padding" Value="2"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
+            <Setter Property="Background" Value="{StaticResource DateInputBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DateInputBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                                   Grid.Column="0"
+                                                   Background="Transparent"
+                                                   BorderThickness="0"
+                                                   Padding="{TemplateBinding Padding}"
+                                                   VerticalAlignment="Center"
+                                                   VerticalContentAlignment="Center"
+                                                   Focusable="{TemplateBinding Focusable}"/>
+                                <Button x:Name="PART_Button"
+                                        Grid.Column="1"
+                                        Width="18"
+                                        Focusable="False"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Padding="1">
+                                    <Path Data="M0,0 L0,6 L6,6 L6,0 z M1,1 L1,2 L2,2 L2,1 z M3,1 L3,2 L4,2 L4,1 z M1,3 L1,4 L2,4 L2,3 z M3,3 L3,4 L4,4 L4,3 z"
+                                          Fill="#666666"
+                                          Width="9"
+                                          Height="9"
+                                          Stretch="Uniform"/>
+                                </Button>
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       Placement="Bottom"
+                                       PlacementTarget="{Binding ElementName=PART_TextBox}"
+                                       StaysOpen="False"/>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </UserControl.Resources>
     
@@ -154,32 +202,32 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="대출원금잔액 합계: " FontSize="12" Opacity="0.7" VerticalAlignment="Center"/>
+                    <TextBlock Text="대출원금잔액 합계: " FontSize="{StaticResource FontSizeBody}" Opacity="0.7" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding Statistics.TotalPrincipalBalance, StringFormat=N0, FallbackValue=0}" 
-                               FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <TextBlock Text="원" FontSize="11" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <TextBlock Text="Loan Cap (1안): " FontSize="12" Opacity="0.7" VerticalAlignment="Center"/>
+                    <TextBlock Text="Loan Cap (1안): " FontSize="{StaticResource FontSizeBody}" Opacity="0.7" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding Statistics.TotalLoanCap1, StringFormat=N0, FallbackValue=0}" 
-                               FontSize="14" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
-                    <TextBlock Text="원" FontSize="11" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold" Foreground="#2E7D32" VerticalAlignment="Center"/>
+                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="4" Orientation="Horizontal">
-                    <TextBlock Text="Loan Cap (2안): " FontSize="12" Opacity="0.7" VerticalAlignment="Center"/>
+                    <TextBlock Text="Loan Cap (2안): " FontSize="{StaticResource FontSizeBody}" Opacity="0.7" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding Statistics.TotalLoanCap2, StringFormat=N0, FallbackValue=0}" 
-                               FontSize="14" FontWeight="Bold" Foreground="#1565C0" VerticalAlignment="Center"/>
-                    <TextBlock Text="원" FontSize="11" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
+                               FontSize="{StaticResource FontSizeH4}" FontWeight="Bold" Foreground="#1565C0" VerticalAlignment="Center"/>
+                    <TextBlock Text="원" FontSize="{StaticResource FontSizeSmall}" Opacity="0.7" VerticalAlignment="Center" Margin="2,0,0,0"/>
                 </StackPanel>
 
                 <!-- 시나리오 날짜 설정 -->
                 <StackPanel Grid.Column="6" Orientation="Horizontal">
-                    <TextBlock Text="1안 배당일:" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
-                    <DatePicker SelectedDate="{Binding Scenario1Date}" Width="100" FontSize="11"/>
-                    <TextBlock Text="2안 배당일:" FontSize="11" VerticalAlignment="Center" Margin="16,0,4,0"/>
-                    <DatePicker SelectedDate="{Binding Scenario2Date}" Width="100" FontSize="11"/>
+                    <TextBlock Text="1안 배당일:" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario1Date}" Width="100" Style="{StaticResource DateInputDatePicker}"/>
+                    <TextBlock Text="2안 배당일:" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center" Margin="16,0,4,0"/>
+                    <DatePicker SelectedDate="{Binding Scenario2Date}" Width="100" Style="{StaticResource DateInputDatePicker}"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -235,7 +283,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="차주 선택" FontWeight="SemiBold" FontSize="12" Margin="4,0,0,4"/>
+                        <TextBlock Grid.Row="0" Text="차주 선택" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="4,0,0,4"/>
                         <ListBox Grid.Row="1"
                                  ItemsSource="{Binding Borrowers}"
                                  SelectedItem="{Binding SelectedBorrower}"
@@ -245,8 +293,8 @@
                                 <DataTemplate>
                                     <Border Padding="6,4">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold" FontSize="12"/>
-                                            <TextBlock Text="{Binding BorrowerNumber}" FontSize="10" Opacity="0.7"/>
+                                            <TextBlock Text="{Binding BorrowerName}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                            <TextBlock Text="{Binding BorrowerNumber}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"/>
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -263,7 +311,7 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" FontWeight="SemiBold" FontSize="12" Margin="4,0,0,4">
+                        <TextBlock Grid.Row="0" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="4,0,0,4">
                             <Run Text="대출 목록 ("/>
                             <Run Text="{Binding Loans.Count, Mode=OneWay, FallbackValue=0}"/>
                             <Run Text="건)"/>
@@ -281,11 +329,11 @@
                                                 <RowDefinition Height="Auto"/>
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
-                                            <TextBlock Grid.Row="0" Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="11"/>
+                                            <TextBlock Grid.Row="0" Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}"/>
                                             <StackPanel Grid.Row="1" Orientation="Horizontal">
-                                                <TextBlock Text="{Binding LoanType}" FontSize="10" Opacity="0.7"/>
-                                                <TextBlock Text=" | " FontSize="10" Opacity="0.5"/>
-                                                <TextBlock Text="{Binding LoanPrincipalBalance, StringFormat=N0}" FontSize="10"/>
+                                                <TextBlock Text="{Binding LoanType}" FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"/>
+                                                <TextBlock Text=" | " FontSize="{StaticResource FontSizeTiny}" Opacity="0.5"/>
+                                                <TextBlock Text="{Binding LoanPrincipalBalance, StringFormat=N0}" FontSize="{StaticResource FontSizeTiny}"/>
                                             </StackPanel>
                                         </Grid>
                                     </Border>
@@ -296,7 +344,7 @@
                                 Command="{Binding AddLoanCommand}"
                                 Style="{StaticResource SecondaryButton}"
                                 Padding="10,6"
-                                FontSize="11"
+                                FontSize="{StaticResource FontSizeSmall}"
                                 Margin="0,8,0,0"/>
                     </Grid>
                 </Border>
@@ -315,7 +363,7 @@
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center"
                                    Opacity="0.5"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSizeH4}"
                                    Visibility="{Binding IsSingleBorrowerMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -341,7 +389,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="13">
+                                <TextBlock Grid.Column="0" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}">
                                     <Run Text="대출 목록 ("/>
                                     <Run Text="{Binding Loans.Count, Mode=OneWay, FallbackValue=0}"/>
                                     <Run Text="건)"/>
@@ -350,7 +398,7 @@
                                         Command="{Binding AddLoanCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="10,4"
-                                        FontSize="11"/>
+                                        FontSize="{StaticResource FontSizeSmall}"/>
                             </Grid>
                             
                             <ListBox Grid.Row="1"
@@ -369,8 +417,8 @@
                                     <DataTemplate>
                                         <Border Padding="8,4" Margin="2" Background="{StaticResource BackgroundColor}" CornerRadius="4">
                                             <StackPanel>
-                                                <TextBlock Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="11"/>
-                                                <TextBlock FontSize="10" Opacity="0.7">
+                                                <TextBlock Text="{Binding AccountSerial}" FontWeight="SemiBold" FontSize="{StaticResource FontSizeSmall}"/>
+                                                <TextBlock FontSize="{StaticResource FontSizeTiny}" Opacity="0.7">
                                                     <Run Text="{Binding LoanPrincipalBalance, StringFormat=N0}"/>
                                                 </TextBlock>
                                             </StackPanel>
@@ -766,7 +814,7 @@
                                         <!-- 1안 -->
                                         <Border Grid.Column="0" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,0">
                                             <StackPanel>
-                                                <TextBlock Text="1안 (시나리오 1)" FontWeight="SemiBold" FontSize="12" Padding="8,4" Background="#E8F5E9"/>
+                                                <TextBlock Text="1안 (시나리오 1)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Padding="8,4" Background="#E8F5E9"/>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="120"/>
@@ -816,7 +864,7 @@
                                         <!-- 2안 -->
                                         <Border Grid.Column="1">
                                             <StackPanel>
-                                                <TextBlock Text="2안 (시나리오 2)" FontWeight="SemiBold" FontSize="12" Padding="8,4" Background="#E3F2FD"/>
+                                                <TextBlock Text="2안 (시나리오 2)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Padding="8,4" Background="#E3F2FD"/>
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="120"/>
@@ -1024,19 +1072,19 @@
                                                 Command="{Binding RecalculateLoanCapCommand}"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="16,8"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,0,8,0"/>
                                         <Button Content="전체 일괄 계산" 
                                                 Command="{Binding RecalculateAllLoanCapsCommand}"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="16,8"
-                                                FontSize="12"
+                                                FontSize="{StaticResource FontSizeBody}"
                                                 Margin="0,0,8,0"/>
                                         <Button Content="저장" 
                                                 Command="{Binding SaveLoanCommand}"
                                                 Style="{StaticResource PrimaryButton}"
                                                 Padding="24,8"
-                                                FontSize="12"/>
+                                                FontSize="{StaticResource FontSizeBody}"/>
                                     </StackPanel>
                                 </Grid>
                             </Border>

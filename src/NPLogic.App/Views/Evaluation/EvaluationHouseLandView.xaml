@@ -125,7 +125,7 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="탐문결과 합계:" Foreground="White" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding TotalInquiryValue, StringFormat=\{0:N0\}}" 
-                                           Foreground="White" FontWeight="Bold" FontSize="16" Margin="8,0,0,0"/>
+                                           Foreground="White" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}" Margin="8,0,0,0"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -201,7 +201,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="180"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="임차인" Binding="{Binding TenantName}" Width="80"/>
                                 <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, StringFormat=N0}" Width="90"/>
@@ -220,12 +220,12 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="연임대료 합계" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="연임대료 합계" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding TotalAnnualRent, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="수익가치" Style="{StaticResource LabelText}" FontSize="11"/>
+                                    <TextBlock Text="수익가치" Style="{StaticResource LabelText}" FontSize="{StaticResource FontSizeSmall}"/>
                                     <TextBlock Text="{Binding LeaseIncomeValue, StringFormat=\{0:N0\}}" 
                                                Style="{StaticResource ValueText}" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}"/>
                                 </StackPanel>
@@ -247,7 +247,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <TextBlock Text="규칙:" Style="{StaticResource LabelText}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
-                                      Width="70" FontSize="12" Padding="4,2" Margin="0,0,16,0">
+                                      Width="70" FontSize="{StaticResource FontSizeBody}" Padding="4,2" Margin="0,0,16,0">
                                 <ComboBoxItem Content="1순위"/>
                                 <ComboBoxItem Content="2순위"/>
                                 <ComboBoxItem Content="3순위"/>
@@ -274,7 +274,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="150"
-                                  FontSize="11"
+                                  FontSize="{StaticResource FontSizeSmall}"
                                   SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="사건번호" Binding="{Binding CaseNo}" Width="100" IsReadOnly="True"/>
@@ -370,7 +370,7 @@
                                     VerticalAlignment="Center">
                                 <StackPanel>
                                     <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                               FontSize="18"
+                                               FontSize="{StaticResource FontSizeH2}"
                                                FontWeight="Bold"
                                                Foreground="White"
                                                HorizontalAlignment="Center"/>
@@ -401,7 +401,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="250"
-                                  FontSize="11">
+                                  FontSize="{StaticResource FontSizeSmall}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="80" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, Mode=TwoWay}" Width="90"/>

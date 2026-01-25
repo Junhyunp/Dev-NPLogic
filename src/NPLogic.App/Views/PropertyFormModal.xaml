@@ -44,7 +44,7 @@
                             Click="CloseButton_Click"
                             Style="{StaticResource IconButton}"
                             Foreground="White"
-                            FontSize="24"
+                            FontSize="{StaticResource FontSizeXLarge}"
                             Width="32"
                             Height="32"/>
                 </Grid>

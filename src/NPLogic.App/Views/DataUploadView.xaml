@@ -29,71 +29,30 @@
                 <TextBlock Text="데이터 업로드" 
                            Style="{StaticResource H2TextStyle}"
                            Margin="0,0,0,4"/>
-                <TextBlock Text="Excel 파일 또는 PDF 파일을 업로드하여 물건 데이터를 일괄 등록하세요" 
-                           Style="{StaticResource BodyTextStyle}"
-                           Opacity="0.7"/>
+                <TextBlock Text="Excel 파일 또는 PDF 파일을 업로드하여 물건 데이터를 일괄 등록하세요"
+                           Style="{StaticResource MutedTextStyle}"/>
             </StackPanel>
 
-            <!-- 탭 선택 버튼 -->
+            <!-- 탭 선택 버튼 (통일된 PillTabStyle 사용) -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                 <RadioButton x:Name="ExcelTabRadio"
                              GroupName="UploadType"
                              IsChecked="True"
-                             Style="{StaticResource {x:Type ToggleButton}}"
+                             Style="{StaticResource PillTabStyle}"
                              Margin="0,0,8,0">
-                    <RadioButton.Template>
-                        <ControlTemplate TargetType="RadioButton">
-                            <Border x:Name="border"
-                                    Background="{StaticResource BlueGray100Brush}"
-                                    CornerRadius="6"
-                                    Padding="16,8"
-                                    Cursor="Hand">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="iconText" Text="📊" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock x:Name="labelText" Text="Excel 업로드" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                                    <Setter TargetName="iconText" Property="Foreground" Value="White"/>
-                                    <Setter TargetName="labelText" Property="Foreground" Value="White"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Opacity" Value="0.9"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </RadioButton.Template>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📊" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="Excel 업로드" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </RadioButton>
 
                 <RadioButton x:Name="PdfTabRadio"
                              GroupName="UploadType"
-                             Style="{StaticResource {x:Type ToggleButton}}">
-                    <RadioButton.Template>
-                        <ControlTemplate TargetType="RadioButton">
-                            <Border x:Name="border"
-                                    Background="{StaticResource BlueGray100Brush}"
-                                    CornerRadius="6"
-                                    Padding="16,8"
-                                    Cursor="Hand">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock x:Name="iconText" Text="📄" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                    <TextBlock x:Name="labelText" Text="PDF 업로드" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryBrush}"/>
-                                    <Setter TargetName="iconText" Property="Foreground" Value="White"/>
-                                    <Setter TargetName="labelText" Property="Foreground" Value="White"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="border" Property="Opacity" Value="0.9"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </RadioButton.Template>
+                             Style="{StaticResource PillTabStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📄" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="PDF 업로드" VerticalAlignment="Center"/>
+                    </StackPanel>
                 </RadioButton>
             </StackPanel>
         </Grid>
@@ -158,9 +117,8 @@
                                            Style="{StaticResource H3TextStyle}"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,8"/>
-                                <TextBlock Text="또는" 
-                                           Style="{StaticResource BodyTextStyle}"
-                                           Opacity="0.5"
+                                <TextBlock Text="또는"
+                                           Style="{StaticResource MutedTextStyle}"
                                            HorizontalAlignment="Center"
                                            Margin="0,0,0,8"/>
                                 <Button Content="📂 파일 선택하기" 
@@ -168,9 +126,9 @@
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="24,12"
                                         FontSize="{StaticResource FontSizeH4}"/>
-                                <TextBlock Text="지원 형식: .xlsx, .xls" 
-                                           Style="{StaticResource CaptionTextStyle}"
-                                           Opacity="0.5"
+                                <TextBlock Text="지원 형식: .xlsx, .xls"
+                                           Style="{StaticResource MutedTextStyle}"
+                                           FontSize="{StaticResource FontSizeSmall}"
                                            HorizontalAlignment="Center"
                                            Margin="0,16,0,0"/>
                             </StackPanel>
@@ -212,7 +170,7 @@
                                             <TextBlock Text="{Binding SelectedExcelFile}" 
                                                        Foreground="White"
                                                        Opacity="0.9"
-                                                       FontSize="12"
+                                                       FontSize="{StaticResource FontSizeBody}"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
                                         <Button Grid.Column="2"
@@ -222,7 +180,7 @@
                                                 Foreground="White"
                                                 BorderThickness="0"
                                                 Padding="8,4"
-                                                FontSize="16"
+                                                FontSize="{StaticResource FontSizeH3}"
                                                 FontWeight="Bold"
                                                 Cursor="Hand"
                                                 ToolTip="파일 선택 취소"/>
@@ -238,7 +196,7 @@
                                         Visibility="{Binding ShowSheetSelection, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                            <TextBlock Text="📋" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                            <TextBlock Text="📋" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                             <TextBlock Text="업로드할 시트 선택" 
                                                        Style="{StaticResource H4TextStyle}" 
                                                        VerticalAlignment="Center"/>
@@ -273,10 +231,11 @@
                                                                       Margin="0,0,12,0"/>
                                                             
                                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                                <TextBlock Text="{Binding Name}" 
+                                                                <TextBlock Text="{Binding Name}"
                                                                            FontWeight="SemiBold"
-                                                                           FontSize="13"/>
-                                                                <TextBlock FontSize="11" Opacity="0.7">
+                                                                           FontSize="{StaticResource FontSizeBody}"/>
+                                                                <TextBlock FontSize="{StaticResource FontSizeSmall}"
+                                                                           Foreground="{StaticResource TextSecondaryBrush}">
                                                                     <Run Text="{Binding SheetTypeDisplay, Mode=OneWay}"/>
                                                                     <Run Text=" · "/>
                                                                     <Run Text="{Binding DataRowCount, Mode=OneWay}"/>
@@ -293,7 +252,7 @@
                                                                     Opacity="0.8">
                                                                 <TextBlock Text="{Binding SheetTypeDisplay}" 
                                                                            Foreground="White"
-                                                                           FontSize="10"
+                                                                           FontSize="{StaticResource FontSizeTiny}"
                                                                            FontWeight="SemiBold"/>
                                                             </Border>
                                                             
@@ -302,7 +261,7 @@
                                                                     Content="컬럼매핑"
                                                                     Style="{StaticResource SecondaryButton}"
                                                                     Padding="8,4"
-                                                                    FontSize="10"
+                                                                    FontSize="{StaticResource FontSizeTiny}"
                                                                     VerticalAlignment="Center"
                                                                     Click="ColumnMappingButton_Click"
                                                                     Tag="{Binding}"
@@ -327,14 +286,16 @@
                                         <StackPanel Visibility="{Binding IsExcelUploading, Converter={StaticResource BoolToVisibilityConverter}}"
                                                     Margin="0,12,0,0">
                                             <TextBlock Text="{Binding UploadStatusMessage}" 
-                                                       FontSize="12" 
+                                                       FontSize="{StaticResource FontSizeBody}" 
                                                        Opacity="0.8"
                                                        Margin="0,0,0,8"/>
                                             <ProgressBar Value="{Binding ExcelUploadProgress}"
                                                          Maximum="100"
                                                          Height="8"
                                                          Foreground="{StaticResource PrimaryBrush}"/>
-                                            <TextBlock FontSize="11" Opacity="0.6" Margin="0,4,0,0">
+                                            <TextBlock FontSize="{StaticResource FontSizeSmall}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       Margin="0,4,0,0">
                                                 <Run Text="{Binding ProcessedSheets, Mode=OneWay}"/>
                                                 <Run Text=" / "/>
                                                 <Run Text="{Binding TotalSheetsToProcess, Mode=OneWay}"/>
@@ -360,10 +321,10 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="총 데이터 행" Style="{StaticResource BodyTextStyle}" Opacity="0.7"/>
-                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="16">
+                                            <TextBlock Text="총 데이터 행" Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}">
                                                 <Run Text="{Binding TotalRows}"/>
-                                                <Run Text="행" FontWeight="Normal" FontSize="12"/>
+                                                <Run Text="행" FontWeight="Normal" FontSize="{StaticResource FontSizeBody}"/>
                                             </TextBlock>
                                         </Grid>
 
@@ -372,10 +333,10 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="인식된 컬럼" Style="{StaticResource BodyTextStyle}" Opacity="0.7"/>
-                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="16">
+                                            <TextBlock Text="인식된 컬럼" Style="{StaticResource MutedTextStyle}"/>
+                                            <TextBlock Grid.Column="1" FontWeight="Bold" FontSize="{StaticResource FontSizeH3}">
                                                 <Run Text="{Binding ExcelColumns.Count, Mode=OneWay}"/>
-                                                <Run Text="개" FontWeight="Normal" FontSize="12"/>
+                                                <Run Text="개" FontWeight="Normal" FontSize="{StaticResource FontSizeBody}"/>
                                             </TextBlock>
                                         </Grid>
 
@@ -397,7 +358,7 @@
                                                             CornerRadius="4"
                                                             Padding="8,4"
                                                             Margin="0,0,6,6">
-                                                        <TextBlock Text="{Binding}" FontSize="11"/>
+                                                        <TextBlock Text="{Binding}" FontSize="{StaticResource FontSizeSmall}"/>
                                                     </Border>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -601,34 +562,34 @@
                                                   Margin="0,0,0,8"/>
                                         <WrapPanel>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="프로젝트ID" FontSize="11"/>
+                                                <TextBlock Text="프로젝트ID" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="물건번호" FontSize="11"/>
+                                                <TextBlock Text="물건번호" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="물건유형" FontSize="11"/>
+                                                <TextBlock Text="물건유형" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="전체주소" FontSize="11"/>
+                                                <TextBlock Text="전체주소" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="도로명주소" FontSize="11"/>
+                                                <TextBlock Text="도로명주소" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="지번주소" FontSize="11"/>
+                                                <TextBlock Text="지번주소" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="토지면적" FontSize="11"/>
+                                                <TextBlock Text="토지면적" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="건물면적" FontSize="11"/>
+                                                <TextBlock Text="건물면적" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="감정가" FontSize="11"/>
+                                                <TextBlock Text="감정가" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                             <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="6,3" Margin="0,0,6,6">
-                                                <TextBlock Text="최저입찰가" FontSize="11"/>
+                                                <TextBlock Text="최저입찰가" FontSize="{StaticResource FontSizeSmall}"/>
                                             </Border>
                                         </WrapPanel>
                                     </StackPanel>
@@ -663,7 +624,7 @@
                                                 Command="{Binding AutoMapColumnsCommand}"
                                                 Style="{StaticResource SecondaryButton}"
                                                 Padding="12,6"
-                                                FontSize="12"/>
+                                                FontSize="{StaticResource FontSizeBody}"/>
                                     </Grid>
 
                                     <ScrollViewer Grid.Row="1" 
@@ -684,7 +645,7 @@
                                                                 CornerRadius="4"
                                                                 Padding="10,8">
                                                             <TextBlock Text="{Binding TargetColumn}" 
-                                                                       FontSize="12"
+                                                                       FontSize="{StaticResource FontSizeBody}"
                                                                        VerticalAlignment="Center"
                                                                        TextTrimming="CharacterEllipsis"/>
                                                         </Border>
@@ -700,7 +661,7 @@
                                                                   ItemsSource="{Binding DataContext.ExcelColumns, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                   SelectedItem="{Binding SourceColumn}"
                                                                   Padding="10,8"
-                                                                  FontSize="12"/>
+                                                                  FontSize="{StaticResource FontSizeBody}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -741,13 +702,13 @@
                                                 <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
                                                 <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
                                                 <Setter Property="FontWeight" Value="SemiBold"/>
-                                                <Setter Property="FontSize" Value="11"/>
+                                                <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                                                 <Setter Property="Padding" Value="8,6"/>
                                             </Style>
                                         </DataGrid.ColumnHeaderStyle>
                                         <DataGrid.CellStyle>
                                             <Style TargetType="DataGridCell">
-                                                <Setter Property="FontSize" Value="11"/>
+                                                <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
                                                 <Setter Property="Padding" Value="6,4"/>
                                             </Style>
                                         </DataGrid.CellStyle>
@@ -775,7 +736,7 @@
                                         <TextBlock Text="{Binding ExcelErrorMessage}" 
                                                    Foreground="White"
                                                    TextWrapping="Wrap"
-                                                   FontSize="12"/>
+                                                   FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
 
                                     <!-- 프로그레스 & 버튼 -->
@@ -786,16 +747,17 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- 프로그레스바 -->
-                                        <StackPanel Grid.Column="0" 
+                                        <StackPanel Grid.Column="0"
                                                     VerticalAlignment="Center"
                                                     Margin="0,0,16,0"
                                                     Visibility="{Binding IsExcelUploading, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <ProgressBar Value="{Binding ExcelUploadProgress}" 
+                                            <ProgressBar Value="{Binding ExcelUploadProgress}"
                                                          Maximum="100"
                                                          Height="8"
                                                          Foreground="{StaticResource PrimaryBrush}"
                                                          Margin="0,0,0,6"/>
-                                            <TextBlock Style="{StaticResource CaptionTextStyle}" Opacity="0.7">
+                                            <TextBlock Style="{StaticResource MutedTextStyle}"
+                                                       FontSize="{StaticResource FontSizeSmall}">
                                                 <Run Text="{Binding ExcelUploadProgress, StringFormat=N0}"/>
                                                 <Run Text="% 완료 ("/>
                                                 <Run Text="{Binding ProcessedRows}"/>
@@ -862,19 +824,19 @@
                                        Style="{StaticResource H3TextStyle}"
                                        HorizontalAlignment="Center"
                                        Margin="0,0,0,8"/>
-                            <TextBlock Text="다중 파일 선택 가능" 
-                                       Style="{StaticResource CaptionTextStyle}"
-                                       Opacity="0.5"
+                            <TextBlock Text="다중 파일 선택 가능"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       FontSize="{StaticResource FontSizeSmall}"
                                        HorizontalAlignment="Center"
                                        Margin="0,0,0,16"/>
-                            <Button Content="📂 파일 선택하기" 
+                            <Button Content="📂 파일 선택하기"
                                     Command="{Binding SelectPdfFilesCommand}"
                                     Style="{StaticResource PrimaryButton}"
                                     Padding="24,12"
                                     FontSize="{StaticResource FontSizeH4}"/>
-                            <TextBlock Text="지원 형식: .pdf" 
-                                       Style="{StaticResource CaptionTextStyle}"
-                                       Opacity="0.5"
+                            <TextBlock Text="지원 형식: .pdf"
+                                       Style="{StaticResource MutedTextStyle}"
+                                       FontSize="{StaticResource FontSizeSmall}"
                                        HorizontalAlignment="Center"
                                        Margin="0,16,0,0"/>
                         </StackPanel>
@@ -900,7 +862,7 @@
                                             CornerRadius="10"
                                             Padding="8,2"
                                             Margin="8,0,0,0">
-                                        <TextBlock Text="{Binding PdfFiles.Count, Mode=OneWay}" Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding PdfFiles.Count, Mode=OneWay}" Foreground="White" FontSize="{StaticResource FontSizeBody}" FontWeight="Bold"/>
                                     </Border>
                                 </StackPanel>
                                 <Button Grid.Column="1"
@@ -908,7 +870,7 @@
                                         Command="{Binding CancelAllPdfFilesCommand}"
                                         Style="{StaticResource SecondaryButton}"
                                         Padding="10,6"
-                                        FontSize="11"/>
+                                        FontSize="{StaticResource FontSizeSmall}"/>
                             </Grid>
 
                             <!-- 파일 목록 -->
@@ -934,9 +896,9 @@
                                                         <TextBlock Text="{Binding FileName}" 
                                                                    FontWeight="SemiBold"
                                                                    TextTrimming="CharacterEllipsis"/>
-                                                        <TextBlock Text="{Binding FileSizeFormatted}" 
-                                                                   Style="{StaticResource CaptionTextStyle}"
-                                                                   Opacity="0.6"/>
+                                                        <TextBlock Text="{Binding FileSizeFormatted}"
+                                                                   Style="{StaticResource MutedTextStyle}"
+                                                                   FontSize="{StaticResource FontSizeSmall}"/>
                                                     </StackPanel>
 
                                                     <Border Grid.Column="2"
@@ -957,7 +919,7 @@
                                                                 </Style.Triggers>
                                                             </Style>
                                                         </Border.Style>
-                                                        <TextBlock Text="{Binding Status}" FontSize="11">
+                                                        <TextBlock Text="{Binding Status}" FontSize="{StaticResource FontSizeSmall}">
                                                             <TextBlock.Style>
                                                                 <Style TargetType="TextBlock">
                                                                     <Style.Triggers>
@@ -1021,8 +983,7 @@
                                        HorizontalAlignment="Center"
                                        Margin="0,0,0,12"/>
                             <TextBlock Text="PDF 파일은 Supabase Storage에 안전하게 저장됩니다."
-                                       Style="{StaticResource BodyTextStyle}"
-                                       Opacity="0.7"
+                                       Style="{StaticResource MutedTextStyle}"
                                        HorizontalAlignment="Center"
                                        TextAlignment="Center"
                                        TextWrapping="Wrap"
@@ -1088,8 +1049,7 @@
                                                  Height="8"
                                                  Foreground="{StaticResource PrimaryBrush}"
                                                  Margin="0,0,0,8"/>
-                                    <TextBlock Style="{StaticResource BodyTextStyle}"
-                                               Opacity="0.7"
+                                    <TextBlock Style="{StaticResource MutedTextStyle}"
                                                HorizontalAlignment="Center">
                                         <Run Text="{Binding CompletedPdfCount}"/>
                                         <Run Text="/"/>

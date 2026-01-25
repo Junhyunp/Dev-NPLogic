@@ -188,13 +188,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet A (차주일반정보)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet A (차주일반정보)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetAUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetARowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -207,13 +207,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet A-1 (회생차주정보)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet A-1 (회생차주정보)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetA1UploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetA1RowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -226,13 +226,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet B (채권일반정보)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet B (채권일반정보)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetBUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetBRowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -245,13 +245,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet C-1 (물건정보)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet C-1 (물건정보)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetC1UploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetC1RowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -264,13 +264,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet C-2 (등기부등본정보)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet C-2 (등기부등본정보)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetC2UploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetC2RowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                 </StackPanel>
@@ -286,13 +286,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet C-3 (설정순위)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet C-3 (설정순위)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetC3UploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetC3RowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -305,13 +305,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet D (신용보증서)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet D (신용보증서)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetDUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetDRowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -324,13 +324,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Sheet E (가압류)" FontWeight="SemiBold" FontSize="12"/>
+                                                <TextBlock Text="Sheet E (가압류)" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                                 <TextBlock Text="{Binding SheetEUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                             </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding SheetERowCount, StringFormat={}{0}행, FallbackValue=''}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
-                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" Margin="8,0"/>
+                                            <Button Grid.Column="2" Content="업로드" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -342,13 +342,13 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Interim 입력" FontWeight="SemiBold" FontSize="12" Foreground="White"/>
+                                                <TextBlock Text="Interim 입력" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Foreground="White"/>
                                                 <TextBlock Text="{Binding InterimUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                           FontSize="10" Foreground="#B0FFFFFF"/>
+                                                           FontSize="{StaticResource FontSizeTiny}" Foreground="#B0FFFFFF"/>
                                             </StackPanel>
                                             <Button Grid.Column="2" Content="업로드" Style="{StaticResource PrimaryButton}" 
                                                     Background="White" Foreground="{StaticResource InfoBrush}"
-                                                    Padding="8,4" FontSize="10"/>
+                                                    Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                         </Grid>
                                     </Border>
                                     
@@ -500,8 +500,8 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="QA집계" FontWeight="SemiBold" FontSize="12"/>
-                                            <TextBlock FontSize="10" Foreground="{StaticResource TextMutedBrush}">
+                                            <TextBlock Text="QA집계" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                            <TextBlock FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}">
                                                 <Run Text="총"/>
                                                 <Run Text="{Binding QaTotalCount, FallbackValue='0'}"/>
                                                 <Run Text="건 /"/>
@@ -510,7 +510,7 @@
                                                 <Run Text="건"/>
                                             </TextBlock>
                                         </StackPanel>
-                                        <Button Grid.Column="1" Content="상세보기" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                        <Button Grid.Column="1" Content="상세보기" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                     </Grid>
                                 </Border>
                                 
@@ -522,11 +522,11 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
-                                            <TextBlock Text="QA회신 업로드" FontWeight="SemiBold" FontSize="12"/>
+                                            <TextBlock Text="QA회신 업로드" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                             <TextBlock Text="{Binding QaResponseUploadedAt, StringFormat='업로드: {0:yyyy-MM-dd}', FallbackValue='미등록'}" 
-                                                       FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                       FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                         </StackPanel>
-                                        <Button Grid.Column="1" Content="업로드" Style="{StaticResource PrimaryButton}" Padding="8,4" FontSize="10"/>
+                                        <Button Grid.Column="1" Content="업로드" Style="{StaticResource PrimaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -561,11 +561,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="법원별 저감율" FontWeight="SemiBold" FontSize="12"/>
+                                        <TextBlock Text="법원별 저감율" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                         <TextBlock Text="{Binding CourtReductionRateCount, StringFormat={}{0}개 법원 설정됨, FallbackValue='미설정'}" 
-                                                   FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                   FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Grid>
                             </Border>
                             
@@ -577,11 +577,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="선순위 주택임대차보호법" FontWeight="SemiBold" FontSize="12"/>
+                                        <TextBlock Text="선순위 주택임대차보호법" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                         <TextBlock Text="{Binding HousingLeaseProtectionStatus, FallbackValue='미설정'}" 
-                                                   FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                   FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Grid>
                             </Border>
                             
@@ -593,11 +593,11 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="선순위 상가임대차보호법" FontWeight="SemiBold" FontSize="12"/>
+                                        <TextBlock Text="선순위 상가임대차보호법" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
                                         <TextBlock Text="{Binding CommercialLeaseProtectionStatus, FallbackValue='미설정'}" 
-                                                   FontSize="10" Foreground="{StaticResource TextMutedBrush}"/>
+                                                   FontSize="{StaticResource FontSizeTiny}" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
-                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="10"/>
+                                    <Button Grid.Column="1" Content="설정" Style="{StaticResource SecondaryButton}" Padding="8,4" FontSize="{StaticResource FontSizeTiny}"/>
                                 </Grid>
                             </Border>
                         </StackPanel>

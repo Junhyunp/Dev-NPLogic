@@ -70,7 +70,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="150"
-                                  FontSize="12">
+                                  FontSize="{StaticResource FontSizeBody}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="80"/>
                                 <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="90"/>
@@ -103,7 +103,7 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                             <TextBlock Text="규칙:" Style="{StaticResource LabelText}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                             <ComboBox SelectedIndex="{Binding SelectedRuleIndex, Mode=TwoWay}"
-                                      Width="70" FontSize="12" Padding="4,2" Margin="0,0,16,0">
+                                      Width="70" FontSize="{StaticResource FontSizeBody}" Padding="4,2" Margin="0,0,16,0">
                                 <ComboBoxItem Content="1순위"/>
                                 <ComboBoxItem Content="2순위"/>
                                 <ComboBoxItem Content="3순위"/>
@@ -130,7 +130,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="200"
-                                  FontSize="11"
+                                  FontSize="{StaticResource FontSizeSmall}"
                                   SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="사건번호" Binding="{Binding CaseNo}" Width="100" IsReadOnly="True"/>
@@ -165,7 +165,7 @@
                                   BorderThickness="1"
                                   BorderBrush="{StaticResource BlueGray200Brush}"
                                   MaxHeight="400"
-                                  FontSize="12">
+                                  FontSize="{StaticResource FontSizeBody}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="100" IsReadOnly="True"/>
                                 <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, Mode=TwoWay}" Width="100"/>
@@ -222,7 +222,7 @@
                             <TextBlock Text="📈 낙찰통계" Style="{StaticResource SectionHeader}" Margin="0"/>
                             <TextBlock Text="적용낙찰가율" 
                                        HorizontalAlignment="Right"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSizeH4}"
                                        FontWeight="Bold"
                                        Foreground="{StaticResource PrimaryBrush}"/>
                         </Grid>
@@ -302,12 +302,12 @@
                                     VerticalAlignment="Center">
                                 <StackPanel>
                                     <TextBlock Text="{Binding AppliedBidRate, StringFormat={}{0:P1}}" 
-                                               FontSize="20"
+                                               FontSize="{StaticResource FontSizeLarge}"
                                                FontWeight="Bold"
                                                Foreground="White"
                                                HorizontalAlignment="Center"/>
                                     <TextBlock Text="{Binding AppliedBidRateDescription}" 
-                                               FontSize="11"
+                                               FontSize="{StaticResource FontSizeSmall}"
                                                Foreground="White"
                                                Opacity="0.9"
                                                HorizontalAlignment="Center"

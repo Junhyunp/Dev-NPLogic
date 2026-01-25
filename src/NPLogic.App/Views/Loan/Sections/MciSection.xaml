@@ -27,7 +27,7 @@
         </Style>
         
         <Style x:Key="HeaderText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -36,7 +36,7 @@
         </Style>
         
         <Style x:Key="SubHeaderText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="8"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="Foreground" Value="#666666"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -45,13 +45,13 @@
         </Style>
         
         <Style x:Key="AmountText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         
         <Style x:Key="CenterText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeTiny}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
@@ -61,13 +61,13 @@
         <StackPanel>
             <!-- 섹션 헤더 -->
             <Border Background="{StaticResource IndigoBg}" Padding="8,4" BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="0,0,1,1">
-                <TextBlock Text="MCI 보증 *" FontWeight="Bold" FontSize="12"/>
+                <TextBlock Text="MCI 보증 *" FontWeight="Bold" FontSize="{StaticResource FontSizeBody}"/>
             </Border>
             
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                 <StackPanel>
                     <!-- 1안 -->
-                    <TextBlock Text="1안" FontWeight="Bold" FontSize="10" Margin="4,4,0,2"/>
+                    <TextBlock Text="1안" FontWeight="Bold" FontSize="{StaticResource FontSizeTiny}" Margin="4,4,0,2"/>
                     
                     <!-- 1안 헤더 행 -->
                     <Grid>
@@ -235,7 +235,7 @@
                     </Grid>
                     
                     <!-- 2안 -->
-                    <TextBlock Text="2안" FontWeight="Bold" FontSize="10" Margin="4,8,0,2"/>
+                    <TextBlock Text="2안" FontWeight="Bold" FontSize="{StaticResource FontSizeTiny}" Margin="4,8,0,2"/>
                     
                     <!-- 2안 헤더 행 -->
                     <Grid>

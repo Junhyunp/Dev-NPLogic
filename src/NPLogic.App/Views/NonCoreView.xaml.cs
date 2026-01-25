@@ -36,6 +36,7 @@ namespace NPLogic.Views
         // ========== 탭별 View/ViewModel 캐시 (성능 최적화) ==========
         private readonly Dictionary<string, UserControl> _tabViewCache = new();
         private readonly Dictionary<string, object> _tabViewModelCache = new();
+        private readonly Dictionary<string, object> _tabSecondaryViewModelCache = new(); // AuctionSchedule의 PublicSaleVM 등 보조 VM 캐시
         private Guid? _lastPropertyId; // 마지막으로 로드한 물건 ID (캐시 무효화용)
         
         // ========== 탭 전환 성능 최적화 (버전 기반 동기화) ==========
@@ -181,11 +182,12 @@ namespace NPLogic.Views
                 "Restructuring" => TabRestructuring,
                 "Evaluation" => TabEvaluation,
                 "AuctionSchedule" => TabAuctionSchedule,
+                "Interim" => TabInterim,
                 "CashFlow" => TabCashFlow,
                 "XnpvComparison" => TabXnpvComparison,
                 _ => TabHome
             };
-            
+
             radioButton.IsChecked = true;
         }
         
@@ -455,22 +457,25 @@ namespace NPLogic.Views
                     try
                     {
                         var auctionPublicSaleView = new AuctionPublicSaleView();
-                        
+
                         // ViewModel들 가져오기
                         var auctionVm = serviceProvider.GetRequiredService<AuctionScheduleDetailViewModel>();
                         var publicSaleVm = serviceProvider.GetRequiredService<PublicSaleScheduleViewModel>();
-                        
+
                         // PropertyId 설정
                         if (selectedPropertyId.HasValue)
                         {
                             auctionVm.SetPropertyId(selectedPropertyId.Value);
                             publicSaleVm.SetPropertyId(selectedPropertyId.Value);
                         }
-                        
+
                         // ViewModels 연결
                         auctionPublicSaleView.SetViewModels(auctionVm, publicSaleVm);
                         viewModel = auctionVm;
                         content = auctionPublicSaleView;
+
+                        // PublicSaleVM도 보조 캐시에 저장 (데이터 갱신 시 사용)
+                        _tabSecondaryViewModelCache["AuctionSchedule"] = publicSaleVm;
                     }
                     catch (Exception ex)
                     {
@@ -582,6 +587,14 @@ namespace NPLogic.Views
                         token.ThrowIfCancellationRequested();
                         await auctionVm.InitializeAsync();
                     }
+                    // PublicSaleScheduleViewModel도 갱신 (보조 캐시에서 조회)
+                    if (_tabSecondaryViewModelCache.TryGetValue("AuctionSchedule", out var secondaryVm) &&
+                        secondaryVm is PublicSaleScheduleViewModel publicSaleVm && selectedPropertyId.HasValue)
+                    {
+                        publicSaleVm.SetPropertyId(selectedPropertyId.Value);
+                        token.ThrowIfCancellationRequested();
+                        await publicSaleVm.InitializeAsync();
+                    }
                     break;
                     
                 case "Interim":
@@ -607,6 +620,7 @@ namespace NPLogic.Views
         {
             _tabViewCache.Clear();
             _tabViewModelCache.Clear();
+            _tabSecondaryViewModelCache.Clear();
             _lastPropertyId = null;
         }
 
