@@ -138,15 +138,10 @@ namespace NPLogic.Data.Repositories
             {
                 BorrowerRestructuring? existing = null;
 
-                // BorrowerId가 있으면 해당 기준으로 조회
+                // BorrowerId 기준으로 조회 (BorrowerNumber는 borrowers 테이블에 있음)
                 if (restructuring.BorrowerId.HasValue)
                 {
                     existing = await GetByBorrowerIdAsync(restructuring.BorrowerId.Value);
-                }
-                // BorrowerNumber가 있으면 해당 기준으로 조회
-                else if (!string.IsNullOrEmpty(restructuring.BorrowerNumber))
-                {
-                    existing = await GetByBorrowerNumberAsync(restructuring.BorrowerNumber);
                 }
 
                 if (existing != null)
@@ -168,24 +163,15 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
-        /// 차주일련번호로 조회
+        /// 차주일련번호로 조회 (borrowers 테이블에서 borrower_id 조회 후 사용)
+        /// Note: borrower_number 컬럼이 제거되어 직접 조회 불가.
+        ///       BorrowerRepository.GetByBorrowerNumberAsync() 사용 후 borrower_id로 조회 필요
         /// </summary>
+        [Obsolete("borrower_number 컬럼 제거됨. GetByBorrowerIdAsync 사용 권장")]
         public async Task<BorrowerRestructuring?> GetByBorrowerNumberAsync(string borrowerNumber)
         {
-            try
-            {
-                var client = await _supabaseService.GetClientAsync();
-                var response = await client
-                    .From<BorrowerRestructuringTable>()
-                    .Where(x => x.BorrowerNumber == borrowerNumber)
-                    .Single();
-
-                return response == null ? null : MapToModel(response);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"회생 정보 조회 실패: {ex.Message}", ex);
-            }
+            // TODO: BorrowerRepository를 주입받아 borrower_id를 먼저 조회하도록 변경 필요
+            throw new NotSupportedException("borrower_number 컬럼이 제거되었습니다. GetByBorrowerIdAsync를 사용하세요.");
         }
 
         /// <summary>
@@ -215,6 +201,7 @@ namespace NPLogic.Data.Repositories
             {
                 Id = table.Id,
                 BorrowerId = table.BorrowerId,
+                // 회생차주정보 대표컬럼
                 AssetType = table.AssetType,
                 BorrowerNumber = table.BorrowerNumber,
                 BorrowerName = table.BorrowerName,
@@ -243,6 +230,7 @@ namespace NPLogic.Data.Repositories
             {
                 Id = model.Id,
                 BorrowerId = model.BorrowerId,
+                // 회생차주정보 대표컬럼
                 AssetType = model.AssetType,
                 BorrowerNumber = model.BorrowerNumber,
                 BorrowerName = model.BorrowerName,
@@ -264,10 +252,32 @@ namespace NPLogic.Data.Repositories
                 UpdatedAt = model.UpdatedAt
             };
         }
+
+        /// <summary>
+        /// 여러 차주의 회생정보 일괄 삭제
+        /// </summary>
+        public async Task DeleteByBorrowerIdsAsync(List<Guid> borrowerIds)
+        {
+            if (borrowerIds == null || borrowerIds.Count == 0) return;
+
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<BorrowerRestructuringTable>()
+                    .Filter("borrower_id", Postgrest.Constants.Operator.In, borrowerIds)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"회생정보 일괄 삭제 실패: {ex.Message}", ex);
+            }
+        }
     }
 
     /// <summary>
     /// Supabase borrower_restructuring 테이블 매핑
+    /// 차주번호, 차주명, 자산유형은 borrower_id를 통해 borrowers 테이블과 JOIN으로 조회
     /// </summary>
     [Postgrest.Attributes.Table("borrower_restructuring")]
     internal class BorrowerRestructuringTable : Postgrest.Models.BaseModel
@@ -278,6 +288,7 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("borrower_id")]
         public Guid? BorrowerId { get; set; }
 
+        // 회생차주정보 대표컬럼
         [Postgrest.Attributes.Column("asset_type")]
         public string? AssetType { get; set; }
 

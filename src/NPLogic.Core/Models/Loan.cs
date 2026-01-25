@@ -8,12 +8,16 @@ namespace NPLogic.Core.Models
     public class Loan
     {
         public Guid Id { get; set; }
+
+        /// <summary>차주 ID (FK) - borrowers 테이블과 JOIN</summary>
         public Guid? BorrowerId { get; set; }
 
-        /// <summary>차주일련번호</summary>
+        // ========== 채권일반정보 대표컬럼 (직접 저장) ==========
+
+        /// <summary>차주일련번호 (채권일반정보 대표컬럼)</summary>
         public string? BorrowerNumber { get; set; }
 
-        /// <summary>차주명</summary>
+        /// <summary>차주명 (채권일반정보 대표컬럼)</summary>
         public string? BorrowerName { get; set; }
 
         // ========== 채권정보 (기본) ==========

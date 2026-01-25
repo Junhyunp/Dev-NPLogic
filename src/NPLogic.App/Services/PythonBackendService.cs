@@ -97,13 +97,13 @@ namespace NPLogic.Services
         /// </summary>
         private async Task<bool> StartServerInternalAsync()
         {
-            // 1. Python 스크립트 먼저 찾기 (개발 환경 우선 - recommend 모듈 지원)
-            var pythonScriptPath = FindPythonScriptPath();
-
-            // 2. Python 스크립트 없으면 exe 찾기 (패키징 환경)
+            // 1. exe 먼저 찾기 (패키징된 실행 파일 우선 - 의존성 문제 없음)
             var exePath = FindServerExePath();
 
-            if (string.IsNullOrEmpty(pythonScriptPath) && string.IsNullOrEmpty(exePath))
+            // 2. exe 없으면 Python 스크립트 찾기 (개발 환경 폴백)
+            var pythonScriptPath = FindPythonScriptPath();
+
+            if (string.IsNullOrEmpty(exePath) && string.IsNullOrEmpty(pythonScriptPath))
             {
                 throw new FileNotFoundException(
                     "Python 백엔드 서버를 찾을 수 없습니다. exe 파일 또는 Python 스크립트가 필요합니다.");
@@ -113,9 +113,23 @@ namespace NPLogic.Services
             {
                 ProcessStartInfo startInfo;
 
-                // 개발 환경: Python 스크립트 우선 (recommend 모듈 포함)
-                if (!string.IsNullOrEmpty(pythonScriptPath))
+                // exe 우선 (패키징 환경 - 의존성 문제 없음)
+                if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
                 {
+                    startInfo = new ProcessStartInfo
+                    {
+                        FileName = exePath,
+                        WorkingDirectory = Path.GetDirectoryName(exePath),
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true
+                    };
+                    Debug.WriteLine($"[PythonBackendService] Starting exe: {exePath}");
+                }
+                else if (!string.IsNullOrEmpty(pythonScriptPath))
+                {
+                    // 폴백: Python 스크립트 실행 (개발 환경)
                     startInfo = new ProcessStartInfo
                     {
                         FileName = "python",
@@ -127,20 +141,6 @@ namespace NPLogic.Services
                         RedirectStandardError = true
                     };
                     Debug.WriteLine($"[PythonBackendService] Starting python script: {pythonScriptPath}");
-                }
-                else if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
-                {
-                    // 패키징 환경: exe 파일로 실행
-                    startInfo = new ProcessStartInfo
-                    {
-                        FileName = exePath,
-                        WorkingDirectory = Path.GetDirectoryName(exePath),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    };
-                    Debug.WriteLine($"[PythonBackendService] Starting exe: {exePath}");
                 }
                 else
                 {
@@ -211,21 +211,31 @@ namespace NPLogic.Services
         /// </summary>
         private string? FindPythonScriptPath()
         {
-            // 프로젝트 루트를 찾아서 manager/client/Auction-Certificate/server.py 경로 반환
             // DirectoryInfo.Parent를 사용하여 상위 디렉토리로 이동하면서 찾음
             var current = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
-            
+
             while (current != null)
             {
-                var serverPath = Path.Combine(current.FullName, "manager", "client", "Auction-Certificate", PythonServerScript);
-                Debug.WriteLine($"[PythonBackendService] Checking python script at: {serverPath}");
-                
-                if (File.Exists(serverPath))
+                // 1. python 폴더에서 server.py 찾기 (권장 경로)
+                var pythonServerPath = Path.Combine(current.FullName, "python", PythonServerScript);
+                Debug.WriteLine($"[PythonBackendService] Checking python script at: {pythonServerPath}");
+
+                if (File.Exists(pythonServerPath))
                 {
-                    Debug.WriteLine($"[PythonBackendService] Found python script at: {serverPath}");
-                    return serverPath;
+                    Debug.WriteLine($"[PythonBackendService] Found python script at: {pythonServerPath}");
+                    return pythonServerPath;
                 }
-                
+
+                // 2. 레거시 경로: manager/client/Auction-Certificate/server.py
+                var legacyServerPath = Path.Combine(current.FullName, "manager", "client", "Auction-Certificate", PythonServerScript);
+                Debug.WriteLine($"[PythonBackendService] Checking legacy python script at: {legacyServerPath}");
+
+                if (File.Exists(legacyServerPath))
+                {
+                    Debug.WriteLine($"[PythonBackendService] Found python script at: {legacyServerPath}");
+                    return legacyServerPath;
+                }
+
                 current = current.Parent;
             }
 

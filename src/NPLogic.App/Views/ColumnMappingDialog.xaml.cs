@@ -287,6 +287,27 @@ namespace NPLogic.Views
         /// </summary>
         private void Confirm_Click(object sender, RoutedEventArgs e)
         {
+            // 중복 DB 컬럼 매핑 검증
+            var mappedColumns = ColumnMappings
+                .Where(m => !string.IsNullOrEmpty(m.DbColumn))
+                .GroupBy(m => m.DbColumn)
+                .Where(g => g.Count() > 1)
+                .ToList();
+
+            if (mappedColumns.Any())
+            {
+                var duplicates = mappedColumns
+                    .Select(g => $"'{g.Key}': {string.Join(", ", g.Select(m => m.ExcelColumn))}")
+                    .ToList();
+
+                MessageBox.Show(
+                    $"동일한 DB 컬럼에 여러 Excel 컬럼이 매핑되어 있습니다:\n\n{string.Join("\n", duplicates)}\n\n각 DB 컬럼은 하나의 Excel 컬럼만 매핑할 수 있습니다.",
+                    "중복 매핑 오류",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             // 결과 매핑 생성
             ResultMappings = ColumnMappings.Select(m => new ColumnMappingInfo
             {
@@ -375,6 +396,30 @@ namespace NPLogic.Views
                     ("listing_status", "상장/비상장"),
                     ("employee_count", "종업원수"),
                     ("establishment_date", "설립일")
+                },
+                DataDiskSheetType.Guarantee => new List<(string, string)>
+                {
+                    ("asset_type", "자산유형"),
+                    ("borrower_number", "차주일련번호"),
+                    ("borrower_name", "차주명"),
+                    ("loan_account_serial", "계좌일련번호"),
+                    ("guarantee_institution", "보증기관"),
+                    ("guarantee_type", "보증종류"),
+                    ("guarantee_number", "보증서번호"),
+                    ("guarantee_ratio", "보증비율"),
+                    ("converted_guarantee_balance", "환산후 보증잔액"),
+                    ("related_loan_account_number", "관련 대출채권 계좌번호")
+                },
+                DataDiskSheetType.RegistryDetail => new List<(string, string)>
+                {
+                    ("borrower_number", "차주일련번호"),
+                    ("borrower_name", "차주명"),
+                    ("property_number", "물건번호"),
+                    ("jibun_number", "지번번호"),
+                    ("address_province", "담보소재지1"),
+                    ("address_city", "담보소재지2"),
+                    ("address_district", "담보소재지3"),
+                    ("address_detail", "담보소재지4")
                 },
                 _ => new List<(string, string)>()
             };

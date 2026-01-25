@@ -606,7 +606,7 @@ namespace NPLogic.ViewModels
                 SelectPropertyTab(property.Id);
                 
 #if DEBUG
-                System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="SelectPropertyTab called - BUT NO TAB CONTENT REFRESH!",data=new{selectedPropertyTabNumber=SelectedPropertyTab?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
+                // System.IO.File.AppendAllText(@"c:\Users\pwm89\dev\nplogic\.cursor\debug.log", System.Text.Json.JsonSerializer.Serialize(new{location="NonCoreViewModel.cs:LoadProperty",message="SelectPropertyTab called - BUT NO TAB CONTENT REFRESH!",data=new{selectedPropertyTabNumber=SelectedPropertyTab?.PropertyNumber,activeTab=ActiveTab},timestamp=DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),sessionId="debug-session",hypothesisId="F"})+"\n");
 #endif
             }
         }

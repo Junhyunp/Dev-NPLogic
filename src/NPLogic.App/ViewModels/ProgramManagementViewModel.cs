@@ -30,6 +30,8 @@ namespace NPLogic.ViewModels
         private readonly BorrowerRestructuringRepository _borrowerRestructuringRepository;
         private readonly RightAnalysisRepository _rightAnalysisRepository;
         private readonly InterimRepository _interimRepository;
+        private readonly RegistrySheetDataRepository _registrySheetDataRepository;
+        private readonly CreditGuaranteeRepository _creditGuaranteeRepository;
         private readonly AuthService _authService;
         private readonly ExcelService _excelService;
         private readonly DataDiskUploadService _uploadService;
@@ -305,6 +307,8 @@ namespace NPLogic.ViewModels
             BorrowerRestructuringRepository borrowerRestructuringRepository,
             RightAnalysisRepository rightAnalysisRepository,
             InterimRepository interimRepository,
+            RegistrySheetDataRepository registrySheetDataRepository,
+            CreditGuaranteeRepository creditGuaranteeRepository,
             AuthService authService,
             ExcelService excelService,
             DataDiskUploadService uploadService,
@@ -320,6 +324,8 @@ namespace NPLogic.ViewModels
             _borrowerRestructuringRepository = borrowerRestructuringRepository ?? throw new ArgumentNullException(nameof(borrowerRestructuringRepository));
             _rightAnalysisRepository = rightAnalysisRepository ?? throw new ArgumentNullException(nameof(rightAnalysisRepository));
             _interimRepository = interimRepository ?? throw new ArgumentNullException(nameof(interimRepository));
+            _registrySheetDataRepository = registrySheetDataRepository ?? throw new ArgumentNullException(nameof(registrySheetDataRepository));
+            _creditGuaranteeRepository = creditGuaranteeRepository ?? throw new ArgumentNullException(nameof(creditGuaranteeRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
             _uploadService = uploadService ?? throw new ArgumentNullException(nameof(uploadService));
@@ -657,42 +663,152 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private async Task DeleteProgram(Program program)
         {
-            if (program == null) return;
+            System.Diagnostics.Debug.WriteLine($"[DeleteProgram] 시작 - program: {program?.ProgramName ?? "null"}");
 
-            // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
-            var canDelete = await _permissionService.CanDeleteAsync(program.Id, CurrentUser);
-            if (!canDelete)
+            if (program == null)
             {
-                ErrorMessage = PermissionService.GetNoPermissionMessage("delete");
+                System.Diagnostics.Debug.WriteLine("[DeleteProgram] program이 null이어서 return");
                 return;
             }
 
+            System.Diagnostics.Debug.WriteLine($"[DeleteProgram] CurrentUser: {CurrentUser?.Email ?? "null"}, IsAdmin: {CurrentUser?.IsAdmin}, IsPM: {CurrentUser?.IsPM}");
+
+            // 권한 체크: 해당 프로그램의 PM 또는 Admin만 삭제 가능
+            var canDelete = await _permissionService.CanDeleteAsync(program.Id, CurrentUser);
+            System.Diagnostics.Debug.WriteLine($"[DeleteProgram] canDelete: {canDelete}");
+
+            if (!canDelete)
+            {
+                var errorMsg = PermissionService.GetNoPermissionMessage("delete");
+                System.Diagnostics.Debug.WriteLine($"[DeleteProgram] 권한 없음: {errorMsg}");
+                MessageBox.Show(errorMsg, "권한 없음", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 3버튼 다이얼로그: Yes = 연결 데이터 포함 삭제, No = 프로그램만 삭제, Cancel = 취소
             var result = MessageBox.Show(
-                $"'{program.ProgramName}' 프로그램을 삭제하시겠습니까?\n\n주의: 프로그램에 연결된 물건이 있으면 삭제할 수 없습니다.",
+                $"'{program.ProgramName}' 프로그램을 삭제하시겠습니까?\n\n" +
+                "[예] - 연결된 모든 데이터(차주, 대출, 물건 등)와 함께 삭제\n" +
+                "[아니오] - 프로그램만 삭제 (연결 데이터가 있으면 실패)\n" +
+                "[취소] - 삭제 취소",
                 "프로그램 삭제",
-                MessageBoxButton.YesNo,
+                MessageBoxButton.YesNoCancel,
                 MessageBoxImage.Warning);
 
-            if (result != MessageBoxResult.Yes) return;
+            if (result == MessageBoxResult.Cancel) return;
 
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
 
-                await _programRepository.DeleteAsync(program.Id);
-                
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Cascade Delete: 연결된 모든 데이터 삭제
+                    await CascadeDeleteProgramAsync(program);
+                }
+                else
+                {
+                    // 프로그램만 삭제 시도
+                    await _programRepository.DeleteAsync(program.Id);
+                }
+
                 SuccessMessage = "프로그램이 삭제되었습니다.";
                 await LoadProgramsAsync();
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"삭제 실패: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[DeleteProgram] 삭제 실패: {ex.Message}");
+
+                // FK 제약조건 위반 시 친절한 메시지 표시
+                string errorMsg;
+                if (ex.Message.Contains("violates foreign key constraint") ||
+                    ex.Message.Contains("23503"))
+                {
+                    errorMsg = $"'{program.ProgramName}' 프로그램을 삭제할 수 없습니다.\n\n" +
+                               "프로그램에 연결된 데이터(차주, 대출, 물건 등)가 있습니다.\n" +
+                               "[예] 버튼을 눌러 연결 데이터와 함께 삭제하세요.";
+                }
+                else
+                {
+                    errorMsg = $"삭제 실패: {ex.Message}";
+                }
+
+                MessageBox.Show(errorMsg, "삭제 실패", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        /// <summary>
+        /// 프로그램과 연결된 모든 데이터 Cascade 삭제
+        /// </summary>
+        private async Task CascadeDeleteProgramAsync(Program program)
+        {
+            System.Diagnostics.Debug.WriteLine($"[CascadeDelete] 시작 - {program.ProgramName}");
+
+            // 1. 차주 ID 목록 조회
+            var borrowers = await _borrowerRepository.GetByProgramIdAsync(program.Id.ToString());
+            var borrowerIds = borrowers.Select(b => b.Id).ToList();
+            System.Diagnostics.Debug.WriteLine($"[CascadeDelete] 차주 {borrowerIds.Count}건");
+
+            // 2. 물건 ID 목록 조회
+            var properties = await _propertyRepository.GetByProgramIdAsync(program.Id);
+            var propertyIds = properties.Select(p => p.Id).ToList();
+            System.Diagnostics.Debug.WriteLine($"[CascadeDelete] 물건 {propertyIds.Count}건");
+
+            // 3. 등기부등본 데이터 삭제 (property_id FK)
+            if (propertyIds.Count > 0)
+            {
+                await _registrySheetDataRepository.DeleteByPropertyIdsAsync(propertyIds);
+                System.Diagnostics.Debug.WriteLine("[CascadeDelete] 등기부등본 데이터 삭제 완료");
+            }
+
+            // 4. 권리분석 삭제 (property_id FK)
+            if (propertyIds.Count > 0)
+            {
+                await _rightAnalysisRepository.DeleteByPropertyIdsAsync(propertyIds);
+                System.Diagnostics.Debug.WriteLine("[CascadeDelete] 권리분석 삭제 완료");
+            }
+
+            // 5. 신용보증서 삭제 (borrower_id FK)
+            if (borrowerIds.Count > 0)
+            {
+                await _creditGuaranteeRepository.DeleteByBorrowerIdsAsync(borrowerIds);
+                System.Diagnostics.Debug.WriteLine("[CascadeDelete] 신용보증서 삭제 완료");
+            }
+
+            // 6. 대출 삭제 (borrower_id FK)
+            if (borrowerIds.Count > 0)
+            {
+                await _loanRepository.DeleteByBorrowerIdsAsync(borrowerIds);
+                System.Diagnostics.Debug.WriteLine("[CascadeDelete] 대출 삭제 완료");
+            }
+
+            // 7. 회생정보 삭제 (borrower_id FK)
+            if (borrowerIds.Count > 0)
+            {
+                await _borrowerRestructuringRepository.DeleteByBorrowerIdsAsync(borrowerIds);
+                System.Diagnostics.Debug.WriteLine("[CascadeDelete] 회생정보 삭제 완료");
+            }
+
+            // 8. 물건 삭제 (program_id FK)
+            await _propertyRepository.DeleteByProgramIdAsync(program.Id);
+            System.Diagnostics.Debug.WriteLine("[CascadeDelete] 물건 삭제 완료");
+
+            // 9. 차주 삭제 (program_id FK)
+            await _borrowerRepository.DeleteByProgramIdAsync(program.Id.ToString());
+            System.Diagnostics.Debug.WriteLine("[CascadeDelete] 차주 삭제 완료");
+
+            // 10. 시트 매핑 삭제 (program_id FK)
+            await _sheetMappingRepository.DeleteByProgramIdAsync(program.Id);
+            System.Diagnostics.Debug.WriteLine("[CascadeDelete] 시트 매핑 삭제 완료");
+
+            // 11. 프로그램 삭제
+            await _programRepository.DeleteAsync(program.Id);
+            System.Diagnostics.Debug.WriteLine("[CascadeDelete] 프로그램 삭제 완료");
         }
 
         /// <summary>
@@ -1051,9 +1167,12 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private async Task SaveProgramWithData()
         {
+            System.Diagnostics.Debug.WriteLine($"[SaveProgramWithData] 시작 - FormProgramName: '{FormProgramName}', ShowSheetSelection: {ShowSheetSelection}, HasSelectedSheets: {HasSelectedSheets}");
+
             if (string.IsNullOrWhiteSpace(FormProgramName))
             {
                 ErrorMessage = "프로그램명을 입력해주세요.";
+                System.Diagnostics.Debug.WriteLine("[SaveProgramWithData] 프로그램명이 비어있음");
                 return;
             }
 
@@ -1133,7 +1252,14 @@ namespace NPLogic.ViewModels
                 {
                     // 시트 선택 모드: 선택된 시트들 처리
                     var selectedSheets = AvailableSheets.Where(s => s.IsSelected).ToList();
-                    
+
+                    // 시트 처리 순서 로그
+                    System.Diagnostics.Debug.WriteLine($"[SaveProgramWithData] 처리할 시트 순서:");
+                    for (int i = 0; i < selectedSheets.Count; i++)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  {i + 1}. {selectedSheets[i].Name} ({selectedSheets[i].SheetType})");
+                    }
+
                     foreach (var sheet in selectedSheets)
                     {
                         try
@@ -1247,17 +1373,24 @@ namespace NPLogic.ViewModels
                             var borrower = MapRowToBorrower(row, programId);
                             if (string.IsNullOrEmpty(borrower.BorrowerNumber))
                             {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}): 차주번호가 비어있음");
                                 failed++;
                                 continue;
                             }
-                            
+
                             var saved = await _borrowerRepository.CreateAsync(borrower);
                             borrowerCache[borrower.BorrowerNumber] = saved.Id;
+                            // S- 차주번호인 경우 상세 로그
+                            if (borrower.BorrowerNumber.StartsWith("S-"))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet-차주] S- 차주 생성됨: 차주번호='{saved.BorrowerNumber}', ID={saved.Id}");
+                            }
                             created++;
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패: {ex.Message}");
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}, 차주번호: {borrowerNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1269,7 +1402,7 @@ namespace NPLogic.ViewModels
                     {
                         processed++;
                         UpdateProgress(processed, totalRows, sheet.Name);
-                        
+
                         try
                         {
                             // 차주번호로 차주ID 조회
@@ -1287,17 +1420,25 @@ namespace NPLogic.ViewModels
                             Guid? borrowerId = null;
                             if (!string.IsNullOrEmpty(borrowerNumber))
                             {
-                                var existingBorrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet-회생] 차주번호 '{borrowerNumber}' 조회 시도 (programId: {programId})...");
+                                var existingBorrower = await _borrowerRepository.GetByProgramIdAndBorrowerNumberAsync(programId, borrowerNumber);
                                 borrowerId = existingBorrower?.Id;
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet-회생] 차주번호 '{borrowerNumber}' 조회 결과: {(existingBorrower != null ? $"찾음 (ID: {borrowerId})" : "없음")}");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet-회생] 행 {processed}: 차주번호가 비어있음");
                             }
 
                             var restructuring = MapRowToBorrowerRestructuring(row, borrowerId);
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet-회생] 행 {processed}: borrowerId = {(borrowerId.HasValue ? borrowerId.Value.ToString() : "null")} -> 실제 사용값: {restructuring.BorrowerId}");
                             await _borrowerRestructuringRepository.CreateAsync(restructuring);
                             created++;
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 회생정보 생성 실패: {ex.Message}");
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 회생정보 생성 실패 (행 {processed}, 차주번호: {borrowerNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1327,7 +1468,7 @@ namespace NPLogic.ViewModels
                             Guid? borrowerId = null;
                             if (!string.IsNullOrEmpty(borrowerNumber))
                             {
-                                var existingBorrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                                var existingBorrower = await _borrowerRepository.GetByProgramIdAndBorrowerNumberAsync(programId, borrowerNumber);
                                 borrowerId = existingBorrower?.Id;
                             }
 
@@ -1337,7 +1478,9 @@ namespace NPLogic.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 대출 생성 실패: {ex.Message}");
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            var loanNum = row.FirstOrDefault(r => r.Key.Contains("대출") || r.Key.Contains("채권") || r.Key.Contains("계좌")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 대출 생성 실패 (행 {processed}, 차주: {borrowerNum}, 대출번호: {loanNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1348,44 +1491,45 @@ namespace NPLogic.ViewModels
                     // SheetMappingConfig 사용하여 중앙화된 매핑 적용
                     var mappingRules = SheetMappingConfig.GetMappingRules(SheetType.Property);
                     int rowIndex = 0;
+                    // 차주별 물건 순번 카운터 (차주번호 -> 현재 순번)
+                    var borrowerPropertyCount = new Dictionary<string, int>();
                     foreach (var row in data)
                     {
                         rowIndex++;
                         processed++;
                         UpdateProgress(processed, totalRows, sheet.Name);
-                        
+
                         try
                         {
                             // 중앙화된 매핑 규칙 사용 (권리분석 데이터 포함)
                             var (property, rightData) = MapRowToPropertyWithRules(row, columns, mappingRules, programId);
                             if (property == null)
                             {
+                                var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 물건 매핑 실패 (행 {rowIndex}, 차주: {borrowerNum}): property가 null");
                                 failed++;
                                 continue;
                             }
-                            
-                            // 물건번호 설정 - 우선순위: 경매사건번호(PropertyNumber) > 물건번호(CollateralNumber) > 자동생성
-                            string finalPropertyNumber;
-                            if (!string.IsNullOrEmpty(property.PropertyNumber) && 
-                                !property.PropertyNumber.All(char.IsDigit))
+
+                            // 물건번호 설정: {차주번호}_{순번} 형식 (예: R-007_1, R-007_2)
+                            var borrowerNumber = property.BorrowerNumber ?? $"UNKNOWN_{rowIndex}";
+
+                            // 해당 차주의 물건 순번 증가
+                            if (borrowerPropertyCount.TryGetValue(borrowerNumber, out int currentCount))
                             {
-                                // 경매사건번호(IBK)가 있으면 사용
-                                finalPropertyNumber = property.PropertyNumber;
-                            }
-                            else if (!string.IsNullOrEmpty(property.CollateralNumber))
-                            {
-                                // 물건번호가 있으면 사용
-                                finalPropertyNumber = property.CollateralNumber;
+                                borrowerPropertyCount[borrowerNumber] = currentCount + 1;
                             }
                             else
                             {
-                                // 없으면 자동생성
-                                var prefix = property.BorrowerNumber ?? sheet.Name;
-                                finalPropertyNumber = $"{prefix}-P{rowIndex}";
+                                borrowerPropertyCount[borrowerNumber] = 1;
                             }
-                            
+
+                            var propertySeq = borrowerPropertyCount[borrowerNumber];
+                            var finalPropertyNumber = $"{borrowerNumber}_{propertySeq}";
+
                             property.PropertyNumber = finalPropertyNumber;
-                            
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 행 {rowIndex}: BorrowerNumber='{borrowerNumber}', 순번={propertySeq} → PropertyNumber='{finalPropertyNumber}'");
+
                             // CreateAsync 반환값 사용 - DB에 저장된 실제 ID 사용
                             var createdProperty = await _propertyRepository.CreateAsync(property);
                             
@@ -1407,7 +1551,90 @@ namespace NPLogic.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 물건 생성 실패 (행 {rowIndex}): {ex.Message}");
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            var propertyNum = row.FirstOrDefault(r => r.Key.Contains("물건") || r.Key.Contains("Property")).Value?.ToString() ?? "unknown";
+                            var address = row.FirstOrDefault(r => r.Key.Contains("소재지")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 물건 생성 실패 (행 {rowIndex}, 차주: {borrowerNum}, 물건번호: {propertyNum}, 소재지: {address}): {ex.Message}");
+                            if (ex.InnerException != null)
+                                System.Diagnostics.Debug.WriteLine($"  └─ InnerException: {ex.InnerException.Message}");
+                            failed++;
+                        }
+                    }
+                    break;
+
+                case SheetType.RegistryDetail:
+                    // 등기부등본정보 -> registry_sheet_data 테이블
+                    foreach (var row in data)
+                    {
+                        processed++;
+                        UpdateProgress(processed, totalRows, sheet.Name);
+
+                        try
+                        {
+                            var registryData = MapRowToRegistrySheetData(row, programId);
+                            if (string.IsNullOrEmpty(registryData.BorrowerNumber))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 등기부등본 생성 실패 (행 {processed}): 차주번호가 비어있음");
+                                failed++;
+                                continue;
+                            }
+
+                            await _registrySheetDataRepository.CreateAsync(registryData);
+                            created++;
+                        }
+                        catch (Exception ex)
+                        {
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 등기부등본 생성 실패 (행 {processed}, 차주번호: {borrowerNum}): {ex.Message}");
+                            failed++;
+                        }
+                    }
+                    break;
+
+                case SheetType.Guarantee:
+                    // 신용보증서 -> credit_guarantees 테이블
+                    foreach (var row in data)
+                    {
+                        processed++;
+                        UpdateProgress(processed, totalRows, sheet.Name);
+
+                        try
+                        {
+                            // 차주번호로 차주ID 조회
+                            string? borrowerNumber = null;
+                            foreach (var kvp in row)
+                            {
+                                var colName = kvp.Key?.ToLower() ?? "";
+                                if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
+                                {
+                                    borrowerNumber = kvp.Value?.ToString();
+                                    break;
+                                }
+                            }
+
+                            Guid? borrowerId = null;
+                            if (!string.IsNullOrEmpty(borrowerNumber))
+                            {
+                                var existingBorrower = await _borrowerRepository.GetByProgramIdAndBorrowerNumberAsync(programId, borrowerNumber);
+                                borrowerId = existingBorrower?.Id;
+                            }
+
+                            var guarantee = MapRowToCreditGuarantee(row, borrowerId);
+                            if (string.IsNullOrEmpty(guarantee.GuaranteeNumber) && string.IsNullOrEmpty(guarantee.BorrowerNumber))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}): 보증서번호와 차주번호가 모두 비어있음");
+                                failed++;
+                                continue;
+                            }
+
+                            await _creditGuaranteeRepository.CreateAsync(guarantee);
+                            created++;
+                        }
+                        catch (Exception ex)
+                        {
+                            var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
+                            var guaranteeNum = row.FirstOrDefault(r => r.Key.Contains("보증서")).Value?.ToString() ?? "unknown";
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}, 차주번호: {borrowerNum}, 보증서번호: {guaranteeNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1417,7 +1644,7 @@ namespace NPLogic.ViewModels
                     System.Diagnostics.Debug.WriteLine($"[ProcessSheet] '{sheet.Name}'은 지원하지 않는 시트 타입입니다 ({sheet.SheetType})");
                     break;
             }
-            
+
             System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 결과: 생성={created}, 실패={failed}");
 
             return (created, updated, failed);
@@ -1661,6 +1888,10 @@ namespace NPLogic.ViewModels
                 Status = "pending"
             };
 
+            // 차주번호와 물건번호를 별도로 추출 (나중에 조합)
+            string? borrowerNumber = null;
+            string? propertySeqNumber = null;
+
             // 컬럼 이름으로 자동 매핑 시도
             foreach (var kvp in row)
             {
@@ -1669,10 +1900,16 @@ namespace NPLogic.ViewModels
 
                 if (value == null) continue;
 
-                // 물건번호
-                if (colName.Contains("물건번호") || colName.Contains("번호") || colName.Contains("propertynumber"))
+                // 차주번호 추출 (property_number 생성에 사용)
+                if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
                 {
-                    property.PropertyNumber = value.ToString();
+                    borrowerNumber = value.ToString()?.Trim();
+                }
+                // 물건번호 (주의: "번호"만 있는 컬럼은 제외 - "일련번호", "차주번호" 등과 구분)
+                else if (colName.Contains("물건번호") || colName.Contains("propertynumber") ||
+                    (colName.Contains("property") && colName.Contains("번호")))
+                {
+                    propertySeqNumber = value.ToString()?.Trim();
                 }
                 // 물건유형
                 else if (colName.Contains("유형") || colName.Contains("종류") || colName.Contains("propertytype") || colName.Contains("담보물형태"))
@@ -1718,6 +1955,16 @@ namespace NPLogic.ViewModels
                     if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var minimumBid))
                         property.MinimumBid = minimumBid;
                 }
+            }
+
+            // PropertyNumber 생성: 차주번호-물건번호 조합으로 유니크하게
+            if (!string.IsNullOrEmpty(borrowerNumber) && !string.IsNullOrEmpty(propertySeqNumber))
+            {
+                property.PropertyNumber = $"{borrowerNumber}-{propertySeqNumber}";
+            }
+            else if (!string.IsNullOrEmpty(propertySeqNumber))
+            {
+                property.PropertyNumber = propertySeqNumber;
             }
 
             return property;
@@ -2182,6 +2429,149 @@ namespace NPLogic.ViewModels
             }
 
             return collection;
+        }
+
+        /// <summary>
+        /// 행 데이터를 RegistrySheetData 객체로 매핑 (등기부등본정보)
+        /// </summary>
+        private RegistrySheetData MapRowToRegistrySheetData(Dictionary<string, object> row, string programId)
+        {
+            var registryData = new RegistrySheetData
+            {
+                Id = Guid.NewGuid()
+            };
+
+            foreach (var kvp in row)
+            {
+                var colName = kvp.Key?.ToLower().Replace("\n", " ").Replace("\r", "").Trim() ?? "";
+                var value = kvp.Value;
+
+                if (value == null || string.IsNullOrWhiteSpace(value.ToString())) continue;
+
+                // 차주일련번호
+                if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
+                {
+                    registryData.BorrowerNumber = value.ToString()?.Trim();
+                }
+                // 차주명
+                else if (colName.Contains("차주명"))
+                {
+                    registryData.BorrowerName = value.ToString();
+                }
+                // 물건번호
+                else if (colName.Contains("물건번호") || (colName.Contains("property") && colName.Contains("번호")))
+                {
+                    registryData.PropertyNumber = value.ToString()?.Trim();
+                }
+                // 지번번호
+                else if (colName.Contains("지번번호") || colName.Contains("지번"))
+                {
+                    registryData.JibunNumber = value.ToString()?.Trim();
+                }
+                // 담보소재지1 (시/도)
+                else if (colName.Contains("담보소재지1") || colName.Contains("소재지1") || colName.Contains("시도") || colName == "시" || colName == "도")
+                {
+                    registryData.AddressProvince = value.ToString();
+                }
+                // 담보소재지2 (시/군/구)
+                else if (colName.Contains("담보소재지2") || colName.Contains("소재지2") || colName.Contains("시군구"))
+                {
+                    registryData.AddressCity = value.ToString();
+                }
+                // 담보소재지3 (읍/면/동)
+                else if (colName.Contains("담보소재지3") || colName.Contains("소재지3") || colName.Contains("읍면동"))
+                {
+                    registryData.AddressDistrict = value.ToString();
+                }
+                // 담보소재지4 (상세주소)
+                else if (colName.Contains("담보소재지4") || colName.Contains("소재지4") || colName.Contains("상세주소"))
+                {
+                    registryData.AddressDetail = value.ToString();
+                }
+            }
+
+            return registryData;
+        }
+
+        /// <summary>
+        /// 행 데이터를 CreditGuarantee 객체로 매핑 (신용보증서)
+        /// </summary>
+        private CreditGuarantee MapRowToCreditGuarantee(Dictionary<string, object> row, Guid? borrowerId)
+        {
+            var guarantee = new CreditGuarantee
+            {
+                Id = Guid.NewGuid(),
+                BorrowerId = borrowerId
+            };
+
+            foreach (var kvp in row)
+            {
+                var colName = kvp.Key?.ToLower().Replace("\n", " ").Replace("\r", "").Trim() ?? "";
+                var value = kvp.Value;
+
+                if (value == null || string.IsNullOrWhiteSpace(value.ToString())) continue;
+
+                // 자산유형
+                if (colName.Contains("자산유형") || colName.Contains("asset"))
+                {
+                    guarantee.AssetType = value.ToString();
+                }
+                // 차주일련번호
+                else if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
+                {
+                    guarantee.BorrowerNumber = value.ToString()?.Trim();
+                }
+                // 차주명
+                else if (colName.Contains("차주명"))
+                {
+                    guarantee.BorrowerName = value.ToString();
+                }
+                // 계좌일련번호
+                else if (colName.Contains("계좌일련번호"))
+                {
+                    guarantee.AccountSerial = value.ToString()?.Trim();
+                }
+                // 관련 대출채권 계좌번호
+                else if (colName.Contains("관련") && colName.Contains("계좌"))
+                {
+                    guarantee.RelatedLoanAccountNumber = value.ToString()?.Trim();
+                }
+                // 보증서번호
+                else if (colName.Contains("보증서번호"))
+                {
+                    guarantee.GuaranteeNumber = value.ToString()?.Trim();
+                }
+                // 보증종류
+                else if (colName.Contains("보증종류") || colName.Contains("보증유형"))
+                {
+                    guarantee.GuaranteeType = value.ToString();
+                }
+                // 보증기관
+                else if (colName.Contains("보증기관"))
+                {
+                    guarantee.GuaranteeInstitution = value.ToString();
+                }
+                // 보증비율
+                else if (colName.Contains("보증비율"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", "").Replace("%", ""), out var ratio))
+                        guarantee.GuaranteeRatio = ratio;
+                }
+                // 환산후 보증잔액
+                else if (colName.Contains("환산") && colName.Contains("보증잔액"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var balance))
+                        guarantee.ConvertedGuaranteeBalance = balance;
+                }
+                // 보증금액
+                else if (colName.Contains("보증금액"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var amount))
+                        guarantee.GuaranteeAmount = amount;
+                }
+            }
+
+            return guarantee;
         }
 
         /// <summary>

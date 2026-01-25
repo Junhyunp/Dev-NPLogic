@@ -424,17 +424,33 @@ namespace NPLogic.Services
 
             var normalizedSheet = NormalizeColumnName(sheetName);
 
+            // 1. 정확히 일치하는 경우 먼저 확인
             foreach (var kvp in config.Sheets)
             {
                 if (!string.IsNullOrEmpty(kvp.Value.SheetName))
                 {
                     var normalizedBankSheet = NormalizeColumnName(kvp.Value.SheetName);
-                    if (normalizedSheet == normalizedBankSheet || 
-                        sheetName.Contains(kvp.Value.SheetName) ||
-                        normalizedSheet.Contains(normalizedBankSheet))
+                    if (normalizedSheet == normalizedBankSheet ||
+                        sheetName.Equals(kvp.Value.SheetName, StringComparison.OrdinalIgnoreCase))
                     {
-                        return kvp.Key; // 대표 시트명 반환 (차주일반정보, 물건정보 등)
+                        return kvp.Key;
                     }
+                }
+            }
+
+            // 2. 더 구체적인 시트명(길이가 긴 것)부터 Contains 확인
+            //    예: "Sheet A-1"이 "Sheet A"보다 먼저 확인되어야 함
+            var orderedSheets = config.Sheets
+                .Where(kvp => !string.IsNullOrEmpty(kvp.Value.SheetName))
+                .OrderByDescending(kvp => kvp.Value.SheetName!.Length);
+
+            foreach (var kvp in orderedSheets)
+            {
+                var normalizedBankSheet = NormalizeColumnName(kvp.Value.SheetName!);
+                if (sheetName.Contains(kvp.Value.SheetName!) ||
+                    normalizedSheet.Contains(normalizedBankSheet))
+                {
+                    return kvp.Key;
                 }
             }
 

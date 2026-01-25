@@ -9,17 +9,21 @@ namespace NPLogic.Core.Models
     {
         public Guid Id { get; set; }
 
-        /// <summary>차주 ID (FK, optional)</summary>
+        /// <summary>차주 ID (FK) - borrowers 테이블과 JOIN</summary>
         public Guid? BorrowerId { get; set; }
 
-        /// <summary>자산유형</summary>
+        // ========== 회생차주정보 대표컬럼 (직접 저장) ==========
+
+        /// <summary>자산유형 (회생차주정보 대표컬럼)</summary>
         public string? AssetType { get; set; }
 
-        /// <summary>차주일련번호</summary>
+        /// <summary>차주일련번호 (회생차주정보 대표컬럼)</summary>
         public string? BorrowerNumber { get; set; }
 
-        /// <summary>차주명</summary>
+        /// <summary>차주명 (회생차주정보 대표컬럼)</summary>
         public string? BorrowerName { get; set; }
+
+        // ========== 회생 정보 ==========
 
         /// <summary>인가/미인가</summary>
         public string? ApprovalStatus { get; set; }

@@ -119,7 +119,8 @@ namespace NPLogic
             services.AddSingleton<ExcelService>();
             services.AddSingleton<StorageService>();
             services.AddSingleton<StaticMapService>();
-            
+            services.AddSingleton<VworldService>();
+
             // Python Backend Services (Singleton)
             // PythonBackendService는 자체 Singleton이므로 등록하지 않음 (Instance 프로퍼티 사용)
             services.AddSingleton<RegistryOcrService>();
@@ -145,6 +146,8 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.PropertyQaRepository>();
             services.AddSingleton<Data.Repositories.InterimRepository>();
             services.AddSingleton<Data.Repositories.ProgramSheetMappingRepository>();
+            services.AddSingleton<Data.Repositories.RegistrySheetDataRepository>();
+            services.AddSingleton<Data.Repositories.CreditGuaranteeRepository>();
 
             // Upload Services (Singleton)
             services.AddSingleton<Services.DataDiskUploadService>();
@@ -262,6 +265,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.BorrowerRestructuringRepository>(),
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.InterimRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RegistrySheetDataRepository>(),
+                    sp.GetRequiredService<Data.Repositories.CreditGuaranteeRepository>(),
                     sp.GetRequiredService<AuthService>(),
                     sp.GetRequiredService<ExcelService>(),
                     sp.GetRequiredService<Services.DataDiskUploadService>(),

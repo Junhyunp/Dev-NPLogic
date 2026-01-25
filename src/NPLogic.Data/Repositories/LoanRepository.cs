@@ -104,6 +104,27 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 계좌번호로 조회
+        /// </summary>
+        public async Task<Loan?> GetByAccountNumberAsync(string accountNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<LoanTable>()
+                    .Where(x => x.AccountNumber == accountNumber)
+                    .Single();
+
+                return response == null ? null : MapToLoan(response);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"대출 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// MCI 보증이 있는 대출만 조회
         /// </summary>
         public async Task<List<Loan>> GetMciLoansAsync()
@@ -345,6 +366,7 @@ namespace NPLogic.Data.Repositories
             {
                 Id = table.Id,
                 BorrowerId = table.BorrowerId,
+                // 채권일반정보 대표컬럼
                 BorrowerNumber = table.BorrowerNumber,
                 BorrowerName = table.BorrowerName,
                 AccountSerial = table.AccountSerial,
@@ -401,6 +423,7 @@ namespace NPLogic.Data.Repositories
             {
                 Id = loan.Id,
                 BorrowerId = loan.BorrowerId,
+                // 채권일반정보 대표컬럼
                 BorrowerNumber = loan.BorrowerNumber,
                 BorrowerName = loan.BorrowerName,
                 AccountSerial = loan.AccountSerial,
@@ -447,6 +470,27 @@ namespace NPLogic.Data.Repositories
                 UpdatedAt = loan.UpdatedAt
             };
         }
+
+        /// <summary>
+        /// 여러 차주의 대출 일괄 삭제
+        /// </summary>
+        public async Task DeleteByBorrowerIdsAsync(List<Guid> borrowerIds)
+        {
+            if (borrowerIds == null || borrowerIds.Count == 0) return;
+
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<LoanTable>()
+                    .Filter("borrower_id", Postgrest.Constants.Operator.In, borrowerIds)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"대출 일괄 삭제 실패: {ex.Message}", ex);
+            }
+        }
     }
 
     /// <summary>
@@ -464,6 +508,7 @@ namespace NPLogic.Data.Repositories
 
     /// <summary>
     /// Supabase loans 테이블 매핑
+    /// 차주번호, 차주명은 borrower_id를 통해 borrowers 테이블과 JOIN으로 조회
     /// </summary>
     [Postgrest.Attributes.Table("loans")]
     internal class LoanTable : Postgrest.Models.BaseModel
@@ -473,6 +518,8 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("borrower_id")]
         public Guid? BorrowerId { get; set; }
+
+        // ========== 채권일반정보 대표컬럼 ==========
 
         [Postgrest.Attributes.Column("borrower_number")]
         public string? BorrowerNumber { get; set; }

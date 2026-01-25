@@ -171,6 +171,71 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 차주번호와 물건번호로 물건 조회 (등기부등본정보 연결용)
+        /// borrower_number는 borrowers 테이블에 있으므로 borrower_id를 먼저 조회한 후 물건 조회
+        /// </summary>
+        public async Task<Property?> GetByBorrowerAndPropertyNumberAsync(string borrowerNumber, string? propertyNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+
+                // 1. borrowers 테이블에서 차주번호로 borrower_id 조회
+                var borrowerResponse = await client
+                    .From<BorrowerTable>()
+                    .Where(x => x.BorrowerNumber == borrowerNumber)
+                    .Single();
+
+                if (borrowerResponse == null)
+                    return null;
+
+                var borrowerId = borrowerResponse.Id;
+
+                // 2. 물건 테이블에서 borrower_id로 조회
+                var query = client
+                    .From<PropertyTable>()
+                    .Where(x => x.BorrowerId == borrowerId);
+
+                // 물건번호가 있으면 추가 필터
+                if (!string.IsNullOrEmpty(propertyNumber))
+                {
+                    var response = await query.Get();
+                    var match = response.Models.FirstOrDefault(x =>
+                        x.PropertyNumber == propertyNumber ||
+                        x.CollateralNumber == propertyNumber);
+                    return match == null ? null : MapToProperty(match);
+                }
+                else
+                {
+                    // 물건번호 없으면 해당 차주의 첫 번째 물건 반환
+                    var response = await query
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Limit(1)
+                        .Get();
+                    return response.Models.Count > 0 ? MapToProperty(response.Models.First()) : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PropertyRepository] GetByBorrowerAndPropertyNumberAsync 실패: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Borrowers 테이블 (borrower_number 조회용)
+        /// </summary>
+        [Postgrest.Attributes.Table("borrowers")]
+        private class BorrowerTable : Postgrest.Models.BaseModel
+        {
+            [Postgrest.Attributes.PrimaryKey("id", false)]
+            public Guid Id { get; set; }
+
+            [Postgrest.Attributes.Column("borrower_number")]
+            public string? BorrowerNumber { get; set; }
+        }
+
+        /// <summary>
         /// 검색 (주소, 물건번호)
         /// </summary>
         public async Task<List<Property>> SearchAsync(string searchText)
@@ -307,7 +372,7 @@ namespace NPLogic.Data.Repositories
                         .Where(x => x.ProgramId == programId)
                         .Where(x => x.Status == status)
                         .Where(x => x.AssignedTo == assignedTo)
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -317,7 +382,7 @@ namespace NPLogic.Data.Repositories
                         .From<PropertyTable>()
                         .Where(x => x.ProgramId == programId)
                         .Where(x => x.Status == status)
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -327,7 +392,7 @@ namespace NPLogic.Data.Repositories
                         .From<PropertyTable>()
                         .Where(x => x.ProgramId == programId)
                         .Where(x => x.AssignedTo == assignedTo)
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -336,7 +401,7 @@ namespace NPLogic.Data.Repositories
                     response = await client
                         .From<PropertyTable>()
                         .Where(x => x.ProgramId == programId)
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -345,7 +410,7 @@ namespace NPLogic.Data.Repositories
                     response = await client
                         .From<PropertyTable>()
                         .Where(x => x.AssignedTo == assignedTo)
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -354,7 +419,7 @@ namespace NPLogic.Data.Repositories
                     // PM 권한: 담당 프로그램 목록으로 필터링 - 클라이언트 측 필터링 사용
                     var allResponse = await client
                         .From<PropertyTable>()
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Get();
                     
                     var filteredItems = allResponse.Models
@@ -372,7 +437,7 @@ namespace NPLogic.Data.Repositories
                 {
                     response = await client
                         .From<PropertyTable>()
-                        .Order(x => x.BorrowerNumber, Postgrest.Constants.Ordering.Ascending)
+                        .Order(x => x.PropertyNumber, Postgrest.Constants.Ordering.Ascending)
                         .Range(from, to)
                         .Get();
                 }
@@ -889,7 +954,6 @@ namespace NPLogic.Data.Repositories
                 Status = table.Status ?? "pending",
                 AssignedTo = table.AssignedTo,
                 // 대시보드 진행 관리 필드
-                BorrowerNumber = table.BorrowerNumber,
                 DebtorName = table.DebtorName,
                 CollateralNumber = table.CollateralNumber,
                 AgreementDoc = table.AgreementDoc,
@@ -909,9 +973,12 @@ namespace NPLogic.Data.Repositories
                 RightsAnalysisStatus = table.RightsAnalysisStatus ?? "pending",
                 // 물건정보 시트 대표컬럼
                 AssetType = table.AssetType,
+                BorrowerNumber = table.BorrowerNumber,
+                BorrowerName = table.BorrowerName,
                 AddressProvince = table.AddressProvince,
                 AddressCity = table.AddressCity,
                 AddressDistrict = table.AddressDistrict,
+                Pnu = table.Pnu,
                 JointCollateralAmount = table.JointCollateralAmount,
                 // 선순위 정보
                 SeniorMortgageAmount = table.SeniorMortgageAmount,
@@ -997,7 +1064,6 @@ namespace NPLogic.Data.Repositories
                 Status = property.Status,
                 AssignedTo = property.AssignedTo,
                 // 대시보드 진행 관리 필드
-                BorrowerNumber = property.BorrowerNumber,
                 DebtorName = property.DebtorName,
                 CollateralNumber = property.CollateralNumber,
                 AgreementDoc = property.AgreementDoc,
@@ -1017,9 +1083,12 @@ namespace NPLogic.Data.Repositories
                 RightsAnalysisStatus = property.RightsAnalysisStatus,
                 // 물건정보 시트 대표컬럼
                 AssetType = property.AssetType,
+                BorrowerNumber = property.BorrowerNumber,
+                BorrowerName = property.BorrowerName,
                 AddressProvince = property.AddressProvince,
                 AddressCity = property.AddressCity,
                 AddressDistrict = property.AddressDistrict,
+                Pnu = property.Pnu,
                 JointCollateralAmount = property.JointCollateralAmount,
                 // 선순위 정보
                 SeniorMortgageAmount = property.SeniorMortgageAmount,
@@ -1136,6 +1205,25 @@ namespace NPLogic.Data.Repositories
                 throw new Exception($"진행 필드 업데이트 실패: {ex.Message}", ex);
             }
         }
+
+        /// <summary>
+        /// 프로그램의 모든 물건 삭제
+        /// </summary>
+        public async Task DeleteByProgramIdAsync(Guid programId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<PropertyTable>()
+                    .Where(x => x.ProgramId == programId)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"프로그램 물건 일괄 삭제 실패: {ex.Message}", ex);
+            }
+        }
     }
 
     /// <summary>
@@ -1239,9 +1327,6 @@ namespace NPLogic.Data.Repositories
 
         // ========== 대시보드 진행 관리 필드 ==========
 
-        [Postgrest.Attributes.Column("borrower_number")]
-        public string? BorrowerNumber { get; set; }
-
         [Postgrest.Attributes.Column("debtor_name")]
         public string? DebtorName { get; set; }
 
@@ -1298,6 +1383,12 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("asset_type")]
         public string? AssetType { get; set; }
 
+        [Postgrest.Attributes.Column("borrower_number")]
+        public string? BorrowerNumber { get; set; }
+
+        [Postgrest.Attributes.Column("borrower_name")]
+        public string? BorrowerName { get; set; }
+
         [Postgrest.Attributes.Column("address_province")]
         public string? AddressProvince { get; set; }
 
@@ -1306,6 +1397,9 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("address_district")]
         public string? AddressDistrict { get; set; }
+
+        [Postgrest.Attributes.Column("pnu")]
+        public string? Pnu { get; set; }
 
         [Postgrest.Attributes.Column("joint_collateral_amount")]
         public decimal? JointCollateralAmount { get; set; }

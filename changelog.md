@@ -4,6 +4,118 @@
 
 ## [Unreleased]
 
+### 2025-01-25
+
+#### 물건정보 중복 키 에러 수정 (CollateralNumber 처리)
+
+**문제점**
+- IBK 엑셀에서 "물건번호" 컬럼이 `collateral_number`로 매핑됨 ("물건 일련번호"와 별도)
+- `property.PropertyNumber`가 비어있고 `property.CollateralNumber`가 "2" 같은 숫자일 때
+- 기존 로직이 CollateralNumber를 그대로 사용하여 여러 물건이 동일한 property_number "2"를 가짐
+- 결과: `properties_project_id_property_number_key` 중복 키 에러
+
+**해결 방법**
+- CollateralNumber도 숫자만 있을 경우 차주번호와 조합하도록 로직 개선
+- 예: 차주 R-007의 물건번호 2 → "R-007-2"로 생성
+
+**수정된 물건번호 설정 로직**
+1. PropertyNumber가 비숫자 문자 포함 → 그대로 사용 (예: "2025타경12345")
+2. PropertyNumber가 숫자만 → 차주번호 + PropertyNumber 조합 (예: "R-007-2")
+3. CollateralNumber가 비숫자 문자 포함 → 그대로 사용
+4. CollateralNumber가 숫자만 → 차주번호 + CollateralNumber 조합 (예: "R-007-2")
+5. 모두 없으면 → 자동생성 (예: "R-007-P1")
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs` - Property case 물건번호 설정 로직 개선
+
+---
+
+### 2025-01-24
+
+#### 프로그램 삭제 기능 개선 - Cascade Delete 구현
+
+프로그램 삭제 시 FK 제약조건 위반 문제를 해결하기 위해 Cascade Delete 기능 추가
+
+**문제점**
+- 프로그램에 연결된 데이터(차주, 대출, 물건 등)가 있을 경우 FK 제약조건으로 삭제 실패
+- 삭제 실패 시 사용자에게 에러 메시지가 표시되지 않음
+
+**해결 방법**
+- 3버튼 다이얼로그 추가:
+  - [예] - 연결된 모든 데이터와 함께 삭제 (Cascade Delete)
+  - [아니오] - 프로그램만 삭제 시도 (연결 데이터 있으면 실패)
+  - [취소] - 삭제 취소
+
+**Cascade Delete 삭제 순서** (FK 제약조건 고려)
+1. registry_sheet_data (property_id FK)
+2. right_analysis (property_id FK)
+3. credit_guarantees (borrower_id FK)
+4. loans (borrower_id FK)
+5. borrower_restructuring (borrower_id FK)
+6. properties (program_id FK)
+7. borrowers (program_id FK)
+8. program_sheet_mappings (program_id FK)
+9. programs
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+  - `DeleteProgram` 메서드: 3버튼 다이얼로그 추가
+  - `CascadeDeleteProgramAsync` 메서드 추가
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs` - `DeleteByProgramIdAsync()` 추가
+- `src/NPLogic.Data/Repositories/BorrowerRepository.cs` - `DeleteByProgramIdAsync()` 추가
+- `src/NPLogic.Data/Repositories/LoanRepository.cs` - `DeleteByBorrowerIdsAsync()` 추가
+- `src/NPLogic.Data/Repositories/BorrowerRestructuringRepository.cs` - `DeleteByBorrowerIdsAsync()` 추가
+- `src/NPLogic.Data/Repositories/CreditGuaranteeRepository.cs` - `DeleteByBorrowerIdsAsync()` 추가
+- `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs` - `DeleteByPropertyIdsAsync()` 추가
+- `src/NPLogic.Data/Repositories/RegistrySheetDataRepository.cs` - `DeleteByPropertyIdsAsync()` 추가
+
+---
+
+#### 데이터디스크 업로드 - 등기부등본/신용보증서 처리 로직 구현
+
+`ProgramManagementViewModel.ProcessSheetAsync`에 등기부등본정보와 신용보증서 시트 처리 로직 추가
+
+**등기부등본정보 (RegistryDetail)**
+- `MapRowToRegistrySheetData()` 메서드 추가
+- 컬럼 매핑: 차주일련번호, 차주명, 물건번호, 지번번호, 담보소재지1~4
+
+**신용보증서 (Guarantee)**
+- `MapRowToCreditGuarantee()` 메서드 추가
+- 컬럼 매핑: 자산유형, 차주일련번호, 차주명, 계좌일련번호, 보증기관, 보증종류, 보증서번호, 보증비율, 환산후 보증잔액, 관련 대출채권 계좌번호
+- 차주ID 자동 연결 (borrower_id FK)
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+  - `RegistrySheetDataRepository`, `CreditGuaranteeRepository` 필드 및 DI 주입 추가
+  - `ProcessSheetAsync`에 `SheetType.RegistryDetail`, `SheetType.Guarantee` case 추가
+  - `MapRowToRegistrySheetData()`, `MapRowToCreditGuarantee()` 매핑 메서드 추가
+- `src/NPLogic.App/App.xaml.cs` - ProgramManagementViewModel DI 등록에 Repository 추가
+
+---
+
+#### 데이터디스크 업로드 버그 수정
+
+**회생차주정보 FK 제약조건 위반 수정**
+- 원인: `GetByBorrowerNumberAsync`가 program_id 없이 조회하여 다른 프로그램의 차주와 혼동
+- 해결: `GetByProgramIdAndBorrowerNumberAsync` 메서드 추가 및 사용
+
+**물건정보 중복 키 위반 수정**
+- 원인: "번호" 컬럼 매칭이 "일련번호"도 매칭하여 물건번호가 1, 2, 3... 으로 잘못 설정됨
+- 해결: 차주번호 + 물건번호 조합으로 유니크한 property_number 생성 (예: "R-007-2")
+- 수정 위치: `ProcessSheetAsync`의 Property case에서 물건번호 설정 로직 개선
+  - 경매사건번호(비숫자 포함) → 그대로 사용
+  - 숫자만 있는 물건번호 → 차주번호와 조합 (예: "R-007-2")
+  - CollateralNumber만 있으면 → 그대로 사용
+  - 없으면 → 자동생성
+
+**변경된 파일**
+- `src/NPLogic.Data/Repositories/BorrowerRepository.cs` - `GetByProgramIdAndBorrowerNumberAsync()` 추가
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+  - 회생/대출 시트 처리 시 program_id로 차주 조회
+  - Property 시트 물건번호 설정 로직 개선 (숫자만 있는 경우 차주번호와 조합)
+
+---
+
 ### 2025-01-22
 
 #### 데이터디스크 업로드 - 4개 시트 대표컬럼 구현
@@ -88,3 +200,31 @@ Excel 데이터디스크에서 Supabase로 데이터 업로드 시 사용되는 
 - `src/NPLogic.Core/Models/ProgramSheetMapping.cs` - DataDiskSheetType enum 정리
 - `src/NPLogic.App/Views/ColumnMappingDialog.xaml.cs` - SheetTypeDisplay 업데이트
 - `src/NPLogic.Services/DataDiskUploadService.cs` - 시트 타입 변환 메서드 정리
+
+---
+
+#### 등기부등본정보 (RegistryDetail) 시트 업로드 구현
+
+데이터디스크 5번째 시트인 등기부등본정보 업로드 기능 구현
+
+**배경**
+- 기존 `registry_documents`, `registry_rights`, `registry_owners` 테이블은 OCR PDF 처리용
+- 데이터디스크 Excel 업로드용 별도 테이블 필요
+
+**등기부등본정보 (RegistryDetail) - 8개 대표컬럼**
+- 차주일련번호, 차주명, 물건번호, 지번번호, 담보소재지1, 담보소재지2, 담보소재지3, 담보소재지4
+- DB 테이블: `registry_sheet_data` (신규)
+- 물건(properties)과 1:N 관계 (property_id FK, ON DELETE CASCADE)
+
+**Supabase Migration**
+- 테이블명: `registry_sheet_data`
+- 컬럼: id, property_id, borrower_number, borrower_name, property_number, jibun_number, address_province, address_city, address_district, address_detail, created_at, updated_at
+- 인덱스: property_id, borrower_number
+
+**변경된 파일**
+- `src/NPLogic.Core/Models/RegistrySheetData.cs` - 신규 모델 클래스
+- `src/NPLogic.Data/Repositories/RegistrySheetDataRepository.cs` - 신규 Repository (CRUD)
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs` - `GetByBorrowerAndPropertyNumberAsync()` 메서드 추가
+- `src/NPLogic.App/App.xaml.cs` - DI 등록 (RegistrySheetDataRepository)
+- `src/NPLogic.App/Services/SheetMappingConfig.cs` - `GetRegistryDetailMappings()` 대표컬럼 매핑
+- `src/NPLogic.App/Services/DataDiskUploadService.cs` - `ProcessRegistryDetailAsync()`, `MapRowToRegistrySheetData()` 추가

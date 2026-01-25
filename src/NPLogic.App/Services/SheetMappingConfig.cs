@@ -352,36 +352,139 @@ namespace NPLogic.Services
         }
 
         /// <summary>
-        /// Sheet C-2: 등기부등본정보 (OCR로 처리하므로 기본 매핑만 제공)
+        /// Sheet C-2: 등기부등본정보 → registry_sheet_data
         /// </summary>
         private static List<ColumnMappingRule> GetRegistryDetailMappings()
         {
             return new List<ColumnMappingRule>
             {
-                // 기본 조회용 정보
+                // 기본 정보
                 new("일련번호", "serial_number", false, ColumnDataType.Integer),
-                new("차주일련번호", "borrower_number", false, ColumnDataType.String),
-                new("물건번호", "collateral_number", false, ColumnDataType.String),
-                new("Property 일련번호", "property_serial", false, ColumnDataType.Integer),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", false, ColumnDataType.String),
+                new("물건번호", "property_number", false, ColumnDataType.String),
+                new("물건일련번호", "property_number", false, ColumnDataType.String),
+                new("Property 일련번호", "property_number", false, ColumnDataType.String),
+                new("Property일련번호", "property_number", false, ColumnDataType.String),
+
+                // 지번번호
+                new("지번번호", "jibun_number", false, ColumnDataType.String),
+                new("지번", "jibun_number", false, ColumnDataType.String),
+
+                // 주소 정보
+                new("담보소재지1", "address_province", false, ColumnDataType.String),
+                new("담보소재지 1", "address_province", false, ColumnDataType.String),
+                new("(특별광역시/도)", "address_province", false, ColumnDataType.String),
+                new("(특별,광역시/도)", "address_province", false, ColumnDataType.String),
+                new("담보소재지2", "address_city", false, ColumnDataType.String),
+                new("담보소재지 2", "address_city", false, ColumnDataType.String),
+                new("(시/군/구)", "address_city", false, ColumnDataType.String),
+                new("담보소재지3", "address_district", false, ColumnDataType.String),
+                new("담보소재지 3", "address_district", false, ColumnDataType.String),
+                new("(동/리/읍/면)", "address_district", false, ColumnDataType.String),
+                new("(동/읍/면/리)", "address_district", false, ColumnDataType.String),
+                new("담보소재지4", "address_detail", false, ColumnDataType.String),
+                new("담보소재지 4", "address_detail", false, ColumnDataType.String),
+                new("(나머지/상세지번/기타재산내역)", "address_detail", false, ColumnDataType.String),
             };
         }
 
         /// <summary>
-        /// Sheet D: 신용보증서
+        /// Sheet D: 신용보증서 → credit_guarantees
         /// </summary>
         private static List<ColumnMappingRule> GetGuaranteeMappings()
         {
             return new List<ColumnMappingRule>
             {
-                // 기본 조회용 정보
+                // ========== 기본 조회용 정보 (차주/대출 식별용) ==========
                 new("일련번호", "serial_number", false, ColumnDataType.Integer),
-                new("차주일련번호", "borrower_number", false, ColumnDataType.String),
-                
-                // 보증 정보
-                new("보증인", "guarantor_name", false, ColumnDataType.String),
-                new("보증인유형", "guarantor_type", false, ColumnDataType.String),
-                new("보증금액", "guarantee_amount", false, ColumnDataType.Decimal),
+                new("자산유형", "asset_type", false, ColumnDataType.String),
+                new("채권구분", "asset_type", false, ColumnDataType.String),
+                new("차주일련번호", "borrower_number", true, ColumnDataType.String),
+                new("차주명", "borrower_name", false, ColumnDataType.String),
+
+                // 관련 대출 정보 (대표컬럼: 계좌일련번호, 관련 대출채권 계좌번호)
+                new("계좌일련번호", "loan_account_serial", false, ColumnDataType.String),
+                new("대출일련번호", "loan_account_serial", false, ColumnDataType.String),
+                new("관련대출채권일련번호", "loan_account_serial", false, ColumnDataType.String),
+                new("관련 대출채권 일련번호", "loan_account_serial", false, ColumnDataType.String),
+                new("대출계좌번호", "related_loan_account_number", false, ColumnDataType.String),
+                new("계좌번호", "related_loan_account_number", false, ColumnDataType.String),
+                new("관련대출채권계좌번호", "related_loan_account_number", false, ColumnDataType.String),
+                new("관련 대출채권 계좌번호", "related_loan_account_number", false, ColumnDataType.String),
+                new("보증관련계좌번호", "related_loan_account_number", false, ColumnDataType.String),
+
+                // ========== 보증 기본 정보 ==========
+                new("보증번호", "guarantee_number", false, ColumnDataType.String),
+                new("보증서번호", "guarantee_number", false, ColumnDataType.String),
+                new("신용보증번호", "guarantee_number", false, ColumnDataType.String),
                 new("보증종류", "guarantee_type", false, ColumnDataType.String),
+                new("보증유형", "guarantee_type", false, ColumnDataType.String),
+                new("보증형태", "guarantee_type", false, ColumnDataType.String),
+                new("보증서종류", "guarantee_type", false, ColumnDataType.String),
+                new("보증기관", "guarantee_institution", false, ColumnDataType.String),
+                new("보증인", "guarantee_institution", false, ColumnDataType.String),
+                new("신용보증기관", "guarantee_institution", false, ColumnDataType.String),
+                new("보증기관명", "guarantee_institution", false, ColumnDataType.String),
+
+                // ========== 보증 금액 정보 ==========
+                new("보증금액", "guarantee_amount", false, ColumnDataType.Decimal),
+                new("보증한도", "guarantee_amount", false, ColumnDataType.Decimal),
+                new("신용보증금액", "guarantee_amount", false, ColumnDataType.Decimal),
+                new("보증비율", "guarantee_ratio", false, ColumnDataType.Decimal),
+                new("보증률", "guarantee_ratio", false, ColumnDataType.Decimal),
+                new("보증율", "guarantee_ratio", false, ColumnDataType.Decimal),
+                new("보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+                new("환산보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+                new("환산 보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+                new("환산후보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+                new("환산후 보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+                new("환산된 보증잔액", "converted_guarantee_balance", false, ColumnDataType.Decimal),
+
+                // ========== 대위변제 정보 ==========
+                new("대위변제금액", "subrogation_amount", false, ColumnDataType.Decimal),
+                new("대위변제액", "subrogation_amount", false, ColumnDataType.Decimal),
+                new("대위변제", "subrogation_amount", false, ColumnDataType.Decimal),
+                new("기대위변제금액", "prior_subrogation_amount", false, ColumnDataType.Decimal),
+                new("기대위변제액", "prior_subrogation_amount", false, ColumnDataType.Decimal),
+                new("기수령 대위변제금액", "prior_subrogation_amount", false, ColumnDataType.Decimal),
+
+                // ========== 상태 정보 ==========
+                new("유효여부", "is_valid", false, ColumnDataType.Boolean),
+                new("보증유효", "is_valid", false, ColumnDataType.Boolean),
+                new("보증유효여부", "is_valid", false, ColumnDataType.Boolean),
+                new("해지여부", "is_terminated", false, ColumnDataType.Boolean),
+                new("보증해지", "is_terminated", false, ColumnDataType.Boolean),
+                new("보증해지여부", "is_terminated", false, ColumnDataType.Boolean),
+                new("수령여부", "is_received", false, ColumnDataType.Boolean),
+                new("대위변제수령여부", "is_received", false, ColumnDataType.Boolean),
+
+                // ========== 날짜 정보 ==========
+                new("발급일", "issue_date", false, ColumnDataType.Date),
+                new("보증발급일", "issue_date", false, ColumnDataType.Date),
+                new("보증서발급일", "issue_date", false, ColumnDataType.Date),
+                new("만기일", "expiry_date", false, ColumnDataType.Date),
+                new("보증만기일", "expiry_date", false, ColumnDataType.Date),
+                new("보증기간만료일", "expiry_date", false, ColumnDataType.Date),
+                new("대위변제예정일", "subrogation_expected_date", false, ColumnDataType.Date),
+                new("대위변제 예정일", "subrogation_expected_date", false, ColumnDataType.Date),
+                new("수령일", "received_date", false, ColumnDataType.Date),
+                new("대위변제수령일", "received_date", false, ColumnDataType.Date),
+                new("대위변제 수령일", "received_date", false, ColumnDataType.Date),
+
+                // ========== MCI 정보 ==========
+                new("MCI채권번호", "mci_bond_number", false, ColumnDataType.String),
+                new("MCI 채권번호", "mci_bond_number", false, ColumnDataType.String),
+                new("MCI번호", "mci_bond_number", false, ColumnDataType.String),
+                new("MCI최초금액", "mci_initial_amount", false, ColumnDataType.Decimal),
+                new("MCI 최초금액", "mci_initial_amount", false, ColumnDataType.Decimal),
+                new("MCI최초잔액", "mci_initial_amount", false, ColumnDataType.Decimal),
+                new("MCI잔액", "mci_balance", false, ColumnDataType.Decimal),
+                new("MCI 잔액", "mci_balance", false, ColumnDataType.Decimal),
+                new("MCI현재잔액", "mci_balance", false, ColumnDataType.Decimal),
+
+                // ========== 기타 ==========
+                new("비고", "notes", false, ColumnDataType.String),
             };
         }
 

@@ -22,6 +22,8 @@ namespace NPLogic.Services
         private readonly RightAnalysisRepository _rightAnalysisRepository;
         private readonly InterimRepository _interimRepository;
         private readonly ProgramSheetMappingRepository _sheetMappingRepository;
+        private readonly RegistrySheetDataRepository _registrySheetDataRepository;
+        private readonly CreditGuaranteeRepository _creditGuaranteeRepository;
 
         /// <summary>
         /// 진행 상황 업데이트 콜백
@@ -36,7 +38,9 @@ namespace NPLogic.Services
             BorrowerRestructuringRepository restructuringRepository,
             RightAnalysisRepository rightAnalysisRepository,
             InterimRepository interimRepository,
-            ProgramSheetMappingRepository sheetMappingRepository)
+            ProgramSheetMappingRepository sheetMappingRepository,
+            RegistrySheetDataRepository registrySheetDataRepository,
+            CreditGuaranteeRepository creditGuaranteeRepository)
         {
             _excelService = excelService;
             _propertyRepository = propertyRepository;
@@ -46,6 +50,8 @@ namespace NPLogic.Services
             _rightAnalysisRepository = rightAnalysisRepository;
             _interimRepository = interimRepository;
             _sheetMappingRepository = sheetMappingRepository;
+            _registrySheetDataRepository = registrySheetDataRepository;
+            _creditGuaranteeRepository = creditGuaranteeRepository;
         }
 
         #region 시트 로드 및 매핑
@@ -153,12 +159,15 @@ namespace NPLogic.Services
         {
             var result = new List<ColumnMappingInfo>();
 
+            // 이미 매핑된 DB 컬럼 추적 (중복 방지)
+            var mappedDbColumns = new HashSet<string>();
+
             // 은행이 감지된 경우 매핑 템플릿 사용
             if (bankType != BankType.Unknown)
             {
                 var standardSheetName = ConvertDataDiskTypeToStandardSheetName(sheetType);
                 var reverseMapping = BankMappingConfig.BuildReverseColumnMapping(bankType, standardSheetName);
-                
+
                 System.Diagnostics.Debug.WriteLine($"[GetDefaultColumnMappings] 은행: {bankType}, 시트: {standardSheetName}, 역매핑 규칙: {reverseMapping.Count}개");
 
                 foreach (var header in headers)
@@ -168,7 +177,7 @@ namespace NPLogic.Services
 
                     // 컬럼명 정규화 (공백 제거)
                     var normalizedHeader = BankMappingConfig.NormalizeColumnName(header);
-                    
+
                     // 은행별 매핑 템플릿에서 대표컬럼명 찾기
                     string? standardColumnName = null;
                     if (reverseMapping.TryGetValue(normalizedHeader, out var standardCol))
@@ -179,25 +188,40 @@ namespace NPLogic.Services
                     // 기존 SheetMappingConfig에서 DB 컬럼 찾기
                     var mappingRules = SheetMappingConfig.GetMappingRules(ConvertToExcelSheetType(sheetType));
                     ColumnMappingRule? rule = null;
-                    
+
                     if (standardColumnName != null)
                     {
                         // 대표컬럼명으로 DB 컬럼 찾기
                         rule = SheetMappingConfig.FindMappingRule(mappingRules, standardColumnName);
                     }
-                    
+
                     if (rule == null)
                     {
                         // 원본 컬럼명으로 직접 찾기
                         rule = SheetMappingConfig.FindMappingRule(mappingRules, header);
                     }
 
+                    // 중복 DB 컬럼 매핑 방지: 이미 매핑된 DB 컬럼은 건너뛰기
+                    string? dbColumn = rule?.DbColumnName;
+                    bool isAutoMatched = rule != null;
+
+                    if (!string.IsNullOrEmpty(dbColumn) && mappedDbColumns.Contains(dbColumn))
+                    {
+                        // 이미 다른 Excel 컬럼이 이 DB 컬럼에 매핑됨 → 매핑 안함
+                        dbColumn = null;
+                        isAutoMatched = false;
+                    }
+                    else if (!string.IsNullOrEmpty(dbColumn))
+                    {
+                        mappedDbColumns.Add(dbColumn);
+                    }
+
                     result.Add(new ColumnMappingInfo
                     {
                         ExcelColumn = header,
-                        DbColumn = rule?.DbColumnName,
-                        DbColumnDisplay = rule != null ? GetDbColumnDisplayName(rule.DbColumnName) : null,
-                        IsAutoMatched = rule != null,
+                        DbColumn = dbColumn,
+                        DbColumnDisplay = dbColumn != null ? GetDbColumnDisplayName(dbColumn) : null,
+                        IsAutoMatched = isAutoMatched,
                         IsRequired = rule?.IsRequired ?? false,
                         StandardColumnName = standardColumnName // 대표컬럼명 저장
                     });
@@ -216,12 +240,27 @@ namespace NPLogic.Services
                     var normalizedHeader = header.Replace("\n", " ").Replace("\r", "").Trim();
                     var rule = SheetMappingConfig.FindMappingRule(mappingRules, normalizedHeader);
 
+                    // 중복 DB 컬럼 매핑 방지: 이미 매핑된 DB 컬럼은 건너뛰기
+                    string? dbColumn = rule?.DbColumnName;
+                    bool isAutoMatched = rule != null;
+
+                    if (!string.IsNullOrEmpty(dbColumn) && mappedDbColumns.Contains(dbColumn))
+                    {
+                        // 이미 다른 Excel 컬럼이 이 DB 컬럼에 매핑됨 → 매핑 안함
+                        dbColumn = null;
+                        isAutoMatched = false;
+                    }
+                    else if (!string.IsNullOrEmpty(dbColumn))
+                    {
+                        mappedDbColumns.Add(dbColumn);
+                    }
+
                     result.Add(new ColumnMappingInfo
                     {
                         ExcelColumn = header,
-                        DbColumn = rule?.DbColumnName,
-                        DbColumnDisplay = rule != null ? GetDbColumnDisplayName(rule.DbColumnName) : null,
-                        IsAutoMatched = rule != null,
+                        DbColumn = dbColumn,
+                        DbColumnDisplay = dbColumn != null ? GetDbColumnDisplayName(dbColumn) : null,
+                        IsAutoMatched = isAutoMatched,
                         IsRequired = rule?.IsRequired ?? false
                     });
                 }
@@ -402,6 +441,31 @@ namespace NPLogic.Services
                     "accrued_interest",         // 미수이자
                     "total_claim_amount"        // 채권액 합계
                 },
+                DataDiskSheetType.RegistryDetail => new List<string>
+                {
+                    "borrower_number",          // 차주일련번호
+                    "borrower_name",            // 차주명
+                    "property_number",          // 물건번호
+                    "jibun_number",             // 지번번호
+                    "address_province",         // 담보소재지1
+                    "address_city",             // 담보소재지2
+                    "address_district",         // 담보소재지3
+                    "address_detail"            // 담보소재지4
+                },
+                DataDiskSheetType.Guarantee => new List<string>
+                {
+                    // 신용보증서 대표 컬럼 (모두 직접 저장)
+                    "asset_type",                       // 자산유형
+                    "borrower_number",                  // 차주일련번호
+                    "borrower_name",                    // 차주명
+                    "loan_account_serial",              // 계좌일련번호
+                    "guarantee_institution",            // 보증기관
+                    "guarantee_type",                   // 보증종류
+                    "guarantee_number",                 // 보증서번호
+                    "guarantee_ratio",                  // 보증비율
+                    "converted_guarantee_balance",      // 환산후 보증잔액
+                    "related_loan_account_number"       // 관련 대출채권 계좌번호
+                },
                 _ => new List<string>()
             };
         }
@@ -535,6 +599,24 @@ namespace NPLogic.Services
                     case DataDiskSheetType.Property:
                         {
                             var (created, failed, newProcessed) = await ProcessPropertyAsync(data, columns, programId, processed, totalRows, columnMappings);
+                            result.CreatedCount = created;
+                            result.FailedCount = failed;
+                            processed = newProcessed;
+                        }
+                        break;
+
+                    case DataDiskSheetType.RegistryDetail:
+                        {
+                            var (created, failed, newProcessed) = await ProcessRegistryDetailAsync(data, programId, processed, totalRows, columnMappings);
+                            result.CreatedCount = created;
+                            result.FailedCount = failed;
+                            processed = newProcessed;
+                        }
+                        break;
+
+                    case DataDiskSheetType.Guarantee:
+                        {
+                            var (created, failed, newProcessed) = await ProcessGuaranteeAsync(data, programId, processed, totalRows, columnMappings);
                             result.CreatedCount = created;
                             result.FailedCount = failed;
                             processed = newProcessed;
@@ -756,6 +838,158 @@ namespace NPLogic.Services
             return (created, failed, processed);
         }
 
+        private async Task<(int Created, int Failed, int Processed)> ProcessRegistryDetailAsync(
+            List<Dictionary<string, object>> data,
+            string programId,
+            int startProcessed,
+            int totalRows,
+            Dictionary<string, string> columnMappings)
+        {
+            int created = 0, failed = 0;
+            int processed = startProcessed;
+
+            // property_number -> property_id 캐시 (차주번호와 물건번호 조합으로 물건 조회)
+            var propertyCache = new Dictionary<string, Guid>();
+
+            foreach (var row in data)
+            {
+                processed++;
+                OnProgressUpdate?.Invoke(processed, totalRows, "등기부등본정보");
+
+                try
+                {
+                    // 대표 컬럼을 모두 직접 저장 (MapRowToRegistrySheetData에서 처리)
+                    var registryData = MapRowToRegistrySheetData(row, columnMappings);
+
+                    // 최소 필수값 체크 (차주일련번호 또는 물건번호 중 하나는 있어야 함)
+                    if (string.IsNullOrEmpty(registryData.BorrowerNumber) && string.IsNullOrEmpty(registryData.PropertyNumber))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    // FK 연결 시도 (선택사항 - 실패해도 계속 진행)
+                    var borrowerNumber = registryData.BorrowerNumber;
+                    var propertyNumber = registryData.PropertyNumber;
+
+                    if (!string.IsNullOrEmpty(borrowerNumber) || !string.IsNullOrEmpty(propertyNumber))
+                    {
+                        var cacheKey = $"{borrowerNumber}_{propertyNumber}";
+                        if (propertyCache.TryGetValue(cacheKey, out var cachedPropertyId))
+                        {
+                            registryData.PropertyId = cachedPropertyId;
+                        }
+                        else if (!string.IsNullOrEmpty(borrowerNumber) && !string.IsNullOrEmpty(propertyNumber))
+                        {
+                            // 차주번호와 물건번호로 물건 조회
+                            var property = await _propertyRepository.GetByBorrowerAndPropertyNumberAsync(
+                                borrowerNumber, propertyNumber);
+
+                            if (property != null)
+                            {
+                                registryData.PropertyId = property.Id;
+                                propertyCache[cacheKey] = property.Id;
+                            }
+                        }
+                    }
+
+                    await _registrySheetDataRepository.UpsertAsync(registryData);
+                    created++;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ProcessRegistryDetail] 등기부등본정보 생성 실패: {ex.Message}");
+                    failed++;
+                }
+            }
+
+            return (created, failed, processed);
+        }
+
+        private async Task<(int Created, int Failed, int Processed)> ProcessGuaranteeAsync(
+            List<Dictionary<string, object>> data,
+            string programId,
+            int startProcessed,
+            int totalRows,
+            Dictionary<string, string> columnMappings)
+        {
+            int created = 0, failed = 0;
+            int processed = startProcessed;
+
+            // 캐시: 차주번호 -> borrower_id (FK 연결용, 선택사항)
+            var borrowerCache = new Dictionary<string, Guid>();
+
+            foreach (var row in data)
+            {
+                processed++;
+                OnProgressUpdate?.Invoke(processed, totalRows, "신용보증서");
+
+                try
+                {
+                    // 대표 컬럼 값 읽기
+                    var assetType = GetMappedValue<string>(row, "asset_type", columnMappings);
+                    var borrowerNumber = GetMappedValue<string>(row, "borrower_number", columnMappings);
+                    var borrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings);
+                    var guaranteeNumber = GetMappedValue<string>(row, "guarantee_number", columnMappings);
+
+                    // 최소 필수값 체크 (차주일련번호 또는 보증서번호 중 하나는 있어야 함)
+                    if (string.IsNullOrEmpty(borrowerNumber) && string.IsNullOrEmpty(guaranteeNumber))
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    // FK 연결 시도 (선택사항 - 실패해도 계속 진행)
+                    Guid? borrowerId = null;
+                    if (!string.IsNullOrEmpty(borrowerNumber))
+                    {
+                        if (borrowerCache.TryGetValue(borrowerNumber, out var cachedBorrowerId))
+                        {
+                            borrowerId = cachedBorrowerId;
+                        }
+                        else
+                        {
+                            var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(borrowerNumber);
+                            if (borrower != null)
+                            {
+                                borrowerId = borrower.Id;
+                                borrowerCache[borrowerNumber] = borrower.Id;
+                            }
+                        }
+                    }
+
+                    var guarantee = new CreditGuarantee
+                    {
+                        Id = Guid.NewGuid(),
+                        BorrowerId = borrowerId,
+                        // 대표 컬럼들 (모두 직접 저장)
+                        AssetType = assetType,
+                        BorrowerNumber = borrowerNumber,
+                        BorrowerName = borrowerName,
+                        AccountSerial = GetMappedValue<string>(row, "loan_account_serial", columnMappings),
+                        GuaranteeInstitution = GetMappedValue<string>(row, "guarantee_institution", columnMappings),
+                        GuaranteeType = GetMappedValue<string>(row, "guarantee_type", columnMappings),
+                        GuaranteeNumber = guaranteeNumber,
+                        GuaranteeRatio = GetMappedValue<decimal?>(row, "guarantee_ratio", columnMappings),
+                        ConvertedGuaranteeBalance = GetMappedValue<decimal?>(row, "converted_guarantee_balance", columnMappings),
+                        RelatedLoanAccountNumber = GetMappedValue<string>(row, "related_loan_account_number", columnMappings),
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _creditGuaranteeRepository.UpsertAsync(guarantee);
+                    created++;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] 신용보증서 생성 실패: {ex.Message}");
+                    failed++;
+                }
+            }
+
+            return (created, failed, processed);
+        }
+
         #endregion
 
         #region 매핑 메서드
@@ -768,11 +1002,18 @@ namespace NPLogic.Services
                 ProgramId = programId
             };
 
+            // 차주일반정보 대표컬럼
+            borrower.AssetType = GetMappedValue<string>(row, "asset_type", columnMappings);
             borrower.BorrowerNumber = GetMappedValue<string>(row, "borrower_number", columnMappings) ?? "";
             borrower.BorrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings) ?? "";
+            borrower.RelatedBorrower = GetMappedValue<string>(row, "related_borrower", columnMappings);
             borrower.BorrowerType = GetMappedValue<string>(row, "borrower_type", columnMappings) ?? "개인";
-            borrower.Opb = GetMappedValue<decimal?>(row, "opb", columnMappings) ?? 0;
+            borrower.UnpaidPrincipal = GetMappedValue<decimal?>(row, "unpaid_principal", columnMappings);
+            borrower.AccruedInterest = GetMappedValue<decimal?>(row, "accrued_interest", columnMappings);
             borrower.MortgageAmount = GetMappedValue<decimal?>(row, "mortgage_amount", columnMappings) ?? 0;
+            borrower.Notes = GetMappedValue<string>(row, "notes", columnMappings);
+            // 기타
+            borrower.Opb = GetMappedValue<decimal?>(row, "opb", columnMappings) ?? 0;
 
             return borrower;
         }
@@ -783,6 +1024,11 @@ namespace NPLogic.Services
             {
                 Id = Guid.NewGuid(),
                 BorrowerId = borrowerId ?? Guid.Empty,
+                // 회생차주정보 대표컬럼 (직접 저장)
+                AssetType = GetMappedValue<string>(row, "asset_type", columnMappings),
+                BorrowerNumber = GetMappedValue<string>(row, "borrower_number", columnMappings),
+                BorrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings),
+                // 회생 정보
                 ApprovalStatus = GetMappedValue<string>(row, "approval_status", columnMappings),
                 ProgressStage = GetMappedValue<string>(row, "progress_stage", columnMappings),
                 CourtName = GetMappedValue<string>(row, "court_name", columnMappings),
@@ -790,7 +1036,13 @@ namespace NPLogic.Services
                 FilingDate = GetMappedValue<DateTime?>(row, "filing_date", columnMappings),
                 PreservationDate = GetMappedValue<DateTime?>(row, "preservation_date", columnMappings),
                 CommencementDate = GetMappedValue<DateTime?>(row, "commencement_date", columnMappings),
-                ClaimFilingDate = GetMappedValue<DateTime?>(row, "claim_filing_date", columnMappings)
+                ClaimFilingDate = GetMappedValue<DateTime?>(row, "claim_filing_date", columnMappings),
+                ApprovalDismissalDate = GetMappedValue<DateTime?>(row, "approval_dismissal_date", columnMappings),
+                // 회사 정보
+                Industry = GetMappedValue<string>(row, "industry", columnMappings),
+                ListingStatus = GetMappedValue<string>(row, "listing_status", columnMappings),
+                EmployeeCount = GetMappedValue<int?>(row, "employee_count", columnMappings),
+                EstablishmentDate = GetMappedValue<DateTime?>(row, "establishment_date", columnMappings)
             };
         }
 
@@ -840,6 +1092,7 @@ namespace NPLogic.Services
             {
                 Id = Guid.NewGuid(),
                 BorrowerId = borrowerId,
+                // 채권일반정보 대표컬럼 (직접 저장)
                 BorrowerNumber = borrowerNumber,
                 BorrowerName = borrowerName,
                 AccountSerial = accountSerial,
@@ -855,6 +1108,25 @@ namespace NPLogic.Services
                 AdvancePayment = advancePayment,
                 AccruedInterest = accruedInterest,
                 TotalClaimAmount = totalClaimAmount
+            };
+        }
+
+        private RegistrySheetData MapRowToRegistrySheetData(Dictionary<string, object> row, Dictionary<string, string> columnMappings)
+        {
+            // 등기부등본정보 대표 컬럼 (모두 직접 저장)
+            return new RegistrySheetData
+            {
+                Id = Guid.NewGuid(),
+                BorrowerNumber = GetMappedValue<string>(row, "borrower_number", columnMappings),
+                BorrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings),
+                PropertyNumber = GetMappedValue<string>(row, "property_number", columnMappings),
+                JibunNumber = GetMappedValue<string>(row, "jibun_number", columnMappings),
+                AddressProvince = GetMappedValue<string>(row, "address_province", columnMappings),
+                AddressCity = GetMappedValue<string>(row, "address_city", columnMappings),
+                AddressDistrict = GetMappedValue<string>(row, "address_district", columnMappings),
+                AddressDetail = GetMappedValue<string>(row, "address_detail", columnMappings),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
         }
 
@@ -913,7 +1185,7 @@ namespace NPLogic.Services
         {
             switch (dbColumn)
             {
-                // ========== 기본 정보 ==========
+                // ========== 기본 정보 (물건정보 대표컬럼) ==========
                 case "asset_type":
                     property.AssetType = value?.ToString();
                     break;
@@ -921,7 +1193,8 @@ namespace NPLogic.Services
                     property.BorrowerNumber = value?.ToString();
                     break;
                 case "borrower_name":
-                    property.DebtorName = value?.ToString();
+                    property.BorrowerName = value?.ToString();
+                    property.DebtorName = value?.ToString(); // 기존 DebtorName도 호환성 유지
                     break;
                 case "collateral_number":
                     property.CollateralNumber = value?.ToString();
@@ -1379,6 +1652,19 @@ namespace NPLogic.Services
                 "listing_status" => "상장/비상장",
                 "employee_count" => "종업원수",
                 "establishment_date" => "설립일",
+
+                // 신용보증서정보 대표컬럼
+                "loan_account_serial" => "계좌일련번호",
+                "guarantee_institution" => "보증기관",
+                "guarantee_type" => "보증종류",
+                "guarantee_number" => "보증서번호",
+                "guarantee_ratio" => "보증비율",
+                "converted_guarantee_balance" => "환산후 보증잔액",
+                "guarantee_amount" => "보증금액",
+                "related_loan_account_number" => "관련 대출채권 계좌번호",
+
+                // 등기부등본정보 대표컬럼
+                "jibun_number" => "지번번호",
 
                 // 기타 (자동매칭용)
                 "opb" => "대출원금잔액",

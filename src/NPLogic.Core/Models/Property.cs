@@ -18,9 +18,20 @@ namespace NPLogic.Core.Models
         public Guid? ProgramId { get; set; }
 
         /// <summary>
-        /// 차주 ID (borrowers 테이블 FK)
+        /// 차주 ID (FK) - borrowers 테이블과 JOIN하여 차주번호, 자산유형 조회
         /// </summary>
         public Guid? BorrowerId { get; set; }
+
+        // ========== 물건정보 대표컬럼 (직접 저장) ==========
+
+        /// <summary>자산유형 (물건정보 대표컬럼)</summary>
+        public string? AssetType { get; set; }
+
+        /// <summary>차주일련번호 (물건정보 대표컬럼)</summary>
+        public string? BorrowerNumber { get; set; }
+
+        /// <summary>차주명 (물건정보 대표컬럼)</summary>
+        public string? BorrowerName { get; set; }
 
         public string? PropertyNumber { get; set; }
 
@@ -110,9 +121,6 @@ namespace NPLogic.Core.Models
         public Guid? AssignedTo { get; set; }
 
         // ========== 대시보드 진행 관리 필드 ==========
-        
-        /// <summary>차주번호 (엑셀 업로드시 저장, 예: R-003)</summary>
-        public string? BorrowerNumber { get; set; }
 
         /// <summary>차주명</summary>
         public string? DebtorName { get; set; }
@@ -175,9 +183,6 @@ namespace NPLogic.Core.Models
 
         // ========== 물건정보 시트 대표컬럼 (데이터디스크 업로드용) ==========
 
-        /// <summary>자산유형</summary>
-        public string? AssetType { get; set; }
-
         /// <summary>담보소재지1 (시/도)</summary>
         public string? AddressProvince { get; set; }
 
@@ -186,6 +191,9 @@ namespace NPLogic.Core.Models
 
         /// <summary>담보소재지3 (동/읍/면)</summary>
         public string? AddressDistrict { get; set; }
+
+        /// <summary>PNU (필지고유번호) - 토지이음 조회용 19자리 코드</summary>
+        public string? Pnu { get; set; }
 
         /// <summary>공담 물건금액</summary>
         public decimal? JointCollateralAmount { get; set; }

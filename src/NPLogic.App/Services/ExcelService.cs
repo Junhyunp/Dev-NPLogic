@@ -850,30 +850,54 @@ namespace NPLogic.Services
 
         /// <summary>
         /// 워크시트 내에서 헤더 행 감지 (이미 열린 워크시트 사용)
+        /// 우선순위: 1) "일련번호" 셀 → 2) "Field" 패턴 → 3) 헤더 키워드 3개 이상
         /// </summary>
         private int DetectHeaderRowInWorksheet(ExcelWorksheet worksheet, int maxRows, int maxCols)
         {
+            // 1순위: "일련번호" 셀 찾기 (전체 행에서 먼저 검색)
             for (int row = 1; row <= maxRows; row++)
             {
-                // Field 패턴 찾기
-                bool hasFieldPattern = false;
+                for (int col = 1; col <= maxCols; col++)
+                {
+                    var cellValue = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
+                    var normalizedValue = cellValue.Replace(" ", "").Replace("\n", "").Replace("\r", "");
+
+                    // 실제 헤더인지 판별 (주석/설명 텍스트 제외)
+                    // - 정확히 "일련번호"이거나
+                    // - "일련번호"를 포함하되: 차주/대출/계좌 제외, 길이 20자 이하 (주석 제외), "->" 미포함 (주석 화살표)
+                    bool isValidHeader = normalizedValue == "일련번호" ||
+                        (normalizedValue.Contains("일련번호") &&
+                         !normalizedValue.Contains("차주") &&
+                         !normalizedValue.Contains("대출") &&
+                         !normalizedValue.Contains("계좌") &&
+                         !cellValue.Contains("->") &&  // 주석 화살표 제외
+                         normalizedValue.Length <= 20);  // 주석/설명 텍스트는 보통 길이가 길음
+
+                    if (isValidHeader)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRowInWorksheet] '일련번호' 발견 (row {row}, col {col})");
+                        return row;
+                    }
+                }
+            }
+
+            // 2순위: "Field" 패턴 찾기 (전체 행에서 검색)
+            for (int row = 1; row <= maxRows; row++)
+            {
                 for (int col = 1; col <= maxCols; col++)
                 {
                     var cellValue = worksheet.Cells[row, col].Value?.ToString() ?? "";
                     if (cellValue.Contains("Field"))
                     {
-                        hasFieldPattern = true;
-                        break;
+                        System.Diagnostics.Debug.WriteLine($"[DetectHeaderRowInWorksheet] 'Field' 패턴 발견 (row {row}), 헤더는 row {row + 1}");
+                        return row + 1;
                     }
                 }
+            }
 
-                if (hasFieldPattern)
-                {
-                    // Field 패턴 발견 - 다음 행이 실제 헤더
-                    return row + 1;
-                }
-
-                // 헤더 키워드 카운트
+            // 3순위: 헤더 키워드 3개 이상인 행 찾기 (최종 fallback)
+            for (int row = 1; row <= maxRows; row++)
+            {
                 int headerKeywordCount = 0;
                 for (int col = 1; col <= maxCols; col++)
                 {
@@ -884,9 +908,9 @@ namespace NPLogic.Services
                     }
                 }
 
-                // 헤더 키워드가 3개 이상이면 헤더 행으로 인식
                 if (headerKeywordCount >= 3)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[DetectHeaderRowInWorksheet] 헤더 키워드 {headerKeywordCount}개 발견 (row {row})");
                     return row;
                 }
             }
@@ -903,10 +927,12 @@ namespace NPLogic.Services
             if (System.Text.RegularExpressions.Regex.IsMatch(sheetName, @"_\d{6}$"))
                 return SheetType.Unknown;
 
-            // Sheet A-1, Sheet F: 회생차주정보 (A-1이 A보다 먼저 매칭되어야 함)
-            // KB: null, IBK: Sheet A-1, NH: Sheet F, SHB: 4.회생차주 추가정보
-            if (sheetName.Contains("Sheet A-1") || sheetName.Contains("A-1") ||
-                sheetName.Contains("Sheet F") || sheetName.Contains("회생차주"))
+            // 회생차주정보 (A-1이 A보다 먼저 매칭되어야 함)
+            // KB: null (시트 없음), IBK: Sheet A-1, NH: Sheet F, SHB: 4.회생차주 추가정보
+            if (sheetName.Contains("A-1") ||
+                System.Text.RegularExpressions.Regex.IsMatch(sheetName, @"\bSheet\s*F\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase) ||
+                sheetName.Contains("회생차주") ||
+                sheetName.StartsWith("4."))
                 return SheetType.BorrowerRestructuring;
 
             // Sheet A: 차주일반정보
@@ -1074,10 +1100,19 @@ namespace NPLogic.Services
                     {
                         var cellValue = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
                         var normalizedValue = cellValue.Replace(" ", "").Replace("\n", "").Replace("\r", "");
-                        
-                        // "일련번호"를 포함하는 셀 찾기 (차주일련번호 제외하고 정확한 "일련번호" 우선)
-                        if (normalizedValue == "일련번호" || 
-                            (normalizedValue.Contains("일련번호") && !normalizedValue.Contains("차주") && !normalizedValue.Contains("대출") && !normalizedValue.Contains("계좌")))
+
+                        // 실제 헤더인지 판별 (주석/설명 텍스트 제외)
+                        // - 정확히 "일련번호"이거나
+                        // - "일련번호"를 포함하되: 차주/대출/계좌 제외, 길이 20자 이하, "->" 미포함
+                        bool isValidHeader = normalizedValue == "일련번호" ||
+                            (normalizedValue.Contains("일련번호") &&
+                             !normalizedValue.Contains("차주") &&
+                             !normalizedValue.Contains("대출") &&
+                             !normalizedValue.Contains("계좌") &&
+                             !cellValue.Contains("->") &&  // 주석 화살표 제외
+                             normalizedValue.Length <= 20);  // 주석/설명 텍스트 제외
+
+                        if (isValidHeader)
                         {
                             System.Diagnostics.Debug.WriteLine($"[DetectHeaderRow] '{sheetName}': '일련번호' 발견 (row {row}, col {col})");
                             return row;
@@ -1145,16 +1180,24 @@ namespace NPLogic.Services
                 int rowCount = Math.Min(30, worksheet.Dimension.End.Row);
                 int colCount = Math.Min(50, worksheet.Dimension.End.Column);
 
-                // "일련번호" 셀 찾기
+                // "일련번호" 셀 찾기 (주석/설명 텍스트 제외)
                 for (int row = 1; row <= rowCount; row++)
                 {
                     for (int col = 1; col <= colCount; col++)
                     {
                         var cellValue = worksheet.Cells[row, col].Value?.ToString()?.Trim() ?? "";
                         var normalizedValue = cellValue.Replace(" ", "").Replace("\n", "").Replace("\r", "");
-                        
-                        if (normalizedValue == "일련번호" || 
-                            (normalizedValue.Contains("일련번호") && !normalizedValue.Contains("차주") && !normalizedValue.Contains("대출") && !normalizedValue.Contains("계좌")))
+
+                        // 실제 헤더인지 판별 (주석/설명 텍스트 제외)
+                        bool isValidHeader = normalizedValue == "일련번호" ||
+                            (normalizedValue.Contains("일련번호") &&
+                             !normalizedValue.Contains("차주") &&
+                             !normalizedValue.Contains("대출") &&
+                             !normalizedValue.Contains("계좌") &&
+                             !cellValue.Contains("->") &&  // 주석 화살표 제외
+                             normalizedValue.Length <= 20);  // 주석/설명 텍스트 제외
+
+                        if (isValidHeader)
                         {
                             System.Diagnostics.Debug.WriteLine($"[DetectHeaderRowAndColumn] '{sheetName}': '일련번호' 발견 (row {row}, col {col})");
                             return (row, col);

@@ -82,6 +82,29 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 프로그램ID와 차주번호로 조회
+        /// </summary>
+        public async Task<Borrower?> GetByProgramIdAndBorrowerNumberAsync(string programId, string borrowerNumber)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<BorrowerTable>()
+                    .Where(x => x.ProgramId == programId)
+                    .Where(x => x.BorrowerNumber == borrowerNumber)
+                    .Single();
+
+                return response == null ? null : MapToBorrower(response);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BorrowerRepository] GetByProgramIdAndBorrowerNumberAsync 실패 (programId={programId}, borrowerNumber={borrowerNumber}): {ex.Message}");
+                return null; // 찾지 못한 경우 null 반환 (예외 대신)
+            }
+        }
+
+        /// <summary>
         /// 프로그램별 차주 목록 조회
         /// </summary>
         public async Task<List<Borrower>> GetByProgramIdAsync(string programId)
@@ -426,9 +449,14 @@ namespace NPLogic.Data.Repositories
                 BorrowerName = table.BorrowerName ?? "",
                 BorrowerType = table.BorrowerType ?? "개인",
                 BusinessNumber = table.BusinessNumber,
+                AssetType = table.AssetType,
+                RelatedBorrower = table.RelatedBorrower,
                 PropertyCount = table.PropertyCount,
                 Opb = table.Opb,
                 MortgageAmount = table.MortgageAmount,
+                UnpaidPrincipal = table.UnpaidPrincipal,
+                AccruedInterest = table.AccruedInterest,
+                Notes = table.Notes,
                 IsRestructuring = table.IsRestructuring,
                 IsOpened = table.IsOpened,
                 IsDeceased = table.IsDeceased,
@@ -459,9 +487,14 @@ namespace NPLogic.Data.Repositories
                 BorrowerName = borrower.BorrowerName,
                 BorrowerType = borrower.BorrowerType,
                 BusinessNumber = borrower.BusinessNumber,
+                AssetType = borrower.AssetType,
+                RelatedBorrower = borrower.RelatedBorrower,
                 PropertyCount = borrower.PropertyCount,
                 Opb = borrower.Opb,
                 MortgageAmount = borrower.MortgageAmount,
+                UnpaidPrincipal = borrower.UnpaidPrincipal,
+                AccruedInterest = borrower.AccruedInterest,
+                Notes = borrower.Notes,
                 IsRestructuring = borrower.IsRestructuring,
                 IsOpened = borrower.IsOpened,
                 IsDeceased = borrower.IsDeceased,
@@ -478,6 +511,25 @@ namespace NPLogic.Data.Repositories
                 CreatedAt = borrower.CreatedAt,
                 UpdatedAt = borrower.UpdatedAt
             };
+        }
+
+        /// <summary>
+        /// 프로그램의 모든 차주 삭제
+        /// </summary>
+        public async Task DeleteByProgramIdAsync(string programId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<BorrowerTable>()
+                    .Where(x => x.ProgramId == programId)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"프로그램 차주 일괄 삭제 실패: {ex.Message}", ex);
+            }
         }
     }
 
@@ -516,6 +568,12 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("business_number")]
         public string? BusinessNumber { get; set; }
 
+        [Postgrest.Attributes.Column("asset_type")]
+        public string? AssetType { get; set; }
+
+        [Postgrest.Attributes.Column("related_borrower")]
+        public string? RelatedBorrower { get; set; }
+
         [Postgrest.Attributes.Column("property_count")]
         public int PropertyCount { get; set; }
 
@@ -524,6 +582,15 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("mortgage_amount")]
         public decimal MortgageAmount { get; set; }
+
+        [Postgrest.Attributes.Column("unpaid_principal")]
+        public decimal? UnpaidPrincipal { get; set; }
+
+        [Postgrest.Attributes.Column("accrued_interest")]
+        public decimal? AccruedInterest { get; set; }
+
+        [Postgrest.Attributes.Column("notes")]
+        public string? Notes { get; set; }
 
         [Postgrest.Attributes.Column("is_restructuring")]
         public bool IsRestructuring { get; set; }

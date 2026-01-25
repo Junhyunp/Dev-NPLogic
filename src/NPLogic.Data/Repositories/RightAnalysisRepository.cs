@@ -398,6 +398,27 @@ namespace NPLogic.Data.Repositories
             };
         }
 
+        /// <summary>
+        /// 여러 물건의 권리분석 일괄 삭제
+        /// </summary>
+        public async Task DeleteByPropertyIdsAsync(List<Guid> propertyIds)
+        {
+            if (propertyIds == null || propertyIds.Count == 0) return;
+
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<RightAnalysisTable>()
+                    .Filter("property_id", Postgrest.Constants.Operator.In, propertyIds)
+                    .Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"권리분석 일괄 삭제 실패: {ex.Message}", ex);
+            }
+        }
+
         #endregion
     }
 

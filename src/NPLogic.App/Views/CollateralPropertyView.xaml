@@ -1,11 +1,12 @@
 <UserControl x:Class="NPLogic.Views.CollateralPropertyView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
-             mc:Ignorable="d" 
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1200"
              d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}">
     
@@ -31,13 +32,16 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="24">
                 
-                <!-- ========== 상단: 버튼 바 (위성도, 지적도, 로드뷰, 토지이용계획, 건축물대장) ========== -->
-                <Border Background="{StaticResource SurfaceColor}"
+                <!-- ========== 상단: 버튼 바 / WebView2 패널 (토글) ========== -->
+                <!-- 버튼 바 (WebView2 닫혔을 때 표시) -->
+                <Border x:Name="ButtonBarPanel"
+                        Background="{StaticResource SurfaceColor}"
                         BorderBrush="{StaticResource PrimaryBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Padding="16"
-                        Margin="0,0,0,16">
+                        Margin="0,0,0,16"
+                        Visibility="Visible">
                     <!-- 버튼들 -->
                     <StackPanel Orientation="Horizontal">
                         <Button Style="{StaticResource SecondaryButton}"
@@ -50,7 +54,7 @@
                                 <TextBlock Text="위성도" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        
+
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Margin="0,0,8,0"
@@ -61,7 +65,7 @@
                                 <TextBlock Text="지적도" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        
+
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Margin="0,0,8,0"
@@ -72,7 +76,7 @@
                                 <TextBlock Text="로드뷰" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        
+
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Margin="0,0,8,0"
@@ -83,7 +87,7 @@
                                 <TextBlock Text="토지이용계획" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        
+
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Click="OpenBuildingRegister_Click"
@@ -94,6 +98,68 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
+                </Border>
+
+                <!-- WebView2 패널 (버튼 클릭 시 표시) -->
+                <Border x:Name="WebViewPanel"
+                        Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource PrimaryBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16"
+                        Visibility="Collapsed"
+                        MinHeight="500">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- 헤더 (제목 + 닫기 버튼) -->
+                        <Border Grid.Row="0"
+                                Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <materialDesign:PackIcon x:Name="WebViewIcon" Kind="Map"
+                                                         Width="20" Height="20"
+                                                         Foreground="White"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,8,0"/>
+
+                                <TextBlock x:Name="WebViewTitle"
+                                           Grid.Column="1"
+                                           Text="지도"
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"/>
+
+                                <Button Grid.Column="2"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Foreground="White"
+                                        Click="CloseWebView_Click"
+                                        ToolTip="닫기"
+                                        Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" VerticalAlignment="Center"/>
+                                        <TextBlock Text="닫기" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <!-- WebView2 컨트롤 -->
+                        <wv2:WebView2 x:Name="MapWebView"
+                                      Grid.Row="1"
+                                      MinHeight="450"/>
+                    </Grid>
                 </Border>
                 
                 <!-- ========== 물건 기본 정보 테이블 (1~2줄로 간소화) ========== -->
