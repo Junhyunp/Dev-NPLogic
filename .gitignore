@@ -113,6 +113,7 @@ env/
 # =========================
 # Claude Code
 .claude/
+.mcp.json
 
 # Cursor
 .cursor/
