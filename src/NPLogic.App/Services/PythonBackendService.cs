@@ -24,15 +24,20 @@ namespace NPLogic.Services
         private bool _disposed;
         private bool _isStarting;
 
-        private const string DefaultServerUrl = "http://localhost:8000";
+        // EC2 원격 서버 (프로덕션)
+        private const string RemoteServerUrl = "http://3.34.10.57:8000";
+        // 로컬 서버 (개발/폴백)
+        private const string LocalServerUrl = "http://localhost:8000";
+
         private const string HealthEndpoint = "/api/health";
         private const string ServerExeName = "nplogic_backend.exe";
         private const string PythonServerScript = "server.py";
         private const int MaxStartupWaitSeconds = 30;
         private const int HealthCheckIntervalMs = 500;
 
-        public string ServerUrl { get; }
+        public string ServerUrl { get; private set; }
         public bool IsServerRunning { get; private set; }
+        public bool IsRemoteServer { get; private set; }
 
         /// <summary>
         /// Singleton 인스턴스 가져오기
@@ -54,36 +59,53 @@ namespace NPLogic.Services
 
         private PythonBackendService(string? serverUrl = null)
         {
-            ServerUrl = serverUrl ?? DefaultServerUrl;
+            // 기본값: 원격 서버 우선 시도
+            ServerUrl = serverUrl ?? RemoteServerUrl;
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri(ServerUrl),
                 Timeout = TimeSpan.FromMinutes(5)
             };
         }
 
         /// <summary>
         /// 서버가 실행 중인지 확인하고, 아니면 시작합니다.
+        /// 원격 서버(EC2)를 먼저 시도하고, 실패하면 로컬 서버로 폴백합니다.
         /// </summary>
         /// <returns>서버 준비 완료 여부</returns>
         public async Task<bool> EnsureServerRunningAsync()
         {
-            // 이미 실행 중이면 바로 반환
-            if (await CheckHealthAsync())
+            // 1. 원격 서버(EC2) 먼저 시도
+            if (await CheckHealthAsync(RemoteServerUrl))
             {
+                ServerUrl = RemoteServerUrl;
+                IsRemoteServer = true;
                 IsServerRunning = true;
+                Debug.WriteLine($"[PythonBackendService] Connected to remote server: {RemoteServerUrl}");
                 return true;
             }
 
-            // 다른 스레드가 이미 시작 중이면 대기
+            // 2. 로컬 서버가 이미 실행 중인지 확인
+            if (await CheckHealthAsync(LocalServerUrl))
+            {
+                ServerUrl = LocalServerUrl;
+                IsRemoteServer = false;
+                IsServerRunning = true;
+                Debug.WriteLine($"[PythonBackendService] Connected to local server: {LocalServerUrl}");
+                return true;
+            }
+
+            // 3. 다른 스레드가 이미 시작 중이면 대기
             if (_isStarting)
             {
                 return await WaitForServerReadyAsync(MaxStartupWaitSeconds);
             }
 
+            // 4. 로컬 서버 시작 시도 (개발 환경)
             try
             {
                 _isStarting = true;
+                ServerUrl = LocalServerUrl;
+                IsRemoteServer = false;
                 return await StartServerInternalAsync();
             }
             finally
@@ -267,12 +289,13 @@ namespace NPLogic.Services
         /// <summary>
         /// 서버 헬스체크를 수행합니다.
         /// </summary>
-        public async Task<bool> CheckHealthAsync()
+        public async Task<bool> CheckHealthAsync(string? serverUrl = null)
         {
             try
             {
+                var url = (serverUrl ?? ServerUrl) + HealthEndpoint;
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-                var response = await _httpClient.GetAsync(HealthEndpoint, cts.Token);
+                var response = await _httpClient.GetAsync(url, cts.Token);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -319,6 +342,13 @@ namespace NPLogic.Services
         /// HttpClient 인스턴스를 반환합니다. (OCR, Recommend 서비스에서 사용)
         /// </summary>
         public HttpClient GetHttpClient() => _httpClient;
+
+        /// <summary>
+        /// API 엔드포인트의 전체 URL을 반환합니다.
+        /// </summary>
+        /// <param name="endpoint">API 엔드포인트 (예: /api/ocr/registry)</param>
+        /// <returns>전체 URL</returns>
+        public string GetApiUrl(string endpoint) => ServerUrl + endpoint;
 
         public void Dispose()
         {

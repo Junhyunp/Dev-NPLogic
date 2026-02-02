@@ -2,52 +2,49 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 
 namespace NPLogic.Services
 {
     /// <summary>
     /// 카카오 Static Map API 서비스
     /// 지적도, 위성지도, 로드뷰 정적 이미지를 가져옴
+    /// API 키는 MapService에서 가져옴 (Supabase Edge Function에서 로드)
     /// </summary>
     public class StaticMapService
     {
         private readonly HttpClient _httpClient;
+        private readonly MapService? _mapService;
         private string? _kakaoApiKey;
 
         // 카카오 Static Map API URL
         private const string KakaoStaticMapUrl = "https://dapi.kakao.com/v2/local/geo/coord2address.json";
-        
+
         // 네이버 Static Map API URL (대안)
         private const string NaverStaticMapUrl = "https://naveropenapi.apigw.ntruss.com/map-static/v2/raster";
 
-        public StaticMapService()
+        public StaticMapService(MapService? mapService = null)
         {
             _httpClient = new HttpClient();
-            LoadApiKey();
+            _mapService = mapService;
         }
 
         /// <summary>
-        /// API 키 로드
+        /// API 키가 로드되었는지 확인하고 MapService에서 가져옴
         /// </summary>
-        private void LoadApiKey()
+        private void EnsureApiKeyLoaded()
         {
+            if (!string.IsNullOrEmpty(_kakaoApiKey))
+                return;
+
             try
             {
-                var basePath = AppDomain.CurrentDomain.BaseDirectory;
-                var configPath = Path.Combine(basePath, "appsettings.json");
-
-                if (File.Exists(configPath))
+                // MapService에서 API 키 가져오기
+                if (_mapService != null && _mapService.IsConfigLoaded)
                 {
-                    var config = new ConfigurationBuilder()
-                        .SetBasePath(basePath)
-                        .AddJsonFile("appsettings.json", optional: true)
-                        .Build();
-
-                    _kakaoApiKey = config["KakaoMap:ApiKey"] ?? config["KakaoMapApiKey"];
+                    _kakaoApiKey = _mapService.GetKakaoApiKey();
                 }
 
-                // 환경 변수에서도 확인
+                // 환경 변수에서도 확인 (fallback)
                 if (string.IsNullOrEmpty(_kakaoApiKey))
                 {
                     _kakaoApiKey = Environment.GetEnvironmentVariable("KAKAO_MAP_API_KEY");
@@ -69,12 +66,14 @@ namespace NPLogic.Services
         /// <param name="level">줌 레벨 (기본 3)</param>
         /// <returns>이미지 바이트 배열</returns>
         public async Task<byte[]?> GetCadastralMapImageAsync(
-            double lat, 
-            double lng, 
-            int width = 600, 
-            int height = 400, 
+            double lat,
+            double lng,
+            int width = 600,
+            int height = 400,
             int level = 3)
         {
+            EnsureApiKeyLoaded();
+
             if (string.IsNullOrEmpty(_kakaoApiKey))
             {
                 // API 키가 없으면 OSM 타일 서버 사용 (대안)
@@ -119,12 +118,14 @@ namespace NPLogic.Services
         /// 위성지도 이미지 가져오기
         /// </summary>
         public async Task<byte[]?> GetSatelliteMapImageAsync(
-            double lat, 
-            double lng, 
-            int width = 600, 
-            int height = 400, 
+            double lat,
+            double lng,
+            int width = 600,
+            int height = 400,
             int level = 3)
         {
+            EnsureApiKeyLoaded();
+
             if (string.IsNullOrEmpty(_kakaoApiKey))
             {
                 return null;
@@ -262,6 +263,8 @@ namespace NPLogic.Services
         /// </summary>
         public async Task<(double lat, double lng)?> GeocodeAddressAsync(string address)
         {
+            EnsureApiKeyLoaded();
+
             if (string.IsNullOrEmpty(_kakaoApiKey) || string.IsNullOrEmpty(address))
             {
                 return null;

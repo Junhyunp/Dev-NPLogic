@@ -1,11 +1,16 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Web.WebView2.Core;
 using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 using NPLogic.ViewModels;
 
@@ -14,16 +19,122 @@ namespace NPLogic.Views
     /// <summary>
     /// 담보물건 탭 - 물건 기본 정보, 등기부등본 정보, 감정평가 정보를 테이블 형태로 표시
     /// WebView2를 사용하여 위성도/지적도/로드뷰/토지이용계획/건축물대장을 앱 내에서 표시
+    /// 카카오 지도 API로 3분할 지도 패널 (위성도/지적도/로드뷰) 표시
+    /// API 키는 Supabase Edge Function에서 안전하게 로드
     /// </summary>
     public partial class CollateralPropertyView : UserControl
     {
         private bool _webViewInitialized = false;
-        private const string KAKAO_JS_KEY = "485c9d6d11788b3a3aec6a114b3f8461";
+        private bool _mapWebViewsInitialized = false;
+        private bool _mapConfigLoaded = false;
+
+        private string _naverMapClientId = "";
+        private string _naverMapClientSecret = "";
+        private string _naverMapHtmlPath = "";
+        private static readonly HttpClient _httpClient = new HttpClient();
+
+        // MapService 인스턴스 (DI로 주입)
+        private MapService? _mapService;
 
         public CollateralPropertyView()
         {
             InitializeComponent();
+            InitializeMapService();
             InitializeWebView();
+            InitializeMapWebViews();
+
+            // DataContext 변경 시 지도 업데이트
+            DataContextChanged += OnDataContextChanged;
+        }
+
+        /// <summary>
+        /// MapService 초기화 및 설정 로드
+        /// </summary>
+        private async void InitializeMapService()
+        {
+            try
+            {
+                // DI에서 MapService 가져오기
+                _mapService = App.ServiceProvider?.GetService<MapService>();
+                if (_mapService == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[CollateralPropertyView] MapService를 찾을 수 없습니다.");
+                    return;
+                }
+
+                // AuthService에서 액세스 토큰 가져오기
+                var authService = App.ServiceProvider?.GetService<AuthService>();
+                if (authService == null || !authService.IsAuthenticated())
+                {
+                    System.Diagnostics.Debug.WriteLine("[CollateralPropertyView] 인증되지 않음 - 지도 설정 로드 보류");
+                    return;
+                }
+
+                var session = authService.GetSession();
+                if (session?.AccessToken == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[CollateralPropertyView] 액세스 토큰 없음");
+                    return;
+                }
+
+                // Edge Function에서 지도 설정 로드
+                var config = await _mapService.LoadMapConfigAsync(session.AccessToken);
+                if (config != null)
+                {
+                    _kakaoApiKey = _mapService.GetKakaoApiKey() ?? "";
+                    _naverMapClientId = _mapService.GetNaverClientId() ?? "";
+                    _naverMapClientSecret = _mapService.GetNaverClientSecret() ?? "";
+                    _mapConfigLoaded = true;
+
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 지도 설정 로드 완료 - 카카오: {(!string.IsNullOrEmpty(_kakaoApiKey) ? "설정됨" : "미설정")}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[CollateralPropertyView] 지도 설정 로드 실패");
+                }
+
+                // navermap.html 경로 설정 (fallback용)
+                var appDir = AppDomain.CurrentDomain.BaseDirectory;
+                _naverMapHtmlPath = Path.Combine(appDir, "Assets", "Maps", "navermap.html");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] MapService 초기화 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 지도 설정이 로드되었는지 확인하고, 안되어 있으면 로드 시도
+        /// </summary>
+        private async Task EnsureMapConfigLoadedAsync()
+        {
+            if (_mapConfigLoaded && !string.IsNullOrEmpty(_kakaoApiKey))
+                return;
+
+            try
+            {
+                _mapService ??= App.ServiceProvider?.GetService<MapService>();
+                if (_mapService == null) return;
+
+                var authService = App.ServiceProvider?.GetService<AuthService>();
+                if (authService == null || !authService.IsAuthenticated()) return;
+
+                var session = authService.GetSession();
+                if (session?.AccessToken == null) return;
+
+                var config = await _mapService.LoadMapConfigAsync(session.AccessToken);
+                if (config != null)
+                {
+                    _kakaoApiKey = _mapService.GetKakaoApiKey() ?? "";
+                    _naverMapClientId = _mapService.GetNaverClientId() ?? "";
+                    _naverMapClientSecret = _mapService.GetNaverClientSecret() ?? "";
+                    _mapConfigLoaded = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 지도 설정 재로드 실패: {ex.Message}");
+            }
         }
 
         private async void InitializeWebView()
@@ -38,6 +149,414 @@ namespace NPLogic.Views
             {
                 System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] WebView2 초기화 실패: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// 3분할 지도 WebView2 초기화
+        /// </summary>
+        private async void InitializeMapWebViews()
+        {
+            try
+            {
+                // 3개의 WebView2 순차 초기화 (안정성)
+                await SatelliteMapWebView.EnsureCoreWebView2Async(null);
+                await CadastralMapWebView.EnsureCoreWebView2Async(null);
+                await RoadViewWebView.EnsureCoreWebView2Async(null);
+
+                // 가상 호스트 매핑 설정 (네이버 API 도메인 인증용)
+                // 네이버 클라우드 플랫폼에서 "nplogic-map.com" 도메인 등록 필요
+                var mapsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Maps");
+                if (Directory.Exists(mapsFolder))
+                {
+                    SatelliteMapWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                        "nplogic-map.com", mapsFolder, Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+                    CadastralMapWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                        "nplogic-map.com", mapsFolder, Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+                    RoadViewWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                        "nplogic-map.com", mapsFolder, Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 가상 호스트 매핑 완료: nplogic-map.com -> {mapsFolder}");
+                }
+
+                // WebView2 메시지 수신 (JavaScript에서 postMessage로 전송)
+                SatelliteMapWebView.CoreWebView2.WebMessageReceived += OnSatelliteMapMessageReceived;
+                CadastralMapWebView.CoreWebView2.WebMessageReceived += OnCadastralMapMessageReceived;
+                RoadViewWebView.CoreWebView2.WebMessageReceived += OnRoadViewMapMessageReceived;
+
+                // DevTools 콘솔 로그 캡처
+                SatelliteMapWebView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+                CadastralMapWebView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+                RoadViewWebView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+
+                // 네비게이션 완료 이벤트 (에러 감지용)
+                SatelliteMapWebView.CoreWebView2.NavigationCompleted += (s, args) =>
+                    System.Diagnostics.Debug.WriteLine($"[위성도] 네비게이션 완료 - 성공: {args.IsSuccess}, 상태: {args.WebErrorStatus}");
+                CadastralMapWebView.CoreWebView2.NavigationCompleted += (s, args) =>
+                    System.Diagnostics.Debug.WriteLine($"[지적도] 네비게이션 완료 - 성공: {args.IsSuccess}, 상태: {args.WebErrorStatus}");
+                RoadViewWebView.CoreWebView2.NavigationCompleted += (s, args) =>
+                    System.Diagnostics.Debug.WriteLine($"[로드뷰] 네비게이션 완료 - 성공: {args.IsSuccess}, 상태: {args.WebErrorStatus}");
+
+                _mapWebViewsInitialized = true;
+                System.Diagnostics.Debug.WriteLine("[CollateralPropertyView] 3분할 지도 WebView2 초기화 완료");
+
+                // 초기 로딩 메시지 표시
+                var loadingHtml = GenerateLoadingHtml();
+                SatelliteMapWebView.NavigateToString(loadingHtml);
+                CadastralMapWebView.NavigateToString(loadingHtml);
+                RoadViewWebView.NavigateToString(loadingHtml);
+
+                // DataContext가 이미 설정되어 있으면 지도 로드
+                if (DataContext is PropertyDetailViewModel vm && vm.Property != null)
+                {
+                    await LoadNaverMapsAsync(vm);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 3분할 지도 WebView2 초기화 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// DataContext 변경 시 지도 업데이트
+        /// </summary>
+        private async void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!_mapWebViewsInitialized) return;
+
+            if (e.NewValue is PropertyDetailViewModel vm && vm.Property != null)
+            {
+                await LoadNaverMapsAsync(vm);
+            }
+        }
+
+        /// <summary>
+        /// 카카오 지도 3개 로드 (네이버 지도 WebView2 호환성 문제로 카카오 사용)
+        /// </summary>
+        private async Task LoadNaverMapsAsync(PropertyDetailViewModel vm)
+        {
+            // 카카오 API 키 로드 (Supabase Edge Function에서)
+            await EnsureMapConfigLoadedAsync();
+
+            if (string.IsNullOrEmpty(_kakaoApiKey))
+            {
+                var errorHtml = GenerateErrorHtml("카카오 지도 API 키가 설정되지 않았습니다.\n로그인 후 다시 시도해주세요.");
+                SatelliteMapWebView.NavigateToString(errorHtml);
+                CadastralMapWebView.NavigateToString(errorHtml);
+                RoadViewWebView.NavigateToString(errorHtml);
+                return;
+            }
+
+            try
+            {
+                decimal? lat = vm.Property.Latitude;
+                decimal? lng = vm.Property.Longitude;
+
+                // 좌표가 없으면 API로 조회
+                if (!lat.HasValue || !lng.HasValue)
+                {
+                    var coords = await FetchCoordinatesAsync(vm);
+                    if (coords.HasValue)
+                    {
+                        lat = coords.Value.lat;
+                        lng = coords.Value.lng;
+                    }
+                }
+
+                if (lat.HasValue && lng.HasValue)
+                {
+                    // 카카오 지도 HTML 직접 생성하여 로드
+                    var satelliteHtml = GenerateKakaoMapHtml((double)lat.Value, (double)lng.Value, "HYBRID", false);
+                    var cadastralHtml = GenerateKakaoMapHtml((double)lat.Value, (double)lng.Value, "ROADMAP", true);
+                    var roadviewHtml = GenerateKakaoRoadviewHtml((double)lat.Value, (double)lng.Value);
+
+                    SatelliteMapWebView.NavigateToString(satelliteHtml);
+                    CadastralMapWebView.NavigateToString(cadastralHtml);
+                    RoadViewWebView.NavigateToString(roadviewHtml);
+
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 카카오 지도 로드: ({lat}, {lng})");
+                }
+                else
+                {
+                    var noCoordHtml = GenerateNoCoordinatesHtml(vm.Property.DisplayAddress ?? "주소 정보 없음");
+                    SatelliteMapWebView.NavigateToString(noCoordHtml);
+                    CadastralMapWebView.NavigateToString(noCoordHtml);
+                    RoadViewWebView.NavigateToString(noCoordHtml);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 카카오 지도 로드 실패: {ex.Message}");
+                var errorHtml = GenerateErrorHtml($"지도 로드 실패: {ex.Message}");
+                SatelliteMapWebView.NavigateToString(errorHtml);
+                CadastralMapWebView.NavigateToString(errorHtml);
+                RoadViewWebView.NavigateToString(errorHtml);
+            }
+        }
+
+        /// <summary>
+        /// 카카오 지도 HTML 생성
+        /// </summary>
+        private string GenerateKakaoMapHtml(double lat, double lng, string mapType, bool showCadastral)
+        {
+            var cadastralOverlay = showCadastral
+                ? "map.addOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);"
+                : "";
+
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body {{ width: 100%; height: 100%; overflow: hidden; }}
+        #map {{ width: 100%; height: 100%; }}
+    </style>
+</head>
+<body>
+    <div id=""map""></div>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
+    <script>
+        kakao.maps.load(function() {{
+            var container = document.getElementById('map');
+            var options = {{
+                center: new kakao.maps.LatLng({lat}, {lng}),
+                level: 3,
+                mapTypeId: kakao.maps.MapTypeId.{mapType}
+            }};
+            var map = new kakao.maps.Map(container, options);
+            {cadastralOverlay}
+
+            var marker = new kakao.maps.Marker({{
+                position: new kakao.maps.LatLng({lat}, {lng}),
+                map: map
+            }});
+
+            console.log('카카오 지도 로드 완료: {mapType}');
+        }});
+    </script>
+</body>
+</html>";
+        }
+
+        /// <summary>
+        /// 카카오 로드뷰 HTML 생성
+        /// </summary>
+        private string GenerateKakaoRoadviewHtml(double lat, double lng)
+        {
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body {{ width: 100%; height: 100%; overflow: hidden; }}
+        #roadview {{ width: 100%; height: 100%; }}
+        .no-roadview {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            font-family: 'Malgun Gothic', sans-serif;
+        }}
+        .no-roadview-icon {{ font-size: 48px; margin-bottom: 10px; opacity: 0.5; }}
+    </style>
+</head>
+<body>
+    <div id=""roadview""></div>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
+    <script>
+        kakao.maps.load(function() {{
+            var container = document.getElementById('roadview');
+            var position = new kakao.maps.LatLng({lat}, {lng});
+
+            var roadviewClient = new kakao.maps.RoadviewClient();
+            roadviewClient.getNearestPanoId(position, 50, function(panoId) {{
+                if (panoId) {{
+                    var roadview = new kakao.maps.Roadview(container);
+                    roadview.setPanoId(panoId, position);
+                    console.log('카카오 로드뷰 로드 완료');
+                }} else {{
+                    container.innerHTML =
+                        '<div class=""no-roadview"">' +
+                            '<div class=""no-roadview-icon"">&#128694;</div>' +
+                            '<div>이 위치의 거리뷰를 사용할 수 없습니다.</div>' +
+                            '<div style=""margin-top:8px;font-size:12px;color:#999;"">좌표: {lat:F6}, {lng:F6}</div>' +
+                        '</div>';
+                }}
+            }});
+        }});
+    </script>
+</body>
+</html>";
+        }
+
+        /// <summary>
+        /// 네이버 지도 HTML 생성
+        /// </summary>
+        private string GenerateNaverMapHtml(double lat, double lng, string mapType)
+        {
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <script type=""text/javascript"" src=""https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId={_naverMapClientId}&submodules=panorama""></script>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body {{ width: 100%; height: 100%; overflow: hidden; font-family: 'Malgun Gothic', sans-serif; }}
+        #map {{ width: 100%; height: 100%; }}
+        .no-panorama {{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #f5f5f5;
+            color: #666;
+            font-size: 12px;
+            text-align: center;
+        }}
+    </style>
+</head>
+<body>
+    <div id=""map""></div>
+    <script>
+        (function() {{
+            var mapContainer = document.getElementById('map');
+            var lat = {lat};
+            var lng = {lng};
+            var mapType = '{mapType}';
+
+            if (mapType === 'roadview') {{
+                // 로드뷰 (파노라마)
+                var position = new naver.maps.LatLng(lat, lng);
+                naver.maps.Panorama.findNearestPanoId(position, 50, function(panoId) {{
+                    if (panoId) {{
+                        var panorama = new naver.maps.Panorama(mapContainer, {{
+                            panoId: panoId,
+                            pov: {{ pan: 0, tilt: 0, fov: 100 }}
+                        }});
+                    }} else {{
+                        mapContainer.innerHTML = '<div class=""no-panorama""><div style=""font-size:24px;margin-bottom:8px;"">&#128694;</div><div>이 위치의 거리뷰를<br>사용할 수 없습니다.</div></div>';
+                    }}
+                }});
+            }} else {{
+                // 일반 지도 (위성도/지적도)
+                var mapTypeId = (mapType === 'satellite') ? naver.maps.MapTypeId.HYBRID : naver.maps.MapTypeId.NORMAL;
+
+                var map = new naver.maps.Map(mapContainer, {{
+                    center: new naver.maps.LatLng(lat, lng),
+                    zoom: 17,
+                    mapTypeId: mapTypeId
+                }});
+
+                // 지적도 레이어 추가
+                if (mapType === 'cadastral') {{
+                    if (naver.maps.LayerGroup && naver.maps.LayerGroup.CADASTRAL) {{
+                        map.addLayer(naver.maps.LayerGroup.CADASTRAL);
+                    }}
+                }}
+
+                // 마커 추가
+                var marker = new naver.maps.Marker({{
+                    position: new naver.maps.LatLng(lat, lng),
+                    map: map,
+                    icon: {{
+                        content: '<div style=""width:12px;height:12px;background:#d32f2f;border:2px solid white;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);""></div>',
+                        anchor: new naver.maps.Point(6, 6)
+                    }}
+                }});
+            }}
+        }})();
+    </script>
+</body>
+</html>";
+        }
+
+        /// <summary>
+        /// 로딩 중 HTML
+        /// </summary>
+        private string GenerateLoadingHtml()
+        {
+            return @"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
+               font-family: 'Malgun Gothic', sans-serif; background: #f5f5f5; color: #666; }
+        .loading { text-align: center; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #ddd; border-top-color: #1976d2;
+                   border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class=""loading"">
+        <div class=""spinner""></div>
+        <div>지도 로딩 중...</div>
+    </div>
+</body>
+</html>";
+        }
+
+        /// <summary>
+        /// 좌표 없음 HTML
+        /// </summary>
+        private string GenerateNoCoordinatesHtml(string address)
+        {
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <style>
+        body {{ display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
+               font-family: 'Malgun Gothic', sans-serif; background: #fff3e0; color: #e65100; text-align: center; padding: 16px; }}
+        .icon {{ font-size: 32px; margin-bottom: 8px; }}
+        .message {{ font-size: 12px; }}
+        .address {{ font-size: 11px; color: #999; margin-top: 8px; word-break: break-all; }}
+    </style>
+</head>
+<body>
+    <div>
+        <div class=""icon"">&#128205;</div>
+        <div class=""message"">좌표 정보가 없습니다</div>
+        <div class=""address"">{EscapeHtmlString(address)}</div>
+    </div>
+</body>
+</html>";
+        }
+
+        /// <summary>
+        /// 에러 HTML
+        /// </summary>
+        private string GenerateErrorHtml(string message)
+        {
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <style>
+        body {{ display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;
+               font-family: 'Malgun Gothic', sans-serif; background: #ffebee; color: #c62828; text-align: center; padding: 16px; }}
+        .icon {{ font-size: 32px; margin-bottom: 8px; }}
+        .message {{ font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div>
+        <div class=""icon"">&#9888;</div>
+        <div class=""message"">{EscapeHtmlString(message)}</div>
+    </div>
+</body>
+</html>";
         }
 
         /// <summary>
@@ -227,34 +746,64 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// Vworld API로 좌표 조회 및 저장
+        /// 좌표 조회 및 저장 (Naver Geocoding API 우선, Vworld fallback)
         /// </summary>
         private async Task<(decimal lat, decimal lng)?> FetchCoordinatesAsync(PropertyDetailViewModel vm)
         {
             try
             {
-                var vworldService = App.ServiceProvider.GetService<VworldService>();
-                if (vworldService == null || !vworldService.HasApiKey)
+                var rawAddress = vm.Property.DisplayAddress ?? "";
+                if (string.IsNullOrWhiteSpace(rawAddress))
                     return null;
 
-                var address = vm.Property.DisplayAddress ?? "";
-                if (string.IsNullOrWhiteSpace(address))
-                    return null;
+                // 지도 검색용 주소 정제 (괄호, 쉼표 뒤 지번, 동호수 정보 제거)
+                var cleanedAddress = CleanAddressForSearch(rawAddress);
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 주소 정제: '{rawAddress}' → '{cleanedAddress}'");
 
-                var result = await vworldService.SearchAddressAsync(address);
-                if (result == null || (result.Latitude == 0 && result.Longitude == 0))
-                    return null;
+                decimal? lat = null;
+                decimal? lng = null;
 
-                var lat = (decimal)result.Latitude;
-                var lng = (decimal)result.Longitude;
+                // 1. Naver Geocoding API 시도
+                if (!string.IsNullOrEmpty(_naverMapClientId) && !string.IsNullOrEmpty(_naverMapClientSecret))
+                {
+                    var naverResult = await FetchCoordinatesFromNaverAsync(cleanedAddress);
+                    if (naverResult.HasValue)
+                    {
+                        lat = naverResult.Value.lat;
+                        lng = naverResult.Value.lng;
+                        System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Naver 지오코딩 성공: ({lat}, {lng})");
+                    }
+                }
+
+                // 2. Naver 실패 시 Vworld API fallback
+                if (!lat.HasValue || !lng.HasValue)
+                {
+                    var vworldService = App.ServiceProvider.GetService<VworldService>();
+                    if (vworldService != null && vworldService.HasApiKey)
+                    {
+                        var result = await vworldService.SearchAddressAsync(cleanedAddress);
+                        if (result != null && (result.Latitude != 0 || result.Longitude != 0))
+                        {
+                            lat = (decimal)result.Latitude;
+                            lng = (decimal)result.Longitude;
+                            System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Vworld 지오코딩 성공: ({lat}, {lng})");
+
+                            // PNU도 같이 저장 (없는 경우)
+                            if (string.IsNullOrEmpty(vm.Property.Pnu) && result.IsValidPnu)
+                                vm.Property.Pnu = result.Pnu;
+                        }
+                    }
+                }
+
+                if (!lat.HasValue || !lng.HasValue)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 좌표 조회 실패: {cleanedAddress}");
+                    return null;
+                }
 
                 // Property 모델 업데이트
                 vm.Property.Latitude = lat;
                 vm.Property.Longitude = lng;
-
-                // PNU도 같이 저장 (없는 경우)
-                if (string.IsNullOrEmpty(vm.Property.Pnu) && result.IsValidPnu)
-                    vm.Property.Pnu = result.Pnu;
 
                 // DB에 저장
                 var propertyRepository = App.ServiceProvider.GetService<PropertyRepository>();
@@ -264,7 +813,7 @@ namespace NPLogic.Views
                     System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 좌표 저장 완료: ({lat}, {lng})");
                 }
 
-                return (lat, lng);
+                return (lat.Value, lng.Value);
             }
             catch (Exception ex)
             {
@@ -274,28 +823,115 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 검색용 주소 정제 - 부가 정보 제거
-        /// 예: "인천광역시 서구 원창동 40-44(토지, 주건축물제1동 건물), 40-43(토지)"
-        ///   → "인천광역시 서구 원창동 40-44"
+        /// Naver Geocoding API로 좌표 조회
+        /// https://api.ncloud-docs.com/docs/ai-naver-mapsgeocoding-geocode
+        /// </summary>
+        private async Task<(decimal lat, decimal lng)?> FetchCoordinatesFromNaverAsync(string address)
+        {
+            try
+            {
+                var encodedAddress = Uri.EscapeDataString(address);
+                var url = $"https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query={encodedAddress}";
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("x-ncp-apigw-api-key-id", _naverMapClientId);
+                request.Headers.Add("x-ncp-apigw-api-key", _naverMapClientSecret);
+                request.Headers.Add("Accept", "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+                if (!response.IsSuccessStatusCode)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Naver 지오코딩 HTTP 오류: {response.StatusCode}");
+                    return null;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                // status 확인
+                if (root.TryGetProperty("status", out var statusProp) && statusProp.GetString() != "OK")
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Naver 지오코딩 상태: {statusProp.GetString()}");
+                    return null;
+                }
+
+                // addresses 배열 확인
+                if (!root.TryGetProperty("addresses", out var addresses) || addresses.GetArrayLength() == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Naver 지오코딩 결과 없음");
+                    return null;
+                }
+
+                var firstResult = addresses[0];
+                if (firstResult.TryGetProperty("y", out var yProp) && firstResult.TryGetProperty("x", out var xProp))
+                {
+                    var latStr = yProp.GetString();
+                    var lngStr = xProp.GetString();
+
+                    if (decimal.TryParse(latStr, out var lat) && decimal.TryParse(lngStr, out var lng))
+                    {
+                        return (lat, lng);
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] Naver 지오코딩 오류: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 검색용 주소 정제 - 부가 정보 제거하고 첫 번째 지번만 추출
+        ///
+        /// 데이터디스크의 담보소재지4 형식 예시:
+        /// - "56-3(토지, 1동, 2동, 3동, 4동 건물 4개동), 56-22, 56-23(토지 2필지)"
+        /// - "164-1 청라풍림엑슬루타워 제101동 제29층 제2901호"
+        /// - "1029 유-타워 제32층 제3204호"
+        /// - "산192-3(토지)"
+        ///
+        /// 정제 결과:
+        /// - "경기도 용인시 처인구 포곡읍 삼계리 56-3"
+        /// - "인천광역시 서구 청라동 164-1"
         /// </summary>
         private string CleanAddressForSearch(string address)
         {
             if (string.IsNullOrWhiteSpace(address))
                 return address;
 
-            // 괄호와 그 내용 제거: (토지, ...) 등
-            var cleaned = System.Text.RegularExpressions.Regex.Replace(address, @"\([^)]*\)", "");
+            var cleaned = address;
 
-            // 쉼표 이후 내용 제거 (여러 지번이 나열된 경우 첫 번째만)
+            // 1. 괄호와 그 내용 제거: (토지, ...), (건물), (토지 2필지) 등
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\([^)]*\)", "");
+
+            // 2. 쉼표 이후 내용 제거 (여러 지번이 나열된 경우 첫 번째만)
             var commaIndex = cleaned.IndexOf(',');
             if (commaIndex > 0)
                 cleaned = cleaned.Substring(0, commaIndex);
+
+            // 3. "제X동", "제X층", "제X호" 패턴 제거 (아파트/집합건물 상세주소)
+            //    예: "292 우정에쉐르아파트 제102동 제15층 제1502호" → "292 우정에쉐르아파트"
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s*제\d+동.*$", "");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s*제\S*층.*$", "");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s*제\S*호.*$", "");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s*제지하층.*$", "");
+
+            // 4. 건물명 뒤의 동/층/호 정보 제거 (한글 동호수)
+            //    예: "1동", "에이동", "가동" 등 - 지번 뒤에 오는 건물동 정보
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+\d+동\s*$", "");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+[가-힣]+동\s*$", "");
+
+            // 5. 연속 공백 정리
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+", " ");
 
             return cleaned.Trim();
         }
 
         /// <summary>
-        /// 토지이용계획 열기 (토지이음 - WebView2)
+        /// 토지이용계획 열기 (토지이음 - 외부 브라우저)
         /// PNU가 있으면 POST로 바로 조회, 없으면 Vworld API로 PNU 조회 후 열기
         /// </summary>
         private async void OpenLandUsePlan_Click(object sender, RoutedEventArgs e)
@@ -304,12 +940,6 @@ namespace NPLogic.Views
             if (vm?.Property == null)
             {
                 MessageBox.Show("물건 정보가 없습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            if (!_webViewInitialized)
-            {
-                MessageBox.Show("WebView2가 아직 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -330,23 +960,72 @@ namespace NPLogic.Views
                     pnu = await FetchAndSavePnuAsync(vm, address);
                 }
 
-                string html;
                 if (!string.IsNullOrEmpty(pnu) && pnu.Length == 19)
                 {
-                    html = GenerateLandUsePlanHtml(pnu);
+                    // 외부 브라우저에서 토지이음 열기
+                    OpenLandUsePlanInBrowser(pnu);
                 }
                 else
                 {
-                    // PNU 조회 실패 - 검색 페이지
-                    html = GenerateLandUsePlanSearchHtml(vm.Property.DisplayAddress ?? "");
+                    // PNU 조회 실패 - 토지이음 검색 페이지를 브라우저에서 열기
+                    var searchUrl = "https://www.eum.go.kr/web/ar/lu/luLandSrch.jsp";
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(searchUrl) { UseShellExecute = true });
+                    MessageBox.Show("PNU 자동 조회에 실패했습니다.\n토지이음 검색 페이지에서 직접 주소를 검색해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-
-                ShowWebViewPanel("토지이용계획", "FileDocument");
-                MapWebView.NavigateToString(html);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"토지이용계획을 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 토지이음 토지이용계획 페이지를 외부 브라우저에서 열기
+        /// POST 방식이 필요하므로 임시 HTML 파일 생성 후 브라우저로 열기
+        /// </summary>
+        private void OpenLandUsePlanInBrowser(string pnu)
+        {
+            try
+            {
+                var html = $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <title>토지이용계획 조회 중...</title>
+</head>
+<body onload=""document.getElementById('eumForm').submit();"">
+    <form id=""eumForm"" method=""POST"" action=""https://www.eum.go.kr/web/ar/lu/luLandDet.jsp"">
+        <input type=""hidden"" name=""selGbn"" value=""umd"">
+        <input type=""hidden"" name=""isNoScr"" value=""script"">
+        <input type=""hidden"" name=""s_type"" value=""1"">
+        <input type=""hidden"" name=""mode"" value=""search"">
+        <input type=""hidden"" name=""pnu"" value=""{pnu}"">
+    </form>
+    <p style=""font-family: 'Malgun Gothic', sans-serif; text-align: center; margin-top: 100px; color: #666;"">
+        토지이음으로 이동 중입니다...
+    </p>
+</body>
+</html>";
+
+                // 임시 HTML 파일 생성
+                var tempPath = Path.Combine(Path.GetTempPath(), $"eum_land_{pnu}.html");
+                File.WriteAllText(tempPath, html, System.Text.Encoding.UTF8);
+
+                // 기본 브라우저로 열기
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(tempPath) { UseShellExecute = true });
+
+                // 5초 후 임시 파일 삭제
+                Task.Delay(5000).ContinueWith(_ =>
+                {
+                    try { File.Delete(tempPath); } catch { }
+                });
+
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이음 열기 완료: PNU={pnu}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이음 열기 실패: {ex.Message}");
+                throw;
             }
         }
 
@@ -407,7 +1086,7 @@ namespace NPLogic.Views
         }
 
         /// <summary>
-        /// 건축물대장 열기 (정부24 건축물대장 열람 - WebView2)
+        /// 건축물대장 열기 (세움터 - 외부 브라우저)
         /// </summary>
         private void OpenBuildingRegister_Click(object sender, RoutedEventArgs e)
         {
@@ -418,23 +1097,56 @@ namespace NPLogic.Views
                 return;
             }
 
-            if (!_webViewInitialized)
-            {
-                MessageBox.Show("WebView2가 아직 초기화되지 않았습니다. 잠시 후 다시 시도해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
             try
             {
                 var address = vm.Property.DisplayAddress ?? "";
-                var html = GenerateBuildingRegisterHtml(address);
 
-                ShowWebViewPanel("건축물대장", "OfficeBuildingMarker");
-                MapWebView.NavigateToString(html);
+                // 세움터 건축물대장 열람 페이지를 외부 브라우저에서 열기
+                OpenBuildingRegisterInBrowser(address);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"건축물대장을 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 세움터 건축물대장 열람 페이지를 외부 브라우저에서 열기
+        /// 주소를 클립보드에 복사하고 세움터 검색 페이지로 이동
+        /// </summary>
+        private void OpenBuildingRegisterInBrowser(string address)
+        {
+            try
+            {
+                // 세움터 건축물대장 열람 URL
+                var seumteoUrl = "https://cloud.eais.go.kr/moct/bci/aaa02/BCIAAA02L01";
+
+                // 주소를 클립보드에 복사 (사용자 편의)
+                if (!string.IsNullOrWhiteSpace(address))
+                {
+                    var cleanedAddress = CleanAddressForSearch(address);
+                    Clipboard.SetText(cleanedAddress);
+                    System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 주소 클립보드 복사: {cleanedAddress}");
+                }
+
+                // 기본 브라우저로 세움터 열기
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(seumteoUrl) { UseShellExecute = true });
+
+                // 사용자에게 안내
+                MessageBox.Show(
+                    "세움터 건축물대장 열람 페이지가 브라우저에서 열렸습니다.\n\n" +
+                    "주소가 클립보드에 복사되었습니다.\n" +
+                    "검색창에 붙여넣기(Ctrl+V)하여 조회하세요.",
+                    "건축물대장",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 세움터 열기 완료");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 세움터 열기 실패: {ex.Message}");
+                throw;
             }
         }
 
@@ -458,7 +1170,7 @@ namespace NPLogic.Views
 </head>
 <body>
     <div id=""map""></div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var mapOption = {{
@@ -506,7 +1218,7 @@ namespace NPLogic.Views
 </head>
 <body>
     <div id=""map""></div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&libraries=services""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var mapOption = {{
@@ -557,7 +1269,7 @@ namespace NPLogic.Views
 </head>
 <body>
     <div id=""map""></div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var mapOption = {{
@@ -605,7 +1317,7 @@ namespace NPLogic.Views
 </head>
 <body>
     <div id=""map""></div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&libraries=services""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var mapOption = {{
@@ -662,7 +1374,7 @@ namespace NPLogic.Views
         <div id=""map""></div>
         <div id=""roadview""></div>
     </div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var rvContainer = document.getElementById('roadview');
@@ -738,7 +1450,7 @@ namespace NPLogic.Views
         <div id=""map""></div>
         <div id=""roadview""></div>
     </div>
-    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={KAKAO_JS_KEY}&libraries=services""></script>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&libraries=services""></script>
     <script>
         var mapContainer = document.getElementById('map');
         var rvContainer = document.getElementById('roadview');
@@ -929,6 +1641,181 @@ namespace NPLogic.Views
         {
             if (string.IsNullOrEmpty(str)) return "";
             return System.Web.HttpUtility.HtmlEncode(str);
+        }
+
+        #endregion
+
+        #region 네이버/카카오 지도 Fallback 처리
+
+        private string _kakaoApiKey = "";
+
+        /// <summary>
+        /// 위성도 WebView 메시지 수신
+        /// </summary>
+        private void OnSatelliteMapMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            HandleMapMessage("위성도", e, SatelliteMapWebView, "satellite");
+        }
+
+        /// <summary>
+        /// 지적도 WebView 메시지 수신
+        /// </summary>
+        private void OnCadastralMapMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            HandleMapMessage("지적도", e, CadastralMapWebView, "cadastral");
+        }
+
+        /// <summary>
+        /// 로드뷰 WebView 메시지 수신
+        /// </summary>
+        private void OnRoadViewMapMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            HandleMapMessage("로드뷰", e, RoadViewWebView, "roadview");
+        }
+
+        /// <summary>
+        /// 지도 메시지 처리 (인증 실패 시 카카오 지도로 fallback)
+        /// </summary>
+        private void HandleMapMessage(string mapName, CoreWebView2WebMessageReceivedEventArgs e,
+            Microsoft.Web.WebView2.Wpf.WebView2 webView, string mapType)
+        {
+            try
+            {
+                var json = e.WebMessageAsJson;
+                System.Diagnostics.Debug.WriteLine($"[{mapName} WebMessage] {json}");
+
+                var message = JsonSerializer.Deserialize<JsonElement>(json);
+
+                if (message.TryGetProperty("type", out var typeElement))
+                {
+                    var type = typeElement.GetString();
+
+                    if (type == "authFailure")
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[{mapName}] 네이버 지도 인증 실패 - 카카오 지도로 전환");
+
+                        // 좌표 추출
+                        decimal lat = 37.5665m, lng = 126.9780m;
+                        if (message.TryGetProperty("lat", out var latEl)) lat = latEl.GetDecimal();
+                        if (message.TryGetProperty("lng", out var lngEl)) lng = lngEl.GetDecimal();
+
+                        // 카카오 지도로 fallback
+                        Dispatcher.Invoke(() => LoadKakaoMapFallback(webView, mapType, lat, lng));
+                    }
+                    else if (type == "mapSuccess")
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[{mapName}] 네이버 지도 로드 성공");
+                    }
+                    else if (type == "debug")
+                    {
+                        // 디버그 메시지는 이미 위에서 출력됨
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[{mapName}] 메시지 처리 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 카카오 지도 fallback 로드
+        /// </summary>
+        private async void LoadKakaoMapFallback(Microsoft.Web.WebView2.Wpf.WebView2 webView, string mapType, decimal lat, decimal lng)
+        {
+            try
+            {
+                // 카카오 API 키 로드 (Supabase Edge Function에서)
+                await EnsureMapConfigLoadedAsync();
+
+                if (string.IsNullOrEmpty(_kakaoApiKey))
+                {
+                    System.Diagnostics.Debug.WriteLine("[Fallback] 카카오 API 키도 설정되지 않음");
+                    var errorHtml = GenerateErrorHtml("네이버 지도 인증 실패. 카카오 API 키도 설정되지 않았습니다.\n로그인 후 다시 시도해주세요.");
+                    webView.NavigateToString(errorHtml);
+                    return;
+                }
+
+                // 카카오 지도 HTML 생성 및 로드
+                var kakaoMapType = mapType switch
+                {
+                    "satellite" => "HYBRID",
+                    "cadastral" => "ROADMAP",
+                    "roadview" => "ROADVIEW",
+                    _ => "HYBRID"
+                };
+
+                System.Diagnostics.Debug.WriteLine($"[Fallback] 카카오 지도 로드: {mapType} -> {kakaoMapType}");
+
+                var html = GenerateKakaoMapFallbackHtml((double)lat, (double)lng, kakaoMapType, mapType == "cadastral");
+                webView.NavigateToString(html);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Fallback] 카카오 지도 로드 실패: {ex.Message}");
+                var errorHtml = GenerateErrorHtml($"지도 로드 실패: {ex.Message}");
+                webView.NavigateToString(errorHtml);
+            }
+        }
+
+        /// <summary>
+        /// 카카오 지도 Fallback HTML 생성
+        /// </summary>
+        private string GenerateKakaoMapFallbackHtml(double lat, double lng, string mapType, bool showCadastral)
+        {
+            var cadastralOverlay = showCadastral
+                ? "map.addOverlayMapTypeId(kakao.maps.MapTypeId.USE_DISTRICT);"
+                : "";
+
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body {{ width: 100%; height: 100%; overflow: hidden; }}
+        #map {{ width: 100%; height: 100%; }}
+        .fallback-badge {{
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(255, 193, 7, 0.9);
+            color: #333;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Malgun Gothic', sans-serif;
+            z-index: 1000;
+        }}
+    </style>
+</head>
+<body>
+    <div id=""map""></div>
+    <div class=""fallback-badge"">카카오 지도 (Fallback)</div>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
+    <script>
+        kakao.maps.load(function() {{
+            var container = document.getElementById('map');
+            var options = {{
+                center: new kakao.maps.LatLng({lat}, {lng}),
+                level: 3,
+                mapTypeId: kakao.maps.MapTypeId.{mapType}
+            }};
+            var map = new kakao.maps.Map(container, options);
+            {cadastralOverlay}
+
+            // 마커 추가
+            var marker = new kakao.maps.Marker({{
+                position: new kakao.maps.LatLng({lat}, {lng}),
+                map: map
+            }});
+
+            console.log('카카오 지도 (Fallback) 로드 완료');
+        }});
+    </script>
+</body>
+</html>";
         }
 
         #endregion

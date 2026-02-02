@@ -1332,14 +1332,27 @@ namespace NPLogic.ViewModels
         {
             BorrowerSummary = new BorrowerSummaryModel();
 
-            if (_borrowerRepository == null || Property?.BorrowerId == null)
+            if (_borrowerRepository == null || Property == null)
             {
                 return;
             }
 
             try
             {
-                var borrower = await _borrowerRepository.GetByIdAsync(Property.BorrowerId.Value);
+                Borrower? borrower = null;
+
+                // 1차: BorrowerId로 조회
+                if (Property.BorrowerId != null)
+                {
+                    borrower = await _borrowerRepository.GetByIdAsync(Property.BorrowerId.Value);
+                }
+
+                // 2차: BorrowerId가 없거나 못 찾으면 BorrowerNumber로 조회
+                if (borrower == null && !string.IsNullOrWhiteSpace(Property.BorrowerNumber))
+                {
+                    borrower = await _borrowerRepository.GetByBorrowerNumberAsync(Property.BorrowerNumber);
+                }
+
                 if (borrower != null)
                 {
                     BorrowerSummary = new BorrowerSummaryModel

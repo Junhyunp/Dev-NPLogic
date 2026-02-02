@@ -20,28 +20,82 @@ namespace NPLogic.Services
         public string MarkerType { get; set; } = "default"; // subject, case, transaction
         public string? Info { get; set; }
     }
-    
+
+    /// <summary>
+    /// 지도 설정 (Supabase Edge Function에서 로드)
+    /// </summary>
+    public class MapConfig
+    {
+        [JsonPropertyName("kakaoMap")]
+        public KakaoMapConfig? KakaoMap { get; set; }
+
+        [JsonPropertyName("naverMap")]
+        public NaverMapConfig? NaverMap { get; set; }
+
+        [JsonPropertyName("vworld")]
+        public VworldConfig? Vworld { get; set; }
+    }
+
+    public class KakaoMapConfig
+    {
+        [JsonPropertyName("apiKey")]
+        public string ApiKey { get; set; } = "";
+    }
+
+    public class NaverMapConfig
+    {
+        [JsonPropertyName("clientId")]
+        public string ClientId { get; set; } = "";
+
+        [JsonPropertyName("clientSecret")]
+        public string ClientSecret { get; set; } = "";
+    }
+
+    public class VworldConfig
+    {
+        [JsonPropertyName("apiKey")]
+        public string ApiKey { get; set; } = "";
+    }
+
     /// <summary>
     /// 지도 서비스 (Naver/Kakao Map 연동)
     /// </summary>
     public class MapService
     {
         private readonly HttpClient _httpClient;
-        
+        private static MapConfig? _cachedConfig;
+        private static bool _configLoaded = false;
+
         // Kakao API 키 (실제 사용 시 환경변수나 설정에서 가져옴)
         private string? _kakaoApiKey;
-        
+
         // Naver API 키
         private string? _naverClientId;
         private string? _naverClientSecret;
-        
+
+        // Vworld API 키
+        private string? _vworldApiKey;
+
+        // Supabase 설정
+        private string? _supabaseUrl;
+        private string? _supabaseAnonKey;
+
         public MapService()
         {
             _httpClient = new HttpClient();
         }
-        
+
         /// <summary>
-        /// API 키 설정
+        /// Supabase 설정 주입
+        /// </summary>
+        public void SetSupabaseConfig(string url, string anonKey)
+        {
+            _supabaseUrl = url;
+            _supabaseAnonKey = anonKey;
+        }
+
+        /// <summary>
+        /// API 키 설정 (직접 설정용 - 백업)
         /// </summary>
         public void SetApiKeys(string? kakaoApiKey = null, string? naverClientId = null, string? naverClientSecret = null)
         {
@@ -49,6 +103,97 @@ namespace NPLogic.Services
             _naverClientId = naverClientId;
             _naverClientSecret = naverClientSecret;
         }
+
+        /// <summary>
+        /// Supabase Edge Function에서 지도 설정 로드
+        /// </summary>
+        public async Task<MapConfig?> LoadMapConfigAsync(string accessToken)
+        {
+            // 이미 로드된 경우 캐시 반환
+            if (_configLoaded && _cachedConfig != null)
+            {
+                ApplyConfig(_cachedConfig);
+                return _cachedConfig;
+            }
+
+            if (string.IsNullOrEmpty(_supabaseUrl) || string.IsNullOrEmpty(accessToken))
+            {
+                Debug.WriteLine("[MapService] Supabase URL 또는 액세스 토큰이 없습니다.");
+                return null;
+            }
+
+            try
+            {
+                var url = $"{_supabaseUrl}/functions/v1/get-map-config";
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("Authorization", $"Bearer {accessToken}");
+                request.Headers.Add("apikey", _supabaseAnonKey);
+
+                Debug.WriteLine($"[MapService] Edge Function 호출: {url}");
+
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var config = JsonSerializer.Deserialize<MapConfig>(content);
+                    if (config != null)
+                    {
+                        _cachedConfig = config;
+                        _configLoaded = true;
+                        ApplyConfig(config);
+                        Debug.WriteLine("[MapService] 지도 설정 로드 완료");
+                        return config;
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"[MapService] Edge Function 실패: {response.StatusCode} - {content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[MapService] 지도 설정 로드 실패: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 설정 적용
+        /// </summary>
+        private void ApplyConfig(MapConfig config)
+        {
+            _kakaoApiKey = config.KakaoMap?.ApiKey;
+            _naverClientId = config.NaverMap?.ClientId;
+            _naverClientSecret = config.NaverMap?.ClientSecret;
+            _vworldApiKey = config.Vworld?.ApiKey;
+        }
+
+        /// <summary>
+        /// 카카오 API 키 반환
+        /// </summary>
+        public string? GetKakaoApiKey() => _kakaoApiKey;
+
+        /// <summary>
+        /// 네이버 Client ID 반환
+        /// </summary>
+        public string? GetNaverClientId() => _naverClientId;
+
+        /// <summary>
+        /// 네이버 Client Secret 반환
+        /// </summary>
+        public string? GetNaverClientSecret() => _naverClientSecret;
+
+        /// <summary>
+        /// Vworld API 키 반환
+        /// </summary>
+        public string? GetVworldApiKey() => _vworldApiKey;
+
+        /// <summary>
+        /// 설정이 로드되었는지 확인
+        /// </summary>
+        public bool IsConfigLoaded => _configLoaded && !string.IsNullOrEmpty(_kakaoApiKey);
         
         /// <summary>
         /// 주소를 좌표로 변환 (Kakao)

@@ -118,8 +118,28 @@ namespace NPLogic
             services.AddSingleton<AuthService>();
             services.AddSingleton<ExcelService>();
             services.AddSingleton<StorageService>();
-            services.AddSingleton<StaticMapService>();
-            services.AddSingleton<VworldService>();
+
+            // Map Service (Singleton) - Supabase Edge Function에서 API 키 로드
+            services.AddSingleton(sp =>
+            {
+                var mapService = new MapService();
+                mapService.SetSupabaseConfig(SupabaseUrl, SupabaseKey);
+                return mapService;
+            });
+
+            // Static Map Service (Singleton) - MapService에서 API 키 가져옴
+            services.AddSingleton(sp =>
+            {
+                var mapService = sp.GetService<MapService>();
+                return new StaticMapService(mapService);
+            });
+
+            // Vworld Service (Singleton) - MapService에서 API 키 가져옴
+            services.AddSingleton(sp =>
+            {
+                var mapService = sp.GetService<MapService>();
+                return new VworldService(mapService);
+            });
 
             // Python Backend Services (Singleton)
             // PythonBackendService는 자체 Singleton이므로 등록하지 않음 (Instance 프로퍼티 사용)

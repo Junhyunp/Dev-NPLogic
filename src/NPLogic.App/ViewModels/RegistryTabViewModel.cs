@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
@@ -207,6 +208,18 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _ocrExtractedAddress;
+
+        /// <summary>
+        /// 등기부등본 요약 페이지 이미지 (Base64 → BitmapImage 변환)
+        /// </summary>
+        [ObservableProperty]
+        private BitmapImage? _summaryImage;
+
+        /// <summary>
+        /// 요약 이미지가 있는지 여부
+        /// </summary>
+        [ObservableProperty]
+        private bool _hasSummaryImage;
 
         #endregion
 
@@ -648,6 +661,8 @@ namespace NPLogic.ViewModels
             OcrPreviewGapgu.Clear();
             OcrPreviewEulgu.Clear();
             OcrExtractedAddress = null;
+            SummaryImage = null;
+            HasSummaryImage = false;
         }
 
         /// <summary>
@@ -701,19 +716,29 @@ namespace NPLogic.ViewModels
 
                         var result = await _ocrService.ProcessPdfAsync(pdfFile.FilePath, progress, token);
 
-                        if (result.Success && result.Data != null)
+                        if (result.Success)
                         {
                             pdfFile.Status = "완료";
                             pdfFile.Progress = 100;
 
+                            // 요약 페이지 이미지 저장 (Base64 → BitmapImage)
+                            if (!string.IsNullOrEmpty(result.SummaryImage))
+                            {
+                                SummaryImage = ConvertBase64ToBitmapImage(result.SummaryImage);
+                                HasSummaryImage = SummaryImage != null;
+                            }
+
                             // 주소 저장
-                            if (!string.IsNullOrEmpty(result.Data.Address))
+                            if (result.Data != null && !string.IsNullOrEmpty(result.Data.Address))
                             {
                                 OcrExtractedAddress = result.Data.Address;
                             }
 
                             // 결과 파싱 및 미리보기에 추가
-                            ParseOcrResultToPreview(result.Data, pdfFile.FileName);
+                            if (result.Data != null)
+                            {
+                                ParseOcrResultToPreview(result.Data, pdfFile.FileName);
+                            }
                         }
                         else
                         {
@@ -919,6 +944,41 @@ namespace NPLogic.ViewModels
         }
 
         #region Helper Methods
+
+        /// <summary>
+        /// Base64 문자열을 BitmapImage로 변환
+        /// </summary>
+        private static BitmapImage? ConvertBase64ToBitmapImage(string base64String)
+        {
+            try
+            {
+                // data:image/png;base64, 형식에서 Base64 부분만 추출
+                var base64Data = base64String;
+                if (base64String.Contains(","))
+                {
+                    base64Data = base64String.Substring(base64String.IndexOf(",") + 1);
+                }
+
+                var imageBytes = Convert.FromBase64String(base64Data);
+
+                var bitmap = new BitmapImage();
+                using (var stream = new MemoryStream(imageBytes))
+                {
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // UI 스레드에서 사용 가능하도록
+                }
+
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Base64 to BitmapImage 변환 실패: {ex.Message}");
+                return null;
+            }
+        }
 
         private static string? GetStringValue(Dictionary<string, object?>? dict, string key)
         {

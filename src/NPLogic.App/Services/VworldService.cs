@@ -14,10 +14,12 @@ namespace NPLogic.Services
     /// <summary>
     /// 브이월드(Vworld) API 서비스
     /// 주소를 PNU(필지고유번호)로 변환
+    /// API 키는 MapService에서 가져옴 (Supabase Edge Function에서 로드)
     /// </summary>
     public class VworldService
     {
         private readonly HttpClient _httpClient;
+        private readonly MapService? _mapService;
         private string? _vworldApiKey;
 
         private const string VworldSearchUrl = "https://api.vworld.kr/req/search";
@@ -44,20 +46,33 @@ namespace NPLogic.Services
             { "제주", "제주특별자치도" }
         };
 
-        public VworldService()
+        public VworldService(MapService? mapService = null)
         {
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
+            _mapService = mapService;
             LoadApiKey();
         }
 
         /// <summary>
-        /// API 키 로드 (appsettings.json 또는 환경 변수)
+        /// API 키 로드 (MapService → appsettings.json → 환경 변수 순서)
         /// </summary>
         private void LoadApiKey()
         {
             try
             {
+                // 1. MapService에서 API 키 가져오기 (Supabase Edge Function에서 로드된 키)
+                if (_mapService != null && _mapService.IsConfigLoaded)
+                {
+                    _vworldApiKey = _mapService.GetVworldApiKey();
+                    if (!string.IsNullOrEmpty(_vworldApiKey))
+                    {
+                        System.Diagnostics.Debug.WriteLine("[VworldService] MapService에서 API 키 로드 완료");
+                        return;
+                    }
+                }
+
+                // 2. appsettings.json에서 로드 (fallback)
                 var basePath = AppDomain.CurrentDomain.BaseDirectory;
                 var configPath = Path.Combine(basePath, "appsettings.json");
 
@@ -71,7 +86,7 @@ namespace NPLogic.Services
                     _vworldApiKey = config["Vworld:ApiKey"] ?? config["VworldApiKey"];
                 }
 
-                // 환경 변수에서도 확인
+                // 3. 환경 변수에서도 확인 (fallback)
                 if (string.IsNullOrEmpty(_vworldApiKey))
                 {
                     _vworldApiKey = Environment.GetEnvironmentVariable("VWORLD_API_KEY");
@@ -80,6 +95,25 @@ namespace NPLogic.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[VworldService] API 키 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// API 키가 로드되었는지 확인하고, 없으면 MapService에서 다시 시도
+        /// </summary>
+        public void EnsureApiKeyLoaded()
+        {
+            if (!string.IsNullOrEmpty(_vworldApiKey))
+                return;
+
+            // MapService에서 다시 시도
+            if (_mapService != null && _mapService.IsConfigLoaded)
+            {
+                _vworldApiKey = _mapService.GetVworldApiKey();
+                if (!string.IsNullOrEmpty(_vworldApiKey))
+                {
+                    System.Diagnostics.Debug.WriteLine("[VworldService] MapService에서 API 키 재로드 완료");
+                }
             }
         }
 
@@ -105,6 +139,9 @@ namespace NPLogic.Services
         {
             if (string.IsNullOrWhiteSpace(address))
                 return null;
+
+            // API 키가 로드되었는지 확인 (MapService에서 가져오기 시도)
+            EnsureApiKeyLoaded();
 
             if (string.IsNullOrEmpty(_vworldApiKey))
             {

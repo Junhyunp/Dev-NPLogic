@@ -75,8 +75,9 @@ namespace NPLogic.Services
                 var jsonContent = JsonSerializer.Serialize(request, _jsonOptions);
                 var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                // API 호출
-                var response = await httpClient.PostAsync(RecommendEndpoint, content, cancellationToken);
+                // API 호출 (전체 URL 사용)
+                var apiUrl = PythonBackendService.Instance.GetApiUrl(RecommendEndpoint);
+                var response = await httpClient.PostAsync(apiUrl, content, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 // 응답 파싱

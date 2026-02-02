@@ -48,6 +48,10 @@ class HealthResponse(BaseModel):
 class OcrResponse(BaseModel):
     success: bool
     file_path: Optional[str] = None
+    summary_start_page: Optional[int] = None
+    summary_image: Optional[str] = None  # Base64 인코딩된 요약 페이지 이미지
+    pages: Optional[list] = None
+    full_text: Optional[str] = None
     registry_type: Optional[str] = None
     registry_number: Optional[str] = None
     owners: Optional[list] = None

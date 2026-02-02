@@ -89,8 +89,9 @@ namespace NPLogic.Services
                 streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
                 content.Add(streamContent, "file", fileName);
 
-                // API 호출
-                var response = await httpClient.PostAsync(OcrEndpoint, content, cancellationToken);
+                // API 호출 (전체 URL 사용)
+                var apiUrl = PythonBackendService.Instance.GetApiUrl(OcrEndpoint);
+                var response = await httpClient.PostAsync(apiUrl, content, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 progress?.Report(new OcrProgress(fileName, OcrProgressStatus.Parsing, 90));
@@ -120,7 +121,10 @@ namespace NPLogic.Services
                 {
                     Success = true,
                     FileName = fileName,
-                    Data = ocrResponse.Data
+                    Data = ocrResponse.Data,
+                    SummaryImage = ocrResponse.SummaryImage,
+                    FullText = ocrResponse.FullText,
+                    SummaryStartPage = ocrResponse.SummaryStartPage
                 };
             }
             catch (TaskCanceledException)
@@ -214,8 +218,35 @@ namespace NPLogic.Services
         [JsonPropertyName("success")]
         public bool Success { get; set; }
 
+        [JsonPropertyName("summary_start_page")]
+        public int? SummaryStartPage { get; set; }
+
+        [JsonPropertyName("summary_image")]
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+
+        [JsonPropertyName("full_text")]
+        public string? FullText { get; set; }
+
+        [JsonPropertyName("pages")]
+        public List<OcrPageData>? Pages { get; set; }
+
         [JsonPropertyName("data")]
         public OcrResultData? Data { get; set; }
+
+        [JsonPropertyName("error")]
+        public string? Error { get; set; }
+    }
+
+    /// <summary>
+    /// OCR 페이지별 데이터
+    /// </summary>
+    public class OcrPageData
+    {
+        [JsonPropertyName("page_number")]
+        public int PageNumber { get; set; }
+
+        [JsonPropertyName("text")]
+        public string? Text { get; set; }
 
         [JsonPropertyName("error")]
         public string? Error { get; set; }
@@ -228,6 +259,15 @@ namespace NPLogic.Services
     {
         [JsonPropertyName("address")]
         public string? Address { get; set; }
+
+        [JsonPropertyName("summary_start_page")]
+        public int? SummaryStartPage { get; set; }
+
+        [JsonPropertyName("summary_image")]
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+
+        [JsonPropertyName("full_text")]
+        public string? FullText { get; set; }
 
         [JsonPropertyName("owners")]
         public List<Dictionary<string, object?>>? Owners { get; set; }
@@ -247,6 +287,9 @@ namespace NPLogic.Services
         public bool Success { get; set; }
         public string FileName { get; set; } = string.Empty;
         public OcrResultData? Data { get; set; }
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+        public string? FullText { get; set; }
+        public int? SummaryStartPage { get; set; }
         public string? Error { get; set; }
     }
 

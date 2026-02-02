@@ -32,8 +32,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="12,8,12,12">
                 
-                <!-- ========== 상단: 버튼 바 / WebView2 패널 (토글) ========== -->
-                <!-- 버튼 바 (WebView2 닫혔을 때 표시) -->
+                <!-- ========== 상단: 버튼 바 (토지이용계획, 건축물대장) ========== -->
                 <Border x:Name="ButtonBarPanel"
                         Background="{StaticResource SurfaceColor}"
                         BorderBrush="{StaticResource PrimaryBrush}"
@@ -42,41 +41,7 @@
                         Padding="16"
                         Margin="0,0,0,16"
                         Visibility="Visible">
-                    <!-- 버튼들 -->
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"
-                                Margin="0,0,8,0"
-                                Click="OpenSatelliteMap_Click"
-                                ToolTip="위성도 열기">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Satellite" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="위성도" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"
-                                Margin="0,0,8,0"
-                                Click="OpenCadastralMap_Click"
-                                ToolTip="지적도 열기">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Map" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="지적도" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"
-                                Margin="0,0,8,0"
-                                Click="OpenRoadView_Click"
-                                ToolTip="로드뷰 열기">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Walk" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="로드뷰" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Margin="0,0,8,0"
@@ -97,6 +62,107 @@
                                 <TextBlock Text="건축물대장" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- ========== 지도 패널 (위성도, 지적도, 로드뷰 3분할) ========== -->
+                <Border Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <TextBlock Text="🗺️ 지도 정보"
+                                       Foreground="White"
+                                       FontWeight="SemiBold"
+                                       FontSize="{StaticResource FontSizeH4}"/>
+                        </Border>
+
+                        <!-- 3분할 지도 영역 -->
+                        <Grid Height="300">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- 위성도 -->
+                            <Border Grid.Column="0"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,1,0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 위성도 타이틀 -->
+                                    <Border Grid.Row="0"
+                                            Background="{StaticResource BlueGray100Brush}"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="Satellite" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="위성도" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 위성도 WebView2 -->
+                                    <wv2:WebView2 x:Name="SatelliteMapWebView" Grid.Row="1"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 지적도 -->
+                            <Border Grid.Column="1"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="0,0,1,0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 지적도 타이틀 -->
+                                    <Border Grid.Row="0"
+                                            Background="{StaticResource BlueGray100Brush}"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="Map" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="지적도" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 지적도 WebView2 -->
+                                    <wv2:WebView2 x:Name="CadastralMapWebView" Grid.Row="1"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 로드뷰 -->
+                            <Border Grid.Column="2">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- 로드뷰 타이틀 -->
+                                    <Border Grid.Row="0"
+                                            Background="{StaticResource BlueGray100Brush}"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="Walk" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="로드뷰" FontWeight="SemiBold"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- 로드뷰 WebView2 -->
+                                    <wv2:WebView2 x:Name="RoadViewWebView" Grid.Row="1"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

@@ -58,6 +58,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         
                         <!-- 서버 상태 & 파일 선택 -->
@@ -288,8 +289,39 @@
                             </StackPanel>
                         </Grid>
                         
-                        <!-- OCR 결과 미리보기 -->
+                        <!-- 등기부등본 요약 이미지 표시 -->
                         <Border Grid.Row="3"
+                                Background="White"
+                                BorderBrush="{StaticResource PrimaryBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="16"
+                                Margin="0,16,0,0"
+                                Visibility="{Binding RegistryViewModel.HasSummaryImage, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel>
+                                <TextBlock Text="📄 주요 등기사항 요약"
+                                           FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}"
+                                           Margin="0,0,0,12"/>
+
+                                <!-- 이미지 표시 영역 (스크롤 가능) -->
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                              VerticalScrollBarVisibility="Auto"
+                                              MaxHeight="600">
+                                    <Border Background="{StaticResource BlueGray50Brush}"
+                                            CornerRadius="4"
+                                            Padding="8">
+                                        <Image Source="{Binding RegistryViewModel.SummaryImage}"
+                                               Stretch="Uniform"
+                                               MaxWidth="800"
+                                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- OCR 결과 미리보기 -->
+                        <Border Grid.Row="4"
                                 Background="{StaticResource InfoBgBrush}"
                                 BorderBrush="{StaticResource InfoBrush}"
                                 BorderThickness="1"
@@ -303,16 +335,16 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    
+
                                     <StackPanel>
                                         <TextBlock Text="📋 OCR 추출 결과" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
-                                        <TextBlock Text="{Binding RegistryViewModel.OcrExtractedAddress}" 
+                                        <TextBlock Text="{Binding RegistryViewModel.OcrExtractedAddress}"
                                                    Style="{StaticResource CaptionTextStyle}"
                                                    Opacity="0.8"
                                                    Margin="0,4,0,0"
                                                    Visibility="{Binding RegistryViewModel.OcrExtractedAddress, Converter={StaticResource NullToVisibilityConverter}}"/>
                                     </StackPanel>
-                                    
+
                                     <Button Grid.Column="1"
                                             Content="💾 결과 저장"
                                             Command="{Binding RegistryViewModel.SaveOcrResultsCommand}"
@@ -320,7 +352,7 @@
                                             Padding="16,8"
                                             FontSize="{StaticResource FontSizeBody}"/>
                                 </Grid>
-                                
+
                                 <!-- 요약 정보 -->
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                     <Border Background="{StaticResource BlueGray200Brush}" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
@@ -345,8 +377,8 @@
                                         </TextBlock>
                                     </Border>
                                 </StackPanel>
-                                
-                                <TextBlock Text="※ '결과 저장' 버튼을 클릭하면 담보물건 탭에서 확인하실 수 있습니다." 
+
+                                <TextBlock Text="※ '결과 저장' 버튼을 클릭하면 담보물건 탭에서 확인하실 수 있습니다."
                                            Style="{StaticResource CaptionTextStyle}"
                                            Opacity="0.6"
                                            FontSize="{StaticResource FontSizeSmall}"/>

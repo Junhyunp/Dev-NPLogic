@@ -197,14 +197,14 @@
                                         Orientation="Horizontal"
                                         VerticalAlignment="Center"
                                         Visibility="{Binding IsDetailMode, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <TextBlock Text="{Binding SelectedProperty.CollateralNumber}"
+                                <TextBlock Text="{Binding SelectedProperty.PropertyNumber}"
                                            FontSize="{StaticResource FontSizeSmall}"
                                            Foreground="{StaticResource PrimaryBrush}"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Text=" ("
                                            FontSize="{StaticResource FontSizeSmall}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedProperty.DebtorName}"
+                                <TextBlock Text="{Binding SelectedProperty.PropertyType}"
                                            FontSize="{StaticResource FontSizeSmall}"
                                            Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text=")"
@@ -514,24 +514,24 @@
                                                        FontSize="{StaticResource FontSizeBody}"
                                                        FontWeight="SemiBold"
                                                        Foreground="White">
-                                                <Run Text="{Binding CollateralNumber, FallbackValue='-'}"/>
+                                                <Run Text="{Binding PropertyNumber, FallbackValue='-'}"/>
                                             </TextBlock>
 
-                                            <!-- 차주번호 + 차주명 -->
+                                            <!-- 차주번호 + 담보종류 -->
                                             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
                                                 <TextBlock Text="{Binding BorrowerNumber}"
                                                            FontSize="{StaticResource FontSizeSmall}"
                                                            Foreground="#B0BEC5"
                                                            TextTrimming="CharacterEllipsis"
-                                                           MaxWidth="60"/>
+                                                           MaxWidth="80"/>
                                                 <TextBlock Text=" | "
                                                            FontSize="{StaticResource FontSizeSmall}"
                                                            Foreground="#B0BEC5"/>
-                                                <TextBlock Text="{Binding DebtorName}"
+                                                <TextBlock Text="{Binding PropertyType}"
                                                            FontSize="{StaticResource FontSizeSmall}"
                                                            Foreground="#B0BEC5"
                                                            TextTrimming="CharacterEllipsis"
-                                                           MaxWidth="100"/>
+                                                           MaxWidth="80"/>
                                             </StackPanel>
                                         </Grid>
                                     </DataTemplate>
@@ -1042,11 +1042,12 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 
-                                <!-- 담보번호 -->
-                                <DataGridTemplateColumn Header="담보번호" Width="100" IsReadOnly="True">
+                                <!-- 물건번호 (담보번호) -->
+                                <DataGridTemplateColumn Header="물건번호" Width="100" IsReadOnly="True"
+                                                        SortMemberPath="PropertyNumber" CanUserSort="True">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding CollateralNumber}"
+                                            <TextBlock Text="{Binding PropertyNumber}"
                                                        Padding="8,0"
                                                        VerticalAlignment="Center"
                                                        Foreground="{StaticResource PrimaryBrush}"

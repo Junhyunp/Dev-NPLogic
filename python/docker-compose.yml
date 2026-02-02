@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  nplogic-backend:
+    build: .
+    container_name: nplogic-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Supabase 설정 (추천 시스템용)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      # Clova OCR 설정
+      - CLOVA_SECRET_KEY=${CLOVA_SECRET_KEY}
+      - CLOVA_INVOKE_URL=${CLOVA_INVOKE_URL}
+    volumes:
+      # 로그 저장용 (선택사항)
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+# 네트워크 설정 (다른 서비스와 연동 시)
+networks:
+  default:
+    name: nplogic-network
