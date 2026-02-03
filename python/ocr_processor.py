@@ -86,12 +86,15 @@ def process_pdf(pdf_path: str, extract_summary: bool = True) -> dict:
             result_data["summary_start_page"] = summary_page
 
             if summary_page is not None:
-                # 요약 페이지부터 이미지 추출
+                # 요약 페이지부터 끝까지 모든 이미지 추출
+                # (주요 등기사항 요약은 PDF의 마지막 섹션이므로 끝까지 모두 요약임)
                 images = images_from_pdf_after(pdf_path, summary_page, dpi=300)
 
-                # 첫 번째 이미지(요약 페이지)를 Base64로 인코딩하여 저장
+                # ★ 수정: 모든 요약 페이지 이미지를 Base64 배열로 저장
                 if images:
-                    result_data["summary_image"] = image_to_base64(images[0])
+                    result_data["summary_images"] = [image_to_base64(img) for img in images]
+                    # 하위 호환성: 첫 번째 이미지도 단일 필드로 유지
+                    result_data["summary_image"] = result_data["summary_images"][0]
             else:
                 # 요약 페이지를 찾지 못하면 전체 PDF 처리
                 from pdf2image import convert_from_path

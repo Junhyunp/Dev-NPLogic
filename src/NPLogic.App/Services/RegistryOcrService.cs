@@ -123,6 +123,7 @@ namespace NPLogic.Services
                     FileName = fileName,
                     Data = ocrResponse.Data,
                     SummaryImage = ocrResponse.SummaryImage,
+                    SummaryImages = ocrResponse.SummaryImages,
                     FullText = ocrResponse.FullText,
                     SummaryStartPage = ocrResponse.SummaryStartPage
                 };
@@ -222,7 +223,10 @@ namespace NPLogic.Services
         public int? SummaryStartPage { get; set; }
 
         [JsonPropertyName("summary_image")]
-        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지 (첫 번째)
+
+        [JsonPropertyName("summary_images")]
+        public List<string>? SummaryImages { get; set; }  // Base64 인코딩된 모든 요약 페이지 이미지 배열
 
         [JsonPropertyName("full_text")]
         public string? FullText { get; set; }
@@ -264,7 +268,10 @@ namespace NPLogic.Services
         public int? SummaryStartPage { get; set; }
 
         [JsonPropertyName("summary_image")]
-        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지 (첫 번째)
+
+        [JsonPropertyName("summary_images")]
+        public List<string>? SummaryImages { get; set; }  // Base64 인코딩된 모든 요약 페이지 이미지 배열
 
         [JsonPropertyName("full_text")]
         public string? FullText { get; set; }
@@ -287,7 +294,8 @@ namespace NPLogic.Services
         public bool Success { get; set; }
         public string FileName { get; set; } = string.Empty;
         public OcrResultData? Data { get; set; }
-        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지
+        public string? SummaryImage { get; set; }  // Base64 인코딩된 요약 페이지 이미지 (첫 번째)
+        public List<string>? SummaryImages { get; set; }  // Base64 인코딩된 모든 요약 페이지 이미지 배열
         public string? FullText { get; set; }
         public int? SummaryStartPage { get; set; }
         public string? Error { get; set; }

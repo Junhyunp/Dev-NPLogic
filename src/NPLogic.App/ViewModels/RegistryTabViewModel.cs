@@ -210,16 +210,22 @@ namespace NPLogic.ViewModels
         private string? _ocrExtractedAddress;
 
         /// <summary>
-        /// 등기부등본 요약 페이지 이미지 (Base64 → BitmapImage 변환)
+        /// 등기부등본 요약 페이지 이미지들 (Base64 → BitmapImage 변환)
+        /// 주요 등기사항 요약이 여러 페이지일 수 있음
         /// </summary>
         [ObservableProperty]
-        private BitmapImage? _summaryImage;
+        private ObservableCollection<BitmapImage> _summaryImages = new();
 
         /// <summary>
         /// 요약 이미지가 있는지 여부
         /// </summary>
         [ObservableProperty]
         private bool _hasSummaryImage;
+
+        /// <summary>
+        /// 현재 요약 이미지 페이지 수
+        /// </summary>
+        public int SummaryImageCount => SummaryImages.Count;
 
         #endregion
 
@@ -661,8 +667,9 @@ namespace NPLogic.ViewModels
             OcrPreviewGapgu.Clear();
             OcrPreviewEulgu.Clear();
             OcrExtractedAddress = null;
-            SummaryImage = null;
+            SummaryImages.Clear();
             HasSummaryImage = false;
+            OnPropertyChanged(nameof(SummaryImageCount));
         }
 
         /// <summary>
@@ -721,11 +728,32 @@ namespace NPLogic.ViewModels
                             pdfFile.Status = "완료";
                             pdfFile.Progress = 100;
 
-                            // 요약 페이지 이미지 저장 (Base64 → BitmapImage)
-                            if (!string.IsNullOrEmpty(result.SummaryImage))
+                            // 요약 페이지 이미지들 저장 (Base64 → BitmapImage)
+                            // 여러 페이지의 요약 이미지를 모두 처리
+                            SummaryImages.Clear();
+                            if (result.SummaryImages != null && result.SummaryImages.Count > 0)
                             {
-                                SummaryImage = ConvertBase64ToBitmapImage(result.SummaryImage);
-                                HasSummaryImage = SummaryImage != null;
+                                foreach (var base64Image in result.SummaryImages)
+                                {
+                                    var bitmap = ConvertBase64ToBitmapImage(base64Image);
+                                    if (bitmap != null)
+                                    {
+                                        SummaryImages.Add(bitmap);
+                                    }
+                                }
+                                HasSummaryImage = SummaryImages.Count > 0;
+                                OnPropertyChanged(nameof(SummaryImageCount));
+                            }
+                            else if (!string.IsNullOrEmpty(result.SummaryImage))
+                            {
+                                // 하위 호환성: 단일 이미지만 있는 경우
+                                var bitmap = ConvertBase64ToBitmapImage(result.SummaryImage);
+                                if (bitmap != null)
+                                {
+                                    SummaryImages.Add(bitmap);
+                                }
+                                HasSummaryImage = SummaryImages.Count > 0;
+                                OnPropertyChanged(nameof(SummaryImageCount));
                             }
 
                             // 주소 저장

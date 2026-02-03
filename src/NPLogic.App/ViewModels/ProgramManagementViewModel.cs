@@ -1493,6 +1493,48 @@ namespace NPLogic.ViewModels
                     int rowIndex = 0;
                     // 차주별 물건 순번 카운터 (차주번호 -> 현재 순번)
                     var borrowerPropertyCount = new Dictionary<string, int>();
+
+                    // ★ 파일 로그: Property 처리 시작
+                    {
+                        var propDebugLogPath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "nplogic_debug.log");
+                        var logMsg = $"\n=== [ProcessSheet-Property] 시작 ({DateTime.Now:HH:mm:ss}) ===\n";
+                        logMsg += $"시트명: {sheet.Name}, 데이터행수: {data.Count}, 컬럼수: {columns.Count}\n";
+                        logMsg += $"컬럼 목록 (처음 20개): {string.Join(" | ", columns.Take(20))}\n";
+
+                        // 차주일련번호 컬럼 확인
+                        var borrowerCol = columns.FirstOrDefault(c => c.Contains("차주일련번호") || c.Contains("차주번호"));
+                        logMsg += $"차주일련번호 컬럼: {borrowerCol ?? "NOT_FOUND"}\n";
+
+                        if (data.Count > 0)
+                        {
+                            var firstRow = data[0];
+                            logMsg += $"첫 행 데이터 (처음 10개 키):\n";
+                            foreach (var kv in firstRow.Take(10))
+                            {
+                                logMsg += $"  '{kv.Key}' = '{kv.Value}'\n";
+                            }
+                        }
+                        System.IO.File.AppendAllText(propDebugLogPath, logMsg);
+                    }
+
+                    // 디버그: 모든 컬럼 목록 출력
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 전체 컬럼 목록 ({columns.Count}개):");
+                    for (int i = 0; i < columns.Count; i++)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  [{i}] '{columns[i]}'");
+                    }
+
+                    // 첫 번째 데이터 행의 키 목록도 출력
+                    if (data.Count > 0)
+                    {
+                        var firstRow = data[0];
+                        System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 첫 번째 행 키 목록 ({firstRow.Count}개):");
+                        foreach (var key in firstRow.Keys.Take(15))
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  '{key}' = '{firstRow[key]}'");
+                        }
+                    }
+
                     foreach (var row in data)
                     {
                         rowIndex++;
@@ -1511,8 +1553,21 @@ namespace NPLogic.ViewModels
                                 continue;
                             }
 
+                            // ★ 수정: BorrowerNumber가 없는 행은 건너뛰기 (합계행, 빈행, 메모행 등 무시)
+                            if (string.IsNullOrWhiteSpace(property.BorrowerNumber))
+                            {
+                                // 첫 몇 행만 디버그 로그 출력
+                                if (rowIndex <= 5)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 행 {rowIndex}: 차주번호 없음 - 건너뜀");
+                                    System.Diagnostics.Debug.WriteLine($"  - Row 키 목록: {string.Join(", ", row.Keys.Take(10))}");
+                                }
+                                // 차주번호가 없는 행은 유효한 물건 데이터가 아니므로 건너뜀
+                                continue;
+                            }
+
                             // 물건번호 설정: {차주번호}_{순번} 형식 (예: R-007_1, R-007_2)
-                            var borrowerNumber = property.BorrowerNumber ?? $"UNKNOWN_{rowIndex}";
+                            var borrowerNumber = property.BorrowerNumber;
 
                             // 해당 차주의 물건 순번 증가
                             if (borrowerPropertyCount.TryGetValue(borrowerNumber, out int currentCount))
@@ -1529,6 +1584,13 @@ namespace NPLogic.ViewModels
 
                             property.PropertyNumber = finalPropertyNumber;
                             System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 행 {rowIndex}: BorrowerNumber='{borrowerNumber}', 순번={propertySeq} → PropertyNumber='{finalPropertyNumber}'");
+
+                            // ★ 저장 직전 property.BorrowerNumber 확인 (첫 3행만)
+                            if (rowIndex <= 3)
+                            {
+                                var saveDebugLog = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "nplogic_debug.log");
+                                System.IO.File.AppendAllText(saveDebugLog, $"[SAVE] 행 {rowIndex}: property.BorrowerNumber='{property.BorrowerNumber}', property.PropertyNumber='{property.PropertyNumber}'\n");
+                            }
 
                             // CreateAsync 반환값 사용 - DB에 저장된 실제 ID 사용
                             var createdProperty = await _propertyRepository.CreateAsync(property);
@@ -1804,6 +1866,28 @@ namespace NPLogic.ViewModels
             if (addressComponents.Count > 0)
             {
                 property.AddressFull = string.Join(" ", addressComponents);
+            }
+
+            // Fallback: BorrowerNumber가 매핑되지 않았으면 row에서 직접 찾기
+            if (string.IsNullOrEmpty(property.BorrowerNumber))
+            {
+                foreach (var col in columns)
+                {
+                    var normalizedCol = col.Replace("\n", " ").Replace("\r", "").Trim().ToLower();
+                    if (normalizedCol.Contains("차주일련번호") || normalizedCol.Contains("차주번호"))
+                    {
+                        if (row.TryGetValue(col, out var borrowerVal) && borrowerVal != null)
+                        {
+                            var borrowerStr = borrowerVal.ToString()?.Trim();
+                            if (!string.IsNullOrEmpty(borrowerStr))
+                            {
+                                property.BorrowerNumber = borrowerStr;
+                                System.Diagnostics.Debug.WriteLine($"[MapRowToPropertyWithRules] Fallback으로 BorrowerNumber 설정: '{borrowerStr}' (컬럼: '{col}')");
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             return (property, rightData);

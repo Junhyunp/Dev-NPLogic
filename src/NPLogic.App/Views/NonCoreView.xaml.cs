@@ -211,11 +211,24 @@ namespace NPLogic.Views
         {
             // RadioButton UI 상태를 기준으로 현재 선택된 탭 확인
             var currentTab = GetCurrentSelectedTabFromUI();
-            
+
             if (!string.IsNullOrEmpty(currentTab))
             {
                 await LoadFunctionContentAsync(currentTab);
             }
+        }
+
+        /// <summary>
+        /// "전체"(Home) 탭으로 리셋하고 콘텐츠 새로고침 (외부 네비게이션 시 호출)
+        /// 다른 뷰에서 새 물건을 선택하여 비핵심으로 이동할 때 사용
+        /// </summary>
+        public async Task ResetToHomeTabAsync()
+        {
+            // RadioButton UI 상태를 "전체"로 리셋
+            TabHome.IsChecked = true;
+
+            // "Home" 탭 콘텐츠 로드
+            await LoadFunctionContentAsync("Home");
         }
 
         /// <summary>
@@ -255,12 +268,18 @@ namespace NPLogic.Views
         {
             // 1. 요청 버전 증가 (원자적) - 이 요청이 최신인지 나중에 확인할 때 사용
             var currentVersion = Interlocked.Increment(ref _tabLoadRequestVersion);
-            
+
             // 2. 이전 로드 작업 취소
             _tabLoadCts?.Cancel();
             _tabLoadCts = new CancellationTokenSource();
             var token = _tabLoadCts.Token;
-            
+
+            // ★ 로딩 표시 시작 (담보물건 탭 등 지도 로딩 시 사용자에게 피드백 제공)
+            if (_viewModel != null)
+            {
+                _viewModel.IsLoading = true;
+            }
+
             try
             {
                 var serviceProvider = App.ServiceProvider;
@@ -316,6 +335,14 @@ namespace NPLogic.Views
             {
                 // 취소된 경우 무시 - 새로운 탭 로드가 진행 중
                 Debug.WriteLine($"탭 로드 취소됨: {tabName}");
+            }
+            finally
+            {
+                // ★ 로딩 표시 종료
+                if (_viewModel != null)
+                {
+                    _viewModel.IsLoading = false;
+                }
             }
         }
         
@@ -653,12 +680,13 @@ namespace NPLogic.Views
                 {
                     await _viewModel.SelectBorrowerAsync(selectedItem.BorrowerId);
                 }
-                
-                // 물건 목록 로드 완료 후 현재 탭 컨텐츠 새로고침
-                if (_viewModel?.ActiveTab != null)
-                {
-                    await LoadFunctionContentAsync(_viewModel.ActiveTab);
-                }
+
+                // ★ 수정: 차주 변경 시 항상 "전체"(Home) 탭으로 리셋
+                // RadioButton UI 상태와 콘텐츠를 동기화
+                TabHome.IsChecked = true;
+
+                // "Home" 탭 콘텐츠 로드 (RadioButton의 Checked 이벤트가 처리하지만 명시적으로도 호출)
+                await LoadFunctionContentAsync("Home");
             }
         }
 

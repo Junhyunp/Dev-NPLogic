@@ -551,9 +551,21 @@ namespace NPLogic.Views
         {
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
-            
+
+            // ★ 버그 수정: 탭 전환 시 이전 콘텐츠 즉시 클리어
+            // 이전 탭(예: NonCoreView)이 새 탭(예: RegistryTab) 로딩 중에 보이는 문제 방지
+            TabContentControl.Content = null;
+
+            // ★ 로딩 표시 시작
+            if (DataContext is DashboardViewModel viewModel)
+            {
+                viewModel.IsLoading = true;
+            }
+
             UserControl? view = null;
-            
+
+            try
+            {
             switch (tabName)
             {
                 case "noncore":
@@ -575,9 +587,10 @@ namespace NPLogic.Views
                         _cachedNonCoreViewModel.LoadProperty(property);
                         _cachedNonCoreView.DataContext = _cachedNonCoreViewModel;
                         view = _cachedNonCoreView;
-                        
-                        // 현재 활성 탭 컨텐츠 새로고침 (물건 변경 시 UI 업데이트) - await로 완료 대기
-                        await _cachedNonCoreView.RefreshCurrentTabAsync();
+
+                        // ★ 수정: 새 물건 선택 시 "전체"(Home) 탭으로 리셋
+                        // 이전 탭 상태가 유지되어 혼란을 주는 문제 해결
+                        await _cachedNonCoreView.ResetToHomeTabAsync();
                     }
                     break;
                     
@@ -662,10 +675,19 @@ namespace NPLogic.Views
                     }
                     break;
             }
-            
+
             if (view != null)
             {
                 TabContentControl.Content = view;
+            }
+            }
+            finally
+            {
+                // ★ 로딩 표시 종료
+                if (DataContext is DashboardViewModel vm)
+                {
+                    vm.IsLoading = false;
+                }
             }
         }
 
@@ -911,16 +933,22 @@ namespace NPLogic.Views
         {
             if (_isRestoringState) return;
 
-            if (e.AddedItems.Count > 0 && 
-                e.AddedItems[0] is Property property && 
+            if (e.AddedItems.Count > 0 &&
+                e.AddedItems[0] is Property property &&
                 DataContext is DashboardViewModel viewModel &&
                 viewModel.IsDetailMode)
             {
                 // 이미 상세 모드이므로 선택된 물건만 변경
                 viewModel.SelectPropertyInDetailMode(property);
-                
-                // 탭 컨텐츠 업데이트 - await로 완료 대기
-                await LoadTabViewAsync(viewModel.ActiveTab, property);
+
+                // ★ 수정: 물건 변경 시 항상 "비핵심" > "전체" 탭을 기본으로 표시
+                // 이유: 1) 사용자가 다른 탭에서 물건을 바꾸면 새 물건의 전체 정보를 먼저 보고 싶어함
+                //       2) 캐시된 NonCoreView가 새 물건으로 업데이트되어야 함
+                TabNonCore.IsChecked = true;
+                viewModel.SetActiveTab("noncore");
+
+                // 비핵심 탭 로드 (NonCoreView가 새 물건으로 업데이트됨 + "전체" 탭으로 리셋)
+                await LoadTabViewAsync("noncore", property);
             }
         }
 

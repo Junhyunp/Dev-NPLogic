@@ -263,10 +263,17 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                await client
-                    .From<BorrowerRestructuringTable>()
-                    .Filter("borrower_id", Postgrest.Constants.Operator.In, borrowerIds)
-                    .Delete();
+
+                // 배치 처리: 한 번에 50개씩 삭제 (URL 길이 제한 방지)
+                const int batchSize = 50;
+                for (int i = 0; i < borrowerIds.Count; i += batchSize)
+                {
+                    var batch = borrowerIds.Skip(i).Take(batchSize).ToList();
+                    await client
+                        .From<BorrowerRestructuringTable>()
+                        .Filter("borrower_id", Postgrest.Constants.Operator.In, batch)
+                        .Delete();
+                }
             }
             catch (Exception ex)
             {

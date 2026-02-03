@@ -220,10 +220,17 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                await client
-                    .From<RegistrySheetDataTable>()
-                    .Filter("property_id", Postgrest.Constants.Operator.In, propertyIds)
-                    .Delete();
+
+                // 배치 처리: 한 번에 50개씩 삭제 (URL 길이 제한 방지)
+                const int batchSize = 50;
+                for (int i = 0; i < propertyIds.Count; i += batchSize)
+                {
+                    var batch = propertyIds.Skip(i).Take(batchSize).ToList();
+                    await client
+                        .From<RegistrySheetDataTable>()
+                        .Filter("property_id", Postgrest.Constants.Operator.In, batch)
+                        .Delete();
+                }
             }
             catch (Exception ex)
             {

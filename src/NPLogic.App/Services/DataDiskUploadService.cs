@@ -1177,6 +1177,28 @@ namespace NPLogic.Services
             // 주소 조합
             CombineAddress(property, addressParts);
 
+            // Fallback: BorrowerNumber가 매핑되지 않았으면 row에서 직접 찾기
+            if (string.IsNullOrEmpty(property.BorrowerNumber))
+            {
+                foreach (var col in columns)
+                {
+                    var normalizedCol = col.Replace("\n", " ").Replace("\r", "").Trim().ToLower();
+                    if (normalizedCol.Contains("차주일련번호") || normalizedCol.Contains("차주번호"))
+                    {
+                        if (row.TryGetValue(col, out var borrowerVal) && borrowerVal != null)
+                        {
+                            var borrowerStr = borrowerVal.ToString()?.Trim();
+                            if (!string.IsNullOrEmpty(borrowerStr))
+                            {
+                                property.BorrowerNumber = borrowerStr;
+                                System.Diagnostics.Debug.WriteLine($"[DataDiskUploadService] Fallback으로 BorrowerNumber 설정: '{borrowerStr}' (컬럼: '{col}')");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             return (property, rightData);
         }
 
