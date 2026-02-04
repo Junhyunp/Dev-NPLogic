@@ -39,6 +39,18 @@ namespace NPLogic.Views
         // 상태 복원 중 플래그 (이벤트 중복 방지)
         private bool _isRestoringState = false;
 
+        // 스크롤 리셋 중 플래그 (무한 스크롤 방지)
+        private bool _isResettingScroll = false;
+
+        // ★ 초기 로드 완료 시간 (시간 기반 무한 스크롤 방지)
+        private DateTime _lastDataLoadTime = DateTime.MinValue;
+
+        // ★ 스크롤 이벤트 핸들러 등록 여부 (중복 등록 방지)
+        private bool _scrollHandlerRegistered = false;
+
+        // ★ 스크롤 이벤트 핸들러 인스턴스 (동일 인스턴스로 Add/Remove 필요)
+        private ScrollChangedEventHandler? _scrollChangedHandler;
+
         // #region agent log
         private static void DebugLog(string hypothesisId, string location, string message, object? data = null)
         {
@@ -65,6 +77,16 @@ namespace NPLogic.Views
         /// </summary>
         private async void DashboardView_Loaded(object sender, RoutedEventArgs e)
         {
+            // ★ 스크롤 이벤트 핸들러 코드에서 등록 (XAML에서 제거됨 - ClearDataGridSort에서 분리/재연결 위해)
+            // ★ 중복 등록 방지: Loaded가 여러 번 호출되어도 한 번만 등록
+            // ★ 핵심: 동일 인스턴스를 사용해야 RemoveHandler가 정상 작동함
+            if (!_scrollHandlerRegistered)
+            {
+                _scrollChangedHandler ??= new ScrollChangedEventHandler(ProgressDataGrid_ScrollChanged);
+                ProgressDataGrid.AddHandler(ScrollViewer.ScrollChangedEvent, _scrollChangedHandler);
+                _scrollHandlerRegistered = true;
+            }
+
             if (DataContext is DashboardViewModel viewModel)
             {
                 // 물건 선택 이벤트 구독 (상세 버튼 클릭 시 상세 모드로 전환)
@@ -203,23 +225,35 @@ namespace NPLogic.Views
         {
             if (DataContext is not DashboardViewModel viewModel)
                 return;
-            
+
+            // 스크롤 리셋 중이면 무시 (초기 로드 후 스크롤 리셋 시 무한 스크롤 방지)
+            if (_isResettingScroll)
+                return;
+
+            // ★ 시간 기반 방어: 데이터 로드 후 1.5초 이내에는 무한 스크롤 차단
+            // ClearDataGridSort 중 발생하는 spurious 스크롤 이벤트 방지
+            if ((DateTime.Now - _lastDataLoadTime).TotalSeconds < 1.5)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DashboardView] Scroll blocked by time-based defense. Elapsed: {(DateTime.Now - _lastDataLoadTime).TotalMilliseconds}ms");
+                return;
+            }
+
             // 수직 스크롤만 처리 (수평 스크롤 무시)
             if (e.VerticalChange == 0)
                 return;
-            
+
             // 이미 로드 중이거나 더 이상 데이터가 없으면 무시
             if (viewModel.IsLoadingMore || !viewModel.HasMoreData)
                 return;
-            
+
             // 스크롤 가능한 영역이 있는지 확인
             if (e.ExtentHeight <= e.ViewportHeight)
                 return;
-            
+
             // 스크롤이 하단 90% 지점에 도달했는지 확인
             var scrollableHeight = e.ExtentHeight - e.ViewportHeight;
             var scrollPercentage = e.VerticalOffset / scrollableHeight;
-            
+
             if (scrollPercentage >= 0.9)
             {
                 // 추가 데이터 로드
@@ -448,10 +482,10 @@ namespace NPLogic.Views
             {
                 // ViewModel에서 선택된 프로그램 데이터 로드 (비동기)
                 await viewModel.LoadSelectedProgramDataAsync();
-                
-                // UI 업데이트 (차주 목록 표시)
+
+                // UI 업데이트 (차주 목록 표시) - UpdateNavigationUI 내부에서 ClearDataGridSort 호출
                 UpdateNavigationUI();
-                
+
                 // 상태 저장 (상태 복원 중이 아닐 때만)
                 if (!_isRestoringState)
                 {
@@ -968,6 +1002,113 @@ namespace NPLogic.Views
         #region 간소화된 네비게이션 지원
 
         /// <summary>
+        /// DataGrid의 사용자 정렬을 초기화하여 ViewModel의 정렬 순서를 적용
+        /// </summary>
+        private void ClearDataGridSort()
+        {
+            System.Diagnostics.Debug.WriteLine($"[DashboardView] ClearDataGridSort called. Items count BEFORE: {ProgressDataGrid.Items.Count}");
+
+            // ★ 시간 기반 방어: 데이터 로드 시점 기록
+            _lastDataLoadTime = DateTime.Now;
+            _isResettingScroll = true;
+
+            try
+            {
+                // 정렬 설명 초기화만 수행 (스크롤 조작 제거 - 문제의 원인)
+                ProgressDataGrid.Items.SortDescriptions.Clear();
+
+                // 모든 컬럼의 정렬 방향 제거
+                foreach (var column in ProgressDataGrid.Columns)
+                {
+                    column.SortDirection = null;
+                }
+
+                // 선택 해제
+                ProgressDataGrid.SelectedIndex = -1;
+
+                System.Diagnostics.Debug.WriteLine($"[DashboardView] ClearDataGridSort completed. Items count: {ProgressDataGrid.Items.Count}");
+
+                // ViewModel에서 첫 번째 항목 로깅
+                if (DataContext is DashboardViewModel vm && vm.DashboardProperties.Count > 0)
+                {
+                    var first5 = vm.DashboardProperties.Take(5).Select(p => p.PropertyNumber).ToList();
+                    System.Diagnostics.Debug.WriteLine($"[DashboardView] ViewModel first 5 items: {string.Join(", ", first5)}");
+                }
+            }
+            finally
+            {
+                // 지연 후 플래그 해제
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
+                {
+                    _isResettingScroll = false;
+                }));
+            }
+        }
+
+        /// <summary>
+        /// DataGrid를 맨 위로 스크롤
+        /// </summary>
+        private void ScrollToTop()
+        {
+            if (ProgressDataGrid.Items.Count > 0)
+            {
+                try
+                {
+                    // 스크롤 리셋 중 플래그 설정 (무한 스크롤 방지)
+                    _isResettingScroll = true;
+
+                    // 방법 1: ScrollViewer 직접 제어 (더 확실함)
+                    var scrollViewer = GetScrollViewer(ProgressDataGrid);
+                    if (scrollViewer != null)
+                    {
+                        scrollViewer.ScrollToTop();
+                        scrollViewer.ScrollToLeftEnd();
+                        System.Diagnostics.Debug.WriteLine($"[DashboardView] ScrollViewer scrolled to top. VerticalOffset: {scrollViewer.VerticalOffset}");
+                    }
+
+                    // 방법 2: ScrollIntoView로 첫 번째 항목으로 스크롤
+                    ProgressDataGrid.ScrollIntoView(ProgressDataGrid.Items[0]);
+
+                    ProgressDataGrid.SelectedIndex = -1; // 선택 해제
+
+                    // 첫 번째 항목 로깅
+                    if (ProgressDataGrid.Items[0] is Property firstProp)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[DashboardView] First visible item: {firstProp.PropertyNumber}");
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[DashboardView] ScrollToTop completed. Items count: {ProgressDataGrid.Items.Count}");
+                }
+                finally
+                {
+                    // 다음 프레임에서 플래그 해제 (스크롤 이벤트가 완전히 처리된 후)
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
+                    {
+                        _isResettingScroll = false;
+                    }));
+                }
+            }
+        }
+
+        /// <summary>
+        /// DataGrid 내부의 ScrollViewer 찾기
+        /// </summary>
+        private static ScrollViewer? GetScrollViewer(DependencyObject obj)
+        {
+            if (obj is ScrollViewer sv)
+                return sv;
+
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(obj, i);
+                var result = GetScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// NavigationLevel에 따라 UI 업데이트
         /// 간소화된 네비게이션: Property와 Detail 모드만 사용
         /// </summary>
@@ -982,11 +1123,11 @@ namespace NPLogic.Views
                     ProgressDataGrid.Visibility = Visibility.Collapsed;
                     DetailModeTabs.Visibility = Visibility.Visible;
                     TabContentControl.Visibility = Visibility.Visible;
-                    
+
                     // 좌측 패널: 물건 리스트 표시 및 패널 열기
                     ProgramListPanel.Visibility = Visibility.Collapsed;
                     PropertyListPanel.Visibility = Visibility.Visible;
-                    
+
                     // 좌측 패널 자동 열기 (상세 모드 진입 시)
                     if (LeftPanel.Visibility == Visibility.Collapsed)
                     {
@@ -995,17 +1136,20 @@ namespace NPLogic.Views
                         LeftPanelOpenButton.Visibility = Visibility.Collapsed;
                     }
                     break;
-                    
+
                 default: // "Property" 및 기타
                     // 물건 목록 표시
                     ProgressDataGrid.Visibility = Visibility.Visible;
                     ProgressDataGrid.SelectedItem = null;
                     DetailModeTabs.Visibility = Visibility.Collapsed;
                     TabContentControl.Visibility = Visibility.Collapsed;
-                    
+
                     // 좌측 패널: 프로그램 목록 표시
                     ProgramListPanel.Visibility = Visibility.Visible;
                     PropertyListPanel.Visibility = Visibility.Collapsed;
+
+                    // DataGrid 정렬 초기화 (물건 목록 모드로 전환 시)
+                    ClearDataGridSort();
                     break;
             }
         }

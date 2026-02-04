@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -79,6 +80,13 @@ namespace NPLogic.ViewModels
         private bool _hasMoreData = true;
         private bool _isLoadingMore = false;
         private int _totalPropertyCount = 0;
+
+        // ★ 초기 로드 완료 시간 (무한 스크롤 방지 - ViewModel 레벨)
+        private DateTime _initialLoadCompletedTime = DateTime.MinValue;
+        private const double InitialLoadCooldownSeconds = 2.0;
+
+        // ========== 중복 호출 방지 ==========
+        private bool _isLoadingProgramData = false;
 
         // ========== 사용자 정보 ==========
         [ObservableProperty]
@@ -547,8 +555,16 @@ namespace NPLogic.ViewModels
             if (SelectedProgram == null)
                 return;
 
+            // 중복 호출 방지
+            if (_isLoadingProgramData)
+            {
+                System.Diagnostics.Debug.WriteLine("[DashboardViewModel] LoadSelectedProgramDataAsync skipped - already loading");
+                return;
+            }
+
             try
             {
+                _isLoadingProgramData = true;
                 IsLoading = true;
                 ErrorMessage = null;
 
@@ -574,6 +590,7 @@ namespace NPLogic.ViewModels
             }
             finally
             {
+                _isLoadingProgramData = false;
                 IsLoading = false;
             }
         }
@@ -589,22 +606,27 @@ namespace NPLogic.ViewModels
 
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadAllPropertiesForProgramAsync started for program: {SelectedProgram.ProjectName} (ID: {SelectedProgram.ProjectId})");
+
                 // 페이지네이션 상태 초기화
                 _currentPage = 1;
                 _hasMoreData = true;
                 _totalPropertyCount = 0;
-                DashboardProperties.Clear();
-                
+
+                // ★ 핵심 수정: 임시 리스트에 수집 후 새 ObservableCollection 생성 (CollectionView 캐시 문제 해결)
+                var loadedProperties = new List<Property>();
+
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
 
                 // 프로그램 ID 파싱
                 Guid? programId = Guid.TryParse(SelectedProgram.ProjectId, out var pid) ? pid : null;
-                
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] Parsed program ID: {programId}");
+
                 // 권한별 필터 설정
                 Guid? assignedTo = null;
                 List<Guid>? filterProgramIds = null;
-                
+
                 if (CurrentUser?.IsEvaluator == true)
                 {
                     // 평가자: 자기에게 할당된 물건만
@@ -636,6 +658,13 @@ namespace NPLogic.ViewModels
                     _totalPropertyCount = totalCount;
                     pagesLoaded++;
 
+                    System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] GetPagedServerSideAsync returned {items.Count} items (total: {totalCount})");
+                    if (items.Count > 0)
+                    {
+                        var first5 = items.Take(5).Select(p => p.PropertyNumber).ToList();
+                        System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] First 5 property_numbers from DB: {string.Join(", ", first5)}");
+                    }
+
                     // 서버에서 더 이상 데이터가 없으면 중단
                     if (items.Count == 0)
                     {
@@ -650,21 +679,31 @@ namespace NPLogic.ViewModels
                         filteredItems = ApplyAdvancedFilters(items);
                     }
 
-                    // 기본 정렬: 차주번호 -> 담보번호 순
-                    var sortedItems = filteredItems
-                        .OrderBy(p => p.BorrowerNumber ?? "")
-                        .ThenBy(p => p.CollateralNumber ?? "");
+                    // 기본 정렬: PropertyNumber 자연 정렬 (R-001_1, R-002_1, ... R-0010_1 순서)
+                    var sortedItems = NaturalSortByPropertyNumber(filteredItems);
 
-                    foreach (var property in sortedItems)
+                    var sortedList = sortedItems.ToList();
+                    if (sortedList.Count > 0)
                     {
-                        DashboardProperties.Add(property);
+                        var first5Sorted = sortedList.Take(5).Select(p => p.PropertyNumber).ToList();
+                        System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] First 5 property_numbers after client-side sort: {string.Join(", ", first5Sorted)}");
+                    }
+
+                    // ★ 임시 리스트에 추가 (기존 ObservableCollection에 직접 추가하지 않음)
+                    loadedProperties.AddRange(sortedList);
+
+                    System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] Added to loadedProperties. Total count now: {loadedProperties.Count}");
+                    if (loadedProperties.Count > 0 && loadedProperties.Count <= 3)
+                    {
+                        var first3 = loadedProperties.Take(3).Select(p => p.PropertyNumber).ToList();
+                        System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] First 3 items in loadedProperties: {string.Join(", ", first3)}");
                     }
 
                     // 더 로드할 데이터가 있는지 확인
                     _hasMoreData = (_currentPage * PageSize) < totalCount;
 
                     // 고급 필터가 없거나 최소 개수를 채웠으면 중단
-                    if (ActiveFilterCount == 0 || DashboardProperties.Count >= MinimumDisplayCount || !_hasMoreData)
+                    if (ActiveFilterCount == 0 || loadedProperties.Count >= MinimumDisplayCount || !_hasMoreData)
                     {
                         break;
                     }
@@ -672,12 +711,27 @@ namespace NPLogic.ViewModels
                     // 다음 페이지 로드
                     _currentPage++;
                 }
+
+                // ★ 핵심 수정: 새 ObservableCollection 인스턴스 생성하여 할당
+                // 이렇게 하면 WPF가 새로운 CollectionView를 생성하여 캐시 문제 해결
+                DashboardProperties = new ObservableCollection<Property>(loadedProperties);
+
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
+
+                // ★ 초기 로드 완료 시간 기록 (무한 스크롤 방지)
+                _initialLoadCompletedTime = DateTime.Now;
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadAllPropertiesForProgramAsync completed. Final DashboardProperties count: {DashboardProperties.Count}. Cooldown started.");
+                if (DashboardProperties.Count > 0)
+                {
+                    var first5Final = DashboardProperties.Take(5).Select(p => p.PropertyNumber).ToList();
+                    System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] Final first 5 items: {string.Join(", ", first5Final)}");
+                }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadAllPropertiesForProgramAsync error: {ex.Message}");
             }
         }
 
@@ -688,6 +742,14 @@ namespace NPLogic.ViewModels
         {
             if (_isLoadingMore || !_hasMoreData || SelectedProgram == null)
                 return;
+
+            // ★ 시간 기반 방어: 초기 로드 완료 후 일정 시간 동안 추가 로드 차단
+            var elapsedSinceInitialLoad = (DateTime.Now - _initialLoadCompletedTime).TotalSeconds;
+            if (elapsedSinceInitialLoad < InitialLoadCooldownSeconds)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadMorePropertiesAsync BLOCKED by cooldown. Elapsed: {elapsedSinceInitialLoad:F2}s");
+                return;
+            }
 
             try
             {
@@ -747,10 +809,8 @@ namespace NPLogic.ViewModels
                         filteredItems = ApplyAdvancedFilters(items);
                     }
 
-                    // 정렬: 차주번호 -> 담보번호 순
-                    var sortedItems = filteredItems
-                        .OrderBy(p => p.BorrowerNumber ?? "")
-                        .ThenBy(p => p.CollateralNumber ?? "");
+                    // 정렬: PropertyNumber 자연 정렬
+                    var sortedItems = NaturalSortByPropertyNumber(filteredItems);
 
                     foreach (var property in sortedItems)
                     {
@@ -933,21 +993,17 @@ namespace NPLogic.ViewModels
 
             try
             {
-                DashboardProperties.Clear();
-
                 // 프로그램의 전체 물건 중 해당 차주의 물건만 필터링
                 var properties = await _propertyRepository.GetFilteredAsync(projectId: SelectedProgram.ProjectId);
-                
+
                 var borrowerProperties = properties.Where(p =>
                     p.DebtorName == SelectedBorrower.BorrowerName ||
                     p.DebtorName == SelectedBorrower.BorrowerNumber ||
                     p.BorrowerNumber == SelectedBorrower.BorrowerNumber
                 ).ToList();
 
-                foreach (var property in borrowerProperties)
-                {
-                    DashboardProperties.Add(property);
-                }
+                // ★ 새 ObservableCollection 인스턴스 생성 (CollectionView 캐시 문제 해결)
+                DashboardProperties = new ObservableCollection<Property>(borrowerProperties);
 
                 // 컬럼별 진행률 계산
                 RecalculateColumnProgress();
@@ -1084,17 +1140,10 @@ namespace NPLogic.ViewModels
                 // ========== F-001: 고급 필터 적용 ==========
                 filteredProperties = ApplyAdvancedFilters(filteredProperties);
 
-                DashboardProperties.Clear();
-                RecentProperties.Clear();
-
-                foreach (var property in filteredProperties)
-                {
-                    DashboardProperties.Add(property);
-                    if (RecentProperties.Count < 10)
-                    {
-                        RecentProperties.Add(property);
-                    }
-                }
+                // ★ 새 ObservableCollection 인스턴스 생성 (CollectionView 캐시 문제 해결)
+                var filteredList = filteredProperties.ToList();
+                DashboardProperties = new ObservableCollection<Property>(filteredList);
+                RecentProperties = new ObservableCollection<Property>(filteredList.Take(10));
             }
             catch (Exception ex)
             {
@@ -1529,5 +1578,41 @@ namespace NPLogic.ViewModels
         {
             MainWindow.Instance?.NavigateToProgramManagement();
         }
+
+        #region 자연 정렬 (Natural Sort)
+
+        /// <summary>
+        /// PropertyNumber에서 자연 정렬용 키를 추출합니다.
+        /// 예: "R-001_1" → (1, 1), "R-0010_2" → (10, 2)
+        /// </summary>
+        private static (int major, int minor) ExtractPropertySortKey(string? propertyNumber)
+        {
+            if (string.IsNullOrEmpty(propertyNumber))
+                return (int.MaxValue, int.MaxValue);
+
+            // 패턴: R-XXX_Y 또는 R-XXXX_Y (숫자 부분 추출)
+            var match = Regex.Match(propertyNumber, @"R-?(\d+)_(\d+)");
+            if (match.Success)
+            {
+                int.TryParse(match.Groups[1].Value, out int major);
+                int.TryParse(match.Groups[2].Value, out int minor);
+                return (major, minor);
+            }
+
+            // 패턴이 맞지 않으면 문자열 전체를 기준으로
+            return (int.MaxValue, int.MaxValue);
+        }
+
+        /// <summary>
+        /// Property 컬렉션을 PropertyNumber 기준 자연 정렬합니다.
+        /// </summary>
+        private static IEnumerable<Property> NaturalSortByPropertyNumber(IEnumerable<Property> properties)
+        {
+            return properties
+                .OrderBy(p => ExtractPropertySortKey(p.PropertyNumber).major)
+                .ThenBy(p => ExtractPropertySortKey(p.PropertyNumber).minor);
+        }
+
+        #endregion
     }
 }

@@ -365,10 +365,13 @@ namespace NPLogic.ViewModels
             try
             {
                 var properties = await _propertyRepository.GetByProgramIdAsync(_programId.Value);
-                // PropertyNumber 기준 오름차순 정렬
-                var sortedProperties = properties.OrderBy(p => p.PropertyNumber).ToList();
+                // PropertyNumber 기준 자연 정렬 (R-0001_1, R-0002_1, ... R-0010_1 순서)
+                var sortedProperties = properties
+                    .OrderBy(p => ExtractPropertySortKey(p.PropertyNumber).major)
+                    .ThenBy(p => ExtractPropertySortKey(p.PropertyNumber).minor)
+                    .ToList();
                 AvailableProperties = new ObservableCollection<Property>(sortedProperties);
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Loaded {properties.Count} properties for matching (sorted by PropertyNumber)");
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Loaded {properties.Count} properties for matching (natural sorted by PropertyNumber)");
             }
             catch (Exception ex)
             {
@@ -377,19 +380,39 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 파일명에서 물건번호 추출 (예: "R-001-01", "R-001_01", "R001-01")
+        /// PropertyNumber에서 정렬용 키 추출 (자연 정렬용)
+        /// </summary>
+        private static (int major, int minor) ExtractPropertySortKey(string? propertyNumber)
+        {
+            if (string.IsNullOrEmpty(propertyNumber))
+                return (int.MaxValue, int.MaxValue);
+
+            // 패턴: R-XXX_Y 또는 R-XXXX_Y (숫자 부분 추출)
+            var match = Regex.Match(propertyNumber, @"R-?(\d+)[_-](\d+)");
+            if (match.Success)
+            {
+                int.TryParse(match.Groups[1].Value, out int major);
+                int.TryParse(match.Groups[2].Value, out int minor);
+                return (major, minor);
+            }
+
+            // 패턴이 맞지 않으면 문자열 전체를 기준으로
+            return (int.MaxValue, int.MaxValue);
+        }
+
+        /// <summary>
+        /// 파일명에서 물건번호 추출 (예: "R-001-01", "R-0001-01", "R-001_01", "R001-01")
         /// </summary>
         private string? ExtractPropertyNumberFromFileName(string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName))
                 return null;
 
-            // 다양한 물건번호 패턴 매칭
-            // 패턴: R-XXX-XX, R-XXX_XX, R_XXX_XX, R_XXX-XX, RXXX-XX, RXXX_XX 등
+            // 다양한 물건번호 패턴 매칭 (3~4자리 숫자 지원)
+            // 패턴: R-XXX-XX, R-XXXX-XX, R-XXX_XX, R_XXX_XX, RXXX-XX, RXXXX_XX 등
             var patterns = new[]
             {
-                @"R[-_]?(\d{3})[-_](\d{2})",  // R-001-01, R_001_01, R001-01, R00101
-                @"R[-_]?(\d{3})[-_]?(\d{1})",  // R-001-1, R_001_1
+                @"R[-_]?(\d{3,4})[-_](\d{1,2})",  // R-001-01, R-0001-01, R_001_01, R001-01, R0001_1
             };
 
             foreach (var pattern in patterns)
@@ -397,11 +420,18 @@ namespace NPLogic.ViewModels
                 var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
-                    // DB 형식으로 변환: "R-001-01" → "R-001_1"
-                    var num1 = match.Groups[1].Value;  // "001"
+                    // DB 형식으로 변환: "R-001-01" → "R-0001_1" (4자리 + underscore + 숫자)
+                    var num1 = match.Groups[1].Value;  // "001" or "0001"
                     var num2 = match.Groups[2].Value.TrimStart('0');  // "01" → "1"
-                    if (string.IsNullOrEmpty(num2)) num2 = "0";  // "00" 케이스 처리
-                    var propertyNumber = $"R-{num1}_{num2}";  // "R-001_1" 형식
+                    if (string.IsNullOrEmpty(num2)) num2 = "1";  // "00" 케이스 처리
+
+                    // 첫 번째 숫자를 4자리로 패딩 (001 → 0001)
+                    if (int.TryParse(num1, out int majorNum))
+                    {
+                        num1 = majorNum.ToString("D4");  // 4자리로 패딩
+                    }
+
+                    var propertyNumber = $"R-{num1}_{num2}";  // "R-0001_1" 형식
                     System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Extracted PropertyNumber from '{fileName}': {propertyNumber}");
                     return propertyNumber;
                 }
@@ -433,7 +463,25 @@ namespace NPLogic.ViewModels
                         return (matchedByNumber, 1.0);
                     }
 
-                    // 2차: 밑줄을 대시로 바꾼 형식도 확인 (R-001_1 → R-001-1)
+                    // 2차: 숫자 부분만 비교하여 매칭 (형식 차이 무시)
+                    var extractedKey = ExtractPropertySortKey(propertyNumber);
+                    if (extractedKey.major != int.MaxValue)
+                    {
+                        matchedByNumber = AvailableProperties.FirstOrDefault(p =>
+                        {
+                            if (string.IsNullOrEmpty(p.PropertyNumber)) return false;
+                            var dbKey = ExtractPropertySortKey(p.PropertyNumber);
+                            return dbKey.major == extractedKey.major && dbKey.minor == extractedKey.minor;
+                        });
+
+                        if (matchedByNumber != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Matched by numeric key ({extractedKey.major}, {extractedKey.minor}): {matchedByNumber.PropertyNumber} -> {matchedByNumber.DisplayAddress}");
+                            return (matchedByNumber, 1.0);
+                        }
+                    }
+
+                    // 3차: 밑줄을 대시로 바꾼 형식도 확인 (R-0001_1 → R-0001-1)
                     var alternateFormat1 = propertyNumber.Replace('_', '-');
                     matchedByNumber = AvailableProperties.FirstOrDefault(p =>
                         !string.IsNullOrEmpty(p.PropertyNumber) &&
@@ -445,23 +493,7 @@ namespace NPLogic.ViewModels
                         return (matchedByNumber, 1.0);
                     }
 
-                    // 3차: 두 번째 숫자에 앞자리 0 추가 (R-001_1 → R-001_01)
-                    var parts = propertyNumber.Split('_');
-                    if (parts.Length == 2 && int.TryParse(parts[1], out int num))
-                    {
-                        var alternateFormat2 = $"{parts[0]}_{num:D2}";
-                        matchedByNumber = AvailableProperties.FirstOrDefault(p =>
-                            !string.IsNullOrEmpty(p.PropertyNumber) &&
-                            p.PropertyNumber.Equals(alternateFormat2, StringComparison.OrdinalIgnoreCase));
-
-                        if (matchedByNumber != null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Matched by alternate format (padded): {alternateFormat2} -> {matchedByNumber.DisplayAddress}");
-                            return (matchedByNumber, 1.0);
-                        }
-                    }
-
-                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No property found with PropertyNumber: {propertyNumber} (tried alternate formats too)");
+                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No property found with PropertyNumber: {propertyNumber} (tried numeric key and alternate formats)");
                 }
             }
 

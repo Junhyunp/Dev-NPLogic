@@ -810,13 +810,24 @@ namespace NPLogic.Services
                     var (property, rightData) = MapRowToPropertyWithRules(row, columns, mappingRules, programId, columnMappings);
                     if (property == null)
                     {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessProperty] Row {rowIndex}: property is NULL, skipping");
                         failed++;
                         continue;
                     }
 
+                    // 물건번호 설정 전 원본값 기록
+                    var originalPropertyNumber = property.PropertyNumber;
+                    var originalCollateralNumber = property.CollateralNumber;
+
                     // 물건번호 설정
                     string finalPropertyNumber = DeterminePropertyNumber(property, rowIndex);
                     property.PropertyNumber = finalPropertyNumber;
+
+                    // 디버그: 처음 20개와 R-0001 포함 여부 확인
+                    if (rowIndex <= 20 || (originalPropertyNumber?.Contains("0001") == true) || (originalCollateralNumber?.Contains("0001") == true))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessProperty] Row {rowIndex}: Original='{originalPropertyNumber ?? "NULL"}', Collateral='{originalCollateralNumber ?? "NULL"}', Final='{finalPropertyNumber}'");
+                    }
 
                     await _propertyRepository.CreateAsync(property);
 
@@ -830,7 +841,7 @@ namespace NPLogic.Services
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[ProcessProperty] 물건 생성 실패: {ex.Message}");
+                    System.Diagnostics.Debug.WriteLine($"[ProcessProperty] Row {rowIndex} 물건 생성 실패: {ex.Message}");
                     failed++;
                 }
             }
@@ -932,9 +943,26 @@ namespace NPLogic.Services
                     var borrowerName = GetMappedValue<string>(row, "borrower_name", columnMappings);
                     var guaranteeNumber = GetMappedValue<string>(row, "guarantee_number", columnMappings);
 
+                    // 디버그: 보증서 행 정보 출력
+                    if (processed <= 5 || (string.IsNullOrEmpty(borrowerNumber) && string.IsNullOrEmpty(guaranteeNumber)))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] Row {processed}: borrowerNumber='{borrowerNumber ?? "NULL"}', guaranteeNumber='{guaranteeNumber ?? "NULL"}'");
+                        if (string.IsNullOrEmpty(borrowerNumber) && string.IsNullOrEmpty(guaranteeNumber))
+                        {
+                            // 원본 row 키 출력 (첫 5개만)
+                            var rowKeys = string.Join(", ", row.Keys.Take(10));
+                            System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] Row keys (first 10): {rowKeys}");
+                            // columnMappings에서 borrower_number, guarantee_number 매핑 확인
+                            var borrowerMapping = columnMappings.FirstOrDefault(x => x.Value == "borrower_number");
+                            var guaranteeMapping = columnMappings.FirstOrDefault(x => x.Value == "guarantee_number");
+                            System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] Mapping - borrower_number: '{borrowerMapping.Key ?? "NOT FOUND"}', guarantee_number: '{guaranteeMapping.Key ?? "NOT FOUND"}'");
+                        }
+                    }
+
                     // 최소 필수값 체크 (차주일련번호 또는 보증서번호 중 하나는 있어야 함)
                     if (string.IsNullOrEmpty(borrowerNumber) && string.IsNullOrEmpty(guaranteeNumber))
                     {
+                        System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] SKIP Row {processed}: 보증서번호와 차주번호가 모두 비어있음");
                         failed++;
                         continue;
                     }
@@ -1442,14 +1470,19 @@ namespace NPLogic.Services
 
         private string DeterminePropertyNumber(Property property, int rowIndex)
         {
-            if (!string.IsNullOrEmpty(property.PropertyNumber) && !property.PropertyNumber.All(char.IsDigit))
+            // 1. PropertyNumber가 있으면 그대로 사용 (순수 숫자여도 유지)
+            if (!string.IsNullOrEmpty(property.PropertyNumber))
             {
                 return property.PropertyNumber;
             }
+
+            // 2. CollateralNumber가 있으면 사용
             if (!string.IsNullOrEmpty(property.CollateralNumber))
             {
                 return property.CollateralNumber;
             }
+
+            // 3. 아무것도 없으면 rowIndex 기반 생성
             return $"P-{rowIndex:D4}";
         }
 
@@ -1731,6 +1764,12 @@ namespace NPLogic.Services
                 "borrower_number" => normalizedKey.Contains("차주일련번호") || normalizedKey.Contains("차주번호"),
                 "borrower_name" => normalizedKey.Contains("차주명"),
                 "borrower_type" => normalizedKey.Contains("차주형태") || normalizedKey.Contains("차주유형"),
+                "guarantee_number" => normalizedKey.Contains("보증서번호") || normalizedKey.Contains("보증번호") || normalizedKey.Contains("신용보증번호"),
+                "guarantee_institution" => normalizedKey.Contains("보증기관") || normalizedKey.Contains("신용보증기관"),
+                "guarantee_type" => normalizedKey.Contains("보증종류") || normalizedKey.Contains("보증유형") || normalizedKey.Contains("보증서종류"),
+                "guarantee_ratio" => normalizedKey.Contains("보증비율") || normalizedKey.Contains("보증률"),
+                "property_number" => normalizedKey.Contains("물건번호") || normalizedKey.Contains("물건일련번호") || normalizedKey.Contains("property일련번호"),
+                "collateral_number" => normalizedKey.Contains("물건 일련번호") || normalizedKey.Contains("property 일련번호"),
                 _ => false
             };
         }

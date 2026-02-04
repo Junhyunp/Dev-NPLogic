@@ -985,7 +985,6 @@
                                       CanUserSortColumns="True"
                                       SelectionMode="Single"
                                       SelectionChanged="ProgressDataGrid_SelectionChanged"
-                                      ScrollViewer.ScrollChanged="ProgressDataGrid_ScrollChanged"
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource TableBorderBrush}"

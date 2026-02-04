@@ -357,10 +357,12 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                
+
                 // 페이지네이션 범위 계산
                 int from = (page - 1) * pageSize;
                 int to = from + pageSize - 1;
+
+                System.Diagnostics.Debug.WriteLine($"[PropertyRepository] GetPagedServerSideAsync called - page: {page}, pageSize: {pageSize}, from: {from}, to: {to}, programId: {programId}");
                 
                 // 조건에 따라 쿼리 실행 (Supabase C# 클라이언트의 체이닝 제약으로 인해 분기)
                 Postgrest.Responses.ModeledResponse<PropertyTable> response;
@@ -427,11 +429,20 @@ namespace NPLogic.Data.Repositories
                         .Skip(from)
                         .Take(pageSize)
                         .ToList();
-                    
+
                     var totalFiltered = allResponse.Models
                         .Count(x => x.ProgramId.HasValue && filterProgramIds.Contains(x.ProgramId.Value));
-                    
-                    return (filteredItems.Select(MapToProperty).ToList(), totalFiltered);
+
+                    var mappedItems = filteredItems.Select(MapToProperty).ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"[PropertyRepository] PM filter path - returned {mappedItems.Count} items (total filtered: {totalFiltered})");
+                    if (mappedItems.Count > 0)
+                    {
+                        var first5 = mappedItems.Take(5).Select(p => p.PropertyNumber).ToList();
+                        System.Diagnostics.Debug.WriteLine($"[PropertyRepository] PM filter - First 5 property_numbers: {string.Join(", ", first5)}");
+                    }
+
+                    return (mappedItems, totalFiltered);
                 }
                 else
                 {
@@ -443,10 +454,19 @@ namespace NPLogic.Data.Repositories
                 }
                 
                 var items = response.Models.Select(MapToProperty).ToList();
-                
+
+                System.Diagnostics.Debug.WriteLine($"[PropertyRepository] Query returned {items.Count} items from database");
+                if (items.Count > 0)
+                {
+                    var first5 = items.Take(5).Select(p => p.PropertyNumber).ToList();
+                    System.Diagnostics.Debug.WriteLine($"[PropertyRepository] First 5 property_numbers: {string.Join(", ", first5)}");
+                }
+
                 // Total Count 조회 (별도 쿼리) - 페이지네이션 정보 필요
                 int totalCount = await GetTotalCountAsync(programId, status, assignedTo);
-                
+
+                System.Diagnostics.Debug.WriteLine($"[PropertyRepository] Total count: {totalCount}");
+
                 return (items, totalCount);
             }
             catch (Exception ex)

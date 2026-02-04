@@ -156,16 +156,24 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding FileName}"
-                                                                       FontSize="{StaticResource FontSizeBody}"
-                                                                       TextTrimming="CharacterEllipsis"/>
+                                                        <!-- 문서 아이콘 + 용량 (수직 중앙 정렬) -->
+                                                        <StackPanel VerticalAlignment="Center" Margin="0,0,10,0">
+                                                            <TextBlock Text="📄"
+                                                                       FontSize="{StaticResource FontSizeH3}"
+                                                                       HorizontalAlignment="Center"/>
                                                             <TextBlock Text="{Binding FileSizeFormatted}"
                                                                        FontSize="{StaticResource FontSizeTiny}"
-                                                                       Opacity="0.6"/>
+                                                                       Opacity="0.6"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,2,0,0"/>
                                                         </StackPanel>
+
+                                                        <!-- 파일명만 표시 -->
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding FileName}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   VerticalAlignment="Center"/>
 
                                                         <Border Grid.Column="2"
                                                                 CornerRadius="4"
@@ -246,12 +254,16 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" (물건 자동 매칭 모드)"
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="선택된 파일"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   VerticalAlignment="Center"/>
+                                        <TextBlock Text="(물건 자동 매칭 모드)"
                                                    FontSize="{StaticResource FontSizeSmall}"
                                                    Foreground="{StaticResource PrimaryBrush}"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center"
+                                                   Margin="8,0,0,0"/>
                                     </StackPanel>
                                     <Button Grid.Column="1"
                                             Content="전체 취소"
@@ -284,20 +296,28 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <StackPanel Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,8,0">
-                                                            <TextBlock Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center"/>
-                                                        </StackPanel>
-
-                                                        <!-- 파일 정보 -->
-                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding FileName}"
-                                                                       FontSize="{StaticResource FontSizeBody}"
-                                                                       TextTrimming="CharacterEllipsis"/>
+                                                        <!-- 문서 아이콘 + 용량 (수직 중앙 정렬) -->
+                                                        <StackPanel Grid.RowSpan="2"
+                                                                    VerticalAlignment="Center"
+                                                                    Margin="0,0,10,0">
+                                                            <TextBlock Text="📄"
+                                                                       FontSize="{StaticResource FontSizeH3}"
+                                                                       HorizontalAlignment="Center"/>
                                                             <TextBlock Text="{Binding FileSizeFormatted}"
                                                                        FontSize="{StaticResource FontSizeTiny}"
                                                                        Opacity="0.6"
-                                                                       VerticalAlignment="Center"/>
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,2,0,0"/>
                                                         </StackPanel>
+
+                                                        <!-- 파일 정보 (파일명만, 너비 확장) -->
+                                                        <TextBlock Grid.Column="1"
+                                                                   Text="{Binding FileName}"
+                                                                   FontSize="{StaticResource FontSizeBody}"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   TextWrapping="NoWrap"
+                                                                   VerticalAlignment="Center"
+                                                                   Margin="0,0,8,0"/>
 
                                                         <!-- 상태 표시 -->
                                                         <Border Grid.Column="2"
@@ -373,8 +393,9 @@
                                                                           DisplayMemberPath="PropertyNumber"
                                                                           FontSize="{StaticResource FontSizeSmall}"
                                                                           Padding="6,4"
-                                                                          MinWidth="200"
-                                                                          MaxDropDownHeight="300"/>
+                                                                          Width="150"
+                                                                          MaxDropDownHeight="300"
+                                                                          HorizontalAlignment="Left"/>
 
                                                                 <!-- 매칭 상태 표시 -->
                                                                 <Border Grid.Column="1"
