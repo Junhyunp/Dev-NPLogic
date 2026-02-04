@@ -251,7 +251,18 @@ def parse_table_from_ocr(table_data: dict) -> List[Dict[str, str]]:
     for cell in cells:
         row = cell.get('rowIndex', 0)
         col = cell.get('columnIndex', 0)
-        text = cell.get('cellTextLines', [{}])[0].get('cellWords', [{}])[0].get('inferText', '')
+
+        # 셀의 모든 텍스트 라인과 단어를 결합
+        cell_texts = []
+        for text_line in cell.get('cellTextLines', []):
+            line_words = []
+            for word in text_line.get('cellWords', []):
+                infer_text = word.get('inferText', '')
+                if infer_text:
+                    line_words.append(infer_text)
+            if line_words:
+                cell_texts.append(' '.join(line_words))
+        text = ' '.join(cell_texts)
 
         if row not in grid:
             grid[row] = {}
@@ -323,11 +334,25 @@ def parse_registry_tables(ocr_results: List[dict]) -> Dict[str, any]:
             # 테이블 종류 판단 (헤더 또는 주변 텍스트 기반)
             first_row_keys = list(parsed_rows[0].keys()) if parsed_rows else []
 
+            # 헤더 키워드 존재 여부 확인
+            has_owner_key = any('소유지분' in key or '소유자' in key or '성명' in key for key in first_row_keys)
+            has_rank_key = any('순위번호' in key or '순위' in key for key in first_row_keys)
+            has_purpose_key = any('등기목적' in key or '접수' in key or '권리자' in key for key in first_row_keys)
+
             # "소유지분현황" 표
-            if any('소유지분' in key or '소유자' in key for key in first_row_keys):
+            if has_owner_key:
                 owners.extend(parsed_rows)
-            # "갑구" 관련 표
-            elif any('순위번호' in key and ('등기목적' in key or '접수' in key) for key in first_row_keys):
+            # "갑구/을구" 관련 표 - 순위번호와 등기목적이 각각 다른 컬럼에 있음
+            elif has_rank_key and has_purpose_key:
+                if '소유권' in page_text or '갑구' in page_text:
+                    gapgu.extend(parsed_rows)
+                elif '저당권' in page_text or '전세권' in page_text or '을구' in page_text:
+                    eulgu.extend(parsed_rows)
+                else:
+                    # 페이지 텍스트로 판단 불가 시 기본적으로 갑구로 분류
+                    gapgu.extend(parsed_rows)
+            # 순위번호만 있는 경우 페이지 컨텍스트로 판단
+            elif has_rank_key:
                 if '소유권' in page_text or '갑구' in page_text:
                     gapgu.extend(parsed_rows)
                 elif '저당권' in page_text or '전세권' in page_text or '을구' in page_text:

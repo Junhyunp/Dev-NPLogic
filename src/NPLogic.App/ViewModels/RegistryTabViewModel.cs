@@ -940,6 +940,13 @@ namespace NPLogic.ViewModels
                     await LoadAvailablePropertiesAsync();
                 }
 
+                // 물건 목록 로드 후 로그 추가
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] AvailableProperties count: {AvailableProperties.Count}");
+                if (AvailableProperties.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] First property: {AvailableProperties[0].PropertyNumber}");
+                }
+
                 foreach (var filePath in dialog.FileNames)
                 {
                     // 중복 체크 (기존 목록)
@@ -1113,30 +1120,30 @@ namespace NPLogic.ViewModels
                                 OnPropertyChanged(nameof(SummaryImageCount));
                             }
 
-                            // 주소 저장 및 매칭 처리
+                            // 주소 저장 (있는 경우)
                             if (result.Data != null && !string.IsNullOrEmpty(result.Data.Address))
                             {
                                 OcrExtractedAddress = result.Data.Address;
+                            }
 
-                                // 매칭 모드인 경우 물건 자동 매칭 시도
-                                if (pdfFile is OcrPdfFileWithMatch matchFile)
+                            // 매칭 모드인 경우 물건 자동 매칭 시도 (주소 유무와 무관하게!)
+                            if (pdfFile is OcrPdfFileWithMatch matchFile)
+                            {
+                                matchFile.ExtractedAddress = result.Data?.Address;
+                                matchFile.OcrResultData = result.Data;
+
+                                // 파일명과 주소 모두 전달하여 매칭 (파일명 우선)
+                                var (matchedProperty, confidence) = FindMatchingProperty(result.Data?.Address, pdfFile.FileName);
+                                if (matchedProperty != null)
                                 {
-                                    matchFile.ExtractedAddress = result.Data.Address;
-                                    matchFile.OcrResultData = result.Data;
-
-                                    // 파일명과 주소 모두 전달하여 매칭
-                                    var (matchedProperty, confidence) = FindMatchingProperty(result.Data.Address, pdfFile.FileName);
-                                    if (matchedProperty != null)
-                                    {
-                                        matchFile.MatchedProperty = matchedProperty;
-                                        matchFile.MatchConfidence = confidence;
-                                        matchFile.IsAutoMatched = true;
-                                        System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Auto-matched: {pdfFile.FileName} -> {matchedProperty.DisplayAddress} ({confidence:P0})");
-                                    }
-                                    else
-                                    {
-                                        System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No match found for: {pdfFile.FileName}");
-                                    }
+                                    matchFile.MatchedProperty = matchedProperty;
+                                    matchFile.MatchConfidence = confidence;
+                                    matchFile.IsAutoMatched = true;
+                                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Auto-matched: {pdfFile.FileName} -> {matchedProperty.DisplayAddress} ({confidence:P0})");
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No match found for: {pdfFile.FileName}");
                                 }
                             }
 
@@ -1406,8 +1413,22 @@ namespace NPLogic.ViewModels
 
                 foreach (var pdfFile in completedFiles)
                 {
+                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Processing: {pdfFile.FileName}");
+                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] MatchedProperty: {pdfFile.MatchedProperty?.PropertyNumber ?? "NULL"}");
+                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] OcrResultData: {(pdfFile.OcrResultData != null ? "EXISTS" : "NULL")}");
+
+                    if (pdfFile.OcrResultData != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Owners count: {pdfFile.OcrResultData.Owners?.Count ?? 0}");
+                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Gapgu count: {pdfFile.OcrResultData.Gapgu?.Count ?? 0}");
+                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Eulgu count: {pdfFile.OcrResultData.Eulgu?.Count ?? 0}");
+                    }
+
                     if (pdfFile.MatchedProperty == null || pdfFile.OcrResultData == null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] SKIPPING - Missing data!");
                         continue;
+                    }
 
                     var propertyId = pdfFile.MatchedProperty.Id;
                     var data = pdfFile.OcrResultData;
@@ -1493,6 +1514,7 @@ namespace NPLogic.ViewModels
                     }
 
                     savedFileCount++;
+                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Saved file: {pdfFile.FileName} to property: {pdfFile.MatchedProperty.PropertyNumber}");
                     System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Saved OCR data for: {pdfFile.FileName} -> {pdfFile.MatchedProperty.DisplayAddress}");
                 }
 
