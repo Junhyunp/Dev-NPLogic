@@ -365,8 +365,10 @@ namespace NPLogic.ViewModels
             try
             {
                 var properties = await _propertyRepository.GetByProgramIdAsync(_programId.Value);
-                AvailableProperties = new ObservableCollection<Property>(properties);
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Loaded {properties.Count} properties for matching");
+                // PropertyNumber 기준 오름차순 정렬
+                var sortedProperties = properties.OrderBy(p => p.PropertyNumber).ToList();
+                AvailableProperties = new ObservableCollection<Property>(sortedProperties);
+                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Loaded {properties.Count} properties for matching (sorted by PropertyNumber)");
             }
             catch (Exception ex)
             {
@@ -375,16 +377,101 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 주소 매칭 (간단한 문자열 포함 비교)
+        /// 파일명에서 물건번호 추출 (예: "R-001-01", "R-001_01", "R001-01")
         /// </summary>
-        private (Property? property, double confidence) FindMatchingProperty(string? extractedAddress)
+        private string? ExtractPropertyNumberFromFileName(string fileName)
         {
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            // 다양한 물건번호 패턴 매칭
+            // 패턴: R-XXX-XX, R-XXX_XX, R_XXX_XX, R_XXX-XX, RXXX-XX, RXXX_XX 등
+            var patterns = new[]
+            {
+                @"R[-_]?(\d{3})[-_](\d{2})",  // R-001-01, R_001_01, R001-01, R00101
+                @"R[-_]?(\d{3})[-_]?(\d{1})",  // R-001-1, R_001_1
+            };
+
+            foreach (var pattern in patterns)
+            {
+                var match = Regex.Match(fileName, pattern, RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    // DB 형식으로 변환: "R-001-01" → "R-001_1"
+                    var num1 = match.Groups[1].Value;  // "001"
+                    var num2 = match.Groups[2].Value.TrimStart('0');  // "01" → "1"
+                    if (string.IsNullOrEmpty(num2)) num2 = "0";  // "00" 케이스 처리
+                    var propertyNumber = $"R-{num1}_{num2}";  // "R-001_1" 형식
+                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Extracted PropertyNumber from '{fileName}': {propertyNumber}");
+                    return propertyNumber;
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No PropertyNumber pattern found in '{fileName}'");
+            return null;
+        }
+
+        /// <summary>
+        /// 주소 매칭 (물건번호 우선, 주소 기반 fallback)
+        /// </summary>
+        private (Property? property, double confidence) FindMatchingProperty(string? extractedAddress, string? fileName = null)
+        {
+            // 1. 파일명에서 물건번호로 매칭 시도 (100% 신뢰도)
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                var propertyNumber = ExtractPropertyNumberFromFileName(fileName);
+                if (!string.IsNullOrEmpty(propertyNumber))
+                {
+                    // 1차: 정확히 일치 (R-001_1)
+                    var matchedByNumber = AvailableProperties.FirstOrDefault(p =>
+                        !string.IsNullOrEmpty(p.PropertyNumber) &&
+                        p.PropertyNumber.Equals(propertyNumber, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedByNumber != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Matched by PropertyNumber: {propertyNumber} -> {matchedByNumber.DisplayAddress}");
+                        return (matchedByNumber, 1.0);
+                    }
+
+                    // 2차: 밑줄을 대시로 바꾼 형식도 확인 (R-001_1 → R-001-1)
+                    var alternateFormat1 = propertyNumber.Replace('_', '-');
+                    matchedByNumber = AvailableProperties.FirstOrDefault(p =>
+                        !string.IsNullOrEmpty(p.PropertyNumber) &&
+                        p.PropertyNumber.Equals(alternateFormat1, StringComparison.OrdinalIgnoreCase));
+
+                    if (matchedByNumber != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Matched by alternate format (dash): {alternateFormat1} -> {matchedByNumber.DisplayAddress}");
+                        return (matchedByNumber, 1.0);
+                    }
+
+                    // 3차: 두 번째 숫자에 앞자리 0 추가 (R-001_1 → R-001_01)
+                    var parts = propertyNumber.Split('_');
+                    if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                    {
+                        var alternateFormat2 = $"{parts[0]}_{num:D2}";
+                        matchedByNumber = AvailableProperties.FirstOrDefault(p =>
+                            !string.IsNullOrEmpty(p.PropertyNumber) &&
+                            p.PropertyNumber.Equals(alternateFormat2, StringComparison.OrdinalIgnoreCase));
+
+                        if (matchedByNumber != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Matched by alternate format (padded): {alternateFormat2} -> {matchedByNumber.DisplayAddress}");
+                            return (matchedByNumber, 1.0);
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No property found with PropertyNumber: {propertyNumber} (tried alternate formats too)");
+                }
+            }
+
+            // 2. 주소 기반 매칭 (기존 로직)
             if (string.IsNullOrWhiteSpace(extractedAddress) || AvailableProperties.Count == 0)
                 return (null, 0);
 
             var normalizedExtracted = NormalizeAddress(extractedAddress);
 
-            // 1. 정확히 일치하는 경우
+            // 2-1. 정확히 일치하는 경우
             foreach (var property in AvailableProperties)
             {
                 var propAddress = property.AddressFull ?? property.AddressJibun ?? property.AddressRoad ?? "";
@@ -400,7 +487,7 @@ namespace NPLogic.ViewModels
                 }
             }
 
-            // 2. 부분 일치 (핵심 키워드 비교)
+            // 2-2. 부분 일치 (핵심 키워드 비교)
             var keywords = ExtractAddressKeywords(extractedAddress);
             Property? bestMatch = null;
             double bestScore = 0;
@@ -1037,7 +1124,8 @@ namespace NPLogic.ViewModels
                                     matchFile.ExtractedAddress = result.Data.Address;
                                     matchFile.OcrResultData = result.Data;
 
-                                    var (matchedProperty, confidence) = FindMatchingProperty(result.Data.Address);
+                                    // 파일명과 주소 모두 전달하여 매칭
+                                    var (matchedProperty, confidence) = FindMatchingProperty(result.Data.Address, pdfFile.FileName);
                                     if (matchedProperty != null)
                                     {
                                         matchFile.MatchedProperty = matchedProperty;

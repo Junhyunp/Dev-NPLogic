@@ -10,8 +10,9 @@ import sys
 import json
 import base64
 import io
+import re
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict
 
 from clova_ocr import ClovaOCR, ClovaOCRProcessor, SummaryPageFinder, images_from_pdf_after
 
@@ -134,6 +135,20 @@ def process_pdf(pdf_path: str, extract_summary: bool = True) -> dict:
         # 3. 전체 텍스트 합치기
         result_data["full_text"] = "\n\n".join(result_data["raw_texts"])
 
+        # 4. 표 데이터 파싱
+        table_data = parse_registry_tables(result_data["pages"])
+
+        # 5. 주소 추출
+        address = extract_address_from_text(result_data["full_text"])
+
+        # 6. data 필드에 구조화된 데이터 추가
+        result_data["data"] = {
+            "address": address,
+            "owners": table_data["owners"],
+            "gapgu": table_data["gapgu"],
+            "eulgu": table_data["eulgu"]
+        }
+
         return result_data
 
     except Exception as e:
@@ -166,6 +181,168 @@ def extract_text_from_ocr_result(ocr_result: dict) -> str:
 
     walk(ocr_result)
     return " ".join(texts)
+
+
+def extract_address_from_text(text: str) -> str:
+    """
+    텍스트에서 주소 추출
+
+    Args:
+        text: OCR 결과 텍스트
+
+    Returns:
+        추출된 주소 문자열
+    """
+    # 주소 패턴: 시/도로 시작하는 패턴
+    address_patterns = [
+        r'(서울[특별시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(부산[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(대구[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(인천[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(광주[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(대전[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(울산[광역시]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(세종[특별자치시]*\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(경기도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(강원[특별자치도]*\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(충청북도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(충청남도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(전라북도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(전북특별자치도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(전라남도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(경상북도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(경상남도\s*[^\s]+\s*[^\s]+(?:\s*[^\s]+)?)',
+        r'(제주[특별자치도]*\s*[^\s]+(?:\s*[^\s]+)?)',
+    ]
+
+    for pattern in address_patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1).strip()
+
+    # "소재지번" 다음 텍스트 추출 시도
+    sojaejibun_match = re.search(r'소재지번[:\s]*([^\n]+)', text)
+    if sojaejibun_match:
+        return sojaejibun_match.group(1).strip()
+
+    return ""
+
+
+def parse_table_from_ocr(table_data: dict) -> List[Dict[str, str]]:
+    """
+    Clova OCR 테이블 데이터를 파싱하여 딕셔너리 리스트로 변환
+
+    Args:
+        table_data: Clova OCR API의 table 객체
+
+    Returns:
+        각 행을 딕셔너리로 변환한 리스트
+    """
+    if not table_data or 'cells' not in table_data:
+        return []
+
+    cells = table_data['cells']
+
+    # 셀을 행/열 기준으로 정렬
+    grid = {}
+    max_row = 0
+    max_col = 0
+
+    for cell in cells:
+        row = cell.get('rowIndex', 0)
+        col = cell.get('columnIndex', 0)
+        text = cell.get('cellTextLines', [{}])[0].get('cellWords', [{}])[0].get('inferText', '')
+
+        if row not in grid:
+            grid[row] = {}
+        grid[row][col] = text
+
+        max_row = max(max_row, row)
+        max_col = max(max_col, col)
+
+    # 첫 번째 행을 헤더로 사용
+    if 0 not in grid:
+        return []
+
+    headers = [grid[0].get(i, f'col_{i}') for i in range(max_col + 1)]
+
+    # 데이터 행 파싱
+    rows = []
+    for row_idx in range(1, max_row + 1):
+        if row_idx not in grid:
+            continue
+
+        row_dict = {}
+        for col_idx, header in enumerate(headers):
+            row_dict[header] = grid[row_idx].get(col_idx, '')
+
+        rows.append(row_dict)
+
+    return rows
+
+
+def parse_registry_tables(ocr_results: List[dict]) -> Dict[str, any]:
+    """
+    OCR 결과에서 등기부등본 표 데이터 추출
+
+    Args:
+        ocr_results: 각 페이지의 OCR 결과 리스트
+
+    Returns:
+        파싱된 표 데이터 (owners, gapgu, eulgu)
+    """
+    owners = []
+    gapgu = []
+    eulgu = []
+
+    for page_data in ocr_results:
+        if 'ocr_result' not in page_data:
+            continue
+
+        ocr_result = page_data['ocr_result']
+
+        # Clova OCR 테이블 구조: result["images"][0]["tables"]
+        if 'images' not in ocr_result or not ocr_result['images']:
+            continue
+
+        image_data = ocr_result['images'][0]
+        if 'tables' not in image_data:
+            continue
+
+        tables = image_data['tables']
+
+        # 페이지 텍스트로 테이블 종류 판단
+        page_text = page_data.get('text', '')
+
+        for table in tables:
+            parsed_rows = parse_table_from_ocr(table)
+
+            if not parsed_rows:
+                continue
+
+            # 테이블 종류 판단 (헤더 또는 주변 텍스트 기반)
+            first_row_keys = list(parsed_rows[0].keys()) if parsed_rows else []
+
+            # "소유지분현황" 표
+            if any('소유지분' in key or '소유자' in key for key in first_row_keys):
+                owners.extend(parsed_rows)
+            # "갑구" 관련 표
+            elif any('순위번호' in key and ('등기목적' in key or '접수' in key) for key in first_row_keys):
+                if '소유권' in page_text or '갑구' in page_text:
+                    gapgu.extend(parsed_rows)
+                elif '저당권' in page_text or '전세권' in page_text or '을구' in page_text:
+                    eulgu.extend(parsed_rows)
+            # 페이지 컨텍스트로 판단
+            elif '소유지분' in page_text and not owners:
+                owners.extend(parsed_rows)
+            elif ('저당권' in page_text or '전세권' in page_text) and parsed_rows:
+                eulgu.extend(parsed_rows)
+
+    return {
+        'owners': owners,
+        'gapgu': gapgu,
+        'eulgu': eulgu
+    }
 
 
 def main():

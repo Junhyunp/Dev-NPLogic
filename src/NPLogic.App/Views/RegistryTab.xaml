@@ -247,7 +247,7 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                        <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" VerticalAlignment="Center"/>
                                         <TextBlock Text=" (물건 자동 매칭 모드)"
                                                    FontSize="{StaticResource FontSizeSmall}"
                                                    Foreground="{StaticResource PrimaryBrush}"
@@ -284,17 +284,19 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
-                                                        <TextBlock Grid.RowSpan="2" Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <StackPanel Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                                            <TextBlock Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center"/>
+                                                        </StackPanel>
 
                                                         <!-- 파일 정보 -->
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                             <TextBlock Text="{Binding FileName}"
                                                                        FontSize="{StaticResource FontSizeBody}"
-                                                                       TextTrimming="CharacterEllipsis"
-                                                                       MaxWidth="200"/>
+                                                                       TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Text="{Binding FileSizeFormatted}"
                                                                        FontSize="{StaticResource FontSizeTiny}"
-                                                                       Opacity="0.6"/>
+                                                                       Opacity="0.6"
+                                                                       VerticalAlignment="Center"/>
                                                         </StackPanel>
 
                                                         <!-- 상태 표시 -->
@@ -368,10 +370,11 @@
 
                                                                 <ComboBox ItemsSource="{Binding DataContext.RegistryViewModel.AvailableProperties, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                                           SelectedItem="{Binding MatchedProperty, Mode=TwoWay}"
-                                                                          DisplayMemberPath="DisplayAddress"
+                                                                          DisplayMemberPath="PropertyNumber"
                                                                           FontSize="{StaticResource FontSizeSmall}"
                                                                           Padding="6,4"
-                                                                          MinWidth="200"/>
+                                                                          MinWidth="200"
+                                                                          MaxDropDownHeight="300"/>
 
                                                                 <!-- 매칭 상태 표시 -->
                                                                 <Border Grid.Column="1"
