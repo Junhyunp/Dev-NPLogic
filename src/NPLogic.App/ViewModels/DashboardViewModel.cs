@@ -87,6 +87,7 @@ namespace NPLogic.ViewModels
 
         // ========== 중복 호출 방지 ==========
         private bool _isLoadingProgramData = false;
+        private bool _suppressProjectIdRefresh = false;
 
         // ========== 사용자 정보 ==========
         [ObservableProperty]
@@ -564,11 +565,14 @@ namespace NPLogic.ViewModels
 
             try
             {
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadSelectedProgramDataAsync start - ProgramId: {SelectedProgram.ProjectId}, ProgramName: {SelectedProgram.ProjectName}");
                 _isLoadingProgramData = true;
                 IsLoading = true;
                 ErrorMessage = null;
 
+                _suppressProjectIdRefresh = true;
                 SelectedProjectId = SelectedProgram.ProjectId;
+                _suppressProjectIdRefresh = false;
                 
                 // 간소화된 네비게이션: 프로그램 선택 시 바로 물건 목록으로 이동 (차주 단계 스킵)
                 NavigationLevel = "Property";
@@ -592,6 +596,7 @@ namespace NPLogic.ViewModels
             {
                 _isLoadingProgramData = false;
                 IsLoading = false;
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadSelectedProgramDataAsync end - ProgramId: {SelectedProgram.ProjectId}, DashboardProperties: {DashboardProperties?.Count ?? 0}");
             }
         }
 
@@ -607,6 +612,7 @@ namespace NPLogic.ViewModels
             try
             {
                 System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadAllPropertiesForProgramAsync started for program: {SelectedProgram.ProjectName} (ID: {SelectedProgram.ProjectId})");
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync init - SelectedProjectId: {SelectedProjectId}, ActiveFilterCount: {ActiveFilterCount}, StatusFilter: {StatusFilter ?? "null"}");
 
                 // 페이지네이션 상태 초기화
                 _currentPage = 1;
@@ -637,6 +643,7 @@ namespace NPLogic.ViewModels
                     // PM: 담당 프로그램만
                     filterProgramIds = _pmProgramIds;
                 }
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync filters - programId: {programId}, assignedTo: {assignedTo}, filterProgramIds: {(filterProgramIds == null ? "null" : filterProgramIds.Count.ToString())}");
 
                 // 고급 필터가 활성화된 경우: 최소 개수를 채울 때까지 반복 로드
                 const int MinimumDisplayCount = 20;
@@ -657,6 +664,7 @@ namespace NPLogic.ViewModels
 
                     _totalPropertyCount = totalCount;
                     pagesLoaded++;
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync page {_currentPage} -> items: {items.Count}, total: {totalCount}, hasMore(before): {_hasMoreData}");
 
                     System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] GetPagedServerSideAsync returned {items.Count} items (total: {totalCount})");
                     if (items.Count > 0)
@@ -701,6 +709,7 @@ namespace NPLogic.ViewModels
 
                     // 더 로드할 데이터가 있는지 확인
                     _hasMoreData = (_currentPage * PageSize) < totalCount;
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync page {_currentPage} -> loaded: {loadedProperties.Count}, hasMore(after): {_hasMoreData}");
 
                     // 고급 필터가 없거나 최소 개수를 채웠으면 중단
                     if (ActiveFilterCount == 0 || loadedProperties.Count >= MinimumDisplayCount || !_hasMoreData)
@@ -714,7 +723,14 @@ namespace NPLogic.ViewModels
 
                 // ★ 핵심 수정: 새 ObservableCollection 인스턴스 생성하여 할당
                 // 이렇게 하면 WPF가 새로운 CollectionView를 생성하여 캐시 문제 해결
+                if (loadedProperties.Count > 0)
+                {
+                    var first3 = loadedProperties.Take(3).Select(p => p.PropertyNumber ?? "-").ToList();
+                    var last3 = loadedProperties.TakeLast(3).Select(p => p.PropertyNumber ?? "-").ToList();
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync final list - first3: {string.Join(", ", first3)}, last3: {string.Join(", ", last3)}");
+                }
                 DashboardProperties = new ObservableCollection<Property>(loadedProperties);
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync set DashboardProperties - count: {DashboardProperties.Count}");
 
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
@@ -756,6 +772,7 @@ namespace NPLogic.ViewModels
                 _isLoadingMore = true;
                 OnPropertyChanged(nameof(IsLoadingMore));
                 
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadMorePropertiesAsync start - currentPage(before): {_currentPage}, DashboardProperties: {DashboardProperties.Count}");
                 _currentPage++;
 
                 // 프로그램 ID 파싱
@@ -794,6 +811,7 @@ namespace NPLogic.ViewModels
 
                     _totalPropertyCount = totalCount;
                     pagesLoaded++;
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadMorePropertiesAsync page {_currentPage} -> items: {items.Count}, total: {totalCount}");
 
                     // 서버에서 더 이상 데이터가 없으면 중단
                     if (items.Count == 0)
@@ -819,6 +837,7 @@ namespace NPLogic.ViewModels
 
                     // 더 로드할 데이터가 있는지 확인
                     _hasMoreData = (_currentPage * PageSize) < totalCount;
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadMorePropertiesAsync page {_currentPage} -> added: {DashboardProperties.Count - initialCount}, hasMore: {_hasMoreData}");
 
                     // 고급 필터가 없거나 최소 개수를 추가했으면 중단
                     int addedCount = DashboardProperties.Count - initialCount;
@@ -842,6 +861,7 @@ namespace NPLogic.ViewModels
             {
                 _isLoadingMore = false;
                 OnPropertyChanged(nameof(IsLoadingMore));
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadMorePropertiesAsync end - currentPage: {_currentPage}, DashboardProperties: {DashboardProperties.Count}");
             }
         }
 
@@ -1108,6 +1128,7 @@ namespace NPLogic.ViewModels
             try
             {
                 var projectId = SelectedProjectId == "전체" ? null : SelectedProjectId;
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadDashboardPropertiesAsync start - projectId: {projectId}, SelectedProjectId: {SelectedProjectId}, ActiveFilterCount: {ActiveFilterCount}, StatusFilter: {StatusFilter ?? "null"}");
                 
                 Guid? assignedTo = null;
                 if (CurrentUser?.IsEvaluator == true)
@@ -1142,8 +1163,15 @@ namespace NPLogic.ViewModels
 
                 // ★ 새 ObservableCollection 인스턴스 생성 (CollectionView 캐시 문제 해결)
                 var filteredList = filteredProperties.ToList();
+                if (filteredList.Count > 0)
+                {
+                    var first3 = filteredList.Take(3).Select(p => p.PropertyNumber ?? "-").ToList();
+                    var last3 = filteredList.TakeLast(3).Select(p => p.PropertyNumber ?? "-").ToList();
+                    System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadDashboardPropertiesAsync list - first3: {string.Join(", ", first3)}, last3: {string.Join(", ", last3)}");
+                }
                 DashboardProperties = new ObservableCollection<Property>(filteredList);
                 RecentProperties = new ObservableCollection<Property>(filteredList.Take(10));
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadDashboardPropertiesAsync set DashboardProperties - count: {DashboardProperties.Count}");
             }
             catch (Exception ex)
             {
@@ -1269,6 +1297,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         partial void OnSelectedProjectIdChanged(string value)
         {
+            System.Diagnostics.Debug.WriteLine($"[DashboardTrace] OnSelectedProjectIdChanged - value: {value}, SelectedProgram: {SelectedProgram?.ProjectId ?? "null"}");
+            if (_suppressProjectIdRefresh)
+            {
+                System.Diagnostics.Debug.WriteLine("[DashboardTrace] OnSelectedProjectIdChanged skipped (suppress flag)");
+                return;
+            }
             _ = RefreshDataAsync();
         }
 
@@ -1378,6 +1412,7 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = true;
                 ErrorMessage = null;
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] RefreshDataAsync start - SelectedProgram: {SelectedProgram?.ProjectId ?? "null"}, SelectedProjectId: {SelectedProjectId}, ActiveFilterCount: {ActiveFilterCount}, StatusFilter: {StatusFilter ?? "null"}");
 
                 // 현재 선택된 프로그램 ID 저장 (필터 창 유지를 위해)
                 var selectedProgramId = SelectedProgram?.ProjectId;
@@ -1415,6 +1450,7 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+                System.Diagnostics.Debug.WriteLine($"[DashboardTrace] RefreshDataAsync end - DashboardProperties: {DashboardProperties?.Count ?? 0}");
             }
         }
 
