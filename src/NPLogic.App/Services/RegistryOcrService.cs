@@ -96,13 +96,42 @@ namespace NPLogic.Services
 
                 progress?.Report(new OcrProgress(fileName, OcrProgressStatus.Parsing, 90));
 
+                // 디버그: 원본 응답 로깅 (data 필드 포함 여부 확인)
+                System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response length: {responseContent.Length}");
+                if (responseContent.Contains("\"data\""))
+                {
+                    System.Diagnostics.Debug.WriteLine("[RegistryOcrService] Response contains 'data' field");
+                    // data 필드 내용 일부 출력
+                    var dataStart = responseContent.IndexOf("\"data\"");
+                    var dataPreview = responseContent.Substring(dataStart, Math.Min(500, responseContent.Length - dataStart));
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Data field preview: {dataPreview}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[RegistryOcrService] WARNING: Response does NOT contain 'data' field!");
+                    // 응답 시작 부분 출력
+                    var preview = responseContent.Substring(0, Math.Min(1000, responseContent.Length));
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Response preview: {preview}");
+                }
+
                 // 응답 파싱
-                var ocrResponse = JsonSerializer.Deserialize<OcrApiResponse>(responseContent, 
+                var ocrResponse = JsonSerializer.Deserialize<OcrApiResponse>(responseContent,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 if (ocrResponse == null)
                 {
                     throw new Exception("OCR 응답을 파싱할 수 없습니다.");
+                }
+
+                // 디버그: 파싱 결과 로깅
+                System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Parsed - Success: {ocrResponse.Success}");
+                System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Parsed - Data: {(ocrResponse.Data != null ? "EXISTS" : "NULL")}");
+                if (ocrResponse.Data != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Data.Address: {ocrResponse.Data.Address ?? "NULL"}");
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Data.Owners: {ocrResponse.Data.Owners?.Count ?? 0} items");
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Data.Gapgu: {ocrResponse.Data.Gapgu?.Count ?? 0} items");
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Data.Eulgu: {ocrResponse.Data.Eulgu?.Count ?? 0} items");
                 }
 
                 progress?.Report(new OcrProgress(fileName, OcrProgressStatus.Completed, 100));
