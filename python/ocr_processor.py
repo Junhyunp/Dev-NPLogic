@@ -387,14 +387,24 @@ def parse_registry_tables(ocr_results: List[dict]) -> Dict[str, any]:
             # 2) 권리(갑/을) 표: 순위 + 권리 공통 헤더가 있으면 권리표로 판단
             if has_rank and (has_right_common or any("등기목적" in k for k in first_row_keys)):
                 # 페이지/행 단위로 갑구/을구 분리
-                page_is_eul = any(x in page_text for x in ["을구", "저당", "전세", "근저당"])
-                page_is_gap = any(x in page_text for x in ["갑구", "소유권"])
+                # NOTE: "주요 등기사항 요약" 페이지는 한 테이블에 갑/을구 성격 행이 섞일 수 있어
+                #       page_text에 "근저당" 같은 단어가 한번이라도 나오면 전체가 을구로 오분류됨.
+                #       따라서 page_text는 '갑구/을구' 섹션 헤더가 명시적으로 있을 때만 보조로 사용.
+                page_is_eul = "을구" in page_text
+                page_is_gap = "갑구" in page_text or "소유권" in page_text
 
                 for row in parsed_rows:
                     purpose = str(row.get("등기목적", "") or row.get("목적", "") or "")
                     details = str(row.get("주요등기사항", "") or row.get("비고", "") or "")
 
-                    is_eul_row = page_is_eul or any(x in purpose for x in ["저당", "전세", "근저당"]) or any(x in details for x in eul_markers)
+                    # 행 단위로 분리: 목적/상세에 "근저당/전세/저당/채권최고액/채무자" 등이 있으면 을구로 간주
+                    # 그 외(압류/가압류/강제경매 등)는 갑구로 간주
+                    is_eul_row = any(x in purpose for x in ["저당", "전세", "근저당"]) or any(x in details for x in eul_markers)
+                    # 섹션 헤더가 명확할 때만 보조 적용
+                    if page_is_eul:
+                        is_eul_row = True
+                    elif page_is_gap:
+                        is_eul_row = False
                     if is_eul_row:
                         eulgu.append(row)
                     else:
