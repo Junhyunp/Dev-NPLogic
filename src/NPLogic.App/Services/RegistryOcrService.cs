@@ -98,6 +98,26 @@ namespace NPLogic.Services
 
                 // 디버그: 원본 응답 로깅 (data 필드 포함 여부 확인)
                 System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response length: {responseContent.Length}");
+                try
+                {
+                    // 원본 응답은 길 수 있으므로 파일로도 저장 (출력창에 전체 JSON 덤프 방지)
+                    var safeName = Path.GetFileNameWithoutExtension(fileName);
+                    var dumpPath = Path.Combine(
+                        Path.GetTempPath(),
+                        $"nplogic_registry_ocr_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                    await File.WriteAllTextAsync(dumpPath, responseContent, cancellationToken);
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response dumped to: {dumpPath}");
+
+                    // 출력창에서는 앞/뒤 일부만 표시
+                    var head = responseContent.Substring(0, Math.Min(2000, responseContent.Length));
+                    var tail = responseContent.Substring(Math.Max(0, responseContent.Length - 2000));
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response head(2KB): {head}");
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response tail(2KB): {tail}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RegistryOcrService] Raw response dump failed: {ex.Message}");
+                }
                 if (responseContent.Contains("\"data\""))
                 {
                     System.Diagnostics.Debug.WriteLine("[RegistryOcrService] Response contains 'data' field");

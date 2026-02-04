@@ -277,6 +277,30 @@ def parse_table_from_ocr(table_data: dict) -> List[Dict[str, str]]:
 
     headers = [grid[0].get(i, f'col_{i}') for i in range(max_col + 1)]
 
+    # 헤더 정규화: OCR이 "주 소"처럼 띄어쓰기를 섞는 경우가 있어 키가 흔들림
+    def normalize_header(h: str) -> str:
+        if not h:
+            return h
+        compact = re.sub(r"\s+", "", h)
+        # 주요 키들만 안정적으로 매핑 (나머지는 원문 유지)
+        mapping = {
+            "주소": "주소",
+            "주소": "주소",  # 혹시 OCR이 '주 소'를 '주소'로 붙이는 경우
+            "등기명의인": "등기명의인",
+            "주민등록번호": "주민등록번호",
+            "(주민)등록번호": "(주민)등록번호",
+            "최종지분": "최종지분",
+            "소유지분": "소유지분",
+            "순위번호": "순위번호",
+            "등기목적": "등기목적",
+            "접수정보": "접수정보",
+            "주요등기사항": "주요등기사항",
+            "대상소유자": "대상소유자",
+        }
+        return mapping.get(compact, h)
+
+    headers = [normalize_header(h) for h in headers]
+
     # 데이터 행 파싱
     rows = []
     for row_idx in range(1, max_row + 1):
@@ -334,34 +358,57 @@ def parse_registry_tables(ocr_results: List[dict]) -> Dict[str, any]:
             # 테이블 종류 판단 (헤더 또는 주변 텍스트 기반)
             first_row_keys = list(parsed_rows[0].keys()) if parsed_rows else []
 
-            # 헤더 키워드 존재 여부 확인
-            has_owner_key = any('소유지분' in key or '소유자' in key or '성명' in key for key in first_row_keys)
-            has_rank_key = any('순위번호' in key or '순위' in key for key in first_row_keys)
-            has_purpose_key = any('등기목적' in key or '접수' in key or '권리자' in key for key in first_row_keys)
+            # 헤더 키워드 점수 기반으로 분류 (오탐 방지)
+            # NOTE: "대상소유자" 같은 컬럼은 권리 요약표에도 존재하므로 owners 판정에 단독 사용 금지
+            owner_markers = ["등기명의인", "성명", "(주민)등록번호", "주민등록번호", "등록번호", "최종지분", "소유지분", "주소"]
+            right_rank_markers = ["순위번호", "순위"]
+            right_common_markers = ["등기목적", "접수정보", "접수", "주요등기사항", "비고"]
+            eul_markers = ["근저당", "저당", "전세", "채권최고액", "전세금", "채무자"]
 
-            # "소유지분현황" 표
-            if has_owner_key:
+            def contains_any(markers: List[str]) -> bool:
+                return any(any(m in k for k in first_row_keys) for m in markers)
+
+            owner_score = sum(1 for m in owner_markers if any(m in k for k in first_row_keys))
+            has_rank = contains_any(right_rank_markers)
+            has_right_common = contains_any(right_common_markers)
+
+            # 1) 소유지분현황(소유자 표): 실제 샘플처럼 '순위번호'가 같이 붙는 경우가 있어 rank 존재만으로 배제하면 안 됨
+            #    - 등기명의인/등록번호/최종지분/주소 중 2개 이상이 있으면 소유자 표로 간주
+            has_owner_name = any("등기명의인" in k for k in first_row_keys) or any("성명" in k for k in first_row_keys)
+            has_owner_share = any("최종지분" in k or "소유지분" in k for k in first_row_keys)
+            has_owner_regno = any("등록번호" in k for k in first_row_keys)
+            has_owner_addr = any("주소" in k for k in first_row_keys)
+            owner_table_score = sum([1 if has_owner_name else 0, 1 if has_owner_share else 0, 1 if has_owner_regno else 0, 1 if has_owner_addr else 0])
+
+            if owner_table_score >= 2 and has_owner_name and not any("주요등기사항" in k for k in first_row_keys):
                 owners.extend(parsed_rows)
-            # "갑구/을구" 관련 표 - 순위번호와 등기목적이 각각 다른 컬럼에 있음
-            elif has_rank_key and has_purpose_key:
-                if '소유권' in page_text or '갑구' in page_text:
-                    gapgu.extend(parsed_rows)
-                elif '저당권' in page_text or '전세권' in page_text or '을구' in page_text:
-                    eulgu.extend(parsed_rows)
-                else:
-                    # 페이지 텍스트로 판단 불가 시 기본적으로 갑구로 분류
-                    gapgu.extend(parsed_rows)
-            # 순위번호만 있는 경우 페이지 컨텍스트로 판단
-            elif has_rank_key:
-                if '소유권' in page_text or '갑구' in page_text:
-                    gapgu.extend(parsed_rows)
-                elif '저당권' in page_text or '전세권' in page_text or '을구' in page_text:
-                    eulgu.extend(parsed_rows)
-            # 페이지 컨텍스트로 판단
-            elif '소유지분' in page_text and not owners:
+                continue
+
+            # 2) 권리(갑/을) 표: 순위 + 권리 공통 헤더가 있으면 권리표로 판단
+            if has_rank and (has_right_common or any("등기목적" in k for k in first_row_keys)):
+                # 페이지/행 단위로 갑구/을구 분리
+                page_is_eul = any(x in page_text for x in ["을구", "저당", "전세", "근저당"])
+                page_is_gap = any(x in page_text for x in ["갑구", "소유권"])
+
+                for row in parsed_rows:
+                    purpose = str(row.get("등기목적", "") or row.get("목적", "") or "")
+                    details = str(row.get("주요등기사항", "") or row.get("비고", "") or "")
+
+                    is_eul_row = page_is_eul or any(x in purpose for x in ["저당", "전세", "근저당"]) or any(x in details for x in eul_markers)
+                    if is_eul_row:
+                        eulgu.append(row)
+                    else:
+                        # 기본은 갑구로 분류
+                        gapgu.append(row)
+                continue
+
+            # 3) 텍스트 컨텍스트 fallback
+            if '소유지분' in page_text and owner_score >= 1:
                 owners.extend(parsed_rows)
-            elif ('저당권' in page_text or '전세권' in page_text) and parsed_rows:
+            elif any(x in page_text for x in ["을구", "저당", "전세", "근저당"]):
                 eulgu.extend(parsed_rows)
+            elif any(x in page_text for x in ["갑구", "소유권"]):
+                gapgu.extend(parsed_rows)
 
     return {
         'owners': owners,
