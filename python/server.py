@@ -45,6 +45,14 @@ class HealthResponse(BaseModel):
     message: str
 
 
+class OcrResultData(BaseModel):
+    """OCR 결과 데이터 (파싱된 표 정보)"""
+    address: Optional[str] = None
+    owners: Optional[list] = None
+    gapgu: Optional[list] = None
+    eulgu: Optional[list] = None
+
+
 class OcrResponse(BaseModel):
     success: bool
     file_path: Optional[str] = None
@@ -53,9 +61,10 @@ class OcrResponse(BaseModel):
     summary_images: Optional[list] = None  # Base64 인코딩된 모든 요약 페이지 이미지 배열
     pages: Optional[list] = None
     full_text: Optional[str] = None
+    data: Optional[OcrResultData] = None  # 파싱된 표 데이터 (owners, gapgu, eulgu)
     registry_type: Optional[str] = None
     registry_number: Optional[str] = None
-    owners: Optional[list] = None
+    owners: Optional[list] = None  # 하위 호환성
     rights: Optional[list] = None
     land_info: Optional[dict] = None
     error: Optional[str] = None
