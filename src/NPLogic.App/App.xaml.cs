@@ -313,7 +313,8 @@ namespace NPLogic
             {
                 return new ViewModels.RegistryTabViewModel(
                     sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
-                    sp.GetRequiredService<RegistryOcrService>()
+                    sp.GetRequiredService<RegistryOcrService>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>()
                 );
             });
             services.AddTransient<ViewModels.RightsAnalysisTabViewModel>(sp =>

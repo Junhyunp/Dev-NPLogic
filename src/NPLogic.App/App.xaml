@@ -41,6 +41,7 @@
             <converters:BoolToCheckConverter x:Key="BoolToCheckConverter"/>
             <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
             <converters:NullToTextConverter x:Key="NullToTextConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

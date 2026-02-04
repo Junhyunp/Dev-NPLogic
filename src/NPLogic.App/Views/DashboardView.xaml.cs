@@ -27,9 +27,14 @@ namespace NPLogic.Views
         private readonly string[] _innerTabs = { "noncore", "registry", "rights", "basicdata", "qasummary", "cashflowsummary", "npvcomparison", "closing" };
         private int _currentTabIndex = 0;
 
+        // 물건 변경 감지 (탭 캐시 갱신용)
+        private Guid? _lastPropertyId;
+
         // 탭 View 캐싱 (탭 전환 시 상태 유지)
         private NonCoreView? _cachedNonCoreView;
         private NonCoreViewModel? _cachedNonCoreViewModel;
+        private RegistryTab? _cachedRegistryTab;
+        private RegistryTabViewModel? _cachedRegistryViewModel;
 
         // 상태 복원 중 플래그 (이벤트 중복 방지)
         private bool _isRestoringState = false;
@@ -595,19 +600,25 @@ namespace NPLogic.Views
                     break;
                     
                 case "registry":
-                    // 등기부 탭: RegistryTab 로드
-                    var registryTab = serviceProvider.GetService<RegistryTab>();
-                    if (registryTab != null)
+                    // 등기부 탭: RegistryTab 로드 (캐싱으로 상태 유지)
+                    if (_cachedRegistryTab == null)
                     {
-                        var registryViewModel = serviceProvider.GetService<RegistryTabViewModel>();
-                        if (registryViewModel != null)
+                        _cachedRegistryTab = serviceProvider.GetService<RegistryTab>();
+                        _cachedRegistryViewModel = serviceProvider.GetService<RegistryTabViewModel>();
+                    }
+
+                    if (_cachedRegistryTab != null && _cachedRegistryViewModel != null)
+                    {
+                        // ★ 등기부등본 탭은 프로그램(전체) 레벨 기능
+                        // SetPropertyId()를 호출하지 않아 매칭 모드 활성화
+                        if (property.ProgramId.HasValue)
                         {
-                            registryViewModel.SetPropertyId(property.Id);
-                            registryViewModel.SetPropertyInfo(property);
-                            await registryViewModel.LoadDataAsync();
-                            registryTab.DataContext = new { RegistryViewModel = registryViewModel };
+                            _cachedRegistryViewModel.SetProgramId(property.ProgramId.Value);
+                            await _cachedRegistryViewModel.LoadAvailablePropertiesAsync();
                         }
-                        view = registryTab;
+
+                        _cachedRegistryTab.DataContext = new { RegistryViewModel = _cachedRegistryViewModel };
+                        view = _cachedRegistryTab;
                     }
                     break;
                     

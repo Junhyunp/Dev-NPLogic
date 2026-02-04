@@ -155,18 +155,18 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
-                                                        
+
                                                         <TextBlock Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                        
+
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="{Binding FileName}" 
+                                                            <TextBlock Text="{Binding FileName}"
                                                                        FontSize="{StaticResource FontSizeBody}"
                                                                        TextTrimming="CharacterEllipsis"/>
-                                                            <TextBlock Text="{Binding FileSizeFormatted}" 
+                                                            <TextBlock Text="{Binding FileSizeFormatted}"
                                                                        FontSize="{StaticResource FontSizeTiny}"
                                                                        Opacity="0.6"/>
                                                         </StackPanel>
-                                                        
+
                                                         <Border Grid.Column="2"
                                                                 CornerRadius="4"
                                                                 Padding="8,3"
@@ -206,7 +206,7 @@
                                                                 </TextBlock.Style>
                                                             </TextBlock>
                                                         </Border>
-                                                        
+
                                                         <Button Grid.Column="3"
                                                                 Content="✕"
                                                                 Command="{Binding DataContext.RegistryViewModel.RemoveOcrPdfFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -225,13 +225,194 @@
                                 </ScrollViewer>
                             </Grid>
                         </Border>
+
+                        <!-- 매칭 모드 파일 목록 (물건 선택 ComboBox 포함) -->
+                        <Border Grid.Row="1"
+                                Background="{StaticResource BlueGray50Brush}"
+                                CornerRadius="6"
+                                Padding="12"
+                                Margin="0,0,0,12"
+                                MinHeight="80"
+                                MaxHeight="300"
+                                Visibility="{Binding RegistryViewModel.HasOcrPdfFilesWithMatch, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="선택된 파일" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}"/>
+                                        <TextBlock Text=" (물건 자동 매칭 모드)"
+                                                   FontSize="{StaticResource FontSizeSmall}"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1"
+                                            Content="전체 취소"
+                                            Command="{Binding RegistryViewModel.CancelAllOcrPdfFilesCommand}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Foreground="{StaticResource TextSecondaryBrush}"
+                                            FontSize="{StaticResource FontSizeSmall}"
+                                            Padding="4,2"
+                                            Cursor="Hand"/>
+                                </Grid>
+
+                                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="240">
+                                    <ItemsControl ItemsSource="{Binding RegistryViewModel.OcrPdfFilesWithMatch}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="White"
+                                                        CornerRadius="4"
+                                                        Padding="10,8"
+                                                        Margin="0,0,0,6">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.RowSpan="2" Text="📄" FontSize="{StaticResource FontSizeH3}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                                                        <!-- 파일 정보 -->
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding FileName}"
+                                                                       FontSize="{StaticResource FontSizeBody}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       MaxWidth="200"/>
+                                                            <TextBlock Text="{Binding FileSizeFormatted}"
+                                                                       FontSize="{StaticResource FontSizeTiny}"
+                                                                       Opacity="0.6"/>
+                                                        </StackPanel>
+
+                                                        <!-- 상태 표시 -->
+                                                        <Border Grid.Column="2"
+                                                                CornerRadius="4"
+                                                                Padding="8,3"
+                                                                Margin="8,0"
+                                                                VerticalAlignment="Center">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="{StaticResource BlueGray200Brush}"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="완료">
+                                                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="처리 중">
+                                                                            <Setter Property="Background" Value="{StaticResource InfoBrush}"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding Status}" Value="실패">
+                                                                            <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <TextBlock Text="{Binding Status}" FontSize="{StaticResource FontSizeTiny}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Status}" Value="완료">
+                                                                                <Setter Property="Foreground" Value="White"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding Status}" Value="처리 중">
+                                                                                <Setter Property="Foreground" Value="White"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding Status}" Value="실패">
+                                                                                <Setter Property="Foreground" Value="White"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+
+                                                        <Button Grid.Column="3"
+                                                                Content="✕"
+                                                                Command="{Binding DataContext.RegistryViewModel.RemoveOcrPdfFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                CommandParameter="{Binding}"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Foreground="{StaticResource TextSecondaryBrush}"
+                                                                Padding="6,2"
+                                                                FontSize="{StaticResource FontSizeBody}"
+                                                                Cursor="Hand"/>
+
+                                                        <!-- 물건 매칭 영역 (OCR 완료 후 표시) -->
+                                                        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,6,0,0">
+                                                            <!-- OCR 추출 주소 -->
+                                                            <TextBlock Text="{Binding ExtractedAddress}"
+                                                                       FontSize="{StaticResource FontSizeTiny}"
+                                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       Visibility="{Binding ExtractedAddress, Converter={StaticResource NullToVisibilityConverter}}"
+                                                                       Margin="0,0,0,4"/>
+
+                                                            <!-- 물건 선택 ComboBox -->
+                                                            <Grid Visibility="{Binding Status, Converter={StaticResource StringToVisibilityConverter}, ConverterParameter=완료}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <ComboBox ItemsSource="{Binding DataContext.RegistryViewModel.AvailableProperties, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                          SelectedItem="{Binding MatchedProperty, Mode=TwoWay}"
+                                                                          DisplayMemberPath="DisplayAddress"
+                                                                          FontSize="{StaticResource FontSizeSmall}"
+                                                                          Padding="6,4"
+                                                                          MinWidth="200"/>
+
+                                                                <!-- 매칭 상태 표시 -->
+                                                                <Border Grid.Column="1"
+                                                                        CornerRadius="4"
+                                                                        Padding="6,2"
+                                                                        Margin="6,0,0,0"
+                                                                        VerticalAlignment="Center">
+                                                                    <Border.Style>
+                                                                        <Style TargetType="Border">
+                                                                            <Setter Property="Background" Value="{StaticResource WarningBrush}"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsAutoMatched}" Value="True">
+                                                                                    <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding MatchedProperty}" Value="{x:Null}">
+                                                                                    <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Border.Style>
+                                                                    <TextBlock Text="{Binding MatchStatusText}"
+                                                                               FontSize="{StaticResource FontSizeTiny}"
+                                                                               Foreground="White"/>
+                                                                </Border>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
                         
                         <!-- 빈 상태 메시지 -->
                         <Border Grid.Row="1"
                                 Background="{StaticResource BlueGray50Brush}"
                                 CornerRadius="6"
                                 Padding="24"
-                                Visibility="{Binding RegistryViewModel.HasOcrPdfFiles, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                Visibility="{Binding RegistryViewModel.HasAnyOcrPdfFiles, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <StackPanel HorizontalAlignment="Center">
                                 <TextBlock Text="📄" FontSize="{StaticResource FontSizeXXLarge}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                                 <TextBlock Text="등기부등본 PDF 파일을 선택하세요" 
@@ -285,7 +466,7 @@
                                         Padding="20,8"
                                         FontSize="{StaticResource FontSizeBody}"
                                         Visibility="{Binding RegistryViewModel.IsOcrProcessing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                        IsEnabled="{Binding RegistryViewModel.HasOcrPdfFiles}"/>
+                                        IsEnabled="{Binding RegistryViewModel.HasAnyOcrPdfFiles}"/>
                             </StackPanel>
                         </Grid>
                         

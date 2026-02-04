@@ -35,10 +35,64 @@
       "status": "failed",
       "completed_at": "2026-02-03T05:27:33.707Z",
       "duration_ms": 70294
+    },
+    {
+      "agent_id": "ad8b73d",
+      "agent_type": "oh-my-claudecode:explore-medium",
+      "started_at": "2026-02-04T02:40:08.135Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T02:41:12.173Z",
+      "duration_ms": 64038
+    },
+    {
+      "agent_id": "ab6fd1c",
+      "agent_type": "oh-my-claudecode:explore",
+      "started_at": "2026-02-04T02:40:12.539Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T02:41:20.845Z",
+      "duration_ms": 68306
+    },
+    {
+      "agent_id": "a21571a",
+      "agent_type": "oh-my-claudecode:executor",
+      "started_at": "2026-02-04T02:43:04.139Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T02:45:11.405Z",
+      "duration_ms": 127266
+    },
+    {
+      "agent_id": "ab5e323",
+      "agent_type": "oh-my-claudecode:explore",
+      "started_at": "2026-02-04T02:45:26.621Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T02:45:56.012Z",
+      "duration_ms": 29391
+    },
+    {
+      "agent_id": "ace19ee",
+      "agent_type": "oh-my-claudecode:executor-high",
+      "started_at": "2026-02-04T02:46:26.846Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T02:53:45.711Z",
+      "duration_ms": 438865
+    },
+    {
+      "agent_id": "a5df797",
+      "agent_type": "oh-my-claudecode:explore-medium",
+      "started_at": "2026-02-04T03:31:54.080Z",
+      "parent_mode": "ultrawork",
+      "status": "failed",
+      "completed_at": "2026-02-04T03:32:42.023Z",
+      "duration_ms": 47943
     }
   ],
-  "total_spawned": 4,
+  "total_spawned": 10,
   "total_completed": 0,
-  "total_failed": 4,
-  "last_updated": "2026-02-03T23:31:05.037Z"
+  "total_failed": 10,
+  "last_updated": "2026-02-04T03:40:55.470Z"
 }

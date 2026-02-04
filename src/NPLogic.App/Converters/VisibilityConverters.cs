@@ -343,8 +343,29 @@ namespace NPLogic.Converters
             var texts = parameter?.ToString()?.Split('|') ?? new[] { "", "" };
             var notNullText = texts.Length > 0 ? texts[0] : "";
             var nullText = texts.Length > 1 ? texts[1] : "";
-            
+
             return value != null ? notNullText : nullText;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// 문자열 값이 특정 값과 일치하면 Visible, 아니면 Collapsed
+    /// ConverterParameter에 비교할 값을 전달
+    /// 예: ConverterParameter='완료' -> 값이 "완료"면 Visible
+    /// </summary>
+    public class StringToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var stringValue = value?.ToString() ?? "";
+            var compareValue = parameter?.ToString() ?? "";
+
+            return stringValue == compareValue ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -4,6 +4,74 @@
 
 ## [Unreleased]
 
+### 2025-02-04
+
+#### 대시보드 물건 목록 페이지네이션 버그 수정
+
+**문제점**
+- 대시보드에서 물건 목록이 때로는 R-001_1부터, 때로는 R-050부터만 표시되는 불일치 현상
+- 원인: 서버에서 50개씩 페이지네이션으로 가져온 후, 클라이언트에서 고급 필터를 적용하면 일부만 남아 표시
+
+**해결 방법**
+- 고급 필터 활성화 시 최소 개수를 채울 때까지 자동으로 추가 페이지 로드
+- `LoadAllPropertiesForProgramAsync()`: 최소 20개가 될 때까지 반복 로드
+- `LoadMorePropertiesAsync()`: 무한 스크롤 시 최소 10개 추가될 때까지 로드
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/DashboardViewModel.cs` - 페이지네이션 로직 개선
+
+---
+
+#### 등기부등본 OCR 다중 물건 매칭 기능 구현
+
+여러 PDF 업로드 시 각 PDF에서 추출된 주소로 해당 물건을 자동 매칭하여 저장하는 기능
+
+**기능 설명**
+- 등기부등본 탭에서 여러 PDF 업로드 → OCR 처리 → 각 PDF의 주소 추출
+- Jaccard 유사도 알고리즘으로 프로그램 내 물건들과 주소 비교
+- 유사도 70% 이상이면 자동 매칭 (녹색 배지), 미만이면 수동 선택 필요 (빨간 배지)
+- 매칭된 물건의 담보물건 탭에 OCR 결과 저장
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+  - `OcrPdfFileWithMatch` 클래스 추가 (매칭 정보 포함)
+  - `SetProgramId()`, `LoadAvailablePropertiesAsync()` 메서드 추가
+  - `FindMatchingProperty()` - Jaccard 유사도 기반 주소 매칭
+  - `SaveOcrResultsWithMatchAsync()` - 매칭된 물건에 저장
+- `src/NPLogic.App/Views/RegistryTab.xaml` - 매칭 모드 UI (파일 목록, 상태 배지, 물건 선택 ComboBox)
+- `src/NPLogic.App/Views/DashboardView.xaml.cs` - 프로그램 ID 전달 로직
+
+---
+
+#### 등기부등본 탭 상태 유지 (캐싱)
+
+**문제점**
+- 다른 탭 갔다 오면 등기부등본 탭에 업로드된 PDF 목록과 상태가 초기화됨
+
+**해결 방법**
+- DashboardView에서 등기부등본 탭과 ViewModel을 캐싱
+- 탭 전환 시 캐시된 인스턴스 재사용
+
+**변경된 파일**
+- `src/NPLogic.App/Views/DashboardView.xaml.cs` - `_cachedRegistryTab`, `_cachedRegistryViewModel` 필드 추가
+
+---
+
+#### OCR 다중 페이지 요약 지원
+
+**문제점**
+- "주요 등기사항 요약" 섹션이 여러 페이지인 경우 첫 페이지만 캡처됨
+
+**해결 방법**
+- Python 백엔드에서 `summary_images` 배열로 모든 요약 페이지 이미지 반환
+- 기존 `summary_image` (첫 번째)는 하위 호환성 유지
+
+**변경된 파일**
+- `python/server.py` - `OcrResponse`에 `summary_images` 필드 추가
+- `python/ocr_processor.py` - 다중 요약 페이지 처리 로직
+
+---
+
 ### 2025-01-25
 
 #### 물건정보 중복 키 에러 수정 (CollateralNumber 처리)

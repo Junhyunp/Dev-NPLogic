@@ -616,37 +616,62 @@ namespace NPLogic.ViewModels
                     filterProgramIds = _pmProgramIds;
                 }
 
-                // 서버 사이드 페이지네이션으로 첫 페이지 조회
-                var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
-                    page: _currentPage,
-                    pageSize: PageSize,
-                    programId: programId,
-                    status: StatusFilter,
-                    assignedTo: assignedTo,
-                    filterProgramIds: filterProgramIds
-                );
-                
-                _totalPropertyCount = totalCount;
-                
-                // 고급 필터는 클라이언트에서 적용 (고급 필터가 활성화된 경우)
-                IEnumerable<Property> filteredItems = items;
-                if (ActiveFilterCount > 0)
-                {
-                    filteredItems = ApplyAdvancedFilters(items);
-                }
+                // 고급 필터가 활성화된 경우: 최소 개수를 채울 때까지 반복 로드
+                const int MinimumDisplayCount = 20;
+                int maxPages = 10; // 무한 루프 방지
+                int pagesLoaded = 0;
 
-                // 기본 정렬: 차주번호 -> 담보번호 순
-                var sortedItems = filteredItems
-                    .OrderBy(p => p.BorrowerNumber ?? "")
-                    .ThenBy(p => p.CollateralNumber ?? "");
-
-                foreach (var property in sortedItems)
+                while (pagesLoaded < maxPages)
                 {
-                    DashboardProperties.Add(property);
+                    // 서버 사이드 페이지네이션으로 페이지 조회
+                    var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
+                        page: _currentPage,
+                        pageSize: PageSize,
+                        programId: programId,
+                        status: StatusFilter,
+                        assignedTo: assignedTo,
+                        filterProgramIds: filterProgramIds
+                    );
+
+                    _totalPropertyCount = totalCount;
+                    pagesLoaded++;
+
+                    // 서버에서 더 이상 데이터가 없으면 중단
+                    if (items.Count == 0)
+                    {
+                        _hasMoreData = false;
+                        break;
+                    }
+
+                    // 고급 필터 적용 (활성화된 경우)
+                    IEnumerable<Property> filteredItems = items;
+                    if (ActiveFilterCount > 0)
+                    {
+                        filteredItems = ApplyAdvancedFilters(items);
+                    }
+
+                    // 기본 정렬: 차주번호 -> 담보번호 순
+                    var sortedItems = filteredItems
+                        .OrderBy(p => p.BorrowerNumber ?? "")
+                        .ThenBy(p => p.CollateralNumber ?? "");
+
+                    foreach (var property in sortedItems)
+                    {
+                        DashboardProperties.Add(property);
+                    }
+
+                    // 더 로드할 데이터가 있는지 확인
+                    _hasMoreData = (_currentPage * PageSize) < totalCount;
+
+                    // 고급 필터가 없거나 최소 개수를 채웠으면 중단
+                    if (ActiveFilterCount == 0 || DashboardProperties.Count >= MinimumDisplayCount || !_hasMoreData)
+                    {
+                        break;
+                    }
+
+                    // 다음 페이지 로드
+                    _currentPage++;
                 }
-                
-                // 더 로드할 데이터가 있는지 확인
-                _hasMoreData = DashboardProperties.Count < totalCount;
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
             }
@@ -687,37 +712,64 @@ namespace NPLogic.ViewModels
                     filterProgramIds = _pmProgramIds;
                 }
 
-                // 다음 페이지 조회
-                var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
-                    page: _currentPage,
-                    pageSize: PageSize,
-                    programId: programId,
-                    status: StatusFilter,
-                    assignedTo: assignedTo,
-                    filterProgramIds: filterProgramIds
-                );
-                
-                _totalPropertyCount = totalCount;
+                // 고급 필터가 활성화된 경우: 최소 개수를 채울 때까지 반복 로드
+                const int MinimumAddCount = 10;
+                int maxPages = 5; // 무한 루프 방지
+                int pagesLoaded = 0;
+                int initialCount = DashboardProperties.Count;
 
-                // 고급 필터 적용
-                IEnumerable<Property> filteredItems = items;
-                if (ActiveFilterCount > 0)
+                while (pagesLoaded < maxPages)
                 {
-                    filteredItems = ApplyAdvancedFilters(items);
-                }
+                    // 다음 페이지 조회
+                    var (items, totalCount) = await _propertyRepository.GetPagedServerSideAsync(
+                        page: _currentPage,
+                        pageSize: PageSize,
+                        programId: programId,
+                        status: StatusFilter,
+                        assignedTo: assignedTo,
+                        filterProgramIds: filterProgramIds
+                    );
 
-                // 정렬: 차주번호 -> 담보번호 순
-                var sortedItems = filteredItems
-                    .OrderBy(p => p.BorrowerNumber ?? "")
-                    .ThenBy(p => p.CollateralNumber ?? "");
+                    _totalPropertyCount = totalCount;
+                    pagesLoaded++;
 
-                foreach (var property in sortedItems)
-                {
-                    DashboardProperties.Add(property);
+                    // 서버에서 더 이상 데이터가 없으면 중단
+                    if (items.Count == 0)
+                    {
+                        _hasMoreData = false;
+                        break;
+                    }
+
+                    // 고급 필터 적용
+                    IEnumerable<Property> filteredItems = items;
+                    if (ActiveFilterCount > 0)
+                    {
+                        filteredItems = ApplyAdvancedFilters(items);
+                    }
+
+                    // 정렬: 차주번호 -> 담보번호 순
+                    var sortedItems = filteredItems
+                        .OrderBy(p => p.BorrowerNumber ?? "")
+                        .ThenBy(p => p.CollateralNumber ?? "");
+
+                    foreach (var property in sortedItems)
+                    {
+                        DashboardProperties.Add(property);
+                    }
+
+                    // 더 로드할 데이터가 있는지 확인
+                    _hasMoreData = (_currentPage * PageSize) < totalCount;
+
+                    // 고급 필터가 없거나 최소 개수를 추가했으면 중단
+                    int addedCount = DashboardProperties.Count - initialCount;
+                    if (ActiveFilterCount == 0 || addedCount >= MinimumAddCount || !_hasMoreData)
+                    {
+                        break;
+                    }
+
+                    // 다음 페이지 로드
+                    _currentPage++;
                 }
-                
-                // 더 로드할 데이터가 있는지 확인
-                _hasMoreData = DashboardProperties.Count < totalCount;
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
             }

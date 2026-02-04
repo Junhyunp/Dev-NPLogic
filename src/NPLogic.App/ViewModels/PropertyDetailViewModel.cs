@@ -865,7 +865,7 @@ namespace NPLogic.ViewModels
             // 등기부 탭 ViewModel 초기화
             if (_registryRepository != null)
             {
-                RegistryViewModel = new RegistryTabViewModel(_registryRepository, _registryOcrService);
+                RegistryViewModel = new RegistryTabViewModel(_registryRepository, _registryOcrService, _propertyRepository);
             }
 
             // 권리분석 탭 ViewModel 초기화
