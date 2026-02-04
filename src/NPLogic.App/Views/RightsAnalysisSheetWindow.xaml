@@ -115,7 +115,7 @@
                               ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
                               RowHeight="36">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="순위번호" Binding="{Binding RightOrder}" Width="70">
+                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="70">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -123,51 +123,10 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="150"/>
-                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="120"/>
-                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
-                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
-                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right"/>
-                                        <Setter Property="Padding" Value="0,0,8,0"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTemplateColumn Header="상태" Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#E8F5E9"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
-                                                            <Setter Property="Background" Value="#FFEBEE"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock FontSize="{StaticResource FontSizeSmall}">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Text" Value="유효"/>
-                                                        <Setter Property="Foreground" Value="#388E3C"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="cancelled">
-                                                                <Setter Property="Text" Value="말소"/>
-                                                                <Setter Property="Foreground" Value="#D32F2F"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="150"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="180"/>
+                            <DataGridTextColumn Header="주요등기사항" Binding="{Binding Details}" Width="*"/>
+                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="140"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -216,7 +175,7 @@
                               ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
                               RowHeight="36">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="순위번호" Binding="{Binding RightOrder}" Width="70">
+                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="70">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -224,53 +183,10 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="150"/>
-                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="120"/>
-                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
-                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="150"/>
-                            <DataGridTextColumn Header="채권최고액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right"/>
-                                        <Setter Property="Padding" Value="0,0,8,0"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTemplateColumn Header="상태" Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#E8F5E9"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Status}" Value="cancelled">
-                                                            <Setter Property="Background" Value="#FFEBEE"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock FontSize="{StaticResource FontSizeSmall}">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Text" Value="유효"/>
-                                                        <Setter Property="Foreground" Value="#388E3C"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Status}" Value="cancelled">
-                                                                <Setter Property="Text" Value="말소"/>
-                                                                <Setter Property="Foreground" Value="#D32F2F"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="*"/>
+                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="150"/>
+                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="180"/>
+                            <DataGridTextColumn Header="주요등기사항" Binding="{Binding Details}" Width="*"/>
+                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="140"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     
@@ -335,11 +251,11 @@
                               ColumnHeaderStyle="{StaticResource GridHeaderStyle}"
                               RowHeight="36">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="소유자명" Binding="{Binding OwnerName}" Width="150"/>
-                            <DataGridTextColumn Header="주민번호/사업자번호" Binding="{Binding OwnerRegNo}" Width="150"/>
-                            <DataGridTextColumn Header="지분" Binding="{Binding ShareRatio}" Width="100"/>
-                            <DataGridTextColumn Header="등기일자" Binding="{Binding RegistrationDate, StringFormat=yyyy-MM-dd}" Width="100"/>
-                            <DataGridTextColumn Header="등기원인" Binding="{Binding RegistrationCause}" Width="*"/>
+                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="70"/>
+                            <DataGridTextColumn Header="등기명의인" Binding="{Binding OwnerName}" Width="200"/>
+                            <DataGridTextColumn Header="(주민)등록번호" Binding="{Binding OwnerRegNo}" Width="160"/>
+                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="120"/>
+                            <DataGridTextColumn Header="주소" Binding="{Binding Address}" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

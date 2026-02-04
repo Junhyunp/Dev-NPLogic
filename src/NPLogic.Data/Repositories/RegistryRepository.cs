@@ -394,6 +394,157 @@ namespace NPLogic.Data.Repositories
 
         #endregion
 
+        #region RegistrySummary (요약 표 3종 - 최신 1회 덮어쓰기)
+
+        /// <summary>
+        /// "1. 소유지분현황(갑구)" 행 조회
+        /// </summary>
+        public async Task<List<RegistryGapguOwnershipShareRow>> GetGapguOwnershipShareRowsAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryGapguOwnershipShareRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToGapguOwnershipShareRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"소유지분현황 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// "2. 소유지분을 제외한 소유권에 관한 사항(갑구)" 행 조회
+        /// </summary>
+        public async Task<List<RegistryGapguRightSummaryRow>> GetGapguRightSummaryRowsAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryGapguRightSummaryRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToGapguRightSummaryRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 요약 표 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// "3. (근)저당권 및 전세권 등(을구)" 행 조회
+        /// </summary>
+        public async Task<List<RegistryEulguRightSummaryRow>> GetEulguRightSummaryRowsAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryEulguRightSummaryRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToEulguRightSummaryRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 요약 표 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건별 요약 표 3종을 최신 1회 기준으로 덮어쓰기 저장
+        /// (기존 행 전체 삭제 후 신규 행 일괄 삽입)
+        /// </summary>
+        public async Task ReplaceRegistrySummaryAsync(
+            Guid propertyId,
+            List<RegistryGapguOwnershipShareRow> ownershipRows,
+            List<RegistryGapguRightSummaryRow> gapguRows,
+            List<RegistryEulguRightSummaryRow> eulguRows)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+
+                // 1) 기존 데이터 삭제 (최신 1회 유지 정책)
+                await client.From<RegistryGapguOwnershipShareRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Delete();
+
+                await client.From<RegistryGapguRightSummaryRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Delete();
+
+                await client.From<RegistryEulguRightSummaryRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Delete();
+
+                var now = DateTime.UtcNow;
+
+                // 2) 신규 데이터 삽입 (표 원본 순서 유지)
+                if (ownershipRows != null && ownershipRows.Count > 0)
+                {
+                    var tables = ownershipRows.Select((r, idx) =>
+                    {
+                        r.Id = r.Id == Guid.Empty ? Guid.NewGuid() : r.Id;
+                        r.PropertyId = propertyId;
+                        r.SortIndex ??= idx;
+                        r.CreatedAt = now;
+                        r.UpdatedAt = now;
+                        return MapToGapguOwnershipShareRowTable(r);
+                    }).ToList();
+
+                    await client.From<RegistryGapguOwnershipShareRowTable>().Insert(tables);
+                }
+
+                if (gapguRows != null && gapguRows.Count > 0)
+                {
+                    var tables = gapguRows.Select((r, idx) =>
+                    {
+                        r.Id = r.Id == Guid.Empty ? Guid.NewGuid() : r.Id;
+                        r.PropertyId = propertyId;
+                        r.SortIndex ??= idx;
+                        r.CreatedAt = now;
+                        r.UpdatedAt = now;
+                        return MapToGapguRightSummaryRowTable(r);
+                    }).ToList();
+
+                    await client.From<RegistryGapguRightSummaryRowTable>().Insert(tables);
+                }
+
+                if (eulguRows != null && eulguRows.Count > 0)
+                {
+                    var tables = eulguRows.Select((r, idx) =>
+                    {
+                        r.Id = r.Id == Guid.Empty ? Guid.NewGuid() : r.Id;
+                        r.PropertyId = propertyId;
+                        r.SortIndex ??= idx;
+                        r.CreatedAt = now;
+                        r.UpdatedAt = now;
+                        return MapToEulguRightSummaryRowTable(r);
+                    }).ToList();
+
+                    await client.From<RegistryEulguRightSummaryRowTable>().Insert(tables);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"등기부 요약 표 저장(덮어쓰기) 실패: {ex.Message}", ex);
+            }
+        }
+
+        #endregion
+
         #region Mapping Methods
 
         private RegistryDocument MapToRegistryDocument(RegistryDocumentTable table)
@@ -505,6 +656,108 @@ namespace NPLogic.Data.Repositories
                 RegistrationCause = model.RegistrationCause,
                 Status = model.Status,
                 Notes = model.Notes,
+                CreatedAt = model.CreatedAt,
+                UpdatedAt = model.UpdatedAt
+            };
+        }
+
+        private RegistryGapguOwnershipShareRow MapToGapguOwnershipShareRow(RegistryGapguOwnershipShareRowTable table)
+        {
+            return new RegistryGapguOwnershipShareRow
+            {
+                Id = table.Id,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                RankNo = table.RankNo,
+                OwnerName = table.OwnerName,
+                OwnerRegNo = table.OwnerRegNo,
+                ShareRatio = table.ShareRatio,
+                Address = table.Address,
+                SortIndex = table.SortIndex,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryGapguOwnershipShareRowTable MapToGapguOwnershipShareRowTable(RegistryGapguOwnershipShareRow model)
+        {
+            return new RegistryGapguOwnershipShareRowTable
+            {
+                Id = model.Id,
+                PropertyId = model.PropertyId,
+                RankNo = model.RankNo,
+                OwnerName = model.OwnerName,
+                OwnerRegNo = model.OwnerRegNo,
+                ShareRatio = model.ShareRatio,
+                Address = model.Address,
+                SortIndex = model.SortIndex,
+                CreatedAt = model.CreatedAt,
+                UpdatedAt = model.UpdatedAt
+            };
+        }
+
+        private RegistryGapguRightSummaryRow MapToGapguRightSummaryRow(RegistryGapguRightSummaryRowTable table)
+        {
+            return new RegistryGapguRightSummaryRow
+            {
+                Id = table.Id,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                RankNo = table.RankNo,
+                Purpose = table.Purpose,
+                Receipt = table.Receipt,
+                Details = table.Details,
+                TargetOwner = table.TargetOwner,
+                SortIndex = table.SortIndex,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryGapguRightSummaryRowTable MapToGapguRightSummaryRowTable(RegistryGapguRightSummaryRow model)
+        {
+            return new RegistryGapguRightSummaryRowTable
+            {
+                Id = model.Id,
+                PropertyId = model.PropertyId,
+                RankNo = model.RankNo,
+                Purpose = model.Purpose,
+                Receipt = model.Receipt,
+                Details = model.Details,
+                TargetOwner = model.TargetOwner,
+                SortIndex = model.SortIndex,
+                CreatedAt = model.CreatedAt,
+                UpdatedAt = model.UpdatedAt
+            };
+        }
+
+        private RegistryEulguRightSummaryRow MapToEulguRightSummaryRow(RegistryEulguRightSummaryRowTable table)
+        {
+            return new RegistryEulguRightSummaryRow
+            {
+                Id = table.Id,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                RankNo = table.RankNo,
+                Purpose = table.Purpose,
+                Receipt = table.Receipt,
+                Details = table.Details,
+                TargetOwner = table.TargetOwner,
+                SortIndex = table.SortIndex,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryEulguRightSummaryRowTable MapToEulguRightSummaryRowTable(RegistryEulguRightSummaryRow model)
+        {
+            return new RegistryEulguRightSummaryRowTable
+            {
+                Id = model.Id,
+                PropertyId = model.PropertyId,
+                RankNo = model.RankNo,
+                Purpose = model.Purpose,
+                Receipt = model.Receipt,
+                Details = model.Details,
+                TargetOwner = model.TargetOwner,
+                SortIndex = model.SortIndex,
                 CreatedAt = model.CreatedAt,
                 UpdatedAt = model.UpdatedAt
             };
@@ -636,6 +889,117 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("notes")]
         public string? Notes { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// Supabase registry_gapgu_ownership_shares 테이블 매핑
+    /// </summary>
+    [Postgrest.Attributes.Table("registry_gapgu_ownership_shares")]
+    internal class RegistryGapguOwnershipShareRowTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("rank_no")]
+        public string? RankNo { get; set; }
+
+        [Postgrest.Attributes.Column("owner_name")]
+        public string? OwnerName { get; set; }
+
+        [Postgrest.Attributes.Column("owner_regno")]
+        public string? OwnerRegNo { get; set; }
+
+        [Postgrest.Attributes.Column("share_ratio")]
+        public string? ShareRatio { get; set; }
+
+        [Postgrest.Attributes.Column("address")]
+        public string? Address { get; set; }
+
+        [Postgrest.Attributes.Column("sort_index")]
+        public int? SortIndex { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// Supabase registry_gapgu_rights_summary 테이블 매핑
+    /// </summary>
+    [Postgrest.Attributes.Table("registry_gapgu_rights_summary")]
+    internal class RegistryGapguRightSummaryRowTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("rank_no")]
+        public string? RankNo { get; set; }
+
+        [Postgrest.Attributes.Column("purpose")]
+        public string? Purpose { get; set; }
+
+        [Postgrest.Attributes.Column("receipt")]
+        public string? Receipt { get; set; }
+
+        [Postgrest.Attributes.Column("details")]
+        public string? Details { get; set; }
+
+        [Postgrest.Attributes.Column("target_owner")]
+        public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("sort_index")]
+        public int? SortIndex { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
+    /// Supabase registry_eulgu_rights_summary 테이블 매핑
+    /// </summary>
+    [Postgrest.Attributes.Table("registry_eulgu_rights_summary")]
+    internal class RegistryEulguRightSummaryRowTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("rank_no")]
+        public string? RankNo { get; set; }
+
+        [Postgrest.Attributes.Column("purpose")]
+        public string? Purpose { get; set; }
+
+        [Postgrest.Attributes.Column("receipt")]
+        public string? Receipt { get; set; }
+
+        [Postgrest.Attributes.Column("details")]
+        public string? Details { get; set; }
+
+        [Postgrest.Attributes.Column("target_owner")]
+        public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("sort_index")]
+        public int? SortIndex { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

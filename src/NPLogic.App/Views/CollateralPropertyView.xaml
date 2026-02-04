@@ -344,7 +344,7 @@
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <TextBlock Text="1. 소유지분현황" FontWeight="SemiBold"/>
                                     </Border>
-                                    <DataGrid ItemsSource="{Binding RegistryOwners}"
+                                    <DataGrid ItemsSource="{Binding RegistryGapguOwnershipShares}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -354,10 +354,11 @@
                                               Margin="12"
                                               MinHeight="120">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="소유자" Binding="{Binding OwnerName}" Width="2*"/>
-                                            <DataGridTextColumn Header="등록번호" Binding="{Binding OwnerRegNo}" Width="2*"/>
-                                            <DataGridTextColumn Header="지분" Binding="{Binding ShareRatio}" Width="*"/>
-                                            <DataGridTextColumn Header="주소(임시)" Binding="{Binding RegistrationCause}" Width="3*"/>
+                                            <DataGridTextColumn Header="등기명의인" Binding="{Binding OwnerName}" Width="2*"/>
+                                            <DataGridTextColumn Header="(주민)등록번호" Binding="{Binding OwnerRegNo}" Width="2*"/>
+                                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="*"/>
+                                            <DataGridTextColumn Header="주소" Binding="{Binding Address}" Width="3*"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="Auto"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
@@ -369,7 +370,7 @@
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <TextBlock Text="2. 소유지분을 제외한 소유권에 관한 사항 (갑구)" FontWeight="SemiBold"/>
                                     </Border>
-                                    <DataGrid ItemsSource="{Binding RegistryGapguRights}"
+                                    <DataGrid ItemsSource="{Binding RegistryGapguRightSummaries}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -379,12 +380,11 @@
                                               Margin="12"
                                               MinHeight="140">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="Auto"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="2*"/>
-                                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="2*"/>
-                                            <DataGridTextColumn Header="금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="*"/>
-                                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="3*"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="Auto"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="2*"/>
+                                            <DataGridTextColumn Header="주요등기사항" Binding="{Binding Details}" Width="4*"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
@@ -396,7 +396,7 @@
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <TextBlock Text="3. (근)저당권 및 전세권 등 (을구)" FontWeight="SemiBold"/>
                                     </Border>
-                                    <DataGrid ItemsSource="{Binding RegistryEulguRights}"
+                                    <DataGrid ItemsSource="{Binding RegistryEulguRightSummaries}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -406,13 +406,11 @@
                                               Margin="12"
                                               MinHeight="140">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위" Binding="{Binding RightOrder}" Width="Auto"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding RegistrationCause}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="2*"/>
-                                            <DataGridTextColumn Header="권리자/채권자" Binding="{Binding RightHolder}" Width="2*"/>
-                                            <DataGridTextColumn Header="채무자" Binding="{Binding Debtor}" Width="*"/>
-                                            <DataGridTextColumn Header="금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="*"/>
-                                            <DataGridTextColumn Header="비고" Binding="{Binding Notes}" Width="3*"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="Auto"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="2*"/>
+                                            <DataGridTextColumn Header="주요등기사항" Binding="{Binding Details}" Width="4*"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>

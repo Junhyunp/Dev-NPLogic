@@ -618,27 +618,62 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                // 소유자 정보 로드
-                var owners = await _registryRepository.GetOwnersByPropertyIdAsync(_propertyId.Value);
-                Owners = new ObservableCollection<RegistryOwner>(owners);
+                // 신규 스키마(요약 표 3종) 로드
+                var ownershipShares = await _registryRepository.GetGapguOwnershipShareRowsAsync(_propertyId.Value);
+                var gapguRows = await _registryRepository.GetGapguRightSummaryRowsAsync(_propertyId.Value);
+                var eulguRows = await _registryRepository.GetEulguRightSummaryRowsAsync(_propertyId.Value);
+
+                // NOTE: RegistryTab은 현재 OCR 워크플로우 중심으로 사용되고 있어
+                //       기존 Owners/GapguRights/EulguRights 컬렉션이 UI에 직접 바인딩되지 않는 경우가 많음.
+                //       향후 화면 개편 전까지는 호환을 위해 신규 행을 기존 모델로 매핑해 채워둔다.
+                Owners = new ObservableCollection<RegistryOwner>(
+                    ownershipShares.Select(r => new RegistryOwner
+                    {
+                        Id = r.Id,
+                        PropertyId = r.PropertyId,
+                        OwnerName = r.OwnerName,
+                        OwnerRegNo = r.OwnerRegNo,
+                        ShareRatio = r.ShareRatio,
+                        RegistrationCause = r.Address,
+                        CreatedAt = r.CreatedAt
+                    }).ToList());
                 HasNoOwners = Owners.Count == 0;
 
-                // 갑구 권리 로드
-                var gapguRights = await _registryRepository.GetGapguRightsAsync(_propertyId.Value);
-                GapguRights = new ObservableCollection<RegistryRight>(gapguRights);
+                GapguRights = new ObservableCollection<RegistryRight>(
+                    gapguRows.Select(r => new RegistryRight
+                    {
+                        Id = r.Id,
+                        PropertyId = r.PropertyId,
+                        RightType = "gap",
+                        RegistrationCause = r.Purpose,
+                        RegistrationNumber = r.Receipt,
+                        Notes = r.Details,
+                        Debtor = r.TargetOwner,
+                        CreatedAt = r.CreatedAt,
+                        UpdatedAt = r.UpdatedAt
+                    }).ToList());
                 HasNoGapguRights = GapguRights.Count == 0;
-                GapguTotalAmount = GapguRights.Where(r => r.Status == "active").Sum(r => r.ClaimAmount ?? 0);
+                GapguTotalAmount = 0;
 
-                // 을구 권리 로드
-                var eulguRights = await _registryRepository.GetEulguRightsAsync(_propertyId.Value);
-                EulguRights = new ObservableCollection<RegistryRight>(eulguRights);
+                EulguRights = new ObservableCollection<RegistryRight>(
+                    eulguRows.Select(r => new RegistryRight
+                    {
+                        Id = r.Id,
+                        PropertyId = r.PropertyId,
+                        RightType = "eul",
+                        RegistrationCause = r.Purpose,
+                        RegistrationNumber = r.Receipt,
+                        Notes = r.Details,
+                        Debtor = r.TargetOwner,
+                        CreatedAt = r.CreatedAt,
+                        UpdatedAt = r.UpdatedAt
+                    }).ToList());
                 HasNoEulguRights = EulguRights.Count == 0;
-                EulguTotalAmount = EulguRights.Where(r => r.Status == "active").Sum(r => r.ClaimAmount ?? 0);
+                EulguTotalAmount = 0;
 
-                // 등기부 문서 로드
-                var documents = await _registryRepository.GetDocumentsByPropertyIdAsync(_propertyId.Value);
-                Documents = new ObservableCollection<RegistryDocument>(documents);
-                HasNoDocuments = Documents.Count == 0;
+                // 문서 테이블 미사용 정책: 문서 목록은 항상 빈 값
+                Documents = new ObservableCollection<RegistryDocument>();
+                HasNoDocuments = true;
             }
             catch (Exception ex)
             {
@@ -1468,124 +1503,69 @@ namespace NPLogic.ViewModels
                     var propertyId = pdfFile.MatchedProperty.Id;
                     var data = pdfFile.OcrResultData;
 
-                    // 소유자 저장
+                    // 신규 스키마: 요약 표 3종을 "표 그대로" 저장 + 최신 1회 덮어쓰기
+                    var ownershipRows = new List<RegistryGapguOwnershipShareRow>();
                     if (data.Owners != null)
                     {
-                        foreach (var ownerDict in data.Owners)
+                        foreach (var row in data.Owners)
                         {
-                            var owner = new RegistryOwner
+                            if (IsEmptyRow(row)) continue;
+                            ownershipRows.Add(new RegistryGapguOwnershipShareRow
                             {
-                                Id = Guid.NewGuid(),
                                 PropertyId = propertyId,
-                                OwnerName = GetFirstStringValue(ownerDict, "등기명의인", "성명", "소유자", "등기명 의인", "대상소유자"),
-                                OwnerRegNo = GetFirstStringValue(ownerDict, "(주민)등록번호", "주민등록번호", "등록번호"),
-                                ShareRatio = GetFirstStringValue(ownerDict, "최종지분", "소유지분", "지분"),
-                                CreatedAt = DateTime.UtcNow
-                            };
-
-                            // NOTE: 현재 RegistryOwner 모델에 Address 필드가 없어 임시로 RegistrationCause에 저장
-                            var address = GetFirstStringValue(ownerDict, "주소", "주소(소재지)", "소재지");
-                            if (!string.IsNullOrEmpty(address))
-                            {
-                                owner.RegistrationCause = address;
-                            }
-
-                            await _registryRepository.CreateOwnerAsync(owner);
-                            totalSavedOwners++;
+                                RankNo = GetStringValue(row, "순위번호"),
+                                OwnerName = GetStringValue(row, "등기명의인"),
+                                OwnerRegNo = GetStringValue(row, "(주민)등록번호"),
+                                ShareRatio = GetStringValue(row, "최종지분"),
+                                Address = GetStringValue(row, "주소"),
+                                SortIndex = ownershipRows.Count
+                            });
                         }
                     }
 
-                    // 갑구 저장
+                    var gapguRows = new List<RegistryGapguRightSummaryRow>();
                     if (data.Gapgu != null)
                     {
-                        foreach (var gapDict in data.Gapgu)
+                        foreach (var row in data.Gapgu)
                         {
-                            var details = GetFirstStringValue(gapDict, "주요등기사항", "주요 등기사항", "비고");
-                            var right = new RegistryRight
+                            if (IsEmptyRow(row)) continue;
+                            gapguRows.Add(new RegistryGapguRightSummaryRow
                             {
-                                Id = Guid.NewGuid(),
                                 PropertyId = propertyId,
-                                RightType = "gap",
-                                RightOrder = ParseInt(GetFirstStringValue(gapDict, "순위번호", "순위")),
-                                RegistrationCause = GetFirstStringValue(gapDict, "등기목적", "목적"),
-                                RegistrationNumber = GetFirstStringValue(gapDict, "접수정보", "접수"),
-                                RegistrationDate = ParseDate(GetFirstStringValue(gapDict, "접수날짜", "접수일자")),
-                                RightHolder = GetFirstStringValue(gapDict, "권리자/채권자/가등기권자", "권리자", "채권자") ?? details,
-                                ClaimAmount = ParseDecimal(GetFirstStringValue(gapDict, "청구금액", "금액")),
-                                Notes = details,
-                                Status = "active",
-                                CreatedAt = DateTime.UtcNow,
-                                UpdatedAt = DateTime.UtcNow
-                            };
-
-                            // details 안에 "청구금액 금xxx원 채권자 yyy" 형태가 있으면 보강 파싱
-                            if (!string.IsNullOrWhiteSpace(details))
-                            {
-                                if (right.ClaimAmount == null)
-                                {
-                                    // 금39,352,737원 / 금 39,352,737원 / 39,352,737원
-                                    var m = Regex.Match(details, @"청구금액\s*금?\s*([0-9,]+)\s*원");
-                                    if (m.Success) right.ClaimAmount = ParseDecimal(m.Groups[1].Value);
-                                }
-                                if (string.IsNullOrWhiteSpace(right.RightHolder))
-                                {
-                                    var m = Regex.Match(details, @"채권자\s*([^\n\r]+)");
-                                    if (m.Success) right.RightHolder = m.Groups[1].Value.Trim();
-                                }
-                            }
-
-                            await _registryRepository.CreateRightAsync(right);
-                            totalSavedGapgu++;
+                                RankNo = GetStringValue(row, "순위번호"),
+                                Purpose = GetStringValue(row, "등기목적"),
+                                Receipt = GetStringValue(row, "접수정보"),
+                                Details = GetStringValue(row, "주요등기사항"),
+                                TargetOwner = GetStringValue(row, "대상소유자"),
+                                SortIndex = gapguRows.Count
+                            });
                         }
                     }
 
-                    // 을구 저장
+                    var eulguRows = new List<RegistryEulguRightSummaryRow>();
                     if (data.Eulgu != null)
                     {
-                        foreach (var eulDict in data.Eulgu)
+                        foreach (var row in data.Eulgu)
                         {
-                            var details = GetFirstStringValue(eulDict, "주요등기사항", "주요 등기사항", "비고");
-                            var right = new RegistryRight
+                            if (IsEmptyRow(row)) continue;
+                            eulguRows.Add(new RegistryEulguRightSummaryRow
                             {
-                                Id = Guid.NewGuid(),
                                 PropertyId = propertyId,
-                                RightType = "eul",
-                                RightOrder = ParseInt(GetFirstStringValue(eulDict, "순위번호", "순위")),
-                                RegistrationCause = GetFirstStringValue(eulDict, "등기목적", "목적"),
-                                RegistrationNumber = GetFirstStringValue(eulDict, "접수정보", "접수"),
-                                RegistrationDate = ParseDate(GetFirstStringValue(eulDict, "접수날짜", "접수일자")),
-                                RightHolder = GetFirstStringValue(eulDict, "근저당권자/전세권자/채권자", "근저당권자", "전세권자", "채권자") ?? details,
-                                ClaimAmount = ParseDecimal(GetFirstStringValue(eulDict, "채권최고액/전세금", "채권최고액", "전세금", "금액")),
-                                Debtor = GetFirstStringValue(eulDict, "채무자", "대상소유자"),
-                                Status = "active",
-                                CreatedAt = DateTime.UtcNow,
-                                UpdatedAt = DateTime.UtcNow
-                            };
-
-                            if (!string.IsNullOrWhiteSpace(details))
-                            {
-                                if (right.ClaimAmount == null)
-                                {
-                                    var m = Regex.Match(details, @"채권최고액\s*금?\s*([0-9,]+)\s*원");
-                                    if (m.Success) right.ClaimAmount = ParseDecimal(m.Groups[1].Value);
-                                }
-                                if (string.IsNullOrWhiteSpace(right.RightHolder))
-                                {
-                                    var m = Regex.Match(details, @"채권자\s*([^\n\r]+)");
-                                    if (m.Success) right.RightHolder = m.Groups[1].Value.Trim();
-                                }
-                                if (string.IsNullOrWhiteSpace(right.Debtor))
-                                {
-                                    var m = Regex.Match(details, @"채무자\s*([^\n\r]+)");
-                                    if (m.Success) right.Debtor = m.Groups[1].Value.Trim();
-                                }
-                                right.Notes = details;
-                            }
-
-                            await _registryRepository.CreateRightAsync(right);
-                            totalSavedEulgu++;
+                                RankNo = GetStringValue(row, "순위번호"),
+                                Purpose = GetStringValue(row, "등기목적"),
+                                Receipt = GetStringValue(row, "접수정보"),
+                                Details = GetStringValue(row, "주요등기사항"),
+                                TargetOwner = GetStringValue(row, "대상소유자"),
+                                SortIndex = eulguRows.Count
+                            });
                         }
                     }
+
+                    await _registryRepository.ReplaceRegistrySummaryAsync(propertyId, ownershipRows, gapguRows, eulguRows);
+
+                    totalSavedOwners += ownershipRows.Count;
+                    totalSavedGapgu += gapguRows.Count;
+                    totalSavedEulgu += eulguRows.Count;
 
                     savedFileCount++;
                     System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Saved file: {pdfFile.FileName} to property: {pdfFile.MatchedProperty.PropertyNumber}");
@@ -1662,6 +1642,17 @@ namespace NPLogic.ViewModels
                     return v;
             }
             return null;
+        }
+
+        private static bool IsEmptyRow(Dictionary<string, object?>? dict)
+        {
+            if (dict == null || dict.Count == 0) return true;
+            foreach (var kv in dict)
+            {
+                if (!string.IsNullOrWhiteSpace(kv.Value?.ToString()))
+                    return false;
+            }
+            return true;
         }
 
         private static int? ParseInt(string? value)

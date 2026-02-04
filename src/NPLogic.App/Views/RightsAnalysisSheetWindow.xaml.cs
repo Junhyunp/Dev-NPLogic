@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
+using NPLogic.Core.Models;
 
 namespace NPLogic.Views
 {
@@ -18,9 +18,9 @@ namespace NPLogic.Views
         private readonly Guid _propertyId;
         private readonly string _propertyInfo;
 
-        private List<RegistryRight> _gapguRights = new();
-        private List<RegistryRight> _eulguRights = new();
-        private List<RegistryOwner> _owners = new();
+        private List<RegistryGapguRightSummaryRow> _gapguRights = new();
+        private List<RegistryEulguRightSummaryRow> _eulguRights = new();
+        private List<RegistryGapguOwnershipShareRow> _owners = new();
 
         public RightsAnalysisSheetWindow(
             RegistryRepository registryRepository,
@@ -47,24 +47,21 @@ namespace NPLogic.Views
         {
             try
             {
-                // 갑구 데이터 로드
-                _gapguRights = await _registryRepository.GetGapguRightsAsync(_propertyId);
+                // 갑구 데이터 로드 (신규 요약 표)
+                _gapguRights = await _registryRepository.GetGapguRightSummaryRowsAsync(_propertyId);
                 GapguDataGrid.ItemsSource = _gapguRights;
                 GapguCountText.Text = $" | 총 {_gapguRights.Count}건";
 
-                // 을구 데이터 로드
-                _eulguRights = await _registryRepository.GetEulguRightsAsync(_propertyId);
+                // 을구 데이터 로드 (신규 요약 표)
+                _eulguRights = await _registryRepository.GetEulguRightSummaryRowsAsync(_propertyId);
                 EulguDataGrid.ItemsSource = _eulguRights;
                 EulguCountText.Text = $" | 총 {_eulguRights.Count}건";
 
-                // 을구 합계 계산 (유효한 것만)
-                var totalEulguAmount = _eulguRights
-                    .Where(r => r.Status == "active")
-                    .Sum(r => r.ClaimAmount ?? 0);
-                EulguTotalText.Text = totalEulguAmount.ToString("N0") + "원";
+                // 신규 요약 표는 "표 그대로" 저장이므로 금액 합계는 계산하지 않음
+                EulguTotalText.Text = "-";
 
-                // 소유자 데이터 로드
-                _owners = await _registryRepository.GetOwnersByPropertyIdAsync(_propertyId);
+                // 소유자(소유지분현황) 데이터 로드
+                _owners = await _registryRepository.GetGapguOwnershipShareRowsAsync(_propertyId);
                 OwnerDataGrid.ItemsSource = _owners;
                 OwnerCountText.Text = $" | 총 {_owners.Count}명";
             }

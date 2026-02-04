@@ -6,6 +6,42 @@
 
 ### 2026-02-04
 
+#### 등기부등본 OCR 요약 표 저장 스키마 개편 (진행중)
+
+**목표**
+- "주요 등기사항 요약"의 3개 표를 DB에 **표 형태 그대로** 저장/표시
+- 물건별로 **최신 1회 결과만 유지(덮어쓰기)**
+
+**진행 상황**
+- [완료] Supabase에 신규 테이블 3개 추가 + RLS 정책 적용
+  - `registry_gapgu_ownership_shares`
+  - `registry_gapgu_rights_summary`
+  - `registry_eulgu_rights_summary`
+- [완료] 앱 저장/조회 경로를 신규 테이블로 전환(덮어쓰기)
+  - OCR 저장: 기존 `registry_owners/registry_rights` 대신 신규 3개 테이블에 저장
+  - 담보물건/권리분석시트 조회: 신규 3개 테이블에서 직접 조회
+- [완료] 레거시 테이블 삭제 적용
+  - 삭제: `registry_documents`, `registry_owners`, `registry_rights`
+  - 유지: `registry_sheet_data` (엑셀 Sheet C-2)
+
+#### 등기부 정제 산출물(basic_info/gapgu/eulgu) 스키마 도입 (1단계 완료)
+
+**배경**
+- 담보물건 탭에 표시할 최종 표는 “요약 원문표”가 아니라 `reference/Auction-Certificate`의 산출물 스키마(`basic_info.csv`, `gapgu.csv`, `eulgu.csv`) 기반
+- 물건(`property_id`)당 등기부 결과 세트가 **여러 개** 저장될 수 있어 세트(run) 단위가 필요
+
+**1단계(완료)**
+- Supabase에 아래 신규 테이블/제약/RLS 정책을 추가
+  - `registry_runs`: 물건별 등기부 결과 세트(여러 개) + `deed_seq` 자동 부여 + `jibeon_id` 자동 생성
+  - `registry_basic_info`: 세트당 1행 요약(README의 11컬럼)
+  - `registry_gapgu_rows`: 세트당 N행(사용자 입력: `note_user_input`, `wage_claim_estimate_user_input`)
+  - `registry_eulgu_rows`: 세트당 N행(사용자 입력: `debtor_user_input`, `collateral_type_user_input`, `is_factory_mortgage_user_input`) ※ 을구 “비고” 컬럼 없음
+
+**남은 작업**
+- 2단계: EC2 OCR 서버 응답을 정제 스키마(basic_info/gapgu/eulgu) JSON으로 확장
+- 3단계: Supabase Edge Function(프록시/권한체크/저장) 설계 및 구현
+- 4단계: WPF 담보물건 탭 “등기부등본 정보” 패널을 정제 표 기반으로 교체 + 사용자 입력 저장 연동
+
 #### 대시보드 물건 누락(초기 페이지 스킵) 문제 해결
 
 **문제점**

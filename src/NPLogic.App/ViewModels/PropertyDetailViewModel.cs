@@ -400,15 +400,15 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasNoRegistrySummaryImage = true;
 
-        // 담보물건 탭 표시용 상세 리스트 (소유지분현황/갑구/을구)
+        // 담보물건 탭 표시용 상세 리스트 (요약 표 3종 - OCR 표 그대로)
         [ObservableProperty]
-        private ObservableCollection<RegistryOwner> _registryOwners = new();
+        private ObservableCollection<RegistryGapguOwnershipShareRow> _registryGapguOwnershipShares = new();
 
         [ObservableProperty]
-        private ObservableCollection<RegistryRight> _registryGapguRights = new();
+        private ObservableCollection<RegistryGapguRightSummaryRow> _registryGapguRightSummaries = new();
 
         [ObservableProperty]
-        private ObservableCollection<RegistryRight> _registryEulguRights = new();
+        private ObservableCollection<RegistryEulguRightSummaryRow> _registryEulguRightSummaries = new();
 
         /// <summary>
         /// 토지이용계획 상태
@@ -1618,38 +1618,26 @@ namespace NPLogic.ViewModels
 
             try
             {
-                // 등기부 문서/권리 데이터 조회
-                var documents = await _registryRepository.GetDocumentsByPropertyIdAsync(propertyId);
-                var latestDoc = documents.FirstOrDefault();
-                var owners = await _registryRepository.GetOwnersByPropertyIdAsync(propertyId);
-                var gapguRights = await _registryRepository.GetGapguRightsAsync(propertyId);
-                var eulguRights = await _registryRepository.GetEulguRightsAsync(propertyId);
-                
-                // 담보물건 탭 표시용 리스트 업데이트
-                RegistryOwners = new ObservableCollection<RegistryOwner>(owners);
-                RegistryGapguRights = new ObservableCollection<RegistryRight>(gapguRights);
-                RegistryEulguRights = new ObservableCollection<RegistryRight>(eulguRights);
+                // 신규 요약 표(3종) 조회
+                var ownershipShares = await _registryRepository.GetGapguOwnershipShareRowsAsync(propertyId);
+                var gapguRows = await _registryRepository.GetGapguRightSummaryRowsAsync(propertyId);
+                var eulguRows = await _registryRepository.GetEulguRightSummaryRowsAsync(propertyId);
 
-                var hasAnyRegistryData = latestDoc != null || owners.Any() || gapguRights.Any() || eulguRights.Any();
+                // 담보물건 탭 표시용 리스트 업데이트
+                RegistryGapguOwnershipShares = new ObservableCollection<RegistryGapguOwnershipShareRow>(ownershipShares);
+                RegistryGapguRightSummaries = new ObservableCollection<RegistryGapguRightSummaryRow>(gapguRows);
+                RegistryEulguRightSummaries = new ObservableCollection<RegistryEulguRightSummaryRow>(eulguRows);
+
+                var hasAnyRegistryData = ownershipShares.Any() || gapguRows.Any() || eulguRows.Any();
 
                 if (hasAnyRegistryData)
                 {
                     HasRegistryData = true;
 
-                    // 등기부 요약 정보 구성
-                    var titleSummary = latestDoc != null && !string.IsNullOrWhiteSpace(latestDoc.RegistryNumber)
-                        ? $"등기번호: {latestDoc.RegistryNumber}\n등기유형: {latestDoc.RegistryType ?? "-"}"
-                        : "등기부 문서 없음 (OCR 결과)";
-
-                    var section1Summary = owners.Any()
-                        ? $"소유자: {string.Join(", ", owners.Select(o => o.OwnerName))}"
-                        : (gapguRights.Any()
-                            ? $"갑구 권리 {gapguRights.Count}건"
-                            : "갑구 정보 없음");
-
-                    var section2Summary = eulguRights.Any()
-                        ? $"근저당/전세권 {eulguRights.Count}건\n총액: {eulguRights.Sum(r => r.ClaimAmount ?? 0):N0}원"
-                        : "을구 정보 없음";
+                    // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
+                    var titleSummary = "등기부 문서(표제부) 미사용";
+                    var section1Summary = $"1) 소유지분현황 {ownershipShares.Count}행\n2) 갑구 {gapguRows.Count}행";
+                    var section2Summary = $"3) 을구 {eulguRows.Count}행";
 
                     RegistrySummary = new RegistrySummaryModel
                     {
@@ -1995,38 +1983,9 @@ namespace NPLogic.ViewModels
             }
             else
             {
-                // 등기부 문서 테이블에서 파일 경로 검색
-                if (_registryRepository != null)
-                {
-                    try
-                    {
-                        var documents = await _registryRepository.GetDocumentsByPropertyIdAsync(property.Id);
-                        var latestDoc = documents.FirstOrDefault();
-                        
-                        if (latestDoc != null && !string.IsNullOrWhiteSpace(latestDoc.FilePath))
-                        {
-                            RegistryDocumentFullPath = latestDoc.FilePath;
-                            HasRegistryDocument = true;
-                            HasNoRegistryDocument = false;
-                        }
-                        else
-                        {
-                            HasRegistryDocument = false;
-                            HasNoRegistryDocument = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"등기부 문서 검색 실패: {ex.Message}");
-                        HasRegistryDocument = false;
-                        HasNoRegistryDocument = true;
-                    }
-                }
-                else
-                {
-                    HasRegistryDocument = false;
-                    HasNoRegistryDocument = true;
-                }
+                // registry_documents 테이블 미사용 정책: 원본 경로가 없으면 표시하지 않음
+                HasRegistryDocument = false;
+                HasNoRegistryDocument = true;
             }
         }
 
