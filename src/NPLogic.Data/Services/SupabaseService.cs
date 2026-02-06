@@ -123,13 +123,32 @@ namespace NPLogic.Data.Services
                 return;
             }
 
-            // 세션 만료 시간 확인 (5분 여유)
+            // 세션 만료 시간 확인 (여유를 두고 선제 갱신)
+            // NOTE: 일부 라이브러리는 ExpiresAt()의 DateTime Kind가 Local/Unspecified일 수 있어
+            //       UtcNow로만 비교하면 만료를 감지하지 못하고(PGRST303: JWT expired) 작업 중간에 터질 수 있음.
             var session = _client.Auth.CurrentSession;
             var expiresAt = session.ExpiresAt();
-            var timeUntilExpiry = expiresAt - DateTime.UtcNow;
 
-            // 이미 만료되었거나 5분 이내에 만료 예정인 경우
-            if (timeUntilExpiry.TotalMinutes < 5)
+            TimeSpan timeUntilExpiry;
+            if (expiresAt.Kind == DateTimeKind.Utc)
+            {
+                timeUntilExpiry = expiresAt - DateTime.UtcNow;
+            }
+            else if (expiresAt.Kind == DateTimeKind.Local)
+            {
+                timeUntilExpiry = expiresAt - DateTime.Now;
+            }
+            else
+            {
+                // Kind == Unspecified: Utc 기준/Local 기준 둘 다 계산 후 더 그럴듯한 값을 사용
+                var utcDiff = expiresAt - DateTime.UtcNow;
+                var localDiff = expiresAt - DateTime.Now;
+                timeUntilExpiry = Math.Abs(utcDiff.TotalMinutes) <= Math.Abs(localDiff.TotalMinutes) ? utcDiff : localDiff;
+            }
+
+            // 이미 만료되었거나 곧 만료 예정이면 갱신 (DD 업로드 같은 장시간 작업 대비)
+            const double refreshThresholdMinutes = 10;
+            if (timeUntilExpiry.TotalMinutes < refreshThresholdMinutes)
             {
                 System.Diagnostics.Debug.WriteLine($"Session expiring soon ({timeUntilExpiry.TotalMinutes:F1} min), refreshing...");
                 

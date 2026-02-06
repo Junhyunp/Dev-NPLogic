@@ -53,6 +53,13 @@ class OcrResultData(BaseModel):
     eulgu: Optional[list] = None
 
 
+class RefinedRegistryTables(BaseModel):
+    """정제된 등기부 산출물 (basic_info/gapgu/eulgu)"""
+    basic_info: Optional[dict] = None
+    gapgu: Optional[list] = None
+    eulgu: Optional[list] = None
+
+
 class OcrResponse(BaseModel):
     success: bool
     file_path: Optional[str] = None
@@ -62,6 +69,8 @@ class OcrResponse(BaseModel):
     pages: Optional[list] = None
     full_text: Optional[str] = None
     data: Optional[OcrResultData] = None  # 파싱된 표 데이터 (owners, gapgu, eulgu)
+    refined: Optional[RefinedRegistryTables] = None  # 정제 산출물 (basic_info/gapgu/eulgu)
+    refined_version: Optional[str] = None
     registry_type: Optional[str] = None
     registry_number: Optional[str] = None
     owners: Optional[list] = None  # 하위 호환성

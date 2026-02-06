@@ -149,6 +149,15 @@ def process_pdf(pdf_path: str, extract_summary: bool = True) -> dict:
             "eulgu": table_data["eulgu"]
         }
 
+        # 7. refined 필드: reference/Auction-Certificate 산출물 스키마 형태로 정제(파일 저장 대신 JSON 반환)
+        result_data["refined"] = build_refined_registry_tables(
+            address=address,
+            owners=table_data.get("owners", []) or [],
+            gapgu=table_data.get("gapgu", []) or [],
+            eulgu=table_data.get("eulgu", []) or [],
+        )
+        result_data["refined_version"] = "basic_info_gapgu_eulgu_v1"
+
         return result_data
 
     except Exception as e:
@@ -226,6 +235,119 @@ def extract_address_from_text(text: str) -> str:
         return sojaejibun_match.group(1).strip()
 
     return ""
+
+
+def _extract_date_from_receipt(receipt: str) -> str:
+    """접수정보에서 날짜 추출 (YYYY-MM-DD). 실패하면 빈 문자열."""
+    if not receipt:
+        return ""
+    m = re.search(r"(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일", str(receipt))
+    if not m:
+        return ""
+    y, mo, d = m.groups()
+    return f"{y}-{int(mo):02d}-{int(d):02d}"
+
+
+def _extract_amount_from_details(details: str, label: str) -> str:
+    """주요등기사항에서 금액 숫자만 추출 (쉼표 유지). 예: label='청구금액' 또는 '채권최고액'."""
+    if not details:
+        return ""
+    # 예: "청구금액 금39,352,737원", "채권최고액 금25,512,000,000원"
+    pat = rf"{re.escape(label)}\s*금?\s*([0-9,]+)\s*원"
+    m = re.search(pat, str(details))
+    return m.group(1) if m else ""
+
+
+def _extract_holder_from_details(details: str) -> str:
+    """주요등기사항에서 권리자/채권자/근저당권자/전세권자 등의 라벨 값을 단순 추출."""
+    if not details:
+        return ""
+    s = str(details)
+    # 가능한 라벨들 (reference/Auction-Certificate와 동일 계열)
+    labels = ["근저당권자", "전세권자", "권리자", "채권자", "가등기권자", "지상권자", "임차권자"]
+    for lab in labels:
+        m = re.search(rf"{re.escape(lab)}\s*([^\n\r]+)", s)
+        if m:
+            return m.group(1).strip()
+    return ""
+
+
+def build_refined_registry_tables(address: str, owners: list, gapgu: list, eulgu: list) -> dict:
+    """
+    reference/Auction-Certificate의 산출물 스키마를 서버 응답(JSON)로 제공.
+    - basic_info: 1행 요약 (DD 값은 서버에서 알 수 없으므로 빈 값으로 둠)
+    - gapgu/eulgu: 파싱 테이블을 정제 컬럼으로 매핑 + 파생(접수날짜/권리자/금액) 일부 추출
+    """
+    # owners(소유지분현황) 요약: 첫 행 기반(추후 여러 행 요약 규칙 고도화 가능)
+    owner_name = ""
+    owner_regno = ""
+    share_ratio = ""
+    owner_addr = ""
+    if owners:
+        first = owners[0] if isinstance(owners[0], dict) else {}
+        owner_name = str(first.get("등기명의인", "")).strip()
+        owner_regno = str(first.get("(주민)등록번호", "")).strip()
+        share_ratio = str(first.get("최종지분", "")).strip()
+        owner_addr = str(first.get("주소", "")).strip()
+
+    basic_info = {
+        "지번일련번호": "",  # Edge/App 저장 단계에서 property_number + deed_seq로 생성 예정
+        "물건지 (등기부등본)": address or "",
+        "물건지 (DD)": "",
+        "일치여부": "",
+        "담보물형태": "",
+        "대지면적 (평)": "",
+        "건물면적 (평)": "",
+        "소유자": owner_name,
+        "등록번호": owner_regno,
+        "최종지분": share_ratio,
+        "소유자 주소": owner_addr,
+    }
+
+    gap_rows = []
+    for row in gapgu:
+        if not isinstance(row, dict):
+            continue
+        receipt = str(row.get("접수정보", "")).strip()
+        details = str(row.get("주요등기사항", "")).strip()
+        gap_rows.append({
+            "순위번호": str(row.get("순위번호", "")).strip(),
+            "등기목적": str(row.get("등기목적", "")).strip(),
+            "접수정보": receipt,
+            "접수날짜": _extract_date_from_receipt(receipt),
+            "권리자/채권자/가등기권자": _extract_holder_from_details(details),
+            "청구금액": _extract_amount_from_details(details, "청구금액"),
+            "비고": "",  # 사용자 입력
+            "임금채권추정": "",  # 사용자 입력
+            "대상소유자": str(row.get("대상소유자", "")).strip(),
+            "지번번호": "",  # DD/앱 컨텍스트에서 채움
+        })
+
+    eul_rows = []
+    for row in eulgu:
+        if not isinstance(row, dict):
+            continue
+        receipt = str(row.get("접수정보", "")).strip()
+        details = str(row.get("주요등기사항", "")).strip()
+        eul_rows.append({
+            "순위번호": str(row.get("순위번호", "")).strip(),
+            "등기목적": str(row.get("등기목적", "")).strip(),
+            "접수정보": receipt,
+            "접수날짜": _extract_date_from_receipt(receipt),
+            "근저당권자": _extract_holder_from_details(details),
+            "채권최고액": _extract_amount_from_details(details, "채권최고액"),
+            "채무자": "",  # 사용자 입력
+            "담보종류": "",  # 사용자 입력
+            "공장저당": "",  # 사용자 입력
+            "대상소유자": str(row.get("대상소유자", "")).strip(),
+            "지번번호": "",  # DD/앱 컨텍스트에서 채움
+        })
+
+    return {
+        "basic_info": basic_info,
+        "gapgu": gap_rows,
+        "eulgu": eul_rows,
+    }
 
 
 def parse_table_from_ocr(table_data: dict) -> List[Dict[str, str]]:

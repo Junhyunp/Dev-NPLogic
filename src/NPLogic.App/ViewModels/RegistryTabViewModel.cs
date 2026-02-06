@@ -86,6 +86,25 @@ namespace NPLogic.ViewModels
         public string MatchStatusText => MatchedProperty != null
             ? (IsAutoMatched ? $"자동매칭 ({MatchConfidence:P0})" : "수동선택")
             : "미매칭";
+
+        partial void OnMatchedPropertyChanged(Property? value)
+        {
+            // 처리 중에는 변경 무시 (UI에서도 비활성화)
+            if (Status == "처리 중")
+                return;
+
+            // 사용자가 바꾸면 수동선택으로 간주
+            IsAutoMatched = false;
+            MatchConfidence = 0;
+
+            // 이미 완료된 파일의 매칭을 바꾸면 재처리 대상으로 되돌림
+            if (Status == "완료")
+            {
+                Status = "대기";
+                Progress = 0;
+                ErrorMessage = null;
+            }
+        }
     }
 
     /// <summary>
@@ -99,6 +118,8 @@ namespace NPLogic.ViewModels
         private Guid? _propertyId;
         private Guid? _programId;
         private CancellationTokenSource? _ocrCancellationTokenSource;
+        private bool _suppressSelectedResultPropertyChanged;
+        private bool _suppressSelectedRegistryRunChanged;
 
         #region Observable Properties
 
@@ -300,6 +321,44 @@ namespace NPLogic.ViewModels
         /// 파일이 있는지 여부 (단일 모드 또는 매칭 모드)
         /// </summary>
         public bool HasAnyOcrPdfFiles => HasOcrPdfFiles || HasOcrPdfFilesWithMatch;
+
+        // ========== 저장된 정제 결과(run/basic_info/gapgu/eulgu) ==========
+
+        /// <summary>
+        /// (프로그램 레벨) 저장된 결과 확인용 선택 물건
+        /// </summary>
+        [ObservableProperty]
+        private Property? _selectedResultProperty;
+
+        [ObservableProperty]
+        private ObservableCollection<RegistryRun> _registryRuns = new();
+
+        [ObservableProperty]
+        private RegistryRun? _selectedRegistryRun;
+
+        [ObservableProperty]
+        private RegistryBasicInfo? _registryBasicInfo;
+
+        [ObservableProperty]
+        private ObservableCollection<RegistryGapguRow> _registryGapguRows = new();
+
+        [ObservableProperty]
+        private ObservableCollection<RegistryEulguRow> _registryEulguRows = new();
+
+        [ObservableProperty]
+        private bool _hasSavedRegistryRuns;
+
+        [ObservableProperty]
+        private bool _hasNoSavedRegistryRuns = true;
+
+        [ObservableProperty]
+        private int _savedBasicInfoCount;
+
+        [ObservableProperty]
+        private int _savedGapguRowCount;
+
+        [ObservableProperty]
+        private int _savedEulguRowCount;
 
         #endregion
 
@@ -611,78 +670,112 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task LoadDataAsync()
         {
+            // 단일 물건 모드일 때만 자동 로드 (프로그램 레벨에서는 사용자가 물건 선택)
             if (_propertyId == null) return;
+            await LoadRegistryRunsForPropertyAsync(_propertyId.Value);
+        }
+
+        partial void OnSelectedResultPropertyChanged(Property? value)
+        {
+            if (_suppressSelectedResultPropertyChanged) return;
+
+            if (value == null)
+            {
+                ClearSavedRegistryData();
+                return;
+            }
+
+            _ = LoadRegistryRunsForPropertyAsync(value.Id);
+        }
+
+        partial void OnSelectedRegistryRunChanged(RegistryRun? value)
+        {
+            if (_suppressSelectedRegistryRunChanged) return;
+            _ = LoadSelectedRegistryRunAsync(value);
+        }
+
+        private async Task LoadRegistryRunsForPropertyAsync(Guid propertyId, Guid? selectRunId = null)
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                var runs = await _registryRepository.GetRunsByPropertyIdAsync(propertyId);
+                RegistryRuns = new ObservableCollection<RegistryRun>(runs);
+
+                HasSavedRegistryRuns = runs.Count > 0;
+                HasNoSavedRegistryRuns = runs.Count == 0;
+
+                _suppressSelectedRegistryRunChanged = true;
+                SelectedRegistryRun = selectRunId.HasValue
+                    ? runs.FirstOrDefault(r => r.Id == selectRunId.Value)
+                    : runs.FirstOrDefault();
+                _suppressSelectedRegistryRunChanged = false;
+
+                await LoadSelectedRegistryRunAsync(SelectedRegistryRun);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"등기부 세트 로드 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+                _suppressSelectedRegistryRunChanged = false;
+            }
+        }
+
+        private async Task LoadSelectedRegistryRunAsync(RegistryRun? run)
+        {
+            if (run == null)
+            {
+                RegistryBasicInfo = null;
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
+                SavedBasicInfoCount = 0;
+                SavedGapguRowCount = 0;
+                SavedEulguRowCount = 0;
+                return;
+            }
 
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
 
-                // 신규 스키마(요약 표 3종) 로드
-                var ownershipShares = await _registryRepository.GetGapguOwnershipShareRowsAsync(_propertyId.Value);
-                var gapguRows = await _registryRepository.GetGapguRightSummaryRowsAsync(_propertyId.Value);
-                var eulguRows = await _registryRepository.GetEulguRightSummaryRowsAsync(_propertyId.Value);
+                RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(run.Id);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
+                    await _registryRepository.GetGapguRowsByRunIdAsync(run.Id));
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
+                    await _registryRepository.GetEulguRowsByRunIdAsync(run.Id));
 
-                // NOTE: RegistryTab은 현재 OCR 워크플로우 중심으로 사용되고 있어
-                //       기존 Owners/GapguRights/EulguRights 컬렉션이 UI에 직접 바인딩되지 않는 경우가 많음.
-                //       향후 화면 개편 전까지는 호환을 위해 신규 행을 기존 모델로 매핑해 채워둔다.
-                Owners = new ObservableCollection<RegistryOwner>(
-                    ownershipShares.Select(r => new RegistryOwner
-                    {
-                        Id = r.Id,
-                        PropertyId = r.PropertyId,
-                        OwnerName = r.OwnerName,
-                        OwnerRegNo = r.OwnerRegNo,
-                        ShareRatio = r.ShareRatio,
-                        RegistrationCause = r.Address,
-                        CreatedAt = r.CreatedAt
-                    }).ToList());
-                HasNoOwners = Owners.Count == 0;
-
-                GapguRights = new ObservableCollection<RegistryRight>(
-                    gapguRows.Select(r => new RegistryRight
-                    {
-                        Id = r.Id,
-                        PropertyId = r.PropertyId,
-                        RightType = "gap",
-                        RegistrationCause = r.Purpose,
-                        RegistrationNumber = r.Receipt,
-                        Notes = r.Details,
-                        Debtor = r.TargetOwner,
-                        CreatedAt = r.CreatedAt,
-                        UpdatedAt = r.UpdatedAt
-                    }).ToList());
-                HasNoGapguRights = GapguRights.Count == 0;
-                GapguTotalAmount = 0;
-
-                EulguRights = new ObservableCollection<RegistryRight>(
-                    eulguRows.Select(r => new RegistryRight
-                    {
-                        Id = r.Id,
-                        PropertyId = r.PropertyId,
-                        RightType = "eul",
-                        RegistrationCause = r.Purpose,
-                        RegistrationNumber = r.Receipt,
-                        Notes = r.Details,
-                        Debtor = r.TargetOwner,
-                        CreatedAt = r.CreatedAt,
-                        UpdatedAt = r.UpdatedAt
-                    }).ToList());
-                HasNoEulguRights = EulguRights.Count == 0;
-                EulguTotalAmount = 0;
-
-                // 문서 테이블 미사용 정책: 문서 목록은 항상 빈 값
-                Documents = new ObservableCollection<RegistryDocument>();
-                HasNoDocuments = true;
+                SavedBasicInfoCount = RegistryBasicInfo != null ? 1 : 0;
+                SavedGapguRowCount = RegistryGapguRows.Count;
+                SavedEulguRowCount = RegistryEulguRows.Count;
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"데이터 로드 실패: {ex.Message}";
+                ErrorMessage = $"등기부 세트 데이터 로드 실패: {ex.Message}";
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private void ClearSavedRegistryData()
+        {
+            RegistryRuns = new ObservableCollection<RegistryRun>();
+            SelectedRegistryRun = null;
+            RegistryBasicInfo = null;
+            RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
+            RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
+            HasSavedRegistryRuns = false;
+            HasNoSavedRegistryRuns = true;
+            SavedBasicInfoCount = 0;
+            SavedGapguRowCount = 0;
+            SavedEulguRowCount = 0;
         }
 
         #region 소유자 관련 Commands
@@ -912,6 +1005,53 @@ namespace NPLogic.ViewModels
 
         #endregion
 
+        #region 정제 결과(user input) 저장 Command
+
+        [RelayCommand]
+        private async Task SaveRegistryUserInputsAsync()
+        {
+            if (SelectedRegistryRun == null)
+            {
+                ErrorMessage = "저장할 등기부 세트를 선택해 주세요.";
+                return;
+            }
+
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = null;
+
+                foreach (var row in RegistryGapguRows)
+                {
+                    await _registryRepository.UpdateGapguUserFieldsAsync(
+                        row.Id,
+                        row.NoteUserInput,
+                        row.WageClaimEstimateUserInput);
+                }
+
+                foreach (var row in RegistryEulguRows)
+                {
+                    await _registryRepository.UpdateEulguUserFieldsAsync(
+                        row.Id,
+                        row.DebtorUserInput,
+                        row.CollateralTypeUserInput,
+                        row.IsFactoryMortgageUserInput);
+                }
+
+                SuccessMessage = "등기부 사용자 입력이 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"사용자 입력 저장 실패: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        #endregion
+
         #region OCR 관련 Commands
 
         /// <summary>
@@ -919,71 +1059,11 @@ namespace NPLogic.ViewModels
         /// </summary>
         public async Task CheckOcrServerStatusAsync()
         {
-            System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] CheckOcrServerStatusAsync 시작");
-            
-            if (_ocrService == null)
-            {
-                System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] _ocrService is null");
-                OcrServerStatus = "OCR 서비스 비활성화";
-                IsOcrServerReady = false;
-                return;
-            }
-
-            try
-            {
-                OcrServerStatus = "서버 확인 중...";
-                System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] 서버 헬스체크 시작");
-                
-                var isHealthy = await _ocrService.CheckHealthAsync();
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 헬스체크 결과: {isHealthy}");
-                
-                if (isHealthy)
-                {
-                    IsOcrServerReady = true;
-                    OcrServerStatus = "서버 준비됨 ✓";
-                }
-                else
-                {
-                    // 서버 시작 시도
-                    OcrServerStatus = "서버 시작 중...";
-                    System.Diagnostics.Debug.WriteLine("[RegistryTabViewModel] 서버 시작 시도");
-                    var started = await _ocrService.StartServerAsync();
-                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 서버 시작 결과: {started}");
-                    
-                    if (started)
-                    {
-                        IsOcrServerReady = true;
-                        OcrServerStatus = "서버 준비됨 ✓";
-                    }
-                    else
-                    {
-                        IsOcrServerReady = false;
-                        OcrServerStatus = "서버 시작 실패 - Python 확인 필요";
-                    }
-                }
-            }
-            catch (FileNotFoundException ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] FileNotFoundException: {ex.Message}");
-                IsOcrServerReady = false;
-                OcrServerStatus = "서버 파일 없음";
-            }
-            catch (TimeoutException ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] TimeoutException: {ex.Message}");
-                IsOcrServerReady = false;
-                OcrServerStatus = "서버 응답 없음 (타임아웃)";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Exception: {ex.GetType().Name} - {ex.Message}");
-                IsOcrServerReady = false;
-                // 에러 메시지 간략화
-                var msg = ex.Message.Length > 30 ? ex.Message.Substring(0, 30) + "..." : ex.Message;
-                OcrServerStatus = $"서버 오류: {msg}";
-            }
-            
-            System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] 최종 상태: {OcrServerStatus}");
+            // 2026-02: OCR은 Supabase Edge Function(ocr-registry-save)을 통해 수행/저장한다.
+            // 따라서 로컬/원격 Python 서버 헬스체크로 UI를 막지 않고, 처리 시점에 Edge Function 호출로 검증한다.
+            IsOcrServerReady = true;
+            OcrServerStatus = "Edge Function 준비됨 ✓";
+            await Task.CompletedTask;
         }
 
         /// <summary>
@@ -1029,13 +1109,24 @@ namespace NPLogic.ViewModels
                     // 단일 물건 모드가 아니면 OcrPdfFileWithMatch 사용
                     if (!IsSinglePropertyMode && _programId.HasValue)
                     {
-                        OcrPdfFilesWithMatch.Add(new OcrPdfFileWithMatch
+                        var matchFile = new OcrPdfFileWithMatch
                         {
                             FilePath = filePath,
                             FileName = fileInfo.Name,
                             FileSize = fileInfo.Length,
                             Status = "대기"
-                        });
+                        };
+
+                        // 파일명 기반 사전 자동매칭 (OCR 전)
+                        var (matchedProperty, confidence) = FindMatchingProperty(null, matchFile.FileName);
+                        if (matchedProperty != null)
+                        {
+                            matchFile.MatchedProperty = matchedProperty;
+                            matchFile.MatchConfidence = confidence;
+                            matchFile.IsAutoMatched = true;
+                        }
+
+                        OcrPdfFilesWithMatch.Add(matchFile);
                     }
                     else
                     {
@@ -1106,16 +1197,35 @@ namespace NPLogic.ViewModels
             // 매칭 모드 또는 단일 모드 확인
             var useMatchMode = HasOcrPdfFilesWithMatch && OcrPdfFilesWithMatch.Count > 0;
             var filesToProcess = useMatchMode
-                ? OcrPdfFilesWithMatch.Cast<OcrPdfFile>().ToList()
-                : OcrPdfFiles.ToList();
+                ? OcrPdfFilesWithMatch.Where(f => f.Status != "완료").Cast<OcrPdfFile>().ToList()
+                : OcrPdfFiles.Where(f => f.Status != "완료").ToList();
 
-            if (_ocrService == null || filesToProcess.Count == 0)
-                return;
-
-            if (!IsOcrServerReady)
+            if (filesToProcess.Count == 0)
             {
-                ErrorMessage = "OCR 서버가 준비되지 않았습니다.";
+                SuccessMessage = "처리할 파일이 없습니다. (모든 파일이 완료 상태입니다.)";
                 return;
+            }
+
+            // 매칭 모드에서는 property_id가 반드시 필요 (Edge Function 저장)
+            if (useMatchMode)
+            {
+                var notMatched = OcrPdfFilesWithMatch
+                    .Where(f => f.Status != "완료" && f.MatchedProperty == null)
+                    .ToList();
+                if (notMatched.Count > 0)
+                {
+                    var names = string.Join(", ", notMatched.Select(f => f.FileName));
+                    ErrorMessage = $"매칭되지 않은 파일이 있습니다: {names}\n물건을 수동으로 선택해 주세요.";
+                    return;
+                }
+            }
+            else
+            {
+                if (_propertyId == null)
+                {
+                    ErrorMessage = "물건 ID가 설정되지 않았습니다.";
+                    return;
+                }
             }
 
             try
@@ -1147,87 +1257,77 @@ namespace NPLogic.ViewModels
 
                     try
                     {
-                        var progress = new Progress<OcrProgress>(p =>
+                        pdfFile.Progress = 10;
+
+                        var propertyId = useMatchMode
+                            ? ((OcrPdfFileWithMatch)pdfFile).MatchedProperty!.Id
+                            : _propertyId!.Value;
+
+                        var (run, biSaved, gapSaved, eulSaved, _, registryAddress, summaryImages) =
+                            await _registryRepository.OcrRegistrySaveViaEdgeFunctionAsync(
+                                propertyId,
+                                pdfFile.FilePath,
+                                includeSummaryImages: true,
+                                summaryImageMaxPages: 3,
+                                cancellationToken: token);
+
+                        pdfFile.Progress = 80;
+
+                        // 요약 페이지 이미지 표시 (응답에 포함된 것만, 최대 N페이지)
+                        SummaryImages.Clear();
+                        if (summaryImages != null && summaryImages.Count > 0)
                         {
-                            pdfFile.Progress = p.ProgressPercent;
-                        });
-
-                        var result = await _ocrService.ProcessPdfAsync(pdfFile.FilePath, progress, token);
-
-                        if (result.Success)
-                        {
-                            pdfFile.Status = "완료";
-                            pdfFile.Progress = 100;
-
-                            // 요약 페이지 이미지들 저장 (Base64 → BitmapImage)
-                            // 여러 페이지의 요약 이미지를 모두 처리
-                            SummaryImages.Clear();
-                            if (result.SummaryImages != null && result.SummaryImages.Count > 0)
+                            foreach (var base64Image in summaryImages)
                             {
-                                foreach (var base64Image in result.SummaryImages)
-                                {
-                                    var bitmap = ConvertBase64ToBitmapImage(base64Image);
-                                    if (bitmap != null)
-                                    {
-                                        SummaryImages.Add(bitmap);
-                                    }
-                                }
-                                HasSummaryImage = SummaryImages.Count > 0;
-                                OnPropertyChanged(nameof(SummaryImageCount));
-                            }
-                            else if (!string.IsNullOrEmpty(result.SummaryImage))
-                            {
-                                // 하위 호환성: 단일 이미지만 있는 경우
-                                var bitmap = ConvertBase64ToBitmapImage(result.SummaryImage);
+                                var bitmap = ConvertBase64ToBitmapImage(base64Image);
                                 if (bitmap != null)
                                 {
                                     SummaryImages.Add(bitmap);
                                 }
-                                HasSummaryImage = SummaryImages.Count > 0;
-                                OnPropertyChanged(nameof(SummaryImageCount));
                             }
-
-                            // 주소 저장 (있는 경우)
-                            if (result.Data != null && !string.IsNullOrEmpty(result.Data.Address))
-                            {
-                                OcrExtractedAddress = result.Data.Address;
-                            }
-
-                            // 매칭 모드인 경우 물건 자동 매칭 시도 (주소 유무와 무관하게!)
-                            if (pdfFile is OcrPdfFileWithMatch matchFile)
-                            {
-                                matchFile.ExtractedAddress = result.Data?.Address;
-                                matchFile.OcrResultData = result.Data;
-
-                                // 파일명과 주소 모두 전달하여 매칭 (파일명 우선)
-                                var (matchedProperty, confidence) = FindMatchingProperty(result.Data?.Address, pdfFile.FileName);
-                                if (matchedProperty != null)
-                                {
-                                    matchFile.MatchedProperty = matchedProperty;
-                                    matchFile.MatchConfidence = confidence;
-                                    matchFile.IsAutoMatched = true;
-                                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Auto-matched: {pdfFile.FileName} -> {matchedProperty.DisplayAddress} ({confidence:P0})");
-                                }
-                                else
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] No match found for: {pdfFile.FileName}");
-                                }
-                            }
-
-                            // 결과 파싱 및 미리보기에 추가
-                            // 매칭 모드에서도 OCR 추출 결과 건수 표시를 위해 누적 파싱
-                            if (result.Data != null)
-                            {
-                                ParseOcrResultToPreview(result.Data, pdfFile.FileName);
-                                System.Diagnostics.Debug.WriteLine(
-                                    $"[RegistryTabViewModel] OCR parsed counts - Owners: {result.Data.Owners?.Count ?? 0}, Gapgu: {result.Data.Gapgu?.Count ?? 0}, Eulgu: {result.Data.Eulgu?.Count ?? 0}");
-                            }
+                            HasSummaryImage = SummaryImages.Count > 0;
+                            OnPropertyChanged(nameof(SummaryImageCount));
                         }
                         else
                         {
-                            pdfFile.Status = "실패";
-                            pdfFile.ErrorMessage = result.Error ?? "알 수 없는 오류";
+                            HasSummaryImage = false;
+                            OnPropertyChanged(nameof(SummaryImageCount));
                         }
+
+                        // 주소 저장 (있는 경우)
+                        if (!string.IsNullOrWhiteSpace(registryAddress))
+                        {
+                            OcrExtractedAddress = registryAddress;
+                        }
+
+                        // 매칭 모드: 추출 주소 업데이트 (표시용)
+                        if (pdfFile is OcrPdfFileWithMatch matchFile)
+                        {
+                            matchFile.ExtractedAddress = registryAddress;
+                            matchFile.OcrResultData = null;
+                        }
+
+                        // 저장된 정제 결과 섹션 자동 갱신 (마지막 처리된 물건 기준)
+                        if (!useMatchMode)
+                        {
+                            await LoadRegistryRunsForPropertyAsync(propertyId, run.Id);
+                        }
+                        else
+                        {
+                            var prop = ((OcrPdfFileWithMatch)pdfFile).MatchedProperty!;
+                            _suppressSelectedResultPropertyChanged = true;
+                            SelectedResultProperty = prop;
+                            _suppressSelectedResultPropertyChanged = false;
+                            await LoadRegistryRunsForPropertyAsync(prop.Id, run.Id);
+                        }
+
+                        // 저장 카운트(표시용)
+                        SavedBasicInfoCount = biSaved;
+                        SavedGapguRowCount = gapSaved;
+                        SavedEulguRowCount = eulSaved;
+
+                        pdfFile.Status = "완료";
+                        pdfFile.Progress = 100;
                     }
                     catch (TaskCanceledException)
                     {
@@ -1256,17 +1356,17 @@ namespace NPLogic.ViewModels
 
                     if (successCount > 0)
                     {
-                        SuccessMessage = $"OCR 처리 완료! {successCount}개 파일 중 {matchedCount}개 자동 매칭됨";
+                        SuccessMessage = $"OCR+저장 완료! {successCount}개 파일 처리됨";
                     }
                 }
                 else
                 {
-                    HasOcrResults = OcrPreviewOwners.Count > 0 || OcrPreviewGapgu.Count > 0 || OcrPreviewEulgu.Count > 0;
+                    HasOcrResults = successCount > 0;
                     OcrStatusMessage = $"완료: {successCount}개 성공, {failCount}개 실패";
 
                     if (successCount > 0)
                     {
-                        SuccessMessage = $"OCR 처리 완료! {successCount}개 파일에서 데이터를 추출했습니다.";
+                        SuccessMessage = $"OCR+저장 완료! {successCount}개 파일 처리됨";
                     }
                 }
             }
@@ -1279,6 +1379,7 @@ namespace NPLogic.ViewModels
                 IsOcrProcessing = false;
                 _ocrCancellationTokenSource?.Dispose();
                 _ocrCancellationTokenSource = null;
+                _suppressSelectedResultPropertyChanged = false;
             }
         }
 
@@ -1382,72 +1483,31 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private async Task SaveOcrResultsAsync()
         {
-            // 매칭 모드 확인
-            var useMatchMode = HasOcrPdfFilesWithMatch && OcrPdfFilesWithMatch.Count > 0;
-
-            if (useMatchMode)
-            {
-                await SaveOcrResultsWithMatchAsync();
-                return;
-            }
-
-            // 기존 단일 물건 모드
-            if (_propertyId == null)
-            {
-                ErrorMessage = "물건 ID가 설정되지 않았습니다.";
-                return;
-            }
-
-            if (!HasOcrResults)
-            {
-                ErrorMessage = "저장할 OCR 결과가 없습니다.";
-                return;
-            }
-
+            // 2026-02: OCR 처리 시작 시 Edge Function을 통해 "OCR+저장"까지 완료됨.
+            // 여기서는 중복 저장을 방지하고, 저장된 결과 섹션을 새로고침만 수행한다.
             try
             {
-                IsLoading = true;
                 ErrorMessage = null;
 
-                int savedOwners = 0, savedGapgu = 0, savedEulgu = 0;
-
-                // 소유자 저장
-                foreach (var owner in OcrPreviewOwners)
+                if (IsSinglePropertyMode && _propertyId.HasValue)
                 {
-                    owner.PropertyId = _propertyId;
-                    await _registryRepository.CreateOwnerAsync(owner);
-                    savedOwners++;
+                    await LoadRegistryRunsForPropertyAsync(_propertyId.Value);
+                    SuccessMessage = "저장된 등기부 세트를 새로고침했습니다.";
+                    return;
                 }
 
-                // 갑구 저장
-                foreach (var right in OcrPreviewGapgu)
+                if (!IsSinglePropertyMode && SelectedResultProperty != null)
                 {
-                    right.PropertyId = _propertyId;
-                    await _registryRepository.CreateRightAsync(right);
-                    savedGapgu++;
+                    await LoadRegistryRunsForPropertyAsync(SelectedResultProperty.Id);
+                    SuccessMessage = "저장된 등기부 세트를 새로고침했습니다.";
+                    return;
                 }
 
-                // 을구 저장
-                foreach (var right in OcrPreviewEulgu)
-                {
-                    right.PropertyId = _propertyId;
-                    await _registryRepository.CreateRightAsync(right);
-                    savedEulgu++;
-                }
-
-                SuccessMessage = $"저장 완료: 소유자 {savedOwners}건, 갑구 {savedGapgu}건, 을구 {savedEulgu}건";
-
-                // 미리보기 초기화 및 실제 데이터 새로고침
-                CancelAllOcrPdfFiles();
-                await LoadDataAsync();
+                ErrorMessage = "새로고침할 물건을 선택해 주세요.";
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"저장 실패: {ex.Message}";
-            }
-            finally
-            {
-                IsLoading = false;
+                ErrorMessage = $"새로고침 실패: {ex.Message}";
             }
         }
 
@@ -1478,103 +1538,45 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                int totalSavedOwners = 0, totalSavedGapgu = 0, totalSavedEulgu = 0;
                 int savedFileCount = 0;
+                int savedRuns = 0;
+                int savedBasicInfo = 0;
+                int savedGapgu = 0;
+                int savedEulgu = 0;
+
+                RegistryRun? lastRun = null;
+                Property? lastProperty = null;
 
                 foreach (var pdfFile in completedFiles)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Processing: {pdfFile.FileName}");
-                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] MatchedProperty: {pdfFile.MatchedProperty?.PropertyNumber ?? "NULL"}");
-                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] OcrResultData: {(pdfFile.OcrResultData != null ? "EXISTS" : "NULL")}");
+                    var prop = pdfFile.MatchedProperty!;
 
-                    if (pdfFile.OcrResultData != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Owners count: {pdfFile.OcrResultData.Owners?.Count ?? 0}");
-                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Gapgu count: {pdfFile.OcrResultData.Gapgu?.Count ?? 0}");
-                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Eulgu count: {pdfFile.OcrResultData.Eulgu?.Count ?? 0}");
-                    }
-
-                    if (pdfFile.MatchedProperty == null || pdfFile.OcrResultData == null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] SKIPPING - Missing data!");
-                        continue;
-                    }
-
-                    var propertyId = pdfFile.MatchedProperty.Id;
-                    var data = pdfFile.OcrResultData;
-
-                    // 신규 스키마: 요약 표 3종을 "표 그대로" 저장 + 최신 1회 덮어쓰기
-                    var ownershipRows = new List<RegistryGapguOwnershipShareRow>();
-                    if (data.Owners != null)
-                    {
-                        foreach (var row in data.Owners)
-                        {
-                            if (IsEmptyRow(row)) continue;
-                            ownershipRows.Add(new RegistryGapguOwnershipShareRow
-                            {
-                                PropertyId = propertyId,
-                                RankNo = GetStringValue(row, "순위번호"),
-                                OwnerName = GetStringValue(row, "등기명의인"),
-                                OwnerRegNo = GetStringValue(row, "(주민)등록번호"),
-                                ShareRatio = GetStringValue(row, "최종지분"),
-                                Address = GetStringValue(row, "주소"),
-                                SortIndex = ownershipRows.Count
-                            });
-                        }
-                    }
-
-                    var gapguRows = new List<RegistryGapguRightSummaryRow>();
-                    if (data.Gapgu != null)
-                    {
-                        foreach (var row in data.Gapgu)
-                        {
-                            if (IsEmptyRow(row)) continue;
-                            gapguRows.Add(new RegistryGapguRightSummaryRow
-                            {
-                                PropertyId = propertyId,
-                                RankNo = GetStringValue(row, "순위번호"),
-                                Purpose = GetStringValue(row, "등기목적"),
-                                Receipt = GetStringValue(row, "접수정보"),
-                                Details = GetStringValue(row, "주요등기사항"),
-                                TargetOwner = GetStringValue(row, "대상소유자"),
-                                SortIndex = gapguRows.Count
-                            });
-                        }
-                    }
-
-                    var eulguRows = new List<RegistryEulguRightSummaryRow>();
-                    if (data.Eulgu != null)
-                    {
-                        foreach (var row in data.Eulgu)
-                        {
-                            if (IsEmptyRow(row)) continue;
-                            eulguRows.Add(new RegistryEulguRightSummaryRow
-                            {
-                                PropertyId = propertyId,
-                                RankNo = GetStringValue(row, "순위번호"),
-                                Purpose = GetStringValue(row, "등기목적"),
-                                Receipt = GetStringValue(row, "접수정보"),
-                                Details = GetStringValue(row, "주요등기사항"),
-                                TargetOwner = GetStringValue(row, "대상소유자"),
-                                SortIndex = eulguRows.Count
-                            });
-                        }
-                    }
-
-                    await _registryRepository.ReplaceRegistrySummaryAsync(propertyId, ownershipRows, gapguRows, eulguRows);
-
-                    totalSavedOwners += ownershipRows.Count;
-                    totalSavedGapgu += gapguRows.Count;
-                    totalSavedEulgu += eulguRows.Count;
+                    var (run, bi, gap, eul, _, _, _) =
+                        await _registryRepository.OcrRegistrySaveViaEdgeFunctionAsync(prop.Id, pdfFile.FilePath);
 
                     savedFileCount++;
-                    System.Diagnostics.Debug.WriteLine($"[SaveOcrResults] Saved file: {pdfFile.FileName} to property: {pdfFile.MatchedProperty.PropertyNumber}");
-                    System.Diagnostics.Debug.WriteLine($"[RegistryTabViewModel] Saved OCR data for: {pdfFile.FileName} -> {pdfFile.MatchedProperty.DisplayAddress}");
+                    savedRuns++;
+                    savedBasicInfo += bi;
+                    savedGapgu += gap;
+                    savedEulgu += eul;
+
+                    lastRun = run;
+                    lastProperty = prop;
                 }
 
-                SuccessMessage = $"저장 완료: {savedFileCount}개 파일 (소유자 {totalSavedOwners}건, 갑구 {totalSavedGapgu}건, 을구 {totalSavedEulgu}건)";
+                SuccessMessage =
+                    $"저장 완료: {savedFileCount}개 PDF → 세트 {savedRuns}개 생성 (basic_info {savedBasicInfo}행, 갑구 {savedGapgu}행, 을구 {savedEulgu}행)";
 
-                // 미리보기 초기화
+                // 저장된 결과 섹션 자동 갱신 (마지막 저장된 물건 기준)
+                if (lastProperty != null && lastRun != null)
+                {
+                    _suppressSelectedResultPropertyChanged = true;
+                    SelectedResultProperty = lastProperty;
+                    _suppressSelectedResultPropertyChanged = false;
+
+                    await LoadRegistryRunsForPropertyAsync(lastProperty.Id, lastRun.Id);
+                }
+
                 CancelAllOcrPdfFiles();
             }
             catch (Exception ex)
@@ -1584,6 +1586,7 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+                _suppressSelectedResultPropertyChanged = false;
             }
         }
 

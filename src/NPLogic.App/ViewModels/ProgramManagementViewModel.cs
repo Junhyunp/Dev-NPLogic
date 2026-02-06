@@ -1247,6 +1247,7 @@ namespace NPLogic.ViewModels
                 int totalCreated = 0;
                 int totalUpdated = 0;
                 int totalFailed = 0;
+                int totalSkipped = 0;
 
                 if (ShowSheetSelection)
                 {
@@ -1268,6 +1269,7 @@ namespace NPLogic.ViewModels
                             totalCreated += result.Created;
                             totalUpdated += result.Updated;
                             totalFailed += result.Failed;
+                            totalSkipped += result.Skipped;
                         }
                         catch (Exception ex)
                         {
@@ -1310,10 +1312,11 @@ namespace NPLogic.ViewModels
 
                 // 완료 메시지
                 var message = $"프로그램이 등록되었습니다.\n";
-                if (totalCreated > 0 || totalUpdated > 0 || totalFailed > 0)
+                if (totalCreated > 0 || totalUpdated > 0 || totalFailed > 0 || totalSkipped > 0)
                 {
                     message += $"데이터디스크: 생성 {totalCreated}건";
                     if (totalUpdated > 0) message += $", 업데이트 {totalUpdated}건";
+                    if (totalSkipped > 0) message += $", 스킵 {totalSkipped}건";
                     if (totalFailed > 0) message += $", 실패 {totalFailed}건";
                     message += "\n";
                 }
@@ -1342,7 +1345,37 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 시트별 데이터 처리 - Property 시트만 물건으로 저장
         /// </summary>
-        private async Task<(int Created, int Updated, int Failed)> ProcessSheetAsync(string filePath, SelectableSheetInfo sheet, string programId)
+        private static string NormalizeColumnNameForMatch(string? columnName)
+        {
+            return (columnName ?? "")
+                .ToLower()
+                .Replace("\n", " ")
+                .Replace("\r", "")
+                .Trim();
+        }
+
+        private static string? TryGetTrimmedCellValue(Dictionary<string, object> row, Func<string, bool> columnMatch)
+        {
+            foreach (var kvp in row)
+            {
+                var col = NormalizeColumnNameForMatch(kvp.Key);
+                if (!columnMatch(col)) continue;
+                return kvp.Value?.ToString()?.Trim();
+            }
+            return null;
+        }
+
+        private static bool IsBlankRow(Dictionary<string, object> row)
+        {
+            foreach (var v in row.Values)
+            {
+                if (!string.IsNullOrWhiteSpace(v?.ToString()))
+                    return false;
+            }
+            return true;
+        }
+
+        private async Task<(int Created, int Updated, int Failed, int Skipped)> ProcessSheetAsync(string filePath, SelectableSheetInfo sheet, string programId)
         {
             var headerRow = _excelService.DetectHeaderRow(filePath, sheet.Name);
             var (columns, data) = await _excelService.ReadExcelSheetAsync(filePath, sheet.Name, headerRow);
@@ -1350,9 +1383,9 @@ namespace NPLogic.ViewModels
             System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 시트 '{sheet.Name}' ({sheet.SheetType}): {data.Count}행, 헤더행={headerRow}");
             
             if (data.Count == 0)
-                return (0, 0, 0);
+                return (0, 0, 0, 0);
 
-            int created = 0, updated = 0, failed = 0;
+            int created = 0, updated = 0, failed = 0, skipped = 0;
             int totalRows = data.Count;
             int processed = 0;
 
@@ -1367,13 +1400,33 @@ namespace NPLogic.ViewModels
                     {
                         processed++;
                         UpdateProgress(processed, totalRows, sheet.Name);
+                        var excelRowNumber = headerRow + processed;
 
                         try
                         {
                             var borrower = MapRowToBorrower(row, programId);
-                            if (string.IsNullOrEmpty(borrower.BorrowerNumber))
+                            if (string.IsNullOrWhiteSpace(borrower.BorrowerNumber))
                             {
-                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}): 차주번호가 비어있음");
+                                // NOTE: 일부 은행 DD는 시트 하단에 합계/요약/빈 행이 포함됨.
+                                //       이런 행은 실패가 아니라 스킵으로 처리하고, 실제 엑셀 행 번호를 함께 로그로 남긴다.
+                                var seq = TryGetTrimmedCellValue(row, col => col == "일련번호");
+                                var pool = TryGetTrimmedCellValue(row, col => col.Contains("pool"));
+                                var borrowerName = TryGetTrimmedCellValue(row, col => col.Contains("차주명"));
+
+                                var isSummaryOrBlankRow =
+                                    IsBlankRow(row) ||
+                                    (string.IsNullOrWhiteSpace(seq) &&
+                                     string.IsNullOrWhiteSpace(pool) &&
+                                     string.IsNullOrWhiteSpace(borrowerName));
+
+                                if (isSummaryOrBlankRow)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 SKIP (행 {processed}, ExcelRow {excelRowNumber}): 합계/요약/빈 행");
+                                    skipped++;
+                                    continue;
+                                }
+
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}, ExcelRow {excelRowNumber}): 차주번호가 비어있음");
                                 failed++;
                                 continue;
                             }
@@ -1390,7 +1443,7 @@ namespace NPLogic.ViewModels
                         catch (Exception ex)
                         {
                             var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}, 차주번호: {borrowerNum}): {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 차주 생성 실패 (행 {processed}, ExcelRow {excelRowNumber}, 차주번호: {borrowerNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1659,6 +1712,7 @@ namespace NPLogic.ViewModels
                     {
                         processed++;
                         UpdateProgress(processed, totalRows, sheet.Name);
+                        var excelRowNumber = headerRow + processed;
 
                         try
                         {
@@ -1682,9 +1736,27 @@ namespace NPLogic.ViewModels
                             }
 
                             var guarantee = MapRowToCreditGuarantee(row, borrowerId);
-                            if (string.IsNullOrEmpty(guarantee.GuaranteeNumber) && string.IsNullOrEmpty(guarantee.BorrowerNumber))
+                            if (string.IsNullOrWhiteSpace(guarantee.GuaranteeNumber) && string.IsNullOrWhiteSpace(guarantee.BorrowerNumber))
                             {
-                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}): 보증서번호와 차주번호가 모두 비어있음");
+                                // 합계/요약/빈 행 스킵 처리 (실패로 집계하지 않음)
+                                var seq = TryGetTrimmedCellValue(row, col => col == "일련번호");
+                                var accountSerial = TryGetTrimmedCellValue(row, col => col.Contains("계좌일련번호"));
+                                var pool = TryGetTrimmedCellValue(row, col => col.Contains("pool"));
+
+                                var isSummaryOrBlankRow =
+                                    IsBlankRow(row) ||
+                                    (string.IsNullOrWhiteSpace(seq) &&
+                                     string.IsNullOrWhiteSpace(pool) &&
+                                     string.IsNullOrWhiteSpace(accountSerial));
+
+                                if (isSummaryOrBlankRow)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 SKIP (행 {processed}, ExcelRow {excelRowNumber}): 합계/요약/빈 행");
+                                    skipped++;
+                                    continue;
+                                }
+
+                                System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}, ExcelRow {excelRowNumber}): 보증서번호와 차주번호가 모두 비어있음");
                                 failed++;
                                 continue;
                             }
@@ -1696,7 +1768,7 @@ namespace NPLogic.ViewModels
                         {
                             var borrowerNum = row.FirstOrDefault(r => r.Key.Contains("차주")).Value?.ToString() ?? "unknown";
                             var guaranteeNum = row.FirstOrDefault(r => r.Key.Contains("보증서")).Value?.ToString() ?? "unknown";
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}, 차주번호: {borrowerNum}, 보증서번호: {guaranteeNum}): {ex.Message}");
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 신용보증서 생성 실패 (행 {processed}, ExcelRow {excelRowNumber}, 차주번호: {borrowerNum}, 보증서번호: {guaranteeNum}): {ex.Message}");
                             failed++;
                         }
                     }
@@ -1707,9 +1779,9 @@ namespace NPLogic.ViewModels
                     break;
             }
 
-            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 결과: 생성={created}, 실패={failed}");
+            System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 결과: 생성={created}, 실패={failed}, 스킵={skipped}");
 
-            return (created, updated, failed);
+            return (created, updated, failed, skipped);
         }
 
         /// <summary>
@@ -2075,17 +2147,17 @@ namespace NPLogic.ViewModels
                 // 차주번호
                 if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
                 {
-                    borrower.BorrowerNumber = value.ToString() ?? "";
+                    borrower.BorrowerNumber = value.ToString()?.Trim() ?? "";
                 }
                 // 차주명
                 else if (colName.Contains("차주명"))
                 {
-                    borrower.BorrowerName = value.ToString() ?? "";
+                    borrower.BorrowerName = value.ToString()?.Trim() ?? "";
                 }
                 // 차주형태
                 else if (colName.Contains("차주형태") || colName.Contains("차주유형"))
                 {
-                    borrower.BorrowerType = value.ToString() ?? "";
+                    borrower.BorrowerType = value.ToString()?.Trim() ?? "";
                 }
                 // OPB (대출원금잔액)
                 else if (colName.Contains("대출원금잔액") || colName.Contains("미상환원금"))

@@ -963,7 +963,6 @@ namespace NPLogic.Services
                     if (string.IsNullOrEmpty(borrowerNumber) && string.IsNullOrEmpty(guaranteeNumber))
                     {
                         System.Diagnostics.Debug.WriteLine($"[ProcessGuarantee] SKIP Row {processed}: 보증서번호와 차주번호가 모두 비어있음");
-                        failed++;
                         continue;
                     }
 

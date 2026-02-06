@@ -1,6 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using NPLogic.Core.Models;
 using NPLogic.Data.Services;
@@ -13,11 +19,307 @@ namespace NPLogic.Data.Repositories
     public class RegistryRepository
     {
         private readonly SupabaseService _supabaseService;
+        private static readonly HttpClient _edgeFunctionsHttpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(10)
+        };
+
+        private const string OcrRegistrySaveFunctionName = "ocr-registry-save";
 
         public RegistryRepository(Services.SupabaseService supabaseService)
         {
             _supabaseService = supabaseService ?? throw new ArgumentNullException(nameof(supabaseService));
         }
+
+        #region RegistryRun / BasicInfo / Gapgu / Eulgu (정제 산출물 스키마)
+
+        public async Task<List<RegistryRun>> GetRunsByPropertyIdAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryRunTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.DeedSeq, Postgrest.Constants.Ordering.Descending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryRun).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"등기부 세트 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<RegistryRun?> GetLatestRunByPropertyIdAsync(Guid propertyId)
+        {
+            var runs = await GetRunsByPropertyIdAsync(propertyId);
+            return runs.FirstOrDefault();
+        }
+
+        public async Task<RegistryBasicInfo?> GetBasicInfoByRunIdAsync(Guid registryRunId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryBasicInfoTable>()
+                    .Where(x => x.RegistryRunId == registryRunId)
+                    .Limit(1)
+                    .Get();
+
+                var model = response.Models.FirstOrDefault();
+                return model == null ? null : MapToRegistryBasicInfo(model);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"basic_info 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<RegistryGapguRow>> GetGapguRowsByRunIdAsync(Guid registryRunId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryGapguRowTable>()
+                    .Where(x => x.RegistryRunId == registryRunId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryGapguRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 표 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<List<RegistryEulguRow>> GetEulguRowsByRunIdAsync(Guid registryRunId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryEulguRowTable>()
+                    .Where(x => x.RegistryRunId == registryRunId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryEulguRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 표 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Supabase Edge Function(ocr-registry-save)을 호출하여
+        /// PDF OCR → refined(basic_info/gapgu/eulgu) 생성 → registry_runs/basic_info/gapgu/eulgu 저장까지 수행합니다.
+        /// </summary>
+        public async Task<(RegistryRun Run, int SavedBasicInfo, int SavedGapguRows, int SavedEulguRows, string? RefinedVersion, string? RegistryAddress, List<string>? SummaryImages)>
+            OcrRegistrySaveViaEdgeFunctionAsync(
+                Guid propertyId,
+                string pdfFilePath,
+                bool includeSummaryImages = true,
+                int summaryImageMaxPages = 3,
+                CancellationToken cancellationToken = default)
+        {
+            if (propertyId == Guid.Empty)
+                throw new ArgumentException("propertyId is empty.", nameof(propertyId));
+
+            if (string.IsNullOrWhiteSpace(pdfFilePath))
+                throw new ArgumentException("pdfFilePath is empty.", nameof(pdfFilePath));
+
+            if (!File.Exists(pdfFilePath))
+                throw new FileNotFoundException("PDF 파일을 찾을 수 없습니다.", pdfFilePath);
+
+            await _supabaseService.EnsureValidSessionAsync(throwOnFailure: true);
+            var accessToken = _supabaseService.GetSession()?.AccessToken;
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new Exception("Supabase 세션이 없습니다. 다시 로그인해주세요.");
+
+            var url = $"{_supabaseService.Url}/functions/v1/{OcrRegistrySaveFunctionName}";
+            var fileName = Path.GetFileName(pdfFilePath);
+
+            using var fileStream = new FileStream(pdfFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using var content = new MultipartFormDataContent();
+            using var streamContent = new StreamContent(fileStream);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+            content.Add(streamContent, "file", fileName);
+            content.Add(new StringContent(propertyId.ToString()), "property_id");
+            content.Add(new StringContent(includeSummaryImages ? "true" : "false"), "include_summary_images");
+            content.Add(new StringContent(summaryImageMaxPages.ToString()), "summary_image_max_pages");
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Headers.Add("apikey", _supabaseService.Key);
+            request.Content = content;
+
+            using var response = await _edgeFunctionsHttpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseContentRead,
+                cancellationToken);
+
+            var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            OcrRegistrySaveEdgeResponse? edge;
+            try
+            {
+                edge = JsonSerializer.Deserialize<OcrRegistrySaveEdgeResponse>(
+                    responseText,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Edge Function 응답 파싱 실패: {ex.Message}", ex);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var msg = edge?.Error ?? responseText;
+                throw new Exception($"Edge Function 호출 실패: {(int)response.StatusCode} - {msg}");
+            }
+
+            if (edge == null)
+                throw new Exception("Edge Function 응답이 비어있습니다.");
+
+            if (!edge.Success)
+                throw new Exception(edge.Error ?? "Edge Function 처리 실패");
+
+            if (edge.RegistryRun == null)
+                throw new Exception("Edge Function 응답에 registry_run이 없습니다.");
+
+            var run = new RegistryRun
+            {
+                Id = edge.RegistryRun.Id,
+                PropertyId = edge.RegistryRun.PropertyId,
+                PropertyNumber = edge.RegistryRun.PropertyNumber,
+                DeedSeq = edge.RegistryRun.DeedSeq,
+                JibeonId = edge.RegistryRun.JibeonId,
+                SourcePdfName = fileName,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            return (
+                run,
+                edge.Saved?.BasicInfo ?? 0,
+                edge.Saved?.GapguRows ?? 0,
+                edge.Saved?.EulguRows ?? 0,
+                edge.RefinedVersion,
+                edge.RegistryAddress,
+                edge.SummaryImages
+            );
+        }
+
+        public async Task UpdateGapguUserFieldsAsync(Guid id, string? noteUserInput, bool? wageClaimEstimateUserInput)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = new RegistryGapguRowTable
+                {
+                    Id = id,
+                    NoteUserInput = noteUserInput,
+                    WageClaimEstimateUserInput = wageClaimEstimateUserInput,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await client
+                    .From<RegistryGapguRowTable>()
+                    .Where(x => x.Id == id)
+                    .Update(table);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 사용자 입력 저장 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task UpdateEulguUserFieldsAsync(Guid id, string? debtorUserInput, string? collateralTypeUserInput, bool? isFactoryMortgageUserInput)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = new RegistryEulguRowTable
+                {
+                    Id = id,
+                    DebtorUserInput = debtorUserInput,
+                    CollateralTypeUserInput = collateralTypeUserInput,
+                    IsFactoryMortgageUserInput = isFactoryMortgageUserInput,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await client
+                    .From<RegistryEulguRowTable>()
+                    .Where(x => x.Id == id)
+                    .Update(table);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 사용자 입력 저장 실패: {ex.Message}", ex);
+            }
+        }
+
+        private sealed class OcrRegistrySaveEdgeResponse
+        {
+            [JsonPropertyName("success")]
+            public bool Success { get; set; }
+
+            [JsonPropertyName("error")]
+            public string? Error { get; set; }
+
+            [JsonPropertyName("registry_run")]
+            public OcrRegistrySaveEdgeRegistryRun? RegistryRun { get; set; }
+
+            [JsonPropertyName("saved")]
+            public OcrRegistrySaveEdgeSaved? Saved { get; set; }
+
+            [JsonPropertyName("refined_version")]
+            public string? RefinedVersion { get; set; }
+
+            [JsonPropertyName("registry_address")]
+            public string? RegistryAddress { get; set; }
+
+            [JsonPropertyName("summary_images")]
+            public List<string>? SummaryImages { get; set; }
+        }
+
+        private sealed class OcrRegistrySaveEdgeRegistryRun
+        {
+            [JsonPropertyName("id")]
+            public Guid Id { get; set; }
+
+            [JsonPropertyName("property_id")]
+            public Guid PropertyId { get; set; }
+
+            [JsonPropertyName("property_number")]
+            public string? PropertyNumber { get; set; }
+
+            [JsonPropertyName("deed_seq")]
+            public int DeedSeq { get; set; }
+
+            [JsonPropertyName("jibeon_id")]
+            public string? JibeonId { get; set; }
+        }
+
+        private sealed class OcrRegistrySaveEdgeSaved
+        {
+            [JsonPropertyName("basic_info")]
+            public int BasicInfo { get; set; }
+
+            [JsonPropertyName("gapgu_rows")]
+            public int GapguRows { get; set; }
+
+            [JsonPropertyName("eulgu_rows")]
+            public int EulguRows { get; set; }
+        }
+
+        #endregion
 
         #region RegistryDocument (등기부 문서)
 
@@ -763,6 +1065,91 @@ namespace NPLogic.Data.Repositories
             };
         }
 
+        private RegistryRun MapToRegistryRun(RegistryRunTable table)
+        {
+            return new RegistryRun
+            {
+                Id = table.Id,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                PropertyNumber = table.PropertyNumber,
+                DeedSeq = table.DeedSeq ?? 0,
+                JibeonId = table.JibeonId,
+                SourcePdfName = table.SourcePdfName,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryBasicInfo MapToRegistryBasicInfo(RegistryBasicInfoTable table)
+        {
+            return new RegistryBasicInfo
+            {
+                Id = table.Id,
+                RegistryRunId = table.RegistryRunId ?? Guid.Empty,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                JibeonId = table.JibeonId,
+                RegistryAddress = table.RegistryAddress,
+                DdAddress = table.DdAddress,
+                IsAddressMatched = table.IsAddressMatched,
+                CollateralType = table.CollateralType,
+                LandAreaPyeong = table.LandAreaPyeong,
+                BuildingAreaPyeong = table.BuildingAreaPyeong,
+                OwnerName = table.OwnerName,
+                OwnerRegNo = table.OwnerRegNo,
+                ShareRatio = table.ShareRatio,
+                OwnerAddress = table.OwnerAddress,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryGapguRow MapToRegistryGapguRow(RegistryGapguRowTable table)
+        {
+            return new RegistryGapguRow
+            {
+                Id = table.Id,
+                RegistryRunId = table.RegistryRunId ?? Guid.Empty,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                RankNo = table.RankNo,
+                Purpose = table.Purpose,
+                Receipt = table.Receipt,
+                ReceiptDate = table.ReceiptDate,
+                RightHolder = table.RightHolder,
+                ClaimAmount = table.ClaimAmount,
+                NoteUserInput = table.NoteUserInput,
+                WageClaimEstimateUserInput = table.WageClaimEstimateUserInput,
+                TargetOwner = table.TargetOwner,
+                JibunNumber = table.JibunNumber,
+                SortIndex = table.SortIndex,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
+        private RegistryEulguRow MapToRegistryEulguRow(RegistryEulguRowTable table)
+        {
+            return new RegistryEulguRow
+            {
+                Id = table.Id,
+                RegistryRunId = table.RegistryRunId ?? Guid.Empty,
+                PropertyId = table.PropertyId ?? Guid.Empty,
+                RankNo = table.RankNo,
+                Purpose = table.Purpose,
+                Receipt = table.Receipt,
+                ReceiptDate = table.ReceiptDate,
+                MortgageHolder = table.MortgageHolder,
+                MaxClaimAmount = table.MaxClaimAmount,
+                DebtorUserInput = table.DebtorUserInput,
+                CollateralTypeUserInput = table.CollateralTypeUserInput,
+                IsFactoryMortgageUserInput = table.IsFactoryMortgageUserInput,
+                TargetOwner = table.TargetOwner,
+                JibunNumber = table.JibunNumber,
+                SortIndex = table.SortIndex,
+                CreatedAt = table.CreatedAt,
+                UpdatedAt = table.UpdatedAt
+            };
+        }
+
         #endregion
     }
 
@@ -997,6 +1384,195 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("target_owner")]
         public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("sort_index")]
+        public int? SortIndex { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    // ===== 정제 산출물 스키마 테이블 매핑 =====
+
+    [Postgrest.Attributes.Table("registry_runs")]
+    internal class RegistryRunTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("property_number")]
+        public string? PropertyNumber { get; set; }
+
+        [Postgrest.Attributes.Column("deed_seq")]
+        public int? DeedSeq { get; set; }
+
+        [Postgrest.Attributes.Column("jibeon_id")]
+        public string? JibeonId { get; set; }
+
+        [Postgrest.Attributes.Column("source_pdf_name")]
+        public string? SourcePdfName { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    [Postgrest.Attributes.Table("registry_basic_info")]
+    internal class RegistryBasicInfoTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("registry_run_id")]
+        public Guid? RegistryRunId { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("jibeon_id")]
+        public string? JibeonId { get; set; }
+
+        [Postgrest.Attributes.Column("registry_address")]
+        public string? RegistryAddress { get; set; }
+
+        [Postgrest.Attributes.Column("dd_address")]
+        public string? DdAddress { get; set; }
+
+        [Postgrest.Attributes.Column("is_address_matched")]
+        public bool? IsAddressMatched { get; set; }
+
+        [Postgrest.Attributes.Column("collateral_type")]
+        public string? CollateralType { get; set; }
+
+        [Postgrest.Attributes.Column("land_area_pyeong")]
+        public decimal? LandAreaPyeong { get; set; }
+
+        [Postgrest.Attributes.Column("building_area_pyeong")]
+        public decimal? BuildingAreaPyeong { get; set; }
+
+        [Postgrest.Attributes.Column("owner_name")]
+        public string? OwnerName { get; set; }
+
+        [Postgrest.Attributes.Column("owner_regno")]
+        public string? OwnerRegNo { get; set; }
+
+        [Postgrest.Attributes.Column("share_ratio")]
+        public string? ShareRatio { get; set; }
+
+        [Postgrest.Attributes.Column("owner_address")]
+        public string? OwnerAddress { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    [Postgrest.Attributes.Table("registry_gapgu_rows")]
+    internal class RegistryGapguRowTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("registry_run_id")]
+        public Guid? RegistryRunId { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("rank_no")]
+        public string? RankNo { get; set; }
+
+        [Postgrest.Attributes.Column("purpose")]
+        public string? Purpose { get; set; }
+
+        [Postgrest.Attributes.Column("receipt")]
+        public string? Receipt { get; set; }
+
+        [Postgrest.Attributes.Column("receipt_date")]
+        public DateTime? ReceiptDate { get; set; }
+
+        [Postgrest.Attributes.Column("right_holder")]
+        public string? RightHolder { get; set; }
+
+        [Postgrest.Attributes.Column("claim_amount")]
+        public decimal? ClaimAmount { get; set; }
+
+        [Postgrest.Attributes.Column("note_user_input")]
+        public string? NoteUserInput { get; set; }
+
+        [Postgrest.Attributes.Column("wage_claim_estimate_user_input")]
+        public bool? WageClaimEstimateUserInput { get; set; }
+
+        [Postgrest.Attributes.Column("target_owner")]
+        public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("jibun_number")]
+        public string? JibunNumber { get; set; }
+
+        [Postgrest.Attributes.Column("sort_index")]
+        public int? SortIndex { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    [Postgrest.Attributes.Table("registry_eulgu_rows")]
+    internal class RegistryEulguRowTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id", false)]
+        public Guid Id { get; set; }
+
+        [Postgrest.Attributes.Column("registry_run_id")]
+        public Guid? RegistryRunId { get; set; }
+
+        [Postgrest.Attributes.Column("property_id")]
+        public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("rank_no")]
+        public string? RankNo { get; set; }
+
+        [Postgrest.Attributes.Column("purpose")]
+        public string? Purpose { get; set; }
+
+        [Postgrest.Attributes.Column("receipt")]
+        public string? Receipt { get; set; }
+
+        [Postgrest.Attributes.Column("receipt_date")]
+        public DateTime? ReceiptDate { get; set; }
+
+        [Postgrest.Attributes.Column("mortgage_holder")]
+        public string? MortgageHolder { get; set; }
+
+        [Postgrest.Attributes.Column("max_claim_amount")]
+        public decimal? MaxClaimAmount { get; set; }
+
+        [Postgrest.Attributes.Column("debtor_user_input")]
+        public string? DebtorUserInput { get; set; }
+
+        [Postgrest.Attributes.Column("collateral_type_user_input")]
+        public string? CollateralTypeUserInput { get; set; }
+
+        [Postgrest.Attributes.Column("is_factory_mortgage_user_input")]
+        public bool? IsFactoryMortgageUserInput { get; set; }
+
+        [Postgrest.Attributes.Column("target_owner")]
+        public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("jibun_number")]
+        public string? JibunNumber { get; set; }
 
         [Postgrest.Attributes.Column("sort_index")]
         public int? SortIndex { get; set; }

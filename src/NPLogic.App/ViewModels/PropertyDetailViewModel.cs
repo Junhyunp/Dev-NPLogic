@@ -400,15 +400,21 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasNoRegistrySummaryImage = true;
 
-        // 담보물건 탭 표시용 상세 리스트 (요약 표 3종 - OCR 표 그대로)
+        // 담보물건 탭 표시용 등기부 정제 산출물 (run/basic_info/gapgu/eulgu)
         [ObservableProperty]
-        private ObservableCollection<RegistryGapguOwnershipShareRow> _registryGapguOwnershipShares = new();
+        private ObservableCollection<RegistryRun> _registryRuns = new();
 
         [ObservableProperty]
-        private ObservableCollection<RegistryGapguRightSummaryRow> _registryGapguRightSummaries = new();
+        private RegistryRun? _selectedRegistryRun;
 
         [ObservableProperty]
-        private ObservableCollection<RegistryEulguRightSummaryRow> _registryEulguRightSummaries = new();
+        private RegistryBasicInfo? _registryBasicInfo;
+
+        [ObservableProperty]
+        private ObservableCollection<RegistryGapguRow> _registryGapguRows = new();
+
+        [ObservableProperty]
+        private ObservableCollection<RegistryEulguRow> _registryEulguRows = new();
 
         /// <summary>
         /// 토지이용계획 상태
@@ -1618,26 +1624,43 @@ namespace NPLogic.ViewModels
 
             try
             {
-                // 신규 요약 표(3종) 조회
-                var ownershipShares = await _registryRepository.GetGapguOwnershipShareRowsAsync(propertyId);
-                var gapguRows = await _registryRepository.GetGapguRightSummaryRowsAsync(propertyId);
-                var eulguRows = await _registryRepository.GetEulguRightSummaryRowsAsync(propertyId);
+                // 물건별 등기부 세트(run) 목록 + 최신 세트 로드
+                var runs = await _registryRepository.GetRunsByPropertyIdAsync(propertyId);
+                RegistryRuns = new ObservableCollection<RegistryRun>(runs);
 
-                // 담보물건 탭 표시용 리스트 업데이트
-                RegistryGapguOwnershipShares = new ObservableCollection<RegistryGapguOwnershipShareRow>(ownershipShares);
-                RegistryGapguRightSummaries = new ObservableCollection<RegistryGapguRightSummaryRow>(gapguRows);
-                RegistryEulguRightSummaries = new ObservableCollection<RegistryEulguRightSummaryRow>(eulguRows);
+                var latestRun = runs.FirstOrDefault();
+                SelectedRegistryRun = latestRun;
 
-                var hasAnyRegistryData = ownershipShares.Any() || gapguRows.Any() || eulguRows.Any();
+                if (latestRun != null)
+                {
+                    RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(latestRun.Id);
+                    RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
+                        await _registryRepository.GetGapguRowsByRunIdAsync(latestRun.Id)
+                    );
+                    RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
+                        await _registryRepository.GetEulguRowsByRunIdAsync(latestRun.Id)
+                    );
+                }
+                else
+                {
+                    RegistryBasicInfo = null;
+                    RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
+                    RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
+                }
+
+                var hasAnyRegistryData =
+                    latestRun != null &&
+                    (RegistryBasicInfo != null || RegistryGapguRows.Any() || RegistryEulguRows.Any());
 
                 if (hasAnyRegistryData)
                 {
                     HasRegistryData = true;
 
                     // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
-                    var titleSummary = "등기부 문서(표제부) 미사용";
-                    var section1Summary = $"1) 소유지분현황 {ownershipShares.Count}행\n2) 갑구 {gapguRows.Count}행";
-                    var section2Summary = $"3) 을구 {eulguRows.Count}행";
+                    var deedSeqText = latestRun?.DeedSeq > 0 ? $"#{latestRun.DeedSeq}" : "";
+                    var titleSummary = $"등기부 세트 {deedSeqText} (정제 산출물)";
+                    var section1Summary = $"basic_info {(RegistryBasicInfo != null ? 1 : 0)}행\n갑구 {RegistryGapguRows.Count}행";
+                    var section2Summary = $"을구 {RegistryEulguRows.Count}행";
 
                     RegistrySummary = new RegistrySummaryModel
                     {
@@ -1652,7 +1675,7 @@ namespace NPLogic.ViewModels
                     OnPropertyChanged(nameof(RegistryMortgageSummary));
 
                     // 주소 일치 여부 확인 (D-010) - 추후 ExtractedData에서 주소 추출 시 구현
-                    IsAddressMatched = true;
+                    IsAddressMatched = RegistryBasicInfo?.IsAddressMatched ?? true;
 
                     // 등기부 요약 이미지 확인 (D-009) - 추후 OCR 시 캡처 이미지 저장 경로 사용
                     RegistrySummaryImagePath = null;
@@ -1673,6 +1696,75 @@ namespace NPLogic.ViewModels
                 HasRegistryData = false;
                 HasRegistrySummaryImage = false;
                 HasNoRegistrySummaryImage = true;
+            }
+        }
+
+        partial void OnSelectedRegistryRunChanged(RegistryRun? value)
+        {
+            _ = LoadSelectedRegistryRunAsync(value);
+        }
+
+        private async Task LoadSelectedRegistryRunAsync(RegistryRun? run)
+        {
+            if (_registryRepository == null || run == null)
+            {
+                RegistryBasicInfo = null;
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
+                return;
+            }
+
+            try
+            {
+                RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(run.Id);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
+                    await _registryRepository.GetGapguRowsByRunIdAsync(run.Id)
+                );
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
+                    await _registryRepository.GetEulguRowsByRunIdAsync(run.Id)
+                );
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"등기부 세트 로드 실패: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task SaveRegistryUserInputsAsync()
+        {
+            if (_registryRepository == null)
+            {
+                return;
+            }
+
+            try
+            {
+                foreach (var row in RegistryGapguRows)
+                {
+                    await _registryRepository.UpdateGapguUserFieldsAsync(
+                        row.Id,
+                        row.NoteUserInput,
+                        row.WageClaimEstimateUserInput
+                    );
+                }
+
+                foreach (var row in RegistryEulguRows)
+                {
+                    await _registryRepository.UpdateEulguUserFieldsAsync(
+                        row.Id,
+                        row.DebtorUserInput,
+                        row.CollateralTypeUserInput,
+                        row.IsFactoryMortgageUserInput
+                    );
+                }
+
+                SuccessMessage = "등기부 사용자 입력이 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"등기부 사용자 입력 저장 실패: {ex.Message}");
+                ErrorMessage = $"등기부 사용자 입력 저장 실패: {ex.Message}";
             }
         }
 

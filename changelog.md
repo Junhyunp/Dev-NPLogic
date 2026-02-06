@@ -39,8 +39,73 @@
 
 **남은 작업**
 - 2단계: EC2 OCR 서버 응답을 정제 스키마(basic_info/gapgu/eulgu) JSON으로 확장
-- 3단계: Supabase Edge Function(프록시/권한체크/저장) 설계 및 구현
-- 4단계: WPF 담보물건 탭 “등기부등본 정보” 패널을 정제 표 기반으로 교체 + 사용자 입력 저장 연동
+- (완료) 3단계: Supabase Edge Function(프록시/권한체크/저장) 설계 및 구현
+- (완료) 4단계: WPF 담보물건 탭 “등기부등본 정보” 패널을 정제 표 기반으로 교체 + 사용자 입력 저장 연동
+
+**2단계 진행(코드 반영 완료, 배포 필요)**
+- OCR 응답에 `refined` 필드를 추가하여 `basic_info/gapgu/eulgu` 정제 테이블을 JSON으로 제공
+  - `python/ocr_processor.py`: `build_refined_registry_tables()` 추가
+  - `python/server.py`: 응답 모델에 `refined`, `refined_version` 포함
+
+**3단계 진행(완료)**
+- Supabase Edge Function `ocr-registry-save` 배포
+  - 역할: 앱 요청(인증 필요) → EC2 OCR 서버 호출 → Supabase에서 DD 관련 값 조회 → `registry_runs/basic_info/gapgu/eulgu` 저장
+  - `deed_seq`, `jibeon_id`는 DB 트리거로 자동 부여
+
+**4단계 진행(완료)**
+- 담보물건 탭 “등기부등본 정보” 패널을 `registry_runs/basic_info/gapgu/eulgu` 기반으로 전환
+  - `registry_runs`에서 물건별 세트 목록 로드 후, 기본으로 최신 세트 선택
+  - 세트 선택(ComboBox) 시 해당 run의 `basic_info/gapgu/eulgu`를 다시 로드해 표로 표시
+- 사용자 입력 저장 연동
+  - 갑구: `note_user_input`, `wage_claim_estimate_user_input` 편집 가능 + 저장 버튼으로 DB 업데이트
+  - 을구: `debtor_user_input`, `collateral_type_user_input`, `is_factory_mortgage_user_input` 편집 가능 + 저장 버튼으로 DB 업데이트
+- 상위 메뉴 “등기부등본” 탭(RegistryTab)도 정제 스키마 기반으로 통일
+  - “저장된 정제 결과” 섹션 추가: 물건 선택 → run 선택 → `basic_info/gapgu/eulgu` 표 표시
+  - “OCR 처리 시작” 시 Supabase Edge Function `ocr-registry-save` 호출로 전환하여 `registry_runs/basic_info/gapgu/eulgu`에 저장 (중복 OCR 제거)
+  - 일괄 업로드(매칭 모드)에서 **PDF별 물건 선택 콤보박스**를 OCR 전부터 표시(Edge Function 저장을 위해 `property_id` 사전 지정 필요)
+  - 완료된 파일은 기본적으로 재처리 대상에서 제외(매칭 변경 시 “대기”로 되돌아가 재처리 가능)
+  - 사용자 입력 저장 버튼으로 갑구/을구 user_input 업데이트
+  - Edge Function 응답에 `summary_images`(최대 3페이지) + `refined`를 포함하도록 확장하여, UI에서 이미지/정제표를 즉시 확인 가능
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+- `src/NPLogic.App/Views/RegistryTab.xaml`
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+
+### 2026-02-05
+
+#### DD 업로드 중 `JWT expired (PGRST303)` 오류 대응
+
+**문제점**
+- DD 업로드(대량 Insert/Update) 도중 Supabase PostgREST가 `JWT expired`를 반환하며 저장이 연쇄 실패
+- 내부적으로는 세션 만료 시점 계산에서 `ExpiresAt()`의 시간대(Local/UTC) 처리 차이로 인해
+  만료를 제때 감지/갱신하지 못하는 케이스가 존재
+
+**해결 방법**
+- `SupabaseService.EnsureValidSessionAsync()`에서 `ExpiresAt()`의 `DateTime.Kind`를 고려해
+  **UTC/Local 기준을 올바르게 선택**하도록 보정
+- 장시간 작업 대비 **갱신 임계값을 10분**으로 상향하여 선제적으로 토큰을 Refresh
+
+**변경된 파일**
+- `src/NPLogic.Data/Services/SupabaseService.cs`
+
+#### DD 업로드 시 합계/요약 행 실패 카운트 개선
+
+**문제점**
+- 일부 은행(예: SHB) 데이터디스크 엑셀은 시트 하단에 **합계/요약 행**(키 컬럼 공란)이 포함됨
+- 기존 로직은 키(차주번호/보증서번호 등)가 비어있으면 “실패”로 집계하여, 실제 데이터 오류가 아닌데도 실패 건수가 발생
+- 로그의 `(행 N)`은 엑셀 행번호가 아니라 **처리 순번**이라 사용자 입장에서 원인 파악이 어려움
+
+**해결 방법**
+- 키가 비어있는 행을 **합계/요약/빈 행**으로 판별하면 실패가 아닌 **스킵**으로 처리
+- 디버그 로그에 처리 순번과 함께 **실제 엑셀 행번호(`ExcelRow`)** 를 함께 출력
+- 완료 메시지에 `스킵 N건`을 함께 표시
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+- `src/NPLogic.App/Services/DataDiskUploadService.cs`
 
 #### 대시보드 물건 누락(초기 페이지 스킵) 문제 해결
 
