@@ -104,6 +104,19 @@ namespace NPLogic.ViewModels
                 Progress = 0;
                 ErrorMessage = null;
             }
+
+            // MatchStatusText는 computed property이므로 수동 알림 필요
+            OnPropertyChanged(nameof(MatchStatusText));
+        }
+
+        partial void OnIsAutoMatchedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(MatchStatusText));
+        }
+
+        partial void OnMatchConfidenceChanged(double value)
+        {
+            OnPropertyChanged(nameof(MatchStatusText));
         }
     }
 
@@ -1101,13 +1114,42 @@ namespace NPLogic.ViewModels
 
                 foreach (var filePath in dialog.FileNames)
                 {
-                    // 중복 체크 (기존 목록)
-                    if (OcrPdfFiles.Any(f => f.FilePath == filePath))
+                    // 중복 체크 (기존 목록) - 완료/실패 파일은 재처리 대상으로 리셋
+                    var existingFile = OcrPdfFiles.FirstOrDefault(f => f.FilePath == filePath);
+                    if (existingFile != null)
+                    {
+                        if (existingFile.Status == "완료" || existingFile.Status == "실패")
+                        {
+                            existingFile.Status = "대기";
+                            existingFile.Progress = 0;
+                            existingFile.ErrorMessage = null;
+                            System.Diagnostics.Debug.WriteLine($"[SelectPdf] 기존 파일 리셋: {existingFile.FileName} → 대기");
+                        }
                         continue;
+                    }
 
-                    // 중복 체크 (매칭 목록)
-                    if (OcrPdfFilesWithMatch.Any(f => f.FilePath == filePath))
+                    // 중복 체크 (매칭 목록) - 완료/실패 파일은 재처리 대상으로 리셋 + 자동매칭 재실행
+                    var existingMatchFile = OcrPdfFilesWithMatch.FirstOrDefault(f => f.FilePath == filePath);
+                    if (existingMatchFile != null)
+                    {
+                        if (existingMatchFile.Status == "완료" || existingMatchFile.Status == "실패")
+                        {
+                            existingMatchFile.Status = "대기";
+                            existingMatchFile.Progress = 0;
+                            existingMatchFile.ErrorMessage = null;
+
+                            // 자동 매칭 재실행
+                            var (reMatchedProperty, reConfidence) = FindMatchingProperty(null, existingMatchFile.FileName);
+                            if (reMatchedProperty != null)
+                            {
+                                existingMatchFile.MatchedProperty = reMatchedProperty;
+                                existingMatchFile.MatchConfidence = reConfidence;
+                                existingMatchFile.IsAutoMatched = true;
+                            }
+                            System.Diagnostics.Debug.WriteLine($"[SelectPdf] 기존 매칭 파일 리셋: {existingMatchFile.FileName} → 대기, 매칭={reMatchedProperty?.PropertyNumber ?? "없음"}");
+                        }
                         continue;
+                    }
 
                     var fileInfo = new FileInfo(filePath);
 

@@ -1636,53 +1636,59 @@ namespace NPLogic.ViewModels
                 var gapList = await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
                 var eulList = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
                 Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu={gapList.Count}, eulgu={eulList.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
-                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(biList);
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapList);
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulList);
 
                 var hasAnyRegistryData =
                     latestRun != null &&
-                    (RegistryBasicInfoList.Any() || RegistryGapguRows.Any() || RegistryEulguRows.Any());
+                    (biList.Count > 0 || gapList.Count > 0 || eulList.Count > 0);
 
                 Debug.WriteLine($"[LoadRegistrySummary] hasAnyRegistryData={hasAnyRegistryData}");
-                if (hasAnyRegistryData)
+
+                // UI 스레드에서 컬렉션 교체 및 속성 업데이트 보장
+                System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
-                    HasRegistryData = true;
-                    Debug.WriteLine($"[LoadRegistrySummary] HasRegistryData set to TRUE, biList={RegistryBasicInfoList.Count}");
+                    RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(biList);
+                    RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapList);
+                    RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulList);
 
-                    // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
-                    var deedSeqText = latestRun?.DeedSeq > 0 ? $"#{latestRun.DeedSeq}" : "";
-                    var titleSummary = $"등기부 세트 {deedSeqText} (정제 산출물)";
-                    var section1Summary = $"basic_info {RegistryBasicInfoList.Count}행\n갑구 {RegistryGapguRows.Count}행";
-                    var section2Summary = $"을구 {RegistryEulguRows.Count}행";
-
-                    RegistrySummary = new RegistrySummaryModel
+                    if (hasAnyRegistryData)
                     {
-                        TitleSummary = titleSummary,
-                        Section1Summary = section1Summary,
-                        Section2Summary = section2Summary,
-                        RegistryAddress = "" // 추후 ExtractedData에서 파싱 가능
-                    };
+                        HasRegistryData = true;
+                        Debug.WriteLine($"[LoadRegistrySummary] HasRegistryData set to TRUE, biList={biList.Count}");
 
-                    OnPropertyChanged(nameof(RegistryTitleSummary));
-                    OnPropertyChanged(nameof(RegistryOwnershipSummary));
-                    OnPropertyChanged(nameof(RegistryMortgageSummary));
+                        // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
+                        var deedSeqText = latestRun?.DeedSeq > 0 ? $"#{latestRun.DeedSeq}" : "";
+                        var titleSummary = $"등기부 세트 {deedSeqText} (정제 산출물)";
+                        var section1Summary = $"basic_info {biList.Count}행\n갑구 {gapList.Count}행";
+                        var section2Summary = $"을구 {eulList.Count}행";
 
-                    // 주소 일치 여부 확인 (D-010) - 추후 ExtractedData에서 주소 추출 시 구현
-                    IsAddressMatched = RegistryBasicInfoList.FirstOrDefault()?.IsAddressMatched ?? true;
+                        RegistrySummary = new RegistrySummaryModel
+                        {
+                            TitleSummary = titleSummary,
+                            Section1Summary = section1Summary,
+                            Section2Summary = section2Summary,
+                            RegistryAddress = "" // 추후 ExtractedData에서 파싱 가능
+                        };
 
-                    // 등기부 요약 이미지 확인 (D-009) - 추후 OCR 시 캡처 이미지 저장 경로 사용
-                    RegistrySummaryImagePath = null;
-                    HasRegistrySummaryImage = false;
-                    HasNoRegistrySummaryImage = true;
-                }
-                else
-                {
-                    HasRegistryData = false;
-                    HasRegistrySummaryImage = false;
-                    HasNoRegistrySummaryImage = true;
-                    RegistrySummary = new RegistrySummaryModel();
-                }
+                        OnPropertyChanged(nameof(RegistryTitleSummary));
+                        OnPropertyChanged(nameof(RegistryOwnershipSummary));
+                        OnPropertyChanged(nameof(RegistryMortgageSummary));
+
+                        // 주소 일치 여부 확인
+                        IsAddressMatched = biList.FirstOrDefault()?.IsAddressMatched ?? true;
+
+                        // 등기부 요약 이미지 확인
+                        RegistrySummaryImagePath = null;
+                        HasRegistrySummaryImage = false;
+                        HasNoRegistrySummaryImage = true;
+                    }
+                    else
+                    {
+                        HasRegistryData = false;
+                        HasRegistrySummaryImage = false;
+                        HasNoRegistrySummaryImage = true;
+                        RegistrySummary = new RegistrySummaryModel();
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -3414,10 +3420,27 @@ namespace NPLogic.ViewModels
                 _previousTabIndex = value;
             }
 
-            // 담보물건 탭으로 이동 시 등기부 요약 갱신
+            // 담보물건 탭으로 이동 시 등기부 요약 갱신 (최신 OCR 결과 반영)
             if (value == 2 && Property != null)
             {
-                _ = LoadRegistrySummaryAsync(Property.Id);
+                _ = RefreshRegistryDataAsync(Property.Id);
+            }
+        }
+
+        /// <summary>
+        /// 등기부 데이터 새로고침 (에러 로깅 포함)
+        /// </summary>
+        private async Task RefreshRegistryDataAsync(Guid propertyId)
+        {
+            try
+            {
+                Debug.WriteLine($"[RefreshRegistryData] 담보물건 탭 진입 → 등기부 데이터 새로고침 시작 (propertyId={propertyId})");
+                await LoadRegistrySummaryAsync(propertyId);
+                Debug.WriteLine($"[RefreshRegistryData] 완료: basicInfo={RegistryBasicInfoList.Count}, gapgu={RegistryGapguRows.Count}, eulgu={RegistryEulguRows.Count}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[RefreshRegistryData] 등기부 데이터 새로고침 실패: {ex.Message}\n{ex.StackTrace}");
             }
         }
     }

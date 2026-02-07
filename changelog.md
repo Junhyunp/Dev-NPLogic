@@ -24,10 +24,6 @@
 - 등기부등본 탭: PDF 업로드 + OCR 처리 전용으로 단순화 (결과 조회 UI 제거)
 - 결과 조회: 비핵심 → 담보물건 탭의 "등기부등본 정보" 패널에서만 확인
 
-**알려진 이슈 (다음 세션 수정 예정)**
-- PDF 재업로드 시 기존 매칭 상태가 유지되지 않아 수동 매칭 필요한 경우 발생
-- OCR 완료 후 담보물건 탭으로 전환 시 최신 결과가 즉시 반영되지 않는 경우 있음
-
 **변경된 파일/서비스**
 - Supabase Edge Function `ocr-registry-save` v11
 - `src/NPLogic.Data/Repositories/RegistryRepository.cs`
@@ -35,6 +31,33 @@
 - `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
 - `src/NPLogic.App/Views/RegistryTab.xaml`
 - `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+
+#### PDF 재업로드 시 기존 완료 파일 매칭/재처리 문제 수정
+
+**문제점**
+- 이미 OCR 완료된 PDF를 다시 선택하면 중복 체크로 건너뛰어, 재처리 불가
+- 이전 매칭 정보(다른 물건에 연결된 상태)가 그대로 유지되어 잘못된 물건에 데이터 저장
+- `MatchStatusText` (computed property)가 `IsAutoMatched`/`MatchConfidence` 변경 시 UI에 알림되지 않음
+
+**해결 방법**
+- 파일 선택 시 이미 "완료"/"실패" 상태인 파일은 **"대기"로 리셋**하고 자동 매칭을 재실행
+- `OnMatchedPropertyChanged`, `OnIsAutoMatchedChanged`, `OnMatchConfidenceChanged`에서 `MatchStatusText` 변경 알림 추가
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+
+#### OCR 완료 후 담보물건 탭 데이터 갱신 문제 수정
+
+**문제점**
+- 탭 전환 시 `LoadRegistrySummaryAsync`가 fire-and-forget으로 호출되어 에러가 무시됨
+- `ObservableCollection` 교체가 비-UI 스레드에서 일어날 수 있어 바인딩 업데이트 누락 가능
+
+**해결 방법**
+- 탭 전환 핸들러에 `RefreshRegistryDataAsync` 래퍼 추가 (에러 로깅 포함)
+- `LoadRegistrySummaryAsync` 내 컬렉션 교체 및 속성 업데이트를 `Dispatcher.Invoke`로 UI 스레드 보장
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
 
 #### DD 업로드 시 합계/요약 행 실패 카운트 개선
 
