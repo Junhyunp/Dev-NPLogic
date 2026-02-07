@@ -1617,13 +1617,10 @@ namespace NPLogic.ViewModels
         {
             if (rows.Count <= 1) return rows;
 
-            // 병합 키: 등기목적 + 권리자 + 청구금액 + 대상소유자
-            // (reference/Auction-Certificate의 _dedup_with_remark content_cols 기준)
+            // 병합 키: 접수정보 + 대상소유자 (접수정보가 같아야 같은 법률행위)
             var groups = rows
                 .GroupBy(r => (
-                    Purpose: NormalizeForMerge(r.Purpose),
-                    RightHolder: NormalizeForMerge(r.RightHolder),
-                    ClaimAmount: r.ClaimAmount?.ToString("0") ?? "",
+                    Receipt: NormalizeForMerge(r.Receipt),
                     TargetOwner: NormalizeForMerge(r.TargetOwner)
                 ));
 
@@ -1647,13 +1644,6 @@ namespace NPLogic.ViewModels
                     .OrderBy(j => j)
                     .ToList();
 
-                // 접수정보가 다른 경우 결합
-                var receipts = items
-                    .Select(r => r.Receipt?.Trim())
-                    .Where(r => !string.IsNullOrEmpty(r))
-                    .Distinct()
-                    .ToList();
-
                 var mergedRow = new RegistryGapguRow
                 {
                     Id = first.Id,
@@ -1661,7 +1651,7 @@ namespace NPLogic.ViewModels
                     PropertyId = first.PropertyId,
                     RankNo = first.RankNo,
                     Purpose = first.Purpose,
-                    Receipt = receipts.Count <= 1 ? first.Receipt : string.Join(", ", receipts),
+                    Receipt = first.Receipt,
                     ReceiptDate = first.ReceiptDate,
                     RightHolder = first.RightHolder,
                     ClaimAmount = first.ClaimAmount,
@@ -1686,12 +1676,10 @@ namespace NPLogic.ViewModels
         {
             if (rows.Count <= 1) return rows;
 
-            // 병합 키: 등기목적 + 근저당권자 + 채권최고액 + 대상소유자
+            // 병합 키: 접수정보 + 대상소유자 (접수정보가 같아야 같은 법률행위)
             var groups = rows
                 .GroupBy(r => (
-                    Purpose: NormalizeForMerge(r.Purpose),
-                    MortgageHolder: NormalizeForMerge(r.MortgageHolder),
-                    MaxClaimAmount: r.MaxClaimAmount?.ToString("0") ?? "",
+                    Receipt: NormalizeForMerge(r.Receipt),
                     TargetOwner: NormalizeForMerge(r.TargetOwner)
                 ));
 
@@ -1714,12 +1702,6 @@ namespace NPLogic.ViewModels
                     .OrderBy(j => j)
                     .ToList();
 
-                var receipts = items
-                    .Select(r => r.Receipt?.Trim())
-                    .Where(r => !string.IsNullOrEmpty(r))
-                    .Distinct()
-                    .ToList();
-
                 var mergedRow = new RegistryEulguRow
                 {
                     Id = first.Id,
@@ -1727,7 +1709,7 @@ namespace NPLogic.ViewModels
                     PropertyId = first.PropertyId,
                     RankNo = first.RankNo,
                     Purpose = first.Purpose,
-                    Receipt = receipts.Count <= 1 ? first.Receipt : string.Join(", ", receipts),
+                    Receipt = first.Receipt,
                     ReceiptDate = first.ReceiptDate,
                     MortgageHolder = first.MortgageHolder,
                     MaxClaimAmount = first.MaxClaimAmount,
