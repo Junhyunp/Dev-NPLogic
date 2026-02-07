@@ -302,11 +302,21 @@ namespace NPLogic.Views
                 {
                     content = cachedView;
                     
-                    // 물건이 변경된 경우에만 데이터 갱신
+                    // 물건이 변경된 경우 전체 데이터 갱신
                     if (propertyChanged)
                     {
                         token.ThrowIfCancellationRequested();
                         await RefreshTabDataAsync(tabName, selectedPropertyId, token);
+                    }
+                    // 담보물건 탭: 같은 물건이라도 등기부 데이터가 OCR로 변경될 수 있으므로 항상 갱신
+                    else if (tabName == "CollateralProperty" && _tabViewModelCache.TryGetValue(tabName, out var cachedVm) && cachedVm is PropertyDetailViewModel propVm)
+                    {
+                        token.ThrowIfCancellationRequested();
+                        System.Diagnostics.Debug.WriteLine($"[NonCoreView] 담보물건 탭 복귀 → 등기부 데이터 새로고침 (propertyId={selectedPropertyId})");
+                        if (selectedPropertyId.HasValue)
+                        {
+                            await propVm.RefreshRegistryDataOnlyAsync(selectedPropertyId.Value);
+                        }
                     }
                 }
                 else

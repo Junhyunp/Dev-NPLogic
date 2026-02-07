@@ -3428,6 +3428,14 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
+        /// 등기부 데이터만 외부에서 새로고침 요청 시 (NonCoreView 탭 복귀 등)
+        /// </summary>
+        public async Task RefreshRegistryDataOnlyAsync(Guid propertyId)
+        {
+            await RefreshRegistryDataAsync(propertyId);
+        }
+
+        /// <summary>
         /// 등기부 데이터 새로고침 (에러 로깅 포함)
         /// </summary>
         private async Task RefreshRegistryDataAsync(Guid propertyId)

@@ -56,8 +56,15 @@
 - 탭 전환 핸들러에 `RefreshRegistryDataAsync` 래퍼 추가 (에러 로깅 포함)
 - `LoadRegistrySummaryAsync` 내 컬렉션 교체 및 속성 업데이트를 `Dispatcher.Invoke`로 UI 스레드 보장
 
+**근본 원인 추가 발견 및 수정**
+- `NonCoreView`의 탭 캐시 시스템에서, 같은 물건에 대해 "등기부등본" → "비핵심" → "담보물건" 탭 전환 시
+  `propertyChanged = false`로 판단되어 **캐시된 데이터를 그대로 재사용** → OCR 이후 새 데이터 미반영
+- `LoadFunctionContentAsync`에서 "CollateralProperty" 탭 복귀 시 등기부 데이터만 선택적으로 새로고침하도록 수정
+- `PropertyDetailViewModel.RefreshRegistryDataOnlyAsync()` public 메서드 추가
+
 **변경된 파일**
 - `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/NonCoreView.xaml.cs`
 
 #### DD 업로드 시 합계/요약 행 실패 카운트 개선
 
