@@ -1610,6 +1610,132 @@ namespace NPLogic.ViewModels
         #region 등기부 요약 관련 (D-002, D-009, D-010)
 
         /// <summary>
+        /// 갑구 중복 행 병합: 접수정보+대상소유자가 동일한 행은 지번번호를 쉼표로 결합
+        /// (reference/Auction-Certificate의 _dedup_with_remark 로직 참조)
+        /// </summary>
+        private static List<RegistryGapguRow> MergeGapguDuplicates(List<RegistryGapguRow> rows)
+        {
+            if (rows.Count <= 1) return rows;
+
+            var groups = rows
+                .GroupBy(r => (
+                    Receipt: NormalizeForMerge(r.Receipt),
+                    TargetOwner: NormalizeForMerge(r.TargetOwner)
+                ));
+
+            var merged = new List<RegistryGapguRow>();
+            foreach (var group in groups)
+            {
+                var items = group.OrderBy(r => r.SortIndex ?? 0).ToList();
+                var first = items[0];
+
+                if (items.Count == 1)
+                {
+                    merged.Add(first);
+                    continue;
+                }
+
+                // 지번번호 결합
+                var jibunNumbers = items
+                    .Select(r => r.JibunNumber?.Trim())
+                    .Where(j => !string.IsNullOrEmpty(j))
+                    .Distinct()
+                    .OrderBy(j => j)
+                    .ToList();
+
+                var mergedRow = new RegistryGapguRow
+                {
+                    Id = first.Id,
+                    RegistryRunId = first.RegistryRunId,
+                    PropertyId = first.PropertyId,
+                    RankNo = first.RankNo,
+                    Purpose = first.Purpose,
+                    Receipt = first.Receipt,
+                    ReceiptDate = first.ReceiptDate,
+                    RightHolder = first.RightHolder,
+                    ClaimAmount = first.ClaimAmount,
+                    NoteUserInput = first.NoteUserInput,
+                    WageClaimEstimateUserInput = first.WageClaimEstimateUserInput,
+                    TargetOwner = first.TargetOwner,
+                    JibunNumber = string.Join(", ", jibunNumbers),
+                    SortIndex = first.SortIndex,
+                    CreatedAt = first.CreatedAt,
+                    UpdatedAt = first.UpdatedAt
+                };
+                merged.Add(mergedRow);
+            }
+
+            return merged.OrderBy(r => r.SortIndex ?? 0).ToList();
+        }
+
+        /// <summary>
+        /// 을구 중복 행 병합: 접수정보+대상소유자가 동일한 행은 지번번호를 쉼표로 결합
+        /// </summary>
+        private static List<RegistryEulguRow> MergeEulguDuplicates(List<RegistryEulguRow> rows)
+        {
+            if (rows.Count <= 1) return rows;
+
+            var groups = rows
+                .GroupBy(r => (
+                    Receipt: NormalizeForMerge(r.Receipt),
+                    TargetOwner: NormalizeForMerge(r.TargetOwner)
+                ));
+
+            var merged = new List<RegistryEulguRow>();
+            foreach (var group in groups)
+            {
+                var items = group.OrderBy(r => r.SortIndex ?? 0).ToList();
+                var first = items[0];
+
+                if (items.Count == 1)
+                {
+                    merged.Add(first);
+                    continue;
+                }
+
+                var jibunNumbers = items
+                    .Select(r => r.JibunNumber?.Trim())
+                    .Where(j => !string.IsNullOrEmpty(j))
+                    .Distinct()
+                    .OrderBy(j => j)
+                    .ToList();
+
+                var mergedRow = new RegistryEulguRow
+                {
+                    Id = first.Id,
+                    RegistryRunId = first.RegistryRunId,
+                    PropertyId = first.PropertyId,
+                    RankNo = first.RankNo,
+                    Purpose = first.Purpose,
+                    Receipt = first.Receipt,
+                    ReceiptDate = first.ReceiptDate,
+                    MortgageHolder = first.MortgageHolder,
+                    MaxClaimAmount = first.MaxClaimAmount,
+                    DebtorUserInput = first.DebtorUserInput,
+                    CollateralTypeUserInput = first.CollateralTypeUserInput,
+                    IsFactoryMortgageUserInput = first.IsFactoryMortgageUserInput,
+                    TargetOwner = first.TargetOwner,
+                    JibunNumber = string.Join(", ", jibunNumbers),
+                    SortIndex = first.SortIndex,
+                    CreatedAt = first.CreatedAt,
+                    UpdatedAt = first.UpdatedAt
+                };
+                merged.Add(mergedRow);
+            }
+
+            return merged.OrderBy(r => r.SortIndex ?? 0).ToList();
+        }
+
+        /// <summary>
+        /// 병합 키 정규화: 공백 제거, 소문자, null → ""
+        /// </summary>
+        private static string NormalizeForMerge(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return "";
+            return value.Replace(" ", "").Replace("\n", "").Replace("\r", "").Trim().ToLowerInvariant();
+        }
+
+        /// <summary>
         /// 등기부 요약 정보 로드
         /// </summary>
         private async Task LoadRegistrySummaryAsync(Guid propertyId)
@@ -1633,9 +1759,14 @@ namespace NPLogic.ViewModels
 
                 // property 기준으로 모든 run의 데이터를 합산 조회
                 var biList = await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId);
-                var gapList = await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
-                var eulList = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
-                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu={gapList.Count}, eulgu={eulList.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
+                var gapListRaw = await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
+                var eulListRaw = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu(raw)={gapListRaw.Count}, eulgu(raw)={eulListRaw.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
+
+                // 중복 행 병합: 접수정보+대상소유자가 같은 행은 지번번호를 쉼표로 결합
+                var gapList = MergeGapguDuplicates(gapListRaw);
+                var eulList = MergeEulguDuplicates(eulListRaw);
+                Debug.WriteLine($"[LoadRegistrySummary] 병합 후: gapgu={gapList.Count}, eulgu={eulList.Count}");
 
                 var hasAnyRegistryData =
                     latestRun != null &&
