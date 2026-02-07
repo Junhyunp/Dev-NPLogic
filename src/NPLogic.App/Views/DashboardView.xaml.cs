@@ -651,6 +651,9 @@ namespace NPLogic.Views
                             await _cachedRegistryViewModel.LoadAvailablePropertiesAsync();
                         }
 
+                        // 탭 진입 시 이전 PDF 파일 목록 초기화 (처리 완료된 파일이 남아있는 문제 방지)
+                        _cachedRegistryViewModel.CancelAllOcrPdfFilesCommand.Execute(null);
+
                         _cachedRegistryTab.DataContext = new { RegistryViewModel = _cachedRegistryViewModel };
                         view = _cachedRegistryTab;
                     }
