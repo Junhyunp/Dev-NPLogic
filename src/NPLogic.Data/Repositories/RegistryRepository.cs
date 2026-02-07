@@ -217,11 +217,16 @@ namespace NPLogic.Data.Repositories
             var url = $"{_supabaseService.Url}/functions/v1/{OcrRegistrySaveFunctionName}";
             var fileName = Path.GetFileName(pdfFilePath);
 
+            System.Diagnostics.Debug.WriteLine($"[EdgeFunction] fileName={fileName}");
+
             using var fileStream = new FileStream(pdfFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var content = new MultipartFormDataContent();
             using var streamContent = new StreamContent(fileStream);
             streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
-            content.Add(streamContent, "file", fileName);
+            content.Add(streamContent, "file", "upload.pdf");
+            // NOTE: .NET은 한글/특수문자 파일명을 RFC 5987로 인코딩하여 Deno에서 깨짐.
+            // 원본 파일명은 별도 form-data 필드(source_pdf_name)로 전달.
+            content.Add(new StringContent(fileName), "source_pdf_name");
             content.Add(new StringContent(propertyId.ToString()), "property_id");
             content.Add(new StringContent(includeSummaryImages ? "true" : "false"), "include_summary_images");
             content.Add(new StringContent(summaryImageMaxPages.ToString()), "summary_image_max_pages");

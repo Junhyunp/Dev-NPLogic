@@ -1632,20 +1632,23 @@ namespace NPLogic.ViewModels
                 SelectedRegistryRun = latestRun;
 
                 // property 기준으로 모든 run의 데이터를 합산 조회
-                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
-                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId));
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                    await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId));
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                    await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId));
+                var biList = await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId);
+                var gapList = await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
+                var eulList = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu={gapList.Count}, eulgu={eulList.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(biList);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapList);
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulList);
 
                 var hasAnyRegistryData =
                     latestRun != null &&
                     (RegistryBasicInfoList.Any() || RegistryGapguRows.Any() || RegistryEulguRows.Any());
 
+                Debug.WriteLine($"[LoadRegistrySummary] hasAnyRegistryData={hasAnyRegistryData}");
                 if (hasAnyRegistryData)
                 {
                     HasRegistryData = true;
+                    Debug.WriteLine($"[LoadRegistrySummary] HasRegistryData set to TRUE, biList={RegistryBasicInfoList.Count}");
 
                     // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
                     var deedSeqText = latestRun?.DeedSeq > 0 ? $"#{latestRun.DeedSeq}" : "";

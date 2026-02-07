@@ -4,75 +4,52 @@
 
 ## [Unreleased]
 
-### 2026-02-04
+### 2026-02-07
 
-#### 등기부등본 OCR 요약 표 저장 스키마 개편 (진행중)
+#### 등기부등본 OCR 전체 파이프라인 개편
 
-**목표**
-- "주요 등기사항 요약"의 3개 표를 DB에 **표 형태 그대로** 저장/표시
-- 물건별로 **최신 1회 결과만 유지(덮어쓰기)**
+**Edge Function `ocr-registry-save` v11**
+- **인증**: `verify_jwt: false` + `supabase.auth.getUser()` 수동 검증 (ES256/HS256 모두 지원)
+- **파일명 전달**: .NET의 한글 파일명 인코딩 문제 해결 → `source_pdf_name` 별도 form-data 필드로 전달
+- **덮어쓰기**: "물건+PDF파일명" 단위 DELETE → INSERT (같은 파일 재업로드 시 교체, 다른 파일은 유지)
+- **deed_seq**: 트리거 auto-increment 대신 PDF 파일명에서 직접 추출 (R-0003-1-05 → deed_seq=5)
+- **DD 주소 (물건지 DD)**: `registry_sheet_data` 테이블에서 지번별 개별 주소 조회 후 PDF 파일명 주소와 매칭
+- **등기 주소 (물건지 등기부등본)**: PDF 파일명에서 주소 추출 (reference/Auction-Certificate 기존 로직과 동일)
+- **지번번호**: deed_seq를 2자리 문자열(01, 02...)로 갑구/을구 행에 자동 채움
 
-**진행 상황**
-- [완료] Supabase에 신규 테이블 3개 추가 + RLS 정책 적용
-  - `registry_gapgu_ownership_shares`
-  - `registry_gapgu_rights_summary`
-  - `registry_eulgu_rights_summary`
-- [완료] 앱 저장/조회 경로를 신규 테이블로 전환(덮어쓰기)
-  - OCR 저장: 기존 `registry_owners/registry_rights` 대신 신규 3개 테이블에 저장
-  - 담보물건/권리분석시트 조회: 신규 3개 테이블에서 직접 조회
-- [완료] 레거시 테이블 삭제 적용
-  - 삭제: `registry_documents`, `registry_owners`, `registry_rights`
-  - 유지: `registry_sheet_data` (엑셀 Sheet C-2)
+**WPF 앱 변경**
+- basic_info: 단일 객체 → `ObservableCollection<RegistryBasicInfo>` (DataGrid N행)
+- 갑구/을구: run 단위 → property 단위 합산 조회 (여러 PDF 결과 통합)
+- 갑구/을구 DataGrid에 `지번번호` 컬럼 추가
+- 등기부등본 탭: PDF 업로드 + OCR 처리 전용으로 단순화 (결과 조회 UI 제거)
+- 결과 조회: 비핵심 → 담보물건 탭의 "등기부등본 정보" 패널에서만 확인
 
-#### 등기부 정제 산출물(basic_info/gapgu/eulgu) 스키마 도입 (1단계 완료)
+**알려진 이슈 (다음 세션 수정 예정)**
+- PDF 재업로드 시 기존 매칭 상태가 유지되지 않아 수동 매칭 필요한 경우 발생
+- OCR 완료 후 담보물건 탭으로 전환 시 최신 결과가 즉시 반영되지 않는 경우 있음
 
-**배경**
-- 담보물건 탭에 표시할 최종 표는 “요약 원문표”가 아니라 `reference/Auction-Certificate`의 산출물 스키마(`basic_info.csv`, `gapgu.csv`, `eulgu.csv`) 기반
-- 물건(`property_id`)당 등기부 결과 세트가 **여러 개** 저장될 수 있어 세트(run) 단위가 필요
+**변경된 파일/서비스**
+- Supabase Edge Function `ocr-registry-save` v11
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/RegistryTab.xaml`
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
 
-**1단계(완료)**
-- Supabase에 아래 신규 테이블/제약/RLS 정책을 추가
-  - `registry_runs`: 물건별 등기부 결과 세트(여러 개) + `deed_seq` 자동 부여 + `jibeon_id` 자동 생성
-  - `registry_basic_info`: 세트당 1행 요약(README의 11컬럼)
-  - `registry_gapgu_rows`: 세트당 N행(사용자 입력: `note_user_input`, `wage_claim_estimate_user_input`)
-  - `registry_eulgu_rows`: 세트당 N행(사용자 입력: `debtor_user_input`, `collateral_type_user_input`, `is_factory_mortgage_user_input`) ※ 을구 “비고” 컬럼 없음
+#### DD 업로드 시 합계/요약 행 실패 카운트 개선
 
-**남은 작업**
-- 2단계: EC2 OCR 서버 응답을 정제 스키마(basic_info/gapgu/eulgu) JSON으로 확장
-- (완료) 3단계: Supabase Edge Function(프록시/권한체크/저장) 설계 및 구현
-- (완료) 4단계: WPF 담보물건 탭 “등기부등본 정보” 패널을 정제 표 기반으로 교체 + 사용자 입력 저장 연동
+**문제점**
+- 일부 은행(예: SHB) 데이터디스크 엑셀은 시트 하단에 합계/요약 행(키 컬럼 공란)이 포함됨
+- 기존 로직은 키가 비어있으면 "실패"로 집계하여 실제 데이터 오류가 아닌데도 실패 건수 발생
 
-**2단계 진행(코드 반영 완료, 배포 필요)**
-- OCR 응답에 `refined` 필드를 추가하여 `basic_info/gapgu/eulgu` 정제 테이블을 JSON으로 제공
-  - `python/ocr_processor.py`: `build_refined_registry_tables()` 추가
-  - `python/server.py`: 응답 모델에 `refined`, `refined_version` 포함
-
-**3단계 진행(완료)**
-- Supabase Edge Function `ocr-registry-save` 배포
-  - 역할: 앱 요청(인증 필요) → EC2 OCR 서버 호출 → Supabase에서 DD 관련 값 조회 → `registry_runs/basic_info/gapgu/eulgu` 저장
-  - `deed_seq`, `jibeon_id`는 DB 트리거로 자동 부여
-
-**4단계 진행(완료)**
-- 담보물건 탭 “등기부등본 정보” 패널을 `registry_runs/basic_info/gapgu/eulgu` 기반으로 전환
-  - `registry_runs`에서 물건별 세트 목록 로드 후, 기본으로 최신 세트 선택
-  - 세트 선택(ComboBox) 시 해당 run의 `basic_info/gapgu/eulgu`를 다시 로드해 표로 표시
-- 사용자 입력 저장 연동
-  - 갑구: `note_user_input`, `wage_claim_estimate_user_input` 편집 가능 + 저장 버튼으로 DB 업데이트
-  - 을구: `debtor_user_input`, `collateral_type_user_input`, `is_factory_mortgage_user_input` 편집 가능 + 저장 버튼으로 DB 업데이트
-- 상위 메뉴 “등기부등본” 탭(RegistryTab)도 정제 스키마 기반으로 통일
-  - “저장된 정제 결과” 섹션 추가: 물건 선택 → run 선택 → `basic_info/gapgu/eulgu` 표 표시
-  - “OCR 처리 시작” 시 Supabase Edge Function `ocr-registry-save` 호출로 전환하여 `registry_runs/basic_info/gapgu/eulgu`에 저장 (중복 OCR 제거)
-  - 일괄 업로드(매칭 모드)에서 **PDF별 물건 선택 콤보박스**를 OCR 전부터 표시(Edge Function 저장을 위해 `property_id` 사전 지정 필요)
-  - 완료된 파일은 기본적으로 재처리 대상에서 제외(매칭 변경 시 “대기”로 되돌아가 재처리 가능)
-  - 사용자 입력 저장 버튼으로 갑구/을구 user_input 업데이트
-  - Edge Function 응답에 `summary_images`(최대 3페이지) + `refined`를 포함하도록 확장하여, UI에서 이미지/정제표를 즉시 확인 가능
+**해결 방법**
+- 키가 비어있는 행을 합계/요약/빈 행으로 판별하면 실패가 아닌 **스킵**으로 처리
+- 디버그 로그에 실제 엑셀 행번호(`ExcelRow`) 함께 출력
+- 완료 메시지에 `스킵 N건` 표시
 
 **변경된 파일**
-- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
-- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
-- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
-- `src/NPLogic.App/Views/RegistryTab.xaml`
-- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+- `src/NPLogic.App/Services/DataDiskUploadService.cs`
 
 ### 2026-02-05
 
@@ -91,67 +68,6 @@
 **변경된 파일**
 - `src/NPLogic.Data/Services/SupabaseService.cs`
 
-#### 등기부등본 OCR: Edge Function 인증 및 기능 개선
-
-**문제점 1 – `Invalid JWT` (401)**
-- `supabase-csharp` 라이브러리가 ES256 알고리즘으로 JWT를 발급하는데,
-  Edge Function의 `verify_jwt: true`(HS256만 지원)와 호환되지 않아 인증 실패
-
-**해결 방법**
-- Edge Function `verify_jwt: false`로 변경 후, 함수 내부에서 `supabase.auth.getUser()`로 수동 인증 검증
-- ES256/HS256 모두 지원, RLS도 동일하게 적용
-
-**문제점 2 – OCR 서버 `400 Bad Request`**
-- Edge Function이 파일을 `Blob`으로 전달 시 파일명이 누락되어 FastAPI의 `.pdf` 확장자 검증 실패
-
-**해결 방법**
-- `new File([bytes], fileName, { type: "application/pdf" })`로 파일 객체를 생성하여 파일명 보존
-
-**기능 변경 – 덮어쓰기 모드**
-- 기존: 같은 물건에 OCR을 여러 번 돌리면 `registry_runs`에 세트가 누적
-- 변경: 동일 물건에 대해 **기존 run + 하위 데이터를 DELETE 후 INSERT** (항상 최신 1개만 유지)
-- UI에서 세트 선택 ComboBox 제거, 자동으로 최신 결과 표시
-
-**UI 개선 – basic_info 레이아웃**
-- 기존: 4열 Grid + TextBlock (라벨/값이 구분 없이 나열)
-- 변경: **Border 테두리가 있는 키-값 표** (라벨 셀 배경색 구분, 갑구/을구 DataGrid와 시각적 통일)
-
-**여러 PDF 지원 (물건당 N개 PDF = N행 basic_info)**
-- 기존: 물건 전체 DELETE → INSERT → 마지막 PDF만 남음
-- 변경: **"같은 물건 + 같은 PDF 파일명"** 단위로만 기존 run을 삭제하고, 다른 PDF의 결과는 유지
-- `deed_seq` (01, 02, ...) 를 `지번번호`로 갑구/을구 행에 자동 채움
-- basic_info를 **단일 객체 → 리스트**(DataGrid)로 변경하여 여러 PDF 결과를 N행으로 표시
-- 갑구/을구도 run 단위가 아닌 **물건(property) 단위로 합산 조회**
-
-**basic_info UI 통일**
-- 기존: 4열 Grid + TextBlock (키-값 레이아웃)
-- 변경: **DataGrid** (갑구/을구와 동일한 표 형태, 11개 컬럼)
-  - 지번일련번호, 물건지(등기), 물건지(DD), 일치여부, 담보물형태, 대지면적(평), 건물면적(평), 소유자, 등록번호, 최종지분, 소유자주소
-
-**변경된 파일/서비스**
-- Supabase Edge Function `ocr-registry-save` v7
-- `src/NPLogic.Data/Repositories/RegistryRepository.cs` (property 단위 조회 메서드 추가)
-- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs` (리스트 + property 합산 조회)
-- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs` (리스트 + property 합산 조회)
-- `src/NPLogic.App/Views/RegistryTab.xaml` (basic_info DataGrid)
-- `src/NPLogic.App/Views/CollateralPropertyView.xaml` (basic_info DataGrid)
-
-#### DD 업로드 시 합계/요약 행 실패 카운트 개선
-
-**문제점**
-- 일부 은행(예: SHB) 데이터디스크 엑셀은 시트 하단에 **합계/요약 행**(키 컬럼 공란)이 포함됨
-- 기존 로직은 키(차주번호/보증서번호 등)가 비어있으면 “실패”로 집계하여, 실제 데이터 오류가 아닌데도 실패 건수가 발생
-- 로그의 `(행 N)`은 엑셀 행번호가 아니라 **처리 순번**이라 사용자 입장에서 원인 파악이 어려움
-
-**해결 방법**
-- 키가 비어있는 행을 **합계/요약/빈 행**으로 판별하면 실패가 아닌 **스킵**으로 처리
-- 디버그 로그에 처리 순번과 함께 **실제 엑셀 행번호(`ExcelRow`)** 를 함께 출력
-- 완료 메시지에 `스킵 N건`을 함께 표시
-
-**변경된 파일**
-- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
-- `src/NPLogic.App/Services/DataDiskUploadService.cs`
-
 #### 대시보드 물건 누락(초기 페이지 스킵) 문제 해결
 
 **문제점**
@@ -164,6 +80,34 @@
 **해결 방법**
 - 프로그램 로딩 중에는 `SelectedProjectId` 변경으로 인한 **자동 새로고침을 일시 차단**
 - 한 번의 로딩 경로만 실행되도록 만들어 **서버 페이지네이션 결과가 덮어쓰이지 않게 함**
+
+### 2026-02-04
+
+#### 등기부등본 OCR 스키마 개편 및 정제 파이프라인 도입
+
+**배경**
+- 담보물건 탭에 표시할 최종 표는 `reference/Auction-Certificate`의 산출물 스키마(`basic_info.csv`, `gapgu.csv`, `eulgu.csv`) 기반
+- 물건(`property_id`)당 등기부 결과 세트가 여러 개 저장될 수 있어 세트(run) 단위가 필요
+
+**완료된 작업**
+- Supabase 신규 테이블 생성 + RLS 정책 적용
+  - `registry_runs`: 물건별 등기부 결과 세트 + `deed_seq` 자동 부여
+  - `registry_basic_info`: 세트당 1행 요약(11컬럼)
+  - `registry_gapgu_rows`: 세트당 N행 (사용자 입력: `note_user_input`, `wage_claim_estimate_user_input`)
+  - `registry_eulgu_rows`: 세트당 N행 (사용자 입력: `debtor_user_input`, `collateral_type_user_input`, `is_factory_mortgage_user_input`)
+- 레거시 테이블 삭제: `registry_documents`, `registry_owners`, `registry_rights`
+- OCR 응답에 `refined` 필드 추가 (`python/ocr_processor.py`, `python/server.py`)
+- Supabase Edge Function `ocr-registry-save` 배포
+- WPF 담보물건 탭 및 등기부등본 탭을 정제 스키마 기반으로 전환
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+- `src/NPLogic.App/Views/RegistryTab.xaml`
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+- `python/ocr_processor.py`
+- `python/server.py`
 
 #### 등기부등본 OCR 추출 결과 건수 표시 개선
 
@@ -186,14 +130,8 @@
 - 등기부 문서가 없어도 소유자/갑구/을구 데이터가 있으면 요약을 구성
 - 담보물건 탭 진입 시 등기부 요약을 다시 로드하여 최신 상태 반영
 
-#### 담보물건 탭 등기부등본 패널 레이아웃/표시 개선
-
-**변경 내용**
-- 3열(표제부/갑구/을구) 요약 텍스트 방식 → 3행(소유지분현황/갑구/을구) **표(DataGrid)** 방식으로 변경
-- OCR 저장된 `registry_owners`, `registry_rights` 데이터를 그대로 표시하도록 바인딩 추가
-
-**추가**
-- OCR 원본 응답(JSON)을 임시 파일로 덤프하고, 출력창에 head/tail 일부를 함께 로깅
-
 **변경된 파일**
 - `src/NPLogic.App/ViewModels/DashboardViewModel.cs`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
