@@ -91,6 +91,51 @@
 **변경된 파일**
 - `src/NPLogic.Data/Services/SupabaseService.cs`
 
+#### 등기부등본 OCR: Edge Function 인증 및 기능 개선
+
+**문제점 1 – `Invalid JWT` (401)**
+- `supabase-csharp` 라이브러리가 ES256 알고리즘으로 JWT를 발급하는데,
+  Edge Function의 `verify_jwt: true`(HS256만 지원)와 호환되지 않아 인증 실패
+
+**해결 방법**
+- Edge Function `verify_jwt: false`로 변경 후, 함수 내부에서 `supabase.auth.getUser()`로 수동 인증 검증
+- ES256/HS256 모두 지원, RLS도 동일하게 적용
+
+**문제점 2 – OCR 서버 `400 Bad Request`**
+- Edge Function이 파일을 `Blob`으로 전달 시 파일명이 누락되어 FastAPI의 `.pdf` 확장자 검증 실패
+
+**해결 방법**
+- `new File([bytes], fileName, { type: "application/pdf" })`로 파일 객체를 생성하여 파일명 보존
+
+**기능 변경 – 덮어쓰기 모드**
+- 기존: 같은 물건에 OCR을 여러 번 돌리면 `registry_runs`에 세트가 누적
+- 변경: 동일 물건에 대해 **기존 run + 하위 데이터를 DELETE 후 INSERT** (항상 최신 1개만 유지)
+- UI에서 세트 선택 ComboBox 제거, 자동으로 최신 결과 표시
+
+**UI 개선 – basic_info 레이아웃**
+- 기존: 4열 Grid + TextBlock (라벨/값이 구분 없이 나열)
+- 변경: **Border 테두리가 있는 키-값 표** (라벨 셀 배경색 구분, 갑구/을구 DataGrid와 시각적 통일)
+
+**여러 PDF 지원 (물건당 N개 PDF = N행 basic_info)**
+- 기존: 물건 전체 DELETE → INSERT → 마지막 PDF만 남음
+- 변경: **"같은 물건 + 같은 PDF 파일명"** 단위로만 기존 run을 삭제하고, 다른 PDF의 결과는 유지
+- `deed_seq` (01, 02, ...) 를 `지번번호`로 갑구/을구 행에 자동 채움
+- basic_info를 **단일 객체 → 리스트**(DataGrid)로 변경하여 여러 PDF 결과를 N행으로 표시
+- 갑구/을구도 run 단위가 아닌 **물건(property) 단위로 합산 조회**
+
+**basic_info UI 통일**
+- 기존: 4열 Grid + TextBlock (키-값 레이아웃)
+- 변경: **DataGrid** (갑구/을구와 동일한 표 형태, 11개 컬럼)
+  - 지번일련번호, 물건지(등기), 물건지(DD), 일치여부, 담보물형태, 대지면적(평), 건물면적(평), 소유자, 등록번호, 최종지분, 소유자주소
+
+**변경된 파일/서비스**
+- Supabase Edge Function `ocr-registry-save` v7
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs` (property 단위 조회 메서드 추가)
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs` (리스트 + property 합산 조회)
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs` (리스트 + property 합산 조회)
+- `src/NPLogic.App/Views/RegistryTab.xaml` (basic_info DataGrid)
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml` (basic_info DataGrid)
+
 #### DD 업로드 시 합계/요약 행 실패 카운트 개선
 
 **문제점**

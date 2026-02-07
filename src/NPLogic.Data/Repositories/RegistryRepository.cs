@@ -58,6 +58,72 @@ namespace NPLogic.Data.Repositories
             return runs.FirstOrDefault();
         }
 
+        /// <summary>
+        /// 물건 ID 기준으로 모든 run의 basic_info를 조회 (여러 PDF = 여러 행)
+        /// </summary>
+        public async Task<List<RegistryBasicInfo>> GetBasicInfoListByPropertyIdAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryBasicInfoTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.JibeonId, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryBasicInfo).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"basic_info 리스트 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 ID 기준으로 모든 run의 갑구 행을 조회 (여러 PDF 합산)
+        /// </summary>
+        public async Task<List<RegistryGapguRow>> GetGapguRowsByPropertyIdAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryGapguRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryGapguRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 리스트 조회 실패 (property): {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 물건 ID 기준으로 모든 run의 을구 행을 조회 (여러 PDF 합산)
+        /// </summary>
+        public async Task<List<RegistryEulguRow>> GetEulguRowsByPropertyIdAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryEulguRowTable>()
+                    .Where(x => x.PropertyId == propertyId)
+                    .Order(x => x.SortIndex, Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(MapToRegistryEulguRow).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 리스트 조회 실패 (property): {ex.Message}", ex);
+            }
+        }
+
         public async Task<RegistryBasicInfo?> GetBasicInfoByRunIdAsync(Guid registryRunId)
         {
             try
@@ -138,9 +204,15 @@ namespace NPLogic.Data.Repositories
                 throw new FileNotFoundException("PDF 파일을 찾을 수 없습니다.", pdfFilePath);
 
             await _supabaseService.EnsureValidSessionAsync(throwOnFailure: true);
-            var accessToken = _supabaseService.GetSession()?.AccessToken;
+            var session = _supabaseService.GetSession();
+            var accessToken = session?.AccessToken;
             if (string.IsNullOrWhiteSpace(accessToken))
                 throw new Exception("Supabase 세션이 없습니다. 다시 로그인해주세요.");
+
+            // 디버그: 토큰 유효성 확인
+            System.Diagnostics.Debug.WriteLine($"[EdgeFunction] AccessToken length={accessToken.Length}, first20={accessToken[..Math.Min(20, accessToken.Length)]}...");
+            System.Diagnostics.Debug.WriteLine($"[EdgeFunction] ExpiresAt={session!.ExpiresAt():O}, CreatedAt={session.CreatedAt:O}");
+            System.Diagnostics.Debug.WriteLine($"[EdgeFunction] Url={_supabaseService.Url}/functions/v1/{OcrRegistrySaveFunctionName}");
 
             var url = $"{_supabaseService.Url}/functions/v1/{OcrRegistrySaveFunctionName}";
             var fileName = Path.GetFileName(pdfFilePath);
@@ -181,6 +253,7 @@ namespace NPLogic.Data.Repositories
             if (!response.IsSuccessStatusCode)
             {
                 var msg = edge?.Error ?? responseText;
+                System.Diagnostics.Debug.WriteLine($"[EdgeFunction] HTTP {(int)response.StatusCode}: {responseText[..Math.Min(500, responseText.Length)]}");
                 throw new Exception($"Edge Function 호출 실패: {(int)response.StatusCode} - {msg}");
             }
 

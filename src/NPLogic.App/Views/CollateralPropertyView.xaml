@@ -330,83 +330,37 @@
                                        FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
 
-                        <!-- 세트 선택 + basic_info + 갑구 + 을구 -->
+                        <!-- basic_info + 갑구 + 을구 -->
                         <StackPanel>
-                            <!-- 세트 선택 -->
-                            <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
-                                <StackPanel Margin="12">
-                                    <TextBlock Text="등기부 세트 선택" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                                    <ComboBox ItemsSource="{Binding RegistryRuns}"
-                                              SelectedItem="{Binding SelectedRegistryRun}"
-                                              MinWidth="320">
-                                        <ComboBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding DeedSeq, StringFormat=#{0}}" FontWeight="SemiBold"/>
-                                                    <TextBlock Text="  " />
-                                                    <TextBlock Text="{Binding JibeonId}" />
-                                                    <TextBlock Text="  " />
-                                                    <TextBlock Text="{Binding SourcePdfName}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ComboBox.ItemTemplate>
-                                    </ComboBox>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- 1) basic_info -->
+                            <!-- 1) 소유지분현황 (basic_info) - DataGrid -->
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                                 <StackPanel>
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
-                                        <TextBlock Text="1. basic_info (요약)" FontWeight="SemiBold"/>
+                                        <TextBlock Text="1. 소유지분현황 (기본정보)" FontWeight="SemiBold"/>
                                     </Border>
-
-                                    <Grid Margin="12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="180"/>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="180"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-
-                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="지번일련번호" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding RegistryBasicInfo.JibeonId, FallbackValue=-}" TextWrapping="Wrap"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="담보물형태" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding RegistryBasicInfo.CollateralType, FallbackValue=-}" TextWrapping="Wrap"/>
-
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="물건지(등기)" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RegistryBasicInfo.RegistryAddress, FallbackValue=-}" TextWrapping="Wrap"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="물건지(DD)" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding RegistryBasicInfo.DdAddress, FallbackValue=-}" TextWrapping="Wrap"/>
-
-                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="주소일치" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding RegistryBasicInfo.IsAddressMatched, FallbackValue=-}"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="대지면적(평)" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding RegistryBasicInfo.LandAreaPyeong, StringFormat=N2, FallbackValue=-}"/>
-
-                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="건물면적(평)" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding RegistryBasicInfo.BuildingAreaPyeong, StringFormat=N2, FallbackValue=-}"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="2" Text="소유자" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding RegistryBasicInfo.OwnerName, FallbackValue=-}" TextWrapping="Wrap"/>
-
-                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="등록번호" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding RegistryBasicInfo.OwnerRegNo, FallbackValue=-}" TextWrapping="Wrap"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="2" Text="최종지분" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="4" Grid.Column="3" Text="{Binding RegistryBasicInfo.ShareRatio, FallbackValue=-}" TextWrapping="Wrap"/>
-
-                                        <TextBlock Grid.Row="5" Grid.Column="0" Text="소유자 주소" FontWeight="SemiBold"/>
-                                        <TextBlock Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3"
-                                                   Text="{Binding RegistryBasicInfo.OwnerAddress, FallbackValue=-}"
-                                                   TextWrapping="Wrap"/>
-                                    </Grid>
+                                    <DataGrid ItemsSource="{Binding RegistryBasicInfoList}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              IsReadOnly="True"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              Margin="12"
+                                              MinHeight="80">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="지번일련번호" Binding="{Binding JibeonId}" Width="Auto"/>
+                                            <DataGridTextColumn Header="물건지 (등기부등본)" Binding="{Binding RegistryAddress}" Width="*"/>
+                                            <DataGridTextColumn Header="물건지 (DD)" Binding="{Binding DdAddress}" Width="*"/>
+                                            <DataGridTextColumn Header="일치여부" Binding="{Binding IsAddressMatched}" Width="Auto"/>
+                                            <DataGridTextColumn Header="담보물형태" Binding="{Binding CollateralType}" Width="Auto"/>
+                                            <DataGridTextColumn Header="대지면적 (평)" Binding="{Binding LandAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"/>
+                                            <DataGridTextColumn Header="건물면적 (평)" Binding="{Binding BuildingAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"/>
+                                            <DataGridTextColumn Header="소유자" Binding="{Binding OwnerName}" Width="Auto"/>
+                                            <DataGridTextColumn Header="등록번호" Binding="{Binding OwnerRegNo}" Width="Auto"/>
+                                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="Auto"/>
+                                            <DataGridTextColumn Header="소유자 주소" Binding="{Binding OwnerAddress}" Width="*"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
                                 </StackPanel>
                             </Border>
 
@@ -435,6 +389,7 @@
                                             <DataGridTextColumn Header="비고(입력)" Binding="{Binding NoteUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
                                             <DataGridCheckBoxColumn Header="임금채권추정(입력)" Binding="{Binding WageClaimEstimateUserInput}" Width="Auto"/>
                                             <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*" IsReadOnly="True"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber}" Width="Auto" IsReadOnly="True"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
@@ -466,6 +421,7 @@
                                             <DataGridTextColumn Header="담보종류(입력)" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                                             <DataGridCheckBoxColumn Header="공장저당(입력)" Binding="{Binding IsFactoryMortgageUserInput}" Width="Auto"/>
                                             <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*" IsReadOnly="True"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber}" Width="Auto" IsReadOnly="True"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
 

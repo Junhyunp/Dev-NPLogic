@@ -337,7 +337,7 @@ namespace NPLogic.ViewModels
         private RegistryRun? _selectedRegistryRun;
 
         [ObservableProperty]
-        private RegistryBasicInfo? _registryBasicInfo;
+        private ObservableCollection<RegistryBasicInfo> _registryBasicInfoList = new();
 
         [ObservableProperty]
         private ObservableCollection<RegistryGapguRow> _registryGapguRows = new();
@@ -713,7 +713,8 @@ namespace NPLogic.ViewModels
                     : runs.FirstOrDefault();
                 _suppressSelectedRegistryRunChanged = false;
 
-                await LoadSelectedRegistryRunAsync(SelectedRegistryRun);
+                // property 기준으로 모든 run의 데이터를 합산 조회
+                await LoadAllDataForPropertyAsync(propertyId);
             }
             catch (Exception ex)
             {
@@ -726,37 +727,30 @@ namespace NPLogic.ViewModels
             }
         }
 
-        private async Task LoadSelectedRegistryRunAsync(RegistryRun? run)
+        /// <summary>
+        /// 물건 ID 기준으로 모든 run의 basic_info/gapgu/eulgu를 합산 로드
+        /// </summary>
+        private async Task LoadAllDataForPropertyAsync(Guid propertyId)
         {
-            if (run == null)
-            {
-                RegistryBasicInfo = null;
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
-                SavedBasicInfoCount = 0;
-                SavedGapguRowCount = 0;
-                SavedEulguRowCount = 0;
-                return;
-            }
-
             try
             {
                 IsLoading = true;
                 ErrorMessage = null;
 
-                RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(run.Id);
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
+                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId));
                 RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                    await _registryRepository.GetGapguRowsByRunIdAsync(run.Id));
+                    await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId));
                 RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                    await _registryRepository.GetEulguRowsByRunIdAsync(run.Id));
+                    await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId));
 
-                SavedBasicInfoCount = RegistryBasicInfo != null ? 1 : 0;
+                SavedBasicInfoCount = RegistryBasicInfoList.Count;
                 SavedGapguRowCount = RegistryGapguRows.Count;
                 SavedEulguRowCount = RegistryEulguRows.Count;
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"등기부 세트 데이터 로드 실패: {ex.Message}";
+                ErrorMessage = $"등기부 데이터 로드 실패: {ex.Message}";
             }
             finally
             {
@@ -764,11 +758,22 @@ namespace NPLogic.ViewModels
             }
         }
 
+        private async Task LoadSelectedRegistryRunAsync(RegistryRun? run)
+        {
+            if (run == null)
+            {
+                ClearSavedRegistryData();
+                return;
+            }
+            // run 변경 시에도 property 기준으로 전체 로드 (여러 run 합산)
+            await LoadAllDataForPropertyAsync(run.PropertyId);
+        }
+
         private void ClearSavedRegistryData()
         {
             RegistryRuns = new ObservableCollection<RegistryRun>();
             SelectedRegistryRun = null;
-            RegistryBasicInfo = null;
+            RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>();
             RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
             RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
             HasSavedRegistryRuns = false;
@@ -1233,6 +1238,7 @@ namespace NPLogic.ViewModels
                 IsOcrProcessing = true;
                 ErrorMessage = null;
                 SuccessMessage = null;
+                System.Diagnostics.Debug.WriteLine($"[OCR] StartOcrProcessingAsync 시작 - useMatchMode={useMatchMode}, filesToProcess={filesToProcess.Count}");
 
                 _ocrCancellationTokenSource = new CancellationTokenSource();
                 var token = _ocrCancellationTokenSource.Token;
@@ -1262,6 +1268,8 @@ namespace NPLogic.ViewModels
                         var propertyId = useMatchMode
                             ? ((OcrPdfFileWithMatch)pdfFile).MatchedProperty!.Id
                             : _propertyId!.Value;
+
+                        System.Diagnostics.Debug.WriteLine($"[OCR] Edge Function 호출 시작 - propertyId={propertyId}, file={pdfFile.FileName}");
 
                         var (run, biSaved, gapSaved, eulSaved, _, registryAddress, summaryImages) =
                             await _registryRepository.OcrRegistrySaveViaEdgeFunctionAsync(
@@ -1332,11 +1340,15 @@ namespace NPLogic.ViewModels
                     catch (TaskCanceledException)
                     {
                         pdfFile.Status = "취소됨";
+                        System.Diagnostics.Debug.WriteLine($"[OCR] 취소됨: {pdfFile.FileName}");
                     }
                     catch (Exception ex)
                     {
                         pdfFile.Status = "실패";
                         pdfFile.ErrorMessage = ex.Message;
+                        System.Diagnostics.Debug.WriteLine($"[OCR] 실패: {pdfFile.FileName} - {ex.Message}");
+                        if (ex.InnerException != null)
+                            System.Diagnostics.Debug.WriteLine($"[OCR]   └─ Inner: {ex.InnerException.Message}");
                     }
 
                     OcrCompletedCount++;
@@ -1373,6 +1385,9 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"OCR 처리 중 오류: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"[OCR] 전체 처리 오류: {ex.Message}");
+                if (ex.InnerException != null)
+                    System.Diagnostics.Debug.WriteLine($"[OCR]   └─ Inner: {ex.InnerException.Message}");
             }
             finally
             {

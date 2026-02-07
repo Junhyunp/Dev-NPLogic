@@ -408,7 +408,7 @@ namespace NPLogic.ViewModels
         private RegistryRun? _selectedRegistryRun;
 
         [ObservableProperty]
-        private RegistryBasicInfo? _registryBasicInfo;
+        private ObservableCollection<RegistryBasicInfo> _registryBasicInfoList = new();
 
         [ObservableProperty]
         private ObservableCollection<RegistryGapguRow> _registryGapguRows = new();
@@ -1631,26 +1631,17 @@ namespace NPLogic.ViewModels
                 var latestRun = runs.FirstOrDefault();
                 SelectedRegistryRun = latestRun;
 
-                if (latestRun != null)
-                {
-                    RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(latestRun.Id);
-                    RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                        await _registryRepository.GetGapguRowsByRunIdAsync(latestRun.Id)
-                    );
-                    RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                        await _registryRepository.GetEulguRowsByRunIdAsync(latestRun.Id)
-                    );
-                }
-                else
-                {
-                    RegistryBasicInfo = null;
-                    RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
-                    RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
-                }
+                // property 기준으로 모든 run의 데이터를 합산 조회
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
+                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId));
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
+                    await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId));
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
+                    await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId));
 
                 var hasAnyRegistryData =
                     latestRun != null &&
-                    (RegistryBasicInfo != null || RegistryGapguRows.Any() || RegistryEulguRows.Any());
+                    (RegistryBasicInfoList.Any() || RegistryGapguRows.Any() || RegistryEulguRows.Any());
 
                 if (hasAnyRegistryData)
                 {
@@ -1659,7 +1650,7 @@ namespace NPLogic.ViewModels
                     // 요약 텍스트는 담보물건 탭의 표가 메인이므로, 간단한 카운트만 구성
                     var deedSeqText = latestRun?.DeedSeq > 0 ? $"#{latestRun.DeedSeq}" : "";
                     var titleSummary = $"등기부 세트 {deedSeqText} (정제 산출물)";
-                    var section1Summary = $"basic_info {(RegistryBasicInfo != null ? 1 : 0)}행\n갑구 {RegistryGapguRows.Count}행";
+                    var section1Summary = $"basic_info {RegistryBasicInfoList.Count}행\n갑구 {RegistryGapguRows.Count}행";
                     var section2Summary = $"을구 {RegistryEulguRows.Count}행";
 
                     RegistrySummary = new RegistrySummaryModel
@@ -1675,7 +1666,7 @@ namespace NPLogic.ViewModels
                     OnPropertyChanged(nameof(RegistryMortgageSummary));
 
                     // 주소 일치 여부 확인 (D-010) - 추후 ExtractedData에서 주소 추출 시 구현
-                    IsAddressMatched = RegistryBasicInfo?.IsAddressMatched ?? true;
+                    IsAddressMatched = RegistryBasicInfoList.FirstOrDefault()?.IsAddressMatched ?? true;
 
                     // 등기부 요약 이미지 확인 (D-009) - 추후 OCR 시 캡처 이미지 저장 경로 사용
                     RegistrySummaryImagePath = null;
@@ -1708,7 +1699,7 @@ namespace NPLogic.ViewModels
         {
             if (_registryRepository == null || run == null)
             {
-                RegistryBasicInfo = null;
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>();
                 RegistryGapguRows = new ObservableCollection<RegistryGapguRow>();
                 RegistryEulguRows = new ObservableCollection<RegistryEulguRow>();
                 return;
@@ -1716,13 +1707,13 @@ namespace NPLogic.ViewModels
 
             try
             {
-                RegistryBasicInfo = await _registryRepository.GetBasicInfoByRunIdAsync(run.Id);
+                // property 기준으로 모든 run의 데이터를 합산 조회
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
+                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(run.PropertyId));
                 RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                    await _registryRepository.GetGapguRowsByRunIdAsync(run.Id)
-                );
+                    await _registryRepository.GetGapguRowsByPropertyIdAsync(run.PropertyId));
                 RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                    await _registryRepository.GetEulguRowsByRunIdAsync(run.Id)
-                );
+                    await _registryRepository.GetEulguRowsByPropertyIdAsync(run.PropertyId));
             }
             catch (Exception ex)
             {
