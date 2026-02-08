@@ -1138,6 +1138,55 @@ namespace NPLogic.Data.Repositories
             }
         }
 
+        // ========== 기계기구 감정가 ==========
+
+        public async Task<List<MachineryAppraisalTable>> GetMachineryAppraisalsAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<MachineryAppraisalTable>()
+                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Order("item_number", Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"기계기구 감정가 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task SaveMachineryAppraisalsAsync(Guid propertyId, List<MachineryAppraisalTable> rows)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+
+                // 기존 데이터 삭제
+                await client
+                    .From<MachineryAppraisalTable>()
+                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Delete();
+
+                // 새 데이터 삽입
+                foreach (var row in rows)
+                {
+                    row.Id = Guid.NewGuid().ToString();
+                    row.PropertyId = propertyId.ToString();
+                    row.CreatedAt = DateTime.UtcNow;
+                    row.UpdatedAt = DateTime.UtcNow;
+                    await client.From<MachineryAppraisalTable>().Insert(row);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"기계기구 감정가 저장 실패: {ex.Message}", ex);
+            }
+        }
+
         /// <summary>
         /// Property -> PropertyTable 매핑
         /// </summary>
@@ -1724,6 +1773,59 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("ja_appraisal_value")]
         public decimal? JaAppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    [Postgrest.Attributes.Table("property_machinery_appraisals")]
+    public class MachineryAppraisalTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id")]
+        [Postgrest.Attributes.Column("id")]
+        public string Id { get; set; } = "";
+
+        [Postgrest.Attributes.Column("property_id")]
+        public string PropertyId { get; set; } = "";
+
+        [Postgrest.Attributes.Column("item_number")]
+        public int? ItemNumber { get; set; }
+
+        [Postgrest.Attributes.Column("machinery_name")]
+        public string? MachineryName { get; set; }
+
+        [Postgrest.Attributes.Column("manufacturer")]
+        public string? Manufacturer { get; set; }
+
+        [Postgrest.Attributes.Column("manufacture_date")]
+        public string? ManufactureDate { get; set; }
+
+        [Postgrest.Attributes.Column("quantity")]
+        public int Quantity { get; set; } = 1;
+
+        [Postgrest.Attributes.Column("unit_price")]
+        public decimal? UnitPrice { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_value")]
+        public decimal? AppraisalValue { get; set; }
+
+        [Postgrest.Attributes.Column("factory_mortgages")]
+        public string FactoryMortgages { get; set; } = "{}";
+
+        [Postgrest.Attributes.Column("is_collateral")]
+        public bool IsCollateral { get; set; }
+
+        [Postgrest.Attributes.Column("evaluation_rate")]
+        public decimal? EvaluationRate { get; set; }
+
+        [Postgrest.Attributes.Column("evaluation_value")]
+        public decimal? EvaluationValue { get; set; }
+
+        [Postgrest.Attributes.Column("mortgage_column_names")]
+        public string MortgageColumnNames { get; set; } = "[]";
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

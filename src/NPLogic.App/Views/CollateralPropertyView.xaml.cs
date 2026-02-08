@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Web.WebView2.Core;
@@ -37,6 +39,8 @@ namespace NPLogic.Views
 
         // MapService 인스턴스 (DI로 주입)
         private MapService? _mapService;
+
+        private PropertyDetailViewModel? _currentVm;
 
         public CollateralPropertyView()
         {
@@ -223,11 +227,24 @@ namespace NPLogic.Views
         /// </summary>
         private async void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (!_mapWebViewsInitialized) return;
-
-            if (e.NewValue is PropertyDetailViewModel vm && vm.Property != null)
+            // 기존 VM 이벤트 해제
+            if (_currentVm != null)
             {
-                await LoadNaverMapsAsync(vm);
+                _currentVm.MortgageColumnNames.CollectionChanged -= MortgageColumnNames_CollectionChanged;
+            }
+
+            if (e.NewValue is PropertyDetailViewModel vm)
+            {
+                _currentVm = vm;
+                // 공장저당 동적 컬럼 구독
+                vm.MortgageColumnNames.CollectionChanged += MortgageColumnNames_CollectionChanged;
+                // 초기 컬럼 빌드
+                RebuildMachineryDynamicColumns();
+
+                if (_mapWebViewsInitialized && vm.Property != null)
+                {
+                    await LoadNaverMapsAsync(vm);
+                }
             }
         }
 
@@ -1932,6 +1949,183 @@ namespace NPLogic.Views
     </script>
 </body>
 </html>";
+        }
+
+        #endregion
+
+        #region 기계기구 감정가 동적 컬럼
+
+        // XAML에서 고정 컬럼 7개 (번호~감정가) 뒤에 동적 공장저당 컬럼이 삽입됨
+        private const int MachineryFixedColumnCountBefore = 7;
+        // 뒤쪽 고정 컬럼: 담보여부, 평가율, 평가액, 삭제
+        private readonly List<DataGridColumn> _machineryTrailingColumns = new();
+        private bool _machineryTrailingColumnsInitialized = false;
+
+        private void MortgageColumnNames_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RebuildMachineryDynamicColumns();
+        }
+
+        private void RebuildMachineryDynamicColumns()
+        {
+            if (MachineryDataGrid == null) return;
+
+            // 최초 1회: 뒤쪽 고정 컬럼 생성 (담보여부, 평가율, 평가액, 삭제)
+            if (!_machineryTrailingColumnsInitialized)
+            {
+                _machineryTrailingColumnsInitialized = true;
+                InitializeTrailingColumns();
+            }
+
+            // 기존 동적 컬럼 + 뒤쪽 고정 컬럼 제거
+            while (MachineryDataGrid.Columns.Count > MachineryFixedColumnCountBefore)
+                MachineryDataGrid.Columns.RemoveAt(MachineryDataGrid.Columns.Count - 1);
+
+            var vm = DataContext as PropertyDetailViewModel;
+            if (vm == null) return;
+
+            // 동적 공장저당 체크박스 컬럼 추가
+            for (int i = 0; i < vm.MortgageColumnNames.Count; i++)
+            {
+                var colName = vm.MortgageColumnNames[i];
+                var checkCol = new DataGridCheckBoxColumn
+                {
+                    Header = colName,
+                    Width = new DataGridLength(70),
+                    Binding = new Binding($"MortgageValues[{i}].IsChecked")
+                    {
+                        Mode = BindingMode.TwoWay,
+                        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                    }
+                };
+                MachineryDataGrid.Columns.Add(checkCol);
+            }
+
+            // 뒤쪽 고정 컬럼 추가
+            foreach (var col in _machineryTrailingColumns)
+                MachineryDataGrid.Columns.Add(col);
+        }
+
+        private void InitializeTrailingColumns()
+        {
+            _machineryTrailingColumns.Clear();
+
+            // 담보여부
+            _machineryTrailingColumns.Add(new DataGridCheckBoxColumn
+            {
+                Header = "담보여부",
+                Width = new DataGridLength(70),
+                Binding = new Binding("IsCollateral")
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                }
+            });
+
+            // 평가율
+            var evalRateCol = new DataGridTextColumn
+            {
+                Header = "평가율",
+                Width = new DataGridLength(80),
+                Binding = new Binding("EvaluationRate")
+                {
+                    StringFormat = "N2",
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                }
+            };
+            evalRateCol.ElementStyle = CreateCenterStyle();
+            evalRateCol.EditingElementStyle = CreateCenterEditStyle();
+            _machineryTrailingColumns.Add(evalRateCol);
+
+            // 평가액
+            var evalValueCol = new DataGridTextColumn
+            {
+                Header = "평가액",
+                Width = new DataGridLength(120),
+                Binding = new Binding("EvaluationValue")
+                {
+                    StringFormat = "N0",
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                }
+            };
+            evalValueCol.ElementStyle = CreateCenterStyle();
+            evalValueCol.EditingElementStyle = CreateCenterEditStyle();
+            _machineryTrailingColumns.Add(evalValueCol);
+
+            // 삭제 버튼
+            var deleteCol = new DataGridTemplateColumn
+            {
+                Header = "",
+                Width = new DataGridLength(40),
+            };
+            var cellTemplate = new DataTemplate();
+            var buttonFactory = new FrameworkElementFactory(typeof(Button));
+            buttonFactory.SetValue(Button.ContentProperty, "✕");
+            buttonFactory.SetValue(Button.FontSizeProperty, 11.0);
+            buttonFactory.SetValue(Button.BackgroundProperty, System.Windows.Media.Brushes.Transparent);
+            buttonFactory.SetValue(Button.ForegroundProperty, new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE5, 0x39, 0x35)));
+            buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
+            buttonFactory.SetValue(Button.CursorProperty, System.Windows.Input.Cursors.Hand);
+            buttonFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            buttonFactory.SetValue(FrameworkElement.ToolTipProperty, "행 삭제");
+            buttonFactory.SetBinding(Button.CommandProperty, new Binding("DataContext.RemoveMachineryAppraisalRowCommand")
+            {
+                RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(UserControl), 1)
+            });
+            buttonFactory.SetBinding(Button.CommandParameterProperty, new Binding());
+            cellTemplate.VisualTree = buttonFactory;
+            deleteCol.CellTemplate = cellTemplate;
+            _machineryTrailingColumns.Add(deleteCol);
+        }
+
+        private static Style CreateCenterStyle()
+        {
+            var style = new Style(typeof(TextBlock));
+            style.Setters.Add(new Setter(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center));
+            style.Setters.Add(new Setter(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center));
+            return style;
+        }
+
+        private static Style CreateCenterEditStyle()
+        {
+            var style = new Style(typeof(TextBox));
+            style.Setters.Add(new Setter(TextBox.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+            style.Setters.Add(new Setter(TextBox.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+            return style;
+        }
+
+        private void MortgageColumnName_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is not TextBox textBox) return;
+            var vm = DataContext as PropertyDetailViewModel;
+            if (vm == null) return;
+
+            var oldName = textBox.Tag as string;
+            var newName = textBox.Text?.Trim();
+            if (string.IsNullOrEmpty(newName) || oldName == newName) return;
+
+            var index = vm.MortgageColumnNames.IndexOf(oldName!);
+            if (index >= 0)
+            {
+                vm.MortgageColumnNames[index] = newName;
+                // 컬럼 헤더 갱신
+                RebuildMachineryDynamicColumns();
+            }
+        }
+
+        private void RemoveMortgageColumn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button btn) return;
+            var vm = DataContext as PropertyDetailViewModel;
+            if (vm == null) return;
+
+            // 부모 DataTemplate의 DataContext에서 컬럼명 가져오기
+            var colName = btn.DataContext as string;
+            if (colName == null) return;
+
+            var index = vm.MortgageColumnNames.IndexOf(colName);
+            if (index >= 0)
+                vm.RemoveMortgageColumnCommand.Execute(index);
         }
 
         #endregion

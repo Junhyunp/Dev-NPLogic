@@ -6,6 +6,27 @@
 
 ### 2026-02-09
 
+#### 기계기구 감정가 패널 추가
+
+- 기계기구 감정가(`MachineryAppraisalValue > 0`)가 있는 물건에서만 표시되는 패널 신규 추가
+- (+) 버튼으로 테이블 생성, 행 추가/삭제(✕), 저장 버튼으로 DB 저장
+- 고정 컬럼: 번호, 기계기구명, 제조사, 제작일자, 수량, 단가, 감정가(자동계산), 담보여부, 평가율, 평가액
+- **동적 컬럼**: 공장저당n호 - 열 추가/삭제/이름 수정 가능 (체크박스 형태)
+- 공장저당 열 관리 UI: 인라인 텍스트 편집 + 삭제(✕) + 열 추가 버튼
+- 동적 컬럼은 code-behind에서 DataGrid 컬럼 동적 생성 (MortgageColumnNames CollectionChanged 구독)
+- 감정가 자동 계산: 수량 × 단가
+
+**DB 테이블 (Supabase migration)**
+- `property_machinery_appraisals` 테이블 신규 생성 (properties FK, RLS 활성화)
+- 고정 컬럼: `item_number`, `machinery_name`, `manufacturer`, `manufacture_date`, `quantity`, `unit_price`, `appraisal_value`, `is_collateral`, `evaluation_rate`, `evaluation_value`
+- 동적 컬럼 저장: `factory_mortgages` (jsonb, `{"공장저당1호": true, ...}`), `mortgage_column_names` (jsonb, `["공장저당1호", ...]`)
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml` (패널 XAML)
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml.cs` (동적 컬럼 code-behind)
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs` (MachineryAppraisalRow, MortgageCheckItem, CRUD 커맨드)
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs` (MachineryAppraisalTable, Get/SaveMachineryAppraisalsAsync)
+
 #### 보조패널 UI 개선 및 저장 방식 변경
 
 - 지번별 감정평가 DataGrid: 모든 컬럼 값 수평·수직 중앙정렬 (ElementStyle + EditingElementStyle)
