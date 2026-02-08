@@ -6,6 +6,18 @@
 
 ### 2026-02-09
 
+#### 보조패널 UI 개선 및 저장 방식 변경
+
+- 지번별 감정평가 DataGrid: 모든 컬럼 값 수평·수직 중앙정렬 (ElementStyle + EditingElementStyle)
+- KB시세 패널: 값 수평·수직 중앙정렬
+- 분양가 패널: 값 수평·수직 중앙정렬 (Right → Center)
+- KB시세/분양가 패널: 자동저장(On*Changed → HasUnsavedChanges) 제거 → 각 패널별 "저장" 버튼으로 수동 저장 방식으로 변경 (DB 통신 빈도 감소)
+- `SaveKbPanelCommand`, `SaveSalePanelCommand` 신규 추가
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+
 #### 지번별 감정평가 패널 추가
 
 - 담보물건 탭 감정평가정보 패널 아래에 "지번별 감정평가" 패널 신규 추가

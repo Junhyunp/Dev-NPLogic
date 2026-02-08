@@ -642,15 +642,21 @@
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
                                             <TextBlock Text="{Binding KbPrice, StringFormat=N0, TargetNullValue='-'}"
-                                                       HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding KbSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                     </Grid>
                                 </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
+                                    <Button Content="저장"
+                                            Command="{Binding SaveKbPanelCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 
@@ -703,30 +709,36 @@
                                         <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding SaleSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                         <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding SalePriceLand, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                         <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding SalePriceBuilding, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                         <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding SalePriceTotal, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                         <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
                                             <TextBox Text="{Binding SalePriceVat, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
-                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
                                     </Grid>
                                 </Border>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
+                                    <Button Content="저장"
+                                            Command="{Binding SaveSalePanelCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"/>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -786,32 +798,98 @@
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                         <Setter Property="BorderThickness" Value="0,0,1,0"/>
                                         <Setter Property="Padding" Value="4,2"/>
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                                     </Style>
                                 </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <Style TargetType="DataGridRow">
+                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
-                                    <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="면적(평)" Binding="{Binding JaAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="90">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="110">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
                                     </DataGridTextColumn>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120">
                                         <DataGridTextColumn.ElementStyle>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
                                             </Style>
                                         </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
                                     </DataGridTextColumn>
                                     <DataGridTemplateColumn Header="" Width="40">
                                         <DataGridTemplateColumn.CellTemplate>

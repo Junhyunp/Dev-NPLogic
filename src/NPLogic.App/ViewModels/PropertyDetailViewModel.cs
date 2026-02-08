@@ -3866,42 +3866,42 @@ namespace NPLogic.ViewModels
             OnPropertyChanged(nameof(DisplayAddress));
         }
 
-        // ========== 보조패널 유저 입력 → Property 동기화 + 변경 감지 ==========
+        // ========== 보조패널 저장 커맨드 (KB시세/분양가) ==========
 
-        partial void OnKbSupplyAreaChanged(decimal? value)
+        [RelayCommand]
+        private async Task SaveKbPanelAsync()
         {
-            if (Property != null) Property.KbSupplyArea = value;
-            HasUnsavedChanges = true;
+            if (Property == null) return;
+            try
+            {
+                Property.KbSupplyArea = KbSupplyArea;
+                await _propertyRepository.UpdateAsync(Property);
+                SuccessMessage = "KB시세 정보가 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"KB시세 저장 실패: {ex.Message}";
+            }
         }
 
-        partial void OnSaleSupplyAreaChanged(decimal? value)
+        [RelayCommand]
+        private async Task SaveSalePanelAsync()
         {
-            if (Property != null) Property.SaleSupplyArea = value;
-            HasUnsavedChanges = true;
-        }
-
-        partial void OnSalePriceLandChanged(decimal? value)
-        {
-            if (Property != null) Property.SalePriceLand = value;
-            HasUnsavedChanges = true;
-        }
-
-        partial void OnSalePriceBuildingChanged(decimal? value)
-        {
-            if (Property != null) Property.SalePriceBuilding = value;
-            HasUnsavedChanges = true;
-        }
-
-        partial void OnSalePriceTotalChanged(decimal? value)
-        {
-            if (Property != null) Property.SalePriceTotal = value;
-            HasUnsavedChanges = true;
-        }
-
-        partial void OnSalePriceVatChanged(decimal? value)
-        {
-            if (Property != null) Property.SalePriceVat = value;
-            HasUnsavedChanges = true;
+            if (Property == null) return;
+            try
+            {
+                Property.SaleSupplyArea = SaleSupplyArea;
+                Property.SalePriceLand = SalePriceLand;
+                Property.SalePriceBuilding = SalePriceBuilding;
+                Property.SalePriceTotal = SalePriceTotal;
+                Property.SalePriceVat = SalePriceVat;
+                await _propertyRepository.UpdateAsync(Property);
+                SuccessMessage = "분양가 정보가 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"분양가 저장 실패: {ex.Message}";
+            }
         }
 
         /// <summary>
