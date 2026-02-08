@@ -84,6 +84,33 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 지번별 감정평가 행 모델 (유저 입력, DB 저장)
+    /// </summary>
+    public partial class JibunAppraisalRow : ObservableObject
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid PropertyId { get; set; }
+
+        [ObservableProperty]
+        private string _jaSeq = "";
+
+        [ObservableProperty]
+        private string _jaCategory = "";
+
+        [ObservableProperty]
+        private string _jaAddress = "";
+
+        [ObservableProperty]
+        private decimal? _jaAreaPyeong;
+
+        [ObservableProperty]
+        private decimal? _jaPricePerPyeong;
+
+        [ObservableProperty]
+        private decimal? _jaAppraisalValue;
+    }
+
+    /// <summary>
     /// 권리분석 알림 모델
     /// </summary>
     public class RightsAnalysisAlert
@@ -475,6 +502,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<AppraisalInfoRow> _appraisalInfoList = new();
+
+        // 지번별 감정평가
+        [ObservableProperty]
+        private ObservableCollection<JibunAppraisalRow> _jibunAppraisalRows = new();
+
+        [ObservableProperty]
+        private bool _hasJibunAppraisalTable;
 
         /// <summary>
         /// 토지이용계획 상태
@@ -1100,6 +1134,9 @@ namespace NPLogic.ViewModels
             SalePriceTotal = property.SalePriceTotal;
             SalePriceVat = property.SalePriceVat;
 
+            // 지번별 감정평가 로드
+            _ = LoadJibunAppraisalsAsync(property.Id);
+
             // 원본 복사 (변경 감지용)
             CopyPropertyToOriginal(property);
 
@@ -1220,6 +1257,9 @@ namespace NPLogic.ViewModels
                     SalePriceBuilding = property.SalePriceBuilding;
                     SalePriceTotal = property.SalePriceTotal;
                     SalePriceVat = property.SalePriceVat;
+
+                    // 지번별 감정평가 로드
+                    await LoadJibunAppraisalsAsync(property.Id);
 
                     // 감정평가 정보 갱신
                     AppraisalInfoList = new ObservableCollection<AppraisalInfoRow>
@@ -2762,6 +2802,102 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"사이트 열기 실패: {ex.Message}";
+            }
+        }
+
+        // ========== 지번별 감정평가 ==========
+
+        /// <summary>
+        /// 지번별 감정평가 데이터 로드
+        /// </summary>
+        private async Task LoadJibunAppraisalsAsync(Guid propertyId)
+        {
+            try
+            {
+                var rows = await _propertyRepository.GetJibunAppraisalsAsync(propertyId);
+                JibunAppraisalRows.Clear();
+                foreach (var r in rows)
+                {
+                    JibunAppraisalRows.Add(new JibunAppraisalRow
+                    {
+                        Id = r.Id,
+                        PropertyId = r.PropertyId,
+                        JaSeq = r.JaSeq ?? "",
+                        JaCategory = r.JaCategory ?? "",
+                        JaAddress = r.JaAddress ?? "",
+                        JaAreaPyeong = r.JaAreaPyeong,
+                        JaPricePerPyeong = r.JaPricePerPyeong,
+                        JaAppraisalValue = r.JaAppraisalValue,
+                    });
+                }
+                HasJibunAppraisalTable = JibunAppraisalRows.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"지번별 감정평가 로드 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 테이블 생성 (+버튼)
+        /// </summary>
+        [RelayCommand]
+        private void CreateJibunAppraisalTable()
+        {
+            if (HasJibunAppraisalTable) return;
+            var propertyId = Property?.Id ?? Guid.Empty;
+            JibunAppraisalRows.Add(new JibunAppraisalRow { PropertyId = propertyId });
+            HasJibunAppraisalTable = true;
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 행 추가
+        /// </summary>
+        [RelayCommand]
+        private void AddJibunAppraisalRow()
+        {
+            var propertyId = Property?.Id ?? Guid.Empty;
+            JibunAppraisalRows.Add(new JibunAppraisalRow { PropertyId = propertyId });
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 행 삭제
+        /// </summary>
+        [RelayCommand]
+        private void RemoveJibunAppraisalRow(JibunAppraisalRow? row)
+        {
+            if (row == null) return;
+            JibunAppraisalRows.Remove(row);
+            if (JibunAppraisalRows.Count == 0)
+                HasJibunAppraisalTable = false;
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 저장
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveJibunAppraisalsAsync()
+        {
+            try
+            {
+                var propertyId = Property?.Id ?? Guid.Empty;
+                if (propertyId == Guid.Empty) return;
+
+                var rows = JibunAppraisalRows.Select(r => (
+                    (string?)r.JaSeq,
+                    (string?)r.JaCategory,
+                    (string?)r.JaAddress,
+                    r.JaAreaPyeong,
+                    r.JaPricePerPyeong,
+                    r.JaAppraisalValue
+                )).ToList();
+
+                await _propertyRepository.SaveJibunAppraisalsAsync(propertyId, rows);
+                SuccessMessage = "지번별 감정평가가 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"지번별 감정평가 저장 실패: {ex.Message}";
             }
         }
 

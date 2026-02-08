@@ -6,6 +6,24 @@
 
 ### 2026-02-09
 
+#### 지번별 감정평가 패널 추가
+
+- 담보물건 탭 감정평가정보 패널 아래에 "지번별 감정평가" 패널 신규 추가
+- 초기에는 빈 상태, 헤더의 (+) 버튼으로 테이블 생성
+- 컬럼: 지번일련번호, 구분, 지번주소지, 면적(평), 평당감정가, 감정가 (모두 유저 입력)
+- 행 추가/삭제(✕ 버튼) 기능, 저장 버튼으로 DB 저장
+- 물건 로드 시 기존 데이터 자동 로드
+
+**DB 테이블 (Supabase migration)**
+- `property_jibun_appraisals` 테이블 신규 생성 (properties FK, RLS 활성화)
+- 컬럼 prefix `ja_`: `ja_seq`, `ja_category`, `ja_address`, `ja_area_pyeong`, `ja_price_per_pyeong`, `ja_appraisal_value`
+- 모든 컬럼에 COMMENT 설명 추가
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs` (JibunAppraisalRow 모델, CRUD 커맨드)
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs` (JibunAppraisalTable, GetJibunAppraisalsAsync, SaveJibunAppraisalsAsync)
+
 #### 경(공)매일정 탭 디자인 개선
 
 - 담보물건 탭의 디자인 패턴(PrimaryBrush 헤더, CornerRadius=8, 일관된 테두리/간격)을 경매일정·공매일정에 통일 적용

@@ -1062,6 +1062,82 @@ namespace NPLogic.Data.Repositories
             };
         }
 
+        // ========== 지번별 감정평가 CRUD ==========
+
+        /// <summary>
+        /// 지번별 감정평가 조회
+        /// </summary>
+        public async Task<List<(Guid Id, Guid PropertyId, string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)>> GetJibunAppraisalsAsync(Guid propertyId)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<JibunAppraisalTable>()
+                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Order("created_at", Postgrest.Constants.Ordering.Ascending)
+                    .Get();
+
+                return response.Models.Select(t => (
+                    Guid.Parse(t.Id),
+                    Guid.Parse(t.PropertyId),
+                    t.JaSeq,
+                    t.JaCategory,
+                    t.JaAddress,
+                    t.JaAreaPyeong,
+                    t.JaPricePerPyeong,
+                    t.JaAppraisalValue
+                )).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"지번별 감정평가 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 저장 (DELETE + INSERT 방식)
+        /// </summary>
+        public async Task SaveJibunAppraisalsAsync(Guid propertyId, List<(string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)> rows)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+
+                // 기존 데이터 삭제
+                await client
+                    .From<JibunAppraisalTable>()
+                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Delete();
+
+                // 새 데이터 삽입
+                if (rows.Count > 0)
+                {
+                    foreach (var row in rows)
+                    {
+                        var table = new JibunAppraisalTable
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            PropertyId = propertyId.ToString(),
+                            JaSeq = row.JaSeq,
+                            JaCategory = row.JaCategory,
+                            JaAddress = row.JaAddress,
+                            JaAreaPyeong = row.JaAreaPyeong,
+                            JaPricePerPyeong = row.JaPricePerPyeong,
+                            JaAppraisalValue = row.JaAppraisalValue,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+                        await client.From<JibunAppraisalTable>().Insert(table);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"지번별 감정평가 저장 실패: {ex.Message}", ex);
+            }
+        }
+
         /// <summary>
         /// Property -> PropertyTable 매핑
         /// </summary>
@@ -1611,6 +1687,43 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("created_by")]
         public Guid? CreatedBy { get; set; }
+
+        [Postgrest.Attributes.Column("created_at")]
+        public DateTime CreatedAt { get; set; }
+
+        [Postgrest.Attributes.Column("updated_at")]
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    // ========== 지번별 감정평가 Postgrest 모델 ==========
+
+    [Postgrest.Attributes.Table("property_jibun_appraisals")]
+    public class JibunAppraisalTable : Postgrest.Models.BaseModel
+    {
+        [Postgrest.Attributes.PrimaryKey("id")]
+        [Postgrest.Attributes.Column("id")]
+        public string Id { get; set; } = "";
+
+        [Postgrest.Attributes.Column("property_id")]
+        public string PropertyId { get; set; } = "";
+
+        [Postgrest.Attributes.Column("ja_seq")]
+        public string? JaSeq { get; set; }
+
+        [Postgrest.Attributes.Column("ja_category")]
+        public string? JaCategory { get; set; }
+
+        [Postgrest.Attributes.Column("ja_address")]
+        public string? JaAddress { get; set; }
+
+        [Postgrest.Attributes.Column("ja_area_pyeong")]
+        public decimal? JaAreaPyeong { get; set; }
+
+        [Postgrest.Attributes.Column("ja_price_per_pyeong")]
+        public decimal? JaPricePerPyeong { get; set; }
+
+        [Postgrest.Attributes.Column("ja_appraisal_value")]
+        public decimal? JaAppraisalValue { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

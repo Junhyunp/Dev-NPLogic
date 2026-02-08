@@ -732,6 +732,117 @@
                     </StackPanel>
                 </Border>
 
+                <!-- ===== 지번별 감정평가 패널 ===== -->
+                <Border Background="{StaticResource SurfaceColor}" CornerRadius="8"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 패널 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
+                            <Grid>
+                                <TextBlock Text="지번별 감정평가" FontWeight="Bold" FontSize="14" Foreground="White"
+                                           VerticalAlignment="Center"/>
+                                <Button Content="+" FontSize="16" FontWeight="Bold"
+                                        HorizontalAlignment="Right"
+                                        Command="{Binding CreateJibunAppraisalTableCommand}"
+                                        Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                        Background="Transparent" Foreground="White" BorderThickness="0"
+                                        Padding="8,2" Cursor="Hand"
+                                        ToolTip="지번별 감정평가 테이블 생성"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- 테이블 (HasJibunAppraisalTable이 true일 때만 표시) -->
+                        <StackPanel Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                    Margin="12">
+                            <DataGrid ItemsSource="{Binding JibunAppraisalRows}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      Background="White"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#FAFAFA"
+                                      MinHeight="60">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                        <Setter Property="Padding" Value="8,6"/>
+                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                        <Setter Property="FontSize" Value="12"/>
+                                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                        <Setter Property="Padding" Value="4,2"/>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                    <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridTextColumn Header="면적(평)" Binding="{Binding JaAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="90">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="110">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="" Width="40">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="✕" FontSize="11"
+                                                        Command="{Binding DataContext.RemoveJibunAppraisalRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Background="Transparent" Foreground="#E53935" BorderThickness="0"
+                                                        Cursor="Hand" HorizontalAlignment="Center"
+                                                        ToolTip="행 삭제"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- 행 추가 / 저장 버튼 -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                <Button Content="+ 행 추가"
+                                        Command="{Binding AddJibunAppraisalRowCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Padding="12,6" Margin="0,0,8,0"/>
+                                <Button Content="저장"
+                                        Command="{Binding SaveJibunAppraisalsCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
             </StackPanel>
         </ScrollViewer>
     </Grid>
