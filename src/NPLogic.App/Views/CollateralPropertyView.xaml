@@ -32,27 +32,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="12,8,12,12">
                 
-                <!-- ========== 상단: 버튼 바 (건축물대장) ========== -->
-                <Border x:Name="ButtonBarPanel"
-                        Background="{StaticResource SurfaceColor}"
-                        BorderBrush="{StaticResource PrimaryBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="16"
-                        Margin="0,0,0,16"
-                        Visibility="Visible">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"
-                                Click="OpenBuildingRegister_Click"
-                                ToolTip="건축물대장 열기">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="OfficeBuildingMarker" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="건축물대장" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Border>
+                <!-- 상단 버튼 바 제거됨: 토지이용계획은 물건 기본 정보 헤더, 등기부등본은 등기부등본 정보 헤더로 이동 -->
 
                 <!-- ========== 지도 패널 (위성도, 지적도, 로드뷰 3분할) ========== -->
                 <Border Background="{StaticResource SurfaceColor}"
@@ -333,11 +313,32 @@
                         <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,10">
-                            <TextBlock Text="📄 등기부등본 정보" 
-                                       Foreground="White" 
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeH4}"/>
+                                Padding="16,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="📄 등기부등본 정보" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}"
+                                           VerticalAlignment="Center"/>
+                                <Button Grid.Column="1"
+                                        Padding="10,4"
+                                        Command="{Binding ToggleRegistryImagePanelCommand}"
+                                        ToolTip="등기부등본 원본 이미지 보기/숨기기"
+                                        Background="Transparent"
+                                        BorderBrush="White"
+                                        BorderThickness="1"
+                                        Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="FileImage" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="등기부등본" VerticalAlignment="Center" Foreground="White" FontSize="{StaticResource FontSizeSmall}"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
                         </Border>
 
                         <!-- basic_info + 갑구 + 을구 -->
@@ -444,6 +445,58 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
+
+                        <!-- 등기부등본 이미지 뷰어 (토글 패널) -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" 
+                                BorderThickness="0,1,0,0"
+                                Visibility="{Binding IsRegistryImageExpanded, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="물건지 선택:" VerticalAlignment="Center" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                                        <ComboBox Grid.Column="1"
+                                                  ItemsSource="{Binding RegistryRuns}"
+                                                  SelectedItem="{Binding SelectedImageRun}"
+                                                  DisplayMemberPath="SourcePdfName"
+                                                  MinWidth="300"
+                                                  MaxWidth="600"
+                                                  HorizontalAlignment="Left"/>
+                                    </Grid>
+                                </Border>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="800" Margin="12">
+                                    <ItemsControl ItemsSource="{Binding RegistryDocumentImages}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="0,0,0,8" CornerRadius="4">
+                                                    <Image Source="{Binding}" Stretch="Uniform"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <!-- 이미지 없을 때 안내 -->
+                                <TextBlock Text="선택한 물건지에 대한 등기부등본 이미지가 없습니다. OCR 처리를 먼저 수행해 주세요."
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="12,20"
+                                           FontSize="{StaticResource FontSizeSmall}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding RegistryDocumentImages.Count}" Value="0">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
                 

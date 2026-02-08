@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace NPLogic.Core.Models
 {
@@ -22,6 +23,9 @@ namespace NPLogic.Core.Models
 
         /// <summary>원본 PDF 파일명</summary>
         public string? SourcePdfName { get; set; }
+
+        /// <summary>주요 등기사항 요약 이미지 (Base64 문자열 배열, DB jsonb)</summary>
+        public List<string>? SummaryImagesBase64 { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

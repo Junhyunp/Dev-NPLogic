@@ -1153,6 +1153,7 @@ namespace NPLogic.Data.Repositories
                 DeedSeq = table.DeedSeq ?? 0,
                 JibeonId = table.JibeonId,
                 SourcePdfName = table.SourcePdfName,
+                SummaryImagesBase64 = table.SummaryImagesBase64,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
             };
@@ -1495,6 +1496,9 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("source_pdf_name")]
         public string? SourcePdfName { get; set; }
+
+        [Postgrest.Attributes.Column("summary_images_base64")]
+        public List<string>? SummaryImagesBase64 { get; set; }
 
         [Postgrest.Attributes.Column("created_at")]
         public DateTime CreatedAt { get; set; }

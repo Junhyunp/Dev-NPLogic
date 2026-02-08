@@ -566,7 +566,6 @@ namespace NPLogic.Views
         {
             WebViewTitle.Text = title;
             WebViewIcon.Kind = (MaterialDesignThemes.Wpf.PackIconKind)Enum.Parse(typeof(MaterialDesignThemes.Wpf.PackIconKind), iconKind);
-            ButtonBarPanel.Visibility = Visibility.Collapsed;
             WebViewPanel.Visibility = Visibility.Visible;
         }
 
@@ -576,7 +575,6 @@ namespace NPLogic.Views
         private void CloseWebView_Click(object sender, RoutedEventArgs e)
         {
             WebViewPanel.Visibility = Visibility.Collapsed;
-            ButtonBarPanel.Visibility = Visibility.Visible;
             MapWebView.NavigateToString("<html><body></body></html>");
         }
 
