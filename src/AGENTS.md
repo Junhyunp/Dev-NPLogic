@@ -1,7 +1,7 @@
 # NPLogic 소스 디렉토리
 
 **Parent:** ../AGENTS.md
-**Generated:** 2026-02-02
+**Updated:** 2026-02-08
 
 ## 목적
 
@@ -127,6 +127,26 @@ PropertyDetailView
             → Supabase (properties 테이블)
 ```
 
+### 등기부등본 OCR 흐름 (현재 아키텍처)
+```
+RegistryTab (PDF 업로드 + 물건 자동 매칭)
+    → RegistryTabViewModel.StartOcrProcessingAsync()
+        → RegistryRepository.OcrRegistrySaveViaEdgeFunctionAsync()
+            → Edge Function "ocr-registry-save" (v12)
+                → EC2 Python OCR 서버 (/api/ocr/registry)
+                → DD 데이터(registry_sheet_data) 조회 + 주소 매칭
+                → registry_runs / basic_info / gapgu_rows / eulgu_rows 저장
+                → summary_images를 registry_runs.summary_images_base64에 저장
+            ← 응답 (run, 정제 데이터, 이미지)
+
+담보물건 탭 (PropertyDetailViewModel)
+    → LoadRegistrySummaryAsync()
+        → DB에서 property 기준 합산 조회 (모든 run의 데이터 통합)
+        → MergeGapguDuplicates() / MergeEulguDuplicates() (접수정보+대상소유자 기준 병합)
+        → DataGrid 표시
+    → "등기부등본" 버튼 → 이미지 뷰어 (DB에서 Base64 이미지 로드)
+```
+
 ### 권리 분석 흐름
 ```
 RightAnalysisView
@@ -138,11 +158,12 @@ RightAnalysisView
 
 ### 데이터디스크 업로드 흐름
 ```
-DataDiskUploadService
+DataDiskUploadService / ProgramManagementViewModel
     → Excel 파싱 (6개 시트)
         → 대표컬럼 추출
             → Repository 일괄 저장
-                → Supabase 42개 테이블
+                → Supabase 테이블들
+    → 합계/요약 행은 스킵 처리 (실패가 아닌 스킵)
 ```
 
 ## 기술 스택

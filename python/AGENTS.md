@@ -68,11 +68,16 @@ python/
 ```json
 {
   "success": true,
-  "registry_type": "토지",
-  "registry_number": "1234-5678-901234",
   "owners": [...],
-  "rights": [...],
-  "land_info": {...}
+  "gapgu": [...],
+  "eulgu": [...],
+  "summary_images": ["base64_img1", ...],
+  "refined": {
+    "basic_info": {"소유자": "...", "등록번호": "...", ...},
+    "gapgu": [{"순위번호": "1", "등기목적": "...", ...}],
+    "eulgu": [{"순위번호": "1", "등기목적": "...", ...}]
+  },
+  "refined_version": "v1"
 }
 ```
 
@@ -81,9 +86,11 @@ python/
 - pytesseract: OCR (Tesseract 엔진)
 - Pillow: 이미지 전처리
 
-**중요**: Tesseract OCR 설치 필요 (Windows: `C:\Program Files\Tesseract-OCR`)
+**중요**: Tesseract OCR + Poppler 설치 필요
 
-**현재 상태**: 샘플 구현 (실제 클라이언트 OCR 코드로 대체 예정)
+**배포**: EC2(3.34.10.57)에서 Docker compose로 운영 (`docker compose up -d --build`)
+
+**연동**: WPF 앱은 직접 호출하지 않고, Supabase Edge Function `ocr-registry-save`를 통해 간접 호출
 
 ### 3. recommend_processor.py - 추천 프로세서
 
@@ -456,5 +463,6 @@ PORT=8001 python server.py
 ---
 
 **작성일**: 2026-02-02
+**수정일**: 2026-02-08
 **대상**: AI 에이전트 (Claude Code 등)
 **목적**: Python 백엔드 코드베이스 이해 및 작업 가이드

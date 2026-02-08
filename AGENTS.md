@@ -1,6 +1,6 @@
 # AGENTS.md
 
-**Generated**: 2026-02-02
+**Updated**: 2026-02-08
 
 ---
 
@@ -90,10 +90,19 @@ NPLogic은 .NET 10.0 기반 WPF 데스크톱 애플리케이션으로, 부동산
    - `RightAnalysisRuleEngine`: 40+ 케이스 자동 분류
    - 케이스별 설명, 위험도, 조치사항 자동 생성
 
-4. **Python 백엔드 통신**
-   - `PythonBackendService.Instance` (Singleton)
-   - OCR: `POST /ocr` - 등기부등본 PDF → JSON
-   - 추천: `POST /recommend` - 유사물건 분석
+4. **등기부등본 OCR 파이프라인** (현재 아키텍처)
+   - WPF → Supabase Edge Function `ocr-registry-save` (v12) → EC2 Python OCR 서버
+   - Edge Function이 OCR + DD 데이터 병합 + DB 저장까지 일괄 처리
+   - `RegistryRepository.OcrRegistrySaveViaEdgeFunctionAsync()` 로 호출
+   - OCR 결과: `registry_runs` / `registry_basic_info` / `registry_gapgu_rows` / `registry_eulgu_rows`
+   - 요약 이미지: `registry_runs.summary_images_base64` (jsonb)
+   - 레거시 테이블 삭제됨: `registry_documents`, `registry_owners`, `registry_rights`
+
+5. **Python 백엔드 통신**
+   - EC2 서버: `http://3.34.10.57:8000` (Docker compose)
+   - OCR: `POST /api/ocr/registry` - 등기부등본 PDF → JSON (refined 포함)
+   - 추천: `POST /api/recommend/similar` - 유사물건 분석
+   - `PythonBackendService.Instance` (Singleton) - 추천 기능용
 
 ### 파일 수정 시 주의사항
 
@@ -107,7 +116,8 @@ NPLogic은 .NET 10.0 기반 WPF 데스크톱 애플리케이션으로, 부동산
 
 - 빌드: `dotnet build`
 - 실행: `dotnet run --project src/NPLogic.App`
-- Python 서버: `cd python && python server.py` (포트 5000)
+- Python 서버 (EC2): `cd python && docker compose up -d --build` (포트 8000)
+- Python 서버 (로컬): `cd python && python server.py` (포트 8000)
 
 ### 권장 작업 순서
 
