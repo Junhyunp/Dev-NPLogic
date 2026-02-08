@@ -278,6 +278,9 @@ namespace NPLogic.Views
             _tabLoadCts = new CancellationTokenSource();
             var token = _tabLoadCts.Token;
 
+            // ★ 탭 전환 시 이전 컨텐츠 즉시 클리어 (이전 탭 화면이 남는 문제 방지)
+            ContentArea.Content = null;
+
             // ★ 로딩 표시 시작 (담보물건 탭 등 지도 로딩 시 사용자에게 피드백 제공)
             if (_viewModel != null)
             {
