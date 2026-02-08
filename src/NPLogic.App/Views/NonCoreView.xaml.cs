@@ -32,6 +32,7 @@ namespace NPLogic.Views
             "Interim", "CashFlow", "XnpvComparison" 
         };
         private int _currentFunctionTabIndex = 0;
+        private bool _suppressFunctionTabChecked; // 프로그래밍 방식 탭 변경 시 이벤트 억제
         
         // ========== 탭별 View/ViewModel 캐시 (성능 최적화) ==========
         private readonly Dictionary<string, UserControl> _tabViewCache = new();
@@ -224,10 +225,12 @@ namespace NPLogic.Views
         /// </summary>
         public async Task ResetToHomeTabAsync()
         {
-            // RadioButton UI 상태를 "전체"로 리셋
+            // RadioButton UI 상태를 "전체"로 리셋 (이벤트 억제하여 이중 로드 방지)
+            _suppressFunctionTabChecked = true;
             TabHome.IsChecked = true;
+            _suppressFunctionTabChecked = false;
 
-            // "Home" 탭 콘텐츠 로드
+            // "Home" 탭 콘텐츠 로드 (단일 호출만)
             await LoadFunctionContentAsync("Home");
         }
 
@@ -255,6 +258,7 @@ namespace NPLogic.Views
         /// </summary>
         private async void FunctionTab_Checked(object sender, RoutedEventArgs e)
         {
+            if (_suppressFunctionTabChecked) return;
             if (sender is RadioButton radioButton && radioButton.Tag is string tabName)
             {
                 await LoadFunctionContentAsync(tabName);

@@ -39,6 +39,9 @@ namespace NPLogic.Views
         // 상태 복원 중 플래그 (이벤트 중복 방지)
         private bool _isRestoringState = false;
 
+        // 프로그래밍 방식 탭 변경 시 이벤트 억제
+        private bool _suppressInnerTabChecked = false;
+
         // 스크롤 리셋 중 플래그 (무한 스크롤 방지)
         private bool _isResettingScroll = false;
 
@@ -395,8 +398,10 @@ namespace NPLogic.Views
                 UpdateNavigationUI();
             }
             
-            // 기본 탭(비핵심) 선택 및 컨텐츠 로드
+            // 기본 탭(비핵심) 선택 및 컨텐츠 로드 (이벤트 억제하여 이중 로드 방지)
+            _suppressInnerTabChecked = true;
             TabNonCore.IsChecked = true;
+            _suppressInnerTabChecked = false;
             _currentTabIndex = 0;
             await LoadTabViewAsync("noncore", property);
         }
@@ -547,6 +552,7 @@ namespace NPLogic.Views
         /// </summary>
         private async void InnerTab_Checked(object sender, RoutedEventArgs e)
         {
+            if (_suppressInnerTabChecked) return;
             if (sender is RadioButton radioButton && DataContext is DashboardViewModel viewModel)
             {
                 var tabName = radioButton.Name switch
@@ -990,9 +996,9 @@ namespace NPLogic.Views
                 viewModel.SelectPropertyInDetailMode(property);
 
                 // ★ 수정: 물건 변경 시 항상 "비핵심" > "전체" 탭을 기본으로 표시
-                // 이유: 1) 사용자가 다른 탭에서 물건을 바꾸면 새 물건의 전체 정보를 먼저 보고 싶어함
-                //       2) 캐시된 NonCoreView가 새 물건으로 업데이트되어야 함
+                _suppressInnerTabChecked = true;
                 TabNonCore.IsChecked = true;
+                _suppressInnerTabChecked = false;
                 viewModel.SetActiveTab("noncore");
 
                 // 비핵심 탭 로드 (NonCoreView가 새 물건으로 업데이트됨 + "전체" 탭으로 리셋)
