@@ -61,6 +61,29 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 감정평가 정보 행 모델
+    /// </summary>
+    public class AppraisalInfoRow
+    {
+        public string? AppraisalType { get; set; }
+        public DateTime? AppraisalDate { get; set; }
+        public string? AppraisalAgency { get; set; }
+        public decimal? LandAppraisalValue { get; set; }
+        public decimal? BuildingAppraisalValue { get; set; }
+        public decimal? MachineryAppraisalValue { get; set; }
+        public decimal? ExcludedAppraisal { get; set; }
+        public decimal? AppraisalValue { get; set; }
+
+        // 포맷된 표시 속성
+        public string AppraisalDateFormatted => AppraisalDate?.ToString("yyyy-MM-dd") ?? "";
+        public string LandAppraisalFormatted => LandAppraisalValue?.ToString("N0") ?? "";
+        public string BuildingAppraisalFormatted => BuildingAppraisalValue?.ToString("N0") ?? "";
+        public string MachineryAppraisalFormatted => MachineryAppraisalValue?.ToString("N0") ?? "";
+        public string ExcludedAppraisalFormatted => ExcludedAppraisal?.ToString("N0") ?? "";
+        public string AppraisalValueFormatted => AppraisalValue?.ToString("N0") ?? "";
+    }
+
+    /// <summary>
     /// 권리분석 알림 모델
     /// </summary>
     public class RightsAnalysisAlert
@@ -223,6 +246,26 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _isApartment;
 
+        // KB시세 패널 - 분양면적 (Property.KbSupplyArea 연동)
+        [ObservableProperty]
+        private decimal? _kbSupplyArea;
+
+        // 분양가 패널 - 유저 입력 (Property 연동)
+        [ObservableProperty]
+        private decimal? _saleSupplyArea;
+
+        [ObservableProperty]
+        private decimal? _salePriceLand;
+
+        [ObservableProperty]
+        private decimal? _salePriceBuilding;
+
+        [ObservableProperty]
+        private decimal? _salePriceTotal;
+
+        [ObservableProperty]
+        private decimal? _salePriceVat;
+
         // KB시세 정보
         [ObservableProperty]
         private decimal _kbPrice;
@@ -235,6 +278,10 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private DateTime? _kbPriceDate;
+
+        // KB부동산 URL (좌표 기반)
+        [ObservableProperty]
+        private string? _kbLandUrl;
 
         // 감정평가 상세 정보
         [ObservableProperty]
@@ -425,6 +472,9 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<System.Windows.Media.Imaging.BitmapImage> _registryDocumentImages = new();
+
+        [ObservableProperty]
+        private ObservableCollection<AppraisalInfoRow> _appraisalInfoList = new();
 
         /// <summary>
         /// 토지이용계획 상태
@@ -1011,10 +1061,44 @@ namespace NPLogic.ViewModels
 
             _propertyId = property.Id;
             Property = property;
-            
+
+            // 감정평가 정보 갱신
+            AppraisalInfoList = new ObservableCollection<AppraisalInfoRow>
+            {
+                new AppraisalInfoRow
+                {
+                    AppraisalType = property.AppraisalType,
+                    AppraisalDate = property.AppraisalDate,
+                    AppraisalAgency = property.AppraisalAgency,
+                    LandAppraisalValue = property.LandAppraisalValue,
+                    BuildingAppraisalValue = property.BuildingAppraisalValue,
+                    MachineryAppraisalValue = property.MachineryAppraisalValue,
+                    ExcludedAppraisal = property.ExcludedAppraisal,
+                    AppraisalValue = property.AppraisalValue,
+                }
+            };
+
             // 아파트 여부 확인
-            IsApartment = property.PropertyType?.Contains("아파트") == true 
-                       || property.PropertyType?.Contains("오피스텔") == true;
+            IsApartment = property.PropertyType?.Contains("아파트") == true;
+
+            // KB시세 로드: DD의 kb_price, 또는 감정평가구분이 "KB시세"면 감정평가액합계 사용
+            KbPrice = property.KbPrice
+                      ?? (property.AppraisalType?.Contains("KB시세") == true ? property.AppraisalValue ?? 0 : 0);
+
+            // KB부동산 URL 생성 (좌표 기반)
+            KbLandUrl = property.Latitude.HasValue && property.Longitude.HasValue
+                ? $"https://kbland.kr/c/15307?xy={property.Latitude},{property.Longitude},16"
+                : null;
+
+            // KB시세 패널 - 분양면적 로드
+            KbSupplyArea = property.KbSupplyArea;
+
+            // 분양가 패널 로드
+            SaleSupplyArea = property.SaleSupplyArea;
+            SalePriceLand = property.SalePriceLand;
+            SalePriceBuilding = property.SalePriceBuilding;
+            SalePriceTotal = property.SalePriceTotal;
+            SalePriceVat = property.SalePriceVat;
 
             // 원본 복사 (변경 감지용)
             CopyPropertyToOriginal(property);
@@ -1116,9 +1200,43 @@ namespace NPLogic.ViewModels
                 if (property != null)
                 {
                     Property = property;
-                    IsApartment = property.PropertyType?.Contains("아파트") == true 
-                               || property.PropertyType?.Contains("오피스텔") == true;
-                    
+                    IsApartment = property.PropertyType?.Contains("아파트") == true;
+
+                    // KB시세 로드: DD의 kb_price, 또는 감정평가구분이 "KB시세"면 감정평가액합계 사용
+                    KbPrice = property.KbPrice
+                              ?? (property.AppraisalType?.Contains("KB시세") == true ? property.AppraisalValue ?? 0 : 0);
+
+                    // KB부동산 URL 생성 (좌표 기반)
+                    KbLandUrl = property.Latitude.HasValue && property.Longitude.HasValue
+                        ? $"https://kbland.kr/c/15307?xy={property.Latitude},{property.Longitude},16"
+                        : null;
+
+                    // KB시세 패널 - 분양면적 로드
+                    KbSupplyArea = property.KbSupplyArea;
+
+                    // 분양가 패널 로드
+                    SaleSupplyArea = property.SaleSupplyArea;
+                    SalePriceLand = property.SalePriceLand;
+                    SalePriceBuilding = property.SalePriceBuilding;
+                    SalePriceTotal = property.SalePriceTotal;
+                    SalePriceVat = property.SalePriceVat;
+
+                    // 감정평가 정보 갱신
+                    AppraisalInfoList = new ObservableCollection<AppraisalInfoRow>
+                    {
+                        new AppraisalInfoRow
+                        {
+                            AppraisalType = property.AppraisalType,
+                            AppraisalDate = property.AppraisalDate,
+                            AppraisalAgency = property.AppraisalAgency,
+                            LandAppraisalValue = property.LandAppraisalValue,
+                            BuildingAppraisalValue = property.BuildingAppraisalValue,
+                            MachineryAppraisalValue = property.MachineryAppraisalValue,
+                            ExcludedAppraisal = property.ExcludedAppraisal,
+                            AppraisalValue = property.AppraisalValue,
+                        }
+                    };
+
                     CopyPropertyToOriginal(property);
 
                     // 동기 작업 먼저 실행
@@ -1333,26 +1451,18 @@ namespace NPLogic.ViewModels
 
             try
             {
-                // 1. 차주 정보 로드
-                await LoadBorrowerSummaryAsync();
-
-                // 2. Loan 요약 로드
-                await LoadLoanSummaryAsync();
-
-                // 3. 담보물건 요약 로드
+                // 동기 작업 먼저 실행
                 LoadCollateralSummary();
 
-                // 3-1. 등기부 요약 로드 (담보물건 탭 표시용)
-                await LoadRegistrySummaryAsync(Property.Id);
-
-                // 4. 선순위 요약 로드
-                await LoadSeniorRightsSummaryAsync();
-
-                // 5. 평가 요약 로드
-                await LoadEvaluationSummaryAsync();
-
-                // 6. 경매일정 요약 로드
-                await LoadAuctionSummaryAsync();
+                // 독립적인 비동기 작업들을 병렬로 실행
+                // (LoadRegistrySummaryAsync는 InitializeAsync에서 이미 병렬 호출되므로 제외)
+                await Task.WhenAll(
+                    LoadBorrowerSummaryAsync(),
+                    LoadLoanSummaryAsync(),
+                    LoadSeniorRightsSummaryAsync(),
+                    LoadEvaluationSummaryAsync(),
+                    LoadAuctionSummaryAsync()
+                );
 
                 IsSummaryLoaded = true;
             }
@@ -1762,17 +1872,23 @@ namespace NPLogic.ViewModels
 
             try
             {
-                // 물건별 등기부 세트(run) 목록 + 최신 세트 로드
-                var runs = await _registryRepository.GetRunsByPropertyIdAsync(propertyId);
+                // 물건별 등기부 데이터를 병렬로 조회
+                var runsTask = _registryRepository.GetRunsByPropertyIdAsync(propertyId);
+                var biTask = _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId);
+                var gapTask = _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
+                var eulTask = _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+
+                await Task.WhenAll(runsTask, biTask, gapTask, eulTask);
+
+                var runs = runsTask.Result;
                 RegistryRuns = new ObservableCollection<RegistryRun>(runs);
 
                 var latestRun = runs.FirstOrDefault();
                 SelectedRegistryRun = latestRun;
 
-                // property 기준으로 모든 run의 데이터를 합산 조회
-                var biList = await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId);
-                var gapListRaw = await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
-                var eulListRaw = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+                var biList = biTask.Result;
+                var gapListRaw = gapTask.Result;
+                var eulListRaw = eulTask.Result;
                 Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu(raw)={gapListRaw.Count}, eulgu(raw)={eulListRaw.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
 
                 // 중복 행 병합: 접수정보+대상소유자가 같은 행은 지번번호를 쉼표로 결합
@@ -1885,29 +2001,106 @@ namespace NPLogic.ViewModels
             {
                 foreach (var row in RegistryGapguRows)
                 {
-                    await _registryRepository.UpdateGapguUserFieldsAsync(
-                        row.Id,
-                        row.NoteUserInput,
-                        row.WageClaimEstimateUserInput
-                    );
+                    await _registryRepository.UpdateGapguRowAsync(row);
                 }
 
                 foreach (var row in RegistryEulguRows)
                 {
-                    await _registryRepository.UpdateEulguUserFieldsAsync(
-                        row.Id,
-                        row.DebtorUserInput,
-                        row.CollateralTypeUserInput,
-                        row.IsFactoryMortgageUserInput
-                    );
+                    await _registryRepository.UpdateEulguRowAsync(row);
                 }
 
-                SuccessMessage = "등기부 사용자 입력이 저장되었습니다.";
+                SuccessMessage = "등기부 데이터가 저장되었습니다.";
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"등기부 사용자 입력 저장 실패: {ex.Message}");
-                ErrorMessage = $"등기부 사용자 입력 저장 실패: {ex.Message}";
+                Debug.WriteLine($"등기부 데이터 저장 실패: {ex.Message}");
+                ErrorMessage = $"등기부 데이터 저장 실패: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddGapguRowAsync()
+        {
+            if (_registryRepository == null || _propertyId == null) return;
+
+            try
+            {
+                var latestRun = RegistryRuns.FirstOrDefault();
+                var newRow = new RegistryGapguRow
+                {
+                    Id = Guid.NewGuid(),
+                    RegistryRunId = latestRun?.Id ?? Guid.Empty,
+                    PropertyId = _propertyId.Value,
+                    SortIndex = RegistryGapguRows.Count > 0 ? (RegistryGapguRows.Max(r => r.SortIndex ?? 0) + 1) : 1
+                };
+
+                await _registryRepository.InsertGapguRowAsync(newRow);
+                RegistryGapguRows.Add(newRow);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"갑구 행 추가 실패: {ex.Message}");
+                ErrorMessage = $"갑구 행 추가 실패: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteGapguRowAsync(RegistryGapguRow? row)
+        {
+            if (_registryRepository == null || row == null) return;
+
+            try
+            {
+                await _registryRepository.DeleteGapguRowAsync(row.Id);
+                RegistryGapguRows.Remove(row);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"갑구 행 삭제 실패: {ex.Message}");
+                ErrorMessage = $"갑구 행 삭제 실패: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private async Task AddEulguRowAsync()
+        {
+            if (_registryRepository == null || _propertyId == null) return;
+
+            try
+            {
+                var latestRun = RegistryRuns.FirstOrDefault();
+                var newRow = new RegistryEulguRow
+                {
+                    Id = Guid.NewGuid(),
+                    RegistryRunId = latestRun?.Id ?? Guid.Empty,
+                    PropertyId = _propertyId.Value,
+                    SortIndex = RegistryEulguRows.Count > 0 ? (RegistryEulguRows.Max(r => r.SortIndex ?? 0) + 1) : 1
+                };
+
+                await _registryRepository.InsertEulguRowAsync(newRow);
+                RegistryEulguRows.Add(newRow);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"을구 행 추가 실패: {ex.Message}");
+                ErrorMessage = $"을구 행 추가 실패: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private async Task DeleteEulguRowAsync(RegistryEulguRow? row)
+        {
+            if (_registryRepository == null || row == null) return;
+
+            try
+            {
+                await _registryRepository.DeleteEulguRowAsync(row.Id);
+                RegistryEulguRows.Remove(row);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"을구 행 삭제 실패: {ex.Message}");
+                ErrorMessage = $"을구 행 삭제 실패: {ex.Message}";
             }
         }
 
@@ -1947,13 +2140,8 @@ namespace NPLogic.ViewModels
         /// </summary>
         private void InitializePropertyTypeAttributes(Property property)
         {
-            // 상가/공장 여부 확인 (분양정보 표시 조건)
-            var propertyType = property.PropertyType?.ToLower() ?? "";
-            IsCommercialOrFactory = propertyType.Contains("상가") 
-                                 || propertyType.Contains("공장") 
-                                 || propertyType.Contains("근린")
-                                 || propertyType.Contains("factory")
-                                 || propertyType.Contains("commercial");
+            // 상가/아파트형공장 여부 확인 (분양가 패널 표시 조건)
+            IsCommercialOrFactory = property.PropertyType == "상가" || property.PropertyType == "아파트형공장";
 
             // 분양 정보 로드 (Property 모델에서)
             SupplyArea = property.SupplyArea ?? 0;
@@ -2568,7 +2756,7 @@ namespace NPLogic.ViewModels
         {
             try
             {
-                var url = "https://kbland.kr/";
+                var url = KbLandUrl ?? "https://kbland.kr/";
                 Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
             }
             catch (Exception ex)
@@ -3531,13 +3719,53 @@ namespace NPLogic.ViewModels
             HasUnsavedChanges = true;
             
             // 아파트 여부 업데이트
-            IsApartment = value?.PropertyType?.Contains("아파트") == true 
-                       || value?.PropertyType?.Contains("오피스텔") == true;
-            
+            IsApartment = value?.PropertyType?.Contains("아파트") == true;
+
+            // 상가/아파트형공장 여부 업데이트
+            IsCommercialOrFactory = value?.PropertyType == "상가" || value?.PropertyType == "아파트형공장";
+
             // HomeTab 면적 속성 변경 알림
             OnPropertyChanged(nameof(LandAreaPyeong));
             OnPropertyChanged(nameof(BuildingAreaPyeong));
             OnPropertyChanged(nameof(DisplayAddress));
+        }
+
+        // ========== 보조패널 유저 입력 → Property 동기화 + 변경 감지 ==========
+
+        partial void OnKbSupplyAreaChanged(decimal? value)
+        {
+            if (Property != null) Property.KbSupplyArea = value;
+            HasUnsavedChanges = true;
+        }
+
+        partial void OnSaleSupplyAreaChanged(decimal? value)
+        {
+            if (Property != null) Property.SaleSupplyArea = value;
+            HasUnsavedChanges = true;
+        }
+
+        partial void OnSalePriceLandChanged(decimal? value)
+        {
+            if (Property != null) Property.SalePriceLand = value;
+            HasUnsavedChanges = true;
+        }
+
+        partial void OnSalePriceBuildingChanged(decimal? value)
+        {
+            if (Property != null) Property.SalePriceBuilding = value;
+            HasUnsavedChanges = true;
+        }
+
+        partial void OnSalePriceTotalChanged(decimal? value)
+        {
+            if (Property != null) Property.SalePriceTotal = value;
+            HasUnsavedChanges = true;
+        }
+
+        partial void OnSalePriceVatChanged(decimal? value)
+        {
+            if (Property != null) Property.SalePriceVat = value;
+            HasUnsavedChanges = true;
         }
 
         /// <summary>

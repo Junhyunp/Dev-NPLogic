@@ -47,17 +47,17 @@
         
         <!-- 테이블 헤더 셀 스타일 -->
         <Style x:Key="TableHeaderCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
-            <Setter Property="Background" Value="#E8E8E8"/>
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
         </Style>
         
         <!-- 입력 가능 셀 스타일 (노란색 배경) -->
         <Style x:Key="InputCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
-            <Setter Property="Background" Value="#FFFDE7"/>
+            <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
         </Style>
         
         <!-- 결과 셀 스타일 (연한 파란색) -->
         <Style x:Key="ResultCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
-            <Setter Property="Background" Value="#E3F2FD"/>
+            <Setter Property="Background" Value="{StaticResource ResultFieldBgBrush}"/>
         </Style>
         
         <!-- 투명 TextBox 스타일 -->
@@ -111,7 +111,7 @@
         </Grid.RowDefinitions>
 
         <!-- 헤더 영역 (저장 버튼 포함) -->
-        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" Margin="12,8,12,4" Padding="10" CornerRadius="4">
+        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" Margin="12,8,12,4" Padding="10" CornerRadius="8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -136,7 +136,7 @@
 
         <!-- 탭 컨트롤 영역 -->
         <Border Grid.Row="1" Background="White" Margin="12,0,12,8"
-                BorderBrush="#ABABAB" BorderThickness="1" CornerRadius="4">
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <TabControl x:Name="ScheduleTabControl"
                         Background="Transparent"
                         BorderThickness="0"

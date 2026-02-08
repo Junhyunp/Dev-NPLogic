@@ -38,15 +38,24 @@ namespace NPLogic.Views
         private readonly Dictionary<string, UserControl> _tabViewCache = new();
         private readonly Dictionary<string, object> _tabViewModelCache = new();
         private readonly Dictionary<string, object> _tabSecondaryViewModelCache = new(); // AuctionSchedule의 PublicSaleVM 등 보조 VM 캐시
-        private Guid? _lastPropertyId; // 마지막으로 로드한 물건 ID (캐시 무효화용)
+        private readonly Dictionary<string, Guid?> _tabLastPropertyId = new(); // 탭별 마지막 로드 물건 ID (캐시 무효화용)
         
         // ========== 탭 전환 성능 최적화 (버전 기반 동기화) ==========
         private CancellationTokenSource? _tabLoadCts; // 탭 전환 취소용
         private int _tabLoadRequestVersion = 0; // 요청 버전 (최신 요청만 UI 업데이트)
 
+        private bool _initialLoadDone; // ResetToHomeTabAsync에서 이미 Home 탭을 로드했는지 여부
+
         public NonCoreView()
         {
             InitializeComponent();
+
+            // DataContext 변경 시 즉시 _viewModel 설정
+            // (Loaded 이벤트 전에 ResetToHomeTabAsync가 호출되어도 _viewModel 사용 가능)
+            DataContextChanged += (s, _) =>
+            {
+                _viewModel = DataContext as NonCoreViewModel;
+            };
         }
 
         private async void NonCoreView_Loaded(object sender, RoutedEventArgs e)
@@ -55,11 +64,14 @@ namespace NPLogic.Views
             if (_viewModel != null)
             {
                 await _viewModel.InitializeAsync();
-                
-                // 기본 탭 로드 (전체)
-                await LoadFunctionContentAsync("Home");
+
+                // ResetToHomeTabAsync에서 이미 Home 탭을 로드한 경우 중복 로드 방지
+                if (!_initialLoadDone)
+                {
+                    await LoadFunctionContentAsync("Home");
+                }
             }
-            
+
             // 키보드 포커스 설정
             this.Focus();
         }
@@ -232,6 +244,9 @@ namespace NPLogic.Views
 
             // "Home" 탭 콘텐츠 로드 (단일 호출만)
             await LoadFunctionContentAsync("Home");
+
+            // Loaded 이벤트에서 중복 Home 로드 방지
+            _initialLoadDone = true;
         }
 
         /// <summary>
@@ -298,9 +313,10 @@ namespace NPLogic.Views
                 // 현재 선택된 물건 ID 가져오기
                 var selectedPropertyId = _viewModel?.SelectedPropertyTab?.PropertyId;
                 
-                // 물건이 변경되었는지 확인 (캐시 데이터 갱신 필요 여부)
-                var propertyChanged = selectedPropertyId != _lastPropertyId;
-                _lastPropertyId = selectedPropertyId;
+                // 물건이 변경되었는지 확인 (탭별로 추적하여 캐시 데이터 갱신 필요 여부 판단)
+                _tabLastPropertyId.TryGetValue(tabName, out var lastPropertyIdForTab);
+                var propertyChanged = selectedPropertyId != lastPropertyIdForTab;
+                _tabLastPropertyId[tabName] = selectedPropertyId;
                 
                 UserControl? content;
                 
@@ -665,7 +681,7 @@ namespace NPLogic.Views
             _tabViewCache.Clear();
             _tabViewModelCache.Clear();
             _tabSecondaryViewModelCache.Clear();
-            _lastPropertyId = null;
+            _tabLastPropertyId.Clear();
         }
 
         /// <summary>

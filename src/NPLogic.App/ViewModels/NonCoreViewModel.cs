@@ -340,10 +340,23 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // LoadProperty에서 이미 PropertyTabs/SelectedPropertyTab이 설정된 상태인지 확인
+                // (SwitchToDetailMode → LoadProperty → InitializeAsync 순서로 호출될 때)
+                var preservePropertyTabs = SelectedPropertyTab != null && PropertyTabs.Any();
+
                 // 차주 목록 로드
                 if (!string.IsNullOrEmpty(CurrentProjectId) && _borrowerRepository != null)
                 {
-                    await LoadBorrowersAsync();
+                    if (preservePropertyTabs)
+                    {
+                        // PropertyTabs가 이미 설정된 경우: 차주 목록만 로드하고
+                        // 현재 선택된 물건에 해당하는 차주를 자동 선택 (PropertyTabs 덮어쓰기 방지)
+                        await LoadBorrowersWithoutPropertyResetAsync();
+                    }
+                    else
+                    {
+                        await LoadBorrowersAsync();
+                    }
                 }
 
                 _isInitialized = true;
@@ -355,6 +368,64 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 차주 목록만 로드 (PropertyTabs를 건드리지 않음)
+        /// SwitchToDetailMode에서 LoadProperty로 PropertyTabs가 이미 설정된 경우 사용
+        /// </summary>
+        private async Task LoadBorrowersWithoutPropertyResetAsync()
+        {
+            if (_borrowerRepository == null || string.IsNullOrEmpty(CurrentProjectId))
+                return;
+
+            try
+            {
+                var borrowers = await _borrowerRepository.GetByProgramIdAsync(CurrentProjectId);
+
+                BorrowerItems.Clear();
+                _allBorrowerItems.Clear();
+
+                foreach (var borrower in borrowers.OrderBy(b => b.BorrowerNumber))
+                {
+                    var item = new BorrowerListItem
+                    {
+                        BorrowerId = borrower.Id,
+                        BorrowerNumber = borrower.BorrowerNumber,
+                        BorrowerName = borrower.BorrowerName,
+                        BorrowerType = borrower.BorrowerType,
+                        PropertyCount = borrower.PropertyCount,
+                        Opb = borrower.Opb,
+                        IsRestructuring = borrower.IsRestructuring,
+                        IsSelected = false
+                    };
+
+                    BorrowerItems.Add(item);
+                    _allBorrowerItems.Add(item);
+                }
+
+                FilteredCount = BorrowerItems.Count;
+                TotalCount = _allBorrowerItems.Count;
+
+                // 현재 SelectedPropertyTab에 매칭되는 차주를 하이라이트 (PropertyTabs 건드리지 않음)
+                if (SelectedPropertyTab != null)
+                {
+                    var matchingBorrower = BorrowerItems.FirstOrDefault(b =>
+                        b.BorrowerName == SelectedPropertyTab.BorrowerName ||
+                        b.BorrowerNumber == SelectedPropertyTab.BorrowerNumber);
+                    if (matchingBorrower != null)
+                    {
+                        foreach (var item in BorrowerItems)
+                            item.IsSelected = item.BorrowerId == matchingBorrower.BorrowerId;
+                        SelectedBorrower = matchingBorrower;
+                        IsRestructuringBorrower = matchingBorrower.IsRestructuring;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
             }
         }
 
@@ -718,7 +789,8 @@ namespace NPLogic.ViewModels
             {
                 PropertyId = property.Id,
                 PropertyNumber = property.PropertyNumber ?? "-",
-                BorrowerNumber = "-", // Property에는 BorrowerNumber가 없음
+                BorrowerNumber = "-",
+                BorrowerName = property.DebtorName ?? "",
                 IsSelected = true
             };
 

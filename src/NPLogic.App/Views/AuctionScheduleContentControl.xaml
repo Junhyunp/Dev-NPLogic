@@ -45,7 +45,7 @@
         
         <!-- 테이블 헤더 셀 스타일 -->
         <Style x:Key="TableHeaderCellStyle" TargetType="Border" BasedOn="{StaticResource TableCellStyle}">
-            <Setter Property="Background" Value="#E8E8E8"/>
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
         </Style>
         
         <!-- 입력 가능 셀 스타일 (노란색 배경 - 수기 입력) -->
@@ -83,17 +83,21 @@
         </Grid.RowDefinitions>
         
         <!-- ========== 1. 평가결과 + 구분별 감정평가금액 (상단 좌우 배치) ========== -->
-        <Grid Grid.Row="0" Margin="0,0,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="350"/>
-            </Grid.ColumnDefinitions>
-            
-            <!-- 평가결과 테이블 -->
-            <Border Grid.Column="0" Background="{StaticResource SurfaceColor}" CornerRadius="4" Padding="12">
-                <StackPanel>
-                    <TextBlock Text="평가결과" Style="{StaticResource SectionHeaderStyle}"/>
+        <Border Grid.Row="0" Background="{StaticResource SurfaceColor}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,16">
+            <StackPanel>
+                <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,8">
+                    <TextBlock Text="평가결과 / 감정평가금액" Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
+                </Border>
+                <Grid Margin="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="350"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 평가결과 테이블 -->
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="평가결과" Style="{StaticResource SectionHeaderStyle}"/>
                     <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -175,13 +179,11 @@
                             </Border>
                         </Grid>
                     </Border>
-                </StackPanel>
-            </Border>
-            
-            <!-- 구분별 감정평가금액 테이블 -->
-            <Border Grid.Column="2" Background="{StaticResource SurfaceColor}" CornerRadius="4" Padding="12">
-                <StackPanel>
-                    <TextBlock Text="구분별 감정평가금액" Style="{StaticResource SectionHeaderStyle}"/>
+                    </StackPanel>
+
+                    <!-- 구분별 감정평가금액 테이블 -->
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="구분별 감정평가금액" Style="{StaticResource SectionHeaderStyle}"/>
                     <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -288,13 +290,18 @@
                             </Border>
                         </Grid>
                     </Border>
-                </StackPanel>
-            </Border>
-        </Grid>
-        
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <!-- ========== 2. 경매일정 섹션 ========== -->
-        <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+        <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Margin="0,0,0,16">
             <StackPanel>
+                <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,8">
+                    <TextBlock Text="경매일정" Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}"/>
+                </Border>
+                <StackPanel Margin="12">
                 <!-- 경매/공매 선택 + 경매신청여부 + 경매신청금액 -->
                 <Border BorderBrush="{StaticResource TableBorderBrush}" BorderThickness="1,1,0,0" Margin="0,0,0,8">
                     <Grid>
@@ -886,9 +893,10 @@
                         </Grid>
                     </Border>
                 </Grid>
+                </StackPanel>
             </StackPanel>
         </Border>
-        
+
         <!-- ========== 3. 회수가능액 요약 ========== -->
         <Border Grid.Row="5" Background="{StaticResource PrimaryBrush}" CornerRadius="8" Padding="20">
             <Grid>

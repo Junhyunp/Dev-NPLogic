@@ -1022,6 +1022,14 @@ namespace NPLogic.Data.Repositories
                 MachineryAppraisalValue = table.MachineryAppraisalValue,
                 ExcludedAppraisal = table.ExcludedAppraisal,
                 KbPrice = table.KbPrice,
+                // KB시세 보조패널
+                KbSupplyArea = table.KbSupplyArea,
+                // 분양가 보조패널
+                SaleSupplyArea = table.SaleSupplyArea,
+                SalePriceLand = table.SalePriceLand,
+                SalePriceBuilding = table.SalePriceBuilding,
+                SalePriceTotal = table.SalePriceTotal,
+                SalePriceVat = table.SalePriceVat,
                 // 경매 기본 정보
                 AuctionStarted = table.AuctionStarted,
                 AuctionCourt = table.AuctionCourt,
@@ -1132,6 +1140,14 @@ namespace NPLogic.Data.Repositories
                 MachineryAppraisalValue = property.MachineryAppraisalValue,
                 ExcludedAppraisal = property.ExcludedAppraisal,
                 KbPrice = property.KbPrice,
+                // KB시세 보조패널
+                KbSupplyArea = property.KbSupplyArea,
+                // 분양가 보조패널
+                SaleSupplyArea = property.SaleSupplyArea,
+                SalePriceLand = property.SalePriceLand,
+                SalePriceBuilding = property.SalePriceBuilding,
+                SalePriceTotal = property.SalePriceTotal,
+                SalePriceVat = property.SalePriceVat,
                 // 경매 기본 정보
                 AuctionStarted = property.AuctionStarted,
                 AuctionCourt = property.AuctionCourt,
@@ -1487,6 +1503,28 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("kb_price")]
         public decimal? KbPrice { get; set; }
+
+        // ========== KB시세 보조패널 (아파트, 유저 입력) ==========
+
+        [Postgrest.Attributes.Column("kb_supply_area")]
+        public decimal? KbSupplyArea { get; set; }
+
+        // ========== 분양가 보조패널 (상가/아파트형공장, 유저 입력) ==========
+
+        [Postgrest.Attributes.Column("sale_supply_area")]
+        public decimal? SaleSupplyArea { get; set; }
+
+        [Postgrest.Attributes.Column("sale_price_land")]
+        public decimal? SalePriceLand { get; set; }
+
+        [Postgrest.Attributes.Column("sale_price_building")]
+        public decimal? SalePriceBuilding { get; set; }
+
+        [Postgrest.Attributes.Column("sale_price_total")]
+        public decimal? SalePriceTotal { get; set; }
+
+        [Postgrest.Attributes.Column("sale_price_vat")]
+        public decimal? SalePriceVat { get; set; }
 
         // ========== 경매 기본 정보 ==========
 

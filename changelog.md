@@ -4,7 +4,91 @@
 
 ## [Unreleased]
 
+### 2026-02-09
+
+#### 경(공)매일정 탭 디자인 개선
+
+- 담보물건 탭의 디자인 패턴(PrimaryBrush 헤더, CornerRadius=8, 일관된 테두리/간격)을 경매일정·공매일정에 통일 적용
+- 하드코딩 컬러(`#E8E8E8`, `#FFFDE7`, `#E3F2FD`, `#ABABAB`)를 리소스 브러시로 교체
+- 각 섹션(평가결과, 경매일정, 공매일정, 공매비용, 회차별 공매일정, 타채권자 배분)에 PrimaryBrush 헤더 바 추가
+
+**변경된 파일**
+- `src/NPLogic.App/Views/AuctionPublicSaleView.xaml`
+- `src/NPLogic.App/Views/AuctionScheduleContentControl.xaml`
+- `src/NPLogic.App/Views/PublicSaleScheduleContentControl.xaml`
+
+#### 감정평가정보 패널: KB시세 하위 패널 추가 (아파트)
+
+- 물건종류가 "아파트"인 경우 감정평가정보 패널 내에 KB시세 테이블 표시
+- 컬럼: KB시세 데이터(KB부동산 좌표 URL 링크), KB시세(DD kb_price 또는 감정평가구분 KB시세 시 감정평가액합계), 분양면적(유저 입력)
+- KB부동산 URL: `kbland.kr/c/15307?xy={lat},{lng},16` 좌표 기반 생성
+- 분양면적은 DB `properties.kb_supply_area` 컬럼에 저장 (유저 입력 → 탭 전환 시 자동저장)
+
+**DB 컬럼 (Supabase migration)**
+- `kb_supply_area` (numeric) - KB시세 패널 분양면적
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.Core/Models/Property.cs`
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs`
+
+#### 감정평가정보 패널: 분양가 하위 패널 추가 (상가/아파트형공장)
+
+- 물건종류가 정확히 "상가" 또는 "아파트형공장"인 경우 감정평가정보 패널 내에 분양가 테이블 표시
+- 헤더 구조: 분양면적(RowSpan=2) | 분양가(ColSpan=4) → 토지, 건물, 합계, 부가세
+- 모든 필드는 유저 입력 (ManualInputBgBrush 배경), 탭 전환 시 자동저장
+- 현재 DB 물건종류: 상가(49건), 아파트형공장(26건) 대상. 추후 근린시설, 아파트형공장(상가) 등 추가 검토 가능
+
+**DB 컬럼 (Supabase migration)**
+- `sale_supply_area` (numeric) - 분양가 패널 분양면적
+- `sale_price_land` (numeric) - 토지 분양가
+- `sale_price_building` (numeric) - 건물 분양가
+- `sale_price_total` (numeric) - 합계 분양가
+- `sale_price_vat` (numeric) - 부가세
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.Core/Models/Property.cs`
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs`
+
+#### NonCoreView 탭 캐시 버그 수정
+
+- **버그**: 물건 변경 후 다른 탭(예: 담보물건)으로 이동 시 이전 물건 데이터가 그대로 표시됨
+- **원인**: `_lastPropertyId`가 전역 1개로 관리되어, Home 탭 로드 시 갱신된 후 다른 탭에서는 `propertyChanged=false`로 판단
+- **수정**: `_lastPropertyId` → `_tabLastPropertyId` (탭별 Dictionary)로 변경하여 각 탭이 독립적으로 물건 변경을 감지
+
+**변경된 파일**
+- `src/NPLogic.App/Views/NonCoreView.xaml.cs`
+
+#### IsApartment 조건 수정
+
+- 오피스텔을 KB시세 패널 표시 대상에서 제외 (아파트만 대상)
+- 3개 로드 경로 모두 통일
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+
 ### 2026-02-08
+
+#### 지적도 패널: 필지 경계 폴리곤 표시 기능
+
+**구현 내용**
+- 지적도 패널을 기존 지적편집도(USE_DISTRICT) 오버레이에서 **위성도 + 해당 필지 경계선 폴리곤** 방식으로 변경
+- VWORLD Data API (`/req/data`)로 PNU 기반 필지 경계 폴리곤(LP_PA_CBND_BUBUN) 조회
+- 카카오 HYBRID 위성도 위에 빨간 경계선 폴리곤 오버레이 (strokeColor:#FF0000, fillOpacity:0.15)
+- 폴리곤 영역 기준 자동 지도 범위 조정 (`map.setBounds`)
+- 폴리곤 조회 실패 시 위성도+마커 fallback
+
+**VWORLD API 키 이슈 해결**
+- "웹사이트" 유형 키는 도메인 검증으로 WPF 데스크톱 앱에서 `INCORRECT_KEY` 에러 발생
+- "APP(모바일, 솔루션 등)" 유형 키로 교체하여 해결
+- DB `app_config.vworld_api_key` 업데이트
+
+**변경된 파일**
+- `src/NPLogic.App/Views/CollateralPropertyView.xaml.cs` (LoadCadastralBoundaryMapAsync, GenerateKakaoSatelliteWithBoundaryHtml 추가)
+- `src/NPLogic.App/Services/VworldService.cs` (GetParcelBoundaryAsync - Data API 방식 추가)
 
 #### 등기부등본 이미지 뷰어 기능 추가
 

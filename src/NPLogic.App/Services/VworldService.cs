@@ -384,6 +384,107 @@ namespace NPLogic.Services
                 return "";
             return Regex.Replace(s, @"\s+", "").Trim();
         }
+
+        /// <summary>
+        /// PNU로 필지 경계 폴리곤 좌표 조회 (VWORLD Data API)
+        /// </summary>
+        /// <param name="pnu">19자리 필지고유번호</param>
+        /// <returns>폴리곤 좌표 배열 [[lat, lng], ...] 또는 null</returns>
+        public async Task<List<double[]>?> GetParcelBoundaryAsync(string pnu)
+        {
+            if (string.IsNullOrWhiteSpace(pnu) || pnu.Length != 19)
+                return null;
+
+            EnsureApiKeyLoaded();
+            if (string.IsNullOrEmpty(_vworldApiKey))
+                return null;
+
+            try
+            {
+                var url = $"https://api.vworld.kr/req/data?service=data&version=2.0&request=GetFeature" +
+                          $"&data=LP_PA_CBND_BUBUN&key={Uri.EscapeDataString(_vworldApiKey)}" +
+                          $"&domain=localhost&attrFilter=pnu:=:{pnu}" +
+                          $"&crs=EPSG:4326&format=json&errorFormat=json&size=1";
+
+                System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 요청: PNU={pnu}");
+
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("User-Agent", "Mozilla/5.0");
+
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 응답 (처음 500자): {content.Substring(0, Math.Min(500, content.Length))}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 호출 실패: {response.StatusCode}");
+                    return null;
+                }
+
+                // XML 응답인 경우 (에러)
+                if (content.TrimStart().StartsWith("<"))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 응답이 XML (에러): {content.Substring(0, Math.Min(500, content.Length))}");
+                    return null;
+                }
+
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+
+                // response.status 확인
+                if (root.TryGetProperty("response", out var resp))
+                {
+                    var status = resp.GetProperty("status").GetString();
+                    if (status != "OK")
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 상태 오류: {status}");
+                        return null;
+                    }
+
+                    // result.featureCollection.features[0].geometry
+                    var features = resp.GetProperty("result")
+                                       .GetProperty("featureCollection")
+                                       .GetProperty("features");
+
+                    if (features.GetArrayLength() == 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[VworldService] Data API features 없음");
+                        return null;
+                    }
+
+                    var geometry = features[0].GetProperty("geometry");
+                    var geoType = geometry.GetProperty("type").GetString();
+                    var coordinates = geometry.GetProperty("coordinates");
+
+                    // MultiPolygon → 첫 번째 Polygon의 외곽선, Polygon → 외곽선
+                    JsonElement ring;
+                    if (geoType == "MultiPolygon")
+                        ring = coordinates[0][0];
+                    else
+                        ring = coordinates[0];
+
+                    var result = new List<double[]>();
+                    foreach (var point in ring.EnumerateArray())
+                    {
+                        var lng = point[0].GetDouble();
+                        var lat = point[1].GetDouble();
+                        result.Add(new[] { lat, lng });
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[VworldService] 필지 경계 조회 성공: PNU={pnu}, 좌표 {result.Count}개");
+                    return result;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[VworldService] Data API 응답 구조 오류");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VworldService] 필지 경계 조회 실패: {ex.Message}");
+                return null;
+            }
+        }
+
     }
 
     /// <summary>

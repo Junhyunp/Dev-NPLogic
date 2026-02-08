@@ -1041,19 +1041,12 @@ namespace NPLogic.ViewModels
 
                 foreach (var row in RegistryGapguRows)
                 {
-                    await _registryRepository.UpdateGapguUserFieldsAsync(
-                        row.Id,
-                        row.NoteUserInput,
-                        row.WageClaimEstimateUserInput);
+                    await _registryRepository.UpdateGapguRowAsync(row);
                 }
 
                 foreach (var row in RegistryEulguRows)
                 {
-                    await _registryRepository.UpdateEulguUserFieldsAsync(
-                        row.Id,
-                        row.DebtorUserInput,
-                        row.CollateralTypeUserInput,
-                        row.IsFactoryMortgageUserInput);
+                    await _registryRepository.UpdateEulguRowAsync(row);
                 }
 
                 SuccessMessage = "등기부 사용자 입력이 저장되었습니다.";

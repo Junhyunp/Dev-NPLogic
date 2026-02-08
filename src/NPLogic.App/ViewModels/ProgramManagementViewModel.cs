@@ -1812,10 +1812,14 @@ namespace NPLogic.ViewModels
                 switch (rule.DbColumnName)
                 {
                     // ========== Property 기본 필드 ==========
+                    case "asset_type":
+                        property.AssetType = value?.ToString();
+                        break;
                     case "borrower_number":
                         property.BorrowerNumber = value?.ToString();
                         break;
                     case "borrower_name":
+                        property.BorrowerName = value?.ToString();
                         property.DebtorName = value?.ToString();
                         break;
                     case "property_number":
@@ -1828,98 +1832,204 @@ namespace NPLogic.ViewModels
                         property.PropertyType = NormalizePropertyType(value?.ToString());
                         break;
                     case "land_area":
-                        if (value is decimal la) property.LandArea = la;
+                        property.LandArea = value as decimal?;
                         break;
                     case "building_area":
-                        if (value is decimal ba) property.BuildingArea = ba;
+                        property.BuildingArea = value as decimal?;
+                        break;
+                    case "machinery_value":
+                        property.MachineryValue = value as decimal?;
+                        break;
+                    case "joint_collateral_amount":
+                        property.JointCollateralAmount = value as decimal?;
                         break;
                     case "address_province":
+                        property.AddressProvince = value?.ToString();
                         addressParts["province"] = value?.ToString() ?? "";
                         break;
                     case "address_city":
+                        property.AddressCity = value?.ToString();
                         addressParts["city"] = value?.ToString() ?? "";
                         break;
                     case "address_district":
+                        property.AddressDistrict = value?.ToString();
                         addressParts["district"] = value?.ToString() ?? "";
                         break;
                     case "address_detail":
                         addressParts["detail"] = value?.ToString() ?? "";
                         break;
 
-                    // ========== 권리분석: 선순위 정보 ==========
+                    // ========== 선순위 정보 (property + rightData) ==========
+                    case "senior_mortgage_amount":
+                        property.SeniorMortgageAmount = value as decimal?;
+                        break;
+                    case "senior_housing_small_deposit":
+                        property.SeniorHousingSmallDeposit = value as decimal?;
+                        break;
+                    case "senior_commercial_small_deposit":
+                        property.SeniorCommercialSmallDeposit = value as decimal?;
+                        break;
                     case "senior_small_deposit":
+                        property.SeniorSmallDeposit = value as decimal?;
                         rightData["small_deposit_dd"] = value;
                         break;
+                    case "senior_housing_lease_deposit":
+                        property.SeniorHousingLeaseDeposit = value as decimal?;
+                        break;
+                    case "senior_commercial_lease_deposit":
+                        property.SeniorCommercialLeaseDeposit = value as decimal?;
+                        break;
                     case "senior_lease_deposit":
+                        property.SeniorLeaseDeposit = value as decimal?;
                         rightData["lease_deposit_dd"] = value;
                         break;
                     case "senior_wage_claim":
+                        property.SeniorWageClaim = value as decimal?;
                         rightData["wage_claim_dd"] = value;
                         break;
                     case "senior_current_tax":
+                        property.SeniorCurrentTax = value as decimal?;
                         rightData["current_tax_dd"] = value;
                         break;
                     case "senior_tax_claim":
+                        property.SeniorTaxClaim = value as decimal?;
                         rightData["senior_tax_dd"] = value;
                         break;
-                    case "senior_other":
+                    case "senior_etc":
+                        property.SeniorEtc = value as decimal?;
                         rightData["etc_dd"] = value;
                         break;
                     case "senior_total":
+                        property.SeniorTotal = value as decimal?;
                         rightData["senior_total_dd"] = value;
                         break;
 
-                    // ========== 권리분석: 감정평가 정보 ==========
+                    // ========== 감정평가 정보 (property + rightData) ==========
                     case "appraisal_type":
+                        property.AppraisalType = value?.ToString();
                         rightData["appraisal_type"] = value;
                         break;
                     case "appraisal_date":
+                        property.AppraisalDate = value as DateTime?;
                         rightData["appraisal_date"] = value;
                         break;
                     case "appraisal_agency":
+                        property.AppraisalAgency = value?.ToString();
                         rightData["appraisal_agency"] = value;
                         break;
+                    case "land_appraisal_value":
+                        property.LandAppraisalValue = value as decimal?;
+                        break;
+                    case "building_appraisal_value":
+                        property.BuildingAppraisalValue = value as decimal?;
+                        break;
+                    case "machinery_appraisal_value":
+                        property.MachineryAppraisalValue = value as decimal?;
+                        break;
+                    case "excluded_appraisal":
+                        property.ExcludedAppraisal = value as decimal?;
+                        break;
                     case "appraisal_value":
-                        rightData["appraisal_value"] = value;
                         property.AppraisalValue = value as decimal?;
+                        rightData["appraisal_value"] = value;
+                        break;
+                    case "kb_price":
+                        property.KbPrice = value as decimal?;
                         break;
 
-                    // ========== 권리분석: 경매 정보 ==========
-                    case "auction_status":
+                    // ========== 경매 기본 정보 (property + rightData) ==========
+                    case "auction_started":
+                        if (value is bool boolVal)
+                            property.AuctionStarted = boolVal;
+                        else if (value != null)
+                        {
+                            var strVal = value.ToString()?.Trim().ToLower();
+                            property.AuctionStarted = strVal == "y" || strVal == "yes" || strVal == "true" || strVal == "1" || strVal == "예" || strVal == "개시";
+                        }
                         rightData["auction_status"] = value;
                         break;
-                    case "court_name":
+                    case "auction_court":
+                        property.AuctionCourt = value?.ToString();
                         rightData["court_name"] = value;
                         break;
-                    case "auction_applicant_precedent":
+
+                    // ========== 경매 선행 정보 ==========
+                    case "precedent_auction_applicant":
+                        property.PrecedentAuctionApplicant = value?.ToString();
                         rightData["auction_applicant"] = value;
                         break;
-                    case "auction_start_date_precedent":
+                    case "precedent_auction_start_date":
+                        property.PrecedentAuctionStartDate = value as DateTime?;
                         rightData["auction_start_date"] = value;
                         break;
-                    case "case_number_precedent":
+                    case "precedent_case_number":
+                        property.PrecedentCaseNumber = value?.ToString();
                         rightData["case_number"] = value;
-                        if (!string.IsNullOrEmpty(value?.ToString()))
-                            property.PropertyNumber = value?.ToString();
                         break;
-                    case "claim_deadline_precedent":
+                    case "precedent_claim_deadline":
+                        property.PrecedentClaimDeadline = value as DateTime?;
                         rightData["claim_deadline"] = value;
                         break;
-                    case "initial_appraisal_value":
+                    case "precedent_claim_amount":
+                        property.PrecedentClaimAmount = value as decimal?;
+                        break;
+
+                    // ========== 경매 후행 정보 ==========
+                    case "subsequent_auction_applicant":
+                        property.SubsequentAuctionApplicant = value?.ToString();
+                        break;
+                    case "subsequent_auction_start_date":
+                        property.SubsequentAuctionStartDate = value as DateTime?;
+                        break;
+                    case "subsequent_case_number":
+                        property.SubsequentCaseNumber = value?.ToString();
+                        break;
+                    case "subsequent_claim_deadline":
+                        property.SubsequentClaimDeadline = value as DateTime?;
+                        break;
+                    case "subsequent_claim_amount":
+                        property.SubsequentClaimAmount = value as decimal?;
+                        break;
+
+                    // ========== 경매 기일/결과 정보 ==========
+                    case "initial_court_value":
+                        property.InitialCourtValue = value as decimal?;
                         rightData["initial_appraisal"] = value;
                         break;
+                    case "first_auction_date":
+                        property.FirstAuctionDate = value as DateTime?;
+                        break;
                     case "final_auction_round":
+                        if (value is int intRound)
+                            property.FinalAuctionRound = intRound;
+                        else if (int.TryParse(value?.ToString(), out var parsedRound))
+                            property.FinalAuctionRound = parsedRound;
                         rightData["auction_count"] = value;
                         break;
+                    case "final_auction_result":
+                        property.FinalAuctionResult = value?.ToString();
+                        break;
                     case "final_auction_date":
+                        property.FinalAuctionDate = value as DateTime?;
                         rightData["final_auction_date"] = value;
                         break;
                     case "next_auction_date":
+                        property.NextAuctionDate = value as DateTime?;
                         rightData["next_auction_date"] = value;
                         break;
+                    case "winning_bid_amount":
+                        property.WinningBidAmount = value as decimal?;
+                        break;
                     case "final_minimum_bid":
-                        rightData["final_min_bid"] = value;
+                        property.FinalMinimumBid = value as decimal?;
                         property.MinimumBid = value as decimal?;
+                        rightData["final_min_bid"] = value;
+                        break;
+                    case "next_minimum_bid":
+                        property.NextMinimumBid = value as decimal?;
+                        break;
+                    case "notes":
+                        property.Notes = value?.ToString();
                         break;
                 }
             }

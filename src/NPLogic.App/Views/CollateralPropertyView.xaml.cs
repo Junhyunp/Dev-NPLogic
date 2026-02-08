@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -266,12 +268,13 @@ namespace NPLogic.Views
                 {
                     // 카카오 지도 HTML 직접 생성하여 로드
                     var satelliteHtml = GenerateKakaoMapHtml((double)lat.Value, (double)lng.Value, "HYBRID", false);
-                    var cadastralHtml = GenerateKakaoMapHtml((double)lat.Value, (double)lng.Value, "ROADMAP", true);
                     var roadviewHtml = GenerateKakaoRoadviewHtml((double)lat.Value, (double)lng.Value);
 
                     SatelliteMapWebView.NavigateToString(satelliteHtml);
-                    CadastralMapWebView.NavigateToString(cadastralHtml);
                     RoadViewWebView.NavigateToString(roadviewHtml);
+
+                    // 지적도: 위성도 + 해당 필지 경계선 폴리곤 오버레이
+                    _ = LoadCadastralBoundaryMapAsync(vm, (double)lat.Value, (double)lng.Value);
 
                     System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 카카오 지도 로드: ({lat}, {lng})");
                 }
@@ -1810,6 +1813,121 @@ namespace NPLogic.Views
             }});
 
             console.log('카카오 지도 (Fallback) 로드 완료');
+        }});
+    </script>
+</body>
+</html>";
+        }
+
+        #endregion
+
+        #region 필지경계 지도
+
+        /// <summary>
+        /// 지적도 로드: VWORLD Data API로 필지 폴리곤 조회 → 카카오 위성도 위에 경계선 표시
+        /// </summary>
+        private async Task LoadCadastralBoundaryMapAsync(PropertyDetailViewModel vm, double lat, double lng)
+        {
+            try
+            {
+                // PNU 확보
+                var pnu = vm.Property.Pnu;
+                if (string.IsNullOrEmpty(pnu) || pnu.Length != 19)
+                {
+                    var address = vm.Property.DisplayAddress ?? "";
+                    if (!string.IsNullOrWhiteSpace(address))
+                        pnu = await FetchAndSavePnuAsync(vm, CleanAddressForSearch(address));
+                }
+
+                List<double[]>? boundary = null;
+                if (!string.IsNullOrEmpty(pnu) && pnu.Length == 19)
+                {
+                    var vworldService = App.ServiceProvider?.GetService<VworldService>();
+                    if (vworldService != null)
+                        boundary = await vworldService.GetParcelBoundaryAsync(pnu);
+                }
+
+                string html;
+                if (boundary != null && boundary.Count > 0)
+                {
+                    html = GenerateKakaoSatelliteWithBoundaryHtml(lat, lng, boundary);
+                    System.Diagnostics.Debug.WriteLine($"[지적도] 필지 경계 폴리곤 표시: 좌표 {boundary.Count}개");
+                }
+                else
+                {
+                    // 폴리곤 없으면 위성도+마커만 표시
+                    html = GenerateKakaoMapHtml(lat, lng, "HYBRID", false);
+                    System.Diagnostics.Debug.WriteLine("[지적도] 필지 경계 폴리곤 없음 - 위성도 fallback");
+                }
+
+                CadastralMapWebView.NavigateToString(html);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[지적도] 로드 실패: {ex.Message}");
+                var fallbackHtml = GenerateKakaoMapHtml(lat, lng, "HYBRID", false);
+                CadastralMapWebView.NavigateToString(fallbackHtml);
+            }
+        }
+
+        /// <summary>
+        /// 카카오 위성도 + 필지 경계 폴리곤 오버레이 HTML 생성
+        /// </summary>
+        private string GenerateKakaoSatelliteWithBoundaryHtml(double lat, double lng, List<double[]> boundary)
+        {
+            var pathJs = string.Join(",\n                    ",
+                boundary.Select(p => $"new kakao.maps.LatLng({p[0].ToString("F8")}, {p[1].ToString("F8")})"));
+
+            return $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        html, body {{ width: 100%; height: 100%; overflow: hidden; }}
+        #map {{ width: 100%; height: 100%; }}
+    </style>
+</head>
+<body>
+    <div id=""map""></div>
+    <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
+    <script>
+        kakao.maps.load(function() {{
+            var container = document.getElementById('map');
+            var options = {{
+                center: new kakao.maps.LatLng({lat}, {lng}),
+                level: 2,
+                mapTypeId: kakao.maps.MapTypeId.HYBRID
+            }};
+            var map = new kakao.maps.Map(container, options);
+
+            var path = [
+                    {pathJs}
+            ];
+
+            var polygon = new kakao.maps.Polygon({{
+                map: map,
+                path: path,
+                strokeWeight: 3,
+                strokeColor: '#FF0000',
+                strokeOpacity: 0.9,
+                strokeStyle: 'solid',
+                fillColor: '#FF0000',
+                fillOpacity: 0.15
+            }});
+
+            // 폴리곤 영역에 맞게 지도 범위 조정
+            var bounds = new kakao.maps.LatLngBounds();
+            for (var i = 0; i < path.length; i++) {{
+                bounds.extend(path[i]);
+            }}
+            map.setBounds(bounds, 50, 50, 50, 50);
+
+            var marker = new kakao.maps.Marker({{
+                position: new kakao.maps.LatLng({lat}, {lng}),
+                map: map
+            }});
         }});
     </script>
 </body>

@@ -22,7 +22,7 @@ namespace NPLogic.Core.Models
         // 사용자 입력
         public string? DebtorUserInput { get; set; } // 채무자
         public string? CollateralTypeUserInput { get; set; } // 담보종류
-        public bool? IsFactoryMortgageUserInput { get; set; } // 공장저당
+        public string? IsFactoryMortgageUserInput { get; set; } // 공장저당
 
         public string? TargetOwner { get; set; } // 대상소유자
         public string? JibunNumber { get; set; } // 지번번호

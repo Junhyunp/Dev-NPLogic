@@ -79,11 +79,33 @@ namespace NPLogic.Core.Models
 
         // ========== 분양 정보 (아파트/상가/공장용) ==========
 
-        /// <summary>분양면적 (㎡)</summary>
+        /// <summary>분양면적 (㎡) - 레거시</summary>
         public decimal? SupplyArea { get; set; }
 
-        /// <summary>분양가 (원)</summary>
+        /// <summary>분양가 (원) - 레거시</summary>
         public decimal? SupplyPrice { get; set; }
+
+        // ========== KB시세 보조패널 (아파트, 유저 입력) ==========
+
+        /// <summary>KB시세 패널 - 분양면적 (㎡)</summary>
+        public decimal? KbSupplyArea { get; set; }
+
+        // ========== 분양가 보조패널 (상가/아파트형공장, 유저 입력) ==========
+
+        /// <summary>분양가 패널 - 분양면적 (㎡)</summary>
+        public decimal? SaleSupplyArea { get; set; }
+
+        /// <summary>분양가 패널 - 토지 분양가 (원)</summary>
+        public decimal? SalePriceLand { get; set; }
+
+        /// <summary>분양가 패널 - 건물 분양가 (원)</summary>
+        public decimal? SalePriceBuilding { get; set; }
+
+        /// <summary>분양가 패널 - 합계 분양가 (원)</summary>
+        public decimal? SalePriceTotal { get; set; }
+
+        /// <summary>분양가 패널 - 부가세 (원)</summary>
+        public decimal? SalePriceVat { get; set; }
 
         // ========== 지적도/위치도/등기부 이미지 경로 ==========
 

@@ -20,7 +20,7 @@ namespace NPLogic.Core.Models
 
         // 사용자 입력
         public string? NoteUserInput { get; set; } // 비고
-        public bool? WageClaimEstimateUserInput { get; set; } // 임금채권추정
+        public string? WageClaimEstimateUserInput { get; set; } // 임금채권추정
 
         public string? TargetOwner { get; set; } // 대상소유자
         public string? JibunNumber { get; set; } // 지번번호

@@ -24,6 +24,7 @@ namespace NPLogic.Services
         private readonly ProgramSheetMappingRepository _sheetMappingRepository;
         private readonly RegistrySheetDataRepository _registrySheetDataRepository;
         private readonly CreditGuaranteeRepository _creditGuaranteeRepository;
+        private readonly SupabaseService _supabaseService;
 
         /// <summary>
         /// 진행 상황 업데이트 콜백
@@ -40,7 +41,8 @@ namespace NPLogic.Services
             InterimRepository interimRepository,
             ProgramSheetMappingRepository sheetMappingRepository,
             RegistrySheetDataRepository registrySheetDataRepository,
-            CreditGuaranteeRepository creditGuaranteeRepository)
+            CreditGuaranteeRepository creditGuaranteeRepository,
+            SupabaseService supabaseService)
         {
             _excelService = excelService;
             _propertyRepository = propertyRepository;
@@ -52,6 +54,7 @@ namespace NPLogic.Services
             _sheetMappingRepository = sheetMappingRepository;
             _registrySheetDataRepository = registrySheetDataRepository;
             _creditGuaranteeRepository = creditGuaranteeRepository;
+            _supabaseService = supabaseService;
         }
 
         #region 시트 로드 및 매핑
@@ -564,6 +567,9 @@ namespace NPLogic.Services
                     DataTransformService.ApplyAllTransformations(row, DetectedBankType, sheetTypeName);
                 }
 
+                // JWT 토큰 갱신 (시트 처리 전)
+                await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+
                 // 차주번호 -> 차주ID 캐시 (Loan, Restructuring 저장 시 사용)
                 var borrowerCache = new Dictionary<string, Guid>();
 
@@ -654,10 +660,13 @@ namespace NPLogic.Services
         {
             int created = 0, failed = 0;
             int processed = startProcessed;
+            int localRow = 0;
 
             foreach (var row in data)
             {
                 processed++;
+                localRow++;
+                if (localRow % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "차주일반정보");
 
                 try
@@ -693,10 +702,13 @@ namespace NPLogic.Services
         {
             int created = 0, failed = 0;
             int processed = startProcessed;
+            int localRow = 0;
 
             foreach (var row in data)
             {
                 processed++;
+                localRow++;
+                if (localRow % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "회생차주정보");
 
                 try
@@ -756,10 +768,13 @@ namespace NPLogic.Services
         {
             int created = 0, failed = 0;
             int processed = startProcessed;
+            int localRow = 0;
 
             foreach (var row in data)
             {
                 processed++;
+                localRow++;
+                if (localRow % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "채권정보");
 
                 try
@@ -803,10 +818,35 @@ namespace NPLogic.Services
             {
                 rowIndex++;
                 processed++;
+                if (rowIndex % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "담보물건정보");
 
                 try
                 {
+                    // 디버그: 첫 행에서 감정평가 관련 컬럼 매핑 상태 출력
+                    if (rowIndex == 1)
+                    {
+                        var appraisalKeywords = new[] { "감정평가", "제시외", "appraisal" };
+                        System.Diagnostics.Debug.WriteLine("[ProcessProperty] === 감정평가 컬럼 매핑 디버그 ===");
+                        foreach (var col in columns)
+                        {
+                            if (appraisalKeywords.Any(k => col.Contains(k, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                var inMapping = columnMappings.TryGetValue(col, out var mapped);
+                                var rawVal = row.ContainsKey(col) ? row[col]?.ToString() : "KEY_NOT_FOUND";
+                                System.Diagnostics.Debug.WriteLine($"  컬럼='{col}' → columnMappings: {(inMapping ? $"'{mapped}'" : "없음")} | 값='{rawVal}'");
+
+                                if (!inMapping)
+                                {
+                                    var normalizedCol = col.Replace("\n", " ").Replace("\r", "").Trim();
+                                    var rule = SheetMappingConfig.FindMappingRule(mappingRules, normalizedCol);
+                                    System.Diagnostics.Debug.WriteLine($"    fallback: normalized='{normalizedCol}' → rule={rule?.DbColumnName ?? "null"}");
+                                }
+                            }
+                        }
+                        System.Diagnostics.Debug.WriteLine("[ProcessProperty] === 디버그 끝 ===");
+                    }
+
                     var (property, rightData) = MapRowToPropertyWithRules(row, columns, mappingRules, programId, columnMappings);
                     if (property == null)
                     {
@@ -858,6 +898,7 @@ namespace NPLogic.Services
         {
             int created = 0, failed = 0;
             int processed = startProcessed;
+            int localRow = 0;
 
             // property_number -> property_id 캐시 (차주번호와 물건번호 조합으로 물건 조회)
             var propertyCache = new Dictionary<string, Guid>();
@@ -865,6 +906,8 @@ namespace NPLogic.Services
             foreach (var row in data)
             {
                 processed++;
+                localRow++;
+                if (localRow % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "등기부등본정보");
 
                 try
@@ -926,6 +969,7 @@ namespace NPLogic.Services
         {
             int created = 0, failed = 0;
             int processed = startProcessed;
+            int localRow = 0;
 
             // 캐시: 차주번호 -> borrower_id (FK 연결용, 선택사항)
             var borrowerCache = new Dictionary<string, Guid>();
@@ -933,6 +977,8 @@ namespace NPLogic.Services
             foreach (var row in data)
             {
                 processed++;
+                localRow++;
+                if (localRow % 50 == 0) await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
                 OnProgressUpdate?.Invoke(processed, totalRows, "신용보증서");
 
                 try

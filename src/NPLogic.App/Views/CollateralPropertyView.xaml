@@ -379,9 +379,32 @@
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
                                 <StackPanel>
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
-                                        <TextBlock Text="2. 갑구" FontWeight="SemiBold"/>
+                                        <Grid>
+                                            <TextBlock Text="2. 갑구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button Command="{Binding AddGapguRowCommand}"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Command="{Binding DeleteGapguRowCommand}"
+                                                        CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="{StaticResource ErrorBrush}"
+                                                        Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
                                     </Border>
-                                    <DataGrid ItemsSource="{Binding RegistryGapguRows}"
+                                    <DataGrid x:Name="GapguDataGrid"
+                                              ItemsSource="{Binding RegistryGapguRows}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -391,16 +414,16 @@
                                               Margin="12"
                                               MinHeight="160">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="권리자" Binding="{Binding RightHolder}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="비고(입력)" Binding="{Binding NoteUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridCheckBoxColumn Header="임금채권추정(입력)" Binding="{Binding WageClaimEstimateUserInput}" Width="Auto"/>
-                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber}" Width="Auto" IsReadOnly="True"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="권리자" Binding="{Binding RightHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="비고" Binding="{Binding NoteUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="임금채권추정" Binding="{Binding WageClaimEstimateUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
@@ -410,9 +433,32 @@
                             <Border>
                                 <StackPanel>
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
-                                        <TextBlock Text="3. 을구" FontWeight="SemiBold"/>
+                                        <Grid>
+                                            <TextBlock Text="3. 을구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Button Command="{Binding AddEulguRowCommand}"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                                <Button Command="{Binding DeleteEulguRowCommand}"
+                                                        CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Foreground="{StaticResource ErrorBrush}"
+                                                        Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
                                     </Border>
-                                    <DataGrid ItemsSource="{Binding RegistryEulguRows}"
+                                    <DataGrid x:Name="EulguDataGrid"
+                                              ItemsSource="{Binding RegistryEulguRows}"
                                               AutoGenerateColumns="False"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -422,22 +468,22 @@
                                               Margin="12"
                                               MinHeight="160">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="근저당권자" Binding="{Binding MortgageHolder}" Width="2*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="채권최고액" Binding="{Binding MaxClaimAmount, StringFormat=N0}" Width="Auto" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="채무자(입력)" Binding="{Binding DebtorUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="담보종류(입력)" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                            <DataGridCheckBoxColumn Header="공장저당(입력)" Binding="{Binding IsFactoryMortgageUserInput}" Width="Auto"/>
-                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner}" Width="*" IsReadOnly="True"/>
-                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber}" Width="Auto" IsReadOnly="True"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="근저당권자" Binding="{Binding MortgageHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="채권최고액" Binding="{Binding MaxClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="채무자" Binding="{Binding DebtorUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
+                                            <DataGridTextColumn Header="담보종류" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="공장저당" Binding="{Binding IsFactoryMortgageUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,12">
-                                        <Button Content="사용자 입력 저장"
+                                        <Button Content="저장"
                                                 Command="{Binding SaveRegistryUserInputsCommand}"
                                                 Style="{StaticResource MaterialDesignRaisedButton}"
                                                 Padding="12,6"/>
@@ -499,174 +545,193 @@
                         </Border>
                     </StackPanel>
                 </Border>
-                
-                <!-- ========== 건축물대장 정보 (총괄표제부 + 표제부) ========== -->
+
+                <!-- ========== 감정평가 정보 ========== -->
                 <Border Background="{StaticResource SurfaceColor}"
                         BorderBrush="{StaticResource BorderBrush}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Margin="0,0,0,16">
                     <StackPanel>
-                        <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,10">
-                            <TextBlock Text="🏢 건축물대장 정보" 
-                                       Foreground="White" 
+                                Padding="16,8">
+                            <TextBlock Text="감정평가 정보"
+                                       Foreground="White"
                                        FontWeight="SemiBold"
                                        FontSize="{StaticResource FontSizeH4}"/>
                         </Border>
-                        
-                        <!-- 2열 테이블 (총괄표제부, 표제부) -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- 총괄표제부 -->
-                            <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-                                <StackPanel>
-                                    <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
-                                        <TextBlock Text="총괄표제부" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                    </Border>
-                                    <Border Padding="12" MinHeight="80">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding BuildingRegisterGeneralSummary, FallbackValue='건축물대장 조회 필요'}"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       FontSize="{StaticResource FontSizeBody}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 표제부 -->
-                            <Border Grid.Column="1">
-                                <StackPanel>
-                                    <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
-                                        <TextBlock Text="표제부" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                                    </Border>
-                                    <Border Padding="12" MinHeight="80">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding BuildingRegisterTitleSummary, FallbackValue='건축물대장 조회 필요'}"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                                       FontSize="{StaticResource FontSizeBody}"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-                
-                <!-- ========== 감정평가 정보 (한 줄로 간소화) ========== -->
-                <Border Background="{StaticResource SurfaceColor}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Margin="0,0,0,16">
-                    <StackPanel>
-                        <!-- 헤더 -->
-                        <Border Background="{StaticResource PrimaryBrush}"
-                                CornerRadius="8,8,0,0"
-                                Padding="16,10">
-                            <TextBlock Text="💰 감정평가 정보" 
-                                       Foreground="White" 
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeH4}"/>
+                        <DataGrid ItemsSource="{Binding AppraisalInfoList}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  Margin="12"
+                                  MinHeight="60">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="감정평가구분" Binding="{Binding AppraisalType}" Width="Auto"/>
+                                <DataGridTextColumn Header="감정평가일자" Binding="{Binding AppraisalDateFormatted}" Width="Auto"/>
+                                <DataGridTextColumn Header="감정평가기관" Binding="{Binding AppraisalAgency}" Width="Auto"/>
+                                <DataGridTextColumn Header="토지 감정평가액" Binding="{Binding LandAppraisalFormatted}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="건물 감정평가액" Binding="{Binding BuildingAppraisalFormatted}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="기계 감정평가액" Binding="{Binding MachineryAppraisalFormatted}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="제시외" Binding="{Binding ExcludedAppraisalFormatted}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="감정평가액합계" Binding="{Binding AppraisalValueFormatted}" Width="Auto">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- KB시세 (아파트인 경우만 표시) -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                                Visibility="{Binding IsApartment, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                    <TextBlock Text="KB시세" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,1,0,0" Margin="12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- 헤더 -->
+                                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="KB시세 데이터" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="KB시세" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="분양면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- 데이터 -->
+                                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableDataCell}">
+                                            <TextBlock HorizontalAlignment="Center">
+                                                <Hyperlink Command="{Binding OpenKBSiteCommand}" ToolTip="{Binding KbLandUrl}">
+                                                    <Run Text="KB부동산 시세 확인"/>
+                                                </Hyperlink>
+                                            </TextBlock>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                            <TextBlock Text="{Binding KbPrice, StringFormat=N0, TargetNullValue='-'}"
+                                                       HorizontalAlignment="Right" FontWeight="SemiBold"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding KbSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
                         </Border>
-                        
-                        <!-- 감정평가 정보 한 줄 테이블 -->
-                        <Grid Margin="0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="130"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="60"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- 구분 -->
-                            <Border Grid.Column="0" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="구분" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="1" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="{Binding AppraisalType, FallbackValue='-'}" HorizontalAlignment="Center"/>
-                            </Border>
-                            
-                            <!-- 일자 -->
-                            <Border Grid.Column="2" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="일자" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="{Binding Property.AppraisalDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}" HorizontalAlignment="Center"/>
-                            </Border>
-                            
-                            <!-- 기관 -->
-                            <Border Grid.Column="4" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="기관" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="{Binding AppraisalOrganization, FallbackValue='-'}" 
-                                           TextTrimming="CharacterEllipsis"
-                                           ToolTip="{Binding AppraisalOrganization}"/>
-                            </Border>
-                            
-                            <!-- 토지 -->
-                            <Border Grid.Column="6" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="토지" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock HorizontalAlignment="Right">
-                                    <Run Text="{Binding LandAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
-                                </TextBlock>
-                            </Border>
-                            
-                            <!-- 건물 -->
-                            <Border Grid.Column="8" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="건물" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="9" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock HorizontalAlignment="Right">
-                                    <Run Text="{Binding BuildingAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
-                                </TextBlock>
-                            </Border>
-                            
-                            <!-- 기계 -->
-                            <Border Grid.Column="10" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="기계" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </Border>
-                            <Border Grid.Column="11" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,0">
-                                <TextBlock HorizontalAlignment="Right">
-                                    <Run Text="{Binding MachineAppraisalValue, StringFormat=N0, FallbackValue='0'}"/>
-                                </TextBlock>
-                            </Border>
-                            
-                            <!-- 합계 (강조) -->
-                            <Border Grid.Column="12" Style="{StaticResource TableHeaderCell}" Background="{StaticResource PrimaryBrush}" BorderThickness="0,0,1,0">
-                                <TextBlock Text="합계" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Grid.Column="13" Background="{StaticResource PrimaryBrush}" BorderThickness="0">
-                                <TextBlock Margin="8,0" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                    <Run Text="{Binding Property.AppraisalValue, StringFormat=N0, FallbackValue='0'}" FontWeight="Bold" Foreground="White"/>
-                                    <Run Text=" 원" FontSize="{StaticResource FontSizeSmall}" Foreground="#B0FFFFFF"/>
-                                </TextBlock>
-                            </Border>
-                        </Grid>
+
+                        <!-- 분양가 (상가/아파트형공장인 경우만 표시) -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                                Visibility="{Binding IsCommercialOrFactory, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel>
+                                <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
+                                    <TextBlock Text="분양가" FontWeight="SemiBold"/>
+                                </Border>
+                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,1,0,0" Margin="12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <!-- Row 0: 분양면적 (RowSpan=2) | 분양가 (ColSpan=4) -->
+                                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="분양면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="분양가" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Row 1: 분양가 하위 헤더 (토지, 건물, 합계, 부가세) -->
+                                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="토지" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="건물" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="합계" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="부가세" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+
+                                        <!-- Row 2: 데이터 (모두 유저 입력) -->
+                                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding SaleSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding SalePriceLand, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding SalePriceBuilding, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding SalePriceTotal, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                            <TextBox Text="{Binding SalePriceVat, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                                     BorderThickness="0" Background="Transparent"
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
-                
+
             </StackPanel>
         </ScrollViewer>
     </Grid>

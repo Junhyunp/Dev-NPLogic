@@ -294,52 +294,173 @@ namespace NPLogic.Data.Repositories
             );
         }
 
-        public async Task UpdateGapguUserFieldsAsync(Guid id, string? noteUserInput, bool? wageClaimEstimateUserInput)
+        public async Task UpdateGapguRowAsync(RegistryGapguRow row)
         {
             try
             {
                 var client = await _supabaseService.GetClientAsync();
                 var table = new RegistryGapguRowTable
                 {
-                    Id = id,
-                    NoteUserInput = noteUserInput,
-                    WageClaimEstimateUserInput = wageClaimEstimateUserInput,
+                    Id = row.Id,
+                    RankNo = row.RankNo,
+                    Purpose = row.Purpose,
+                    Receipt = row.Receipt,
+                    ReceiptDate = row.ReceiptDate,
+                    RightHolder = row.RightHolder,
+                    ClaimAmount = row.ClaimAmount,
+                    NoteUserInput = row.NoteUserInput,
+                    WageClaimEstimateUserInput = row.WageClaimEstimateUserInput,
+                    TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
+                    SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
 
                 await client
                     .From<RegistryGapguRowTable>()
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == row.Id)
                     .Update(table);
             }
             catch (Exception ex)
             {
-                throw new Exception($"갑구 사용자 입력 저장 실패: {ex.Message}", ex);
+                throw new Exception($"갑구 행 저장 실패: {ex.Message}", ex);
             }
         }
 
-        public async Task UpdateEulguUserFieldsAsync(Guid id, string? debtorUserInput, string? collateralTypeUserInput, bool? isFactoryMortgageUserInput)
+        public async Task UpdateEulguRowAsync(RegistryEulguRow row)
         {
             try
             {
                 var client = await _supabaseService.GetClientAsync();
                 var table = new RegistryEulguRowTable
                 {
-                    Id = id,
-                    DebtorUserInput = debtorUserInput,
-                    CollateralTypeUserInput = collateralTypeUserInput,
-                    IsFactoryMortgageUserInput = isFactoryMortgageUserInput,
+                    Id = row.Id,
+                    RankNo = row.RankNo,
+                    Purpose = row.Purpose,
+                    Receipt = row.Receipt,
+                    ReceiptDate = row.ReceiptDate,
+                    MortgageHolder = row.MortgageHolder,
+                    MaxClaimAmount = row.MaxClaimAmount,
+                    DebtorUserInput = row.DebtorUserInput,
+                    CollateralTypeUserInput = row.CollateralTypeUserInput,
+                    IsFactoryMortgageUserInput = row.IsFactoryMortgageUserInput,
+                    TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
+                    SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
 
                 await client
                     .From<RegistryEulguRowTable>()
-                    .Where(x => x.Id == id)
+                    .Where(x => x.Id == row.Id)
                     .Update(table);
             }
             catch (Exception ex)
             {
-                throw new Exception($"을구 사용자 입력 저장 실패: {ex.Message}", ex);
+                throw new Exception($"을구 행 저장 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<RegistryGapguRow> InsertGapguRowAsync(RegistryGapguRow row)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = new RegistryGapguRowTable
+                {
+                    Id = row.Id,
+                    RegistryRunId = row.RegistryRunId,
+                    PropertyId = row.PropertyId,
+                    RankNo = row.RankNo,
+                    Purpose = row.Purpose,
+                    Receipt = row.Receipt,
+                    ReceiptDate = row.ReceiptDate,
+                    RightHolder = row.RightHolder,
+                    ClaimAmount = row.ClaimAmount,
+                    NoteUserInput = row.NoteUserInput,
+                    WageClaimEstimateUserInput = row.WageClaimEstimateUserInput,
+                    TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
+                    SortIndex = row.SortIndex,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var result = await client.From<RegistryGapguRowTable>().Insert(table);
+                var inserted = result.Models.First();
+                row.Id = inserted.Id;
+                row.CreatedAt = inserted.CreatedAt;
+                row.UpdatedAt = inserted.UpdatedAt;
+                return row;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 행 추가 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<RegistryEulguRow> InsertEulguRowAsync(RegistryEulguRow row)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var table = new RegistryEulguRowTable
+                {
+                    Id = row.Id,
+                    RegistryRunId = row.RegistryRunId,
+                    PropertyId = row.PropertyId,
+                    RankNo = row.RankNo,
+                    Purpose = row.Purpose,
+                    Receipt = row.Receipt,
+                    ReceiptDate = row.ReceiptDate,
+                    MortgageHolder = row.MortgageHolder,
+                    MaxClaimAmount = row.MaxClaimAmount,
+                    DebtorUserInput = row.DebtorUserInput,
+                    CollateralTypeUserInput = row.CollateralTypeUserInput,
+                    IsFactoryMortgageUserInput = row.IsFactoryMortgageUserInput,
+                    TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
+                    SortIndex = row.SortIndex,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var result = await client.From<RegistryEulguRowTable>().Insert(table);
+                var inserted = result.Models.First();
+                row.Id = inserted.Id;
+                row.CreatedAt = inserted.CreatedAt;
+                row.UpdatedAt = inserted.UpdatedAt;
+                return row;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 행 추가 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task DeleteGapguRowAsync(Guid id)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client.From<RegistryGapguRowTable>().Where(x => x.Id == id).Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"갑구 행 삭제 실패: {ex.Message}", ex);
+            }
+        }
+
+        public async Task DeleteEulguRowAsync(Guid id)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client.From<RegistryEulguRowTable>().Where(x => x.Id == id).Delete();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"을구 행 삭제 실패: {ex.Message}", ex);
             }
         }
 
@@ -1593,7 +1714,7 @@ namespace NPLogic.Data.Repositories
         public string? NoteUserInput { get; set; }
 
         [Postgrest.Attributes.Column("wage_claim_estimate_user_input")]
-        public bool? WageClaimEstimateUserInput { get; set; }
+        public string? WageClaimEstimateUserInput { get; set; }
 
         [Postgrest.Attributes.Column("target_owner")]
         public string? TargetOwner { get; set; }
@@ -1648,7 +1769,7 @@ namespace NPLogic.Data.Repositories
         public string? CollateralTypeUserInput { get; set; }
 
         [Postgrest.Attributes.Column("is_factory_mortgage_user_input")]
-        public bool? IsFactoryMortgageUserInput { get; set; }
+        public string? IsFactoryMortgageUserInput { get; set; }
 
         [Postgrest.Attributes.Column("target_owner")]
         public string? TargetOwner { get; set; }
