@@ -1984,21 +1984,23 @@ namespace NPLogic.Views
             var vm = DataContext as PropertyDetailViewModel;
             if (vm == null) return;
 
-            // 동적 공장저당 체크박스 컬럼 추가
+            // 동적 공장저당 텍스트 컬럼 추가
             for (int i = 0; i < vm.MortgageColumnNames.Count; i++)
             {
                 var colName = vm.MortgageColumnNames[i];
-                var checkCol = new DataGridCheckBoxColumn
+                var textCol = new DataGridTextColumn
                 {
                     Header = colName,
-                    Width = new DataGridLength(70),
-                    Binding = new Binding($"MortgageValues[{i}].IsChecked")
+                    Width = new DataGridLength(90),
+                    Binding = new Binding($"MortgageValues[{i}].Value")
                     {
                         Mode = BindingMode.TwoWay,
                         UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                     }
                 };
-                MachineryDataGrid.Columns.Add(checkCol);
+                textCol.ElementStyle = CreateCenterStyle();
+                textCol.EditingElementStyle = CreateCenterEditStyle();
+                MachineryDataGrid.Columns.Add(textCol);
             }
 
             // 뒤쪽 고정 컬럼 추가

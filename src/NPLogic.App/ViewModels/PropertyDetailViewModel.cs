@@ -111,12 +111,12 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
-    /// 기계기구 감정가 - 공장저당 체크 아이템
+    /// 기계기구 감정가 - 공장저당 값 아이템 (텍스트)
     /// </summary>
-    public partial class MortgageCheckItem : ObservableObject
+    public partial class MortgageValueItem : ObservableObject
     {
         [ObservableProperty]
-        private bool _isChecked;
+        private string _value = "";
     }
 
     /// <summary>
@@ -157,8 +157,8 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private decimal? _evaluationValue;
 
-        /// <summary>공장저당 체크값 (인덱스 = MortgageColumnNames 인덱스)</summary>
-        public ObservableCollection<MortgageCheckItem> MortgageValues { get; } = new();
+        /// <summary>공장저당 값 (인덱스 = MortgageColumnNames 인덱스)</summary>
+        public ObservableCollection<MortgageValueItem> MortgageValues { get; } = new();
 
         partial void OnQuantityChanged(int value) => CalculateAppraisalValue();
         partial void OnUnitPriceChanged(decimal? value) => CalculateAppraisalValue();
@@ -583,6 +583,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<string> _mortgageColumnNames = new();
+
+        // 합계 (지번별 감정평가)
+        public decimal JibunAppraisalTotalValue => JibunAppraisalRows.Sum(r => r.JaAppraisalValue ?? 0);
+
+        // 합계 (기계기구 감정가, 평가액)
+        public decimal MachineryAppraisalTotalValue => MachineryAppraisalRows.Sum(r => r.AppraisalValue ?? 0);
+        public decimal MachineryEvaluationTotalValue => MachineryAppraisalRows.Sum(r => r.EvaluationValue ?? 0);
 
         /// <summary>
         /// 토지이용계획 상태
@@ -1208,10 +1215,17 @@ namespace NPLogic.ViewModels
             SalePriceTotal = property.SalePriceTotal;
             SalePriceVat = property.SalePriceVat;
 
-            // 지번별 감정평가 로드
+            // 지번별 감정평가 초기화 + 로드
+            JibunAppraisalRows.Clear();
+            HasJibunAppraisalTable = false;
+            OnPropertyChanged(nameof(JibunAppraisalTotalValue));
             _ = LoadJibunAppraisalsAsync(property.Id);
 
-            // 기계기구 감정가 로드
+            // 기계기구 감정가 초기화 + 로드
+            MachineryAppraisalRows.Clear();
+            MortgageColumnNames.Clear();
+            HasMachineryAppraisalTable = false;
+            NotifyMachineryTotals();
             _ = LoadMachineryAppraisalsAsync(property.Id);
 
             // 원본 복사 (변경 감지용)
@@ -2914,6 +2928,7 @@ namespace NPLogic.ViewModels
                     });
                 }
                 HasJibunAppraisalTable = JibunAppraisalRows.Count > 0;
+                OnPropertyChanged(nameof(JibunAppraisalTotalValue));
             }
             catch (Exception ex)
             {
@@ -2941,6 +2956,7 @@ namespace NPLogic.ViewModels
         {
             var propertyId = Property?.Id ?? Guid.Empty;
             JibunAppraisalRows.Add(new JibunAppraisalRow { PropertyId = propertyId });
+            OnPropertyChanged(nameof(JibunAppraisalTotalValue));
         }
 
         /// <summary>
@@ -2953,6 +2969,7 @@ namespace NPLogic.ViewModels
             JibunAppraisalRows.Remove(row);
             if (JibunAppraisalRows.Count == 0)
                 HasJibunAppraisalTable = false;
+            OnPropertyChanged(nameof(JibunAppraisalTotalValue));
         }
 
         /// <summary>
@@ -2976,6 +2993,7 @@ namespace NPLogic.ViewModels
                 )).ToList();
 
                 await _propertyRepository.SaveJibunAppraisalsAsync(propertyId, rows);
+                OnPropertyChanged(nameof(JibunAppraisalTotalValue));
                 SuccessMessage = "지번별 감정평가가 저장되었습니다.";
             }
             catch (Exception ex)
@@ -3004,7 +3022,7 @@ namespace NPLogic.ViewModels
 
                     foreach (var r in rows)
                     {
-                        var mortgagesDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, bool>>(r.FactoryMortgages ?? "{}") ?? new();
+                        var mortgagesDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(r.FactoryMortgages ?? "{}") ?? new();
                         var row = new MachineryAppraisalRow
                         {
                             Id = Guid.TryParse(r.Id, out var id) ? id : Guid.NewGuid(),
@@ -3020,15 +3038,16 @@ namespace NPLogic.ViewModels
                             EvaluationRate = r.EvaluationRate,
                             EvaluationValue = r.EvaluationValue,
                         };
-                        // 컬럼 순서대로 체크값 생성
+                        // 컬럼 순서대로 값 생성
                         foreach (var colName in colNames)
                         {
-                            mortgagesDict.TryGetValue(colName, out var isChecked);
-                            row.MortgageValues.Add(new MortgageCheckItem { IsChecked = isChecked });
+                            mortgagesDict.TryGetValue(colName, out var val);
+                            row.MortgageValues.Add(new MortgageValueItem { Value = val ?? "" });
                         }
                         MachineryAppraisalRows.Add(row);
                     }
                     HasMachineryAppraisalTable = true;
+                    NotifyMachineryTotals();
                 }
                 else
                 {
@@ -3039,6 +3058,12 @@ namespace NPLogic.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"기계기구 감정가 로드 실패: {ex.Message}");
             }
+        }
+
+        private void NotifyMachineryTotals()
+        {
+            OnPropertyChanged(nameof(MachineryAppraisalTotalValue));
+            OnPropertyChanged(nameof(MachineryEvaluationTotalValue));
         }
 
         [RelayCommand]
@@ -3058,8 +3083,9 @@ namespace NPLogic.ViewModels
             var row = new MachineryAppraisalRow { PropertyId = propertyId, ItemNumber = nextNum };
             // 기존 열 수에 맞춰 체크 아이템 추가
             foreach (var _ in MortgageColumnNames)
-                row.MortgageValues.Add(new MortgageCheckItem());
+                row.MortgageValues.Add(new MortgageValueItem());
             MachineryAppraisalRows.Add(row);
+            NotifyMachineryTotals();
         }
 
         [RelayCommand]
@@ -3072,6 +3098,7 @@ namespace NPLogic.ViewModels
                 MachineryAppraisalRows[i].ItemNumber = i + 1;
             if (MachineryAppraisalRows.Count == 0)
                 HasMachineryAppraisalTable = false;
+            NotifyMachineryTotals();
         }
 
         [RelayCommand]
@@ -3081,7 +3108,7 @@ namespace NPLogic.ViewModels
             MortgageColumnNames.Add($"공장저당{nextNum}호");
             // 모든 행에 체크 아이템 추가
             foreach (var row in MachineryAppraisalRows)
-                row.MortgageValues.Add(new MortgageCheckItem());
+                row.MortgageValues.Add(new MortgageValueItem());
         }
 
         [RelayCommand]
@@ -3109,9 +3136,9 @@ namespace NPLogic.ViewModels
                 var tables = MachineryAppraisalRows.Select(r =>
                 {
                     // 공장저당 체크값 → JSON
-                    var mortgagesDict = new Dictionary<string, bool>();
+                    var mortgagesDict = new Dictionary<string, string>();
                     for (int i = 0; i < MortgageColumnNames.Count && i < r.MortgageValues.Count; i++)
-                        mortgagesDict[MortgageColumnNames[i]] = r.MortgageValues[i].IsChecked;
+                        mortgagesDict[MortgageColumnNames[i]] = r.MortgageValues[i].Value;
 
                     return new MachineryAppraisalTable
                     {
@@ -3131,6 +3158,7 @@ namespace NPLogic.ViewModels
                 }).ToList();
 
                 await _propertyRepository.SaveMachineryAppraisalsAsync(propertyId, tables);
+                NotifyMachineryTotals();
                 SuccessMessage = "기계기구 감정가가 저장되었습니다.";
             }
             catch (Exception ex)
