@@ -32,7 +32,7 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="12,8,12,12">
                 
-                <!-- ========== 상단: 버튼 바 (토지이용계획, 건축물대장) ========== -->
+                <!-- ========== 상단: 버튼 바 (건축물대장) ========== -->
                 <Border x:Name="ButtonBarPanel"
                         Background="{StaticResource SurfaceColor}"
                         BorderBrush="{StaticResource PrimaryBrush}"
@@ -42,17 +42,6 @@
                         Margin="0,0,0,16"
                         Visibility="Visible">
                     <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource SecondaryButton}"
-                                Padding="16,8"
-                                Margin="0,0,8,0"
-                                Click="OpenLandUsePlan_Click"
-                                ToolTip="토지이용계획 열기">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="FileDocument" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="토지이용계획" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-
                         <Button Style="{StaticResource SecondaryButton}"
                                 Padding="16,8"
                                 Click="OpenBuildingRegister_Click"
@@ -238,11 +227,32 @@
                         <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,10">
-                            <TextBlock Text="📍 물건 기본 정보" 
-                                       Foreground="White" 
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeH4}"/>
+                                Padding="16,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           Text="📍 물건 기본 정보" 
+                                           Foreground="White" 
+                                           FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}"
+                                           VerticalAlignment="Center"/>
+                                <Button Grid.Column="1"
+                                        Padding="10,4"
+                                        Click="OpenLandUsePlan_Click"
+                                        ToolTip="토지이용계획 열기"
+                                        Background="Transparent"
+                                        BorderBrush="White"
+                                        BorderThickness="1"
+                                        Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="FileDocument" Width="14" Height="14" Margin="0,0,4,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="토지이용계획" VerticalAlignment="Center" Foreground="White" FontSize="{StaticResource FontSizeSmall}"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
                         </Border>
                         
                         <!-- 테이블 (1줄: 주소, 담보종류, 토지면적, 건물면적, 공장저당) -->
