@@ -2006,6 +2006,75 @@ namespace NPLogic.Views
             // 뒤쪽 고정 컬럼 추가
             foreach (var col in _machineryTrailingColumns)
                 MachineryDataGrid.Columns.Add(col);
+
+            // 합계 행 재구성 (동적 컬럼에 맞춰 위치 조정)
+            RebuildMachineryTotalsRow(vm.MortgageColumnNames.Count);
+        }
+
+        /// <summary>
+        /// 기계기구 감정가 합계 행을 동적 컬럼 수에 맞춰 재구성
+        /// </summary>
+        private void RebuildMachineryTotalsRow(int mortgageColumnCount)
+        {
+            if (MachineryTotalsGrid == null) return;
+
+            MachineryTotalsGrid.ColumnDefinitions.Clear();
+            MachineryTotalsGrid.Children.Clear();
+
+            // 고정 앞쪽 컬럼: 번호(50), 기계기구명(150), 제조사(100), 제작일자(90), 수량(60), 단가(100), 감정가(120)
+            var frontWidths = new double[] { 50, 150, 100, 90, 60, 100, 120 };
+            for (int i = 0; i < frontWidths.Length; i++)
+                MachineryTotalsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(frontWidths[i]) });
+
+            // 동적 공장저당 컬럼 (각 90)
+            for (int i = 0; i < mortgageColumnCount; i++)
+                MachineryTotalsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(90) });
+
+            // 뒤쪽 고정 컬럼: 담보여부(70), 평가율(80), 평가액(120), 삭제(40)
+            var trailingWidths = new double[] { 70, 80, 120, 40 };
+            for (int i = 0; i < trailingWidths.Length; i++)
+                MachineryTotalsGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(trailingWidths[i]) });
+
+            int colCount = frontWidths.Length + mortgageColumnCount + trailingWidths.Length;
+
+            // "합계" 텍스트 (Column 0)
+            var totalLabel = new System.Windows.Controls.TextBlock
+            {
+                Text = "합계",
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(8, 6, 8, 6)
+            };
+            Grid.SetColumn(totalLabel, 0);
+            MachineryTotalsGrid.Children.Add(totalLabel);
+
+            // 감정가 합계 (Column 6 = 감정가)
+            var appraisalTotal = new System.Windows.Controls.TextBlock
+            {
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(8, 6, 8, 6)
+            };
+            appraisalTotal.SetBinding(System.Windows.Controls.TextBlock.TextProperty,
+                new Binding("MachineryAppraisalTotalValue") { StringFormat = "N0" });
+            Grid.SetColumn(appraisalTotal, 6);
+            MachineryTotalsGrid.Children.Add(appraisalTotal);
+
+            // 평가액 합계 (Column = 7 + mortgageColumnCount + 2 = 평가액 컬럼 위치)
+            int evalValueColIndex = 7 + mortgageColumnCount + 2; // 담보여부(+0), 평가율(+1), 평가액(+2)
+            var evalTotal = new System.Windows.Controls.TextBlock
+            {
+                FontWeight = FontWeights.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Padding = new Thickness(8, 6, 8, 6)
+            };
+            evalTotal.SetBinding(System.Windows.Controls.TextBlock.TextProperty,
+                new Binding("MachineryEvaluationTotalValue") { StringFormat = "N0" });
+            Grid.SetColumn(evalTotal, evalValueColIndex);
+            MachineryTotalsGrid.Children.Add(evalTotal);
         }
 
         private void InitializeTrailingColumns()

@@ -6,7 +6,21 @@
 
 ### 2026-02-09
 
-#### 기계기구 감정가 패널 개선 및 버그 수정
+#### DataGrid UI 개선 및 버그 수정
+
+- **흰색 폰트 수정**: 지번별 감정평가·기계기구 감정가 DataGrid에서 셀 선택/편집 시 글자가 흰색으로 바뀌는 문제 해결
+  - CellStyle에 `Foreground="Black"` + `IsSelected`/`IsEditing` 트리거 추가
+  - RowStyle에 `Foreground="Black"` 추가
+- **합계 실시간 갱신**: 셀 값 편집 시 합계가 즉시 갱신되도록 행별 PropertyChanged 구독 추가
+  - `SubscribeJibunRowChanged()`, `SubscribeMachineryRowChanged()` 메서드 추가
+  - 행 생성/로드 6곳에서 구독 설정
+- **평가액 합계 동적 위치**: 기계기구 감정가 합계 행의 평가액 합계가 동적 컬럼 추가/삭제에 따라 평가액 컬럼 위치에 자동 정렬
+  - 고정 Grid → code-behind `RebuildMachineryTotalsRow()` 동적 생성으로 변경
+- **물건 전환 시 이전 데이터 잔류 버그 수정 (탭 캐시 경로)**
+  - `InitializeAsync()` 시작부에 await 전 동기적 Clear 추가 (LoadProperty 경로에 이어 추가)
+  - NonCoreView 탭 캐시에서 RefreshTabDataAsync → InitializeAsync 호출 시에도 이전 데이터 즉시 클리어
+
+#### 기계기구 감정가 패널 개선
 
 - **공장저당n호 컬럼 타입 변경**: 체크박스(bool) → 텍스트(string) 입력으로 변경
   - `MortgageCheckItem` → `MortgageValueItem` (bool IsChecked → string Value)

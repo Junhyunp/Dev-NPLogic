@@ -591,6 +591,26 @@ namespace NPLogic.ViewModels
         public decimal MachineryAppraisalTotalValue => MachineryAppraisalRows.Sum(r => r.AppraisalValue ?? 0);
         public decimal MachineryEvaluationTotalValue => MachineryAppraisalRows.Sum(r => r.EvaluationValue ?? 0);
 
+        /// <summary>행의 PropertyChanged 구독 → 합계 실시간 갱신</summary>
+        private void SubscribeJibunRowChanged(JibunAppraisalRow row)
+        {
+            row.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(JibunAppraisalRow.JaAppraisalValue))
+                    OnPropertyChanged(nameof(JibunAppraisalTotalValue));
+            };
+        }
+
+        private void SubscribeMachineryRowChanged(MachineryAppraisalRow row)
+        {
+            row.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(MachineryAppraisalRow.AppraisalValue) ||
+                    e.PropertyName == nameof(MachineryAppraisalRow.EvaluationValue))
+                    NotifyMachineryTotals();
+            };
+        }
+
         /// <summary>
         /// 토지이용계획 상태
         /// </summary>
@@ -1316,6 +1336,15 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = true;
                 ErrorMessage = null;
+
+                // 즉시 이전 물건의 테이블 데이터 클리어 (탭 캐시 경로에서 이전 데이터 잔류 방지)
+                JibunAppraisalRows.Clear();
+                HasJibunAppraisalTable = false;
+                OnPropertyChanged(nameof(JibunAppraisalTotalValue));
+                MachineryAppraisalRows.Clear();
+                MortgageColumnNames.Clear();
+                HasMachineryAppraisalTable = false;
+                NotifyMachineryTotals();
 
                 // 현재 사용자 정보 로드
                 if (_permissionService != null)
@@ -2915,7 +2944,7 @@ namespace NPLogic.ViewModels
                 JibunAppraisalRows.Clear();
                 foreach (var r in rows)
                 {
-                    JibunAppraisalRows.Add(new JibunAppraisalRow
+                    var row = new JibunAppraisalRow
                     {
                         Id = r.Id,
                         PropertyId = r.PropertyId,
@@ -2925,7 +2954,9 @@ namespace NPLogic.ViewModels
                         JaAreaPyeong = r.JaAreaPyeong,
                         JaPricePerPyeong = r.JaPricePerPyeong,
                         JaAppraisalValue = r.JaAppraisalValue,
-                    });
+                    };
+                    SubscribeJibunRowChanged(row);
+                    JibunAppraisalRows.Add(row);
                 }
                 HasJibunAppraisalTable = JibunAppraisalRows.Count > 0;
                 OnPropertyChanged(nameof(JibunAppraisalTotalValue));
@@ -2944,7 +2975,9 @@ namespace NPLogic.ViewModels
         {
             if (HasJibunAppraisalTable) return;
             var propertyId = Property?.Id ?? Guid.Empty;
-            JibunAppraisalRows.Add(new JibunAppraisalRow { PropertyId = propertyId });
+            var row = new JibunAppraisalRow { PropertyId = propertyId };
+            SubscribeJibunRowChanged(row);
+            JibunAppraisalRows.Add(row);
             HasJibunAppraisalTable = true;
         }
 
@@ -2955,7 +2988,9 @@ namespace NPLogic.ViewModels
         private void AddJibunAppraisalRow()
         {
             var propertyId = Property?.Id ?? Guid.Empty;
-            JibunAppraisalRows.Add(new JibunAppraisalRow { PropertyId = propertyId });
+            var row = new JibunAppraisalRow { PropertyId = propertyId };
+            SubscribeJibunRowChanged(row);
+            JibunAppraisalRows.Add(row);
             OnPropertyChanged(nameof(JibunAppraisalTotalValue));
         }
 
@@ -3044,6 +3079,7 @@ namespace NPLogic.ViewModels
                             mortgagesDict.TryGetValue(colName, out var val);
                             row.MortgageValues.Add(new MortgageValueItem { Value = val ?? "" });
                         }
+                        SubscribeMachineryRowChanged(row);
                         MachineryAppraisalRows.Add(row);
                     }
                     HasMachineryAppraisalTable = true;
@@ -3071,7 +3107,9 @@ namespace NPLogic.ViewModels
         {
             if (HasMachineryAppraisalTable) return;
             var propertyId = Property?.Id ?? Guid.Empty;
-            MachineryAppraisalRows.Add(new MachineryAppraisalRow { PropertyId = propertyId, ItemNumber = 1 });
+            var row = new MachineryAppraisalRow { PropertyId = propertyId, ItemNumber = 1 };
+            SubscribeMachineryRowChanged(row);
+            MachineryAppraisalRows.Add(row);
             HasMachineryAppraisalTable = true;
         }
 
@@ -3081,9 +3119,9 @@ namespace NPLogic.ViewModels
             var propertyId = Property?.Id ?? Guid.Empty;
             var nextNum = MachineryAppraisalRows.Count + 1;
             var row = new MachineryAppraisalRow { PropertyId = propertyId, ItemNumber = nextNum };
-            // 기존 열 수에 맞춰 체크 아이템 추가
             foreach (var _ in MortgageColumnNames)
                 row.MortgageValues.Add(new MortgageValueItem());
+            SubscribeMachineryRowChanged(row);
             MachineryAppraisalRows.Add(row);
             NotifyMachineryTotals();
         }

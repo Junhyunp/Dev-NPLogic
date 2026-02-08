@@ -794,16 +794,26 @@
                                 </DataGrid.ColumnHeaderStyle>
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
+                                        <Setter Property="Foreground" Value="Black"/>
                                         <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                         <Setter Property="BorderThickness" Value="0,0,1,0"/>
                                         <Setter Property="Padding" Value="4,2"/>
                                         <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Foreground" Value="Black"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEditing" Value="True">
+                                                <Setter Property="Foreground" Value="Black"/>
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </DataGrid.CellStyle>
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
                                         <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Foreground" Value="Black"/>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
@@ -1029,16 +1039,26 @@
                                 </DataGrid.ColumnHeaderStyle>
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
+                                        <Setter Property="Foreground" Value="Black"/>
                                         <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                         <Setter Property="BorderThickness" Value="0,0,1,0"/>
                                         <Setter Property="Padding" Value="4,2"/>
                                         <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Foreground" Value="Black"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEditing" Value="True">
+                                                <Setter Property="Foreground" Value="Black"/>
+                                            </Trigger>
+                                        </Style.Triggers>
                                     </Style>
                                 </DataGrid.CellStyle>
                                 <DataGrid.RowStyle>
                                     <Style TargetType="DataGridRow">
                                         <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                        <Setter Property="Foreground" Value="Black"/>
                                     </Style>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
@@ -1101,25 +1121,10 @@
                                 </DataGrid.Columns>
                             </DataGrid>
 
-                            <!-- 합계 행 (감정가, 평가액) -->
+                            <!-- 합계 행 (감정가, 평가액) - code-behind에서 동적 컬럼에 맞춰 ColumnDefinitions 재구성 -->
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,1,1" Background="{StaticResource BlueGray100Brush}">
-                                <Grid MinHeight="30">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="50"/>   <!-- 번호 -->
-                                        <ColumnDefinition Width="150"/>  <!-- 기계기구명 -->
-                                        <ColumnDefinition Width="100"/>  <!-- 제조사 -->
-                                        <ColumnDefinition Width="90"/>   <!-- 제작일자 -->
-                                        <ColumnDefinition Width="60"/>   <!-- 수량 -->
-                                        <ColumnDefinition Width="100"/>  <!-- 단가 -->
-                                        <ColumnDefinition Width="120"/>  <!-- 감정가 -->
-                                        <ColumnDefinition Width="*"/>    <!-- 동적 컬럼 + 뒤쪽 고정 영역 -->
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
-                                    <TextBlock Grid.Column="6" Text="{Binding MachineryAppraisalTotalValue, StringFormat=N0}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
-                                    <!-- 평가액 합계는 동적 컬럼 수에 따라 위치가 변하므로 x:Name으로 code-behind에서 관리 -->
-                                    <TextBlock x:Name="MachineryEvalTotalText" Grid.Column="7"
-                                               Text="{Binding MachineryEvaluationTotalValue, StringFormat=평가액 합계: {0:N0}}"
-                                               FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="8,6" Margin="0,0,50,0"/>
+                                <Grid x:Name="MachineryTotalsGrid" MinHeight="30">
+                                    <!-- ColumnDefinitions는 code-behind에서 동적 생성 -->
                                 </Grid>
                             </Border>
 
