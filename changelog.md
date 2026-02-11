@@ -4,6 +4,52 @@
 
 ## [Unreleased]
 
+### 2026-02-12
+
+#### 선순위 탭 - 전입/임차 현황 외부 데이터 바인딩
+
+- **차주구분 표시**: `borrowers.borrower_type`에서 읽기전용 TextBlock으로 표시 (DD 데이터)
+- **주소지 일치여부 표시**: `registry_basic_info.is_address_matched`에서 읽기전용 CheckBox로 표시 (OCR 데이터)
+- **(?) 툴팁 추가**: "물건지, 소유주 주소지 일치여부" 헤더에 (?) 아이콘, 마우스 호버 시 "등기부등본 OCR 업로드 필요" 안내 (InitialShowDelay=200ms)
+
+#### 선순위 탭 - 전입/임차 현황 테이블 레이아웃 변경
+
+- **8×8 테이블 재설계**: 전입/임차 현황 및 등기부 정보 영역을 8열×8행 Grid 테이블로 재구성
+  - 왼쪽 5열: 주소지 일치여부, 차주구분, 임차인, 전입인, 전입일, 소유주 전입, 현황조사서 제출, 임대차 유무 등
+  - 오른쪽 3열: 접수정보, 근저당권자, 채권최고액
+
+#### NonCoreView 선순위 탭 DataContext 수정
+
+- **DataContext 미설정 버그 수정**: `CreateAndCacheTabViewAsync`에서 SeniorRightsView 생성 시 DataContext를 명시적으로 설정하도록 변경 (기존: `content.DataContext is SeniorRightsViewModel` 체크가 항상 false)
+- **Properties 1000개 제한 우회**: `GetAllAsync()` 기본 제한(1000행)으로 선택된 물건이 목록에 없는 경우 `GetByIdAsync`로 개별 조회 후 추가
+- **SeniorRightsView DI 팩토리 정리**: App.xaml.cs에서 불필요한 DataContext 팩토리 제거 (NonCoreView가 직접 ViewModel 생성/설정)
+- **Loaded 이벤트 핸들러 제거**: SeniorRightsView.xaml.cs의 `SeniorRightsView_Loaded` 제거 (이중 InitializeAsync 호출 방지)
+
+#### BorrowerRepository 중복 행 에러 수정
+
+- **`.Single()` → `.Limit(1).Get()`**: `GetByBorrowerNumberAsync`에서 같은 `borrower_number`에 중복 행이 있을 때 Supabase가 "multiple rows returned" 에러를 던지는 문제 수정
+
+#### OCR 상태 조회 인프라 추가
+
+- **RegistryRepository**: `GetAllOcrPropertyIdsAsync()` — OCR 데이터가 있는 모든 property_id를 HashSet으로 반환
+- **DashboardViewModel**: `RegistryRepository` DI 추가, `ApplyOcrStatusAsync`로 물건별 OCR 상태 설정
+- **Property 모델**: `HasOcrData` 런타임 전용 프로퍼티 추가 (DB 비저장)
+- **NonCoreViewModel**: `RegistryRepository` DI 추가, `LoadOcrCountsAsync`로 차주별 OCR 카운트 로드, `BorrowerListItem.OcrPropertyCount/OcrDisplay/HasOcr` 추가
+
+**변경된 파일**
+- `src/NPLogic.App/App.xaml.cs`
+- `src/NPLogic.App/Converters/VisibilityConverters.cs`
+- `src/NPLogic.App/ViewModels/DashboardViewModel.cs`
+- `src/NPLogic.App/ViewModels/NonCoreViewModel.cs`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.App/Views/NonCoreView.xaml`
+- `src/NPLogic.App/Views/NonCoreView.xaml.cs`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml.cs`
+- `src/NPLogic.Core/Models/Property.cs`
+- `src/NPLogic.Data/Repositories/BorrowerRepository.cs`
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+
 ### 2026-02-11
 
 #### 선순위 탭 - 경매사건 테이블 UI 개선 및 데이터 저장
