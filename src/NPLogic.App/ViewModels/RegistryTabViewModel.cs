@@ -861,7 +861,7 @@ namespace NPLogic.ViewModels
                 {
                     Id = Guid.NewGuid(),
                     PropertyId = _propertyId,
-                    RightType = "gap",
+                    Section = "갑구",
                     RightOrder = maxOrder + 1,
                     RegistrationCause = "가압류",
                     Status = "active",
@@ -923,7 +923,7 @@ namespace NPLogic.ViewModels
                 {
                     Id = Guid.NewGuid(),
                     PropertyId = _propertyId,
-                    RightType = "eul",
+                    Section = "을구",
                     RightOrder = maxOrder + 1,
                     RegistrationCause = "근저당권",
                     Status = "active",
@@ -1483,7 +1483,7 @@ namespace NPLogic.ViewModels
                     {
                         Id = Guid.NewGuid(),
                         PropertyId = _propertyId,
-                        RightType = "gap",
+                        Section = "갑구",
                         RightOrder = ParseInt(GetStringValue(gapDict, "순위번호")),
                         RegistrationCause = GetStringValue(gapDict, "등기목적"),
                         RegistrationNumber = GetStringValue(gapDict, "접수정보"),
@@ -1509,14 +1509,14 @@ namespace NPLogic.ViewModels
                     {
                         Id = Guid.NewGuid(),
                         PropertyId = _propertyId,
-                        RightType = "eul",
+                        Section = "을구",
                         RightOrder = ParseInt(GetStringValue(eulDict, "순위번호")),
                         RegistrationCause = GetStringValue(eulDict, "등기목적"),
                         RegistrationNumber = GetStringValue(eulDict, "접수정보"),
                         RegistrationDate = ParseDate(GetStringValue(eulDict, "접수날짜")),
                         RightHolder = GetStringValue(eulDict, "근저당권자/전세권자/채권자"),
                         ClaimAmount = ParseDecimal(GetStringValue(eulDict, "채권최고액/전세금")),
-                        Debtor = GetStringValue(eulDict, "채무자"),
+                        Notes = GetStringValue(eulDict, "채무자"),
                         Status = "active",
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow

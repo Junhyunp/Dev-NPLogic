@@ -473,6 +473,17 @@ namespace NPLogic.Views
                     
                 case "SeniorRights":
                     content = serviceProvider.GetRequiredService<SeniorRightsView>();
+                    if (content.DataContext is SeniorRightsViewModel seniorVm)
+                    {
+                        await seniorVm.InitializeAsync();
+                        if (selectedPropertyId.HasValue)
+                        {
+                            var prop = seniorVm.Properties.FirstOrDefault(p => p.Id == selectedPropertyId.Value);
+                            if (prop != null)
+                                seniorVm.SelectedProperty = prop;
+                        }
+                        viewModel = seniorVm;
+                    }
                     break;
                     
                 case "Restructuring":
@@ -657,6 +668,20 @@ namespace NPLogic.Views
                     }
                     break;
                     
+                case "SeniorRights":
+                    if (viewModel is SeniorRightsViewModel srVm && property != null)
+                    {
+                        var matchProp = srVm.Properties.FirstOrDefault(p => p.Id == property.Id);
+                        if (matchProp != null)
+                            srVm.SelectedProperty = matchProp;
+                        else
+                        {
+                            srVm.Properties.Add(property);
+                            srVm.SelectedProperty = property;
+                        }
+                    }
+                    break;
+
                 case "Interim":
                     if (viewModel is InterimTabViewModel interimVm)
                     {

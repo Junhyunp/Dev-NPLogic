@@ -4,6 +4,47 @@
 
 ## [Unreleased]
 
+### 2026-02-11
+
+#### registry_rights 테이블 C# 코드 동기화
+
+- **RegistryRight 모델 업데이트**: Supabase에 재생성한 `registry_rights` 테이블 스키마에 맞게 동기화
+  - `RegistryDocumentId`, `Debtor`, `CollateralType`, `IsFactoryMortgage`, `IsWageClaimEstimate` 필드 제거
+  - `Section`("갑구"/"을구"), `TargetOwner`(대상소유자), `JibeonNumber`(지번번호) 필드 추가
+- **Postgrest 매핑 업데이트**: `RegistryRightTable` 모델 및 매핑 메서드 동기화
+- **ViewModel 필터 변경**: `RightType == "gap"/"eul"` → `Section == "갑구"/"을구"` (SeniorRightsViewModel, RegistryTabViewModel)
+
+#### 선순위 탭 경매사건 테이블 레이아웃 변경
+
+- **통합 8×5 테이블**: 기존 선행/후행 분리 Grid → 통합 테이블로 재구성
+  - 왼쪽: 경매신청기관, 경매개시일자, 경매사건번호, 배당요구종기일 (선행/후행 각각)
+  - 오른쪽: 경매개시여부, 관할법원, 최초법사가, 최초경매기일, 최종경매회차, 최종경매결과, 낙찰금액, 차후최저입찰금액
+- **읽기 전용 표시**: TextBox → TextBlock 변경 (DD 데이터 표시 용도)
+- **담보물건 탭 스타일 통일**: TableHeaderCell/TableDataCell 스타일 적용
+- **데이터 바인딩 연결**: SelectedProperty의 경매 관련 Property 속성에 바인딩
+- **AuctionStarted 표시**: bool 값을 DataTrigger로 "경매개시"/"경매미개시" 한국어 텍스트 변환
+
+#### NonCoreView 선순위 탭 데이터 로딩 수정
+
+- **LoadFunctionContentAsync**: SeniorRights 케이스 추가 — InitializeAsync + SelectedProperty 설정
+- **RefreshTabDataAsync**: SeniorRights 케이스 추가 — 물건 전환 시 SelectedProperty 갱신
+
+#### 물건번호 생성 로직 수정
+
+- **ProgramManagementViewModel**: DD 업로드 시 물건번호를 카운터 기반 대신 엑셀 "물건 일련번호" 값 활용
+  - 엑셀 일련번호가 있으면 `{차주번호}_{일련번호}` 형식으로 생성 (예: R-0035_2)
+  - 없으면 기존 카운터 방식으로 폴백
+  - R-0035처럼 비연속 일련번호(2번만 존재)에서 잘못된 번호(R-0035_1) 생성되던 버그 수정
+
+**변경된 파일**
+- `src/NPLogic.Core/Models/RegistryRight.cs`
+- `src/NPLogic.Data/Repositories/RegistryRepository.cs`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+- `src/NPLogic.App/Views/NonCoreView.xaml.cs`
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+
 ### 2026-02-09
 
 #### DataGrid UI 개선 및 버그 수정

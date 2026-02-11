@@ -8,13 +8,17 @@ namespace NPLogic.Core.Models
     public class RegistryRight
     {
         public Guid Id { get; set; }
-        public Guid? RegistryDocumentId { get; set; }
         public Guid? PropertyId { get; set; }
-        
+
         /// <summary>
-        /// 권리 유형: 갑구(gap), 을구(eul)
+        /// 구분: 갑구, 을구
         /// </summary>
-        public string RightType { get; set; } = "gap";
+        public string Section { get; set; } = "갑구";
+
+        /// <summary>
+        /// 권리 유형: 근저당권설정, 가압류, 전세권 등
+        /// </summary>
+        public string? RightType { get; set; }
         
         /// <summary>
         /// 순위번호
@@ -55,31 +59,17 @@ namespace NPLogic.Core.Models
         /// 비고/메모
         /// </summary>
         public string? Notes { get; set; }
-        
-        // ========== 을구 전용 필드 ==========
-        
+
         /// <summary>
-        /// 채무자 (을구 전용)
+        /// 대상소유자
         /// </summary>
-        public string? Debtor { get; set; }
-        
+        public string? TargetOwner { get; set; }
+
         /// <summary>
-        /// 담보종류 (을구 전용)
+        /// 지번번호
         /// </summary>
-        public string? CollateralType { get; set; }
-        
-        /// <summary>
-        /// 공장저당 여부 (을구 전용)
-        /// </summary>
-        public bool IsFactoryMortgage { get; set; }
-        
-        // ========== 갑구 전용 필드 ==========
-        
-        /// <summary>
-        /// 임금채권 추정 여부 (갑구 전용)
-        /// </summary>
-        public bool IsWageClaimEstimate { get; set; }
-        
+        public string? JibeonNumber { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

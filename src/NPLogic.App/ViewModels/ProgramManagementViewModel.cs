@@ -1619,24 +1619,42 @@ namespace NPLogic.ViewModels
                                 continue;
                             }
 
-                            // 물건번호 설정: {차주번호}_{순번} 형식 (예: R-007_1, R-007_2)
+                            // 물건번호 설정: 엑셀의 "물건 일련번호" 값을 활용
                             var borrowerNumber = property.BorrowerNumber;
+                            string finalPropertyNumber;
 
-                            // 해당 차주의 물건 순번 증가
-                            if (borrowerPropertyCount.TryGetValue(borrowerNumber, out int currentCount))
+                            // MapRowToPropertyWithRules에서 설정된 PropertyNumber (엑셀 "물건 일련번호") 활용
+                            var excelPropertyNumber = property.PropertyNumber;
+                            if (!string.IsNullOrWhiteSpace(excelPropertyNumber))
                             {
-                                borrowerPropertyCount[borrowerNumber] = currentCount + 1;
+                                // 이미 차주번호가 포함되어 있으면 그대로 사용 (예: "R-0035-2")
+                                if (excelPropertyNumber.Contains(borrowerNumber))
+                                {
+                                    finalPropertyNumber = excelPropertyNumber;
+                                }
+                                else
+                                {
+                                    // 순수 숫자나 일련번호만 있으면 차주번호와 조합 (예: "2" → "R-0035_2")
+                                    finalPropertyNumber = $"{borrowerNumber}_{excelPropertyNumber}";
+                                }
                             }
                             else
                             {
-                                borrowerPropertyCount[borrowerNumber] = 1;
+                                // 엑셀에 물건 일련번호가 없으면 카운터 폴백
+                                if (borrowerPropertyCount.TryGetValue(borrowerNumber, out int currentCount))
+                                {
+                                    borrowerPropertyCount[borrowerNumber] = currentCount + 1;
+                                }
+                                else
+                                {
+                                    borrowerPropertyCount[borrowerNumber] = 1;
+                                }
+                                var propertySeq = borrowerPropertyCount[borrowerNumber];
+                                finalPropertyNumber = $"{borrowerNumber}_{propertySeq}";
                             }
 
-                            var propertySeq = borrowerPropertyCount[borrowerNumber];
-                            var finalPropertyNumber = $"{borrowerNumber}_{propertySeq}";
-
                             property.PropertyNumber = finalPropertyNumber;
-                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 행 {rowIndex}: BorrowerNumber='{borrowerNumber}', 순번={propertySeq} → PropertyNumber='{finalPropertyNumber}'");
+                            System.Diagnostics.Debug.WriteLine($"[ProcessSheet-Property] 행 {rowIndex}: BorrowerNumber='{borrowerNumber}', Excel일련번호='{excelPropertyNumber}' → PropertyNumber='{finalPropertyNumber}'");
 
                             // ★ 저장 직전 property.BorrowerNumber 확인 (첫 3행만)
                             if (rowIndex <= 3)

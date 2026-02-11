@@ -526,7 +526,7 @@ namespace NPLogic.ViewModels
 
         // 편집 필드
         [ObservableProperty]
-        private string _editRightType = "gap";
+        private string _editSection = "갑구";
 
         [ObservableProperty]
         private int _editRightOrder = 1;
@@ -631,8 +631,7 @@ namespace NPLogic.ViewModels
                 // 필터 적용
                 if (SelectedRightType != "전체")
                 {
-                    var typeFilter = SelectedRightType == "갑구" ? "gap" : "eul";
-                    rights = rights.Where(r => r.RightType == typeFilter).ToList();
+                    rights = rights.Where(r => r.Section == SelectedRightType).ToList();
                 }
 
                 if (SelectedStatus != "전체")
@@ -680,7 +679,7 @@ namespace NPLogic.ViewModels
             
             // 을구(eul)에서 근저당권설정 항목만 필터링하여 순위별로 정렬
             var mortgages = Rights
-                .Where(r => r.RightType == "eul" && 
+                .Where(r => r.Section == "을구" &&
                            (r.RegistrationCause?.Contains("근저당") ?? false) &&
                            r.Status == "active")
                 .OrderBy(r => r.RightOrder);
@@ -888,7 +887,7 @@ namespace NPLogic.ViewModels
         {
             if (value != null)
             {
-                EditRightType = value.RightType;
+                EditSection = value.Section;
                 EditRightOrder = value.RightOrder ?? 1;
                 EditRightHolder = value.RightHolder ?? "";
                 EditClaimAmount = value.ClaimAmount ?? 0;
@@ -909,7 +908,7 @@ namespace NPLogic.ViewModels
         private void NewRight()
         {
             SelectedRight = null;
-            EditRightType = "gap";
+            EditSection = "갑구";
             EditRightOrder = Rights.Count > 0 ? Rights.Max(r => r.RightOrder ?? 0) + 1 : 1;
             EditRightHolder = "";
             EditClaimAmount = 0;
@@ -944,7 +943,7 @@ namespace NPLogic.ViewModels
                     {
                         Id = Guid.NewGuid(),
                         PropertyId = SelectedProperty?.Id,
-                        RightType = EditRightType,
+                        Section = EditSection,
                         RightOrder = EditRightOrder,
                         RightHolder = EditRightHolder,
                         ClaimAmount = EditClaimAmount,
@@ -960,7 +959,7 @@ namespace NPLogic.ViewModels
                 }
                 else if (SelectedRight != null)
                 {
-                    SelectedRight.RightType = EditRightType;
+                    SelectedRight.Section = EditSection;
                     SelectedRight.RightOrder = EditRightOrder;
                     SelectedRight.RightHolder = EditRightHolder;
                     SelectedRight.ClaimAmount = EditClaimAmount;

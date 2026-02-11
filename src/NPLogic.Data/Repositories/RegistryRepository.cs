@@ -781,7 +781,7 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<RegistryRightTable>()
                     .Where(x => x.PropertyId == propertyId)
-                    .Where(x => x.RightType == "gap")
+                    .Where(x => x.Section == "갑구")
                     .Order(x => x.RightOrder, Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
@@ -804,7 +804,7 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<RegistryRightTable>()
                     .Where(x => x.PropertyId == propertyId)
-                    .Where(x => x.RightType == "eul")
+                    .Where(x => x.Section == "을구")
                     .Order(x => x.RightOrder, Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
@@ -1125,9 +1125,9 @@ namespace NPLogic.Data.Repositories
             return new RegistryRight
             {
                 Id = table.Id,
-                RegistryDocumentId = table.RegistryDocumentId,
                 PropertyId = table.PropertyId,
-                RightType = table.RightType ?? "gap",
+                Section = table.Section,
+                RightType = table.RightType,
                 RightOrder = table.RightOrder,
                 RightHolder = table.RightHolder,
                 ClaimAmount = table.ClaimAmount,
@@ -1135,6 +1135,8 @@ namespace NPLogic.Data.Repositories
                 RegistrationNumber = table.RegistrationNumber,
                 RegistrationCause = table.RegistrationCause,
                 Status = table.Status ?? "active",
+                TargetOwner = table.TargetOwner,
+                JibeonNumber = table.JibeonNumber,
                 Notes = table.Notes,
                 CreatedAt = table.CreatedAt,
                 UpdatedAt = table.UpdatedAt
@@ -1146,8 +1148,8 @@ namespace NPLogic.Data.Repositories
             return new RegistryRightTable
             {
                 Id = model.Id,
-                RegistryDocumentId = model.RegistryDocumentId,
                 PropertyId = model.PropertyId,
+                Section = model.Section,
                 RightType = model.RightType,
                 RightOrder = model.RightOrder,
                 RightHolder = model.RightHolder,
@@ -1156,6 +1158,8 @@ namespace NPLogic.Data.Repositories
                 RegistrationNumber = model.RegistrationNumber,
                 RegistrationCause = model.RegistrationCause,
                 Status = model.Status,
+                TargetOwner = model.TargetOwner,
+                JibeonNumber = model.JibeonNumber,
                 Notes = model.Notes,
                 CreatedAt = model.CreatedAt,
                 UpdatedAt = model.UpdatedAt
@@ -1444,11 +1448,11 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.PrimaryKey("id", false)]
         public Guid Id { get; set; }
 
-        [Postgrest.Attributes.Column("registry_document_id")]
-        public Guid? RegistryDocumentId { get; set; }
-
         [Postgrest.Attributes.Column("property_id")]
         public Guid? PropertyId { get; set; }
+
+        [Postgrest.Attributes.Column("section")]
+        public string Section { get; set; } = "갑구";
 
         [Postgrest.Attributes.Column("right_type")]
         public string? RightType { get; set; }
@@ -1473,6 +1477,12 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("status")]
         public string? Status { get; set; }
+
+        [Postgrest.Attributes.Column("target_owner")]
+        public string? TargetOwner { get; set; }
+
+        [Postgrest.Attributes.Column("jibeon_number")]
+        public string? JibeonNumber { get; set; }
 
         [Postgrest.Attributes.Column("notes")]
         public string? Notes { get; set; }
