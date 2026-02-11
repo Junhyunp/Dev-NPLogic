@@ -185,6 +185,53 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 대출 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<List<Loan>> CreateBatchAsync(List<Loan> loans, int chunkSize = 50)
+        {
+            var allCreated = new List<Loan>();
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in loans.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(l =>
+                    {
+                        var table = MapToLoanTable(l);
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<LoanTable>()
+                        .Insert(tables);
+
+                    allCreated.AddRange(response.Models.Select(MapToLoan));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LoanRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var loan in chunk)
+                    {
+                        try
+                        {
+                            var created = await CreateAsync(loan);
+                            allCreated.Add(created);
+                        }
+                        catch (Exception innerEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[LoanRepository] 개별 삽입 실패: {innerEx.Message}");
+                        }
+                    }
+                }
+            }
+
+            return allCreated;
+        }
+
+        /// <summary>
         /// 대출 생성
         /// </summary>
         public async Task<Loan> CreateAsync(Loan loan)

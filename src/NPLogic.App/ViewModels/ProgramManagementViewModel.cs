@@ -1251,21 +1251,38 @@ namespace NPLogic.ViewModels
 
                 if (ShowSheetSelection)
                 {
-                    // 시트 선택 모드: 선택된 시트들 처리
+                    // 시트 선택 모드: 선택된 시트들 처리 (배치 최적화)
                     var selectedSheets = AvailableSheets.Where(s => s.IsSelected).ToList();
 
-                    // 시트 처리 순서 로그
-                    System.Diagnostics.Debug.WriteLine($"[SaveProgramWithData] 처리할 시트 순서:");
-                    for (int i = 0; i < selectedSheets.Count; i++)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"  {i + 1}. {selectedSheets[i].Name} ({selectedSheets[i].SheetType})");
-                    }
+                    // 차주번호 → 차주ID 캐시 (시트 간 공유)
+                    var borrowerIdCache = new Dictionary<string, Guid>();
 
-                    foreach (var sheet in selectedSheets)
+                    // Step 1: BorrowerGeneral 시트를 먼저 처리하여 차주 캐시 구축
+                    var borrowerSheet = selectedSheets.FirstOrDefault(s => s.SheetType == SheetType.BorrowerGeneral);
+                    if (borrowerSheet != null)
                     {
                         try
                         {
-                            var result = await ProcessSheetAsync(DataDiskFilePath!, sheet, savedProgram.Id.ToString());
+                            var result = await ProcessSheetBatchAsync(DataDiskFilePath!, borrowerSheet, savedProgram.Id.ToString(), borrowerIdCache);
+                            totalCreated += result.Created;
+                            totalUpdated += result.Updated;
+                            totalFailed += result.Failed;
+                            totalSkipped += result.Skipped;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"차주 시트 처리 실패: {ex.Message}");
+                            totalFailed++;
+                        }
+                    }
+
+                    // Step 2: 나머지 시트 처리 (차주 캐시 활용)
+                    var otherSheets = selectedSheets.Where(s => s.SheetType != SheetType.BorrowerGeneral).ToList();
+                    foreach (var sheet in otherSheets)
+                    {
+                        try
+                        {
+                            var result = await ProcessSheetBatchAsync(DataDiskFilePath!, sheet, savedProgram.Id.ToString(), borrowerIdCache);
                             totalCreated += result.Created;
                             totalUpdated += result.Updated;
                             totalFailed += result.Failed;
@@ -1799,6 +1816,319 @@ namespace NPLogic.ViewModels
 
             System.Diagnostics.Debug.WriteLine($"[ProcessSheet] 결과: 생성={created}, 실패={failed}, 스킵={skipped}");
 
+            return (created, updated, failed, skipped);
+        }
+
+        /// <summary>
+        /// 행에서 차주번호 추출 (공통 헬퍼)
+        /// </summary>
+        private static string? ExtractBorrowerNumber(Dictionary<string, object> row)
+        {
+            foreach (var kvp in row)
+            {
+                var colName = kvp.Key?.ToLower() ?? "";
+                if (colName.Contains("차주일련번호") || colName.Contains("차주번호"))
+                    return kvp.Value?.ToString();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// RightAnalysis 객체 생성 (DB 호출 없는 순수 매핑)
+        /// </summary>
+        private static RightAnalysis BuildRightAnalysis(Property property, Dictionary<string, object?> rightData)
+        {
+            var rightAnalysis = new RightAnalysis
+            {
+                Id = Guid.NewGuid(),
+                PropertyId = property.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            if (rightData.TryGetValue("small_deposit_dd", out var smallDeposit) && smallDeposit is decimal sd)
+                rightAnalysis.SmallDepositDd = sd;
+            if (rightData.TryGetValue("lease_deposit_dd", out var leaseDeposit) && leaseDeposit is decimal ld)
+                rightAnalysis.LeaseDepositDd = ld;
+            if (rightData.TryGetValue("wage_claim_dd", out var wageClaim) && wageClaim is decimal wc)
+                rightAnalysis.WageClaimDd = wc;
+            if (rightData.TryGetValue("current_tax_dd", out var currentTax) && currentTax is decimal ct)
+                rightAnalysis.CurrentTaxDd = ct;
+            if (rightData.TryGetValue("senior_tax_dd", out var seniorTax) && seniorTax is decimal st)
+                rightAnalysis.SeniorTaxDd = st;
+            if (rightData.TryGetValue("etc_dd", out var etcDd) && etcDd is decimal etc)
+                rightAnalysis.EtcDd = etc;
+
+            if (rightData.TryGetValue("appraisal_value", out var appraisalValue) && appraisalValue is decimal av)
+                rightAnalysis.AppraisalValue = av;
+            if (rightData.TryGetValue("appraisal_date", out var appraisalDate) && appraisalDate is DateTime ad)
+                rightAnalysis.AppraisalDate = ad;
+
+            if (rightData.TryGetValue("court_name", out var courtName) && courtName != null)
+                rightAnalysis.CourtName = courtName.ToString();
+            if (rightData.TryGetValue("case_number", out var caseNumber) && caseNumber != null)
+                rightAnalysis.CaseNumber = caseNumber.ToString();
+            if (rightData.TryGetValue("auction_count", out var auctionCount) && auctionCount is int ac)
+                rightAnalysis.AuctionCount = ac;
+            if (rightData.TryGetValue("final_min_bid", out var minBid) && minBid is decimal mb)
+                rightAnalysis.MinimumBid = mb;
+
+            rightAnalysis.SeniorTotalDd =
+                rightAnalysis.SmallDepositDd +
+                rightAnalysis.LeaseDepositDd +
+                rightAnalysis.WageClaimDd +
+                rightAnalysis.CurrentTaxDd +
+                rightAnalysis.SeniorTaxDd +
+                rightAnalysis.EtcDd;
+
+            return rightAnalysis;
+        }
+
+        /// <summary>
+        /// 배치 최적화된 시트 처리. 행을 메모리에서 매핑한 후 배치 INSERT로 DB 호출 최소화.
+        /// </summary>
+        private async Task<(int Created, int Updated, int Failed, int Skipped)> ProcessSheetBatchAsync(
+            string filePath, SelectableSheetInfo sheet, string programId, Dictionary<string, Guid> borrowerIdCache)
+        {
+            var headerRow = _excelService.DetectHeaderRow(filePath, sheet.Name);
+            var (columns, data) = await _excelService.ReadExcelSheetAsync(filePath, sheet.Name, headerRow);
+
+            System.Diagnostics.Debug.WriteLine($"[ProcessSheetBatch] 시트 '{sheet.Name}' ({sheet.SheetType}): {data.Count}행");
+
+            if (data.Count == 0)
+                return (0, 0, 0, 0);
+
+            int created = 0, updated = 0, failed = 0, skipped = 0;
+            UpdateProgress(0, data.Count, sheet.Name);
+
+            switch (sheet.SheetType)
+            {
+                case SheetType.BorrowerGeneral:
+                {
+                    // Phase A: 모든 행을 메모리에서 Borrower 객체로 매핑
+                    var validBorrowers = new List<Borrower>();
+                    foreach (var row in data)
+                    {
+                        try
+                        {
+                            var borrower = MapRowToBorrower(row, programId);
+                            if (string.IsNullOrWhiteSpace(borrower.BorrowerNumber))
+                            {
+                                var isSummaryOrBlankRow = IsBlankRow(row) ||
+                                    (string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col == "일련번호")) &&
+                                     string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col.Contains("pool"))) &&
+                                     string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col.Contains("차주명"))));
+
+                                if (isSummaryOrBlankRow) { skipped++; continue; }
+                                failed++;
+                                continue;
+                            }
+                            validBorrowers.Add(borrower);
+                        }
+                        catch { failed++; }
+                    }
+
+                    // Phase B: 배치 INSERT
+                    var createdBorrowers = await _borrowerRepository.CreateBatchAsync(validBorrowers);
+                    created = createdBorrowers.Count;
+                    failed += validBorrowers.Count - createdBorrowers.Count;
+
+                    // Phase C: 차주 캐시 구축
+                    foreach (var b in createdBorrowers)
+                    {
+                        if (!string.IsNullOrEmpty(b.BorrowerNumber))
+                            borrowerIdCache[b.BorrowerNumber] = b.Id;
+                    }
+
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                case SheetType.BorrowerRestructuring:
+                {
+                    var validRestructurings = new List<BorrowerRestructuring>();
+                    foreach (var row in data)
+                    {
+                        try
+                        {
+                            var borrowerNumber = ExtractBorrowerNumber(row);
+                            Guid? borrowerId = null;
+                            if (!string.IsNullOrEmpty(borrowerNumber) && borrowerIdCache.TryGetValue(borrowerNumber, out var cachedId))
+                                borrowerId = cachedId;
+
+                            var restructuring = MapRowToBorrowerRestructuring(row, borrowerId);
+                            validRestructurings.Add(restructuring);
+                        }
+                        catch { failed++; }
+                    }
+
+                    var batchCreated = await _borrowerRestructuringRepository.CreateBatchAsync(validRestructurings);
+                    created = batchCreated;
+                    failed += validRestructurings.Count - batchCreated;
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                case SheetType.Loan:
+                {
+                    var validLoans = new List<Loan>();
+                    foreach (var row in data)
+                    {
+                        try
+                        {
+                            var borrowerNumber = ExtractBorrowerNumber(row);
+                            Guid? borrowerId = null;
+                            if (!string.IsNullOrEmpty(borrowerNumber) && borrowerIdCache.TryGetValue(borrowerNumber, out var cachedId))
+                                borrowerId = cachedId;
+
+                            var loan = MapRowToLoan(row, borrowerId);
+                            validLoans.Add(loan);
+                        }
+                        catch { failed++; }
+                    }
+
+                    var createdLoans = await _loanRepository.CreateBatchAsync(validLoans);
+                    created = createdLoans.Count;
+                    failed += validLoans.Count - createdLoans.Count;
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                case SheetType.Property:
+                {
+                    var mappingRules = SheetMappingConfig.GetMappingRules(SheetType.Property);
+                    var borrowerPropertyCount = new Dictionary<string, int>();
+                    var validProperties = new List<Property>();
+                    var propertyRightDataList = new List<(string PropertyNumber, Dictionary<string, object?> RightData)>();
+
+                    // Phase A: 모든 행을 메모리에서 매핑 + PropertyNumber 생성
+                    int rowIndex = 0;
+                    foreach (var row in data)
+                    {
+                        rowIndex++;
+                        try
+                        {
+                            var (property, rightData) = MapRowToPropertyWithRules(row, columns, mappingRules, programId);
+                            if (property == null || string.IsNullOrWhiteSpace(property.BorrowerNumber))
+                                continue;
+
+                            // 물건번호 설정 (기존 로직 유지)
+                            var borrowerNumber = property.BorrowerNumber;
+                            string finalPropertyNumber;
+                            var excelPropertyNumber = property.PropertyNumber;
+                            if (!string.IsNullOrWhiteSpace(excelPropertyNumber))
+                            {
+                                finalPropertyNumber = excelPropertyNumber.Contains(borrowerNumber)
+                                    ? excelPropertyNumber
+                                    : $"{borrowerNumber}_{excelPropertyNumber}";
+                            }
+                            else
+                            {
+                                if (borrowerPropertyCount.TryGetValue(borrowerNumber, out int currentCount))
+                                    borrowerPropertyCount[borrowerNumber] = currentCount + 1;
+                                else
+                                    borrowerPropertyCount[borrowerNumber] = 1;
+                                finalPropertyNumber = $"{borrowerNumber}_{borrowerPropertyCount[borrowerNumber]}";
+                            }
+                            property.PropertyNumber = finalPropertyNumber;
+
+                            validProperties.Add(property);
+                            propertyRightDataList.Add((finalPropertyNumber, rightData));
+                        }
+                        catch { failed++; }
+                    }
+
+                    // Phase B: 배치 INSERT 물건
+                    var createdProperties = await _propertyRepository.CreateBatchAsync(validProperties);
+                    created = createdProperties.Count;
+                    failed += validProperties.Count - createdProperties.Count;
+
+                    // Phase C: RightAnalysis 객체 구축 (DB 호출 없이 메모리에서)
+                    var createdPropertyLookup = createdProperties.ToDictionary(p => p.PropertyNumber ?? "", p => p);
+                    var rightAnalysisList = new List<RightAnalysis>();
+
+                    foreach (var (propertyNumber, rightData) in propertyRightDataList)
+                    {
+                        if (createdPropertyLookup.TryGetValue(propertyNumber, out var createdProp))
+                        {
+                            rightAnalysisList.Add(BuildRightAnalysis(createdProp, rightData));
+                        }
+                    }
+
+                    // Phase D: 배치 INSERT 권리분석
+                    if (rightAnalysisList.Count > 0)
+                    {
+                        await _rightAnalysisRepository.CreateBatchAsync(rightAnalysisList);
+                    }
+
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                case SheetType.RegistryDetail:
+                {
+                    var validRegistryData = new List<RegistrySheetData>();
+                    foreach (var row in data)
+                    {
+                        try
+                        {
+                            var registryData = MapRowToRegistrySheetData(row, programId);
+                            if (string.IsNullOrEmpty(registryData.BorrowerNumber))
+                                continue;
+                            validRegistryData.Add(registryData);
+                        }
+                        catch { failed++; }
+                    }
+
+                    var batchCreated = await _registrySheetDataRepository.CreateBatchAsync(validRegistryData);
+                    created = batchCreated;
+                    failed += validRegistryData.Count - batchCreated;
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                case SheetType.Guarantee:
+                {
+                    var validGuarantees = new List<CreditGuarantee>();
+                    foreach (var row in data)
+                    {
+                        try
+                        {
+                            var borrowerNumber = ExtractBorrowerNumber(row);
+                            Guid? borrowerId = null;
+                            if (!string.IsNullOrEmpty(borrowerNumber) && borrowerIdCache.TryGetValue(borrowerNumber, out var cachedId))
+                                borrowerId = cachedId;
+
+                            var guarantee = MapRowToCreditGuarantee(row, borrowerId);
+                            if (string.IsNullOrWhiteSpace(guarantee.GuaranteeNumber) && string.IsNullOrWhiteSpace(guarantee.BorrowerNumber))
+                            {
+                                var isSummaryOrBlankRow = IsBlankRow(row) ||
+                                    (string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col == "일련번호")) &&
+                                     string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col.Contains("pool"))) &&
+                                     string.IsNullOrWhiteSpace(TryGetTrimmedCellValue(row, col => col.Contains("계좌일련번호"))));
+
+                                if (isSummaryOrBlankRow) { skipped++; continue; }
+                                failed++;
+                                continue;
+                            }
+                            validGuarantees.Add(guarantee);
+                        }
+                        catch { failed++; }
+                    }
+
+                    var batchCreated = await _creditGuaranteeRepository.CreateBatchAsync(validGuarantees);
+                    created = batchCreated;
+                    failed += validGuarantees.Count - batchCreated;
+                    UpdateProgress(data.Count, data.Count, sheet.Name);
+                    break;
+                }
+
+                default:
+                    System.Diagnostics.Debug.WriteLine($"[ProcessSheetBatch] '{sheet.Name}'은 지원하지 않는 시트 타입입니다 ({sheet.SheetType})");
+                    break;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[ProcessSheetBatch] '{sheet.Name}' 결과: 생성={created}, 실패={failed}, 스킵={skipped}");
             return (created, updated, failed, skipped);
         }
 

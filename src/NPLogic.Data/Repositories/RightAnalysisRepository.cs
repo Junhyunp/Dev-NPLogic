@@ -62,6 +62,50 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 권리분석 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<int> CreateBatchAsync(List<RightAnalysis> analyses, int chunkSize = 50)
+        {
+            int created = 0;
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in analyses.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(a =>
+                    {
+                        var table = MapToRightAnalysisTable(a);
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<RightAnalysisTable>()
+                        .Insert(tables);
+
+                    created += response.Models.Count;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RightAnalysisRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var analysis in chunk)
+                    {
+                        try
+                        {
+                            await CreateAsync(analysis);
+                            created++;
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            return created;
+        }
+
+        /// <summary>
         /// 권리분석 생성
         /// </summary>
         public async Task<RightAnalysis> CreateAsync(RightAnalysis analysis)

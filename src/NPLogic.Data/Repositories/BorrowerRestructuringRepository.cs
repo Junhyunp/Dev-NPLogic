@@ -81,6 +81,51 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 회생 정보 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<int> CreateBatchAsync(List<BorrowerRestructuring> restructurings, int chunkSize = 50)
+        {
+            int created = 0;
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in restructurings.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(r =>
+                    {
+                        var table = MapToTable(r);
+                        table.Id = Guid.NewGuid();
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<BorrowerRestructuringTable>()
+                        .Insert(tables);
+
+                    created += response.Models.Count;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[BorrowerRestructuringRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var restructuring in chunk)
+                    {
+                        try
+                        {
+                            await CreateAsync(restructuring);
+                            created++;
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            return created;
+        }
+
+        /// <summary>
         /// 회생 정보 생성
         /// </summary>
         public async Task<BorrowerRestructuring> CreateAsync(BorrowerRestructuring restructuring)

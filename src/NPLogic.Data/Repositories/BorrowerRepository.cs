@@ -242,6 +242,53 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 차주 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<List<Borrower>> CreateBatchAsync(List<Borrower> borrowers, int chunkSize = 50)
+        {
+            var allCreated = new List<Borrower>();
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in borrowers.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(b =>
+                    {
+                        var table = MapToBorrowerTable(b);
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<BorrowerTable>()
+                        .Insert(tables);
+
+                    allCreated.AddRange(response.Models.Select(MapToBorrower));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[BorrowerRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var borrower in chunk)
+                    {
+                        try
+                        {
+                            var created = await CreateAsync(borrower);
+                            allCreated.Add(created);
+                        }
+                        catch (Exception innerEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[BorrowerRepository] 개별 삽입 실패: {innerEx.Message}");
+                        }
+                    }
+                }
+            }
+
+            return allCreated;
+        }
+
+        /// <summary>
         /// 차주 생성
         /// </summary>
         public async Task<Borrower> CreateAsync(Borrower borrower)

@@ -61,6 +61,51 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 신용보증서 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<int> CreateBatchAsync(List<CreditGuarantee> guarantees, int chunkSize = 50)
+        {
+            int created = 0;
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in guarantees.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(g =>
+                    {
+                        var table = MapToTable(g);
+                        table.Id = Guid.NewGuid();
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<CreditGuaranteeTable>()
+                        .Insert(tables);
+
+                    created += response.Models.Count;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[CreditGuaranteeRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var guarantee in chunk)
+                    {
+                        try
+                        {
+                            await CreateAsync(guarantee);
+                            created++;
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            return created;
+        }
+
+        /// <summary>
         /// 신용보증서 생성
         /// </summary>
         public async Task<CreditGuarantee> CreateAsync(CreditGuarantee guarantee)

@@ -41,6 +41,51 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 등기부등본정보 일괄 생성 (배치 INSERT). 실패 시 개별 삽입으로 폴백.
+        /// </summary>
+        public async Task<int> CreateBatchAsync(List<RegistrySheetData> dataList, int chunkSize = 50)
+        {
+            int created = 0;
+            var client = await _supabaseService.GetClientAsync();
+
+            foreach (var chunk in dataList.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(d =>
+                    {
+                        var table = MapToTable(d);
+                        table.Id = Guid.NewGuid();
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<RegistrySheetDataTable>()
+                        .Insert(tables);
+
+                    created += response.Models.Count;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[RegistrySheetDataRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var data in chunk)
+                    {
+                        try
+                        {
+                            await CreateAsync(data);
+                            created++;
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            return created;
+        }
+
+        /// <summary>
         /// 등기부등본정보 생성
         /// </summary>
         public async Task<RegistrySheetData> CreateAsync(RegistrySheetData data)

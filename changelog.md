@@ -6,6 +6,30 @@
 
 ### 2026-02-11
 
+#### DD 업로드 성능 최적화 (배치 INSERT)
+
+- **배치 INSERT 메서드 추가**: 7개 Repository에 `CreateBatchAsync` 메서드 추가
+  - `BorrowerRepository`, `LoanRepository`, `PropertyRepository`, `RightAnalysisRepository`
+  - `BorrowerRestructuringRepository`, `RegistrySheetDataRepository`, `CreditGuaranteeRepository`
+  - 청크 단위 배치 INSERT + 실패 시 개별 삽입 폴백 (InterimRepository 패턴)
+- **ProgramManagementViewModel 배치 처리 리팩터링**:
+  - BorrowerGeneral 시트 우선 처리 → 차주 캐시(`borrowerIdCache`) 구축
+  - 나머지 시트에서 차주 조회 시 캐시 사용 (DB 호출 제거)
+  - 각 시트별 행을 메모리에서 매핑 후 배치 INSERT로 DB 호출 최소화
+  - Property + RightAnalysis 배치 INSERT로 물건당 4회 → 청크당 2회로 감소
+- **헬퍼 메서드 추출**: `ExtractBorrowerNumber()`, `BuildRightAnalysis()`
+- **예상 효과**: DB 호출 ~2,260회 → ~30-40회, 업로드 시간 40-60초 → 8-15초
+
+**변경된 파일**
+- `src/NPLogic.Data/Repositories/BorrowerRepository.cs`
+- `src/NPLogic.Data/Repositories/LoanRepository.cs`
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs`
+- `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs`
+- `src/NPLogic.Data/Repositories/BorrowerRestructuringRepository.cs`
+- `src/NPLogic.Data/Repositories/RegistrySheetDataRepository.cs`
+- `src/NPLogic.Data/Repositories/CreditGuaranteeRepository.cs`
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+
 #### registry_rights 테이블 C# 코드 동기화
 
 - **RegistryRight 모델 업데이트**: Supabase에 재생성한 `registry_rights` 테이블 스키마에 맞게 동기화

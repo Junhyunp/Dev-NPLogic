@@ -543,6 +543,73 @@ namespace NPLogic.Data.Repositories
         /// <summary>
         /// 물건 생성
         /// </summary>
+        /// <summary>
+        /// 물건 일괄 생성 (배치 INSERT). ProgramId 워크어라운드 포함. 실패 시 개별 삽입 폴백.
+        /// </summary>
+        public async Task<List<Property>> CreateBatchAsync(List<Property> properties, int chunkSize = 30)
+        {
+            var allCreated = new List<Property>();
+            var client = await _supabaseService.GetClientAsync();
+            var programId = properties.FirstOrDefault()?.ProgramId;
+
+            foreach (var chunk in properties.Chunk(chunkSize))
+            {
+                try
+                {
+                    var tables = chunk.Select(p =>
+                    {
+                        TrimAddressFields(p);
+                        var table = MapToPropertyTable(p);
+                        table.CreatedAt = DateTime.UtcNow;
+                        table.UpdatedAt = DateTime.UtcNow;
+                        return table;
+                    }).ToList();
+
+                    var response = await client
+                        .From<PropertyTable>()
+                        .Insert(tables);
+
+                    // ProgramId nullable Guid 워크어라운드: 배치 결과에서 누락된 경우 일괄 수정
+                    if (programId.HasValue)
+                    {
+                        var needsFixup = response.Models
+                            .Where(m => m.ProgramId != programId)
+                            .ToList();
+
+                        foreach (var model in needsFixup)
+                        {
+                            await client
+                                .From<PropertyTable>()
+                                .Where(x => x.Id == model.Id)
+                                .Set(x => x.ProgramId, programId)
+                                .Update();
+                            model.ProgramId = programId;
+                        }
+                    }
+
+                    allCreated.AddRange(response.Models.Select(MapToProperty));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PropertyRepository] 배치 삽입 실패 ({chunk.Length}건), 개별 삽입 폴백: {ex.Message}");
+                    foreach (var property in chunk)
+                    {
+                        try
+                        {
+                            var created = await CreateAsync(property);
+                            allCreated.Add(created);
+                        }
+                        catch (Exception innerEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[PropertyRepository] 개별 삽입 실패: {innerEx.Message}");
+                        }
+                    }
+                }
+            }
+
+            return allCreated;
+        }
+
         public async Task<Property> CreateAsync(Property property)
         {
             try
