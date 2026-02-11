@@ -203,6 +203,25 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _appraisalReportNote = "";
 
+        // ========== 대법원 경매 이미지 ==========
+        [ObservableProperty]
+        private BitmapSource? _courtCaseSearchImage;
+
+        [ObservableProperty]
+        private string _courtCaseSearchImageInfo = "";
+
+        [ObservableProperty]
+        private BitmapSource? _courtDateSearchImage;
+
+        [ObservableProperty]
+        private string _courtDateSearchImageInfo = "";
+
+        [ObservableProperty]
+        private BitmapSource? _courtDocumentDeliveryImage;
+
+        [ObservableProperty]
+        private string _courtDocumentDeliveryImageInfo = "";
+
         // ========== 선순위 구분 상세 ==========
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
@@ -785,6 +804,9 @@ namespace NPLogic.ViewModels
                     SurveyReportNote = _currentRightAnalysis.SurveyReportNote ?? "";
                     AppraisalReportNote = _currentRightAnalysis.AppraisalReportNote ?? "";
                     LoadPartyDetailsImageFromBase64(_currentRightAnalysis.PartyDetailsImageBase64);
+                    LoadImageFromBase64(_currentRightAnalysis.CourtCaseSearchImage, v => CourtCaseSearchImage = v, v => CourtCaseSearchImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.CourtDateSearchImage, v => CourtDateSearchImage = v, v => CourtDateSearchImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.CourtDocumentDeliveryImage, v => CourtDocumentDeliveryImage = v, v => CourtDocumentDeliveryImageInfo = v);
 
                     // 전입/임차 현황
                     AddressMatch = _currentRightAnalysis.AddressMatch ?? false;
@@ -873,6 +895,12 @@ namespace NPLogic.ViewModels
             AppraisalReportNote = "";
             PartyDetailsImage = null;
             PartyDetailsImageInfo = "";
+            CourtCaseSearchImage = null;
+            CourtCaseSearchImageInfo = "";
+            CourtDateSearchImage = null;
+            CourtDateSearchImageInfo = "";
+            CourtDocumentDeliveryImage = null;
+            CourtDocumentDeliveryImageInfo = "";
 
             // 전입/임차 현황
             AddressMatch = false;
@@ -1269,6 +1297,9 @@ namespace NPLogic.ViewModels
                 analysis.SurveyReportNote = SurveyReportNote;
                 analysis.AppraisalReportNote = AppraisalReportNote;
                 analysis.PartyDetailsImageBase64 = ConvertImageToBase64(PartyDetailsImage);
+                analysis.CourtCaseSearchImage = ConvertImageToBase64(CourtCaseSearchImage);
+                analysis.CourtDateSearchImage = ConvertImageToBase64(CourtDateSearchImage);
+                analysis.CourtDocumentDeliveryImage = ConvertImageToBase64(CourtDocumentDeliveryImage);
 
                 // 전입/임차 현황
                 analysis.AddressMatch = AddressMatch;
@@ -1636,6 +1667,67 @@ namespace NPLogic.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void PasteCourtCaseSearchImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                CourtCaseSearchImage = Clipboard.GetImage();
+                CourtCaseSearchImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건검색 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+            }
+        }
+
+        [RelayCommand]
+        private void PasteCourtDateSearchImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                CourtDateSearchImage = Clipboard.GetImage();
+                CourtDateSearchImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("기일내역검색 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+            }
+        }
+
+        [RelayCommand]
+        private void PasteCourtDocumentDeliveryImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                CourtDocumentDeliveryImage = Clipboard.GetImage();
+                CourtDocumentDeliveryImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("문건송달내역 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+            }
+        }
+
+        /// <summary>
+        /// 대법원 경매사건 검색 사이트 열기
+        /// </summary>
+        [RelayCommand]
+        private void OpenCourtAuctionSearch()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ159M00.xml") { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"사이트 열기 실패: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// BitmapSource → Base64 변환
         /// </summary>
@@ -1681,7 +1773,38 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 경매사건 정보 저장 (당사자내역 이미지, 현황조사서, 감정평가서 메모)
+        /// Base64 → BitmapSource 범용 변환
+        /// </summary>
+        private void LoadImageFromBase64(string? base64, Action<BitmapSource?> setImage, Action<string> setInfo)
+        {
+            if (string.IsNullOrEmpty(base64))
+            {
+                setImage(null);
+                setInfo("");
+                return;
+            }
+            try
+            {
+                var bytes = Convert.FromBase64String(base64);
+                using var ms = new System.IO.MemoryStream(bytes);
+                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = ms;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                setImage(bitmap);
+                setInfo("DB에서 로드됨");
+            }
+            catch
+            {
+                setImage(null);
+                setInfo("");
+            }
+        }
+
+        /// <summary>
+        /// 경매사건 정보 저장 (당사자내역 이미지, 현황조사서, 감정평가서 메모, 대법원 경매 이미지)
         /// </summary>
         [RelayCommand]
         private async Task SaveAuctionCaseNotesAsync()
@@ -1707,6 +1830,9 @@ namespace NPLogic.ViewModels
                 _currentRightAnalysis.AppraisalReportNote = AppraisalReportNote;
                 _currentRightAnalysis.PartyDetailsImageBase64 = ConvertImageToBase64(PartyDetailsImage);
                 _currentRightAnalysis.ClaimDeadlinePassed = ClaimDeadlinePassed;
+                _currentRightAnalysis.CourtCaseSearchImage = ConvertImageToBase64(CourtCaseSearchImage);
+                _currentRightAnalysis.CourtDateSearchImage = ConvertImageToBase64(CourtDateSearchImage);
+                _currentRightAnalysis.CourtDocumentDeliveryImage = ConvertImageToBase64(CourtDocumentDeliveryImage);
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건 정보가 저장되었습니다.");

@@ -83,6 +83,15 @@ namespace NPLogic.Core.Models
         /// <summary>감정평가서 메모</summary>
         public string? AppraisalReportNote { get; set; }
 
+        /// <summary>경매사건검색 이미지 (Base64)</summary>
+        public string? CourtCaseSearchImage { get; set; }
+
+        /// <summary>기일내역검색 이미지 (Base64)</summary>
+        public string? CourtDateSearchImage { get; set; }
+
+        /// <summary>문건송달내역 이미지 (Base64)</summary>
+        public string? CourtDocumentDeliveryImage { get; set; }
+
         // ===== 전입/임차 현황 =====
         
         /// <summary>물건지, 소유주 주소지 일치여부</summary>

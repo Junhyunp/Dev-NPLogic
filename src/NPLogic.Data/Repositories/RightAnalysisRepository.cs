@@ -304,6 +304,9 @@ namespace NPLogic.Data.Repositories
                 PartyDetailsImageBase64 = table.PartyDetailsImageBase64,
                 SurveyReportNote = table.SurveyReportNote,
                 AppraisalReportNote = table.AppraisalReportNote,
+                CourtCaseSearchImage = table.CourtCaseSearchImage,
+                CourtDateSearchImage = table.CourtDateSearchImage,
+                CourtDocumentDeliveryImage = table.CourtDocumentDeliveryImage,
 
                 // 전입/임차 현황
                 AddressMatch = table.AddressMatch,
@@ -407,6 +410,9 @@ namespace NPLogic.Data.Repositories
                 PartyDetailsImageBase64 = model.PartyDetailsImageBase64,
                 SurveyReportNote = model.SurveyReportNote,
                 AppraisalReportNote = model.AppraisalReportNote,
+                CourtCaseSearchImage = model.CourtCaseSearchImage,
+                CourtDateSearchImage = model.CourtDateSearchImage,
+                CourtDocumentDeliveryImage = model.CourtDocumentDeliveryImage,
 
                 // 전입/임차 현황
                 AddressMatch = model.AddressMatch,
@@ -589,6 +595,15 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("appraisal_report_note")]
         public string? AppraisalReportNote { get; set; }
+
+        [Postgrest.Attributes.Column("court_case_search_image")]
+        public string? CourtCaseSearchImage { get; set; }
+
+        [Postgrest.Attributes.Column("court_date_search_image")]
+        public string? CourtDateSearchImage { get; set; }
+
+        [Postgrest.Attributes.Column("court_document_delivery_image")]
+        public string? CourtDocumentDeliveryImage { get; set; }
 
         // 전입/임차 현황
         [Postgrest.Attributes.Column("address_match")]

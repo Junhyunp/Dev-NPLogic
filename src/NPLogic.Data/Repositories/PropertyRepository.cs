@@ -1141,7 +1141,7 @@ namespace NPLogic.Data.Repositories
                 var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<JibunAppraisalTable>()
-                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Filter("property_id", Postgrest.Constants.Operator.Equals, propertyId.ToString())
                     .Order("created_at", Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
@@ -1174,7 +1174,7 @@ namespace NPLogic.Data.Repositories
                 // 기존 데이터 삭제
                 await client
                     .From<JibunAppraisalTable>()
-                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Filter("property_id", Postgrest.Constants.Operator.Equals, propertyId.ToString())
                     .Delete();
 
                 // 새 데이터 삽입
@@ -1214,7 +1214,7 @@ namespace NPLogic.Data.Repositories
                 var client = await _supabaseService.GetClientAsync();
                 var response = await client
                     .From<MachineryAppraisalTable>()
-                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Filter("property_id", Postgrest.Constants.Operator.Equals, propertyId.ToString())
                     .Order("item_number", Postgrest.Constants.Ordering.Ascending)
                     .Get();
 
@@ -1235,7 +1235,7 @@ namespace NPLogic.Data.Repositories
                 // 기존 데이터 삭제
                 await client
                     .From<MachineryAppraisalTable>()
-                    .Where(x => x.PropertyId == propertyId.ToString())
+                    .Filter("property_id", Postgrest.Constants.Operator.Equals, propertyId.ToString())
                     .Delete();
 
                 // 새 데이터 삽입

@@ -471,12 +471,114 @@
                                 <GridSplitter Grid.Column="5" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                                 <GridSplitter Grid.Column="6" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                             </Grid>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
-                                <Button Content="저장"
+
+                            <!-- 대법원 경매 이미지 테이블 (3열 x 2행) -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Row 0: 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}" BorderThickness="2,2,1,1">
+                                    <TextBlock Text="경매사건검색" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}" BorderThickness="0,2,1,1">
+                                    <TextBlock Text="기일내역검색" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}" BorderThickness="0,2,2,1">
+                                    <TextBlock Text="문건송달내역" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+
+                                <!-- Row 1: 이미지 붙여넣기 영역 -->
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,2">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="140" MinHeight="40"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Button Grid.Row="0" Content="이미지 붙여넣기"
+                                                Command="{Binding PasteCourtCaseSearchImageCommand}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <Image Grid.Row="1" Source="{Binding CourtCaseSearchImage}" Stretch="Uniform"/>
+                                        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
+                                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                                      Cursor="SizeNS" Height="5"/>
+                                        <TextBlock Grid.Row="3" Text="{Binding CourtCaseSearchImageInfo}"
+                                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </Grid>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,2">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="140" MinHeight="40"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Button Grid.Row="0" Content="이미지 붙여넣기"
+                                                Command="{Binding PasteCourtDateSearchImageCommand}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <Image Grid.Row="1" Source="{Binding CourtDateSearchImage}" Stretch="Uniform"/>
+                                        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
+                                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                                      Cursor="SizeNS" Height="5"/>
+                                        <TextBlock Grid.Row="3" Text="{Binding CourtDateSearchImageInfo}"
+                                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </Grid>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}" BorderThickness="0,0,2,2">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="140" MinHeight="40"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Button Grid.Row="0" Content="이미지 붙여넣기"
+                                                Command="{Binding PasteCourtDocumentDeliveryImageCommand}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <Image Grid.Row="1" Source="{Binding CourtDocumentDeliveryImage}" Stretch="Uniform"/>
+                                        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
+                                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                                      Cursor="SizeNS" Height="5"/>
+                                        <TextBlock Grid.Row="3" Text="{Binding CourtDocumentDeliveryImageInfo}"
+                                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <!-- 하단: 대법원 링크 (왼쪽) + 저장 버튼 (오른쪽) -->
+                            <Grid Margin="0,8,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="대법원 경매사건 검색"
+                                        Command="{Binding OpenCourtAuctionSearchCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Padding="12,6" HorizontalAlignment="Left"/>
+                                <Button Grid.Column="1" Content="저장"
                                         Command="{Binding SaveAuctionCaseNotesCommand}"
                                         Style="{StaticResource MaterialDesignRaisedButton}"
                                         Padding="12,6"/>
-                            </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
 

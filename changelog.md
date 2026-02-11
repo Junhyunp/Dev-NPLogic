@@ -13,12 +13,19 @@
 - **이미지 크기 조정**: 당사자내역 이미지 영역에 GridSplitter(ResizeDirection=Rows)로 높이 드래그 조정
 - **배당요구종기일경과 자동 판단**: DD의 `precedent_claim_deadline` (선행, 없으면 후행) 날짜가 오늘 이전이면 자동 체크
 - **경매사건 정보 DB 저장**: `right_analysis` 테이블에 `survey_report_note`, `appraisal_report_note`, `party_details_image_base64` 컬럼 추가, "저장" 버튼으로 DB 영구 저장/로드
+- **대법원 경매 이미지 테이블 추가**: 경매사건검색/기일내역검색/문건송달내역 3열 이미지 붙여넣기 테이블 + DB 저장 (`court_case_search_image`, `court_date_search_image`, `court_document_delivery_image`)
+- **"대법원 경매사건 검색" 버튼**: 대법원 경매사건 검색 사이트 바로가기 (courtauction.go.kr)
+
+#### 지번별 감정평가/기계기구 감정가 조회 오류 수정
+
+- **Postgrest `.Where()` → `.Filter()` 변경**: `PropertyRepository`에서 `.Where(x => x.PropertyId == propertyId.ToString())` 호출 시 Postgrest 표현식 파서가 `ToString()` 미지원 → `NotImplementedException` 발생. `.Filter("property_id", Operator.Equals, ...)` 방식으로 4곳 수정
 
 **변경된 파일**
 - `src/NPLogic.App/Views/SeniorRightsView.xaml`
 - `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
 - `src/NPLogic.Core/Models/RightAnalysis.cs`
 - `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs`
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs`
 
 #### 탭 이동/물건 선택 시 로딩 성능 최적화
 
