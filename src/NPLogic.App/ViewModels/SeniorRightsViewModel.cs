@@ -189,6 +189,20 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _wageDataImageInfo = "";
 
+        // ========== 당사자내역 이미지 ==========
+        [ObservableProperty]
+        private BitmapSource? _partyDetailsImage;
+
+        [ObservableProperty]
+        private string _partyDetailsImageInfo = "";
+
+        // ========== 경매사건 하단 메모 ==========
+        [ObservableProperty]
+        private string _surveyReportNote = "";
+
+        [ObservableProperty]
+        private string _appraisalReportNote = "";
+
         // ========== 선순위 구분 상세 ==========
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
@@ -763,7 +777,14 @@ namespace NPLogic.ViewModels
                     WinningBidAmount = _currentRightAnalysis.WinningBidAmount ?? 0;
                     NextAuctionDate = _currentRightAnalysis.NextAuctionDate;
                     NextMinimumBid = _currentRightAnalysis.NextMinimumBid ?? 0;
-                    ClaimDeadlinePassed = _currentRightAnalysis.ClaimDeadlinePassed;
+                    // 배당요구종기일 경과 여부: DD의 날짜 기준 자동 판단 (선행 우선, 없으면 후행)
+                    var deadlineDate = SelectedProperty?.PrecedentClaimDeadline ?? SelectedProperty?.SubsequentClaimDeadline;
+                    ClaimDeadlinePassed = deadlineDate.HasValue && deadlineDate.Value.Date <= DateTime.Today;
+
+                    // 경매사건 메모/이미지
+                    SurveyReportNote = _currentRightAnalysis.SurveyReportNote ?? "";
+                    AppraisalReportNote = _currentRightAnalysis.AppraisalReportNote ?? "";
+                    LoadPartyDetailsImageFromBase64(_currentRightAnalysis.PartyDetailsImageBase64);
 
                     // 전입/임차 현황
                     AddressMatch = _currentRightAnalysis.AddressMatch ?? false;
@@ -845,7 +866,13 @@ namespace NPLogic.ViewModels
             WinningBidAmount = 0;
             NextAuctionDate = null;
             NextMinimumBid = 0;
-            ClaimDeadlinePassed = false;
+            // 배당요구종기일 경과 여부: DD 날짜 기준 자동 판단
+            var deadlineDate = SelectedProperty?.PrecedentClaimDeadline ?? SelectedProperty?.SubsequentClaimDeadline;
+            ClaimDeadlinePassed = deadlineDate.HasValue && deadlineDate.Value.Date <= DateTime.Today;
+            SurveyReportNote = "";
+            AppraisalReportNote = "";
+            PartyDetailsImage = null;
+            PartyDetailsImageInfo = "";
 
             // 전입/임차 현황
             AddressMatch = false;
@@ -1239,6 +1266,9 @@ namespace NPLogic.ViewModels
                 analysis.NextAuctionDate = NextAuctionDate;
                 analysis.NextMinimumBid = NextMinimumBid;
                 analysis.ClaimDeadlinePassed = ClaimDeadlinePassed;
+                analysis.SurveyReportNote = SurveyReportNote;
+                analysis.AppraisalReportNote = AppraisalReportNote;
+                analysis.PartyDetailsImageBase64 = ConvertImageToBase64(PartyDetailsImage);
 
                 // 전입/임차 현황
                 analysis.AddressMatch = AddressMatch;
@@ -1585,6 +1615,105 @@ namespace NPLogic.ViewModels
             else
             {
                 ErrorMessage = "클립보드에 이미지가 없습니다.";
+            }
+        }
+
+        /// <summary>
+        /// 당사자내역 이미지 붙여넣기
+        /// </summary>
+        [RelayCommand]
+        private void PastePartyDetailsImage()
+        {
+            if (Clipboard.ContainsImage())
+            {
+                PartyDetailsImage = Clipboard.GetImage();
+                PartyDetailsImageInfo = $"이미지 붙여넣기됨 ({DateTime.Now:HH:mm:ss})";
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("당사자내역 이미지가 붙여넣기되었습니다.");
+            }
+            else
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("클립보드에 이미지가 없습니다.");
+            }
+        }
+
+        /// <summary>
+        /// BitmapSource → Base64 변환
+        /// </summary>
+        private static string? ConvertImageToBase64(BitmapSource? image)
+        {
+            if (image == null) return null;
+            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
+            using var ms = new System.IO.MemoryStream();
+            encoder.Save(ms);
+            return Convert.ToBase64String(ms.ToArray());
+        }
+
+        /// <summary>
+        /// Base64 → BitmapSource 변환 + 프로퍼티 설정
+        /// </summary>
+        private void LoadPartyDetailsImageFromBase64(string? base64)
+        {
+            if (string.IsNullOrEmpty(base64))
+            {
+                PartyDetailsImage = null;
+                PartyDetailsImageInfo = "";
+                return;
+            }
+            try
+            {
+                var bytes = Convert.FromBase64String(base64);
+                using var ms = new System.IO.MemoryStream(bytes);
+                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = ms;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                PartyDetailsImage = bitmap;
+                PartyDetailsImageInfo = "DB에서 로드됨";
+            }
+            catch
+            {
+                PartyDetailsImage = null;
+                PartyDetailsImageInfo = "";
+            }
+        }
+
+        /// <summary>
+        /// 경매사건 정보 저장 (당사자내역 이미지, 현황조사서, 감정평가서 메모)
+        /// </summary>
+        [RelayCommand]
+        private async Task SaveAuctionCaseNotesAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+
+            try
+            {
+                if (_currentRightAnalysis == null)
+                {
+                    _currentRightAnalysis = new RightAnalysis
+                    {
+                        Id = Guid.NewGuid(),
+                        PropertyId = SelectedProperty.Id,
+                    };
+                }
+
+                _currentRightAnalysis.SurveyReportNote = SurveyReportNote;
+                _currentRightAnalysis.AppraisalReportNote = AppraisalReportNote;
+                _currentRightAnalysis.PartyDetailsImageBase64 = ConvertImageToBase64(PartyDetailsImage);
+                _currentRightAnalysis.ClaimDeadlinePassed = ClaimDeadlinePassed;
+
+                await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건 정보가 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
             }
         }
 

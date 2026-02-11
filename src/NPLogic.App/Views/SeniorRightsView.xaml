@@ -222,11 +222,14 @@
                             <!-- 경매사건 통합 테이블: 왼쪽(선행/후행) + 오른쪽(공통) -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120"/>  <!-- 왼쪽 라벨 -->
-                                    <ColumnDefinition Width="*"/>    <!-- 선행 값 -->
-                                    <ColumnDefinition Width="*"/>    <!-- 후행 값 -->
-                                    <ColumnDefinition Width="180"/>  <!-- 오른쪽 라벨 -->
-                                    <ColumnDefinition Width="*"/>    <!-- 오른쪽 값 -->
+                                    <ColumnDefinition Width="Auto" MinWidth="80"/>   <!-- 0: 왼쪽 라벨 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 1: 선행 값 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 2: 후행 값 -->
+                                    <ColumnDefinition Width="Auto" MinWidth="100"/>  <!-- 3: 오른쪽 라벨 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 4: 오른쪽 값 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 5: 당사자내역 1 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 6: 당사자내역 2 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>      <!-- 7: 당사자내역 3 -->
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -238,6 +241,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
+
+                                <!-- ===== 기존 5열 (Col 0-4) ===== -->
 
                                 <!-- Row 0: 헤더 / 최초법사가 -->
                                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}"/>
@@ -394,7 +399,84 @@
                                 <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableDataCell}">
                                     <TextBlock Text="{Binding SelectedProperty.NextMinimumBid, StringFormat=N0, FallbackValue='-'}"/>
                                 </Border>
+
+                                <!-- ===== 추가 3열 (Col 5-7): 당사자내역 ===== -->
+
+                                <!-- Row 0: 당사자내역 헤더 (3열 병합) -->
+                                <Border Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="3"
+                                        Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,0,1">
+                                    <TextBlock Text="당사자내역" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+
+                                <!-- Row 1-5: 당사자내역 이미지 영역 (3열×5행 병합) -->
+                                <Border Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3" Grid.RowSpan="5"
+                                        Style="{StaticResource TableDataCell}" BorderThickness="2,0,0,1">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="140" MinHeight="40"/>
+                                            <RowDefinition Height="5"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Button Grid.Row="0" Content="이미지 붙여넣기"
+                                                Command="{Binding PastePartyDetailsImageCommand}"
+                                                Style="{StaticResource SecondaryButton}"
+                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                HorizontalAlignment="Left" Margin="0,0,0,4"/>
+                                        <Image Grid.Row="1" Source="{Binding PartyDetailsImage}"
+                                               Stretch="Uniform"/>
+                                        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
+                                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                                      Cursor="SizeNS" Height="5"/>
+                                        <TextBlock Grid.Row="3" Text="{Binding PartyDetailsImageInfo}"
+                                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                                   TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Row 6: 현황조사서 / 감정평가서 / 배당요구종기일경과 (헤더) -->
+                                <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="현황조사서" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="6" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="감정평가서" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="7" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="배당요구종기일경과" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+
+                                <!-- Row 7: 현황조사서 / 감정평가서 / 배당요구종기일경과 (입력) -->
+                                <Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBox Text="{Binding SurveyReportNote, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBoxStyle}"
+                                             TextWrapping="Wrap" AcceptsReturn="True" MinHeight="24"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding AppraisalReportNote, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBoxStyle}"
+                                             TextWrapping="Wrap" AcceptsReturn="True" MinHeight="24"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <CheckBox IsChecked="{Binding ClaimDeadlinePassed}"
+                                              Style="{StaticResource CompactCheckBoxStyle}"
+                                              HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- 컬럼 너비 조정 핸들 (셀 위에 렌더링되도록 마지막에 배치) -->
+                                <GridSplitter Grid.Column="0" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="1" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="2" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="3" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="4" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="5" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="6" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                             </Grid>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
+                                <Button Content="저장"
+                                        Command="{Binding SaveAuctionCaseNotesCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -427,8 +509,8 @@
                                     
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="180"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto" MinWidth="120"/>
+                                            <ColumnDefinition Width="*" MinWidth="60"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
@@ -806,10 +888,10 @@
                             
                             <Grid Margin="8">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="150"/>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="120"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" MinWidth="100"/>
+                                    <ColumnDefinition Width="120" MinWidth="80"/>
+                                    <ColumnDefinition Width="Auto" MinWidth="80"/>
+                                    <ColumnDefinition Width="*" MinWidth="100"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -821,7 +903,7 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                
+
                                 <!-- 헤더 -->
                                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
                                     <TextBlock Text="선순위 구분" Style="{StaticResource LabelStyle}" FontWeight="SemiBold"/>
@@ -936,6 +1018,11 @@
                                 <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableCellStyle}">
                                     <TextBox Text="{Binding SeniorTaxClaimReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}"/>
                                 </Border>
+
+                                <!-- 컬럼 너비 조정 핸들 (셀 위에 렌더링되도록 마지막에 배치) -->
+                                <GridSplitter Grid.Column="0" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="1" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="2" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                             </Grid>
                         </StackPanel>
                     </Border>

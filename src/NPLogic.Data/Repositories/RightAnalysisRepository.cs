@@ -301,6 +301,9 @@ namespace NPLogic.Data.Repositories
                 NextAuctionDate = table.NextAuctionDate,
                 NextMinimumBid = table.NextMinimumBid,
                 ClaimDeadlinePassed = table.ClaimDeadlinePassed,
+                PartyDetailsImageBase64 = table.PartyDetailsImageBase64,
+                SurveyReportNote = table.SurveyReportNote,
+                AppraisalReportNote = table.AppraisalReportNote,
 
                 // 전입/임차 현황
                 AddressMatch = table.AddressMatch,
@@ -401,6 +404,9 @@ namespace NPLogic.Data.Repositories
                 NextAuctionDate = model.NextAuctionDate,
                 NextMinimumBid = model.NextMinimumBid,
                 ClaimDeadlinePassed = model.ClaimDeadlinePassed,
+                PartyDetailsImageBase64 = model.PartyDetailsImageBase64,
+                SurveyReportNote = model.SurveyReportNote,
+                AppraisalReportNote = model.AppraisalReportNote,
 
                 // 전입/임차 현황
                 AddressMatch = model.AddressMatch,
@@ -574,6 +580,15 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("claim_deadline_passed")]
         public bool ClaimDeadlinePassed { get; set; }
+
+        [Postgrest.Attributes.Column("party_details_image_base64")]
+        public string? PartyDetailsImageBase64 { get; set; }
+
+        [Postgrest.Attributes.Column("survey_report_note")]
+        public string? SurveyReportNote { get; set; }
+
+        [Postgrest.Attributes.Column("appraisal_report_note")]
+        public string? AppraisalReportNote { get; set; }
 
         // 전입/임차 현황
         [Postgrest.Attributes.Column("address_match")]

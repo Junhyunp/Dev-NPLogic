@@ -6,6 +6,20 @@
 
 ### 2026-02-11
 
+#### 선순위 탭 - 경매사건 테이블 UI 개선 및 데이터 저장
+
+- **컬럼 너비 드래그 조정**: 경매사건/선순위 구분/전입임차 테이블에 GridSplitter 추가, 컬럼 너비 마우스 드래그로 조절 가능
+- **"당사자내역" 3열 추가**: 경매사건 테이블 오른쪽에 당사자내역 이미지 붙여넣기 영역 + 현황조사서/감정평가서 메모 + 배당요구종기일경과 체크박스
+- **이미지 크기 조정**: 당사자내역 이미지 영역에 GridSplitter(ResizeDirection=Rows)로 높이 드래그 조정
+- **배당요구종기일경과 자동 판단**: DD의 `precedent_claim_deadline` (선행, 없으면 후행) 날짜가 오늘 이전이면 자동 체크
+- **경매사건 정보 DB 저장**: `right_analysis` 테이블에 `survey_report_note`, `appraisal_report_note`, `party_details_image_base64` 컬럼 추가, "저장" 버튼으로 DB 영구 저장/로드
+
+**변경된 파일**
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.Core/Models/RightAnalysis.cs`
+- `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs`
+
 #### 탭 이동/물건 선택 시 로딩 성능 최적화
 
 - **N+1 문제 해결**: `LoadCollateralStatisticsAsync`에서 물건마다 개별 DB 호출 → `GetByPropertyIdsAsync` 배치 조회 (50개 물건 5초 → 0.1초)

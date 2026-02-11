@@ -72,6 +72,17 @@ namespace NPLogic.Core.Models
         /// <summary>배당요구종기일 경과여부</summary>
         public bool ClaimDeadlinePassed { get; set; }
 
+        // ===== 경매사건 메모/이미지 =====
+
+        /// <summary>당사자내역 이미지 (Base64)</summary>
+        public string? PartyDetailsImageBase64 { get; set; }
+
+        /// <summary>현황조사서 메모</summary>
+        public string? SurveyReportNote { get; set; }
+
+        /// <summary>감정평가서 메모</summary>
+        public string? AppraisalReportNote { get; set; }
+
         // ===== 전입/임차 현황 =====
         
         /// <summary>물건지, 소유주 주소지 일치여부</summary>
