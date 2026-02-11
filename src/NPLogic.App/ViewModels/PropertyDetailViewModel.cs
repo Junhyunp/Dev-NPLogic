@@ -1378,12 +1378,6 @@ namespace NPLogic.ViewModels
                     SalePriceTotal = property.SalePriceTotal;
                     SalePriceVat = property.SalePriceVat;
 
-                    // 지번별 감정평가 로드
-                    await LoadJibunAppraisalsAsync(property.Id);
-
-                    // 기계기구 감정가 로드
-                    await LoadMachineryAppraisalsAsync(property.Id);
-
                     // 감정평가 정보 갱신
                     AppraisalInfoList = new ObservableCollection<AppraisalInfoRow>
                     {
@@ -1409,6 +1403,8 @@ namespace NPLogic.ViewModels
                     // 2단계: 독립적인 비동기 작업들을 병렬로 실행 (성능 최적화)
                     var parallelTasks = new List<Task>
                     {
+                        LoadJibunAppraisalsAsync(property.Id),
+                        LoadMachineryAppraisalsAsync(property.Id),
                         LoadAttachmentsAsync(),
                         LoadQAListAsync(),
                         LoadRegistrySummaryAsync(property.Id),
@@ -1575,19 +1571,12 @@ namespace NPLogic.ViewModels
                 TotalAppraisalValue = properties.Sum(p => p.AppraisalValue ?? 0);
                 TotalEstimatedValue = properties.Sum(p => p.SalePrice ?? p.AppraisalValue ?? 0);
 
-                // Loan Cap: right_analysis에서 조회 (있는 경우)
+                // Loan Cap: right_analysis에서 배치 조회 (N+1 → 1회)
                 if (_rightAnalysisRepository != null)
                 {
-                    decimal totalLoanCap = 0;
-                    foreach (var prop in properties)
-                    {
-                        var analysis = await _rightAnalysisRepository.GetByPropertyIdAsync(prop.Id);
-                        if (analysis != null)
-                        {
-                            totalLoanCap += analysis.LoanCap ?? 0;
-                        }
-                    }
-                    LoanCap = totalLoanCap;
+                    var propertyIds = properties.Select(p => p.Id).ToList();
+                    var analyses = await _rightAnalysisRepository.GetByPropertyIdsAsync(propertyIds);
+                    LoanCap = analyses.Sum(a => a.LoanCap ?? 0);
                 }
                 else
                 {

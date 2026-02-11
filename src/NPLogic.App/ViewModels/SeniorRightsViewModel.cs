@@ -574,9 +574,11 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                await LoadPropertiesAsync();
-                await LoadRightsAsync();
-                await LoadRightAnalysisAsync();
+                await Task.WhenAll(
+                    LoadPropertiesAsync(),
+                    LoadRightsAsync(),
+                    LoadRightAnalysisAsync()
+                );
             }
             catch (Exception ex)
             {

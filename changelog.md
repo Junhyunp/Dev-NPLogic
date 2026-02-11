@@ -6,6 +6,20 @@
 
 ### 2026-02-11
 
+#### 탭 이동/물건 선택 시 로딩 성능 최적화
+
+- **N+1 문제 해결**: `LoadCollateralStatisticsAsync`에서 물건마다 개별 DB 호출 → `GetByPropertyIdsAsync` 배치 조회 (50개 물건 5초 → 0.1초)
+- **RightAnalysisRepository에 배치 조회 추가**: `GetByPropertyIdsAsync(List<Guid>)` — Filter("property_id", Operator.In) 사용
+- **PropertyDetailViewModel.InitializeAsync 병렬화**: `LoadJibunAppraisalsAsync`, `LoadMachineryAppraisalsAsync`를 순차 실행에서 `Task.WhenAll` 배치로 이동 (10개 병렬 작업)
+- **SeniorRightsViewModel.InitializeAsync 병렬화**: LoadProperties/LoadRights/LoadRightAnalysis 3개 순차 → `Task.WhenAll` 병렬
+- **RegistryTabViewModel.LoadAllDataForPropertyAsync 병렬화**: BasicInfo/Gapgu/Eulgu 3개 순차 → `Task.WhenAll` 병렬
+
+**변경된 파일**
+- `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.App/ViewModels/RegistryTabViewModel.cs`
+
 #### DD 업로드 성능 최적화 (배치 INSERT)
 
 - **배치 INSERT 메서드 추가**: 7개 Repository에 `CreateBatchAsync` 메서드 추가

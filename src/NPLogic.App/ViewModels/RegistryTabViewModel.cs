@@ -750,12 +750,15 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
-                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
-                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId));
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                    await _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId));
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                    await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId));
+                var basicInfoTask = _registryRepository.GetBasicInfoListByPropertyIdAsync(propertyId);
+                var gapguTask = _registryRepository.GetGapguRowsByPropertyIdAsync(propertyId);
+                var eulguTask = _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+
+                await Task.WhenAll(basicInfoTask, gapguTask, eulguTask);
+
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(basicInfoTask.Result);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapguTask.Result);
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulguTask.Result);
 
                 SavedBasicInfoCount = RegistryBasicInfoList.Count;
                 SavedGapguRowCount = RegistryGapguRows.Count;

@@ -41,6 +41,39 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// 여러 물건의 권리분석 일괄 조회 (배치)
+        /// </summary>
+        public async Task<List<RightAnalysis>> GetByPropertyIdsAsync(List<Guid> propertyIds)
+        {
+            if (propertyIds == null || propertyIds.Count == 0)
+                return new List<RightAnalysis>();
+
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var allResults = new List<RightAnalysis>();
+
+                const int batchSize = 50;
+                for (int i = 0; i < propertyIds.Count; i += batchSize)
+                {
+                    var batch = propertyIds.Skip(i).Take(batchSize).ToList();
+                    var response = await client
+                        .From<RightAnalysisTable>()
+                        .Filter("property_id", Postgrest.Constants.Operator.In, batch)
+                        .Get();
+
+                    allResults.AddRange(response.Models.Select(MapToRightAnalysis));
+                }
+
+                return allResults;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"권리분석 일괄 조회 실패: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// ID로 권리분석 조회
         /// </summary>
         public async Task<RightAnalysis?> GetByIdAsync(Guid id)
