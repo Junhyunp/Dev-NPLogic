@@ -186,7 +186,8 @@ namespace NPLogic
                     sp.GetRequiredService<AuthService>(),
                     sp.GetRequiredService<Data.Repositories.ProgramUserRepository>(),
                     sp.GetRequiredService<Data.Repositories.ProgramRepository>(),
-                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>()
                 );
             });
             // AdminHomeViewModel, PMHomeViewModel, EvaluatorHomeViewModel: DashboardView로 통합됨 (삭제)
@@ -250,7 +251,13 @@ namespace NPLogic
             services.AddTransient<ViewModels.UserManagementViewModel>();
             services.AddTransient<ViewModels.SettingsViewModel>();
             services.AddTransient<ViewModels.AuditLogsViewModel>();
-            services.AddTransient<ViewModels.SeniorRightsViewModel>();
+            services.AddTransient<ViewModels.SeniorRightsViewModel>(sp =>
+                new ViewModels.SeniorRightsViewModel(
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
+                    sp.GetRequiredService<Data.Repositories.ReferenceDataRepository>(),
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()));
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.AuctionScheduleDetailViewModel>(sp =>
             {
@@ -299,7 +306,8 @@ namespace NPLogic
             {
                 return new ViewModels.NonCoreViewModel(
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
-                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<Data.Repositories.RegistryRepository>()
                 );
             });
             services.AddTransient<ViewModels.MapTabViewModel>(sp =>
@@ -448,12 +456,8 @@ namespace NPLogic
                 return view;
             });
 
-            services.AddTransient<Views.SeniorRightsView>(sp =>
-            {
-                var view = new Views.SeniorRightsView();
-                view.DataContext = sp.GetRequiredService<ViewModels.SeniorRightsViewModel>();
-                return view;
-            });
+            // NonCoreView.CreateAndCacheTabViewAsync에서 직접 ViewModel을 생성하고 DataContext를 설정함
+            services.AddTransient<Views.SeniorRightsView>();
 
             services.AddTransient<Views.PublicSaleScheduleView>(sp =>
             {

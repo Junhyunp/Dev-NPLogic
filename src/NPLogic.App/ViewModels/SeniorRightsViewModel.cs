@@ -21,6 +21,7 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository _propertyRepository;
         private readonly RightAnalysisRepository _rightAnalysisRepository;
         private readonly ReferenceDataRepository? _referenceDataRepository;
+        private readonly BorrowerRepository? _borrowerRepository;
         
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
@@ -284,6 +285,9 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string _debtorType = "individual"; // 채무자 유형: individual, business, corporation
+
+        [ObservableProperty]
+        private string _borrowerTypeDisplay = ""; // 차주구분 (DD에서 가져온 한국어 표시용: 개인/개인사업자/법인)
 
         [ObservableProperty]
         private bool _hasWageClaim; // 임금채권 존재
@@ -586,15 +590,17 @@ namespace NPLogic.ViewModels
         private string _editNotes = "";
 
         public SeniorRightsViewModel(
-            RegistryRepository registryRepository, 
+            RegistryRepository registryRepository,
             PropertyRepository propertyRepository,
             RightAnalysisRepository rightAnalysisRepository,
-            ReferenceDataRepository? referenceDataRepository = null)
+            ReferenceDataRepository? referenceDataRepository = null,
+            BorrowerRepository? borrowerRepository = null)
         {
             _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _rightAnalysisRepository = rightAnalysisRepository ?? throw new ArgumentNullException(nameof(rightAnalysisRepository));
             _referenceDataRepository = referenceDataRepository;
+            _borrowerRepository = borrowerRepository;
         }
 
         /// <summary>
@@ -809,7 +815,6 @@ namespace NPLogic.ViewModels
                     LoadImageFromBase64(_currentRightAnalysis.CourtDocumentDeliveryImage, v => CourtDocumentDeliveryImage = v, v => CourtDocumentDeliveryImageInfo = v);
 
                     // 전입/임차 현황
-                    AddressMatch = _currentRightAnalysis.AddressMatch ?? false;
                     OwnerRegistered = _currentRightAnalysis.OwnerRegistered ?? false;
                     HasTenant = _currentRightAnalysis.HasTenant ?? false;
                     SurveyReportSubmitted = _currentRightAnalysis.SurveyReportSubmitted ?? false;
@@ -834,6 +839,54 @@ namespace NPLogic.ViewModels
                 else
                 {
                     ResetRightAnalysisFields();
+                }
+
+                // === right_analysis 유무와 무관하게 외부 데이터 로드 ===
+                // 주소지 일치여부: registry_basic_info에서 가져오기
+                try
+                {
+                    var basicInfoList = await _registryRepository.GetBasicInfoListByPropertyIdAsync(SelectedProperty.Id);
+                    if (basicInfoList.Count > 0)
+                        AddressMatch = basicInfoList.All(bi => bi.IsAddressMatched ?? true);
+                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 주소지 일치: basicInfoCount={basicInfoList.Count}, AddressMatch={AddressMatch}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 주소지 일치 로드 실패: {ex.Message}");
+                }
+
+                // 차주구분: borrowers 테이블에서 가져오기 (BorrowerId 또는 BorrowerNumber로 조회)
+                try
+                {
+                    if (_borrowerRepository != null)
+                    {
+                        Core.Models.Borrower? borrower = null;
+                        if (SelectedProperty.BorrowerId.HasValue)
+                        {
+                            borrower = await _borrowerRepository.GetByIdAsync(SelectedProperty.BorrowerId.Value);
+                            System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분: BorrowerId={SelectedProperty.BorrowerId}로 조회");
+                        }
+                        else if (!string.IsNullOrWhiteSpace(SelectedProperty.BorrowerNumber))
+                        {
+                            borrower = await _borrowerRepository.GetByBorrowerNumberAsync(SelectedProperty.BorrowerNumber);
+                            System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분: BorrowerNumber={SelectedProperty.BorrowerNumber}로 조회");
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분: BorrowerId/BorrowerNumber 모두 없음");
+                        }
+                        BorrowerTypeDisplay = borrower?.BorrowerType ?? "";
+                        System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분 결과: BorrowerTypeDisplay={BorrowerTypeDisplay}");
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분: _borrowerRepository is null");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    BorrowerTypeDisplay = "";
+                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분 로드 실패: {ex.Message}");
                 }
             }
             catch (Exception ex)
@@ -912,6 +965,7 @@ namespace NPLogic.ViewModels
             TenantDateBeforeMortgage = false;
             HasAuctionDocs = false;
             DebtorType = "individual";
+            BorrowerTypeDisplay = "";
             HasWageClaim = false;
             WageClaimEstimatedSeizure = false;
             HasTaxClaim = false;

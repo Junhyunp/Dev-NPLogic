@@ -94,6 +94,9 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _isSelected;
 
+        [ObservableProperty]
+        private int _ocrPropertyCount;
+
         /// <summary>
         /// 표시용 차주번호 (회생인 경우 표시)
         /// </summary>
@@ -103,6 +106,24 @@ namespace NPLogic.ViewModels
         /// OPB 표시 (백만원 단위)
         /// </summary>
         public string OpbDisplay => $"{Opb / 1_000_000:N0}백만";
+
+        /// <summary>
+        /// OCR 뱃지 텍스트
+        /// </summary>
+        public string OcrDisplay => OcrPropertyCount > 0
+            ? (OcrPropertyCount >= PropertyCount ? "OCR" : $"OCR {OcrPropertyCount}/{PropertyCount}")
+            : "미등록";
+
+        /// <summary>
+        /// OCR 업로드 완료 여부 (뱃지 색상 결정용)
+        /// </summary>
+        public bool HasOcr => OcrPropertyCount > 0;
+
+        partial void OnOcrPropertyCountChanged(int value)
+        {
+            OnPropertyChanged(nameof(OcrDisplay));
+            OnPropertyChanged(nameof(HasOcr));
+        }
     }
 
     /// <summary>
@@ -129,6 +150,7 @@ namespace NPLogic.ViewModels
     {
         private readonly PropertyRepository? _propertyRepository;
         private readonly BorrowerRepository? _borrowerRepository;
+        private readonly RegistryRepository? _registryRepository;
 
         /// <summary>
         /// 초기화 여부 (탭 전환 시 재초기화 방지)
@@ -315,10 +337,11 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private int _totalCount;
 
-        public NonCoreViewModel(PropertyRepository? propertyRepository = null, BorrowerRepository? borrowerRepository = null)
+        public NonCoreViewModel(PropertyRepository? propertyRepository = null, BorrowerRepository? borrowerRepository = null, RegistryRepository? registryRepository = null)
         {
             _propertyRepository = propertyRepository;
             _borrowerRepository = borrowerRepository;
+            _registryRepository = registryRepository;
 
             // 기본 법원 데이터 초기화
             InitializeCourts();
@@ -465,6 +488,9 @@ namespace NPLogic.ViewModels
                 FilteredCount = BorrowerItems.Count;
                 TotalCount = _allBorrowerItems.Count;
 
+                // OCR 카운트 로드 (비동기, UI 블로킹 없이)
+                _ = LoadOcrCountsAsync();
+
                 // 첫 번째 차주 선택
                 if (BorrowerItems.Any())
                 {
@@ -474,6 +500,42 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"차주 목록 로드 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 차주별 OCR 업로드 건수 로드
+        /// registry_runs에서 OCR된 property_id를 가져와 차주별로 매핑
+        /// </summary>
+        private async Task LoadOcrCountsAsync()
+        {
+            if (_registryRepository == null || _propertyRepository == null || !_currentProgramId.HasValue)
+                return;
+
+            try
+            {
+                // 1. OCR 데이터가 있는 property_id 목록 조회 (한 번)
+                var ocrPropertyIds = await _registryRepository.GetAllOcrPropertyIdsAsync();
+                if (!ocrPropertyIds.Any()) return;
+
+                // 2. 프로그램 내 전체 물건의 (id, borrower_number) 조회
+                var allProperties = await _propertyRepository.GetByProgramIdAsync(_currentProgramId.Value);
+
+                // 3. borrower_number별 OCR 물건 수 계산
+                var ocrCountByBorrower = allProperties
+                    .Where(p => ocrPropertyIds.Contains(p.Id) && !string.IsNullOrEmpty(p.BorrowerNumber))
+                    .GroupBy(p => p.BorrowerNumber!)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                // 4. BorrowerListItem에 반영
+                foreach (var item in _allBorrowerItems)
+                {
+                    item.OcrPropertyCount = ocrCountByBorrower.TryGetValue(item.BorrowerNumber, out var count) ? count : 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[NonCoreViewModel] OCR 카운트 로드 실패: {ex.Message}");
             }
         }
 

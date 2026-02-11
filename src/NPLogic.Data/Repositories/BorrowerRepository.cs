@@ -71,9 +71,11 @@ namespace NPLogic.Data.Repositories
                 var response = await client
                     .From<BorrowerTable>()
                     .Where(x => x.BorrowerNumber == borrowerNumber)
-                    .Single();
+                    .Limit(1)
+                    .Get();
 
-                return response == null ? null : MapToBorrower(response);
+                var first = response.Models?.FirstOrDefault();
+                return first == null ? null : MapToBorrower(first);
             }
             catch (Exception ex)
             {

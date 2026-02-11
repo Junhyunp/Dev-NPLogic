@@ -115,15 +115,15 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-                                
+
                                 <!-- 차주번호 + 회생 표시 -->
-                                <TextBlock Grid.Row="0" 
+                                <TextBlock Grid.Row="0"
                                            Text="{Binding DisplayNumber}"
                                            FontSize="{StaticResource FontSizeBody}"
                                            FontWeight="SemiBold"
                                            Foreground="White"
                                            TextTrimming="CharacterEllipsis"/>
-                                
+
                                 <!-- 차주명 + 물건수 -->
                                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding BorrowerName}"

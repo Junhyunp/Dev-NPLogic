@@ -33,6 +33,31 @@ namespace NPLogic.Data.Repositories
 
         #region RegistryRun / BasicInfo / Gapgu / Eulgu (정제 산출물 스키마)
 
+        /// <summary>
+        /// OCR 데이터가 있는 모든 property_id를 반환 (사이드바 OCR 표시용)
+        /// </summary>
+        public async Task<HashSet<Guid>> GetAllOcrPropertyIdsAsync()
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                var response = await client
+                    .From<RegistryRunTable>()
+                    .Select("property_id")
+                    .Get();
+
+                return response.Models
+                    .Where(r => r.PropertyId.HasValue)
+                    .Select(r => r.PropertyId!.Value)
+                    .ToHashSet();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RegistryRepository] OCR property IDs 조회 실패: {ex.Message}");
+                return new HashSet<Guid>();
+            }
+        }
+
         public async Task<List<RegistryRun>> GetRunsByPropertyIdAsync(Guid propertyId)
         {
             try

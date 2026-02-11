@@ -1,6 +1,4 @@
-using System.Windows;
 using System.Windows.Controls;
-using NPLogic.ViewModels;
 
 namespace NPLogic.Views
 {
@@ -12,14 +10,6 @@ namespace NPLogic.Views
         public SeniorRightsView()
         {
             InitializeComponent();
-        }
-
-        private async void SeniorRightsView_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is SeniorRightsViewModel viewModel)
-            {
-                await viewModel.InitializeAsync();
-            }
         }
     }
 }

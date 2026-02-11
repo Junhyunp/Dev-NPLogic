@@ -324,7 +324,7 @@ namespace NPLogic.Views
                 if (_tabViewCache.TryGetValue(tabName, out var cachedView))
                 {
                     content = cachedView;
-                    
+
                     // 물건이 변경된 경우 전체 데이터 갱신
                     if (propertyChanged)
                     {
@@ -368,6 +368,10 @@ namespace NPLogic.Views
             {
                 // 취소된 경우 무시 - 새로운 탭 로드가 진행 중
                 Debug.WriteLine($"탭 로드 취소됨: {tabName}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[NonCoreView] 탭 로드 에러: tabName={tabName}, error={ex.Message}\n{ex.StackTrace}");
             }
             finally
             {
@@ -473,15 +477,24 @@ namespace NPLogic.Views
                     
                 case "SeniorRights":
                     content = serviceProvider.GetRequiredService<SeniorRightsView>();
-                    if (content.DataContext is SeniorRightsViewModel seniorVm)
                     {
+                        var seniorVm = serviceProvider.GetRequiredService<SeniorRightsViewModel>();
                         await seniorVm.InitializeAsync();
                         if (selectedPropertyId.HasValue)
                         {
                             var prop = seniorVm.Properties.FirstOrDefault(p => p.Id == selectedPropertyId.Value);
+                            if (prop == null)
+                            {
+                                // Properties 목록(1000개 제한)에 없는 경우 개별 조회하여 추가
+                                var propRepo = serviceProvider.GetRequiredService<Data.Repositories.PropertyRepository>();
+                                prop = await propRepo.GetByIdAsync(selectedPropertyId.Value);
+                                if (prop != null)
+                                    seniorVm.Properties.Insert(0, prop);
+                            }
                             if (prop != null)
                                 seniorVm.SelectedProperty = prop;
                         }
+                        content.DataContext = seniorVm;
                         viewModel = seniorVm;
                     }
                     break;

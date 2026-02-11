@@ -192,6 +192,9 @@ namespace NPLogic.Core.Models
         /// <summary>권리분석 업로드 회차 (0=미업로드, 1=1차, 2=2차 등)</summary>
         public int RightsAnalysisUploadCount { get; set; } = 0;
 
+        /// <summary>등기부등본 OCR 업로드 여부 (DB 비저장, 런타임 전용)</summary>
+        public bool HasOcrData { get; set; }
+
         /// <summary>Interim 완료 여부</summary>
         public bool InterimCompleted { get; set; }
 

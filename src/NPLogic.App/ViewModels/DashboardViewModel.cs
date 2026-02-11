@@ -67,6 +67,7 @@ namespace NPLogic.ViewModels
         private readonly ProgramUserRepository _programUserRepository;
         private readonly ProgramRepository _programRepository;
         private readonly BorrowerRepository _borrowerRepository;
+        private readonly RegistryRepository _registryRepository;
         
         // PM 담당 프로그램 ID 목록 (캐시)
         private List<Guid> _pmProgramIds = new();
@@ -306,7 +307,8 @@ namespace NPLogic.ViewModels
             AuthService authService,
             ProgramUserRepository programUserRepository,
             ProgramRepository programRepository,
-            BorrowerRepository borrowerRepository)
+            BorrowerRepository borrowerRepository,
+            RegistryRepository registryRepository)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -314,6 +316,7 @@ namespace NPLogic.ViewModels
             _programUserRepository = programUserRepository ?? throw new ArgumentNullException(nameof(programUserRepository));
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
+            _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
         }
 
         /// <summary>
@@ -732,6 +735,9 @@ namespace NPLogic.ViewModels
                 DashboardProperties = new ObservableCollection<Property>(loadedProperties);
                 System.Diagnostics.Debug.WriteLine($"[DashboardTrace] LoadAllPropertiesForProgramAsync set DashboardProperties - count: {DashboardProperties.Count}");
 
+                // OCR 상태 비동기 로드
+                _ = ApplyOcrStatusAsync(loadedProperties);
+
                 OnPropertyChanged(nameof(HasMoreData));
                 OnPropertyChanged(nameof(TotalPropertyCount));
 
@@ -748,6 +754,25 @@ namespace NPLogic.ViewModels
             {
                 ErrorMessage = $"물건 목록 로드 실패: {ex.Message}";
                 System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] LoadAllPropertiesForProgramAsync error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 물건 목록에 OCR 업로드 여부 적용
+        /// </summary>
+        private async Task ApplyOcrStatusAsync(List<Property> properties)
+        {
+            try
+            {
+                var ocrPropertyIds = await _registryRepository.GetAllOcrPropertyIdsAsync();
+                foreach (var prop in properties)
+                {
+                    prop.HasOcrData = ocrPropertyIds.Contains(prop.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DashboardViewModel] OCR 상태 로드 실패: {ex.Message}");
             }
         }
 

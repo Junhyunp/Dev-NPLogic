@@ -235,11 +235,14 @@ namespace NPLogic.Converters
     /// </summary>
     public class BoolToTextConverter : IValueConverter
     {
+        public string TrueText { get; set; } = "활성";
+        public string FalseText { get; set; } = "비활성";
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is bool boolValue)
             {
-                return boolValue ? "활성" : "비활성";
+                return boolValue ? TrueText : FalseText;
             }
             return "알 수 없음";
         }
@@ -248,7 +251,7 @@ namespace NPLogic.Converters
         {
             if (value is string str)
             {
-                return str == "활성";
+                return str == TrueText;
             }
             return false;
         }

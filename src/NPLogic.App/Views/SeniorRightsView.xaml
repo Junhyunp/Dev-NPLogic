@@ -5,10 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:converters="clr-namespace:NPLogic.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="900" d:DesignWidth="1600"
              d:DataContext="{d:DesignInstance Type=vm:SeniorRightsViewModel}"
-             Loaded="SeniorRightsView_Loaded">
+             >
     
     <UserControl.Resources>
         <!-- 테이블 스타일 (CollateralPropertyView와 동일) -->
@@ -21,13 +22,23 @@
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="Padding" Value="12,8"/>
         </Style>
-        
+
         <!-- 테이블 데이터 셀 스타일 (CollateralPropertyView와 동일) -->
         <Style x:Key="TableDataCell" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="Padding" Value="12,8"/>
+        </Style>
+
+        <!-- 테이블 셀 내 TextBlock 세로 중앙 정렬 -->
+        <Style x:Key="CellTextBlock" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="CellHeaderTextBlock" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
         </Style>
         
         <!-- 섹션 헤더 스타일 -->
@@ -247,24 +258,24 @@
                                 <!-- Row 0: 헤더 / 최초법사가 -->
                                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}"/>
                                 <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="선행" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="선행" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="후행" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="후행" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최초법사가" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최초법사가" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.InitialCourtValue, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.InitialCourtValue, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 1: 경매개시여부 / 최초경매기일 -->
                                 <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="경매개시여부" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="경매개시여부" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock>
+                                    <TextBlock VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="경매미개시"/>
@@ -278,7 +289,7 @@
                                     </TextBlock>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock>
+                                    <TextBlock VerticalAlignment="Center">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Text" Value="경매미개시"/>
@@ -292,112 +303,112 @@
                                     </TextBlock>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최초경매기일" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최초경매기일" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.FirstAuctionDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.FirstAuctionDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 2: 관할법원 / 최종경매회차 -->
                                 <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="관할법원" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="관할법원" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.AuctionCourt, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.AuctionCourt, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.AuctionCourt, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.AuctionCourt, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최종경매회차" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최종경매회차" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionRound, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionRound, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 3: 경매사건번호 / 최종경매기일 -->
                                 <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="경매사건번호" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="경매사건번호" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.PrecedentCaseNumber, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.PrecedentCaseNumber, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.SubsequentCaseNumber, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.SubsequentCaseNumber, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최종경매기일" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최종경매기일" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 4: 경매신청기관 / 최종경매결과 -->
                                 <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="경매신청기관" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="경매신청기관" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.PrecedentAuctionApplicant, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.PrecedentAuctionApplicant, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.SubsequentAuctionApplicant, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.SubsequentAuctionApplicant, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최종경매결과" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최종경매결과" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionResult, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.FinalAuctionResult, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 5: 경매개시일자 / 낙찰금액 -->
                                 <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="경매개시일자" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="경매개시일자" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.PrecedentAuctionStartDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.PrecedentAuctionStartDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.SubsequentAuctionStartDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.SubsequentAuctionStartDate, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="낙찰금액" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="낙찰금액" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.WinningBidAmount, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.WinningBidAmount, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 6: 배당요구종기일 / 최종경매일의 최저입찰금액 -->
                                 <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="배당요구종기일" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="배당요구종기일" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.PrecedentClaimDeadline, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.PrecedentClaimDeadline, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.SubsequentClaimDeadline, StringFormat=yyyy-MM-dd, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.SubsequentClaimDeadline, StringFormat=yyyy-MM-dd, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="최종경매일의 최저입찰금액" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="최종경매일의 최저입찰금액" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.FinalMinimumBid, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.FinalMinimumBid, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- Row 7: 청구금액 / 차후예정경매일의 최저입찰금액 -->
                                 <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="청구금액" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="청구금액" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.PrecedentClaimAmount, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.PrecedentClaimAmount, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.SubsequentClaimAmount, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.SubsequentClaimAmount, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="차후예정경매일의 최저입찰금액" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="차후예정경매일의 최저입찰금액" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableDataCell}">
-                                    <TextBlock Text="{Binding SelectedProperty.NextMinimumBid, StringFormat=N0, FallbackValue='-'}"/>
+                                    <TextBlock Text="{Binding SelectedProperty.NextMinimumBid, StringFormat=N0, FallbackValue='-'}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
 
                                 <!-- ===== 추가 3열 (Col 5-7): 당사자내역 ===== -->
@@ -405,7 +416,7 @@
                                 <!-- Row 0: 당사자내역 헤더 (3열 병합) -->
                                 <Border Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="3"
                                         Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,0,1">
-                                    <TextBlock Text="당사자내역" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="당사자내역" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- Row 1-5: 당사자내역 이미지 영역 (3열×5행 병합) -->
@@ -436,13 +447,13 @@
 
                                 <!-- Row 6: 현황조사서 / 감정평가서 / 배당요구종기일경과 (헤더) -->
                                 <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
-                                    <TextBlock Text="현황조사서" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="현황조사서" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="6" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="감정평가서" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="감정평가서" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="7" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="배당요구종기일경과" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="배당요구종기일경과" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- Row 7: 현황조사서 / 감정평가서 / 배당요구종기일경과 (입력) -->
@@ -486,13 +497,13 @@
 
                                 <!-- Row 0: 헤더 -->
                                 <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}" BorderThickness="2,2,1,1">
-                                    <TextBlock Text="경매사건검색" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="경매사건검색" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}" BorderThickness="0,2,1,1">
-                                    <TextBlock Text="기일내역검색" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="기일내역검색" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}" BorderThickness="0,2,2,1">
-                                    <TextBlock Text="문건송달내역" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="문건송달내역" Style="{StaticResource CellHeaderTextBlock}" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- Row 1: 이미지 붙여넣기 영역 -->
@@ -582,7 +593,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- ========== 2. 체크박스 섹션 + 등기부 정보 ========== -->
+                    <!-- ========== 2. 전입/임차 현황 및 등기부 정보 ========== -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
@@ -593,142 +604,207 @@
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="8,8,0,0"
                                     Padding="16,10">
-                                <TextBlock Text="📝 전입/임차 현황 및 등기부 정보" 
-                                           Foreground="White" 
+                                <TextBlock Text="📝 전입/임차 현황 및 등기부 정보"
+                                           Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}"/>
                             </Border>
-                            
+
+                            <!-- 통합 테이블 (8열 x 8행) -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="350"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 0 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 1 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 2 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 3 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 4 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 5 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 6 -->
+                                    <ColumnDefinition Width="*" MinWidth="80"/>  <!-- 7 -->
                                 </Grid.ColumnDefinitions>
-                                
-                                <!-- 좌측: 체크박스 섹션 -->
-                                <Border Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
-                                    <StackPanel Margin="12">
-                                    
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" MinWidth="120"/>
-                                            <ColumnDefinition Width="*" MinWidth="60"/>
-                                        </Grid.ColumnDefinitions>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        
-                                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="물건지, 소유주 주소지 일치여부" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding AddressMatch}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="소유주 전입" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding OwnerRegistered}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="전입인(임차인)" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <TextBox Text="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="전입일(임차시작일)" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <DatePicker SelectedDate="{Binding TenantMoveInDate}" Style="{StaticResource CompactDatePickerStyle}"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="주택공시가격" Style="{StaticResource LabelStyle}"/>
-                                                <Button Content="조회" Command="{Binding OpenHousingPriceCommand}" Style="{StaticResource LinkButtonStyle}" Margin="4,0,0,0"/>
-                                                <TextBlock Text="|" Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,4,0" VerticalAlignment="Center"/>
-                                                <Button Content="당해세 조회" Command="{Binding OpenEtaxCommand}" Style="{StaticResource LinkButtonStyle}" ToolTip="위택스에서 당해세 조회"/>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <TextBox Text="{Binding HousingOfficialPrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="임금채권" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding HasWageClaim}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="임금채권 추정가압류" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding WageClaimEstimatedSeizure}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="임금채권 배당요구신청" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding WageClaimSubmitted}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="8" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="당해세 교부청구" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="8" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding HasTaxClaim}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                        
-                                        <Border Grid.Row="9" Grid.Column="0" Style="{StaticResource TableHeaderCellStyle}">
-                                            <TextBlock Text="선순위조세 교부청구" Style="{StaticResource LabelStyle}"/>
-                                        </Border>
-                                        <Border Grid.Row="9" Grid.Column="1" Style="{StaticResource TableCellStyle}">
-                                            <CheckBox IsChecked="{Binding HasSeniorTaxClaim}" Style="{StaticResource CompactCheckBoxStyle}" Content="Y"/>
-                                        </Border>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-                            
-                            <!-- 우측: 등기부 정보 테이블 -->
-                            <StackPanel Grid.Column="1" Margin="8">
-                                <TextBlock Text="접수정보 (등기부)" Style="{StaticResource SectionHeaderStyle}"/>
-                                
-                                <DataGrid ItemsSource="{Binding RegistryEntries}" 
-                                          AutoGenerateColumns="False" 
-                                          IsReadOnly="True"
-                                          Background="{StaticResource SurfaceBrush}"
-                                          BorderBrush="{StaticResource TableBorderBrush}"
-                                          BorderThickness="1"
-                                          CanUserAddRows="False"
-                                          GridLinesVisibility="All"
-                                          HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                          VerticalGridLinesBrush="{StaticResource TableBorderBrush}"
-                                          MaxHeight="200"
-                                          RowHeight="32"
-                                          FontSize="{StaticResource FontSizeSmall}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="접수정보" Binding="{Binding RegistrationNumber}" Width="100"/>
-                                        <DataGridTextColumn Header="근저당권자" Binding="{Binding RightHolder}" Width="180"/>
-                                        <DataGridTextColumn Header="채권최고액" Binding="{Binding ClaimAmount, StringFormat=N0}" Width="120"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </StackPanel>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 0: 헤더1 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 1: 데이터1 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 2: 헤더2 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 3: 데이터3 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 4: 헤더3 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 5: 데이터3 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 6: 헤더4 -->
+                                    <RowDefinition Height="Auto" MinHeight="36"/>  <!-- 7: 데이터4 -->
+                                </Grid.RowDefinitions>
+
+                                <!-- ===== 왼쪽 5열 (Col 0-4) ===== -->
+
+                                <!-- Row 0: 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="물건지, 소유주 주소지 일치여부" Style="{StaticResource CellHeaderTextBlock}"/>
+                                            <TextBlock Text=" (?)"
+                                                       Style="{StaticResource CellHeaderTextBlock}"
+                                                       Foreground="{StaticResource PrimaryBrush}"
+                                                       Cursor="Help"
+                                                       ToolTipService.InitialShowDelay="200"
+                                                       ToolTip="등기부등본 OCR 업로드 필요"/>
+                                        </StackPanel>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="차주구분" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="임차인" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="전입인(임차인)" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="전입일(임차시작일)" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+
+                                <!-- Row 1: 데이터 -->
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding AddressMatch, Mode=OneWay}" IsHitTestVisible="False" Focusable="False" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding BorrowerTypeDisplay}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+
+                                <!-- Row 2: 헤더 -->
+                                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="소유주 전입" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="경매열람자료" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="전입세대열람, 상가임대차열람" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="임차인 배당요구신청" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="주택공시가격" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+
+                                <!-- Row 3: 데이터 (비워둠) -->
+                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+
+                                <!-- Row 4: 헤더 -->
+                                <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="임금채권" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="임금채권 추정가압류" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="임금채권 배당요구신청" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="당해세 교부청구" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                        <TextBlock Text="선순위조세 교부청구" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    </Viewbox>
+                                </Border>
+
+                                <!-- Row 5: 데이터 (비워둠) -->
+                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+
+                                <!-- Row 6: 헤더 -->
+                                <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="공시지가" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="건물기준시가" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+
+                                <!-- Row 7: 데이터 (비워둠) -->
+                                <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+
+                                <!-- ===== 오른쪽 3열 (Col 5-7) ===== -->
+
+                                <!-- Row 0: 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="5" Style="{StaticResource TableHeaderCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="접수정보" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="6" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="근저당권자" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="7" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="채권최고액" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+
+                                <!-- Row 1-7: 데이터 (비워둠) -->
+                                <Border Grid.Row="1" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="1" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="1" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="2" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="2" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="3" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="3" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="3" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="4" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="4" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="4" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="5" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="5" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="5" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="6" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="6" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
+                                <Border Grid.Row="7" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="7" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <!-- 컬럼 너비 조정 핸들 -->
+                                <GridSplitter Grid.Column="0" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="1" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="2" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="3" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="4" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="5" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="6" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                             </Grid>
                         </StackPanel>
                     </Border>
