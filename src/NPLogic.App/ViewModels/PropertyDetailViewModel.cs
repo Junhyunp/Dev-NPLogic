@@ -256,6 +256,7 @@ namespace NPLogic.ViewModels
         private readonly LoanRepository? _loanRepository;
         private readonly AuctionScheduleRepository? _auctionScheduleRepository;
         private readonly PermissionService? _permissionService;
+        private bool _suppressSelectedRegistryRunChanged;
 
         [ObservableProperty]
         private User? _currentUser;
@@ -286,6 +287,12 @@ namespace NPLogic.ViewModels
         /// </summary>
         [ObservableProperty]
         private RightsAnalysisTabViewModel? _rightsAnalysisViewModel;
+
+        /// <summary>
+        /// 선순위 탭 ViewModel
+        /// </summary>
+        [ObservableProperty]
+        private SeniorRightsViewModel? _seniorRightsViewModel;
 
         /// <summary>
         /// 평가 탭 ViewModel
@@ -1092,6 +1099,13 @@ namespace NPLogic.ViewModels
             if (_rightAnalysisRepository != null && _registryRepository != null)
             {
                 RightsAnalysisViewModel = new RightsAnalysisTabViewModel(_rightAnalysisRepository, _registryRepository);
+                SeniorRightsViewModel = new SeniorRightsViewModel(
+                    _registryRepository,
+                    _propertyRepository,
+                    _rightAnalysisRepository,
+                    null,
+                    _borrowerRepository,
+                    null);
             }
 
             // 평가 탭 ViewModel 초기화 - 항상 생성 (null이면 바인딩 실패함)
@@ -1357,6 +1371,10 @@ namespace NPLogic.ViewModels
                 if (property != null)
                 {
                     Property = property;
+                    if (SeniorRightsViewModel != null)
+                    {
+                        SeniorRightsViewModel.SelectedProperty = property;
+                    }
                     IsApartment = property.PropertyType?.Contains("아파트") == true;
 
                     // KB시세 로드: DD의 kb_price, 또는 감정평가구분이 "KB시세"면 감정평가액합계 사용
@@ -2036,7 +2054,9 @@ namespace NPLogic.ViewModels
                 RegistryRuns = new ObservableCollection<RegistryRun>(runs);
 
                 var latestRun = runs.FirstOrDefault();
+                _suppressSelectedRegistryRunChanged = true;
                 SelectedRegistryRun = latestRun;
+                _suppressSelectedRegistryRunChanged = false;
 
                 var biList = biTask.Result;
                 var gapListRaw = gapTask.Result;
@@ -2112,6 +2132,7 @@ namespace NPLogic.ViewModels
 
         partial void OnSelectedRegistryRunChanged(RegistryRun? value)
         {
+            if (_suppressSelectedRegistryRunChanged) return;
             _ = LoadSelectedRegistryRunAsync(value);
         }
 
@@ -2128,12 +2149,18 @@ namespace NPLogic.ViewModels
             try
             {
                 // property 기준으로 모든 run의 데이터를 합산 조회
-                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(
-                    await _registryRepository.GetBasicInfoListByPropertyIdAsync(run.PropertyId));
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(
-                    await _registryRepository.GetGapguRowsByPropertyIdAsync(run.PropertyId));
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(
-                    await _registryRepository.GetEulguRowsByPropertyIdAsync(run.PropertyId));
+                var basicInfoTask = _registryRepository.GetBasicInfoListByPropertyIdAsync(run.PropertyId);
+                var gapguTask = _registryRepository.GetGapguRowsByPropertyIdAsync(run.PropertyId);
+                var eulguTask = _registryRepository.GetEulguRowsByPropertyIdAsync(run.PropertyId);
+
+                await Task.WhenAll(basicInfoTask, gapguTask, eulguTask);
+
+                var gapguMerged = MergeGapguDuplicates(gapguTask.Result);
+                var eulguMerged = MergeEulguDuplicates(eulguTask.Result);
+
+                RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(basicInfoTask.Result);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapguMerged);
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulguMerged);
             }
             catch (Exception ex)
             {

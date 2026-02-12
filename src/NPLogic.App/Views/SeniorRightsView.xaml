@@ -771,7 +771,15 @@
                                     <TextBlock Text="공시지가" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
-                                    <TextBlock Text="건물기준시가" Style="{StaticResource CellHeaderTextBlock}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="건물기준시가" Style="{StaticResource CellHeaderTextBlock}"/>
+                                        <TextBlock Text=" (?)"
+                                                   Style="{StaticResource CellHeaderTextBlock}"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   Cursor="Help"
+                                                   ToolTipService.InitialShowDelay="200"
+                                                   ToolTip="건물감정가액의 70%로 계산됩니다."/>
+                                    </StackPanel>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
                                 <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
@@ -801,34 +809,76 @@
                                     <TextBlock Text="채권최고액" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
 
-                                <!-- Row 1-7: 데이터 (비워둠) -->
-                                <Border Grid.Row="1" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="1" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="1" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <!-- Row 1-7: 데이터 (OCR 을구 자동표시, 읽기전용) -->
+                                <Border Grid.Row="1" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[0].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[0].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[0].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="2" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="2" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="2" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[1].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[1].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[1].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="3" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="3" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="3" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="3" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[2].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[2].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[2].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="4" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="4" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="4" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="4" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[3].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[3].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[3].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="5" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="5" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="5" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="5" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[4].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[4].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[4].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="6" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="6" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="6" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[5].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[5].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[5].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
-                                <Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1"/>
-                                <Border Grid.Row="7" Grid.Column="6" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="7" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+                                <Border Grid.Row="7" Grid.Column="5" Style="{StaticResource TableDataCell}" BorderThickness="2,0,1,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[6].Receipt}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="6" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[6].MortgageHolder}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="7" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding RegistryMortgageRows[6].MaxClaimAmount, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
 
                                 <!-- 컬럼 너비 조정 핸들 -->
                                 <GridSplitter Grid.Column="0" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
@@ -854,7 +904,176 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- ========== 3. 열람 자료 섹션 (피드백 #29) ========== -->
+                    <!-- ========== 3. 선순위 항목 산정표 ========== -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <TextBlock Text="📊 선순위 항목 산정표"
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}"/>
+                            </Border>
+
+                            <!-- 9x4 테이블 -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" MinWidth="180"/>
+                                    <ColumnDefinition Width="*" MinWidth="120"/>
+                                    <ColumnDefinition Width="*" MinWidth="140"/>
+                                    <ColumnDefinition Width="2*" MinWidth="220"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                    <RowDefinition Height="Auto" MinHeight="36"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Row 0: 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위 구분" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="DD" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="평가자 반영 금액" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="상세추정 근거" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+
+                                <!-- Row 1 -->
+                                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위근저당권" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding SeniorMortgageDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding SeniorMortgageReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding SeniorMortgageReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 2 -->
+                                <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="유치권 신고금액" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding LienDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding LienReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding LienReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 3 -->
+                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위소액보증금" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding SmallDepositDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding SmallDepositReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding SmallDepositReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 4 -->
+                                <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위임차보증금" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding LeaseDepositDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding LeaseDepositReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding LeaseDepositReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 5 -->
+                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위 임금채권" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding WageClaimDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding WageClaimReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding WageClaimReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 6 -->
+                                <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="당해세" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding CurrentTaxDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding CurrentTax, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding CurrentTaxReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 7 -->
+                                <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="선순위 조세채권" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding SeniorTaxClaimDd, StringFormat=N0}" Style="{StaticResource CellTextBlock}" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding SeniorTaxClaimReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="{Binding SeniorTaxClaimReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                </Border>
+
+                                <!-- Row 8 -->
+                                <Border Grid.Row="8" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
+                                    <TextBlock Text="합계" Style="{StaticResource CellHeaderTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="8" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding SeniorRightsDdTotal, StringFormat=N0}" Style="{StaticResource CellTextBlock}" FontWeight="SemiBold" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="8" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding SeniorRightsReflectedTotal, StringFormat=N0}" Style="{StaticResource CellTextBlock}" FontWeight="SemiBold" TextAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="8" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1"/>
+
+                                <!-- 컬럼 너비 조정 핸들 -->
+                                <GridSplitter Grid.Column="0" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="1" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                                <GridSplitter Grid.Column="2" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ========== 4. 열람 자료 섹션 (피드백 #29) ========== -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"

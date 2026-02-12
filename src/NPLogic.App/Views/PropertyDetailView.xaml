@@ -182,7 +182,7 @@
 
             <!-- 4. 선순위 탭 -->
             <TabItem Header="선순위">
-                <local:SeniorRightsView DataContext="{Binding}"/>
+                <local:SeniorRightsView DataContext="{Binding SeniorRightsViewModel}"/>
             </TabItem>
 
             <!-- 5. 평가 탭 -->

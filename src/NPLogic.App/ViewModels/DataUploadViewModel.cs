@@ -1251,6 +1251,12 @@ namespace NPLogic.ViewModels
                                 break;
                             
                             // ========== 권리분석: 선순위 정보 (DD) ==========
+                            case "senior_mortgage_amount":
+                                rightData["senior_mortgage_dd"] = value;
+                                break;
+                            case "lien_dd":
+                                rightData["lien_dd"] = value;
+                                break;
                             case "senior_small_deposit":
                                 rightData["small_deposit_dd"] = value;
                                 break;
@@ -1266,6 +1272,7 @@ namespace NPLogic.ViewModels
                             case "senior_tax_claim":
                                 rightData["senior_tax_dd"] = value;
                                 break;
+                            case "senior_etc":
                             case "senior_other":
                                 rightData["etc_dd"] = value;
                                 break;
@@ -1439,6 +1446,10 @@ namespace NPLogic.ViewModels
                     };
 
                     // DD 선순위 금액 설정
+                    if (rightData.TryGetValue("senior_mortgage_dd", out var seniorMortgage) && seniorMortgage is decimal sm)
+                        rightAnalysis.SeniorMortgageDd = sm;
+                    if (rightData.TryGetValue("lien_dd", out var lien) && lien is decimal li)
+                        rightAnalysis.LienDd = li;
                     if (rightData.TryGetValue("small_deposit_dd", out var smallDeposit) && smallDeposit is decimal sd)
                         rightAnalysis.SmallDepositDd = sd;
                     if (rightData.TryGetValue("lease_deposit_dd", out var leaseDeposit) && leaseDeposit is decimal ld)
@@ -1470,6 +1481,8 @@ namespace NPLogic.ViewModels
 
                     // 선순위 합계 자동 계산
                     rightAnalysis.SeniorTotalDd = 
+                        rightAnalysis.SeniorMortgageDd +
+                        rightAnalysis.LienDd +
                         rightAnalysis.SmallDepositDd +
                         rightAnalysis.LeaseDepositDd +
                         rightAnalysis.WageClaimDd +

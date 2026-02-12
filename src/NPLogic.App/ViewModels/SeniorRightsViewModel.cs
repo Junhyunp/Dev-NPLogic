@@ -148,6 +148,10 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<RegistryRight> _registryEntries = new();
 
+        // ========== 전입/임차 우측 등기부 요약(읽기전용) ==========
+        [ObservableProperty]
+        private ObservableCollection<RegistryMortgageDisplayRow> _registryMortgageRows = new();
+
         // ========== Tool Box: 주택임대차 ==========
         [ObservableProperty]
         private ObservableCollection<LeaseItem> _residentialLeases = new();
@@ -227,10 +231,12 @@ namespace NPLogic.ViewModels
         // ========== 선순위 구분 상세 ==========
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _seniorMortgageDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _seniorMortgageReflected;
 
         [ObservableProperty]
@@ -238,6 +244,7 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _currentTaxDd;
 
         [ObservableProperty]
@@ -245,10 +252,12 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _seniorTaxClaimDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _seniorTaxClaimReflected;
 
         [ObservableProperty]
@@ -366,11 +375,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _lienDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _lienReflected;
 
         [ObservableProperty]
@@ -380,11 +391,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _smallDepositDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _smallDepositReflected;
 
         [ObservableProperty]
@@ -420,11 +433,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _leaseDepositDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _leaseDepositReflected;
 
         [ObservableProperty]
@@ -443,11 +458,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsDdTotal))]
         private decimal _wageClaimDd;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _wageClaimReflected;
 
         [ObservableProperty]
@@ -523,6 +540,24 @@ namespace NPLogic.ViewModels
         /// 선순위 금액 합계 (근저당 + 유치권 + 소액보증금 + 임차보증금 + 임금채권 + 당해세)
         /// 반영금액 기준으로 합산
         /// </summary>
+        public decimal SeniorRightsDdTotal =>
+            SeniorMortgageDd +
+            LienDd +
+            SmallDepositDd +
+            LeaseDepositDd +
+            WageClaimDd +
+            CurrentTaxDd +
+            SeniorTaxClaimDd;
+
+        public decimal SeniorRightsReflectedTotal =>
+            SeniorMortgageReflected +
+            LienReflected +
+            SmallDepositReflected +
+            LeaseDepositReflected +
+            WageClaimReflected +
+            CurrentTax +
+            SeniorTaxClaimReflected;
+
         public decimal SeniorRightsTotal => 
             SeniorMortgagesTotal + 
             LienReflected + 
@@ -549,6 +584,7 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(SeniorRightsTotal))]
         [NotifyPropertyChangedFor(nameof(RemainingAmount))]
+        [NotifyPropertyChangedFor(nameof(SeniorRightsReflectedTotal))]
         private decimal _currentTax;
 
         /// <summary>
@@ -560,6 +596,14 @@ namespace NPLogic.ViewModels
         /// 대법원 경매 사이트 URL (X-002)
         /// </summary>
         private const string CourtAuctionUrl = "https://www.courtauction.go.kr";
+        private const int RegistryMortgageRowCount = 7;
+
+        public class RegistryMortgageDisplayRow
+        {
+            public string Receipt { get; set; } = "";
+            public string MortgageHolder { get; set; } = "";
+            public decimal? MaxClaimAmount { get; set; }
+        }
 
         // ========== 편집 ==========
         [ObservableProperty]
@@ -610,6 +654,7 @@ namespace NPLogic.ViewModels
             _referenceDataRepository = referenceDataRepository;
             _borrowerRepository = borrowerRepository;
             _vworldService = vworldService;
+            InitializeEmptyRegistryMortgageRows();
         }
 
         /// <summary>
@@ -762,6 +807,11 @@ namespace NPLogic.ViewModels
 
                 if (_currentRightAnalysis != null)
                 {
+                    // 선순위근저당권
+                    SeniorMortgageDd = _currentRightAnalysis.SeniorMortgageDd;
+                    SeniorMortgageReflected = _currentRightAnalysis.SeniorMortgageReflected;
+                    SeniorMortgageReason = _currentRightAnalysis.SeniorMortgageReason ?? "";
+
                     // P-002: 유치권
                     LienDd = _currentRightAnalysis.LienDd;
                     LienReflected = _currentRightAnalysis.LienReflected;
@@ -786,8 +836,15 @@ namespace NPLogic.ViewModels
                     WageClaimReason = _currentRightAnalysis.WageClaimReason ?? "";
                     WageClaimSubmitted = _currentRightAnalysis.WageClaimSubmitted;
 
-                    // 당해세 (기존)
+                    // 당해세
+                    CurrentTaxDd = _currentRightAnalysis.CurrentTaxDd;
                     CurrentTax = _currentRightAnalysis.CurrentTaxReflected;
+                    CurrentTaxReason = _currentRightAnalysis.CurrentTaxReason ?? "";
+
+                    // 선순위 조세채권
+                    SeniorTaxClaimDd = _currentRightAnalysis.SeniorTaxDd;
+                    SeniorTaxClaimReflected = _currentRightAnalysis.SeniorTaxReflected;
+                    SeniorTaxClaimReason = _currentRightAnalysis.SeniorTaxReason ?? "";
 
                     // 합계 섹션
                     ExpectedBidPrice = _currentRightAnalysis.ExpectedWinningBid ?? 0;
@@ -865,6 +922,9 @@ namespace NPLogic.ViewModels
                 {
                     System.Diagnostics.Debug.WriteLine($"[SeniorRights] 주소지 일치 로드 실패: {ex.Message}");
                 }
+
+                // 전입/임차 우측 표(접수정보/근저당권자/채권최고액): OCR 을구에서 자동 로드
+                await LoadRegistryMortgageRowsAsync(SelectedProperty.Id);
 
                 // 차주구분: borrowers 테이블에서 가져오기 (BorrowerId 또는 BorrowerNumber로 조회)
                 try
@@ -1002,6 +1062,9 @@ namespace NPLogic.ViewModels
             _currentRightAnalysis = null;
             
             // 선순위 항목
+            SeniorMortgageDd = 0;
+            SeniorMortgageReflected = 0;
+            SeniorMortgageReason = "";
             LienDd = 0;
             LienReflected = 0;
             LienReason = "";
@@ -1018,7 +1081,12 @@ namespace NPLogic.ViewModels
             WageClaimReflected = 0;
             WageClaimReason = "";
             WageClaimSubmitted = false;
+            CurrentTaxDd = 0;
             CurrentTax = 0;
+            CurrentTaxReason = "";
+            SeniorTaxClaimDd = 0;
+            SeniorTaxClaimReflected = 0;
+            SeniorTaxClaimReason = "";
             ExpectedBidPrice = 0;
             AuctionCost = 0;
             LoanCap = 0;
@@ -1079,6 +1147,102 @@ namespace NPLogic.ViewModels
             Recommendations = "";
             IsAnalysisCompleted = false;
             AnalyzedAt = null;
+            InitializeEmptyRegistryMortgageRows();
+        }
+
+        private async Task LoadRegistryMortgageRowsAsync(Guid propertyId)
+        {
+            try
+            {
+                var eulguRows = await _registryRepository.GetEulguRowsByPropertyIdAsync(propertyId);
+                var filteredRows = eulguRows
+                    .Where(r =>
+                        !string.IsNullOrWhiteSpace(r.Receipt) ||
+                        !string.IsNullOrWhiteSpace(r.MortgageHolder) ||
+                        r.MaxClaimAmount.HasValue)
+                    .ToList();
+
+                var mortgageRows = filteredRows
+                    .Where(r => IsMortgagePurpose(r.Purpose))
+                    .ToList();
+
+                // OCR 결과에 등기목적 누락/오인식이 있을 수 있어, 근저당 목적이 하나도 없으면 전체 을구를 사용
+                var rowsForDisplay = mortgageRows.Count > 0 ? mortgageRows : filteredRows;
+
+                var mergedRows = rowsForDisplay
+                    .GroupBy(GetRegistryMergeKey)
+                    .Select(g => g.OrderBy(r => r.SortIndex ?? int.MaxValue).First())
+                    .OrderBy(r => r.SortIndex ?? int.MaxValue)
+                    .ThenBy(r => r.ReceiptDate ?? DateTime.MaxValue)
+                    .ThenBy(r => ParseRankOrder(r.RankNo))
+                    .Take(RegistryMortgageRowCount)
+                    .Select(r => new RegistryMortgageDisplayRow
+                    {
+                        Receipt = r.Receipt ?? "",
+                        MortgageHolder = r.MortgageHolder ?? "",
+                        MaxClaimAmount = r.MaxClaimAmount
+                    })
+                    .ToList();
+
+                while (mergedRows.Count < RegistryMortgageRowCount)
+                {
+                    mergedRows.Add(new RegistryMortgageDisplayRow());
+                }
+
+                RegistryMortgageRows = new ObservableCollection<RegistryMortgageDisplayRow>(mergedRows);
+                System.Diagnostics.Debug.WriteLine($"[SeniorRights] 우측 등기부 표 로드: raw={eulguRows.Count}, filtered={filteredRows.Count}, displayed={mergedRows.Count}");
+            }
+            catch (Exception ex)
+            {
+                InitializeEmptyRegistryMortgageRows();
+                System.Diagnostics.Debug.WriteLine($"[SeniorRights] 우측 등기부 표 로드 실패: {ex.Message}");
+            }
+        }
+
+        private void InitializeEmptyRegistryMortgageRows()
+        {
+            RegistryMortgageRows = new ObservableCollection<RegistryMortgageDisplayRow>(
+                Enumerable.Range(0, RegistryMortgageRowCount).Select(_ => new RegistryMortgageDisplayRow()));
+        }
+
+        private static bool IsMortgagePurpose(string? purpose)
+        {
+            return !string.IsNullOrWhiteSpace(purpose) && purpose.Contains("근저당", StringComparison.Ordinal);
+        }
+
+        private static string NormalizeForMerge(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "";
+            }
+
+            return value.Replace(" ", "").Replace("\n", "").Replace("\r", "").Trim().ToLowerInvariant();
+        }
+
+        private static string GetRegistryMergeKey(RegistryEulguRow row)
+        {
+            var receiptKey = NormalizeForMerge(row.Receipt);
+            var ownerKey = NormalizeForMerge(row.TargetOwner);
+
+            // 접수정보가 비어 있으면 서로 다른 행이 과도하게 병합될 수 있어 행 단위로 분리
+            if (string.IsNullOrEmpty(receiptKey))
+            {
+                return $"row:{row.Id}";
+            }
+
+            return $"receipt:{receiptKey}|owner:{ownerKey}";
+        }
+
+        private static int ParseRankOrder(string? rankNo)
+        {
+            if (string.IsNullOrWhiteSpace(rankNo))
+            {
+                return int.MaxValue;
+            }
+
+            var digits = new string(rankNo.Where(char.IsDigit).ToArray());
+            return int.TryParse(digits, out var number) ? number : int.MaxValue;
         }
 
         /// <summary>
@@ -1404,6 +1568,11 @@ namespace NPLogic.ViewModels
                     PropertyId = SelectedProperty.Id
                 };
 
+                // 선순위근저당권
+                analysis.SeniorMortgageDd = SeniorMortgageDd;
+                analysis.SeniorMortgageReflected = SeniorMortgageReflected;
+                analysis.SeniorMortgageReason = SeniorMortgageReason;
+
                 // P-002: 유치권
                 analysis.LienDd = LienDd;
                 analysis.LienReflected = LienReflected;
@@ -1429,7 +1598,14 @@ namespace NPLogic.ViewModels
                 analysis.WageClaimSubmitted = WageClaimSubmitted;
 
                 // 당해세
+                analysis.CurrentTaxDd = CurrentTaxDd;
                 analysis.CurrentTaxReflected = CurrentTax;
+                analysis.CurrentTaxReason = CurrentTaxReason;
+
+                // 선순위 조세채권
+                analysis.SeniorTaxDd = SeniorTaxClaimDd;
+                analysis.SeniorTaxReflected = SeniorTaxClaimReflected;
+                analysis.SeniorTaxReason = SeniorTaxClaimReason;
 
                 // 합계 섹션
                 analysis.ExpectedWinningBid = ExpectedBidPrice;
@@ -2131,4 +2307,3 @@ namespace NPLogic.ViewModels
         }
     }
 }
-

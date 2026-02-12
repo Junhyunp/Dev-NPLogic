@@ -4,6 +4,77 @@
 
 ## [Unreleased]
 
+### 2026-02-12 (6)
+
+#### 선순위 DD 데이터 업로드→DB→화면 연동 보강
+
+- **DD 매핑 확장**: `선순위근저당권(DD)` 및 `유치권 신고금액(DD)` 매핑 키를 업로드 파이프라인에 추가
+- **저장 필드 확장**: `right_analysis` 저장 시 `senior_mortgage_dd`, `lien_dd` 포함 및 `SeniorTotalDd` 계산에 반영
+- **업로드 경로 일관화**: `DataDiskUploadService`, `ProgramManagementViewModel`, `DataUploadViewModel` 경로 모두 동일 필드 저장 로직 적용
+
+#### 물건 상세 선순위 탭 바인딩 경로 수정
+
+- **DataContext 연결 수정**: `PropertyDetailView`의 선순위 탭이 `PropertyDetailViewModel` 전체가 아닌 `SeniorRightsViewModel`을 직접 바인딩하도록 수정
+- **탭 ViewModel 초기화 보강**: `PropertyDetailViewModel`에서 `SeniorRightsViewModel` 생성 후 물건 로드 시 `SelectedProperty`를 전달하도록 수정
+
+#### 선순위 항목 산정표 데이터 표시/입력 기능 완성
+
+- **표 바인딩 완성**: `선순위 항목 산정표`의 DD/반영금액/근거 셀을 실제 필드(`SeniorMortgageDd`, `LienDd`, `SmallDepositDd`, `LeaseDepositDd`, `WageClaimDd`, `CurrentTaxDd`, `SeniorTaxClaimDd`)에 연결
+- **반영금액 입력 가능화**: `평가자 반영 금액` 컬럼을 `TextBox`로 변경하고 `N0` 숫자 포맷/우측 정렬 적용
+- **합계 자동 계산 표시**: `SeniorRightsDdTotal`, `SeniorRightsReflectedTotal` 계산 프로퍼티 추가 및 변경 알림 연동
+- **합계 행 텍스트 정리**: 합계 행 우측의 `자동 합계` 문구 제거
+
+#### 전입/임차 패널 툴팁 개선
+
+- **건물기준시가 안내 툴팁 추가**: 헤더에 `(?)` 표시를 추가하고 마우스 오버 시 `건물감정가액의 70%로 계산됩니다.` 안내 표시
+
+**변경된 파일**
+- `src/NPLogic.App/Services/SheetMappingConfig.cs`
+- `src/NPLogic.App/Services/DataDiskUploadService.cs`
+- `src/NPLogic.App/ViewModels/DataUploadViewModel.cs`
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs`
+- `src/NPLogic.App/Views/PropertyDetailView.xaml`
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+
+### 2026-02-12 (5)
+
+#### 선순위 탭 레이아웃 확장 - 선순위 항목 산정표 추가
+
+- **새 패널 추가**: 전입/임차 현황 및 등기부 정보 패널 하단에 `선순위 항목 산정표` 섹션 추가
+- **9×4 표 레이아웃 구성**: 헤더 1행(`선순위 구분`, `DD`, `평가자 반영 금액`, `상세추정 근거`) + 항목 8행
+- **항목 행 구성**: 선순위근저당권, 유치권 신고금액, 선순위소액보증금, 선순위임차보증금, 선순위 임금채권, 당해세, 선순위 조세채권, 합계
+- **열 너비 조정 지원**: 컬럼 사이 `GridSplitter` 추가로 마우스 드래그 너비 조정 가능
+- **데이터 연동 전 준비 단계**: 셀 바인딩 없이 우선 표 구조/디자인만 배치
+
+**변경된 파일**
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+
+### 2026-02-12 (4)
+
+#### 담보물건 탭 등기부 중복 병합 재적용 안정화
+
+- **레이스 조건 수정**: `LoadRegistrySummaryAsync`에서 병합된 갑구/을구를 세팅한 뒤 `SelectedRegistryRun` 변경 콜백이 미병합 데이터로 덮어쓰던 문제 수정
+- **콜백 억제 플래그 추가**: `SelectedRegistryRun`을 내부적으로 갱신할 때 `OnSelectedRegistryRunChanged` 자동 재로드를 막도록 `_suppressSelectedRegistryRunChanged` 적용
+- **보조 로드 경로도 동일 병합 적용**: `LoadSelectedRegistryRunAsync` 경로에서도 `MergeGapguDuplicates`/`MergeEulguDuplicates`를 적용해 일관된 표시 보장
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/PropertyDetailViewModel.cs`
+
+### 2026-02-12 (3)
+
+#### 선순위 탭 우측 등기부 정보 자동 연동
+
+- **자동 바인딩 구현**: 전입/임차 현황 우측 3열(`접수정보`, `근저당권자`, `채권최고액`)을 `registry_eulgu_rows` 기반으로 표시
+- **근저당 우선 표시**: `등기목적`에 `근저당`이 포함된 을구 행을 우선 사용, 없으면 을구 전체를 fallback으로 사용
+- **중복 병합 적용**: 같은 `접수정보 + 대상소유자` 행은 1건으로 병합하여 표시 (지번 분할 OCR 중복 대응)
+- **7행 고정 UI**: 우측 표는 7행 고정으로 유지하고 데이터가 부족한 행은 빈칸으로 표시
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+
 ### 2026-02-12 (2)
 
 #### 선순위 탭 - 전입/임차 현황 데이터 셀 바인딩 구현

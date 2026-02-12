@@ -357,6 +357,7 @@ namespace NPLogic.Services
 
                     // 선순위 정보
                     "senior_mortgage_amount",       // 물건별 선순위 설정액
+                    "lien_dd",                      // 유치권 신고금액 (권리분석 DD)
                     "senior_housing_small_deposit", // 선순위 주택 소액보증금
                     "senior_commercial_small_deposit", // 선순위 상가 소액보증금
                     "senior_small_deposit",         // 선순위 소액보증금
@@ -1336,6 +1337,10 @@ namespace NPLogic.Services
                 // ========== 선순위 정보 ==========
                 case "senior_mortgage_amount":
                     property.SeniorMortgageAmount = value as decimal?;
+                    rightData["senior_mortgage_dd"] = value;
+                    break;
+                case "lien_dd":
+                    rightData["lien_dd"] = value;
                     break;
                 case "senior_housing_small_deposit":
                     property.SeniorHousingSmallDeposit = value as decimal?;
@@ -1544,6 +1549,10 @@ namespace NPLogic.Services
                 };
 
                 // DD 선순위 금액 설정
+                if (rightData.TryGetValue("senior_mortgage_dd", out var seniorMortgage) && seniorMortgage is decimal sm)
+                    rightAnalysis.SeniorMortgageDd = sm;
+                if (rightData.TryGetValue("lien_dd", out var lien) && lien is decimal li)
+                    rightAnalysis.LienDd = li;
                 if (rightData.TryGetValue("small_deposit_dd", out var smallDeposit) && smallDeposit is decimal sd)
                     rightAnalysis.SmallDepositDd = sd;
                 if (rightData.TryGetValue("lease_deposit_dd", out var leaseDeposit) && leaseDeposit is decimal ld)
@@ -1569,6 +1578,8 @@ namespace NPLogic.Services
 
                 // 선순위 합계
                 rightAnalysis.SeniorTotalDd =
+                    rightAnalysis.SeniorMortgageDd +
+                    rightAnalysis.LienDd +
                     rightAnalysis.SmallDepositDd +
                     rightAnalysis.LeaseDepositDd +
                     rightAnalysis.WageClaimDd +
@@ -1675,6 +1686,7 @@ namespace NPLogic.Services
 
                 // 물건정보 선순위 대표컬럼
                 "senior_mortgage_amount" => "물건별 선순위 설정액",
+                "lien_dd" => "유치권 신고금액",
                 "senior_housing_small_deposit" => "선순위 주택 소액보증금",
                 "senior_commercial_small_deposit" => "선순위 상가 소액보증금",
                 "senior_small_deposit" => "선순위 소액보증금",
@@ -1871,7 +1883,8 @@ namespace NPLogic.Services
             var isNumeric = dbColumn.Contains("amount") || dbColumn.Contains("area") || 
                            dbColumn.Contains("value") || dbColumn.Contains("rate") ||
                            dbColumn.Contains("deposit") || dbColumn.Contains("claim") ||
-                           dbColumn.Contains("tax") || dbColumn.Contains("bid");
+                           dbColumn.Contains("tax") || dbColumn.Contains("bid") ||
+                           dbColumn == "lien_dd";
 
             if (isNumeric)
             {
