@@ -673,9 +673,15 @@
                                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableDataCell}">
                                     <TextBlock Text="{Binding BorrowerTypeDisplay}" Style="{StaticResource CellTextBlock}"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+                                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding HasTenant}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableDataCell}">
+                                    <DatePicker SelectedDate="{Binding TenantMoveInDate}" Style="{StaticResource DateInputDatePicker}"/>
+                                </Border>
 
                                 <!-- Row 2: 헤더 -->
                                 <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
@@ -698,12 +704,25 @@
                                     <TextBlock Text="주택공시가격" Style="{StaticResource CellHeaderTextBlock}"/>
                                 </Border>
 
-                                <!-- Row 3: 데이터 (비워둠) -->
-                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+                                <!-- Row 3: 데이터 -->
+                                <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding OwnerRegistered}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding HasAuctionDocs}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <RadioButton Content="전" GroupName="TenantRegistryGroup" IsChecked="{Binding HasTenantRegistry}" Margin="0,0,8,0" FontSize="12"/>
+                                        <RadioButton Content="상" GroupName="TenantRegistryGroup" IsChecked="{Binding HasCommercialLease}" FontSize="12"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding TenantClaimSubmitted}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="4" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding HousingOfficialPrice, StringFormat=N0}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
 
                                 <!-- Row 4: 헤더 -->
                                 <Border Grid.Row="4" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
@@ -730,12 +749,22 @@
                                     </Viewbox>
                                 </Border>
 
-                                <!-- Row 5: 데이터 (비워둠) -->
-                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
+                                <!-- Row 5: 데이터 -->
+                                <Border Grid.Row="5" Grid.Column="0" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding HasWageClaim}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding WageClaimEstimatedSeizure, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" FontSize="{StaticResource FontSizeBody}" HorizontalContentAlignment="Right"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding WageClaimSubmitted}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding HasTaxClaim}" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="4" Style="{StaticResource TableDataCell}">
+                                    <CheckBox IsChecked="{Binding HasSeniorTaxClaim}" VerticalAlignment="Center"/>
+                                </Border>
 
                                 <!-- Row 6: 헤더 -->
                                 <Border Grid.Row="6" Grid.Column="0" Style="{StaticResource TableHeaderCell}">
@@ -748,9 +777,13 @@
                                 <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
                                 <Border Grid.Row="6" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
 
-                                <!-- Row 7: 데이터 (비워둠) -->
-                                <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableDataCell}"/>
-                                <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableDataCell}"/>
+                                <!-- Row 7: 데이터 -->
+                                <Border Grid.Row="7" Grid.Column="0" Style="{StaticResource TableDataCell}">
+                                    <TextBlock Text="{Binding OfficialLandPrice, StringFormat=N0}" Style="{StaticResource CellTextBlock}"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource TableDataCell}">
+                                    <TextBox Text="{Binding BuildingStandardPrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" FontSize="{StaticResource FontSizeBody}" HorizontalContentAlignment="Right"/>
+                                </Border>
                                 <Border Grid.Row="7" Grid.Column="2" Style="{StaticResource TableDataCell}"/>
                                 <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableDataCell}"/>
                                 <Border Grid.Row="7" Grid.Column="4" Style="{StaticResource TableDataCell}"/>
@@ -805,6 +838,18 @@
                                 <GridSplitter Grid.Column="4" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                                 <GridSplitter Grid.Column="5" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                                 <GridSplitter Grid.Column="6" Grid.RowSpan="8" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                            </Grid>
+
+                            <!-- 하단: 저장 버튼 (오른쪽) -->
+                            <Grid Margin="0,8,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="1" Content="저장"
+                                        Command="{Binding SaveTenantInfoCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"/>
                             </Grid>
                         </StackPanel>
                     </Border>

@@ -541,7 +541,7 @@ namespace NPLogic.Core.Services
                         analysis.WageClaimReflected = analysis.WageClaimDd;
                         analysis.WageClaimReason = "경매개시되어 배당요구종기일 미경과물건으로 임금채권자의 배당요구신청 있는바, 배당요구종기일 고려하여 반영함.";
                     }
-                    else if (wageSeizure)
+                    else if (wageSeizure > 0)
                     {
                         analysis.WageClaimReflected = analysis.WageClaimDd;
                         analysis.WageClaimReason = "경매개시되어 배당요구종기일 미경과물건으로 임금채권 배당요구신청 없으나, 관련 가압류 확인되는바, 근로복지공단 임금자료 등 고려하여 반영함.";
@@ -560,7 +560,7 @@ namespace NPLogic.Core.Services
                 else
                 {
                     // 경매미개시
-                    if (wageSeizure)
+                    if (wageSeizure > 0)
                     {
                         analysis.WageClaimReflected = analysis.WageClaimDd;
                         analysis.WageClaimReason = "경매미개시 물건으로, 임금채권 추정가압류 확인되는바 근로복지공단 임금자료 등 고려하여 추정반영함.";

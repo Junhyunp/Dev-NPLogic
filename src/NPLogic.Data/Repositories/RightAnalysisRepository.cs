@@ -328,6 +328,8 @@ namespace NPLogic.Data.Repositories
                 WageClaimEstimatedSeizure = table.WageClaimEstimatedSeizure,
                 HasTaxClaim = table.HasTaxClaim,
                 HasSeniorTaxClaim = table.HasSeniorTaxClaim,
+                OfficialLandPrice = table.OfficialLandPrice,
+                BuildingStandardPrice = table.BuildingStandardPrice,
 
                 // 선순위 분석
                 SeniorMortgageDd = table.SeniorMortgageDd,
@@ -434,6 +436,8 @@ namespace NPLogic.Data.Repositories
                 WageClaimEstimatedSeizure = model.WageClaimEstimatedSeizure,
                 HasTaxClaim = model.HasTaxClaim,
                 HasSeniorTaxClaim = model.HasSeniorTaxClaim,
+                OfficialLandPrice = model.OfficialLandPrice,
+                BuildingStandardPrice = model.BuildingStandardPrice,
 
                 // 선순위 분석
                 SeniorMortgageDd = model.SeniorMortgageDd,
@@ -655,13 +659,19 @@ namespace NPLogic.Data.Repositories
         public bool WageClaimSubmitted { get; set; }
 
         [Postgrest.Attributes.Column("wage_claim_estimated_seizure")]
-        public bool WageClaimEstimatedSeizure { get; set; }
+        public decimal WageClaimEstimatedSeizure { get; set; }
 
         [Postgrest.Attributes.Column("has_tax_claim")]
         public bool HasTaxClaim { get; set; }
 
         [Postgrest.Attributes.Column("has_senior_tax_claim")]
         public bool HasSeniorTaxClaim { get; set; }
+
+        [Postgrest.Attributes.Column("official_land_price")]
+        public decimal OfficialLandPrice { get; set; }
+
+        [Postgrest.Attributes.Column("building_standard_price")]
+        public decimal BuildingStandardPrice { get; set; }
 
         // 선순위 분석
         [Postgrest.Attributes.Column("senior_mortgage_dd")]

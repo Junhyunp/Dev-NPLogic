@@ -4,6 +4,47 @@
 
 ## [Unreleased]
 
+### 2026-02-12 (2)
+
+#### 선순위 탭 - 전입/임차 현황 데이터 셀 바인딩 구현
+
+- **Row 1 바인딩**: 임차인 CheckBox(`HasTenant`), 전입인 TextBox(`TenantName`), 전입일 DatePicker(`TenantMoveInDate`)
+- **Row 3 바인딩**: 소유주 전입(`OwnerRegistered`), 경매열람자료(`HasAuctionDocs`), 전입세대/상가임대차 RadioButton(`HasTenantRegistry`/`HasCommercialLease`), 임차인 배당요구신청(`TenantClaimSubmitted`), 주택공시가격 TextBlock(`HousingOfficialPrice`)
+- **Row 5 바인딩**: 임금채권(`HasWageClaim`), 임금채권 추정가압류 TextBox(`WageClaimEstimatedSeizure`), 임금채권 배당요구신청(`WageClaimSubmitted`), 당해세 교부청구(`HasTaxClaim`), 선순위조세 교부청구(`HasSeniorTaxClaim`)
+- **Row 7 바인딩**: 공시지가 TextBlock(`OfficialLandPrice`, 자동산출), 건물기준시가 TextBox(`BuildingStandardPrice`, 수정가능)
+- **저장 버튼 추가**: 전입/임차 현황 섹션 하단 오른쪽에 저장 버튼(`SaveTenantInfoCommand`)
+
+#### 주택공시가격/공시지가/건물기준시가 자동 산출
+
+- **주택공시가격**: VWORLD NED Data API로 PNU 기반 자동 조회 (공동주택/개별주택/개별공시지가 자동 분기)
+- **PNU 자동 조회**: PNU 없는 물건은 주소로 VWORLD Search API 조회 → DB 저장(`PropertyRepository.UpdatePnuAsync`)
+- **아파트 동/호 매칭**: 공동주택 API 응답에서 주소의 동/호 파싱하여 정확한 세대 가격 매칭
+- **공시지가**: 개별공시지가(원/㎡) × 토지면적 자동 산출, 주택이 아닌 경우 별도 "토지" 타입으로 API 호출
+- **건물기준시가**: 건물감정가액 × 70% 기본값, 사용자 수정 가능
+- **VworldService API 키 로드**: Edge Function(`get-map-config`) 경유 비동기 로드(`EnsureApiKeyLoadedAsync`)
+
+#### DB 마이그레이션
+
+- `wage_claim_estimated_seizure`: `bool` → `numeric` (금액 입력용)
+- `official_land_price`: 새 컬럼 추가 (공시지가)
+- `building_standard_price`: 새 컬럼 추가 (건물기준시가)
+
+#### 기타 수정
+
+- **RightAnalysisRuleEngine**: `WageClaimEstimatedSeizure` bool→decimal 변경에 따른 비교 로직 수정 (`> 0`)
+- **RadioButton 상호 배타**: `OnHasTenantRegistryChanged`/`OnHasCommercialLeaseChanged` partial 메서드 추가
+- **폰트 크기 일치**: 건물기준시가/임금채권 추정가압류 TextBox에 `FontSize=FontSizeBody` 명시
+
+**변경된 파일**
+- `src/NPLogic.App/App.xaml.cs`
+- `src/NPLogic.App/Services/VworldService.cs`
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs`
+- `src/NPLogic.App/Views/SeniorRightsView.xaml`
+- `src/NPLogic.Core/Models/RightAnalysis.cs`
+- `src/NPLogic.Core/Services/RightAnalysisRuleEngine.cs`
+- `src/NPLogic.Data/Repositories/PropertyRepository.cs`
+- `src/NPLogic.Data/Repositories/RightAnalysisRepository.cs`
+
 ### 2026-02-12
 
 #### 선순위 탭 - 전입/임차 현황 외부 데이터 바인딩

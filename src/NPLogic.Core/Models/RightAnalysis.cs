@@ -142,14 +142,20 @@ namespace NPLogic.Core.Models
         /// <summary>임금채권 배당요구신청</summary>
         public bool WageClaimSubmitted { get; set; }
         
-        /// <summary>임금채권 추정가압류</summary>
-        public bool WageClaimEstimatedSeizure { get; set; }
+        /// <summary>임금채권 추정가압류 (금액)</summary>
+        public decimal WageClaimEstimatedSeizure { get; set; }
         
         /// <summary>당해세 교부청구</summary>
         public bool HasTaxClaim { get; set; }
         
         /// <summary>선순위조세 교부청구</summary>
         public bool HasSeniorTaxClaim { get; set; }
+
+        /// <summary>공시지가 (개별공시지가 × 토지면적)</summary>
+        public decimal OfficialLandPrice { get; set; }
+
+        /// <summary>건물기준시가 (기본값: 건물감정가액 × 70%, 수정가능)</summary>
+        public decimal BuildingStandardPrice { get; set; }
 
         // ===== 선순위 분석 그리드 =====
         

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -20,6 +21,7 @@ namespace NPLogic.Services
     {
         private readonly HttpClient _httpClient;
         private readonly MapService? _mapService;
+        private readonly NPLogic.Data.Services.SupabaseService? _supabaseService;
         private string? _vworldApiKey;
 
         private const string VworldSearchUrl = "https://api.vworld.kr/req/search";
@@ -46,11 +48,12 @@ namespace NPLogic.Services
             { "제주", "제주특별자치도" }
         };
 
-        public VworldService(MapService? mapService = null)
+        public VworldService(MapService? mapService = null, NPLogic.Data.Services.SupabaseService? supabaseService = null)
         {
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
             _mapService = mapService;
+            _supabaseService = supabaseService;
             LoadApiKey();
         }
 
@@ -112,7 +115,44 @@ namespace NPLogic.Services
                 _vworldApiKey = _mapService.GetVworldApiKey();
                 if (!string.IsNullOrEmpty(_vworldApiKey))
                 {
-                    System.Diagnostics.Debug.WriteLine("[VworldService] MapService에서 API 키 재로드 완료");
+                    Debug.WriteLine("[VworldService] MapService에서 API 키 재로드 완료");
+                }
+            }
+        }
+
+        /// <summary>
+        /// API 키 비동기 로드 (MapService Edge Function → appsettings → 환경변수)
+        /// </summary>
+        public async Task EnsureApiKeyLoadedAsync()
+        {
+            if (!string.IsNullOrEmpty(_vworldApiKey))
+                return;
+
+            // 1. MapService에서 동기 시도 (이미 로드된 경우)
+            EnsureApiKeyLoaded();
+            if (!string.IsNullOrEmpty(_vworldApiKey))
+                return;
+
+            // 2. MapService Edge Function 호출하여 키 로드
+            if (_mapService != null && _supabaseService != null)
+            {
+                try
+                {
+                    var session = _supabaseService.GetSession();
+                    if (session?.AccessToken != null)
+                    {
+                        await _mapService.LoadMapConfigAsync(session.AccessToken);
+                        _vworldApiKey = _mapService.GetVworldApiKey();
+                        if (!string.IsNullOrEmpty(_vworldApiKey))
+                        {
+                            Debug.WriteLine("[VworldService] Edge Function을 통해 API 키 로드 완료");
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[VworldService] Edge Function API 키 로드 실패: {ex.Message}");
                 }
             }
         }
@@ -140,12 +180,12 @@ namespace NPLogic.Services
             if (string.IsNullOrWhiteSpace(address))
                 return null;
 
-            // API 키가 로드되었는지 확인 (MapService에서 가져오기 시도)
-            EnsureApiKeyLoaded();
+            // API 키가 로드되었는지 확인
+            await EnsureApiKeyLoadedAsync();
 
             if (string.IsNullOrEmpty(_vworldApiKey))
             {
-                System.Diagnostics.Debug.WriteLine("[VworldService] API 키가 설정되지 않았습니다.");
+                Debug.WriteLine("[VworldService] API 키가 설정되지 않았습니다.");
                 return null;
             }
 
@@ -395,7 +435,7 @@ namespace NPLogic.Services
             if (string.IsNullOrWhiteSpace(pnu) || pnu.Length != 19)
                 return null;
 
-            EnsureApiKeyLoaded();
+            await EnsureApiKeyLoadedAsync();
             if (string.IsNullOrEmpty(_vworldApiKey))
                 return null;
 
@@ -485,6 +525,265 @@ namespace NPLogic.Services
             }
         }
 
+        // ========== 공시가격 API ==========
+
+        private const string NedDataBaseUrl = "https://api.vworld.kr/ned/data";
+
+        /// <summary>
+        /// 주소에서 아파트 동호수 파싱
+        /// 예: "제110동 제7층 제702호" → dong="110", ho="702"
+        /// </summary>
+        private (string? dong, string? ho) ParseDongHo(string address)
+        {
+            string? dong = null;
+            string? ho = null;
+
+            // "제110동" or "110동" 패턴
+            var dongMatch = Regex.Match(address, @"제?(\d+)동");
+            if (dongMatch.Success)
+                dong = dongMatch.Groups[1].Value;
+
+            // "제702호" or "702호" 패턴
+            var hoMatch = Regex.Match(address, @"제?(\d+)호");
+            if (hoMatch.Success)
+                ho = hoMatch.Groups[1].Value;
+
+            return (dong, ho);
+        }
+
+        /// <summary>
+        /// PNU와 물건 종류로 공시가격 조회 (개별공시지가/공동주택/개별주택)
+        /// </summary>
+        /// <param name="pnu">19자리 필지고유번호</param>
+        /// <param name="propertyType">물건 종류 (아파트, 단독주택 등)</param>
+        /// <param name="stdrYear">기준연도 (미지정시 올해)</param>
+        /// <param name="addressFull">전체 주소 (아파트 동호수 매칭용)</param>
+        /// <returns>공시가격 결과 또는 null</returns>
+        public async Task<OfficialPriceResult?> GetOfficialPriceAsync(string pnu, string? propertyType = null, string? stdrYear = null, string? addressFull = null)
+        {
+            if (string.IsNullOrWhiteSpace(pnu) || pnu.Length != 19)
+                return null;
+
+            await EnsureApiKeyLoadedAsync();
+            if (string.IsNullOrEmpty(_vworldApiKey))
+            {
+                Debug.WriteLine("[VworldService] 공시가격 조회 실패: API 키 없음");
+                return null;
+            }
+
+            var year = stdrYear ?? DateTime.Now.Year.ToString();
+            var type = (propertyType ?? "").ToLower();
+
+            // 물건 종류에 따라 API 결정
+            var apiName = type switch
+            {
+                "아파트" or "apartment" or "빌라" or "villa" or "오피스텔" or "officetel" => "getApartHousingPriceAttr",
+                "단독주택" or "house" or "다가구주택" or "multi-family" => "getIndvdHousingPriceAttr",
+                _ => "getIndvdLandPriceAttr" // 토지, 상가, 공장, 기타
+            };
+
+            // 올해 → 작년 순서로 시도 (올해 공시가격이 아직 미발표일 수 있음)
+            var yearsToTry = new[] { year, (int.Parse(year) - 1).ToString() };
+
+            foreach (var y in yearsToTry)
+            {
+                var result = await CallOfficialPriceApiAsync(pnu, apiName, y, addressFull);
+                if (result != null)
+                    return result;
+
+                // 공동주택 API로 조회 안 되면 개별주택으로 재시도 (빌라가 개별주택으로 분류될 수 있음)
+                if (apiName == "getApartHousingPriceAttr")
+                {
+                    result = await CallOfficialPriceApiAsync(pnu, "getIndvdHousingPriceAttr", y, null);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            // 마지막으로 개별공시지가 폴백 (건물 공시가가 없으면 토지라도)
+            if (apiName != "getIndvdLandPriceAttr")
+            {
+                foreach (var y in yearsToTry)
+                {
+                    var result = await CallOfficialPriceApiAsync(pnu, "getIndvdLandPriceAttr", y, null);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 공시가격 API 호출
+        /// </summary>
+        private async Task<OfficialPriceResult?> CallOfficialPriceApiAsync(string pnu, string apiName, string stdrYear, string? addressFull = null)
+        {
+            try
+            {
+                var url = $"{NedDataBaseUrl}/{apiName}" +
+                          $"?key={Uri.EscapeDataString(_vworldApiKey!)}" +
+                          $"&pnu={Uri.EscapeDataString(pnu)}" +
+                          $"&stdrYear={Uri.EscapeDataString(stdrYear)}" +
+                          $"&format=json&numOfRows=100&pageNo=1";
+
+                Debug.WriteLine($"[VworldService] 공시가격 조회: API={apiName}, PNU={pnu}, 기준년도={stdrYear}");
+
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("User-Agent", "Mozilla/5.0");
+
+                var response = await _httpClient.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"[VworldService] 공시가격 API 실패: {response.StatusCode}");
+                    return null;
+                }
+
+                // XML 응답이면 에러
+                if (content.TrimStart().StartsWith("<"))
+                {
+                    Debug.WriteLine($"[VworldService] 공시가격 API XML 응답 (에러)");
+                    return null;
+                }
+
+                using var doc = JsonDocument.Parse(content);
+                var root = doc.RootElement;
+
+                // 응답 구조: { "xxxPrices": { "totalCount": "N", "field": [...] } }
+                // 또는 공동주택: { "apartHousingPrices": { ... } }
+                JsonElement dataRoot;
+                string priceField;
+
+                if (apiName == "getApartHousingPriceAttr")
+                {
+                    if (!root.TryGetProperty("apartHousingPrices", out dataRoot))
+                        return null;
+                    priceField = "pblntfPc"; // 공동주택 공시가격
+                }
+                else if (apiName == "getIndvdHousingPriceAttr")
+                {
+                    if (!root.TryGetProperty("indvdHousingPrices", out dataRoot))
+                        return null;
+                    priceField = "housePc"; // 개별주택 공시가격
+                }
+                else // getIndvdLandPriceAttr
+                {
+                    if (!root.TryGetProperty("indvdLandPrices", out dataRoot))
+                        return null;
+                    priceField = "pblntfPclnd"; // 개별공시지가 (원/㎡)
+                }
+
+                var totalCountStr = dataRoot.TryGetProperty("totalCount", out var tc) ? tc.GetString() : "0";
+                if (!int.TryParse(totalCountStr, out var totalCount) || totalCount == 0)
+                {
+                    Debug.WriteLine($"[VworldService] 공시가격 결과 없음: API={apiName}, 년도={stdrYear}");
+                    return null;
+                }
+
+                if (!dataRoot.TryGetProperty("field", out var fields))
+                    return null;
+
+                // 아파트: 동호수 매칭으로 정확한 세대 찾기, 그 외: 최고가
+                decimal maxPrice = 0;
+                string resultYear = stdrYear;
+                string resultAddress = "";
+
+                // 아파트 동호수 매칭 시도
+                if (apiName == "getApartHousingPriceAttr" && !string.IsNullOrWhiteSpace(addressFull))
+                {
+                    var (dong, ho) = ParseDongHo(addressFull);
+                    if (!string.IsNullOrEmpty(dong) || !string.IsNullOrEmpty(ho))
+                    {
+                        foreach (var field in fields.EnumerateArray())
+                        {
+                            var fieldDong = field.TryGetProperty("dongNm", out var d) ? d.GetString() : null;
+                            var fieldHo = field.TryGetProperty("hoNm", out var h) ? h.GetString() : null;
+
+                            bool dongMatch = string.IsNullOrEmpty(dong) || fieldDong == dong;
+                            bool hoMatch = string.IsNullOrEmpty(ho) || fieldHo == ho;
+
+                            if (dongMatch && hoMatch)
+                            {
+                                var priceStr = field.TryGetProperty(priceField, out var pv) ? pv.GetString() : null;
+                                if (decimal.TryParse(priceStr, out var price) && price > 0)
+                                {
+                                    maxPrice = price;
+                                    resultYear = field.TryGetProperty("stdrYear", out var sy) ? sy.GetString() ?? stdrYear : stdrYear;
+                                    resultAddress = field.TryGetProperty("ldCodeNm", out var addr) ? addr.GetString() ?? "" : "";
+                                    Debug.WriteLine($"[VworldService] 아파트 동호 매칭 성공: 동={fieldDong}, 호={fieldHo}, 가격={price:N0}원");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 매칭 실패 시 첫 번째 유효 결과 사용 (최고가 대신)
+                if (maxPrice <= 0)
+                {
+                    foreach (var field in fields.EnumerateArray())
+                    {
+                        var priceStr = field.TryGetProperty(priceField, out var pv) ? pv.GetString() : null;
+                        if (decimal.TryParse(priceStr, out var price) && price > 0)
+                        {
+                            maxPrice = price;
+                            resultYear = field.TryGetProperty("stdrYear", out var sy) ? sy.GetString() ?? stdrYear : stdrYear;
+                            resultAddress = field.TryGetProperty("ldCodeNm", out var addr) ? addr.GetString() ?? "" : "";
+                            break; // 첫 번째 유효 결과 사용
+                        }
+                    }
+                }
+
+                if (maxPrice <= 0)
+                    return null;
+
+                var apiType = apiName switch
+                {
+                    "getApartHousingPriceAttr" => "공동주택",
+                    "getIndvdHousingPriceAttr" => "개별주택",
+                    _ => "개별공시지가"
+                };
+
+                Debug.WriteLine($"[VworldService] 공시가격 조회 성공: {apiType} {maxPrice:N0}원, 기준년도={resultYear}");
+
+                return new OfficialPriceResult
+                {
+                    Price = maxPrice,
+                    PriceType = apiType,
+                    StandardYear = resultYear,
+                    IsPerSquareMeter = apiName == "getIndvdLandPriceAttr",
+                    Address = resultAddress
+                };
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[VworldService] 공시가격 API 호출 오류: {ex.Message}");
+                return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 공시가격 조회 결과
+    /// </summary>
+    public class OfficialPriceResult
+    {
+        /// <summary>공시가격 (원) 또는 공시지가 (원/㎡)</summary>
+        public decimal Price { get; set; }
+
+        /// <summary>가격 유형: "공동주택", "개별주택", "개별공시지가"</summary>
+        public string PriceType { get; set; } = "";
+
+        /// <summary>기준연도</summary>
+        public string StandardYear { get; set; } = "";
+
+        /// <summary>true이면 단위면적당 가격 (원/㎡)</summary>
+        public bool IsPerSquareMeter { get; set; }
+
+        /// <summary>법정동 명칭</summary>
+        public string Address { get; set; } = "";
     }
 
     /// <summary>
@@ -558,4 +857,5 @@ namespace NPLogic.Services
         [JsonPropertyName("y")]
         public string? Y { get; set; }
     }
+
 }

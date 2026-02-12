@@ -22,6 +22,7 @@ namespace NPLogic.ViewModels
         private readonly RightAnalysisRepository _rightAnalysisRepository;
         private readonly ReferenceDataRepository? _referenceDataRepository;
         private readonly BorrowerRepository? _borrowerRepository;
+        private readonly NPLogic.Services.VworldService? _vworldService;
         
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
@@ -293,7 +294,7 @@ namespace NPLogic.ViewModels
         private bool _hasWageClaim; // 임금채권 존재
 
         [ObservableProperty]
-        private bool _wageClaimEstimatedSeizure; // 임금채권 추정가압류
+        private decimal _wageClaimEstimatedSeizure; // 임금채권 추정가압류 (금액)
 
         [ObservableProperty]
         private bool _hasTaxClaim; // 당해세 교부청구
@@ -303,6 +304,12 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private decimal _housingOfficialPrice; // 주택공시가격
+
+        [ObservableProperty]
+        private decimal _officialLandPrice; // 공시지가
+
+        [ObservableProperty]
+        private decimal _buildingStandardPrice; // 건물기준시가
 
         // ========== 배당 시뮬레이션 ==========
         [ObservableProperty]
@@ -594,13 +601,15 @@ namespace NPLogic.ViewModels
             PropertyRepository propertyRepository,
             RightAnalysisRepository rightAnalysisRepository,
             ReferenceDataRepository? referenceDataRepository = null,
-            BorrowerRepository? borrowerRepository = null)
+            BorrowerRepository? borrowerRepository = null,
+            NPLogic.Services.VworldService? vworldService = null)
         {
             _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _rightAnalysisRepository = rightAnalysisRepository ?? throw new ArgumentNullException(nameof(rightAnalysisRepository));
             _referenceDataRepository = referenceDataRepository;
             _borrowerRepository = borrowerRepository;
+            _vworldService = vworldService;
         }
 
         /// <summary>
@@ -828,6 +837,8 @@ namespace NPLogic.ViewModels
                     HasTaxClaim = _currentRightAnalysis.HasTaxClaim;
                     HasSeniorTaxClaim = _currentRightAnalysis.HasSeniorTaxClaim;
                     HousingOfficialPrice = _currentRightAnalysis.HousingOfficialPrice ?? 0;
+                    OfficialLandPrice = _currentRightAnalysis.OfficialLandPrice;
+                    BuildingStandardPrice = _currentRightAnalysis.BuildingStandardPrice;
 
                     // 위험도 평가
                     RiskLevel = _currentRightAnalysis.RiskLevel ?? "";
@@ -887,6 +898,94 @@ namespace NPLogic.ViewModels
                 {
                     BorrowerTypeDisplay = "";
                     System.Diagnostics.Debug.WriteLine($"[SeniorRights] 차주구분 로드 실패: {ex.Message}");
+                }
+
+                // 주택공시가격: DB에 값이 없으면 VWORLD API로 자동 조회
+                if (HousingOfficialPrice == 0 && _vworldService != null)
+                {
+                    try
+                    {
+                        var pnu = SelectedProperty.Pnu;
+
+                        // PNU가 없으면 주소로 조회하여 PNU 확보 + DB 저장
+                        if (string.IsNullOrWhiteSpace(pnu) && !string.IsNullOrWhiteSpace(SelectedProperty.AddressFull))
+                        {
+                            var searchResult = await _vworldService.SearchAddressAsync(SelectedProperty.AddressFull);
+                            if (searchResult?.IsValidPnu == true)
+                            {
+                                pnu = searchResult.Pnu;
+                                SelectedProperty.Pnu = pnu;
+                                // DB에 PNU 저장 (다음번엔 바로 사용)
+                                await _propertyRepository.UpdatePnuAsync(SelectedProperty.Id, pnu);
+                                System.Diagnostics.Debug.WriteLine($"[SeniorRights] PNU 자동 조회 및 저장: {pnu}");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[SeniorRights] PNU 조회 실패: 주소={SelectedProperty.AddressFull}");
+                            }
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(pnu))
+                        {
+                            var priceResult = await _vworldService.GetOfficialPriceAsync(pnu, SelectedProperty.PropertyType, addressFull: SelectedProperty.AddressFull);
+
+                            if (priceResult != null)
+                            {
+                                decimal totalPrice = priceResult.Price;
+
+                                if (priceResult.IsPerSquareMeter)
+                                {
+                                    // 개별공시지가 (원/㎡) × 대지면적 = 총 공시지가
+                                    var landArea = SelectedProperty.LandArea ?? 0;
+                                    totalPrice = landArea > 0 ? priceResult.Price * landArea : priceResult.Price;
+                                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 개별공시지가: {priceResult.Price:N0}원/㎡ × {landArea:N2}㎡ = {totalPrice:N0}원");
+                                }
+                                else
+                                {
+                                    // 공동주택/개별주택 공시가격 (원 단위, 변환 불필요)
+                                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] {priceResult.PriceType}: {totalPrice:N0}원");
+                                }
+
+                                HousingOfficialPrice = totalPrice;
+                                System.Diagnostics.Debug.WriteLine($"[SeniorRights] 공시가격 자동 조회 성공: {priceResult.PriceType} {totalPrice:N0}원 ({priceResult.StandardYear}년)");
+
+                                // 공시지가 자동 산출: 개별공시지가(원/㎡) × 토지면적
+                                if (OfficialLandPrice == 0 && priceResult.IsPerSquareMeter)
+                                {
+                                    // 이미 개별공시지가 결과 → 그대로 사용
+                                    OfficialLandPrice = totalPrice;
+                                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 공시지가 자동 산출 (개별공시지가): {OfficialLandPrice:N0}원");
+                                }
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[SeniorRights] 공시가격 조회 결과 없음: PNU={pnu}");
+                            }
+
+                            // 공시지가: 아파트/주택 등 주택공시가격이 아닌 경우에도 개별공시지가 별도 조회
+                            if (OfficialLandPrice == 0)
+                            {
+                                var landPriceResult = await _vworldService.GetOfficialPriceAsync(pnu, "토지");
+                                if (landPriceResult != null && landPriceResult.IsPerSquareMeter)
+                                {
+                                    var landArea = SelectedProperty.LandArea ?? 0;
+                                    OfficialLandPrice = landArea > 0 ? landPriceResult.Price * landArea : landPriceResult.Price;
+                                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 공시지가 별도 조회: {landPriceResult.Price:N0}원/㎡ × {landArea:N2}㎡ = {OfficialLandPrice:N0}원");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[SeniorRights] 공시가격 자동 조회 실패: {ex.Message}");
+                    }
+                }
+
+                // 건물기준시가: 기본값 = 건물감정가액 × 70%
+                if (BuildingStandardPrice == 0 && SelectedProperty.BuildingAppraisalValue.HasValue && SelectedProperty.BuildingAppraisalValue.Value > 0)
+                {
+                    BuildingStandardPrice = Math.Round(SelectedProperty.BuildingAppraisalValue.Value * 0.7m, 0);
+                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 건물기준시가 자동 산출: {SelectedProperty.BuildingAppraisalValue.Value:N0} × 70% = {BuildingStandardPrice:N0}원");
                 }
             }
             catch (Exception ex)
@@ -967,10 +1066,12 @@ namespace NPLogic.ViewModels
             DebtorType = "individual";
             BorrowerTypeDisplay = "";
             HasWageClaim = false;
-            WageClaimEstimatedSeizure = false;
+            WageClaimEstimatedSeizure = 0;
             HasTaxClaim = false;
             HasSeniorTaxClaim = false;
             HousingOfficialPrice = 0;
+            OfficialLandPrice = 0;
+            BuildingStandardPrice = 0;
 
             // 위험도 평가
             RiskLevel = "";
@@ -989,6 +1090,16 @@ namespace NPLogic.ViewModels
         {
             _ = LoadRightsAsync();
             _ = LoadRightAnalysisAsync();
+        }
+
+        partial void OnHasTenantRegistryChanged(bool value)
+        {
+            if (value) HasCommercialLease = false;
+        }
+
+        partial void OnHasCommercialLeaseChanged(bool value)
+        {
+            if (value) HasTenantRegistry = false;
         }
 
         /// <summary>
@@ -1370,6 +1481,8 @@ namespace NPLogic.ViewModels
                 analysis.HasTaxClaim = HasTaxClaim;
                 analysis.HasSeniorTaxClaim = HasSeniorTaxClaim;
                 analysis.HousingOfficialPrice = HousingOfficialPrice;
+                analysis.OfficialLandPrice = OfficialLandPrice;
+                analysis.BuildingStandardPrice = BuildingStandardPrice;
 
                 // 위험도 평가
                 analysis.RiskLevel = RiskLevel;
@@ -1890,6 +2003,54 @@ namespace NPLogic.ViewModels
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건 정보가 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task SaveTenantInfoAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+
+            try
+            {
+                if (_currentRightAnalysis == null)
+                {
+                    _currentRightAnalysis = new RightAnalysis
+                    {
+                        Id = Guid.NewGuid(),
+                        PropertyId = SelectedProperty.Id,
+                    };
+                }
+
+                // 전입/임차 현황 필드
+                _currentRightAnalysis.AddressMatch = AddressMatch;
+                _currentRightAnalysis.HasTenant = HasTenant;
+                _currentRightAnalysis.TenantName = TenantName;
+                _currentRightAnalysis.TenantMoveInDate = TenantMoveInDate;
+                _currentRightAnalysis.OwnerRegistered = OwnerRegistered;
+                _currentRightAnalysis.HasAuctionDocs = HasAuctionDocs;
+                _currentRightAnalysis.HasTenantRegistry = HasTenantRegistry;
+                _currentRightAnalysis.HasCommercialLease = HasCommercialLease;
+                _currentRightAnalysis.TenantClaimSubmitted = TenantClaimSubmitted;
+                _currentRightAnalysis.HousingOfficialPrice = HousingOfficialPrice;
+                _currentRightAnalysis.HasWageClaim = HasWageClaim;
+                _currentRightAnalysis.WageClaimEstimatedSeizure = WageClaimEstimatedSeizure;
+                _currentRightAnalysis.WageClaimSubmitted = WageClaimSubmitted;
+                _currentRightAnalysis.HasTaxClaim = HasTaxClaim;
+                _currentRightAnalysis.HasSeniorTaxClaim = HasSeniorTaxClaim;
+                _currentRightAnalysis.OfficialLandPrice = OfficialLandPrice;
+                _currentRightAnalysis.BuildingStandardPrice = BuildingStandardPrice;
+
+                await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입/임차 현황이 저장되었습니다.");
             }
             catch (Exception ex)
             {

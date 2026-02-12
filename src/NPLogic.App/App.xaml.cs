@@ -134,11 +134,12 @@ namespace NPLogic
                 return new StaticMapService(mapService);
             });
 
-            // Vworld Service (Singleton) - MapService에서 API 키 가져옴
+            // Vworld Service (Singleton) - MapService 또는 DB app_config에서 API 키 가져옴
             services.AddSingleton(sp =>
             {
                 var mapService = sp.GetService<MapService>();
-                return new VworldService(mapService);
+                var supabaseService = sp.GetService<Data.Services.SupabaseService>();
+                return new VworldService(mapService, supabaseService);
             });
 
             // Python Backend Services (Singleton)
@@ -257,7 +258,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.PropertyRepository>(),
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.ReferenceDataRepository>(),
-                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>()));
+                    sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
+                    sp.GetRequiredService<VworldService>()));
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.AuctionScheduleDetailViewModel>(sp =>
             {

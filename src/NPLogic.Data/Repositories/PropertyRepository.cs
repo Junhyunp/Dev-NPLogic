@@ -850,6 +850,26 @@ namespace NPLogic.Data.Repositories
         }
 
         /// <summary>
+        /// PNU(필지고유번호) 업데이트
+        /// </summary>
+        public async Task UpdatePnuAsync(Guid propertyId, string pnu)
+        {
+            try
+            {
+                var client = await _supabaseService.GetClientAsync();
+                await client
+                    .From<PropertyTable>()
+                    .Where(x => x.Id == propertyId)
+                    .Set(x => x.Pnu!, pnu)
+                    .Update();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PropertyRepository] PNU 업데이트 실패: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 통계 - 전체/상태별 개수
         /// </summary>
         public async Task<PropertyStatistics> GetStatisticsAsync(string? projectId = null, Guid? assignedTo = null)
