@@ -23,7 +23,7 @@ namespace NPLogic.Core.Models
         /// <summary>
         /// 면적 (평)
         /// </summary>
-        public decimal Area { get; set; }
+        public decimal? Area { get; set; }
         
         /// <summary>
         /// 임차인
@@ -53,22 +53,22 @@ namespace NPLogic.Core.Models
         /// <summary>
         /// 보증금
         /// </summary>
-        public decimal Deposit { get; set; }
+        public decimal? Deposit { get; set; }
         
         /// <summary>
         /// 월세
         /// </summary>
-        public decimal MonthlyRent { get; set; }
+        public decimal? MonthlyRent { get; set; }
         
         /// <summary>
         /// 소액보증금
         /// </summary>
-        public decimal SmallDeposit { get; set; }
+        public decimal? SmallDeposit { get; set; }
         
         /// <summary>
         /// 선순위 보증금
         /// </summary>
-        public decimal SeniorDeposit { get; set; }
+        public decimal? SeniorDeposit { get; set; }
         
         /// <summary>
         /// 비고

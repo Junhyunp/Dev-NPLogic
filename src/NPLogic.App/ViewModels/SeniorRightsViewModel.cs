@@ -156,19 +156,28 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<LeaseItem> _residentialLeases = new();
 
-        public decimal ResidentialLeasesTotalDeposit => ResidentialLeases.Sum(l => l.Deposit);
+        public decimal ResidentialLeasesTotalDeposit => ResidentialLeases.Sum(l => l.Deposit ?? 0);
+
+        [ObservableProperty]
+        private bool _hasResidentialLeaseTable;
 
         // ========== Tool Box: 상가임대차 ==========
         [ObservableProperty]
         private ObservableCollection<LeaseItem> _commercialLeases = new();
 
-        public decimal CommercialLeasesTotalDeposit => CommercialLeases.Sum(l => l.Deposit);
+        public decimal CommercialLeasesTotalDeposit => CommercialLeases.Sum(l => l.Deposit ?? 0);
+
+        [ObservableProperty]
+        private bool _hasCommercialLeaseTable;
 
         // ========== Tool Box: 임금채권 ==========
         [ObservableProperty]
         private ObservableCollection<WageClaimItem> _wageClaims = new();
 
         public decimal WageClaimsTotalAmount => WageClaims.Sum(w => w.ReflectedAmount);
+
+        [ObservableProperty]
+        private bool _hasWageClaimTable;
 
         // ========== 열람 자료 이미지 ==========
         [ObservableProperty]
@@ -879,6 +888,10 @@ namespace NPLogic.ViewModels
                     LoadImageFromBase64(_currentRightAnalysis.CourtCaseSearchImage, v => CourtCaseSearchImage = v, v => CourtCaseSearchImageInfo = v);
                     LoadImageFromBase64(_currentRightAnalysis.CourtDateSearchImage, v => CourtDateSearchImage = v, v => CourtDateSearchImageInfo = v);
                     LoadImageFromBase64(_currentRightAnalysis.CourtDocumentDeliveryImage, v => CourtDocumentDeliveryImage = v, v => CourtDocumentDeliveryImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.TenantRegistryImage, v => TenantRegistryImage = v, v => TenantRegistryImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.CommercialLeaseImage, v => CommercialLeaseImage = v, v => CommercialLeaseImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.RightsAnalysisImage, v => RightsAnalysisImage = v, v => RightsAnalysisImageInfo = v);
+                    LoadImageFromBase64(_currentRightAnalysis.WageDataImage, v => WageDataImage = v, v => WageDataImageInfo = v);
 
                     // 전입/임차 현황
                     OwnerRegistered = _currentRightAnalysis.OwnerRegistered ?? false;
@@ -1121,6 +1134,14 @@ namespace NPLogic.ViewModels
             CourtDateSearchImageInfo = "";
             CourtDocumentDeliveryImage = null;
             CourtDocumentDeliveryImageInfo = "";
+            TenantRegistryImage = null;
+            TenantRegistryImageInfo = "";
+            CommercialLeaseImage = null;
+            CommercialLeaseImageInfo = "";
+            RightsAnalysisImage = null;
+            RightsAnalysisImageInfo = "";
+            WageDataImage = null;
+            WageDataImageInfo = "";
 
             // 전입/임차 현황
             AddressMatch = false;
@@ -1641,6 +1662,10 @@ namespace NPLogic.ViewModels
                 analysis.CourtCaseSearchImage = ConvertImageToBase64(CourtCaseSearchImage);
                 analysis.CourtDateSearchImage = ConvertImageToBase64(CourtDateSearchImage);
                 analysis.CourtDocumentDeliveryImage = ConvertImageToBase64(CourtDocumentDeliveryImage);
+                analysis.TenantRegistryImage = ConvertImageToBase64(TenantRegistryImage);
+                analysis.CommercialLeaseImage = ConvertImageToBase64(CommercialLeaseImage);
+                analysis.RightsAnalysisImage = ConvertImageToBase64(RightsAnalysisImage);
+                analysis.WageDataImage = ConvertImageToBase64(WageDataImage);
 
                 // 전입/임차 현황
                 analysis.AddressMatch = AddressMatch;
@@ -1873,7 +1898,40 @@ namespace NPLogic.ViewModels
             }
         }
 
-        // ========== Tool Box 행 추가 Commands ==========
+        // ========== Tool Box 테이블 생성/행 추가/삭제 Commands ==========
+
+        [RelayCommand]
+        private void CreateResidentialLeaseTable()
+        {
+            ErrorMessage = null;
+            HasResidentialLeaseTable = true;
+            if (ResidentialLeases.Count == 0)
+            {
+                AddResidentialLeaseRow();
+            }
+        }
+
+        [RelayCommand]
+        private void CreateCommercialLeaseTable()
+        {
+            ErrorMessage = null;
+            HasCommercialLeaseTable = true;
+            if (CommercialLeases.Count == 0)
+            {
+                AddCommercialLeaseRow();
+            }
+        }
+
+        [RelayCommand]
+        private void CreateWageClaimTable()
+        {
+            ErrorMessage = null;
+            HasWageClaimTable = true;
+            if (WageClaims.Count == 0)
+            {
+                AddWageClaimRow();
+            }
+        }
         
         /// <summary>
         /// 주택임대차 행 추가
@@ -1881,11 +1939,28 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private void AddResidentialLeaseRow()
         {
+            ErrorMessage = null;
+            HasResidentialLeaseTable = true;
             ResidentialLeases.Add(new LeaseItem
             {
                 PropertyId = SelectedProperty?.Id,
                 LeaseType = "residential"
             });
+            OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
+        }
+
+        [RelayCommand]
+        private void RemoveResidentialLeaseRow(LeaseItem? row)
+        {
+            if (row == null)
+            {
+                ErrorMessage = null;
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("삭제할 행을 선택하세요.");
+                return;
+            }
+
+            ErrorMessage = null;
+            ResidentialLeases.Remove(row);
             OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
         }
 
@@ -1895,11 +1970,28 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private void AddCommercialLeaseRow()
         {
+            ErrorMessage = null;
+            HasCommercialLeaseTable = true;
             CommercialLeases.Add(new LeaseItem
             {
                 PropertyId = SelectedProperty?.Id,
                 LeaseType = "commercial"
             });
+            OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
+        }
+
+        [RelayCommand]
+        private void RemoveCommercialLeaseRow(LeaseItem? row)
+        {
+            if (row == null)
+            {
+                ErrorMessage = null;
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("삭제할 행을 선택하세요.");
+                return;
+            }
+
+            ErrorMessage = null;
+            CommercialLeases.Remove(row);
             OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
         }
 
@@ -1909,12 +2001,29 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private void AddWageClaimRow()
         {
+            ErrorMessage = null;
+            HasWageClaimTable = true;
             var sequenceNumber = WageClaims.Count > 0 ? WageClaims.Max(w => w.SequenceNumber) + 1 : 1;
             WageClaims.Add(new WageClaimItem
             {
                 PropertyId = SelectedProperty?.Id,
                 SequenceNumber = sequenceNumber
             });
+            OnPropertyChanged(nameof(WageClaimsTotalAmount));
+        }
+
+        [RelayCommand]
+        private void RemoveWageClaimRow(WageClaimItem? row)
+        {
+            if (row == null)
+            {
+                ErrorMessage = null;
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("삭제할 행을 선택하세요.");
+                return;
+            }
+
+            ErrorMessage = null;
+            WageClaims.Remove(row);
             OnPropertyChanged(nameof(WageClaimsTotalAmount));
         }
 
@@ -2224,6 +2333,10 @@ namespace NPLogic.ViewModels
                 _currentRightAnalysis.HasSeniorTaxClaim = HasSeniorTaxClaim;
                 _currentRightAnalysis.OfficialLandPrice = OfficialLandPrice;
                 _currentRightAnalysis.BuildingStandardPrice = BuildingStandardPrice;
+                _currentRightAnalysis.TenantRegistryImage = ConvertImageToBase64(TenantRegistryImage);
+                _currentRightAnalysis.CommercialLeaseImage = ConvertImageToBase64(CommercialLeaseImage);
+                _currentRightAnalysis.RightsAnalysisImage = ConvertImageToBase64(RightsAnalysisImage);
+                _currentRightAnalysis.WageDataImage = ConvertImageToBase64(WageDataImage);
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입/임차 현황이 저장되었습니다.");

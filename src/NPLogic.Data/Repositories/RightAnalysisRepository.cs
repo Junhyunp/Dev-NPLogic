@@ -307,6 +307,10 @@ namespace NPLogic.Data.Repositories
                 CourtCaseSearchImage = table.CourtCaseSearchImage,
                 CourtDateSearchImage = table.CourtDateSearchImage,
                 CourtDocumentDeliveryImage = table.CourtDocumentDeliveryImage,
+                TenantRegistryImage = table.TenantRegistryImage,
+                CommercialLeaseImage = table.CommercialLeaseImage,
+                RightsAnalysisImage = table.RightsAnalysisImage,
+                WageDataImage = table.WageDataImage,
 
                 // 전입/임차 현황
                 AddressMatch = table.AddressMatch,
@@ -415,6 +419,10 @@ namespace NPLogic.Data.Repositories
                 CourtCaseSearchImage = model.CourtCaseSearchImage,
                 CourtDateSearchImage = model.CourtDateSearchImage,
                 CourtDocumentDeliveryImage = model.CourtDocumentDeliveryImage,
+                TenantRegistryImage = model.TenantRegistryImage,
+                CommercialLeaseImage = model.CommercialLeaseImage,
+                RightsAnalysisImage = model.RightsAnalysisImage,
+                WageDataImage = model.WageDataImage,
 
                 // 전입/임차 현황
                 AddressMatch = model.AddressMatch,
@@ -608,6 +616,18 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("court_document_delivery_image")]
         public string? CourtDocumentDeliveryImage { get; set; }
+
+        [Postgrest.Attributes.Column("tenant_registry_image")]
+        public string? TenantRegistryImage { get; set; }
+
+        [Postgrest.Attributes.Column("commercial_lease_image")]
+        public string? CommercialLeaseImage { get; set; }
+
+        [Postgrest.Attributes.Column("rights_analysis_image")]
+        public string? RightsAnalysisImage { get; set; }
+
+        [Postgrest.Attributes.Column("wage_data_image")]
+        public string? WageDataImage { get; set; }
 
         // 전입/임차 현황
         [Postgrest.Attributes.Column("address_match")]

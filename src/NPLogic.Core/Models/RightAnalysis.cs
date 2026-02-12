@@ -92,6 +92,18 @@ namespace NPLogic.Core.Models
         /// <summary>문건송달내역 이미지 (Base64)</summary>
         public string? CourtDocumentDeliveryImage { get; set; }
 
+        /// <summary>전입세대열람 이미지 (Base64)</summary>
+        public string? TenantRegistryImage { get; set; }
+
+        /// <summary>상가임대차열람 이미지 (Base64)</summary>
+        public string? CommercialLeaseImage { get; set; }
+
+        /// <summary>권리분석 이미지 (Base64)</summary>
+        public string? RightsAnalysisImage { get; set; }
+
+        /// <summary>임금자료 이미지 (Base64)</summary>
+        public string? WageDataImage { get; set; }
+
         // ===== 전입/임차 현황 =====
         
         /// <summary>물건지, 소유주 주소지 일치여부</summary>

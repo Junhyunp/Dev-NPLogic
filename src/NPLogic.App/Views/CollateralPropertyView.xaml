@@ -26,6 +26,14 @@
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="Padding" Value="12,8"/>
         </Style>
+
+        <Style x:Key="CompactTableHeaderCell" TargetType="Border" BasedOn="{StaticResource TableHeaderCell}">
+            <Setter Property="Padding" Value="8,6"/>
+        </Style>
+
+        <Style x:Key="CompactTableDataCell" TargetType="Border" BasedOn="{StaticResource TableDataCell}">
+            <Setter Property="Padding" Value="8,6"/>
+        </Style>
     </UserControl.Resources>
     
     <Grid Background="{StaticResource BackgroundBrush}">
@@ -381,26 +389,6 @@
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <Grid>
                                             <TextBlock Text="2. 갑구" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                                <Button Command="{Binding AddGapguRowCommand}"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Padding="6,2" Height="28" ToolTip="행 추가">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Command="{Binding DeleteGapguRowCommand}"
-                                                        CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Foreground="{StaticResource ErrorBrush}"
-                                                        Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                     <DataGrid x:Name="GapguDataGrid"
@@ -426,6 +414,27 @@
                                             <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,8">
+                                        <Button Command="{Binding AddGapguRowCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="6,2" Height="28" ToolTip="행 추가">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding DeleteGapguRowCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="{StaticResource ErrorBrush}"
+                                                Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
 
@@ -435,26 +444,6 @@
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <Grid>
                                             <TextBlock Text="3. 을구" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                                <Button Command="{Binding AddEulguRowCommand}"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Padding="6,2" Height="28" ToolTip="행 추가">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                </Button>
-                                                <Button Command="{Binding DeleteEulguRowCommand}"
-                                                        CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
-                                                        Style="{StaticResource MaterialDesignFlatButton}"
-                                                        Foreground="{StaticResource ErrorBrush}"
-                                                        Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
-                                                    </StackPanel>
-                                                </Button>
-                                            </StackPanel>
                                         </Grid>
                                     </Border>
                                     <DataGrid x:Name="EulguDataGrid"
@@ -483,6 +472,24 @@
                                     </DataGrid>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,12">
+                                        <Button Command="{Binding AddEulguRowCommand}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="6,2" Height="28" ToolTip="행 추가">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding DeleteEulguRowCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Foreground="{StaticResource ErrorBrush}"
+                                                Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Button>
                                         <Button Content="저장"
                                                 Command="{Binding SaveRegistryUserInputsCommand}"
                                                 Style="{StaticResource MaterialDesignRaisedButton}"
@@ -644,7 +651,7 @@
                                             <TextBlock Text="{Binding KbPrice, StringFormat=N0, TargetNullValue='-'}"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                         </Border>
-                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}">
                                             <TextBox Text="{Binding KbSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
@@ -667,7 +674,7 @@
                                 <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                     <TextBlock Text="분양가" FontWeight="SemiBold"/>
                                 </Border>
-                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,1,0,0" Margin="12">
+                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" Margin="12">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -677,56 +684,56 @@
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="34"/>
+                                            <RowDefinition Height="34"/>
+                                            <RowDefinition Height="34"/>
                                         </Grid.RowDefinitions>
 
                                         <!-- Row 0: 분양면적 (RowSpan=2) | 분양가 (ColSpan=4) -->
-                                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="분양면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"
                                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="4" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="분양가" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
 
                                         <!-- Row 1: 분양가 하위 헤더 (토지, 건물, 합계, 부가세) -->
-                                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="토지" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="건물" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="합계" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource TableHeaderCell}">
+                                        <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource CompactTableHeaderCell}">
                                             <TextBlock Text="부가세" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
 
                                         <!-- Row 2: 데이터 (모두 유저 입력) -->
-                                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource CompactTableDataCell}">
                                             <TextBox Text="{Binding SaleSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource CompactTableDataCell}">
                                             <TextBox Text="{Binding SalePriceLand, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource CompactTableDataCell}">
                                             <TextBox Text="{Binding SalePriceBuilding, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource CompactTableDataCell}">
                                             <TextBox Text="{Binding SalePriceTotal, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                         </Border>
-                                        <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource TableDataCell}" Background="{StaticResource ManualInputBgBrush}">
+                                        <Border Grid.Row="2" Grid.Column="4" Style="{StaticResource CompactTableDataCell}">
                                             <TextBox Text="{Binding SalePriceVat, StringFormat=N0, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
@@ -767,11 +774,13 @@
                         <!-- 테이블 (HasJibunAppraisalTable이 true일 때만 표시) -->
                         <StackPanel Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource BooleanToVisibilityConverter}}"
                                     Margin="12">
-                            <DataGrid ItemsSource="{Binding JibunAppraisalRows}"
+                            <DataGrid x:Name="JibunAppraisalDataGrid"
+                                      ItemsSource="{Binding JibunAppraisalRows}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False" CanUserDeleteRows="False"
                                       CanUserSortColumns="False"
                                       HeadersVisibility="Column"
+                                      RowHeight="32"
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource BorderBrush}"
@@ -795,7 +804,7 @@
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
                                         <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
+                                        <Setter Property="Background" Value="White"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                         <Setter Property="BorderThickness" Value="0,0,1,0"/>
                                         <Setter Property="Padding" Value="4,2"/>
@@ -901,18 +910,6 @@
                                             </Style>
                                         </DataGridTextColumn.EditingElementStyle>
                                     </DataGridTextColumn>
-                                    <DataGridTemplateColumn Header="" Width="40">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Button Content="✕" FontSize="11"
-                                                        Command="{Binding DataContext.RemoveJibunAppraisalRowCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"
-                                                        Background="Transparent" Foreground="#E53935" BorderThickness="0"
-                                                        Cursor="Hand" HorizontalAlignment="Center"
-                                                        ToolTip="행 삭제"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -926,19 +923,32 @@
                                         <ColumnDefinition Width="90"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="120"/>
-                                        <ColumnDefinition Width="40"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
                                     <TextBlock Grid.Column="5" Text="{Binding JibunAppraisalTotalValue, StringFormat=N0}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
                                 </Grid>
                             </Border>
 
-                            <!-- 행 추가 / 저장 버튼 -->
+                            <!-- 저장 버튼 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                                <Button Content="+ 행 추가"
-                                        Command="{Binding AddJibunAppraisalRowCommand}"
+                                <Button Command="{Binding AddJibunAppraisalRowCommand}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
-                                        Padding="12,6" Margin="0,0,8,0"/>
+                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding RemoveJibunAppraisalRowCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=JibunAppraisalDataGrid}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Foreground="{StaticResource ErrorBrush}"
+                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                                 <Button Content="저장"
                                         Command="{Binding SaveJibunAppraisalsCommand}"
                                         Style="{StaticResource MaterialDesignRaisedButton}"
@@ -1016,6 +1026,7 @@
                                       CanUserAddRows="False" CanUserDeleteRows="False"
                                       CanUserSortColumns="False"
                                       HeadersVisibility="Column"
+                                      RowHeight="32"
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource BorderBrush}"
@@ -1040,7 +1051,7 @@
                                 <DataGrid.CellStyle>
                                     <Style TargetType="DataGridCell">
                                         <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="Background" Value="{StaticResource ManualInputBgBrush}"/>
+                                        <Setter Property="Background" Value="White"/>
                                         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
                                         <Setter Property="BorderThickness" Value="0,0,1,0"/>
                                         <Setter Property="Padding" Value="4,2"/>
@@ -1128,12 +1139,26 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 행 추가 / 저장 버튼 -->
+                            <!-- 저장 버튼 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
-                                <Button Content="+ 행 추가"
-                                        Command="{Binding AddMachineryAppraisalRowCommand}"
+                                <Button Command="{Binding AddMachineryAppraisalRowCommand}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
-                                        Padding="12,6" Margin="0,0,8,0"/>
+                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding RemoveMachineryAppraisalRowCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=MachineryDataGrid}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Foreground="{StaticResource ErrorBrush}"
+                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
                                 <Button Content="저장"
                                         Command="{Binding SaveMachineryAppraisalsCommand}"
                                         Style="{StaticResource MaterialDesignRaisedButton}"
