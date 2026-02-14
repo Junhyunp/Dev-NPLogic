@@ -50,8 +50,18 @@ src/
 └── NPLogic.UI      # 재사용 가능 UI 컴포넌트
 
 python/             # Python 보조 서버 (OCR, 유사물건 추천) - EC2에서 Docker로 운영
-reference/          # 원청 참고자료 (Auction-Certificate 등)
+docs/               # 개발 문서 (ERD, 서비스 가이드, 비즈니스 로직 등)
+reference/          # 원청 참고자료 (데이터디스크 샘플, 비핵심조서 양식 등)
 ```
+
+### 주요 파일
+
+| 파일 | 목적 |
+|------|------|
+| `CLAUDE.md` | AI 에이전트 작업 지침 (이 파일) |
+| `changelog.md` | 변경 이력 |
+| `.mcp.json` | MCP 서버 설정 (Supabase 연동) |
+| `NPLogic.sln` | 솔루션 파일 |
 
 ### 의존성 방향
 
@@ -71,9 +81,9 @@ NPLogic.Core → (독립적)
 ### 의존성 주입
 
 `App.xaml.cs`에서 Microsoft.Extensions.DependencyInjection으로 모든 서비스 등록:
-- Services: Singleton
-- Repositories: Singleton
-- ViewModels: Transient
+- Services: Singleton (~18개)
+- Repositories: Singleton (~23개)
+- ViewModels: Transient (~29개)
 - Views: Transient
 
 전역 서비스 접근: `App.ServiceProvider.GetRequiredService<T>()`
@@ -92,7 +102,8 @@ NPLogic.Core → (독립적)
 - `AuthService`: 사용자 인증
 - `PermissionService`: 권한 관리
 - `PythonBackendService`: Python OCR/추천 서버 통신 (Singleton.Instance 패턴)
-- `RightAnalysisRuleEngine`: 권리 분석 규칙 엔진
+- `VworldService`: VWORLD API 연동 (공시가격/공시지가 조회, PNU 자동 조회)
+- `RightAnalysisRuleEngine`: 권리 분석 규칙 엔진 (40+ 케이스)
 - `XnpvCalculator`: 순현재가 계산
 
 ### UI 네비게이션 구조
@@ -107,7 +118,7 @@ MainWindow
         │   ├── 차주개요
         │   ├── Loan
         │   ├── 담보물건 (CollateralPropertyView) ★ 등기부등본 정보 표시
-        │   ├── 선순위
+        │   ├── 선순위 (SeniorRightsView) ★ 전입/임차 현황 + 선순위 항목 산정표
         │   ├── 회생개요
         │   ├── 평가
         │   ├── 경공매일정
@@ -160,7 +171,28 @@ WPF App (RegistryTabViewModel)
 | `registry_eulgu_rows` | 을구 행 (run당 N행) |
 | `registry_sheet_data` | DD 엑셀 Sheet C-2 원본 (OCR과 무관) |
 
-**삭제된 레거시 테이블**: `registry_documents`, `registry_owners`, `registry_rights`
+**삭제된 레거시 테이블**: `registry_documents`, `registry_owners`
+
+### 선순위 관련 DB 테이블
+
+| 테이블 | 용도 |
+|--------|------|
+| `lease_items` | 주택/상가 임대차 (lease_type으로 구분: residential/commercial) |
+| `wage_claim_items` | 임금채권 (직원별 임금/퇴직금/체당금 상세) |
+| `registry_rights` | 물건별 권리 정보 (근저당/가압류 등, 갑구/을구 구분) |
+
+### 평가 관련 DB 테이블 (물건별)
+
+| 테이블 | 용도 |
+|--------|------|
+| `property_jibun_appraisals` | 지번별 감정평가 (토지/건물 면적·단가·감정가) |
+| `property_machinery_appraisals` | 기계기구 감정가 (품목별 수량·단가·공장저당 여부) |
+
+### 성능 최적화 패턴
+
+- **배치 INSERT**: 7개 Repository에 `CreateBatchAsync` 메서드 (청크 단위 + 실패 시 개별 삽입 폴백)
+- **병렬 로드**: `Task.WhenAll`로 독립 DB 호출 병렬화 (PropertyDetailViewModel, SeniorRightsViewModel, RegistryTabViewModel)
+- **배치 조회**: `GetByPropertyIdsAsync`로 N+1 문제 해결 (Filter In 연산자 사용)
 
 ## 주요 기술 스택
 
