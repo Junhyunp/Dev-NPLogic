@@ -200,9 +200,6 @@
             <Setter Property="BorderThickness" Value="0,0,1,0"/>
             <Setter Property="Padding" Value="4,2"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
-            <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Foreground" Value="Black"/>
@@ -214,10 +211,6 @@
         </Style>
 
         <Style x:Key="SectionDataGridRowStyle" TargetType="DataGridRow">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Foreground" Value="Black"/>
         </Style>
@@ -267,11 +260,15 @@
             <!-- 버튼 제거됨 (피드백 #26) -->
         </Grid>
 
-        <!-- 메인 컨텐츠 - 수평 스크롤 지원 -->
+        <!-- 메인 컨텐츠 -->
         <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <StackPanel MinWidth="1400">
-                    
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <!-- 상단 영역: 넓은 테이블들 (수평 스크롤 필요) -->
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                        <StackPanel MinWidth="1400">
+
                     <!-- ========== 1. 경매사건 및 선순위 상단 정보 ========== -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -1283,6 +1280,11 @@
                         </StackPanel>
                     </Border>
 
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- 하단 영역: DataGrid 테이블들 (수평 스크롤 불필요, star 컬럼 정상 작동) -->
+
                     <!-- ========== 4. 주택임대차 ========== -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -1304,28 +1306,20 @@
                                             FontWeight="Bold"
                                             HorizontalAlignment="Right"
                                             Command="{Binding CreateResidentialLeaseTableCommand}"
+                                            Visibility="{Binding HasResidentialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
                                             Padding="8,2"
                                             Cursor="Hand"
-                                            ToolTip="주택임대차 테이블 생성">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasResidentialLeaseTable}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
+                                            ToolTip="주택임대차 테이블 생성"/>
                                 </Grid>
                             </Border>
 
                             <Grid Margin="12"
                                   Visibility="{Binding HasResidentialLeaseTable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
@@ -1337,8 +1331,6 @@
                                           CanUserAddRows="False"
                                           CanUserDeleteRows="False"
                                           CanUserSortColumns="False"
-                                          CanUserResizeRows="False"
-                                          CanUserResizeColumns="True"
                                           HeadersVisibility="Column"
                                           ColumnWidth="*"
                                           Background="White"
@@ -1350,8 +1342,7 @@
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                           VerticalGridLinesBrush="{StaticResource BorderBrush}"
                                           RowHeight="32"
-                                          FontSize="{StaticResource FontSizeBody}"
-                                          HorizontalAlignment="Stretch"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                           MinHeight="60">
                                     <DataGrid.ColumnHeaderStyle>
                                         <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
@@ -1362,23 +1353,17 @@
                                     <DataGrid.RowStyle>
                                         <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                     </DataGrid.RowStyle>
-                                    <DataGrid.Resources>
-                                        <Style TargetType="{x:Type DataGridTextColumn}">
-                                            <Setter Property="ElementStyle" Value="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <Setter Property="EditingElementStyle" Value="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                        </Style>
-                                    </DataGrid.Resources>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차인" Binding="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="전입일" Binding="{Binding MoveInDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="소액보증금" Binding="{Binding SmallDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="선순위 보증금" Binding="{Binding SeniorDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                        <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차인" Binding="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="전입일" Binding="{Binding MoveInDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="소액보증금" Binding="{Binding SmallDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="선순위 보증금" Binding="{Binding SeniorDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
 
@@ -1409,6 +1394,16 @@
                                         </StackPanel>
                                     </Button>
                                 </Grid>
+                                <Grid Grid.Row="2" Margin="0,8,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="1" Content="저장"
+                                            Command="{Binding SaveResidentialLeasesCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"/>
+                                </Grid>
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -1434,28 +1429,20 @@
                                             FontWeight="Bold"
                                             HorizontalAlignment="Right"
                                             Command="{Binding CreateCommercialLeaseTableCommand}"
+                                            Visibility="{Binding HasCommercialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
                                             Padding="8,2"
                                             Cursor="Hand"
-                                            ToolTip="상가임대차 테이블 생성">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasCommercialLeaseTable}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
+                                            ToolTip="상가임대차 테이블 생성"/>
                                 </Grid>
                             </Border>
 
                             <Grid Margin="12"
                                   Visibility="{Binding HasCommercialLeaseTable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
@@ -1467,8 +1454,6 @@
                                           CanUserAddRows="False"
                                           CanUserDeleteRows="False"
                                           CanUserSortColumns="False"
-                                          CanUserResizeRows="False"
-                                          CanUserResizeColumns="True"
                                           HeadersVisibility="Column"
                                           ColumnWidth="*"
                                           Background="White"
@@ -1480,8 +1465,7 @@
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                           VerticalGridLinesBrush="{StaticResource BorderBrush}"
                                           RowHeight="32"
-                                          FontSize="{StaticResource FontSizeBody}"
-                                          HorizontalAlignment="Stretch"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                           MinHeight="60">
                                     <DataGrid.ColumnHeaderStyle>
                                         <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
@@ -1492,23 +1476,17 @@
                                     <DataGrid.RowStyle>
                                         <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                     </DataGrid.RowStyle>
-                                    <DataGrid.Resources>
-                                        <Style TargetType="{x:Type DataGridTextColumn}">
-                                            <Setter Property="ElementStyle" Value="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <Setter Property="EditingElementStyle" Value="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                        </Style>
-                                    </DataGrid.Resources>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차인" Binding="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="소액보증금" Binding="{Binding SmallDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="선순위 보증금" Binding="{Binding SeniorDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                        <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차인" Binding="{Binding TenantName, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="소액보증금" Binding="{Binding SmallDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="선순위 보증금" Binding="{Binding SeniorDeposit, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
 
@@ -1539,6 +1517,16 @@
                                         </StackPanel>
                                     </Button>
                                 </Grid>
+                                <Grid Grid.Row="2" Margin="0,8,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="1" Content="저장"
+                                            Command="{Binding SaveCommercialLeasesCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"/>
+                                </Grid>
                             </Grid>
                         </StackPanel>
                     </Border>
@@ -1564,28 +1552,20 @@
                                             FontWeight="Bold"
                                             HorizontalAlignment="Right"
                                             Command="{Binding CreateWageClaimTableCommand}"
+                                            Visibility="{Binding HasWageClaimTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
                                             Padding="8,2"
                                             Cursor="Hand"
-                                            ToolTip="임금채권 테이블 생성">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasWageClaimTable}" Value="True">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
+                                            ToolTip="임금채권 테이블 생성"/>
                                 </Grid>
                             </Border>
 
                             <Grid Margin="12"
                                   Visibility="{Binding HasWageClaimTable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -1643,7 +1623,6 @@
 
                                 <DataGrid x:Name="WageClaimGrid"
                                           Grid.Row="1"
-                                          HorizontalAlignment="Stretch"
                                           ColumnWidth="*"
                                           ItemsSource="{Binding WageClaims}"
                                           HeadersVisibility="Column"
@@ -1651,8 +1630,6 @@
                                           CanUserAddRows="False"
                                           CanUserDeleteRows="False"
                                           CanUserSortColumns="False"
-                                          CanUserResizeRows="False"
-                                          CanUserResizeColumns="True"
                                           Background="White"
                                           RowBackground="White"
                                           AlternatingRowBackground="#FAFAFA"
@@ -1662,8 +1639,7 @@
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                           VerticalGridLinesBrush="{StaticResource BorderBrush}"
                                           RowHeight="32"
-                                          ColumnHeaderHeight="34"
-                                          FontSize="{StaticResource FontSizeBody}"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                           MinHeight="60">
                                     <DataGrid.ColumnHeaderStyle>
                                         <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
@@ -1674,28 +1650,22 @@
                                     <DataGrid.RowStyle>
                                         <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                     </DataGrid.RowStyle>
-                                    <DataGrid.Resources>
-                                        <Style TargetType="{x:Type DataGridTextColumn}">
-                                            <Setter Property="ElementStyle" Value="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <Setter Property="EditingElementStyle" Value="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                        </Style>
-                                    </DataGrid.Resources>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="순번" Binding="{Binding SequenceNumber, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="성명" Binding="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="생년월일" Binding="{Binding BirthDate, StringFormat=yyMMdd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="가압류일자" Binding="{Binding SeizureDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="가압류금액" Binding="{Binding SeizureAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="배당요구일자" Binding="{Binding ClaimDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="임금" Binding="{Binding WageAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="퇴직금" Binding="{Binding SeveranceAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="기타" Binding="{Binding OtherAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="합계" Binding="{Binding TotalAmount, StringFormat=N0}" Width="*" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="3개월 임금" Binding="{Binding ThreeMonthWage, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="3년분 퇴직금" Binding="{Binding ThreeYearSeverance, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="체당금지급액" Binding="{Binding SubstitutePayment, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                        <DataGridTextColumn Header="합계" Binding="{Binding ReflectedAmount, StringFormat=N0}" Width="*" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="비고" Binding="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                        <DataGridTextColumn Header="순번" Binding="{Binding SequenceNumber, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="성명" Binding="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="생년월일" Binding="{Binding BirthDate, StringFormat=yyMMdd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="가압류일자" Binding="{Binding SeizureDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="가압류금액" Binding="{Binding SeizureAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="배당요구일자" Binding="{Binding ClaimDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="임금" Binding="{Binding WageAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="퇴직금" Binding="{Binding SeveranceAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="기타" Binding="{Binding OtherAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="합계" Binding="{Binding TotalAmount, StringFormat=N0}" Width="*" IsReadOnly="True" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="3개월 임금" Binding="{Binding ThreeMonthWage, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="3년분 퇴직금" Binding="{Binding ThreeYearSeverance, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="체당금지급액" Binding="{Binding SubstitutePayment, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                        <DataGridTextColumn Header="합계" Binding="{Binding ReflectedAmount, StringFormat=N0}" Width="*" IsReadOnly="True" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="비고" Binding="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Width="*" ElementStyle="{StaticResource SectionDataGridTextBlockStyle}" EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
 
@@ -1725,6 +1695,16 @@
                                             <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </Button>
+                                </Grid>
+                                <Grid Grid.Row="3" Margin="0,8,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="1" Content="저장"
+                                            Command="{Binding SaveWageClaimsCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"/>
                                 </Grid>
                             </Grid>
                         </StackPanel>

@@ -4,6 +4,29 @@
 
 ## [Unreleased]
 
+### 2026-02-13
+
+#### 주택임대차/상가임대차/임금채권 DB 영속화 및 저장 버튼 구현
+
+- **DB 테이블 신규 생성**: `lease_items` (주택/상가 임대차, lease_type으로 구분), `wage_claim_items` (임금채권) 테이블 생성 (인덱스, RLS, 한국어 COMMENT 포함)
+- **Repository 신규 생성**: `LeaseItemRepository`, `WageClaimItemRepository` — property_id 기반 조회/저장 (DELETE→INSERT 패턴)
+- **저장 버튼 3개 추가**: 주택임대차, 상가임대차, 임금채권 각 DataGrid 아래에 기존 섹션과 동일한 디자인의 저장 버튼 추가
+- **DB 로드/리셋 연동**: 물건 선택 시 DB에서 3개 컬렉션 자동 로드, 물건 전환 시 컬렉션 초기화
+- **임금채권 합계 실시간 갱신**: `WageClaimItem`에 `INotifyPropertyChanged` 구현 — 임금/퇴직금/기타 입력 시 배당요구액 합계, 3개월임금/3년퇴직금/체당금 입력 시 반영금액 합계 자동 갱신
+
+#### DataGrid 행 간격 및 스타일 수정
+
+- **행 간격 문제 해결**: CellStyle의 `TextBlock.VerticalAlignment` attached property가 DataGrid 내부 레이아웃을 깨뜨리는 문제 수정 — CollateralPropertyView 패턴과 동일하게 각 컬럼에 ElementStyle/EditingElementStyle 직접 지정 방식으로 전환
+- **DataGrid 불필요 속성 제거**: 3개 DataGrid에서 `CanUserResizeRows`, `CanUserResizeColumns`, `FontSize`, `HorizontalAlignment`, `ColumnHeaderHeight` 등 CollateralPropertyView에 없는 속성 제거
+
+**변경된 파일**
+- `src/NPLogic.App/Views/SeniorRightsView.xaml` — 저장 버튼 추가, DataGrid 스타일 수정
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs` — 저장/로드/리셋 로직 추가
+- `src/NPLogic.App/App.xaml.cs` — DI 등록
+- `src/NPLogic.Core/Models/WageClaimItem.cs` — INotifyPropertyChanged 구현
+- `src/NPLogic.Data/Repositories/LeaseItemRepository.cs` (신규)
+- `src/NPLogic.Data/Repositories/WageClaimItemRepository.cs` (신규)
+
 ### 2026-02-12 (7)
 
 #### 선순위 탭 후속 구성 추가 (열람자료 2x4 + 신규 3개 테이블)

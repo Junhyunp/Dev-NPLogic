@@ -169,6 +169,8 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.ProgramSheetMappingRepository>();
             services.AddSingleton<Data.Repositories.RegistrySheetDataRepository>();
             services.AddSingleton<Data.Repositories.CreditGuaranteeRepository>();
+            services.AddSingleton<Data.Repositories.LeaseItemRepository>();
+            services.AddSingleton<Data.Repositories.WageClaimItemRepository>();
 
             // Upload Services (Singleton)
             services.AddSingleton<Services.DataDiskUploadService>();
@@ -259,7 +261,9 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.RightAnalysisRepository>(),
                     sp.GetRequiredService<Data.Repositories.ReferenceDataRepository>(),
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
-                    sp.GetRequiredService<VworldService>()));
+                    sp.GetRequiredService<VworldService>(),
+                    sp.GetRequiredService<Data.Repositories.LeaseItemRepository>(),
+                    sp.GetRequiredService<Data.Repositories.WageClaimItemRepository>()));
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.AuctionScheduleDetailViewModel>(sp =>
             {

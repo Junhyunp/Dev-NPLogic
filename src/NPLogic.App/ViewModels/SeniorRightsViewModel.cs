@@ -23,6 +23,8 @@ namespace NPLogic.ViewModels
         private readonly ReferenceDataRepository? _referenceDataRepository;
         private readonly BorrowerRepository? _borrowerRepository;
         private readonly NPLogic.Services.VworldService? _vworldService;
+        private readonly LeaseItemRepository? _leaseItemRepository;
+        private readonly WageClaimItemRepository? _wageClaimItemRepository;
         
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
@@ -655,7 +657,9 @@ namespace NPLogic.ViewModels
             RightAnalysisRepository rightAnalysisRepository,
             ReferenceDataRepository? referenceDataRepository = null,
             BorrowerRepository? borrowerRepository = null,
-            NPLogic.Services.VworldService? vworldService = null)
+            NPLogic.Services.VworldService? vworldService = null,
+            LeaseItemRepository? leaseItemRepository = null,
+            WageClaimItemRepository? wageClaimItemRepository = null)
         {
             _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
@@ -663,6 +667,8 @@ namespace NPLogic.ViewModels
             _referenceDataRepository = referenceDataRepository;
             _borrowerRepository = borrowerRepository;
             _vworldService = vworldService;
+            _leaseItemRepository = leaseItemRepository;
+            _wageClaimItemRepository = wageClaimItemRepository;
             InitializeEmptyRegistryMortgageRows();
         }
 
@@ -922,6 +928,38 @@ namespace NPLogic.ViewModels
                     ResetRightAnalysisFields();
                 }
 
+                // === 임대차/임금채권 테이블 데이터 로드 ===
+                try
+                {
+                    if (_leaseItemRepository != null)
+                    {
+                        var residentialItems = await _leaseItemRepository.GetByPropertyIdAsync(SelectedProperty.Id, "residential");
+                        ResidentialLeases.Clear();
+                        foreach (var item in residentialItems) ResidentialLeases.Add(item);
+                        HasResidentialLeaseTable = residentialItems.Count > 0;
+                        OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
+
+                        var commercialItems = await _leaseItemRepository.GetByPropertyIdAsync(SelectedProperty.Id, "commercial");
+                        CommercialLeases.Clear();
+                        foreach (var item in commercialItems) CommercialLeases.Add(item);
+                        HasCommercialLeaseTable = commercialItems.Count > 0;
+                        OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
+                    }
+
+                    if (_wageClaimItemRepository != null)
+                    {
+                        var wageItems = await _wageClaimItemRepository.GetByPropertyIdAsync(SelectedProperty.Id);
+                        WageClaims.Clear();
+                        foreach (var item in wageItems) WageClaims.Add(item);
+                        HasWageClaimTable = wageItems.Count > 0;
+                        OnPropertyChanged(nameof(WageClaimsTotalAmount));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[SeniorRights] 임대차/임금채권 로드 실패: {ex.Message}");
+                }
+
                 // === right_analysis 유무와 무관하게 외부 데이터 로드 ===
                 // 주소지 일치여부: registry_basic_info에서 가져오기
                 try
@@ -1169,6 +1207,14 @@ namespace NPLogic.ViewModels
             IsAnalysisCompleted = false;
             AnalyzedAt = null;
             InitializeEmptyRegistryMortgageRows();
+
+            // 임대차/임금채권 테이블 리셋
+            ResidentialLeases.Clear();
+            HasResidentialLeaseTable = false;
+            CommercialLeases.Clear();
+            HasCommercialLeaseTable = false;
+            WageClaims.Clear();
+            HasWageClaimTable = false;
         }
 
         private async Task LoadRegistryMortgageRowsAsync(Guid propertyId)
@@ -2340,6 +2386,77 @@ namespace NPLogic.ViewModels
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입/임차 현황이 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
+            }
+        }
+
+        // ========== 임대차/임금채권 저장 Commands ==========
+
+        [RelayCommand]
+        private async Task SaveResidentialLeasesAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+            if (_leaseItemRepository == null) return;
+
+            try
+            {
+                await _leaseItemRepository.SaveAllAsync(
+                    SelectedProperty.Id, "residential", ResidentialLeases.ToList());
+                OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("주택임대차가 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task SaveCommercialLeasesAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+            if (_leaseItemRepository == null) return;
+
+            try
+            {
+                await _leaseItemRepository.SaveAllAsync(
+                    SelectedProperty.Id, "commercial", CommercialLeases.ToList());
+                OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("상가임대차가 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private async Task SaveWageClaimsAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+            if (_wageClaimItemRepository == null) return;
+
+            try
+            {
+                await _wageClaimItemRepository.SaveAllAsync(
+                    SelectedProperty.Id, WageClaims.ToList());
+                OnPropertyChanged(nameof(WageClaimsTotalAmount));
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("임금채권이 저장되었습니다.");
             }
             catch (Exception ex)
             {
