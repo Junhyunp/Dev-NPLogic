@@ -127,6 +127,9 @@ namespace NPLogic.Core.Models
         /// <summary>빈 행 여부 (UI 표시용, DB에 저장되지 않음)</summary>
         public bool IsEmptyRow { get; set; }
 
+        /// <summary>합계 행 여부 (UI 표시용, DB에 저장되지 않음)</summary>
+        public bool IsSummaryRow { get; set; }
+
         // ========== 체크박스 상태 ==========
 
         /// <summary>약정서 확인</summary>

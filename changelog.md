@@ -4,6 +4,32 @@
 
 ## [Unreleased]
 
+### 2026-02-15
+
+#### DD 임포트 누락 필드 수정 (채권일반정보)
+
+- **3개 코드 경로 필드 누락 수정**: DD 업로드 시 실제 사용되는 `ProgramManagementViewModel.MapRowToLoan`에 연체이자율, 채권액합계, 가지급금, 환산대출잔액, 미상환원금, 계좌일련번호 핸들러 추가. `DataDiskUploadService.MapRowToLoan`에 `loan_principal_balance` 추출 추가. `DataUploadViewModel`에 동일 필드 case 추가.
+- **"최초 대출원금" 공백 매칭 버그 수정**: SHB DD Excel 헤더 "최초 대출원금"에 공백이 포함되어 매핑 실패하던 문제 수정 — `ProgramManagementViewModel`에 공백 포함 조건 추가, `SheetMappingConfig`에 "최초 대출원금" 매핑 규칙 추가
+- **대출원금잔액 fallback**: `LoanPrincipalBalance`가 null일 때 `ConvertedLoanBalance` → `UnpaidPrincipal` 순서로 fallback (3개 코드 경로 모두)
+- **이자율 fallback**: 정상이자율만 있으면 연체이자율 = 정상 + 3%, 채권액합계 미입력 시 잔액+가지급금+미수이자로 자동 계산
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs` — MapRowToLoan 필드 핸들러 대폭 추가
+- `src/NPLogic.App/Services/DataDiskUploadService.cs` — loan_principal_balance 추출 및 fallback
+- `src/NPLogic.App/ViewModels/DataUploadViewModel.cs` — 누락 필드 case 추가 및 fallback
+- `src/NPLogic.App/Services/SheetMappingConfig.cs` — "최초 대출원금" 공백 변형 매핑 규칙 추가
+
+#### 채권정보 테이블 합계 행 개선
+
+- **합계 행을 DataGrid 내부로 이동**: 기존 DataGrid 아래 별도 패널 → DataGrid 마지막 행으로 변경하여 컬럼 너비 조정 시 자동 동기화
+- **합계 행 표시 컬럼 제한**: 계좌일련번호(A)에 "합계" 텍스트, 최초대출원금(F)·대출원금잔액(G)에만 합산값 표시, 나머지 컬럼은 숨김 처리
+- **합계 행 스타일**: BlueGray100 배경, Bold, 비활성(편집 불가). DataTrigger 기반 숨김 스타일 4종 정의
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — `LoansWithSummary` 프로퍼티 추가
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 합계 행 DataGrid 내부 이동, 숨김 스타일 적용
+- `src/NPLogic.Core/Models/Loan.cs` — `IsSummaryRow` 프로퍼티 추가
+
 ### 2026-02-14
 
 #### 선순위 항목 산정표 자동 판단 기능 구현

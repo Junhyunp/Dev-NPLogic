@@ -1111,6 +1111,9 @@ namespace NPLogic.ViewModels
                             case "normal_interest_rate":
                                 if (value is decimal rate) loan.NormalInterestRate = rate;
                                 break;
+                            case "overdue_interest_rate":
+                                if (value is decimal oRate) loan.OverdueInterestRate = oRate;
+                                break;
                             case "initial_loan_date":
                                 if (value is DateTime ild) loan.InitialLoanDate = ild;
                                 break;
@@ -1123,7 +1126,40 @@ namespace NPLogic.ViewModels
                             case "loan_principal_balance":
                                 if (value is decimal lpb) loan.LoanPrincipalBalance = lpb;
                                 break;
+                            case "converted_loan_balance":
+                                if (value is decimal clb) loan.ConvertedLoanBalance = clb;
+                                break;
+                            case "unpaid_principal":
+                                if (value is decimal up) loan.UnpaidPrincipal = up;
+                                break;
+                            case "advance_payment":
+                                if (value is decimal ap) loan.AdvancePayment = ap;
+                                break;
+                            case "accrued_interest":
+                                if (value is decimal ai) loan.AccruedInterest = ai;
+                                break;
+                            case "total_claim_amount":
+                                if (value is decimal tca) loan.TotalClaimAmount = tca;
+                                break;
                         }
+                    }
+
+                    // 이자율 fallback
+                    if (loan.NormalInterestRate.HasValue && !loan.OverdueInterestRate.HasValue)
+                        loan.OverdueInterestRate = loan.NormalInterestRate.Value + 0.03m;
+                    else if (loan.OverdueInterestRate.HasValue && !loan.NormalInterestRate.HasValue)
+                        loan.NormalInterestRate = Math.Max(0, loan.OverdueInterestRate.Value - 0.03m);
+
+                    // 대출원금잔액 fallback
+                    if (!loan.LoanPrincipalBalance.HasValue)
+                        loan.LoanPrincipalBalance = loan.ConvertedLoanBalance ?? loan.UnpaidPrincipal;
+
+                    // 채권액 합계 fallback
+                    if (!loan.TotalClaimAmount.HasValue)
+                    {
+                        var balanceForCalc = loan.ConvertedLoanBalance ?? loan.UnpaidPrincipal ?? loan.LoanPrincipalBalance ?? 0;
+                        var total = balanceForCalc + loan.AdvancePayment + loan.AccruedInterest;
+                        if (total > 0) loan.TotalClaimAmount = total;
                     }
 
                     if (!string.IsNullOrEmpty(loan.AccountSerial))

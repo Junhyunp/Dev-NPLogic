@@ -35,6 +35,29 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private Loan? _selectedLoan;
 
+        /// <summary>
+        /// 합계 행 포함 대출 목록 (BondInfoSection DataGrid 바인딩용)
+        /// </summary>
+        public ObservableCollection<Loan> LoansWithSummary
+        {
+            get
+            {
+                var result = new ObservableCollection<Loan>(Loans.Where(l => !l.IsSummaryRow));
+                var realLoans = result.Where(l => !l.IsEmptyRow).ToList();
+                if (realLoans.Count > 0)
+                {
+                    result.Add(new Loan
+                    {
+                        IsSummaryRow = true,
+                        AccountSerial = "합계",
+                        InitialLoanAmount = realLoans.Sum(l => l.InitialLoanAmount ?? 0),
+                        LoanPrincipalBalance = realLoans.Sum(l => l.LoanPrincipalBalance ?? 0),
+                    });
+                }
+                return result;
+            }
+        }
+
         // ========== 차주 데이터 ==========
 
         [ObservableProperty]
@@ -286,6 +309,8 @@ namespace NPLogic.ViewModels
                 EnsureEmptyRowIfNeeded();
 
                 Statistics = await _loanRepository.GetStatisticsByBorrowerIdAsync(SelectedBorrower.Id);
+
+                OnPropertyChanged(nameof(LoansWithSummary));
             }
             catch (Exception ex)
             {

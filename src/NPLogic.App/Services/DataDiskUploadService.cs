@@ -1130,6 +1130,7 @@ namespace NPLogic.Services
             var overdueRate = GetMappedValue<decimal?>(row, "overdue_interest_rate", columnMappings);
             var convertedLoanBalance = GetMappedValue<decimal?>(row, "converted_loan_balance", columnMappings);
             var unpaidPrincipal = GetMappedValue<decimal?>(row, "unpaid_principal", columnMappings);
+            var loanPrincipalBalance = GetMappedValue<decimal?>(row, "loan_principal_balance", columnMappings);
             var advancePayment = GetMappedValue<decimal?>(row, "advance_payment", columnMappings) ?? 0;
             var accruedInterest = GetMappedValue<decimal?>(row, "accrued_interest", columnMappings) ?? 0;
             var totalClaimAmount = GetMappedValue<decimal?>(row, "total_claim_amount", columnMappings);
@@ -1155,10 +1156,10 @@ namespace NPLogic.Services
                 normalRate = overdueRate.Value - 0.03m;
             }
 
-            // [규칙4] 채권액 합계 없으면 -> 환산된 대출잔액(또는 미상환원금잔액) + 가지급금 + 미수이자
+            // [규칙4] 채권액 합계 없으면 -> 환산된 대출잔액(또는 미상환원금잔액 또는 대출원금잔액) + 가지급금 + 미수이자
             if (!totalClaimAmount.HasValue)
             {
-                var balanceForCalc = convertedLoanBalance ?? unpaidPrincipal ?? 0;
+                var balanceForCalc = convertedLoanBalance ?? unpaidPrincipal ?? loanPrincipalBalance ?? 0;
                 totalClaimAmount = balanceForCalc + advancePayment + accruedInterest;
             }
 
@@ -1177,6 +1178,7 @@ namespace NPLogic.Services
                 InitialLoanDate = GetMappedValue<DateTime?>(row, "initial_loan_date", columnMappings),
                 LastInterestDate = GetMappedValue<DateTime?>(row, "last_interest_date", columnMappings),
                 InitialLoanAmount = GetMappedValue<decimal?>(row, "initial_loan_amount", columnMappings),
+                LoanPrincipalBalance = loanPrincipalBalance ?? convertedLoanBalance ?? unpaidPrincipal,
                 ConvertedLoanBalance = convertedLoanBalance,
                 UnpaidPrincipal = unpaidPrincipal,
                 AdvancePayment = advancePayment,

@@ -131,6 +131,7 @@ namespace NPLogic.Services
                 new("통화표시", "currency", false, ColumnDataType.String),
                 new("최초대출금액", "initial_loan_amount", false, ColumnDataType.Decimal),
                 new("최초대출원금", "initial_loan_amount", false, ColumnDataType.Decimal),
+                new("최초 대출원금", "initial_loan_amount", false, ColumnDataType.Decimal),
                 new("대출금잔액", "loan_principal_balance", false, ColumnDataType.Decimal),
                 new("대출원금잔액", "loan_principal_balance", false, ColumnDataType.Decimal),
                 new("환산된 대출잔액", "converted_loan_balance", false, ColumnDataType.Decimal),

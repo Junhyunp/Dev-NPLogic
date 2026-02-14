@@ -2668,8 +2668,8 @@ namespace NPLogic.ViewModels
 
                 if (value == null) continue;
 
-                // 대출일련번호
-                if (colName.Contains("대출일련번호"))
+                // 대출일련번호 / 계좌일련번호
+                if (colName.Contains("대출일련번호") || colName.Contains("계좌일련번호"))
                 {
                     loan.AccountSerial = value.ToString();
                 }
@@ -2683,8 +2683,14 @@ namespace NPLogic.ViewModels
                 {
                     loan.AccountNumber = value.ToString();
                 }
-                // 이자율
-                else if (colName.Contains("이자율"))
+                // 연체이자율 (cutoff, 연체 등) - 정상이자율보다 먼저 매칭
+                else if (colName.Contains("연체이자율") || colName.Contains("cutoff") || colName.Contains("cut off"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", "").Replace("%", ""), out var rate))
+                        loan.OverdueInterestRate = rate;
+                }
+                // 정상이자율 / 약정이자율 (연체 아닌 이자율)
+                else if (colName.Contains("이자율") || colName.Contains("이율"))
                 {
                     if (decimal.TryParse(value.ToString()?.Replace(",", "").Replace("%", ""), out var rate))
                         loan.NormalInterestRate = rate;
@@ -2701,17 +2707,41 @@ namespace NPLogic.ViewModels
                     if (DateTime.TryParse(value.ToString(), out var date))
                         loan.LastInterestDate = date;
                 }
-                // 최초대출금액
-                else if (colName.Contains("최초대출") && (colName.Contains("금액") || colName.Contains("원금")))
+                // 최초대출금액 (공백 포함 "최초 대출원금" 대응)
+                else if ((colName.Contains("최초대출") || colName.Contains("최초 대출")) && (colName.Contains("금액") || colName.Contains("원금")))
                 {
                     if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var amount))
                         loan.InitialLoanAmount = amount;
                 }
-                // 대출금잔액
+                // 환산된 대출잔액
+                else if (colName.Contains("환산") && colName.Contains("잔액"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var balance))
+                        loan.ConvertedLoanBalance = balance;
+                }
+                // 미상환원금잔액
+                else if (colName.Contains("미상환") && colName.Contains("원금"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var balance))
+                        loan.UnpaidPrincipal = balance;
+                }
+                // 대출금잔액 / 대출원금잔액
                 else if (colName.Contains("대출") && colName.Contains("잔액"))
                 {
                     if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var balance))
                         loan.LoanPrincipalBalance = balance;
+                }
+                // 가지급금
+                else if (colName.Contains("가지급금"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var amount))
+                        loan.AdvancePayment = amount;
+                }
+                // 채권액 합계
+                else if (colName.Contains("채권액") && colName.Contains("합계"))
+                {
+                    if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var amount))
+                        loan.TotalClaimAmount = amount;
                 }
                 // 미수이자
                 else if (colName.Contains("미수이자"))
@@ -2719,6 +2749,28 @@ namespace NPLogic.ViewModels
                     if (decimal.TryParse(value.ToString()?.Replace(",", ""), out var interest))
                         loan.AccruedInterest = interest;
                 }
+            }
+
+            // 이자율 fallback: 정상이자율만 있으면 연체 = 정상 + 3%
+            if (loan.NormalInterestRate.HasValue && !loan.OverdueInterestRate.HasValue)
+            {
+                loan.OverdueInterestRate = loan.NormalInterestRate.Value + 0.03m;
+            }
+            else if (loan.OverdueInterestRate.HasValue && !loan.NormalInterestRate.HasValue)
+            {
+                loan.NormalInterestRate = Math.Max(0, loan.OverdueInterestRate.Value - 0.03m);
+            }
+
+            // 대출원금잔액 fallback: 환산된 대출잔액 → 미상환원금잔액
+            if (!loan.LoanPrincipalBalance.HasValue)
+                loan.LoanPrincipalBalance = loan.ConvertedLoanBalance ?? loan.UnpaidPrincipal;
+
+            // 채권액 합계 fallback: 환산된 대출잔액(또는 미상환원금잔액) + 가지급금 + 미수이자
+            if (!loan.TotalClaimAmount.HasValue)
+            {
+                var balanceForCalc = loan.ConvertedLoanBalance ?? loan.UnpaidPrincipal ?? loan.LoanPrincipalBalance ?? 0;
+                var total = balanceForCalc + loan.AdvancePayment + loan.AccruedInterest;
+                if (total > 0) loan.TotalClaimAmount = total;
             }
 
             return loan;
