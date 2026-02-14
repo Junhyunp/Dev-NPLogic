@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+### 2026-02-14
+
+#### 선순위 탭 UI 개선 및 비즈니스 로직 문서화
+
+- **DataGrid 셀 편집 수정**: 주택임대차 DataGrid에서 일부 셀이 클릭 시 편집 모드에 진입하지 않는 문제 수정 — 3개 DataGrid(주택임대차, 상가임대차, 임금채권) 모두에 `PreviewMouseLeftButtonDown` 핸들러 추가하여 단일 클릭으로 즉시 편집 가능하도록 처리
+- **불필요 UI 섹션 삭제**: 선순위 요약(배당 시뮬레이션) 및 선순위 참고사항 섹션 삭제 (~195줄) — 임금채권이 최하단 섹션
+- **원청 선순위 근거 문구 전문 문서화**: `docs/5. BUSINESS_LOGIC.md` 1.5절에 원청 제공 60개 케이스별 상세추정 근거 문구 전문 기록 (주택류 R1~R18, 토지 L1~L4, 상가/공장 C1~C17, 임금채권 W1~W13, 당해세/조세 T1~T8)
+
+**변경된 파일**
+- `src/NPLogic.App/Views/SeniorRightsView.xaml` — 선순위 요약/참고사항 섹션 삭제
+- `src/NPLogic.App/Views/SeniorRightsView.xaml.cs` — 3개 DataGrid PreviewMouseLeftButtonDown 핸들러 추가
+- `docs/5. BUSINESS_LOGIC.md` — 케이스별 상세추정 근거 원문 추가, 업데이트일 갱신
+
 ### 2026-02-13
 
 #### 주택임대차/상가임대차/임금채권 DB 영속화 및 저장 버튼 구현
