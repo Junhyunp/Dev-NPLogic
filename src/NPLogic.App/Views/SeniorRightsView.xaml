@@ -1022,7 +1022,7 @@
                                     <TextBox Text="{Binding SeniorMortgageReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding SeniorMortgageReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding SeniorMortgageReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 2 -->
@@ -1036,7 +1036,7 @@
                                     <TextBox Text="{Binding LienReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding LienReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding LienReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 3 -->
@@ -1050,7 +1050,7 @@
                                     <TextBox Text="{Binding SmallDepositReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding SmallDepositReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding SmallDepositReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 4 -->
@@ -1064,7 +1064,7 @@
                                     <TextBox Text="{Binding LeaseDepositReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding LeaseDepositReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding LeaseDepositReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 5 -->
@@ -1078,7 +1078,7 @@
                                     <TextBox Text="{Binding WageClaimReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="5" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding WageClaimReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding WageClaimReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 6 -->
@@ -1092,7 +1092,7 @@
                                     <TextBox Text="{Binding CurrentTax, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="6" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding CurrentTaxReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding CurrentTaxReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 7 -->
@@ -1106,7 +1106,7 @@
                                     <TextBox Text="{Binding SeniorTaxClaimReflected, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" HorizontalContentAlignment="Right"/>
                                 </Border>
                                 <Border Grid.Row="7" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                    <TextBlock Text="{Binding SeniorTaxClaimReason}" Style="{StaticResource CellTextBlock}" TextWrapping="Wrap"/>
+                                    <TextBox Text="{Binding SeniorTaxClaimReason, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource InputTextBoxStyle}" TextWrapping="Wrap" AcceptsReturn="True"/>
                                 </Border>
 
                                 <!-- Row 8 -->
@@ -1125,6 +1125,19 @@
                                 <GridSplitter Grid.Column="0" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                                 <GridSplitter Grid.Column="1" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
                                 <GridSplitter Grid.Column="2" Grid.RowSpan="9" Width="5" HorizontalAlignment="Right" Background="Transparent" Cursor="SizeWE"/>
+                            </Grid>
+
+                            <!-- 자동 판단 버튼 -->
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="1"
+                                        Content="자동 판단"
+                                        Command="{Binding AutoJudgeCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"/>
                             </Grid>
 
                             <!-- 하단 2x4 표: 열람 자료 -->

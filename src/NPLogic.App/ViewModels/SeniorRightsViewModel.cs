@@ -8,6 +8,7 @@ using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
+using NPLogic.Core.Services;
 using NPLogic.Data.Repositories;
 
 namespace NPLogic.ViewModels
@@ -1610,6 +1611,93 @@ namespace NPLogic.ViewModels
             else
             {
                 ErrorMessage = "먼저 소액임차보증금을 조회해주세요.";
+            }
+        }
+
+        /// <summary>
+        /// 원청 매트릭스 기반 자동 판단 (반영금액 + 상세추정 근거 자동 채움)
+        /// </summary>
+        [RelayCommand]
+        private void AutoJudge()
+        {
+            if (SelectedProperty == null)
+            {
+                ErrorMessage = "물건을 선택하세요.";
+                return;
+            }
+
+            try
+            {
+                // 1. ViewModel → RightAnalysis 모델로 현재 조건 값 복사
+                var analysis = _currentRightAnalysis ?? new RightAnalysis
+                {
+                    Id = Guid.NewGuid(),
+                    PropertyId = SelectedProperty.Id
+                };
+
+                // DD 금액
+                analysis.SeniorMortgageDd = SeniorMortgageDd;
+                analysis.LienDd = LienDd;
+                analysis.SmallDepositDd = SmallDepositDd;
+                analysis.LeaseDepositDd = LeaseDepositDd;
+                analysis.WageClaimDd = WageClaimDd;
+                analysis.CurrentTaxDd = CurrentTaxDd;
+                analysis.SeniorTaxDd = SeniorTaxClaimDd;
+
+                // 판단 조건
+                analysis.AuctionStatus = AuctionStatus;
+                analysis.ClaimDeadlinePassed = ClaimDeadlinePassed;
+                analysis.SurveyReportSubmitted = SurveyReportSubmitted;
+                analysis.HasTenant = HasTenant;
+                analysis.TenantClaimSubmitted = TenantClaimSubmitted;
+                analysis.TenantDateBeforeMortgage = TenantDateBeforeMortgage;
+                analysis.HasTenantRegistry = HasTenantRegistry;
+                analysis.HasCommercialLease = HasCommercialLease;
+                analysis.AddressMatch = AddressMatch;
+                analysis.DebtorType = DebtorType;
+                analysis.HasWageClaim = HasWageClaim;
+                analysis.WageClaimSubmitted = WageClaimSubmitted;
+                analysis.WageClaimEstimatedSeizure = WageClaimEstimatedSeizure;
+                analysis.HasTaxClaim = HasTaxClaim;
+                analysis.HasSeniorTaxClaim = HasSeniorTaxClaim;
+                analysis.HousingOfficialPrice = HousingOfficialPrice;
+                analysis.InitialAppraisalValue = InitialAppraisalValue;
+
+                // 2. RuleEngine 호출
+                var ruleEngine = new RightAnalysisRuleEngine();
+                ruleEngine.ApplyRules(analysis, SelectedProperty);
+
+                // 3. RightAnalysis → ViewModel로 결과 복사 (반영금액 + Reason)
+                SeniorMortgageReflected = analysis.SeniorMortgageReflected;
+                SeniorMortgageReason = analysis.SeniorMortgageReason ?? "";
+
+                LienReflected = analysis.LienReflected;
+                LienReason = analysis.LienReason ?? "";
+
+                SmallDepositReflected = analysis.SmallDepositReflected;
+                SmallDepositReason = analysis.SmallDepositReason ?? "";
+
+                LeaseDepositReflected = analysis.LeaseDepositReflected;
+                LeaseDepositReason = analysis.LeaseDepositReason ?? "";
+
+                WageClaimReflected = analysis.WageClaimReflected;
+                WageClaimReason = analysis.WageClaimReason ?? "";
+
+                CurrentTax = analysis.CurrentTaxReflected;
+                CurrentTaxReason = analysis.CurrentTaxReason ?? "";
+
+                SeniorTaxClaimReflected = analysis.SeniorTaxReflected;
+                SeniorTaxClaimReason = analysis.SeniorTaxReason ?? "";
+
+                // 4. 합계는 [NotifyPropertyChangedFor] 로 자동 갱신됨
+
+                _currentRightAnalysis = analysis;
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("자동 판단이 완료되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"자동 판단 실패: {ex.Message}";
+                Debug.WriteLine($"[SeniorRights] AutoJudge error: {ex}");
             }
         }
 

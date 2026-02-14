@@ -6,6 +6,17 @@
 
 ### 2026-02-14
 
+#### 선순위 항목 산정표 자동 판단 기능 구현
+
+- **자동 판단 버튼 추가**: 선순위 항목 산정표에 "자동 판단" 버튼 추가 — 클릭 시 `RightAnalysisRuleEngine`(60개 케이스)을 호출하여 반영금액 7개 + 상세추정 근거 7개를 조건에 맞게 자동 채움
+- **상세추정 근거 편집 가능**: 산정표의 상세추정 근거 칼럼을 TextBlock→TextBox로 변경하여 자동 판단 후 유저가 직접 수정 가능
+- **RuleEngine 상가 케이스 보완**: 원청 매트릭스 대비 누락된 상가 주소 분기 추가 (C12~C13 주소불일치/일치, C16~C17 주소불일치/일치) — 총 43개 케이스로 원청 매트릭스 완전 일치
+
+**변경된 파일**
+- `src/NPLogic.Core/Services/RightAnalysisRuleEngine.cs` — 상가 C12~C17 주소 분기 추가
+- `src/NPLogic.App/ViewModels/SeniorRightsViewModel.cs` — AutoJudge() Command 추가
+- `src/NPLogic.App/Views/SeniorRightsView.xaml` — 자동 판단 버튼 추가, 상세추정 근거 칼럼 편집 가능
+
 #### 선순위 탭 UI 개선 및 비즈니스 로직 문서화
 
 - **DataGrid 셀 편집 수정**: 주택임대차 DataGrid에서 일부 셀이 클릭 시 편집 모드에 진입하지 않는 문제 수정 — 3개 DataGrid(주택임대차, 상가임대차, 임금채권) 모두에 `PreviewMouseLeftButtonDown` 핸들러 추가하여 단일 클릭으로 즉시 편집 가능하도록 처리

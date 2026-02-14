@@ -427,10 +427,20 @@ namespace NPLogic.Core.Services
                 }
                 else if (!hasSurvey && !hasCommercialLease)
                 {
-                    // 상가 특성상 보증금 없을 것으로 추정
-                    analysis.SmallDepositReflected = 0;
-                    analysis.SmallDepositCase = "CASE_C12";
-                    analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않았으며, 상가임대차열람서 제공되지 않음. 상가임대 특성상 선순위보증금 없을것으로 추정되어 미반영함.";
+                    if (!addressMatch)
+                    {
+                        // Case C12: 주소 불일치
+                        analysis.SmallDepositReflected = 0;
+                        analysis.SmallDepositCase = "CASE_C12";
+                        analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않았으며, 상가임대차열람서 제공되지 않음. 상가임대 특성상 선순위보증금 없을것으로 추정되어 미반영함.";
+                    }
+                    else
+                    {
+                        // Case C13: 주소 일치
+                        analysis.SmallDepositReflected = 0;
+                        analysis.SmallDepositCase = "CASE_C13";
+                        analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않았으며, 상가임대차열람서 제공되지 않음. 물건지주소지와 소유자주소지 일치하여 반영하지 않음.";
+                    }
                 }
             }
             // 경매미개시
@@ -438,21 +448,31 @@ namespace NPLogic.Core.Services
             {
                 if (hasCommercialLease && hasTenant)
                 {
+                    // Case C14
                     analysis.SmallDepositReflected = analysis.SmallDepositDd;
-                    analysis.SmallDepositCase = "CASE_C13";
+                    analysis.SmallDepositCase = "CASE_C14";
                     analysis.SmallDepositReason = "경매미개시 물건으로, 상가임대차열람서상 임차인 확인되어 소액보증금 추정 반영함.";
                 }
                 else if (hasCommercialLease && !hasTenant)
                 {
+                    // Case C15
                     analysis.SmallDepositReflected = 0;
-                    analysis.SmallDepositCase = "CASE_C14";
+                    analysis.SmallDepositCase = "CASE_C15";
                     analysis.SmallDepositReason = "경매미개시 물건으로, 상가임대차열람서상 임차인 확인되지 않아 미반영함.";
+                }
+                else if (!addressMatch)
+                {
+                    // Case C16: 주소 불일치
+                    analysis.SmallDepositReflected = 0;
+                    analysis.SmallDepositCase = "CASE_C16";
+                    analysis.SmallDepositReason = "경매미개시 물건으로 상가임대차열람서 제공되지 않음. 상가임대 특성상 선순위보증금은 없을것으로 예상되어 미반영함.";
                 }
                 else
                 {
+                    // Case C17: 주소 일치
                     analysis.SmallDepositReflected = 0;
-                    analysis.SmallDepositCase = "CASE_C15";
-                    analysis.SmallDepositReason = "경매미개시 물건으로 상가임대차열람서 제공되지 않음. 상가임대 특성상 선순위보증금은 없을것으로 예상되어 미반영함.";
+                    analysis.SmallDepositCase = "CASE_C17";
+                    analysis.SmallDepositReason = "경매미개시 물건으로 상가임대차열람서 제공되지 않음. 물건지주소지와 소유자주소지 일치하여 미반영함.";
                 }
             }
         }
