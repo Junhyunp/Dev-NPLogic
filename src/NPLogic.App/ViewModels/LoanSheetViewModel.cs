@@ -58,6 +58,39 @@ namespace NPLogic.ViewModels
             }
         }
 
+        /// <summary>
+        /// Loan Cap 1 대상 대출 (유효보증서 N + 기대위변제 N) + 합계 행
+        /// </summary>
+        public ObservableCollection<Loan> LoanCap1LoansWithSummary
+        {
+            get
+            {
+                var filtered = Loans
+                    .Where(l => !l.IsSummaryRow && !l.IsEmptyRow
+                                && !l.HasValidGuarantee && !l.HasPriorSubrogation)
+                    .ToList();
+
+                var result = new ObservableCollection<Loan>(filtered);
+
+                if (filtered.Count > 0)
+                {
+                    result.Add(new Loan
+                    {
+                        IsSummaryRow = true,
+                        AccountSerial = "합계",
+                        LoanPrincipalBalance = filtered.Sum(l => l.LoanPrincipalBalance ?? 0),
+                        AccruedInterest = filtered.Sum(l => l.AccruedInterest),
+                        OverdueInterest1 = filtered.Sum(l => l.OverdueInterest1 ?? 0),
+                        OverdueInterest2 = filtered.Sum(l => l.OverdueInterest2 ?? 0),
+                        LoanCap1 = filtered.Sum(l => l.LoanCap1 ?? 0),
+                        LoanCap2 = filtered.Sum(l => l.LoanCap2 ?? 0),
+                    });
+                }
+
+                return result;
+            }
+        }
+
         // ========== 차주 데이터 ==========
 
         [ObservableProperty]
@@ -85,6 +118,21 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private DateTime _scenario2Date = DateTime.Today.AddMonths(12);
+
+        /// <summary>
+        /// 시나리오 날짜 변경 시 Loan Cap 자동 재계산
+        /// </summary>
+        partial void OnCDateChanged(DateTime value) => RecalculateLoanCaps();
+        partial void OnScenario1DateChanged(DateTime value) => RecalculateLoanCaps();
+        partial void OnScenario2DateChanged(DateTime value) => RecalculateLoanCaps();
+
+        private void RecalculateLoanCaps()
+        {
+            if (Loans.Count == 0) return;
+            CalculateAllLoanCaps();
+            OnPropertyChanged(nameof(LoansWithSummary));
+            OnPropertyChanged(nameof(LoanCap1LoansWithSummary));
+        }
 
         // ========== 보증서 요약 데이터 ==========
 
@@ -311,6 +359,7 @@ namespace NPLogic.ViewModels
                 Statistics = await _loanRepository.GetStatisticsByBorrowerIdAsync(SelectedBorrower.Id);
 
                 OnPropertyChanged(nameof(LoansWithSummary));
+                OnPropertyChanged(nameof(LoanCap1LoansWithSummary));
             }
             catch (Exception ex)
             {
@@ -361,8 +410,8 @@ namespace NPLogic.ViewModels
             {
                 loan.ExpectedDividendDate1 = Scenario1Date;
                 loan.ExpectedDividendDate2 = Scenario2Date;
-                loan.CalculateScenario1();
-                loan.CalculateScenario2();
+                loan.CalculateScenario1(CDate);
+                loan.CalculateScenario2(CDate);
             }
         }
 
@@ -516,13 +565,15 @@ namespace NPLogic.ViewModels
                 {
                     loan.ExpectedDividendDate1 = Scenario1Date;
                     loan.ExpectedDividendDate2 = Scenario2Date;
-                    loan.CalculateScenario1();
-                    loan.CalculateScenario2();
+                    loan.CalculateScenario1(CDate);
+                    loan.CalculateScenario2(CDate);
                     await _loanRepository.UpdateAsync(loan);
                 }
 
                 UpdateSummaries();
                 OnPropertyChanged(nameof(Loans));
+                OnPropertyChanged(nameof(LoansWithSummary));
+                OnPropertyChanged(nameof(LoanCap1LoansWithSummary));
 
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess($"{Loans.Count}건의 Loan Cap이 재계산되었습니다.");
             }

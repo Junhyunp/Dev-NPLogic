@@ -1327,6 +1327,9 @@ namespace NPLogic.ViewModels
                     interimFailed = interimResult.Failed;
                 }
 
+                // 4. 보증서 → 대출 연계: HasValidGuarantee / HasMciGuarantee 자동 판정
+                await UpdateLoanGuaranteeFlagsAsync(savedProgram.Id);
+
                 // 완료 메시지
                 var message = $"프로그램이 등록되었습니다.\n";
                 if (totalCreated > 0 || totalUpdated > 0 || totalFailed > 0 || totalSkipped > 0)
@@ -3223,8 +3226,8 @@ namespace NPLogic.ViewModels
                 {
                     guarantee.GuaranteeNumber = value.ToString()?.Trim();
                 }
-                // 보증종류
-                else if (colName.Contains("보증종류") || colName.Contains("보증유형"))
+                // 보증종류 / 보증서종류
+                else if (colName.Contains("보증종류") || colName.Contains("보증서종류") || colName.Contains("보증유형"))
                 {
                     guarantee.GuaranteeType = value.ToString();
                 }
@@ -3254,6 +3257,62 @@ namespace NPLogic.ViewModels
             }
 
             return guarantee;
+        }
+
+        /// <summary>
+        /// DD 업로드 후 신용보증서(Sheet D) → 대출(loans)의 HasValidGuarantee / HasMciGuarantee 자동 판정
+        /// 계좌일련번호(AccountSerial)로 loan과 guarantee를 매칭
+        /// </summary>
+        private async Task UpdateLoanGuaranteeFlagsAsync(Guid programId)
+        {
+            try
+            {
+                // 프로그램의 차주 목록 조회
+                var borrowers = await _borrowerRepository.GetByProgramIdAsync(programId.ToString());
+                if (borrowers == null || borrowers.Count == 0) return;
+
+                int updated = 0;
+                foreach (var borrower in borrowers)
+                {
+                    var loans = await _loanRepository.GetByBorrowerIdAsync(borrower.Id);
+                    var guarantees = await _creditGuaranteeRepository.GetByBorrowerIdAsync(borrower.Id);
+
+                    if (loans.Count == 0) continue;
+
+                    foreach (var loan in loans)
+                    {
+                        // 계좌일련번호로 매칭
+                        var matchingGuarantees = guarantees
+                            .Where(g => !string.IsNullOrEmpty(g.AccountSerial) &&
+                                        g.AccountSerial.Trim() == loan.AccountSerial?.Trim())
+                            .ToList();
+
+                        bool hasValid = matchingGuarantees.Count > 0;
+                        // 보증서종류(guarantee_type)가 "MCI"이면 MCI보증
+                        bool hasMci = matchingGuarantees.Any(g =>
+                            string.Equals(g.GuaranteeType?.Trim(), "MCI", StringComparison.OrdinalIgnoreCase));
+
+                        // MCI채권번호가 대출에 직접 있는 경우도 체크
+                        if (!hasMci && !string.IsNullOrEmpty(loan.MciBondNumber))
+                            hasMci = true;
+
+                        if (loan.HasValidGuarantee != hasValid || loan.HasMciGuarantee != hasMci)
+                        {
+                            loan.HasValidGuarantee = hasValid;
+                            loan.HasMciGuarantee = hasMci;
+                            await _loanRepository.UpdateAsync(loan);
+                            updated++;
+                        }
+                    }
+                }
+
+                if (updated > 0)
+                    System.Diagnostics.Debug.WriteLine($"[UpdateLoanGuaranteeFlags] {updated}건 대출 보증 플래그 업데이트 완료");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[UpdateLoanGuaranteeFlags] 오류: {ex.Message}");
+            }
         }
 
         /// <summary>

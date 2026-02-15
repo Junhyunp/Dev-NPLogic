@@ -130,6 +130,11 @@ namespace NPLogic.Core.Models
         /// <summary>합계 행 여부 (UI 표시용, DB에 저장되지 않음)</summary>
         public bool IsSummaryRow { get; set; }
 
+        /// <summary>최초대출원금 ≠ 대출원금잔액 여부 (UI 표시용)</summary>
+        public bool HasDifferentPrincipal =>
+            InitialLoanAmount.HasValue && LoanPrincipalBalance.HasValue &&
+            InitialLoanAmount.Value != LoanPrincipalBalance.Value;
+
         // ========== 체크박스 상태 ==========
 
         /// <summary>약정서 확인</summary>
@@ -357,13 +362,15 @@ namespace NPLogic.Core.Models
         /// 연체이자 계산
         /// </summary>
         /// <param name="dividendDate">예상배당일</param>
+        /// <param name="fallbackStartDate">최종이수일이 없을 때 사용할 기준일 (CDate)</param>
         /// <returns>연체이자</returns>
-        public decimal CalculateOverdueInterest(DateTime dividendDate)
+        public decimal CalculateOverdueInterest(DateTime dividendDate, DateTime? fallbackStartDate = null)
         {
-            if (!LastInterestDate.HasValue || !OverdueInterestRate.HasValue || !LoanPrincipalBalance.HasValue)
+            var startDate = LastInterestDate ?? fallbackStartDate;
+            if (!startDate.HasValue || !OverdueInterestRate.HasValue || !LoanPrincipalBalance.HasValue)
                 return 0;
 
-            var days = (dividendDate - LastInterestDate.Value).Days;
+            var days = (dividendDate - startDate.Value).Days;
             if (days <= 0) return 0;
 
             return LoanPrincipalBalance.Value * OverdueInterestRate.Value * days / 365;
@@ -391,11 +398,12 @@ namespace NPLogic.Core.Models
         /// <summary>
         /// 시나리오 1 Loan Cap 계산 및 설정
         /// </summary>
-        public void CalculateScenario1()
+        /// <param name="fallbackStartDate">최종이수일 없을 때 기준일 (CDate)</param>
+        public void CalculateScenario1(DateTime? fallbackStartDate = null)
         {
             if (ExpectedDividendDate1.HasValue)
             {
-                OverdueInterest1 = CalculateOverdueInterest(ExpectedDividendDate1.Value);
+                OverdueInterest1 = CalculateOverdueInterest(ExpectedDividendDate1.Value, fallbackStartDate);
                 LoanCap1 = CalculateLoanCap(OverdueInterest1 ?? 0);
             }
         }
@@ -403,11 +411,12 @@ namespace NPLogic.Core.Models
         /// <summary>
         /// 시나리오 2 Loan Cap 계산 및 설정
         /// </summary>
-        public void CalculateScenario2()
+        /// <param name="fallbackStartDate">최종이수일 없을 때 기준일 (CDate)</param>
+        public void CalculateScenario2(DateTime? fallbackStartDate = null)
         {
             if (ExpectedDividendDate2.HasValue)
             {
-                OverdueInterest2 = CalculateOverdueInterest(ExpectedDividendDate2.Value);
+                OverdueInterest2 = CalculateOverdueInterest(ExpectedDividendDate2.Value, fallbackStartDate);
                 LoanCap2 = CalculateLoanCap(OverdueInterest2 ?? 0);
             }
         }

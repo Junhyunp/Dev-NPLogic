@@ -68,6 +68,7 @@
             </Style.Triggers>
         </Style>
         <Style x:Key="CheckBoxHideOnSummary" TargetType="CheckBox">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
                     <Setter Property="Visibility" Value="Hidden"/>
@@ -146,21 +147,35 @@
                     <DataGridTextColumn Header="최종이수일(K)" Binding="{Binding LastInterestDate, StringFormat=yyyy-MM-dd}" Width="85" ElementStyle="{StaticResource HideOnSummary}"/>
                     <DataGridTextColumn Header="정상이자율(L)" Binding="{Binding NormalInterestRate, StringFormat=P1}" Width="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>
                     <DataGridTextColumn Header="연체이자율(M)" Binding="{Binding OverdueInterestRate, StringFormat=P1}" Width="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="약정서확인" Binding="{Binding HasAgreementDoc, UpdateSourceTrigger=PropertyChanged}" Width="55" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="경매신청서" Binding="{Binding HasAuctionApplication, UpdateSourceTrigger=PropertyChanged}" Width="55" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="경매비용" Binding="{Binding HasAuctionCost, UpdateSourceTrigger=PropertyChanged}" Width="50" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="대위등기비용" Binding="{Binding HasSubrogationRegistrationCost, UpdateSourceTrigger=PropertyChanged}" Width="60" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="1순위피담보(N)" Binding="{Binding HasCollateralPriority1, UpdateSourceTrigger=PropertyChanged}" Width="65" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="2순위피담보(N2)" Binding="{Binding HasCollateralPriority2, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="3순위피담보(N3)" Binding="{Binding HasCollateralPriority3, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="유효보증서여부(O)" Binding="{Binding HasValidGuarantee, UpdateSourceTrigger=PropertyChanged}" Width="75" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="기대위변제(P)" Binding="{Binding HasPriorSubrogation, UpdateSourceTrigger=PropertyChanged}" Width="65" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="해지부보증여부(Q)" Binding="{Binding IsTerminatedGuarantee, UpdateSourceTrigger=PropertyChanged}" Width="75" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
-                    <DataGridCheckBoxColumn Header="MCI보증" Binding="{Binding HasMciGuarantee, UpdateSourceTrigger=PropertyChanged}" Width="50" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="약정서확인" Binding="{Binding HasAgreementDoc, UpdateSourceTrigger=PropertyChanged}" Width="55" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="경매신청서" Binding="{Binding HasAuctionApplication, UpdateSourceTrigger=PropertyChanged}" Width="55" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="경매비용" Binding="{Binding HasAuctionCost, UpdateSourceTrigger=PropertyChanged}" Width="50" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="대위등기비용" Binding="{Binding HasSubrogationRegistrationCost, UpdateSourceTrigger=PropertyChanged}" Width="60" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="1순위피담보(N)" Binding="{Binding HasCollateralPriority1, UpdateSourceTrigger=PropertyChanged}" Width="65" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="2순위피담보(N2)" Binding="{Binding HasCollateralPriority2, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="3순위피담보(N3)" Binding="{Binding HasCollateralPriority3, UpdateSourceTrigger=PropertyChanged}" Width="70" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="유효보증서여부(O)" Binding="{Binding HasValidGuarantee}" Width="75" IsReadOnly="True" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="기대위변제(P)" Binding="{Binding HasPriorSubrogation, UpdateSourceTrigger=PropertyChanged}" Width="65" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}">
+                        <DataGridCheckBoxColumn.CellStyle>
+                            <Style TargetType="DataGridCell" BasedOn="{StaticResource CellStyle}">
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding HasDifferentPrincipal}" Value="True"/>
+                                            <Condition Binding="{Binding IsSummaryRow}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Background" Value="#FFF3E0"/>
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridCheckBoxColumn.CellStyle>
+                    </DataGridCheckBoxColumn>
+                    <DataGridCheckBoxColumn Header="해지부보증여부(Q)" Binding="{Binding IsTerminatedGuarantee, UpdateSourceTrigger=PropertyChanged}" Width="75" ElementStyle="{StaticResource CheckBoxHideOnSummary}" EditingElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
+                    <DataGridCheckBoxColumn Header="MCI보증" Binding="{Binding HasMciGuarantee}" Width="50" IsReadOnly="True" ElementStyle="{StaticResource CheckBoxHideOnSummary}"/>
                     <DataGridTextColumn Header="원금상계(R)" Binding="{Binding PrincipalOffset, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
                     <DataGridTextColumn Header="원금회수(S)" Binding="{Binding PrincipalRecovery, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
                     <DataGridTextColumn Header="이자상계(T)" Binding="{Binding InterestOffset, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
-                    <DataGridTextColumn Header="이자회수(U)" Binding="{Binding InterestRecovery, StringFormat=N0}" Width="*" ElementStyle="{StaticResource AmountHideOnSummary}"/>
+                    <DataGridTextColumn Header="이자회수(U)" Binding="{Binding InterestRecovery, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
                 </DataGrid.Columns>
             </DataGrid>
 

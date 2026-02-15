@@ -6,6 +6,36 @@
 
 ### 2026-02-15
 
+#### 채권정보 체크박스 컬럼 동작 정의 + 보증서 연계
+
+- **유효보증서여부(O) / MCI보증**: DD 신용보증서(Sheet D) 데이터와 연계하여 자동 판정, IsReadOnly 설정
+- **기대위변제(P)**: 최초대출원금 ≠ 대출원금잔액 시 주황배경(#FFF3E0) 표시 (합계 행 제외, MultiDataTrigger)
+- **체크박스 가운데 정렬**: ElementStyle + EditingElementStyle 모두에 HorizontalAlignment="Center" 적용
+- **"보증서종류" 매칭 버그 수정**: SHB DD 컬럼명 "보증서종류"가 코드의 "보증종류" 매칭에 걸리지 않아 guarantee_type이 전부 null이던 문제 수정
+- **MCI 판정 로직 수정**: 보증기관 기준 → guarantee_type(보증서종류) == "MCI" 기준으로 변경
+- **UpdateLoanGuaranteeFlagsAsync 신규**: DD 전체 시트 처리 후 loans의 has_valid_guarantee/has_mci_guarantee 자동 갱신
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/ProgramManagementViewModel.cs` — 보증서종류 매칭 추가, UpdateLoanGuaranteeFlagsAsync, MCI 판정 로직 수정
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 체크박스 정렬, 읽기전용 설정, 주황배경 MultiDataTrigger
+- `src/NPLogic.Core/Models/Loan.cs` — HasDifferentPrincipal 계산 프로퍼티 추가
+
+#### Loan Cap 1 섹션 구현 + 연체이자 실시간 계산
+
+- **LoanCapSection 디자인 통일**: BondInfoSection과 동일한 스타일로 전면 리뉴얼 (네이비 헤더, BlueGray100 헤더 셀, CornerRadius 8, DataGrid 내부 합계 행)
+- **필터링**: 유효보증서=N, 기대위변제=N인 대출만 표시 (`LoanCap1LoansWithSummary`)
+- **컬럼 배경색**: 예상배당일(노랑), 연체이자(파랑), Loan Cap(초록), 전체 균등 너비(Width=*)
+- **연체이자 자동 계산**: 최종이수일 null 시 기준일(CDate)을 fallback으로 사용하여 연체이자 계산
+- **실시간 갱신**: 기준일/1안 배당일/2안 배당일 DatePicker 변경 시 자동 재계산 (OnCDateChanged, OnScenario1DateChanged, OnScenario2DateChanged)
+- **이자회수(U) 컬럼 너비 수정**: Width="*" → Width="85"로 변경하여 컬럼 헤더가 잘리지 않도록 수정
+
+**변경된 파일**
+- `src/NPLogic.App/Views/Loan/Sections/LoanCapSection.xaml` — BondInfoSection 스타일로 전면 리뉴얼
+- `src/NPLogic.App/Views/Loan/Sheets/BasicSheet.xaml` — LoanCapSection 독립 행 배치
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — LoanCap1LoansWithSummary, 날짜 변경 자동 재계산
+- `src/NPLogic.Core/Models/Loan.cs` — CalculateOverdueInterest fallbackStartDate 파라미터 추가
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 이자회수(U) 컬럼 너비 수정
+
 #### DD 임포트 누락 필드 수정 (채권일반정보)
 
 - **3개 코드 경로 필드 누락 수정**: DD 업로드 시 실제 사용되는 `ProgramManagementViewModel.MapRowToLoan`에 연체이자율, 채권액합계, 가지급금, 환산대출잔액, 미상환원금, 계좌일련번호 핸들러 추가. `DataDiskUploadService.MapRowToLoan`에 `loan_principal_balance` 추출 추가. `DataUploadViewModel`에 동일 필드 case 추가.
