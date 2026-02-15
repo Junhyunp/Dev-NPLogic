@@ -130,20 +130,7 @@
                     <DataGridTextColumn Header="대출원금잔액(G)" Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" Width="100" ElementStyle="{StaticResource AmountCellStyle}"/>
                     <DataGridTextColumn Header="가지급금(H)" Binding="{Binding AdvancePayment, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
                     <DataGridTextColumn Header="미수이자(I)" Binding="{Binding AccruedInterest, StringFormat=N0}" Width="85" ElementStyle="{StaticResource AmountHideOnSummary}"/>
-                    <DataGridTextColumn Header="채권액합계(J)" Binding="{Binding TotalClaimAmount, StringFormat=N0}" Width="100" IsReadOnly="True">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Right"/>
-                                <Setter Property="Padding" Value="4,0"/>
-                                <Setter Property="Background" Value="#C6EFCE"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="채권액합계(J)" Binding="{Binding TotalClaimAmount, StringFormat=N0}" Width="100" IsReadOnly="True" ElementStyle="{StaticResource AmountHideOnSummary}"/>
                     <DataGridTextColumn Header="최종이수일(K)" Binding="{Binding LastInterestDate, StringFormat=yyyy-MM-dd}" Width="85" ElementStyle="{StaticResource HideOnSummary}"/>
                     <DataGridTextColumn Header="정상이자율(L)" Binding="{Binding NormalInterestRate, StringFormat=P1}" Width="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>
                     <DataGridTextColumn Header="연체이자율(M)" Binding="{Binding OverdueInterestRate, StringFormat=P1}" Width="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>

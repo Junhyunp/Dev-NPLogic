@@ -6,6 +6,18 @@
 
 ### 2026-02-15
 
+#### Loan 탭 UI 정리: MCI 섹션 리뉴얼 + 이미지 영역 이동 + 데이터 셀 배경색 제거
+
+- **MCI 보증 섹션 디자인 통일**: 6개 분리 Grid → 1안/2안 각각 단일 Grid(2행×23열)로 통합, 서브헤더 배너(#E8EAF6, 네이비 텍스트) 추가, 헤더 셀 BlueGray100 통일
+- **MCI 섹션 정리**: 서브헤더 빨간 문구("N안 배당일에 MCI 회수 반영") 삭제, 산식 설명 행(DD SheetD 등) 삭제, Grid 3행→2행 축소
+- **Loan Cap 1 이미지 영역 이동**: DataGrid 우측 DockPanel → DataGrid 아래 2열 Grid (선순위 탭 경매사건검색 패턴)
+- **데이터 셀 배경색 전면 제거**: 채권정보(채권액합계 연두), Loan Cap 1(예상배당일 노랑, 연체이자 파랑, Loan Cap 초록), MCI 보증(예상배당일 노랑, 일수/유효담보가배당액/배당후 손실액 파랑, MCI 청구액 초록) — 모든 데이터 셀을 흰색 배경으로 통일
+
+**변경된 파일**
+- `src/NPLogic.App/Views/Loan/Sections/MciSection.xaml` — 서브헤더 + 단일 Grid 통합 + 산식 행 삭제 + 헤더/데이터 색상 정리
+- `src/NPLogic.App/Views/Loan/Sections/LoanCapSection.xaml` — 이미지 영역 아래 이동 + 특수 배경색 스타일 제거
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 채권액합계 인라인 스타일을 AmountHideOnSummary로 교체
+
 #### 채권정보 저장 버튼 + DB 컬럼 추가 + 이미지 영속화
 
 - **채권정보 저장 버튼**: BondInfoSection 우측 하단에 "저장" 버튼 추가 (SeniorRightsView 패턴, MaterialDesignRaisedButton)
