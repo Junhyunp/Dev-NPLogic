@@ -86,6 +86,14 @@ namespace NPLogic.Core.Models
         /// <summary>주소</summary>
         public string? Address { get; set; }
 
+        // ========== Loan 이미지 ==========
+
+        /// <summary>보증서 등 이미지 (Base64)</summary>
+        public string? GuaranteeImageBase64 { get; set; }
+
+        /// <summary>기타항목 및 전송 이미지 (Base64)</summary>
+        public string? OtherItemsImageBase64 { get; set; }
+
         // ========== 프로그램 연결 ==========
 
         /// <summary>프로그램 ID</summary>

@@ -517,6 +517,8 @@ namespace NPLogic.Data.Repositories
                 Phone = table.Phone,
                 Email = table.Email,
                 Address = table.Address,
+                GuaranteeImageBase64 = table.GuaranteeImageBase64,
+                OtherItemsImageBase64 = table.OtherItemsImageBase64,
                 ProgramId = table.ProgramId,
                 CreatedBy = table.CreatedBy,
                 CreatedAt = table.CreatedAt,
@@ -555,6 +557,8 @@ namespace NPLogic.Data.Repositories
                 Phone = borrower.Phone,
                 Email = borrower.Email,
                 Address = borrower.Address,
+                GuaranteeImageBase64 = borrower.GuaranteeImageBase64,
+                OtherItemsImageBase64 = borrower.OtherItemsImageBase64,
                 ProgramId = borrower.ProgramId,
                 CreatedBy = borrower.CreatedBy,
                 CreatedAt = borrower.CreatedAt,
@@ -673,6 +677,12 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("address")]
         public string? Address { get; set; }
+
+        [Postgrest.Attributes.Column("guarantee_image_base64")]
+        public string? GuaranteeImageBase64 { get; set; }
+
+        [Postgrest.Attributes.Column("other_items_image_base64")]
+        public string? OtherItemsImageBase64 { get; set; }
 
         [Postgrest.Attributes.Column("program_id")]
         public string? ProgramId { get; set; }

@@ -106,48 +106,142 @@
                 </StackPanel>
             </Border>
 
-            <!-- DataGrid -->
-            <DataGrid ItemsSource="{Binding LoanCap1LoansWithSummary}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      IsReadOnly="True"
-                      RowHeaderWidth="0"
-                      GridLinesVisibility="All"
-                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
-                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
-                      Background="White"
-                      BorderThickness="0"
-                      MinHeight="60"
-                      MaxHeight="250"
-                      HorizontalScrollBarVisibility="Auto"
-                      ColumnWidth="*"
-                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
-                      CellStyle="{StaticResource CellStyle}">
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
-                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="IsEnabled" Value="False"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.RowStyle>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="계좌일련번호(A)" Binding="{Binding AccountSerial}" Width="*" MinWidth="90"/>
-                    <DataGridTextColumn Header="대출원금잔액(G)" Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource AmountCellStyle}"/>
-                    <DataGridTextColumn Header="미수이자(I)" Binding="{Binding AccruedInterest, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
-                    <DataGridTextColumn Header="연체이자율(M)" Binding="{Binding OverdueInterestRate, StringFormat=P1}" Width="*" MinWidth="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>
-                    <DataGridTextColumn Header="1안 예상배당일(DD1)" Binding="{Binding ExpectedDividendDate1, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource YellowCenterStyle}"/>
-                    <DataGridTextColumn Header="1안 연체이자(V)" Binding="{Binding OverdueInterest1, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource BlueAmountStyle}"/>
-                    <DataGridTextColumn Header="2안 예상배당일(DD2)" Binding="{Binding ExpectedDividendDate2, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource YellowCenterStyle}"/>
-                    <DataGridTextColumn Header="2안 연체이자(W)" Binding="{Binding OverdueInterest2, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource BlueAmountStyle}"/>
-                    <DataGridTextColumn Header="1안 Loan Cap(LC1)" Binding="{Binding LoanCap1, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource GreenAmountStyle}"/>
-                    <DataGridTextColumn Header="2안 Loan Cap(LC2)" Binding="{Binding LoanCap2, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource GreenAmountStyle}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <!-- DataGrid + 이미지 영역 가로 배치 (DockPanel으로 빈 공간 제거) -->
+            <DockPanel LastChildFill="True">
+
+                <!-- 기타항목 및 전송 (DockPanel.Dock=Right, 우측 끝) -->
+                <Border DockPanel.Dock="Right" Width="150"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,0" Background="White">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="140" MinHeight="40"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!-- 헤더 -->
+                        <Border Grid.Row="0" Background="{StaticResource BlueGray100Brush}"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                                Padding="6,6">
+                            <TextBlock Text="기타항목 및 전송" FontWeight="SemiBold" FontSize="{StaticResource FontSizeTiny}"
+                                       HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </Border>
+                        <!-- 버튼 (좌측 상단) -->
+                        <Button Grid.Row="1" Content="이미지 붙여넣기"
+                                Command="{Binding PasteOtherItemsImageCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                HorizontalAlignment="Left" Margin="4,4,0,4"/>
+                        <!-- 이미지 (크기 조절 가능) -->
+                        <Image Grid.Row="2" Source="{Binding OtherItemsImage}"
+                               Stretch="Uniform" Margin="4,0"/>
+                        <!-- GridSplitter (이미지 크기 조절) -->
+                        <GridSplitter Grid.Row="3" HorizontalAlignment="Stretch"
+                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                      Cursor="SizeNS" Height="5"/>
+                        <!-- 이미지 정보 -->
+                        <TextBlock Grid.Row="4" Text="{Binding OtherItemsImageInfo}"
+                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                   TextWrapping="Wrap" Margin="4,2,4,4"/>
+                    </Grid>
+                </Border>
+
+                <!-- 보증서 등 (DockPanel.Dock=Right, 구분선 + 이미지) -->
+                <Border DockPanel.Dock="Right" Width="150"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="2,0,1,0" Background="White">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="140" MinHeight="40"/>
+                            <RowDefinition Height="5"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!-- 헤더 -->
+                        <Border Grid.Row="0" Background="{StaticResource BlueGray100Brush}"
+                                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                                Padding="6,6">
+                            <TextBlock Text="보증서 등" FontWeight="SemiBold" FontSize="{StaticResource FontSizeTiny}"
+                                       HorizontalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </Border>
+                        <!-- 버튼 (좌측 상단) -->
+                        <Button Grid.Row="1" Content="이미지 붙여넣기"
+                                Command="{Binding PasteGuaranteeImageCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                HorizontalAlignment="Left" Margin="4,4,0,4"/>
+                        <!-- 이미지 (크기 조절 가능) -->
+                        <Image Grid.Row="2" Source="{Binding GuaranteeImage}"
+                               Stretch="Uniform" Margin="4,0"/>
+                        <!-- GridSplitter (이미지 크기 조절) -->
+                        <GridSplitter Grid.Row="3" HorizontalAlignment="Stretch"
+                                      ResizeDirection="Rows" Background="#E0E0E0"
+                                      Cursor="SizeNS" Height="5"/>
+                        <!-- 이미지 정보 -->
+                        <TextBlock Grid.Row="4" Text="{Binding GuaranteeImageInfo}"
+                                   FontSize="{StaticResource FontSizeTiny}" Opacity="0.7"
+                                   TextWrapping="Wrap" Margin="4,2,4,4"/>
+                    </Grid>
+                </Border>
+
+                <!-- DataGrid (나머지 공간 채움) -->
+                <DataGrid ItemsSource="{Binding LoanCap1LoansWithSummary}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          RowHeaderWidth="0"
+                          GridLinesVisibility="All"
+                          HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                          VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                          Background="White"
+                          BorderThickness="0"
+                          MinHeight="60"
+                          MaxHeight="250"
+                          HorizontalScrollBarVisibility="Auto"
+                          ColumnWidth="*"
+                          ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                          CellStyle="{StaticResource CellStyle}">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="계좌일련번호(A)" Binding="{Binding AccountSerial}" Width="*" MinWidth="90"/>
+                        <DataGridTextColumn Header="대출원금잔액(G)" Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource AmountCellStyle}"/>
+                        <DataGridTextColumn Header="미수이자(I)" Binding="{Binding AccruedInterest, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                        <DataGridTextColumn Header="연체이자율(M)" Binding="{Binding OverdueInterestRate, StringFormat=P1}" Width="*" MinWidth="75" ElementStyle="{StaticResource CenterHideOnSummary}"/>
+                        <DataGridTextColumn Header="1안 예상배당일(DD1)" Binding="{Binding ExpectedDividendDate1, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource YellowCenterStyle}"/>
+                        <DataGridTextColumn Header="1안 연체이자(V)" Binding="{Binding OverdueInterest1, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource BlueAmountStyle}"/>
+                        <DataGridTextColumn Header="2안 예상배당일(DD2)" Binding="{Binding ExpectedDividendDate2, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource YellowCenterStyle}"/>
+                        <DataGridTextColumn Header="2안 연체이자(W)" Binding="{Binding OverdueInterest2, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource BlueAmountStyle}"/>
+                        <DataGridTextColumn Header="1안 Loan Cap(LC1)" Binding="{Binding LoanCap1, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource GreenAmountStyle}"/>
+                        <DataGridTextColumn Header="2안 Loan Cap(LC2)" Binding="{Binding LoanCap2, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource GreenAmountStyle}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+            </DockPanel>
+
+            <!-- 하단: 저장 버튼 (오른쪽) -->
+            <Grid Margin="0,8,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1" Content="저장"
+                        Command="{Binding SaveCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Padding="12,6"/>
+            </Grid>
+
         </StackPanel>
     </Border>
 </UserControl>

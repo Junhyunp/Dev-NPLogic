@@ -179,6 +179,17 @@
                 </DataGrid.Columns>
             </DataGrid>
 
+            <!-- 하단: 저장 버튼 (오른쪽) -->
+            <Grid Margin="0,8,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="1" Content="저장"
+                        Command="{Binding SaveCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Padding="12,6"/>
+            </Grid>
 
         </StackPanel>
     </Border>

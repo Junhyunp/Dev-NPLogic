@@ -440,6 +440,11 @@ namespace NPLogic.Data.Repositories
                 HasPriorSubrogation = table.HasPriorSubrogation,
                 IsTerminatedGuarantee = table.IsTerminatedGuarantee,
                 HasMciGuarantee = table.HasMciGuarantee,
+                HasAuctionApplication = table.HasAuctionApplication,
+                HasSubrogationRegistrationCost = table.HasSubrogationRegistrationCost,
+                HasCollateralPriority1 = table.HasCollateralPriority1,
+                HasCollateralPriority2 = table.HasCollateralPriority2,
+                HasCollateralPriority3 = table.HasCollateralPriority3,
                 PrincipalOffset = table.PrincipalOffset,
                 PrincipalRecovery = table.PrincipalRecovery,
                 InterestOffset = table.InterestOffset,
@@ -497,6 +502,11 @@ namespace NPLogic.Data.Repositories
                 HasPriorSubrogation = loan.HasPriorSubrogation,
                 IsTerminatedGuarantee = loan.IsTerminatedGuarantee,
                 HasMciGuarantee = loan.HasMciGuarantee,
+                HasAuctionApplication = loan.HasAuctionApplication,
+                HasSubrogationRegistrationCost = loan.HasSubrogationRegistrationCost,
+                HasCollateralPriority1 = loan.HasCollateralPriority1,
+                HasCollateralPriority2 = loan.HasCollateralPriority2,
+                HasCollateralPriority3 = loan.HasCollateralPriority3,
                 PrincipalOffset = loan.PrincipalOffset,
                 PrincipalRecovery = loan.PrincipalRecovery,
                 InterestOffset = loan.InterestOffset,
@@ -652,6 +662,21 @@ namespace NPLogic.Data.Repositories
 
         [Postgrest.Attributes.Column("has_mci_guarantee")]
         public bool HasMciGuarantee { get; set; }
+
+        [Postgrest.Attributes.Column("has_auction_application")]
+        public bool HasAuctionApplication { get; set; }
+
+        [Postgrest.Attributes.Column("has_subrogation_registration_cost")]
+        public bool HasSubrogationRegistrationCost { get; set; }
+
+        [Postgrest.Attributes.Column("has_collateral_priority_1")]
+        public bool HasCollateralPriority1 { get; set; }
+
+        [Postgrest.Attributes.Column("has_collateral_priority_2")]
+        public bool HasCollateralPriority2 { get; set; }
+
+        [Postgrest.Attributes.Column("has_collateral_priority_3")]
+        public bool HasCollateralPriority3 { get; set; }
 
         [Postgrest.Attributes.Column("principal_offset")]
         public decimal PrincipalOffset { get; set; }

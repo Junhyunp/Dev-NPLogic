@@ -358,6 +358,12 @@ namespace NPLogic.ViewModels
 
                 Statistics = await _loanRepository.GetStatisticsByBorrowerIdAsync(SelectedBorrower.Id);
 
+                // 차주에 저장된 이미지 로드
+                LoadImageFromBase64(SelectedBorrower.GuaranteeImageBase64,
+                    v => GuaranteeImage = v, v => GuaranteeImageInfo = v);
+                LoadImageFromBase64(SelectedBorrower.OtherItemsImageBase64,
+                    v => OtherItemsImage = v, v => OtherItemsImageInfo = v);
+
                 OnPropertyChanged(nameof(LoansWithSummary));
                 OnPropertyChanged(nameof(LoanCap1LoansWithSummary));
             }
@@ -603,6 +609,17 @@ namespace NPLogic.ViewModels
                     await _loanRepository.UpdateAsync(loan);
                 }
 
+                // 이미지를 차주에 저장
+                if (SelectedBorrower != null && SelectedBorrower.Id != Guid.Empty)
+                {
+                    SelectedBorrower.GuaranteeImageBase64 = ConvertImageToBase64(GuaranteeImage);
+                    SelectedBorrower.OtherItemsImageBase64 = ConvertImageToBase64(OtherItemsImage);
+                    SelectedBorrower.UpdatedAt = DateTime.UtcNow;
+                    await _borrowerRepository.UpdateAsync(SelectedBorrower);
+                }
+
+                OnPropertyChanged(nameof(LoansWithSummary));
+                OnPropertyChanged(nameof(LoanCap1LoansWithSummary));
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("저장되었습니다.");
             }
             catch (Exception ex)
@@ -796,6 +813,53 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 NPLogic.UI.Services.ToastService.Instance.ShowError($"이미지 선택 실패: {ex.Message}");
+            }
+        }
+
+        // ========== 이미지 변환 유틸 ==========
+
+        /// <summary>
+        /// BitmapSource → Base64 변환
+        /// </summary>
+        private static string? ConvertImageToBase64(ImageSource? image)
+        {
+            if (image is not BitmapSource bitmapSource) return null;
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
+            using var ms = new System.IO.MemoryStream();
+            encoder.Save(ms);
+            return Convert.ToBase64String(ms.ToArray());
+        }
+
+        /// <summary>
+        /// Base64 → BitmapImage 로드
+        /// </summary>
+        private static void LoadImageFromBase64(string? base64,
+            Action<ImageSource?> setImage, Action<string> setInfo)
+        {
+            if (string.IsNullOrEmpty(base64))
+            {
+                setImage(null);
+                setInfo("");
+                return;
+            }
+            try
+            {
+                var bytes = Convert.FromBase64String(base64);
+                using var ms = new System.IO.MemoryStream(bytes);
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = ms;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                setImage(bitmap);
+                setInfo("DB에서 로드됨");
+            }
+            catch
+            {
+                setImage(null);
+                setInfo("");
             }
         }
     }

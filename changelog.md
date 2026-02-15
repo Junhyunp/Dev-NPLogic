@@ -6,6 +6,24 @@
 
 ### 2026-02-15
 
+#### 채권정보 저장 버튼 + DB 컬럼 추가 + 이미지 영속화
+
+- **채권정보 저장 버튼**: BondInfoSection 우측 하단에 "저장" 버튼 추가 (SeniorRightsView 패턴, MaterialDesignRaisedButton)
+- **Loan Cap 1 저장 버튼**: LoanCapSection 우측 하단에도 동일 저장 버튼 추가
+- **DB 컬럼 5개 추가 (loans)**: `has_auction_application`, `has_subrogation_registration_cost`, `has_collateral_priority_1/2/3` — 체크박스 값 저장 가능
+- **이미지 DB 저장**: "보증서 등" / "기타항목 및 전송" 이미지를 차주(borrowers) 테이블에 Base64로 저장/로드 (`guarantee_image_base64`, `other_items_image_base64`)
+- **이미지 영역 디자인 통일**: 당사자내역 패턴 적용 (SecondaryButton 좌측 상단, GridSplitter 이미지 크기 조절)
+- **이미지 영역 빈 공간 제거**: Grid → DockPanel 레이아웃 변경으로 LC2 열과 보증서 등 사이 빈 공간 제거
+
+**변경된 파일**
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 저장 버튼 추가
+- `src/NPLogic.App/Views/Loan/Sections/LoanCapSection.xaml` — DockPanel 레이아웃, 당사자내역 스타일 이미지 패널, 저장 버튼
+- `src/NPLogic.App/Views/Loan/Sheets/BasicSheet.xaml` — 이미지 영역을 LoanCapSection 내부로 이동
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — SaveAsync 이미지 저장, LoadLoansAsync 이미지 로드, ConvertImageToBase64/LoadImageFromBase64 유틸
+- `src/NPLogic.Core/Models/Borrower.cs` — GuaranteeImageBase64, OtherItemsImageBase64 프로퍼티
+- `src/NPLogic.Data/Repositories/BorrowerRepository.cs` — BorrowerTable + 매핑 2개 필드 추가
+- `src/NPLogic.Data/Repositories/LoanRepository.cs` — LoanTable + 매핑 5개 필드 추가
+
 #### 채권정보 체크박스 컬럼 동작 정의 + 보증서 연계
 
 - **유효보증서여부(O) / MCI보증**: DD 신용보증서(Sheet D) 데이터와 연계하여 자동 판정, IsReadOnly 설정
