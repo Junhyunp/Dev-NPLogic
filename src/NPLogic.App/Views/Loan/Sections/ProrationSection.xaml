@@ -23,6 +23,13 @@
             <Setter Property="BorderBrush" Value="{StaticResource TableBorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,1"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" TextAlignment="Center"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         
         <Style x:Key="CellStyle" TargetType="DataGridCell">

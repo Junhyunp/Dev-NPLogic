@@ -261,7 +261,7 @@
         </Grid>
 
         <!-- 메인 컨텐츠 -->
-        <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="12">
+        <Border Grid.Row="1" Background="{StaticResource SurfaceColor}" CornerRadius="8" Padding="0">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
 

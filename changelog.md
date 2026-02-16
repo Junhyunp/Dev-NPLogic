@@ -6,6 +6,26 @@
 
 ### 2026-02-16
 
+#### 보증서요약 디자인 통일 + 헤더 줄바꿈 + 섹션 너비 통일 + JWT 갱신 안정화
+
+- **보증서요약 섹션 디자인 통일**: 일반 탭(BondInfoSection/LoanCapSection) 패턴에 맞춰 리뉴얼 — PrimaryBrush 헤더, BlueGray100 셀헤더, CornerRadius 8 카드, 배경색 제거
+- **보증서요약 누락 컬럼 4개 추가**: 1안 예상배당일(DD1), 1안 연체이자(AI), 2안 예상배당일(DD2), 2안 연체이자(AJ)
+- **보증서요약 이미지 영역 이동**: GuaranteeSheet 독립 이미지 영역 → GuaranteeSummarySection 내부 2열 Grid (LoanCapSection 패턴 동일)
+- **컬럼 헤더 TextWrapping 적용**: BondInfoSection, LoanCapSection, GuaranteeSummarySection, ProrationSection — 긴 헤더 텍스트 자동 줄바꿈
+- **섹션 너비 통일**: Loan 탭 SheetContentGrid Margin 12→0, 선순위 메인 Border Padding 12→0 — 담보물건 탭 기준(12px)으로 통일
+- **JWT 갱신 안정화**: 절전/잠금 복귀 시 즉시 토큰 갱신(SystemEvents.PowerModeChanged/SessionSwitch), 5분 공백 감지 강제 갱신, SemaphoreSlim 동시 갱신 방지
+
+**변경된 파일**
+- `src/NPLogic.App/Views/Loan/Sections/GuaranteeSummarySection.xaml` — 디자인 통일 + 컬럼 추가 + 이미지 영역
+- `src/NPLogic.App/Views/Loan/Sheets/GuaranteeSheet.xaml` — 기존 이미지 영역 제거
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — GuaranteeSummaryItem 프로퍼티 추가 + 매핑
+- `src/NPLogic.App/Views/Loan/Sections/BondInfoSection.xaml` — 헤더 TextWrapping
+- `src/NPLogic.App/Views/Loan/Sections/LoanCapSection.xaml` — 헤더 TextWrapping
+- `src/NPLogic.App/Views/Loan/Sections/ProrationSection.xaml` — 헤더 TextWrapping
+- `src/NPLogic.App/Views/Loan/LoanSheetView.xaml` — 컨텐츠 Margin 제거
+- `src/NPLogic.App/Views/SeniorRightsView.xaml` — 메인 Border Padding 제거
+- `src/NPLogic.Data/Services/SupabaseService.cs` — 절전/잠금 복귀 토큰 갱신 + 동시 갱신 방지
+
 #### MCI 산식 구현 + 사이드바 무한스크롤 + Loan 탭 버튼 정리
 
 - **MCI 컬럼 축소 (23→18열)**: 채권잔액, 인수대상원금-MCI가입잔액, (미수이자+연체이자), 유효담보가의 20%, 유효담보가+이자(Max 한도) 5개 중간계산 컬럼 제거

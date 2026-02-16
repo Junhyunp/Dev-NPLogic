@@ -548,7 +548,13 @@ namespace NPLogic.ViewModels
                     OverdueInterestRate = loan.OverdueInterestRate ?? 0,
                     NormalInterestRate = loan.NormalInterestRate ?? 0,
                     SubrogationPrincipal = loan.SubrogationAmount ?? 0,
-                    SubrogationAmount = loan.SubrogationAmountCalculation ?? 0
+                    SubrogationAmount = loan.SubrogationAmountCalculation ?? 0,
+                    ExpectedDividendDate1 = loan.ExpectedDividendDate1,
+                    OverdueInterest1 = loan.OverdueInterest1 ?? 0,
+                    ExpectedDividendDate2 = loan.ExpectedDividendDate2,
+                    OverdueInterest2 = loan.OverdueInterest2 ?? 0,
+                    GuaranteeLoanCap1 = loan.GuaranteeLoanCap1 ?? 0,
+                    GuaranteeLoanCap2 = loan.GuaranteeLoanCap2 ?? 0
                 };
 
                 GuaranteeSummaryItems.Add(item);
@@ -982,7 +988,9 @@ namespace NPLogic.ViewModels
         public decimal AgreedInterest { get; set; }
         public decimal SubrogationAmount { get; set; }
         public decimal InterestDifference { get; set; }
+        public DateTime? ExpectedDividendDate1 { get; set; }
         public decimal OverdueInterest1 { get; set; }
+        public DateTime? ExpectedDividendDate2 { get; set; }
         public decimal OverdueInterest2 { get; set; }
         public decimal GuaranteeLoanCap1 { get; set; }
         public decimal GuaranteeLoanCap2 { get; set; }

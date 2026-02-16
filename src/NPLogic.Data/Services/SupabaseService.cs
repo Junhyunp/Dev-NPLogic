@@ -1,5 +1,7 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using NPLogic.Data.Exceptions;
 
 namespace NPLogic.Data.Services
@@ -14,6 +16,12 @@ namespace NPLogic.Data.Services
         private readonly string _supabaseKey;
         private System.Timers.Timer? _refreshTimer;
         private readonly SessionStorageService _sessionStorage;
+
+        // 동시 갱신 방지용 세마포어
+        private readonly SemaphoreSlim _refreshLock = new(1, 1);
+
+        // 마지막 세션 체크 시각 (절전 감지용)
+        private DateTime _lastSessionCheckTime = DateTime.UtcNow;
 
         public SupabaseService(string supabaseUrl, string supabaseKey)
         {
@@ -51,6 +59,76 @@ namespace NPLogic.Data.Services
 
             // 토큰 자동 갱신 타이머 시작 (50분마다 - JWT는 보통 1시간 만료)
             StartRefreshTimer();
+
+            // 절전/잠금 복귀 이벤트 등록
+            RegisterSystemEvents();
+        }
+
+        /// <summary>
+        /// 절전/잠금 복귀 시 토큰 자동 갱신을 위한 시스템 이벤트 등록
+        /// </summary>
+        private void RegisterSystemEvents()
+        {
+            try
+            {
+                SystemEvents.PowerModeChanged += OnPowerModeChanged;
+                SystemEvents.SessionSwitch += OnSessionSwitch;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SupabaseService] Failed to register system events: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 절전 모드 복귀 시 토큰 갱신
+        /// </summary>
+        private async void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == PowerModes.Resume)
+            {
+                System.Diagnostics.Debug.WriteLine("[SupabaseService] System resumed from sleep, refreshing token...");
+                await ForceRefreshAsync();
+            }
+        }
+
+        /// <summary>
+        /// 화면 잠금 해제 시 토큰 갱신
+        /// </summary>
+        private async void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            if (e.Reason == SessionSwitchReason.SessionUnlock)
+            {
+                System.Diagnostics.Debug.WriteLine("[SupabaseService] Session unlocked, refreshing token...");
+                await ForceRefreshAsync();
+            }
+        }
+
+        /// <summary>
+        /// 강제 토큰 갱신 (절전/잠금 복귀 시 호출)
+        /// </summary>
+        private async Task ForceRefreshAsync()
+        {
+            try
+            {
+                if (_client?.Auth.CurrentSession == null)
+                    return;
+
+                var refreshed = await TryRefreshTokenAsync();
+                if (refreshed)
+                {
+                    _lastSessionCheckTime = DateTime.UtcNow;
+                    System.Diagnostics.Debug.WriteLine("[SupabaseService] Token refreshed after system resume/unlock");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[SupabaseService] Token refresh failed after system resume/unlock");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SupabaseService] ForceRefresh error: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -69,10 +147,17 @@ namespace NPLogic.Data.Services
         }
 
         /// <summary>
-        /// 토큰 수동 갱신 시도
+        /// 토큰 수동 갱신 시도 (동시 호출 방지)
         /// </summary>
         public async Task<bool> TryRefreshTokenAsync()
         {
+            // 동시 갱신 방지: 이미 갱신 중이면 대기 후 성공 반환
+            if (!await _refreshLock.WaitAsync(TimeSpan.FromSeconds(10)))
+            {
+                System.Diagnostics.Debug.WriteLine("[SupabaseService] Refresh already in progress, skipping");
+                return true; // 다른 스레드가 갱신 중이므로 성공으로 간주
+            }
+
             try
             {
                 if (_client?.Auth.CurrentSession == null)
@@ -86,7 +171,7 @@ namespace NPLogic.Data.Services
                     {
                         var expiresAt = DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds();
                         var email = _client.Auth.CurrentUser?.Email;
-                        
+
                         if (email != null)
                         {
                             _sessionStorage.SaveSession(
@@ -97,6 +182,8 @@ namespace NPLogic.Data.Services
                             );
                         }
                     }
+
+                    _lastSessionCheckTime = DateTime.UtcNow;
                     System.Diagnostics.Debug.WriteLine("Token manually refreshed successfully");
                     return true;
                 }
@@ -106,6 +193,10 @@ namespace NPLogic.Data.Services
             {
                 System.Diagnostics.Debug.WriteLine($"Token refresh failed: {ex.Message}");
                 return false;
+            }
+            finally
+            {
+                _refreshLock.Release();
             }
         }
 
@@ -120,6 +211,24 @@ namespace NPLogic.Data.Services
             {
                 if (throwOnFailure)
                     throw new SessionExpiredException("로그인 세션이 없습니다. 다시 로그인해주세요.");
+                return;
+            }
+
+            // 절전/잠금 감지: 마지막 체크로부터 5분 이상 경과 시 강제 갱신
+            // (타이머가 절전 중 밀린 경우를 보완)
+            var timeSinceLastCheck = DateTime.UtcNow - _lastSessionCheckTime;
+            if (timeSinceLastCheck.TotalMinutes > 5)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SupabaseService] Gap detected ({timeSinceLastCheck.TotalMinutes:F1} min since last check), force refreshing...");
+
+                var refreshed = await TryRefreshTokenAsync();
+                _lastSessionCheckTime = DateTime.UtcNow;
+
+                if (!refreshed && throwOnFailure)
+                {
+                    _sessionStorage.ClearSession();
+                    throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
+                }
                 return;
             }
 
@@ -151,9 +260,9 @@ namespace NPLogic.Data.Services
             if (timeUntilExpiry.TotalMinutes < refreshThresholdMinutes)
             {
                 System.Diagnostics.Debug.WriteLine($"Session expiring soon ({timeUntilExpiry.TotalMinutes:F1} min), refreshing...");
-                
+
                 var refreshed = await TryRefreshTokenAsync();
-                
+
                 if (!refreshed && throwOnFailure)
                 {
                     // 갱신 실패 시 세션 정보 삭제
@@ -161,6 +270,8 @@ namespace NPLogic.Data.Services
                     throw new SessionExpiredException("세션이 만료되었습니다. 다시 로그인해주세요.");
                 }
             }
+
+            _lastSessionCheckTime = DateTime.UtcNow;
         }
 
         /// <summary>
@@ -242,4 +353,3 @@ namespace NPLogic.Data.Services
         }
     }
 }
-
