@@ -24,6 +24,7 @@ namespace NPLogic.ViewModels
     {
         private readonly LoanRepository _loanRepository;
         private readonly BorrowerRepository _borrowerRepository;
+        private readonly CreditGuaranteeRepository _creditGuaranteeRepository;
         private readonly AuthService _authService;
         private readonly ExcelService _excelService;
 
@@ -192,11 +193,13 @@ namespace NPLogic.ViewModels
         public LoanSheetViewModel(
             LoanRepository loanRepository,
             BorrowerRepository borrowerRepository,
+            CreditGuaranteeRepository creditGuaranteeRepository,
             AuthService authService,
             ExcelService excelService)
         {
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
+            _creditGuaranteeRepository = creditGuaranteeRepository ?? throw new ArgumentNullException(nameof(creditGuaranteeRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
 
@@ -380,6 +383,7 @@ namespace NPLogic.ViewModels
         partial void OnSelectedBorrowerChanged(Borrower? value)
         {
             SelectedLoan = null;
+            _mciGuarantees.Clear();  // 차주 변경 시 MCI 보증서 캐시 초기화
             _ = LoadLoansAsync();
         }
 
@@ -419,6 +423,99 @@ namespace NPLogic.ViewModels
                 loan.CalculateScenario1(CDate);
                 loan.CalculateScenario2(CDate);
             }
+
+            _ = UpdateMciDataAsync();
+        }
+
+        // MCI 보증서 캐시 (차주별, 대출 로드 시 갱신)
+        private List<CreditGuarantee> _mciGuarantees = new();
+
+        /// <summary>
+        /// MCI 보증 데이터 갱신 — credit_guarantees에서 MCI 보증서 조회 + loans 필드 결합
+        /// </summary>
+        private async Task UpdateMciDataAsync()
+        {
+            var mciLoan = Loans.FirstOrDefault(l => l.HasMciGuarantee);
+            if (mciLoan == null)
+            {
+                MciData1 = new MciData();
+                MciData2 = new MciData();
+                return;
+            }
+
+            // 차주의 MCI 보증서 조회 (캐시가 비어있을 때만)
+            if (_mciGuarantees.Count == 0 && SelectedBorrower?.Id != null && SelectedBorrower.Id != Guid.Empty)
+            {
+                try
+                {
+                    var allGuarantees = await _creditGuaranteeRepository.GetByBorrowerIdAsync(SelectedBorrower.Id);
+                    _mciGuarantees = allGuarantees
+                        .Where(g => string.Equals(g.GuaranteeType?.Trim(), "MCI", StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[LoanSheetViewModel] MCI 보증서 조회 실패: {ex.Message}");
+                }
+            }
+
+            // 해당 대출의 MCI 보증서 매칭 (account_serial 기준)
+            var mciGuarantee = _mciGuarantees.FirstOrDefault(g => g.AccountSerial == mciLoan.AccountSerial);
+
+            void FillMciData(MciData data, DateTime scenarioDate, decimal overdueInterest, decimal loanCap)
+            {
+                // credit_guarantees에서: MCI최초가입금액, MCI가입잔액, 채권번호(보증서번호)
+                data.MciInitialAmount = mciGuarantee?.GuaranteeAmount ?? mciLoan.MciInitialAmount ?? 0;
+                data.MciBalance = mciGuarantee?.ConvertedGuaranteeBalance ?? mciLoan.MciBalance ?? 0;
+                data.BondNumber = mciGuarantee?.GuaranteeNumber ?? mciLoan.MciBondNumber;
+
+                // loans에서: 인수대상원금(대출원금잔액), 최종이수일, 정상이자율
+                data.TargetPrincipal = mciLoan.LoanPrincipalBalance ?? 0;
+                data.LastInterestDate = mciLoan.LastInterestDate;
+                data.NormalInterestRate = mciLoan.NormalInterestRate ?? 0;
+
+                // 시나리오 날짜
+                data.ExpectedDividendDate = scenarioDate;
+
+                // 일수 계산: 예상배당일 - 최종이수일
+                if (mciLoan.LastInterestDate.HasValue)
+                    data.Days = (int)(scenarioDate - mciLoan.LastInterestDate.Value).TotalDays;
+                else
+                    data.Days = 0;
+
+                // 유효담보가 = 인수대상원금 - MCI가입잔액
+                data.ValidCollateralValue = data.TargetPrincipal - data.MciBalance;
+
+                // 유효담보가의 이자 = (미수이자 + 연체이자) / 인수대상원금 * 유효담보가
+                if (data.TargetPrincipal != 0)
+                    data.ValidCollateralInterest = (mciLoan.AccruedInterest + overdueInterest) / data.TargetPrincipal * data.ValidCollateralValue;
+                else
+                    data.ValidCollateralInterest = 0;
+
+                // 유효담보가의 이자한도 = 유효담보가 * 20%
+                data.ValidCollateralInterestLimit = data.ValidCollateralValue * 0.2m;
+
+                // 유효담보가 배당액 = 유효담보가 + 유효담보가의 이자
+                data.ValidCollateralDividend = data.ValidCollateralValue + data.ValidCollateralInterest;
+
+                // MCI 정상이자 = 유효담보가 * 일수 * 정상이자율 / 365
+                data.MciNormalInterest = data.ValidCollateralValue * data.Days * data.NormalInterestRate / 365m;
+
+                // 배당으로 충당되지 않은 MCI 잔액 = max(MCI가입잔액 + MCI정상이자 - (예상배당금 - 유효담보가 배당액), 0)
+                data.RemainingMciBalance = Math.Max(data.MciBalance + data.MciNormalInterest - (data.ExpectedDividend - data.ValidCollateralDividend), 0);
+
+                // 청구가능금액 = min(MCI최초가입금액, 배당으로 충당되지 않은 MCI 잔액)
+                data.ClaimableAmount = Math.Min(data.MciInitialAmount, data.RemainingMciBalance);
+
+                // 배당후 손실액 = 예상배당금 - Loan Cap
+                data.PostDividendLoss = data.ExpectedDividend - loanCap;
+
+                // MCI 청구액 = min(청구가능금액, 배당후 손실액)
+                data.MciClaimAmount = Math.Min(data.ClaimableAmount, data.PostDividendLoss);
+            }
+
+            FillMciData(MciData1, Scenario1Date, mciLoan.OverdueInterest1 ?? 0, mciLoan.LoanCap1 ?? 0);
+            FillMciData(MciData2, Scenario2Date, mciLoan.OverdueInterest2 ?? 0, mciLoan.LoanCap2 ?? 0);
         }
 
         /// <summary>

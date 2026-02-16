@@ -54,6 +54,10 @@ namespace NPLogic.Views
         // ★ 스크롤 이벤트 핸들러 인스턴스 (동일 인스턴스로 Add/Remove 필요)
         private ScrollChangedEventHandler? _scrollChangedHandler;
 
+        // ★ 사이드바 ListBox 스크롤 핸들러 (무한 스크롤)
+        private bool _sideListScrollHandlerRegistered = false;
+        private ScrollChangedEventHandler? _sideListScrollChangedHandler;
+
         // #region agent log
         private static void DebugLog(string hypothesisId, string location, string message, object? data = null)
         {
@@ -88,6 +92,14 @@ namespace NPLogic.Views
                 _scrollChangedHandler ??= new ScrollChangedEventHandler(ProgressDataGrid_ScrollChanged);
                 ProgressDataGrid.AddHandler(ScrollViewer.ScrollChangedEvent, _scrollChangedHandler);
                 _scrollHandlerRegistered = true;
+            }
+
+            // ★ 사이드바 ListBox 무한 스크롤 핸들러 등록
+            if (!_sideListScrollHandlerRegistered)
+            {
+                _sideListScrollChangedHandler ??= new ScrollChangedEventHandler(PropertySideListBox_ScrollChanged);
+                PropertySideListBox.AddHandler(ScrollViewer.ScrollChangedEvent, _sideListScrollChangedHandler);
+                _sideListScrollHandlerRegistered = true;
             }
 
             if (DataContext is DashboardViewModel viewModel)
@@ -1003,6 +1015,37 @@ namespace NPLogic.Views
 
                 // 비핵심 탭 로드 (NonCoreView가 새 물건으로 업데이트됨 + "전체" 탭으로 리셋)
                 await LoadTabViewAsync("noncore", property);
+            }
+        }
+
+        /// <summary>
+        /// 사이드바 ListBox 스크롤 변경 - 무한 스크롤 (서버 사이드 페이지네이션)
+        /// 스크롤이 하단 90% 지점에 도달하면 추가 데이터 로드
+        /// </summary>
+        private async void PropertySideListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (DataContext is not DashboardViewModel viewModel)
+                return;
+
+            // 수직 스크롤만 처리
+            if (e.VerticalChange == 0)
+                return;
+
+            // 이미 로드 중이거나 더 이상 데이터가 없으면 무시
+            if (viewModel.IsLoadingMore || !viewModel.HasMoreData)
+                return;
+
+            // 스크롤 가능한 영역이 있는지 확인
+            if (e.ExtentHeight <= e.ViewportHeight)
+                return;
+
+            // 스크롤이 하단 90% 지점에 도달했는지 확인
+            var scrollableHeight = e.ExtentHeight - e.ViewportHeight;
+            var scrollPercentage = e.VerticalOffset / scrollableHeight;
+
+            if (scrollPercentage >= 0.9)
+            {
+                await viewModel.LoadMorePropertiesAsync();
             }
         }
 

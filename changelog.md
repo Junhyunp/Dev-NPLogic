@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+### 2026-02-16
+
+#### MCI 산식 구현 + 사이드바 무한스크롤 + Loan 탭 버튼 정리
+
+- **MCI 컬럼 축소 (23→18열)**: 채권잔액, 인수대상원금-MCI가입잔액, (미수이자+연체이자), 유효담보가의 20%, 유효담보가+이자(Max 한도) 5개 중간계산 컬럼 제거
+- **MCI 데이터 연동**: credit_guarantees 테이블에서 MCI 보증서 데이터(MCI최초가입금액, MCI가입잔액, 채권번호) 로드, loans 테이블에서 인수대상원금/정상이자율 로드
+- **MCI 산식 구현**: 일수(예상배당일-최종이수일), 유효담보가(인수대상원금-MCI가입잔액), 유효담보가의 이자, 이자한도(20%), 유효담보가 배당액, MCI 정상이자(유효담보가×일수×정상이자율/365), 배당으로 충당되지 않은 MCI 잔액, 청구가능금액, 배당후 손실액(예상배당금-Loan Cap), MCI 청구액
+- **사이드바 무한스크롤**: PropertySideListBox에 ScrollViewer.ScrollChangedEvent 핸들러 추가, 90% 스크롤 도달 시 LoadMorePropertiesAsync() 호출
+- **Loan 탭 우측 상단 버튼 제거**: 전체 재계산, Excel, 저장 버튼 3개 제거 (섹션별 저장 + 상위 탭 Excel로 대체)
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — CreditGuaranteeRepository 주입, UpdateMciDataAsync, MCI 전체 산식 구현
+- `src/NPLogic.App/Views/Loan/Sections/MciSection.xaml` — 23→18열 축소
+- `src/NPLogic.App/Views/DashboardView.xaml.cs` — 사이드바 무한스크롤 핸들러 추가
+- `src/NPLogic.App/Views/Loan/LoanSheetView.xaml` — 우측 상단 버튼 3개 제거
+
 ### 2026-02-15
 
 #### Loan 탭 UI 정리: MCI 섹션 리뉴얼 + 이미지 영역 이동 + 데이터 셀 배경색 제거

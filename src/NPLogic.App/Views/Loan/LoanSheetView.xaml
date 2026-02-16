@@ -291,23 +291,6 @@
                 </StackPanel>
                 
                 <StackPanel Grid.Column="6" Orientation="Horizontal">
-                    <Button Content="전체 재계산" 
-                            Command="{Binding RecalculateAllCommand}"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="10,5"
-                            FontSize="{StaticResource FontSizeSmall}"
-                            Margin="0,0,8,0"/>
-                    <Button Content="Excel" 
-                            Command="{Binding ExportToExcelCommand}"
-                            Style="{StaticResource SecondaryButton}"
-                            Padding="10,5"
-                            FontSize="{StaticResource FontSizeSmall}"
-                            Margin="0,0,8,0"/>
-                    <Button Content="저장" 
-                            Command="{Binding SaveCommand}"
-                            Style="{StaticResource PrimaryButton}"
-                            Padding="12,5"
-                            FontSize="{StaticResource FontSizeSmall}"/>
                 </StackPanel>
             </Grid>
         </Border>
