@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+### 2026-02-17
+
+#### 일반보증 탭 섹션 통합 + 보증여부요약/집계/배당가능재원/안분비율 DataGrid 추가
+
+- **보증여부요약 (per-loan) DataGrid 추가**: 11컬럼(계좌일련번호, 보증여부, 대출원금잔액, 미수이자, 연체이자율, 1·2안 예상배당일, 1·2안 연체이자, 1·2안 Loan Cap) + 합계 행
+- **보증유형별 집계 DataGrid 추가**: 7컬럼(보증여부, 대출원금잔액, 미수이자, 1·2안 연체이자, 1·2안 Loan Cap) — per-loan 데이터를 보증유형으로 그룹핑 집계 + 합계 행
+- **배당가능재원 DataGrid 추가**: 3컬럼(구분, 1안(AT), 2안(AU)) — DividendFund1/2 데이터를 행 단위로 변환, 안분대상금액 합계 행
+- **안분비율(AR) DataGrid 추가**: 3컬럼(보증기관(X), 대위변제원금(AD), 안분비율(AR))
+- **보증기관 안분액(XD) DataGrid 추가**: 3컬럼(보증기관(S), 1안, 2안)
+- **GuaranteeSheet 섹션 통합**: GuaranteeTypeSummarySection, DividendFundSection, ProrationSection → GuaranteeSummarySection 내부로 통합 (보증서요약 카드 내 세로 배치)
+- **ViewModel 모델 추가**: GuaranteeTypeSummaryItem(per-loan), GuaranteeTypeAggregateItem(집계), DividendFundDisplayItem(배당가능재원 행), GetGuaranteeTypeDisplay() 헬퍼
+
+**변경된 파일**
+- `src/NPLogic.App/ViewModels/LoanSheetViewModel.cs` — 3개 모델 클래스 + 3개 컬렉션 + 데이터 생성 로직
+- `src/NPLogic.App/Views/Loan/Sections/GuaranteeSummarySection.xaml` — 5개 DataGrid 추가 (보증여부요약 per-loan, 집계, 배당가능재원, 안분비율, 보증기관 안분액)
+- `src/NPLogic.App/Views/Loan/Sheets/GuaranteeSheet.xaml` — GuaranteeTypeSummarySection, DividendFundSection, ProrationSection 참조 제거
+
 ### 2026-02-16
 
 #### 보증서요약 디자인 통일 + 헤더 줄바꿈 + 섹션 너비 통일 + JWT 갱신 안정화

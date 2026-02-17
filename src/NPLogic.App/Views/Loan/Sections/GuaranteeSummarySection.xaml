@@ -187,6 +187,173 @@
                 </Border>
             </Grid>
 
+            <!-- 보증여부요약 (per-loan) DataGrid -->
+            <DataGrid ItemsSource="{Binding GuaranteeTypeSummaryItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MinHeight="60"
+                      MaxHeight="350"
+                      Margin="0,8,0,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="계좌일련번호(A)" Binding="{Binding AccountSerial}" Width="*" MinWidth="90"/>
+                    <DataGridTextColumn Header="보증여부(AK)" Binding="{Binding GuaranteeType}" Width="*" MinWidth="80"/>
+                    <DataGridTextColumn Header="대출원금잔액(AL)" Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="미수이자(AM)" Binding="{Binding AccruedInterest, StringFormat=N0}" Width="*" MinWidth="85" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="연체이자율(M)" Binding="{Binding OverdueInterestRate, StringFormat=P2}" Width="*" MinWidth="65" ElementStyle="{StaticResource CenterCellStyle}"/>
+                    <DataGridTextColumn Header="1안 예상배당일(DD1)" Binding="{Binding ExpectedDividendDate1, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource CenterCellStyle}"/>
+                    <DataGridTextColumn Header="1안 연체이자(AN)" Binding="{Binding OverdueInterest1, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안 예상배당일(DD2)" Binding="{Binding ExpectedDividendDate2, StringFormat=yyyy-MM-dd}" Width="*" MinWidth="100" ElementStyle="{StaticResource CenterCellStyle}"/>
+                    <DataGridTextColumn Header="2안 연체이자(AO)" Binding="{Binding OverdueInterest2, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="1안 Loan Cap(LC11)" Binding="{Binding LoanCap1, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안 Loan Cap(LC12)" Binding="{Binding LoanCap2, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 보증유형별 집계 DataGrid -->
+            <DataGrid ItemsSource="{Binding GuaranteeTypeAggregateItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MinHeight="60"
+                      MaxHeight="300"
+                      Margin="0,8,0,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="보증여부(AK)" Binding="{Binding GuaranteeType}" Width="*" MinWidth="100"/>
+                    <DataGridTextColumn Header="대출원금잔액(AL)" Binding="{Binding LoanPrincipalBalance, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="미수이자(AM)" Binding="{Binding AccruedInterest, StringFormat=N0}" Width="*" MinWidth="85" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="1안 연체이자(AN)" Binding="{Binding OverdueInterest1, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안 연체이자(AO)" Binding="{Binding OverdueInterest2, StringFormat=N0}" Width="*" MinWidth="90" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="1안 Loan Cap(LC11)" Binding="{Binding LoanCap1, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안 Loan Cap(LC12)" Binding="{Binding LoanCap2, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 배당가능재원 DataGrid -->
+            <DataGrid ItemsSource="{Binding DividendFundDisplayItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MinHeight="60"
+                      MaxHeight="300"
+                      Margin="0,8,0,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSummaryRow}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="*" MinWidth="160"/>
+                    <DataGridTextColumn Header="1안(AT)" Binding="{Binding Amount1, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안(AU)" Binding="{Binding Amount2, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource AmountCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 안분비율(AR) DataGrid -->
+            <DataGrid ItemsSource="{Binding ProrationItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MinHeight="60"
+                      MaxHeight="250"
+                      Margin="0,8,0,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="보증기관(X)" Binding="{Binding GuaranteeOrganization}" Width="*" MinWidth="100"/>
+                    <DataGridTextColumn Header="대위변제원금(AD)" Binding="{Binding SubrogationPrincipal, StringFormat=N0}" Width="*" MinWidth="110" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="안분비율(AR)" Binding="{Binding ProrationRatio, StringFormat=P2}" Width="*" MinWidth="80" ElementStyle="{StaticResource CenterCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 보증기관 안분액(XD) DataGrid -->
+            <DataGrid ItemsSource="{Binding ProrationItems}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      RowHeaderWidth="0"
+                      GridLinesVisibility="All"
+                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                      Background="White"
+                      BorderThickness="0"
+                      MinHeight="60"
+                      MaxHeight="250"
+                      Margin="0,8,0,0"
+                      HorizontalScrollBarVisibility="Auto"
+                      ColumnHeaderStyle="{StaticResource HeaderCellStyle}"
+                      CellStyle="{StaticResource CellStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="보증기관(S)" Binding="{Binding GuaranteeOrganization}" Width="*" MinWidth="100"/>
+                    <DataGridTextColumn Header="1안" Binding="{Binding AllocationAmount1, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                    <DataGridTextColumn Header="2안" Binding="{Binding AllocationAmount2, StringFormat=N0}" Width="*" MinWidth="100" ElementStyle="{StaticResource AmountCellStyle}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
         </StackPanel>
     </Border>
 </UserControl>

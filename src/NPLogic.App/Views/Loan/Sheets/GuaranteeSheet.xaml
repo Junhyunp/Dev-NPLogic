@@ -11,25 +11,14 @@
         <SolidColorBrush x:Key="TableBorderBrush" Color="#D0D0D0"/>
     </UserControl.Resources>
     
-    <!-- 일반보증 시트: 채권정보 + 보증서요약 + Loan Cap 계산 + 보증여부 요약 + 배당가능재원 + 안분비율 + MCI 보증 -->
+    <!-- 일반보증 시트: 채권정보 + 보증서요약(전체 통합) + MCI 보증 -->
     <StackPanel>
         <!-- 채권정보 섹션 -->
         <sections:BondInfoSection DataContext="{Binding}" Margin="0,0,0,16"/>
-        
-        <!-- 보증서요약 섹션 (이미지 영역 포함) -->
+
+        <!-- 보증서요약 섹션 (이미지 + 보증여부요약 + 배당가능재원 + 안분비율 + 보증기관 안분액 통합) -->
         <sections:GuaranteeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
 
-        <!-- 보증여부 요약 섹션 -->
-        <sections:GuaranteeTypeSummarySection DataContext="{Binding}" Margin="0,0,0,16"/>
-        
-        <!-- 배당가능재원 섹션 (일반보증용) -->
-        <sections:DividendFundSection DataContext="{Binding}" 
-                                       SheetType="Guarantee" 
-                                       Margin="0,0,0,16"/>
-        
-        <!-- 안분비율/보증기관 안분액 섹션 -->
-        <sections:ProrationSection DataContext="{Binding}" Margin="0,0,0,16"/>
-        
         <!-- MCI 보증 섹션 -->
         <sections:MciSection DataContext="{Binding}"/>
     </StackPanel>

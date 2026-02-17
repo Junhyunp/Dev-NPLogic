@@ -145,6 +145,12 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private GuaranteeTypeTotals _guaranteeTypeTotals = new();
 
+        [ObservableProperty]
+        private ObservableCollection<GuaranteeTypeSummaryItem> _guaranteeTypeSummaryItems = new();
+
+        [ObservableProperty]
+        private ObservableCollection<GuaranteeTypeAggregateItem> _guaranteeTypeAggregateItems = new();
+
         // ========== 배분대상금액 안분 (토지/건물/기계/제시외/당해시설) ==========
 
         [ObservableProperty]
@@ -157,6 +163,11 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private DividendFundData _dividendFund2 = new();  // 2안
+
+        // ========== 배당가능재원 표시용 ==========
+
+        [ObservableProperty]
+        private ObservableCollection<DividendFundDisplayItem> _dividendFundDisplayItems = new();
 
         // ========== 안분비율/보증기관 안분액 ==========
 
@@ -525,6 +536,22 @@ namespace NPLogic.ViewModels
         {
             UpdateGuaranteeSummary();
             UpdateGuaranteeTypeTotals();
+            UpdateDividendFundDisplay();
+        }
+
+        /// <summary>
+        /// 배당가능재원 표시용 아이템 갱신
+        /// </summary>
+        private void UpdateDividendFundDisplay()
+        {
+            DividendFundDisplayItems = new ObservableCollection<DividendFundDisplayItem>
+            {
+                new() { Category = "당해시설 배당가능재원", Amount1 = DividendFund1.ThisFacilityFund, Amount2 = DividendFund2.ThisFacilityFund },
+                new() { Category = "당해시설 외 배당가능재원", Amount1 = DividendFund1.NonThisFacilityFund, Amount2 = DividendFund2.NonThisFacilityFund },
+                new() { Category = "비보증부대출 합계", Amount1 = DividendFund1.NonGuaranteeTotal, Amount2 = DividendFund2.NonGuaranteeTotal },
+                new() { Category = "연체이자, 약정이자 차이", Amount1 = DividendFund1.InterestDifference, Amount2 = DividendFund2.InterestDifference },
+                new() { Category = "안분대상금액(AV)", Amount1 = DividendFund1.AllocationAmount, Amount2 = DividendFund2.AllocationAmount, IsSummaryRow = true }
+            };
         }
 
         /// <summary>
@@ -567,12 +594,29 @@ namespace NPLogic.ViewModels
         private void UpdateGuaranteeTypeTotals()
         {
             var totals = new GuaranteeTypeTotals();
+            var items = new ObservableCollection<GuaranteeTypeSummaryItem>();
 
-            foreach (var loan in Loans)
+            foreach (var loan in Loans.Where(l => !l.IsSummaryRow && !l.IsEmptyRow))
             {
                 var guaranteeType = GetGuaranteeType(loan);
                 var lc1 = loan.LoanCap1 ?? 0;
                 var lc2 = loan.LoanCap2 ?? 0;
+
+                // per-loan 아이템 추가
+                items.Add(new GuaranteeTypeSummaryItem
+                {
+                    AccountSerial = loan.AccountSerial ?? "-",
+                    GuaranteeType = GetGuaranteeTypeDisplay(guaranteeType),
+                    LoanPrincipalBalance = loan.LoanPrincipalBalance ?? 0,
+                    AccruedInterest = loan.AccruedInterest,
+                    OverdueInterestRate = loan.OverdueInterestRate ?? 0,
+                    ExpectedDividendDate1 = loan.ExpectedDividendDate1,
+                    OverdueInterest1 = loan.OverdueInterest1 ?? 0,
+                    ExpectedDividendDate2 = loan.ExpectedDividendDate2,
+                    OverdueInterest2 = loan.OverdueInterest2 ?? 0,
+                    LoanCap1 = lc1,
+                    LoanCap2 = lc2
+                });
 
                 switch (guaranteeType)
                 {
@@ -627,8 +671,72 @@ namespace NPLogic.ViewModels
                 }
             }
 
+            // 합계 행 추가
+            if (items.Count > 0)
+            {
+                items.Add(new GuaranteeTypeSummaryItem
+                {
+                    AccountSerial = "합계",
+                    GuaranteeType = "",
+                    LoanPrincipalBalance = items.Sum(i => i.LoanPrincipalBalance),
+                    AccruedInterest = items.Sum(i => i.AccruedInterest),
+                    OverdueInterest1 = items.Sum(i => i.OverdueInterest1),
+                    OverdueInterest2 = items.Sum(i => i.OverdueInterest2),
+                    LoanCap1 = items.Sum(i => i.LoanCap1),
+                    LoanCap2 = items.Sum(i => i.LoanCap2),
+                    IsSummaryRow = true
+                });
+            }
+
+            GuaranteeTypeSummaryItems = items;
+
+            // 보증유형별 집계 (per-loan 데이터를 GuaranteeType으로 그룹핑)
+            var aggregates = new ObservableCollection<GuaranteeTypeAggregateItem>();
+            var groups = items.Where(i => !i.IsSummaryRow)
+                              .GroupBy(i => i.GuaranteeType)
+                              .OrderBy(g => g.Key);
+            foreach (var group in groups)
+            {
+                aggregates.Add(new GuaranteeTypeAggregateItem
+                {
+                    GuaranteeType = group.Key,
+                    LoanPrincipalBalance = group.Sum(i => i.LoanPrincipalBalance),
+                    AccruedInterest = group.Sum(i => i.AccruedInterest),
+                    OverdueInterest1 = group.Sum(i => i.OverdueInterest1),
+                    OverdueInterest2 = group.Sum(i => i.OverdueInterest2),
+                    LoanCap1 = group.Sum(i => i.LoanCap1),
+                    LoanCap2 = group.Sum(i => i.LoanCap2)
+                });
+            }
+            if (aggregates.Count > 0)
+            {
+                aggregates.Add(new GuaranteeTypeAggregateItem
+                {
+                    GuaranteeType = "합계",
+                    LoanPrincipalBalance = aggregates.Sum(i => i.LoanPrincipalBalance),
+                    AccruedInterest = aggregates.Sum(i => i.AccruedInterest),
+                    OverdueInterest1 = aggregates.Sum(i => i.OverdueInterest1),
+                    OverdueInterest2 = aggregates.Sum(i => i.OverdueInterest2),
+                    LoanCap1 = aggregates.Sum(i => i.LoanCap1),
+                    LoanCap2 = aggregates.Sum(i => i.LoanCap2),
+                    IsSummaryRow = true
+                });
+            }
+            GuaranteeTypeAggregateItems = aggregates;
+
             GuaranteeTypeTotals = totals;
         }
+
+        private static string GetGuaranteeTypeDisplay(GuaranteeTypeEnum type) => type switch
+        {
+            GuaranteeTypeEnum.NonGuarantee => "비보증부",
+            GuaranteeTypeEnum.NormalGuarantee => "일반보증",
+            GuaranteeTypeEnum.TerminatedGuarantee => "해지부보증",
+            GuaranteeTypeEnum.NormalValidGuarantee => "일반 유효보증",
+            GuaranteeTypeEnum.TerminatedValidGuarantee => "해지부 유효보증",
+            GuaranteeTypeEnum.TerminatedBond => "해지부해지채권",
+            _ => "-"
+        };
 
         /// <summary>
         /// 대출의 보증 유형 판별
@@ -1010,6 +1118,40 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 보증여부 요약 항목 (per-loan)
+    /// </summary>
+    public class GuaranteeTypeSummaryItem
+    {
+        public string AccountSerial { get; set; } = "";
+        public string GuaranteeType { get; set; } = "";
+        public decimal LoanPrincipalBalance { get; set; }
+        public decimal AccruedInterest { get; set; }
+        public decimal? OverdueInterestRate { get; set; }
+        public DateTime? ExpectedDividendDate1 { get; set; }
+        public decimal OverdueInterest1 { get; set; }
+        public DateTime? ExpectedDividendDate2 { get; set; }
+        public decimal OverdueInterest2 { get; set; }
+        public decimal LoanCap1 { get; set; }
+        public decimal LoanCap2 { get; set; }
+        public bool IsSummaryRow { get; set; }
+    }
+
+    /// <summary>
+    /// 보증유형별 집계 항목
+    /// </summary>
+    public class GuaranteeTypeAggregateItem
+    {
+        public string GuaranteeType { get; set; } = "";
+        public decimal LoanPrincipalBalance { get; set; }
+        public decimal AccruedInterest { get; set; }
+        public decimal OverdueInterest1 { get; set; }
+        public decimal OverdueInterest2 { get; set; }
+        public decimal LoanCap1 { get; set; }
+        public decimal LoanCap2 { get; set; }
+        public bool IsSummaryRow { get; set; }
+    }
+
+    /// <summary>
     /// 보증여부별 합계
     /// </summary>
     public class GuaranteeTypeTotals : ObservableObject
@@ -1096,6 +1238,17 @@ namespace NPLogic.ViewModels
         
         [ObservableProperty]
         private bool _hasThirdMortgage;
+    }
+
+    /// <summary>
+    /// 배당가능재원 표시용 행
+    /// </summary>
+    public class DividendFundDisplayItem
+    {
+        public string Category { get; set; } = "";
+        public decimal Amount1 { get; set; }
+        public decimal Amount2 { get; set; }
+        public bool IsSummaryRow { get; set; }
     }
 
     /// <summary>
