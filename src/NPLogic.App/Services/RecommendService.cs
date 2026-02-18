@@ -16,7 +16,7 @@ namespace NPLogic.Services
     public class RecommendService : IDisposable
     {
         private bool _disposed;
-        private const string RecommendEndpoint = "/api/recommend";
+        private const string RecommendEndpoint = "/api/recommend/similar";
         private readonly JsonSerializerOptions _jsonOptions;
 
         public RecommendService()

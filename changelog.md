@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+### 2026-02-19
+
+#### 평가 탭 레이아웃 1칼럼 전환 + 디자인 통일 + 추천 엔드포인트 버그 수정
+
+- **2칼럼 → 1칼럼 레이아웃 전환**: 기존 6:4 비율 Grid → 단일 StackPanel, 모든 섹션이 세로 배치
+- **섹션 헤더 디자인 통일**: 사례지도/유사물건 추천 섹션에 선순위 탭 스타일 적용 (PrimaryBrush 헤더 바, CornerRadius 8 카드, SurfaceColor 배경)
+- **이모지 제거**: 모든 섹션 헤더에서 이모지 제거하여 Loan/선순위 탭과 디자인 통일
+- **유사물건 추천 엔드포인트 수정**: C# RecommendService `/api/recommend` → `/api/recommend/similar` (Python FastAPI 라우트와 일치하도록)
+
+**변경된 파일**
+- `src/NPLogic.App/Views/EvaluationTab.xaml` — 레이아웃 전환 + 섹션 헤더 디자인 통일
+- `src/NPLogic.App/Services/RecommendService.cs` — 엔드포인트 URL 수정
+
 ### 2026-02-17
 
 #### 일반보증 탭 섹션 통합 + 보증여부요약/집계/배당가능재원/안분비율 DataGrid 추가
