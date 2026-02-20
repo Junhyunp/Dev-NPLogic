@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:evalViews="clr-namespace:NPLogic.Views.Evaluation"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
-             mc:Ignorable="d" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:EvaluationTabViewModel}">
 
@@ -23,6 +24,53 @@
         <Style x:Key="AmountStyle" TargetType="TextBlock" BasedOn="{StaticResource AmountText}"/>
         <Style x:Key="CardStyle" TargetType="Border" BasedOn="{StaticResource CardBorder}">
             <Setter Property="Padding" Value="16"/>
+        </Style>
+
+        <!-- DataGrid 공통 스타일 (SeniorRightsView와 동일) -->
+        <Style x:Key="SectionDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+        <Style x:Key="SectionDataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+                <Trigger Property="IsEditing" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SectionDataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        <Style x:Key="SectionDataGridTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="SectionDataGridTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
         </Style>
     </UserControl.Resources>
 
@@ -93,8 +141,10 @@
                                      FontSize="{StaticResource FontSizeBody}"/>
                     </StackPanel>
 
-                    <!-- 피드백 반영: 탭 내부 저장/새로고침 버튼 제거 → 상단 헤더에서만 저장 -->
-                    <!-- 저장은 PropertyDetailView 헤더의 버튼 사용 -->
+                    <Button Grid.Column="2" Content="저장"
+                            Command="{Binding SaveCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Padding="12,6"/>
                 </Grid>
             </Border>
 
@@ -113,10 +163,14 @@
                                     CornerRadius="8,8,0,0"
                                     Padding="16,10">
                                 <Grid>
-                                    <TextBlock Text="사례지도"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="{StaticResource FontSizeH4}"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="MapMarkerRadius" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="사례지도"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
                                     <Button Content="가져오기"
                                             Command="{Binding LoadCaseMapCommand}"
                                             Padding="12,4"
@@ -138,6 +192,82 @@
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"/>
                             </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 실거래가 영역 -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="CurrencyKrw" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="실거래가"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                    <!-- 실거래가는 물건 로드 시 자동 조회 -->
+                                </Grid>
+                            </Border>
+
+                            <!-- 실거래가 테이블 -->
+                            <DataGrid x:Name="RealTransactionGrid"
+                                      ItemsSource="{Binding RealTransactions}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="All"
+                                      BorderThickness="0"
+                                      SelectionUnit="Cell"
+                                      SelectionMode="Single"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      RowHeight="32"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      MinHeight="60">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="거래금액" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="80" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTemplateColumn Header="적용" Width="60">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding IsApplied, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                          IsHitTestVisible="True"
+                                                          Focusable="True"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
 
@@ -410,58 +540,7 @@
                             </DataGrid>
                         </StackPanel>
                     </Border>
-                <!-- 실거래가 + 낙찰통계 + 평가결과 -->
-                    
-                    <!-- 실거래가 영역 -->
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="실거래가" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="조회" 
-                                            Command="{Binding FetchRealTransactionCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            Margin="0,0,8,0"/>
-                                    <!-- E-004: 시세 차트 대안 - 외부 링크 -->
-                                    <Button Content="📈 시세보기" 
-                                            Command="{Binding OpenPriceTrendSiteCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            ToolTip="KB부동산 시세 조회"
-                                            Margin="0,0,8,0"/>
-                                    <Button Content="🔗 rt.molit.go.kr" 
-                                            Command="{Binding OpenRealTransactionSiteCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"/>
-                                </StackPanel>
-                            </Grid>
-                            
-                            <!-- 실거래가 테이블 (E-003: 테이블 크기 축소 150→120) -->
-                            <DataGrid ItemsSource="{Binding RealTransactions}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="All"
-                                      BorderThickness="1"
-                                      BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="120"
-                                      FontSize="{StaticResource FontSizeBody}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="80"/>
-                                    <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="90"/>
-                                    <DataGridTextColumn Header="거래금액" Binding="{Binding Amount, StringFormat=N0}" Width="100"/>
-                                    <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="50"/>
-                                    <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="60"/>
-                                    <DataGridCheckBoxColumn Header="적용" Binding="{Binding IsApplied}" Width="50"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </Border>
+                <!-- 낙찰통계 + 평가결과 -->
 
                     <!-- 낙찰통계 영역 - 피드백 반영: 시/군구/동 3×3 매트릭스 -->
                     <Border Style="{StaticResource CardStyle}">

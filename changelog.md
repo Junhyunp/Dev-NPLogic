@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+### 2026-02-20
+
+#### 평가 탭 저장 버튼 + 실거래가 섹션 리뉴얼 + 평가 유형 매핑 업데이트
+
+- **저장 버튼 추가**: 평가 유형 선택 영역 오른쪽에 저장 버튼 배치 (SaveCommand 바인딩, 평가 유형 + 시나리오 데이터 일괄 저장)
+- **평가 유형 자동 선택 로직 업데이트**: 원청 '평가_시트적용' 엑셀 매핑 테이블 기준으로 갱신 — 1~4번 유형(아파트/연립다세대/공장창고/상가)은 명시적 키워드 매칭, 나머지 전부 5번(주택/근린시설/토지/기타)으로 폴스루
+- **사례지도 섹션 헤더 아이콘 추가**: MapMarkerRadius 아이콘
+- **실거래가 섹션 리뉴얼**: 기존 CardStyle 제거 → PrimaryBrush 헤더 + CurrencyKrw 아이콘으로 디자인 통일 (선순위/담보물건 탭과 동일), 사례지도 바로 아래로 이동
+- **실거래가 DataGrid 디자인 통일**: SectionDataGrid 스타일 적용 (ColumnHeader/Cell/Row/TextBlock/TextBox), RowHeight 32, 적용 컬럼은 DataGridTemplateColumn + CheckBox (싱글클릭 편집)
+- **실거래가 컬럼 속성**: 거래면적/거래일자/거래금액/층수/등기여부 → IsReadOnly (외부 데이터), 적용 → 사용자 입력
+- **materialDesign 네임스페이스 추가**: EvaluationTab.xaml에 PackIcon 사용을 위한 네임스페이스 선언
+
+**변경된 파일**
+- `src/NPLogic.App/Views/EvaluationTab.xaml` — 저장 버튼, 실거래가 섹션 리뉴얼, 아이콘 추가, DataGrid 스타일 통일
+- `src/NPLogic.App/ViewModels/EvaluationTabViewModel.cs` — AutoSelectEvaluationType 매핑 로직 업데이트
+
 ### 2026-02-19
 
 #### 평가 탭 레이아웃 1칼럼 전환 + 디자인 통일 + 추천 엔드포인트 버그 수정

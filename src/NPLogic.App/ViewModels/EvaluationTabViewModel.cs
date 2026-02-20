@@ -592,15 +592,28 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 물건 유형에 따른 평가 유형 자동 선택 (피드백 반영: 산출화면 매핑 테이블 기준)
+        /// 물건 유형에 따른 평가 유형 자동 선택 (원청 '평가_시트적용' 매핑 테이블 기준)
         /// </summary>
         /// <remarks>
-        /// 매핑 규칙:
-        /// - 아파트, 오피스텔 → 1. 아파트
-        /// - 다세대(빌라), 연립 → 2. 연립다세대
-        /// - 공장, 창고 → 3. 공장/창고
-        /// - 근린상가, 사무실, 아파트형공장 → 4. 상가/아파트형공장
-        /// - 주택, 근린시설, 토지, 다가구, 기타 → 5. 주택/근린시설/토지/기타
+        /// 매핑 규칙 (카테고리별):
+        /// [주거용]
+        ///   아파트, 오피스텔 → 1. 아파트
+        ///   다세대(빌라), 연립 → 2. 연립다세대
+        ///   단독주택, 다가구, 다중주택, 근린주택 → 5. 주택/근린시설/토지/기타
+        /// [상업용 및 업무용]
+        ///   근린상가, 사무실 → 4. 상가/아파트형공장
+        ///   아파트형공장 → 4. 상가/아파트형공장
+        ///   공장, 창고 → 3. 공장/창고
+        ///   숙박시설, 콘도, 교육시설, 종교시설, 의료시설, 목욕탕, 노유자시설, 문화및집회시설
+        ///     → 기본: 5. 주택/근린시설/토지/기타 (대체: 4. 상가/아파트형공장)
+        ///   농가관련시설, 주유소, 자동차관련시설 → 5. 주택/근린시설/토지/기타
+        /// [토지]
+        ///   대지, 임야, 전, 답, 과수원, 도로, 묘지, 잡종지, 목장용지, 광천지, 염전, 공장용지
+        ///     → 5. 주택/근린시설/토지/기타
+        /// [차량 및 선박]
+        ///   차량, 선박 → 5. 주택/근린시설/토지/기타
+        /// [기타]
+        ///   기타 → 5. 주택/근린시설/토지/기타
         /// </remarks>
         private void AutoSelectEvaluationType(string? propertyType)
         {
@@ -610,60 +623,51 @@ namespace NPLogic.ViewModels
             IsFactoryType = false;
             IsCommercialType = false;
             IsHouseLandType = false;
-            
+
             if (string.IsNullOrWhiteSpace(propertyType))
             {
                 IsApartmentType = true; // 기본값: 아파트
                 return;
             }
 
-            var type = propertyType.ToLower().Trim();
-            
-            // 1. 아파트 - 아파트, 오피스텔
-            if (type.Contains("아파트") && !type.Contains("아파트형공장"))
+            var type = propertyType.Trim();
+
+            // 1. 아파트 - 아파트, 오피스텔 (아파트형공장 제외)
+            if ((type.Contains("아파트") && !type.Contains("아파트형공장")) ||
+                type.Contains("오피스텔"))
             {
                 IsApartmentType = true;
                 return;
             }
-            if (type.Contains("오피스텔") || type == "officetel")
-            {
-                IsApartmentType = true;
-                return;
-            }
-            
+
             // 2. 연립다세대 - 다세대, 빌라, 연립
             if (type.Contains("다세대") || type.Contains("빌라") || type.Contains("연립"))
             {
                 IsMultiFamilyType = true;
                 return;
             }
-            
+
             // 3. 공장/창고 - 공장, 창고 (아파트형공장 제외)
             if ((type.Contains("공장") && !type.Contains("아파트형")) || type.Contains("창고"))
             {
                 IsFactoryType = true;
                 return;
             }
-            
+
             // 4. 상가/아파트형공장 - 근린상가, 상가, 사무실, 아파트형공장
             if (type.Contains("상가") || type.Contains("사무실") || type.Contains("아파트형공장"))
             {
                 IsCommercialType = true;
                 return;
             }
-            
-            // 5. 주택/근린시설/토지/기타 - 주택, 근린시설, 토지, 다가구, 단독, 기타
-            if (type.Contains("주택") || type.Contains("단독") || type.Contains("다가구") ||
-                type.Contains("토지") || type.Contains("근린") || type.Contains("대지") ||
-                type.Contains("임야") || type.Contains("전") || type.Contains("답") ||
-                type.Contains("과수원") || type.Contains("도로") || type.Contains("묘지"))
-            {
-                IsHouseLandType = true;
-                return;
-            }
-            
-            // 기본값: 아파트
-            IsApartmentType = true;
+
+            // 5. 주택/근린시설/토지/기타 - 나머지 전부
+            // 주거용: 단독주택, 다가구, 다중주택, 근린주택
+            // 상업용: 숙박시설, 콘도, 교육시설, 종교시설, 의료시설, 목욕탕, 노유자시설, 문화및집회시설
+            //         농가관련시설, 주유소, 자동차관련시설
+            // 토지: 대지, 임야, 전, 답, 과수원, 도로, 묘지, 잡종지, 목장용지, 광천지, 염전, 공장용지
+            // 차량/선박, 기타
+            IsHouseLandType = true;
         }
 
         private void SetEvaluationType(string? evaluationType)
