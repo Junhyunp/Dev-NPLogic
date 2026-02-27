@@ -222,6 +222,8 @@
                                           VerticalGridLinesBrush="{StaticResource BorderBrush}"
                                           RowHeight="32"
                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                          MaxHeight="360"
                                           MinHeight="200">
                                     <DataGrid.ColumnHeaderStyle>
                                         <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
@@ -259,7 +261,7 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 유사물건 추천 영역 -->
+                    <!-- 사례평가 영역 -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
@@ -270,264 +272,62 @@
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="8,8,0,0"
                                     Padding="16,10">
-                                <TextBlock Text="유사물건 추천"
-                                           Foreground="White"
-                                           FontWeight="SemiBold"
-                                           FontSize="{StaticResource FontSizeH4}"/>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ChartBox" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="사례평가"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                </Grid>
                             </Border>
 
-                            <StackPanel Margin="16,12,16,16">
-                                <!-- 버튼 행 -->
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                    <Button Content="추천 검색"
-                                            Command="{Binding RecommendSimilarCasesCommand}"
-                                            Style="{StaticResource PrimaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            Margin="0,0,8,0"/>
-                                    <Button Content="사례 적용"
-                                            Command="{Binding ApplyRecommendedCaseCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            Margin="0,0,16,0"/>
-                                    <!-- 로딩 표시 -->
-                                    <ProgressBar IsIndeterminate="True"
-                                                 Width="80" Height="4"
-                                                 VerticalAlignment="Center"
-                                                 Visibility="{Binding IsRecommendLoading, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
-                                </StackPanel>
-
-                                <!-- 상태 메시지 -->
-                                <TextBlock Text="{Binding RecommendStatusMessage}"
-                                           Style="{StaticResource LabelStyle}"
-                                           Margin="0,0,0,8"
-                                           Visibility="{Binding RecommendStatusMessage, Converter={StaticResource NullToVisibilityConverter}}"/>
-
-                                <!-- 추천 결과 테이블 -->
-                                <DataGrid ItemsSource="{Binding RecommendedCases}"
-                                          SelectedItem="{Binding SelectedRecommendCase, Mode=TwoWay}"
-                                          AutoGenerateColumns="False"
-                                          CanUserAddRows="False"
-                                          CanUserDeleteRows="False"
-                                          HeadersVisibility="Column"
-                                          GridLinesVisibility="All"
-                                          BorderThickness="1"
-                                          BorderBrush="{StaticResource BlueGray200Brush}"
-                                          MaxHeight="350"
-                                          MinHeight="200"
-                                          FontSize="{StaticResource FontSizeSmall}"
-                                          SelectionMode="Single">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="사건번호" Binding="{Binding CaseNo}" Width="110" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="낙찰일" Binding="{Binding AuctionDate, StringFormat=yyyy-MM-dd}" Width="85" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="용도" Binding="{Binding Usage}" Width="70" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="감정가" Binding="{Binding AppraisalPrice, StringFormat=N0}" Width="100" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="낙찰가" Binding="{Binding WinningPrice, StringFormat=N0}" Width="100" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="낙찰율" Binding="{Binding WinningRateDisplay}" Width="60" IsReadOnly="True">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                        <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat=N1}" Width="70" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="규칙" Binding="{Binding RuleName}" Width="55" IsReadOnly="True"/>
-                                        <DataGridTextColumn Header="거리" Binding="{Binding DistanceDisplay}" Width="60" IsReadOnly="True">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                        <DataGridTemplateColumn Header="상세" Width="50">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <Button Content="상세"
-                                                            Command="{Binding DataContext.ShowCaseDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                            CommandParameter="{Binding}"
-                                                            Style="{StaticResource SecondaryButton}"
-                                                            Padding="4,2"
-                                                            FontSize="{StaticResource FontSizeSmall}"
-                                                            ToolTip="상세보기"
-                                                            Cursor="Hand"/>
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-
-                                <!-- 페이지네이션 -->
-                                <Grid Margin="0,8,0,0">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Text="표시: " Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding DisplayedCasesCount}" Style="{StaticResource ValueStyle}" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" / " Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding TotalCasesCount}" Style="{StaticResource ValueStyle}" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" 건" Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <Button Content="더보기 (+5)"
-                                            Command="{Binding LoadMoreCasesCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            HorizontalAlignment="Right"
-                                            Visibility="{Binding HasMoreCases, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}"/>
-                                </Grid>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- 사례평가 그리드 -->
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="사례평가" Style="{StaticResource SectionHeaderStyle}" Margin="0"/>
-                                    <TextBlock Text="(직접 입력 가능)" 
-                                               Style="{StaticResource LabelStyle}"
-                                               FontSize="{StaticResource FontSizeSmall}"
-                                               Opacity="0.7"
-                                               Margin="8,0,0,0"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="초기화" 
-                                            Command="{Binding ClearCaseEvaluationCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            Margin="0,0,8,0"/>
-                                    <Button Content="경매사건검색" 
-                                            Command="{Binding SearchAuctionCaseCommand}"
-                                            Style="{StaticResource SecondaryButton}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"/>
-                                </StackPanel>
-                            </Grid>
-                            
-                            <!-- 사례평가 테이블 (피드백 반영: 엑셀 기준 구조, 정렬 맞추기) -->
-                            <DataGrid ItemsSource="{Binding CaseItems}"
+                            <!-- 사례평가 테이블 -->
+                            <DataGrid x:Name="CaseEvaluationGrid"
+                                      ItemsSource="{Binding CaseItems}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
                                       HeadersVisibility="Column"
                                       GridLinesVisibility="All"
-                                      BorderThickness="1"
-                                      BorderBrush="{StaticResource BlueGray200Brush}"
-                                      MaxHeight="500"
-                                      FontSize="{StaticResource FontSizeSmall}"
+                                      BorderThickness="0"
                                       SelectionUnit="Cell"
-                                      HorizontalScrollBarVisibility="Auto">
+                                      SelectionMode="Single"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      RowHeight="32"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      MinHeight="60">
                                 <DataGrid.ColumnHeaderStyle>
-                                    <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                        <Setter Property="Padding" Value="8,6"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
-                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    </Style>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
                                 </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="120" IsReadOnly="True">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="6,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Padding" Value="4,2"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="사례1" Binding="{Binding Case1Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="6,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Padding" Value="4,2"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="사례2" Binding="{Binding Case2Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="6,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Padding" Value="4,2"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="사례3" Binding="{Binding Case3Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="6,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Padding" Value="4,2"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="사례4" Binding="{Binding Case4Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="6,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Padding" Value="4,2"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Background" Value="#F3E8FF"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="140" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="사례 1" Binding="{Binding Case1Value}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="사례 2" Binding="{Binding Case2Value}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="사례 3" Binding="{Binding Case3Value}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="사례 4" Binding="{Binding Case4Value}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
                     </Border>
+
                 <!-- 낙찰통계 + 평가결과 -->
 
                     <!-- 낙찰통계 영역 - 피드백 반영: 시/군구/동 3×3 매트릭스 -->
