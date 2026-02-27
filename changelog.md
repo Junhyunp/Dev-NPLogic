@@ -6,6 +6,20 @@
 
 ### 2026-02-28
 
+#### 실거래가 "적용" 체크 상태 DB 저장
+
+- **DB 테이블 신규**: `property_trade_applied` — 체크된 실거래가 행만 저장 (방식 B: 존재 = 적용)
+- **복합키 매칭**: (property_id, deal_date, deal_amount, area, floor)로 외부 거래 데이터와 매칭하여 체크 상태 복원
+- **저장**: 평가 탭 "저장" 버튼 클릭 시 평가 정보와 함께 일괄 저장 (DELETE + INSERT 패턴)
+- **복원**: 탭 로드 시 DB에서 적용 목록 조회 → 복합키 매칭으로 체크박스 자동 복원
+
+**변경된 파일**
+- `property_trade_applied` 테이블 — Supabase 마이그레이션
+- `src/NPLogic.Core/Models/PropertyTradeApplied.cs` — 신규 도메인 모델
+- `src/NPLogic.Data/Repositories/PropertyTradeAppliedRepository.cs` — 신규 Repository (GetByPropertyIdAsync, SaveAllAsync)
+- `src/NPLogic.App/App.xaml.cs` — DI 등록 추가
+- `src/NPLogic.App/ViewModels/EvaluationTabViewModel.cs` — 적용 상태 복원/저장 로직, RealTransactionItem에 매칭용 필드 추가
+
 #### 실거래가 외부 Supabase 연동 (TradeService + PNU 자동 확보)
 
 - **TradeService 신규 구현**: 외부 Supabase 프로젝트(`gkchpqzbpnmhzcjhsodf`)의 RPC 함수(`get_trades`)를 통해 실거래가 데이터 조회

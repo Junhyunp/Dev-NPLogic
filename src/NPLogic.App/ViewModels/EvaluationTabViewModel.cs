@@ -48,7 +48,11 @@ namespace NPLogic.ViewModels
         public decimal? Amount { get; set; }
         public string? Floor { get; set; }
         public string? IsRegistered { get; set; }
-        
+
+        /// <summary>DB 매칭용 원본 값 (외부 TradeRecord 그대로)</summary>
+        public int DealDateRaw { get; set; }
+        public double AreaRaw { get; set; }
+
         private bool _isApplied;
         public bool IsApplied
         {
@@ -141,12 +145,15 @@ namespace NPLogic.ViewModels
         public string? SupabaseKey { get; set; }
 
         private readonly TradeService _tradeService;
+        private readonly PropertyTradeAppliedRepository? _tradeAppliedRepository;
 
         public EvaluationTabViewModel(EvaluationRepository evaluationRepository)
         {
             _evaluationRepository = evaluationRepository ?? throw new ArgumentNullException(nameof(evaluationRepository));
             _recommendService = new RecommendService();
             _tradeService = new TradeService();
+            _tradeAppliedRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyTradeAppliedRepository)) as PropertyTradeAppliedRepository;
 
             // 초기 데이터 설정
             InitializeCaseItems();
@@ -509,8 +516,35 @@ namespace NPLogic.ViewModels
                     Amount = t.DealAmount,
                     Floor = t.Floor,
                     IsRegistered = t.IsRegistered ? "Y" : "N",
-                    IsApplied = false
+                    IsApplied = false,
+                    DealDateRaw = t.DealDate,
+                    AreaRaw = t.Area
                 });
+            }
+
+            // DB에서 적용 상태 복원
+            if (_tradeAppliedRepository != null && _propertyId != Guid.Empty)
+            {
+                try
+                {
+                    var appliedRows = await _tradeAppliedRepository.GetByPropertyIdAsync(_propertyId);
+                    var appliedSet = new System.Collections.Generic.HashSet<string>(
+                        appliedRows.Select(a => $"{a.DealDate}|{a.DealAmount}|{a.Area:R}|{a.Floor ?? ""}")
+                    );
+
+                    foreach (var txn in RealTransactions)
+                    {
+                        var key = $"{txn.DealDateRaw}|{(int)(txn.Amount ?? 0)}|{txn.AreaRaw:R}|{txn.Floor ?? ""}";
+                        if (appliedSet.Contains(key))
+                            txn.IsApplied = true;
+                    }
+
+                    Debug.WriteLine($"[EvaluationTab] 적용 상태 복원: {appliedRows.Count}건 중 매칭됨");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[EvaluationTab] 적용 상태 복원 실패: {ex.Message}");
+                }
             }
         }
 
@@ -917,7 +951,26 @@ namespace NPLogic.ViewModels
                 evaluation.EvaluationDetails = details;
 
                 _evaluation = await _evaluationRepository.SaveAsync(evaluation);
-                
+
+                // 실거래가 적용 상태 저장
+                if (_tradeAppliedRepository != null)
+                {
+                    var appliedItems = RealTransactions
+                        .Where(t => t.IsApplied)
+                        .Select(t => new NPLogic.Core.Models.PropertyTradeApplied
+                        {
+                            PropertyId = _propertyId,
+                            DealDate = t.DealDateRaw,
+                            DealAmount = (int)(t.Amount ?? 0),
+                            Area = t.AreaRaw,
+                            Floor = t.Floor
+                        })
+                        .ToList();
+
+                    await _tradeAppliedRepository.SaveAllAsync(_propertyId, appliedItems);
+                    Debug.WriteLine($"[EvaluationTab] 실거래가 적용 저장: {appliedItems.Count}건");
+                }
+
                 IsDirty = false; // 저장 완료 후 변경사항 플래그 리셋
                 SuccessMessage = "평가 정보가 저장되었습니다.";
             }
