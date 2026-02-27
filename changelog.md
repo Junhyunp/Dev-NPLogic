@@ -6,6 +6,15 @@
 
 ### 2026-02-28
 
+#### 사례지도 및 실거래가 섹션 통합 + 정렬 개선
+
+- **섹션 통합**: 기존 별도 섹션이던 "사례지도"와 "실거래가"를 "사례지도 및 실거래가" 단일 섹션으로 병합 (좌: 지도, 우: DataGrid, 세로 구분선)
+- **거래일자 오름차순 정렬**: 외부 API 응답(내림차순)을 거래일자 오름차순으로 재정렬
+
+**변경된 파일**
+- `src/NPLogic.App/Views/EvaluationTab.xaml` — 사례지도/실거래가 섹션 Grid 통합 (3컬럼: 지도 | 구분선 | DataGrid)
+- `src/NPLogic.App/ViewModels/EvaluationTabViewModel.cs` — trades.Sort() 오름차순 추가
+
 #### 실거래가 "적용" 체크 상태 DB 저장
 
 - **DB 테이블 신규**: `property_trade_applied` — 체크된 실거래가 행만 저장 (방식 B: 존재 = 적용)

@@ -151,7 +151,7 @@
             <!-- 메인 콘텐츠 -->
             <StackPanel Grid.Row="1">
                     
-                    <!-- 사례지도 영역 -->
+                    <!-- 사례지도 및 실거래가 통합 영역 -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
@@ -166,7 +166,7 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <materialDesign:PackIcon Kind="MapMarkerRadius" Width="18" Height="18"
                                                                  Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="사례지도"
+                                        <TextBlock Text="사례지도 및 실거래가"
                                                    Foreground="White"
                                                    FontWeight="SemiBold"
                                                    FontSize="{StaticResource FontSizeH4}"/>
@@ -180,94 +180,82 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 지도 플레이스홀더 (클릭 시 팝업 확대) -->
-                            <Border Background="{StaticResource BlueGray50Brush}"
-                                    Height="200"
-                                    Cursor="Hand"
-                                    MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp"
-                                    ToolTip="클릭하여 확대">
-                                <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
-                                           Style="{StaticResource BodyTextStyle}"
-                                           Opacity="0.6"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                        </StackPanel>
-                    </Border>
+                            <!-- 좌: 사례지도 / 우: 실거래가 DataGrid -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="2"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                    <!-- 실거래가 영역 -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16">
-                        <StackPanel>
-                            <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="CurrencyKrw" Width="18" Height="18"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="실거래가"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"/>
-                                    </StackPanel>
-                                    <!-- 실거래가는 물건 로드 시 자동 조회 -->
-                                </Grid>
-                            </Border>
+                                <!-- 좌측: 사례지도 -->
+                                <Border Grid.Column="0"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        MinHeight="200"
+                                        Cursor="Hand"
+                                        MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp"
+                                        ToolTip="클릭하여 확대">
+                                    <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
+                                               Style="{StaticResource BodyTextStyle}"
+                                               Opacity="0.6"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
 
-                            <!-- 실거래가 테이블 -->
-                            <DataGrid x:Name="RealTransactionGrid"
-                                      ItemsSource="{Binding RealTransactions}"
-                                      AutoGenerateColumns="False"
-                                      CanUserAddRows="False"
-                                      CanUserDeleteRows="False"
-                                      CanUserSortColumns="False"
-                                      HeadersVisibility="Column"
-                                      GridLinesVisibility="All"
-                                      BorderThickness="0"
-                                      SelectionUnit="Cell"
-                                      SelectionMode="Single"
-                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
-                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
-                                      RowHeight="32"
-                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                      MinHeight="60">
-                                <DataGrid.ColumnHeaderStyle>
-                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
-                                </DataGrid.ColumnHeaderStyle>
-                                <DataGrid.CellStyle>
-                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
-                                </DataGrid.CellStyle>
-                                <DataGrid.RowStyle>
-                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
-                                </DataGrid.RowStyle>
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTextColumn Header="거래금액(만원)" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="80" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTemplateColumn Header="적용" Width="60">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <CheckBox IsChecked="{Binding IsApplied, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                          IsHitTestVisible="True"
-                                                          Focusable="True"/>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                </DataGrid.Columns>
-                            </DataGrid>
+                                <!-- 굵은 세로 구분선 -->
+                                <Border Grid.Column="1" Background="{StaticResource BorderBrush}" Width="2"/>
+
+                                <!-- 우측: 실거래가 DataGrid -->
+                                <DataGrid Grid.Column="2"
+                                          x:Name="RealTransactionGrid"
+                                          ItemsSource="{Binding RealTransactions}"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          CanUserSortColumns="False"
+                                          HeadersVisibility="Column"
+                                          GridLinesVisibility="All"
+                                          BorderThickness="0"
+                                          SelectionUnit="Cell"
+                                          SelectionMode="Single"
+                                          HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                          VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                          RowHeight="32"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          MinHeight="200">
+                                    <DataGrid.ColumnHeaderStyle>
+                                        <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                    </DataGrid.ColumnHeaderStyle>
+                                    <DataGrid.CellStyle>
+                                        <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                    </DataGrid.CellStyle>
+                                    <DataGrid.RowStyle>
+                                        <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                    </DataGrid.RowStyle>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
+                                                            ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
+                                                            ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="거래금액(만원)" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
+                                                            ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
+                                                            ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="80" IsReadOnly="True"
+                                                            ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                        <DataGridTemplateColumn Header="적용" Width="60">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsApplied, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              IsHitTestVisible="True"
+                                                              Focusable="True"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
                         </StackPanel>
                     </Border>
 

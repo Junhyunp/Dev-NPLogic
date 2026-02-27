@@ -497,6 +497,7 @@ namespace NPLogic.ViewModels
             var supabaseService = App.ServiceProvider?.GetService(typeof(SupabaseService)) as SupabaseService;
             var clientUserId = supabaseService?.GetCurrentUser()?.Email ?? "NPLogic-WPF";
             var trades = await _tradeService.GetTradesByPnuAsync(pnu, category, clientUserId: clientUserId);
+            trades.Sort((a, b) => a.DealDate.CompareTo(b.DealDate)); // 거래일자 오름차순
             foreach (var t in trades)
             {
                 DateTime? dealDate = null;
