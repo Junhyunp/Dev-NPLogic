@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+### 2026-02-28
+
+#### 실거래가 외부 Supabase 연동 (TradeService + PNU 자동 확보)
+
+- **TradeService 신규 구현**: 외부 Supabase 프로젝트(`gkchpqzbpnmhzcjhsodf`)의 RPC 함수(`get_trades`)를 통해 실거래가 데이터 조회
+- **서비스 계정 인증**: `wpf-service@nplogic-map.com`으로 로그인 → access_token 획득, 만료 5분 전 자동 갱신, SemaphoreSlim 동시 로그인 방지
+- **PNU 자동 확보**: PNU가 없는 물건은 주소 정제 후 VworldService로 자동 PNU 변환
+- **주소 정제 로직**: `address_full`에서 건물명/동/층/호 제거하여 순수 지번 주소만 추출 (AddressProvince/City/District 기반 + 지번번호 추출, fallback 정규식)
+- **물건유형 → 카테고리 매핑**: 아파트→apt, 연립다세대→multiplex, 오피스텔→officetel 등 자동 매핑하여 RPC 파라미터로 전달
+- **p_client_user_id**: 현재 로그인 사용자 이메일을 전달하여 조회 추적 가능
+- **거래금액 단위 표시**: DataGrid 헤더 `거래금액` → `거래금액(만원)`
+
+**변경된 파일**
+- `src/NPLogic.App/Services/TradeService.cs` — 신규 (서비스 계정 인증 + RPC 호출)
+- `src/NPLogic.App/ViewModels/EvaluationTabViewModel.cs` — LoadRealTransactionsAsync, CleanAddressForPnuLookup, MapPropertyTypeToTradeCategory 추가
+- `src/NPLogic.App/Views/EvaluationTab.xaml` — 거래금액 헤더에 단위 표시
+
 ### 2026-02-20
 
 #### 평가 탭 저장 버튼 + 실거래가 섹션 리뉴얼 + 평가 유형 매핑 업데이트

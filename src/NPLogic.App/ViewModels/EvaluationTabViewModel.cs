@@ -2,6 +2,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -139,11 +140,14 @@ namespace NPLogic.ViewModels
         public string? SupabaseUrl { get; set; }
         public string? SupabaseKey { get; set; }
 
+        private readonly TradeService _tradeService;
+
         public EvaluationTabViewModel(EvaluationRepository evaluationRepository)
         {
             _evaluationRepository = evaluationRepository ?? throw new ArgumentNullException(nameof(evaluationRepository));
             _recommendService = new RecommendService();
-            
+            _tradeService = new TradeService();
+
             // 초기 데이터 설정
             InitializeCaseItems();
         }
@@ -425,6 +429,9 @@ namespace NPLogic.ViewModels
                     // 새 평가 초기화
                     InitializeNewEvaluation();
                 }
+
+                // 실거래가 자동 조회 (PNU 기반)
+                await LoadRealTransactionsAsync();
             }
             catch (Exception ex)
             {
@@ -434,6 +441,165 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        /// <summary>
+        /// PNU 기반 실거래가 자동 조회
+        /// </summary>
+        private async Task LoadRealTransactionsAsync()
+        {
+            RealTransactions.Clear();
+
+            if (_property == null)
+                return;
+
+            var pnu = _property.Pnu;
+
+            // PNU가 없으면 VworldService로 주소 → PNU 자동 변환
+            if (string.IsNullOrWhiteSpace(pnu))
+            {
+                var cleanAddress = CleanAddressForPnuLookup();
+                Debug.WriteLine($"[EvaluationTab] PNU 없음 → 정제 주소로 PNU 자동 조회: {cleanAddress}");
+
+                try
+                {
+                    var vworldService = App.ServiceProvider?.GetService(typeof(VworldService)) as VworldService;
+                    if (vworldService != null && !string.IsNullOrWhiteSpace(cleanAddress))
+                    {
+                        var result = await vworldService.SearchAddressAsync(cleanAddress);
+                        if (result != null && result.IsValidPnu)
+                        {
+                            pnu = result.Pnu;
+                            _property.Pnu = pnu;
+                            Debug.WriteLine($"[EvaluationTab] PNU 자동 확보 성공: {pnu}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[EvaluationTab] PNU 자동 조회 실패: {ex.Message}");
+                }
+            }
+
+            Debug.WriteLine($"[EvaluationTab] 실거래가 조회 - PNU: {pnu ?? "(없음)"}");
+            if (string.IsNullOrWhiteSpace(pnu))
+                return;
+
+            // 물건 유형 → 실거래가 카테고리 매핑
+            var category = MapPropertyTypeToTradeCategory(_property.PropertyType);
+            var supabaseService = App.ServiceProvider?.GetService(typeof(SupabaseService)) as SupabaseService;
+            var clientUserId = supabaseService?.GetCurrentUser()?.Email ?? "NPLogic-WPF";
+            var trades = await _tradeService.GetTradesByPnuAsync(pnu, category, clientUserId: clientUserId);
+            foreach (var t in trades)
+            {
+                DateTime? dealDate = null;
+                var ds = t.DealDate.ToString();
+                if (ds.Length == 8 &&
+                    int.TryParse(ds[..4], out var y) &&
+                    int.TryParse(ds[4..6], out var m) &&
+                    int.TryParse(ds[6..8], out var d))
+                {
+                    try { dealDate = new DateTime(y, m, d); } catch { }
+                }
+
+                RealTransactions.Add(new RealTransactionItem
+                {
+                    Area = (decimal)t.Area,
+                    TransactionDate = dealDate,
+                    Amount = t.DealAmount,
+                    Floor = t.Floor,
+                    IsRegistered = t.IsRegistered ? "Y" : "N",
+                    IsApplied = false
+                });
+            }
+        }
+
+        /// <summary>
+        /// address_full에서 건물명/동/층/호를 제거하고 순수 지번 주소만 추출
+        /// 예: "경기도 안산시 상록구 사동 1536 푸른마을5단지 제515동 제3층 제302호"
+        ///   → "경기도 안산시 상록구 사동 1536"
+        /// </summary>
+        private string? CleanAddressForPnuLookup()
+        {
+            if (_property == null) return null;
+
+            var province = _property.AddressProvince?.Trim();
+            var city = _property.AddressCity?.Trim();
+            var district = _property.AddressDistrict?.Trim();
+
+            // 담보소재지 1/2/3이 모두 있으면 이를 기반으로 정제
+            if (!string.IsNullOrWhiteSpace(province) &&
+                !string.IsNullOrWhiteSpace(city) &&
+                !string.IsNullOrWhiteSpace(district))
+            {
+                var baseAddress = $"{province} {city} {district}";
+
+                // address_full에서 지번번호 추출
+                var full = _property.AddressFull;
+                if (!string.IsNullOrWhiteSpace(full))
+                {
+                    var distIdx = full.IndexOf(district);
+                    if (distIdx >= 0)
+                    {
+                        var afterDistrict = full.Substring(distIdx + district.Length).TrimStart();
+                        // 지번번호 패턴: "1536", "461", "279-8", "166" 등
+                        var jibunMatch = Regex.Match(afterDistrict, @"^(\d+(-\d+)?)");
+                        if (jibunMatch.Success)
+                        {
+                            var result = $"{baseAddress} {jibunMatch.Value}";
+                            Debug.WriteLine($"[EvaluationTab] 주소 정제: '{full}' → '{result}'");
+                            return result;
+                        }
+                    }
+                }
+
+                // 지번번호 못 찾으면 기본 주소만 반환
+                Debug.WriteLine($"[EvaluationTab] 주소 정제 (지번 미발견): '{baseAddress}'");
+                return baseAddress;
+            }
+
+            // 담보소재지 필드 없으면 address_full에서 직접 정제
+            var addressFull = _property.AddressFull;
+            if (string.IsNullOrWhiteSpace(addressFull))
+                return _property.DisplayAddress;
+
+            // "제N동 제N층 제N호" 패턴 이전까지만 사용
+            var cleaned = Regex.Replace(addressFull, @"\s+제?\d+동\s+제?\d+층.*$", "").Trim();
+            // 건물명 제거: 지번번호 뒤의 한글 건물명
+            cleaned = Regex.Replace(cleaned, @"(\d+(-\d+)?)\s+\S*[가-힣]+(아파트|맨숀|빌라|타워|단지|타운).*$", "$1").Trim();
+            // 괄호 내용 제거
+            cleaned = Regex.Replace(cleaned, @"\(.*?\)", "").Trim();
+            // 쉼표 이후 제거 (복수 필지)
+            var commaIdx = cleaned.IndexOf(',');
+            if (commaIdx > 0) cleaned = cleaned.Substring(0, commaIdx).Trim();
+
+            Debug.WriteLine($"[EvaluationTab] 주소 정제 (fallback): '{addressFull}' → '{cleaned}'");
+            return cleaned;
+        }
+
+        /// <summary>
+        /// 물건 유형 → 실거래가 API 카테고리 매핑
+        /// </summary>
+        private static string? MapPropertyTypeToTradeCategory(string? propertyType)
+        {
+            if (string.IsNullOrWhiteSpace(propertyType)) return null;
+
+            if (propertyType.Contains("아파트") && !propertyType.Contains("공장"))
+                return "apt";
+            if (propertyType.Contains("연립") || propertyType.Contains("다세대") || propertyType.Contains("빌라"))
+                return "multiplex";
+            if (propertyType.Contains("오피스텔"))
+                return "officetel";
+            if (propertyType.Contains("단독") || propertyType.Contains("다가구"))
+                return "house";
+            if (propertyType.Contains("상가") || propertyType.Contains("근린") || propertyType.Contains("업무"))
+                return "commercial";
+            if (propertyType.Contains("토지") || propertyType.Contains("대지") || propertyType.Contains("임야"))
+                return "land";
+            if (propertyType.Contains("공장") || propertyType.Contains("창고"))
+                return "factory";
+
+            return null; // 매핑 안 되면 전체 카테고리로 조회
         }
 
         private void InitializeCaseItems()

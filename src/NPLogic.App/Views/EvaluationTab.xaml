@@ -250,7 +250,7 @@
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                    <DataGridTextColumn Header="거래금액" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
+                                    <DataGridTextColumn Header="거래금액(만원)" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
