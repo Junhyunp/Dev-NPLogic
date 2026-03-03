@@ -626,12 +626,27 @@ namespace NPLogic.Views
             switch (tabName)
             {
                 case "Home":
+                    if (viewModel is PropertyDetailViewModel homeVm && selectedPropertyId.HasValue)
+                    {
+                        homeVm.SetPropertyId(selectedPropertyId.Value);
+                        token.ThrowIfCancellationRequested();
+                        await homeVm.InitializeAsync();
+                    }
+                    break;
+
                 case "CollateralProperty":
                     if (viewModel is PropertyDetailViewModel propVm && selectedPropertyId.HasValue)
                     {
                         propVm.SetPropertyId(selectedPropertyId.Value);
                         token.ThrowIfCancellationRequested();
                         await propVm.InitializeAsync();
+
+                        if (_tabViewCache.TryGetValue("CollateralProperty", out var cachedView)
+                            && cachedView is CollateralPropertyView collateralView
+                            && propVm.Property != null)
+                        {
+                            await collateralView.ReloadMapsAsync(propVm);
+                        }
                     }
                     break;
                     

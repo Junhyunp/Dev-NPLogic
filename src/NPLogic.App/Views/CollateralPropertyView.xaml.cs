@@ -249,6 +249,17 @@ namespace NPLogic.Views
         }
 
         /// <summary>
+        /// 외부에서 물건 전환 시 지도 재로드용
+        /// </summary>
+        public async Task ReloadMapsAsync(PropertyDetailViewModel vm)
+        {
+            if (_mapWebViewsInitialized && vm.Property != null)
+            {
+                await LoadNaverMapsAsync(vm);
+            }
+        }
+
+        /// <summary>
         /// 카카오 지도 3개 로드 (네이버 지도 WebView2 호환성 문제로 카카오 사용)
         /// </summary>
         private async Task LoadNaverMapsAsync(PropertyDetailViewModel vm)
