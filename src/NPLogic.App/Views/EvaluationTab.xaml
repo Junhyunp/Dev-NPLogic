@@ -208,7 +208,7 @@
                                 <!-- 우측: 실거래가 DataGrid -->
                                 <DataGrid Grid.Column="2"
                                           x:Name="RealTransactionGrid"
-                                          PreviewMouseWheel="DataGrid_PreviewMouseWheel"
+                                          PreviewMouseWheel="DataGrid_SmartScrollMouseWheel"
                                           ItemsSource="{Binding RealTransactions}"
                                           AutoGenerateColumns="False"
                                           CanUserAddRows="False"
@@ -1028,138 +1028,153 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 차주별 배당 요약 (피드백 반영: 시나리오 3 컬럼 제거) -->
-                    <Border Style="{StaticResource CardStyle}">
+                    <!-- 인터림 상계/회수 (모든 물건 공통 표시) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="시나리오별 배당 요약" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
-                            
-                            <DataGrid ItemsSource="{Binding ScenarioSummaryItems}"
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="SwapHorizontal" Width="18" Height="18"
+                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="인터림 상계/회수"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 16열 테이블 -->
+                            <DataGrid ItemsSource="{Binding InterimRecoveryRows}"
                                       PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
                                       HeadersVisibility="Column"
                                       GridLinesVisibility="All"
-                                      BorderThickness="1"
-                                      BorderBrush="{StaticResource BlueGray200Brush}"
-                                      FontSize="{StaticResource FontSizeBody}"
-                                      IsReadOnly="True">
+                                      BorderThickness="0"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      RowHeight="32"
+                                      IsReadOnly="True"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                      MinHeight="60">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="80">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="시나리오 1" Binding="{Binding Scenario1Display}" Width="120">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="시나리오 2" Binding="{Binding Scenario2Display}" Width="120">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="Foreground" Value="{StaticResource SecondaryBrush}"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="합계" Binding="{Binding TotalDisplay}" Width="*">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Padding" Value="8,4"/>
-                                                <Setter Property="TextAlignment" Value="Right"/>
-                                                <Setter Property="FontWeight" Value="Bold"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="차주일련번호" Binding="{Binding BorrowerNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="차주명" Binding="{Binding BorrowerName}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="채권일련번호" Binding="{Binding LoanNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="계좌번호" Binding="{Binding AccountNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수구분" Binding="{Binding RecoveryType}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수일자" Binding="{Binding RecoveryDate}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수원금" Binding="{Binding RecoveryPrincipal}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수이자" Binding="{Binding RecoveryInterest}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수가지급금" Binding="{Binding RecoveryProvisional}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="회수총액" Binding="{Binding RecoveryTotal}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridCheckBoxColumn Header="원금회수반영" Binding="{Binding PrincipalRecoveryApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="원금상계반영" Binding="{Binding PrincipalOffsetApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="이자회수반영" Binding="{Binding InterestRecoveryApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="이자상계반영" Binding="{Binding InterestOffsetApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="대위변제반영" Binding="{Binding SubrogationApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="기타회수반영" Binding="{Binding OtherRecoveryApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </StackPanel>
                     </Border>
 
-                    <!-- 인터림 상계/회수 (차주당 첫 번째 물건에만 표시) -->
-                    <Border Style="{StaticResource CardStyle}" 
-                            Visibility="{Binding IsFirstPropertyInBorrower, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <!-- 인터림 지출 (모든 물건 공통 표시) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                <TextBlock Text="인터림 상계/회수" Style="{StaticResource SectionHeaderStyle}"/>
-                                <TextBlock Text="(차주별 합산)" 
-                                           Style="{StaticResource LabelStyle}" 
-                                           FontSize="{StaticResource FontSizeSmall}" 
-                                           Opacity="0.6" 
-                                           VerticalAlignment="Center"
-                                           Margin="8,0,0,0"/>
-                            </StackPanel>
-                            
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- 회수 정보 -->
-                                <Border Grid.Column="0" Background="{StaticResource SuccessLightBrush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
-                                    <StackPanel>
-                                        <TextBlock Text="회수 총액" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,0,4"/>
-                                        <TextBlock Text="{Binding InterimTotalRecovery, StringFormat=N0}" 
-                                                   Style="{StaticResource AmountStyle}" 
-                                                   FontSize="{StaticResource FontSizeH2}"
-                                                   Foreground="{StaticResource SuccessBrush}"/>
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <StackPanel Margin="0,0,16,0">
-                                                <TextBlock Text="원금회수" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeTiny}"/>
-                                                <TextBlock Text="{Binding InterimPrincipalRecovery, StringFormat=N0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                                            </StackPanel>
-                                            <StackPanel>
-                                                <TextBlock Text="이자회수" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeTiny}"/>
-                                                <TextBlock Text="{Binding InterimInterestRecovery, StringFormat=N0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                                
-                                <!-- 지출 정보 -->
-                                <Border Grid.Column="1" Background="{StaticResource WarningLightBrush}" CornerRadius="4" Padding="12" Margin="0,0,8,0">
-                                    <StackPanel>
-                                        <TextBlock Text="지출 총액" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,0,4"/>
-                                        <TextBlock Text="{Binding InterimTotalAdvance, StringFormat=N0}" 
-                                                   Style="{StaticResource AmountStyle}" 
-                                                   FontSize="{StaticResource FontSizeH2}"
-                                                   Foreground="{StaticResource WarningBrush}"/>
-                                        <StackPanel Margin="0,8,0,0">
-                                            <TextBlock Text="경매비용" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeTiny}"/>
-                                            <TextBlock Text="{Binding InterimAuctionCost, StringFormat=N0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-                                
-                                <!-- 순수익 -->
-                                <Border Grid.Column="2" Background="{StaticResource PrimaryLightBrush}" CornerRadius="4" Padding="12">
-                                    <StackPanel>
-                                        <TextBlock Text="순수익" Style="{StaticResource LabelStyle}" FontSize="{StaticResource FontSizeSmall}" Margin="0,0,0,4"/>
-                                        <TextBlock Text="{Binding InterimNetAmount, StringFormat=N0}" 
-                                                   Style="{StaticResource AmountStyle}" 
-                                                   FontSize="{StaticResource FontSizeH2}"
-                                                   FontWeight="Bold"
-                                                   Foreground="{StaticResource PrimaryBrush}"/>
-                                        <TextBlock Text="회수 - 지출" 
-                                                   Style="{StaticResource LabelStyle}" 
-                                                   FontSize="{StaticResource FontSizeTiny}" 
-                                                   Opacity="0.6"
-                                                   Margin="0,8,0,0"/>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="CashMinus" Width="18" Height="18"
+                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="인터림 지출"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 10열 테이블 -->
+                            <DataGrid ItemsSource="{Binding InterimExpenseRows}"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      GridLinesVisibility="All"
+                                      BorderThickness="0"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      RowHeight="32"
+                                      IsReadOnly="True"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                      MinHeight="60">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="차주일련번호" Binding="{Binding BorrowerNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="차주명" Binding="{Binding BorrowerName}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="채권일련번호" Binding="{Binding LoanNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="계좌번호" Binding="{Binding AccountNumber}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="발생일자" Binding="{Binding OccurrenceDate}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="최초발생액" Binding="{Binding InitialAmount}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="잔액" Binding="{Binding Balance}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="비고" Binding="{Binding Remarks}" Width="*" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridCheckBoxColumn Header="경매비용반영" Binding="{Binding AuctionCostApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                    <DataGridCheckBoxColumn Header="기타비용반영" Binding="{Binding OtherCostApplied, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
 

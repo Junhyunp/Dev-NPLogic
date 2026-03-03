@@ -41,6 +41,47 @@ namespace NPLogic.Views
         }
 
         /// <summary>
+        /// 내부 스크롤이 있는 DataGrid용 스마트 스크롤 핸들러.
+        /// 내부 스크롤이 끝에 도달했을 때만 부모 ScrollViewer로 전달한다.
+        /// </summary>
+        private void DataGrid_SmartScrollMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled || sender is not DataGrid dataGrid) return;
+
+            // DataGrid 내부 ScrollViewer 찾기
+            var internalSv = FindChildScrollViewer(dataGrid);
+            if (internalSv == null || internalSv.ScrollableHeight <= 0)
+            {
+                // 내부 스크롤 없음 (데이터 적음) → 부모로 전달
+                DataGrid_PreviewMouseWheel(sender, e);
+                return;
+            }
+
+            bool scrollingUp = e.Delta > 0;
+            bool atTop = internalSv.VerticalOffset <= 0;
+            bool atBottom = internalSv.VerticalOffset >= internalSv.ScrollableHeight;
+
+            if ((scrollingUp && atTop) || (!scrollingUp && atBottom))
+            {
+                // 끝에 도달 → 부모로 전달
+                DataGrid_PreviewMouseWheel(sender, e);
+            }
+            // 그 외 → 내부 스크롤 동작 (아무것도 안 함, 기본 동작 유지)
+        }
+
+        private static ScrollViewer? FindChildScrollViewer(DependencyObject parent)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is ScrollViewer sv) return sv;
+                var found = FindChildScrollViewer(child);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// E-001: 사례지도 클릭 시 팝업으로 확대 표시
         /// </summary>
         private void MapPlaceholder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

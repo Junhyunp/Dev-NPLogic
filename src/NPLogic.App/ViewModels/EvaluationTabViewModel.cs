@@ -145,6 +145,46 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 인터림 상계/회수 테이블 행 아이템
+    /// </summary>
+    public class InterimRecoveryRow : ObservableObject
+    {
+        public string? BorrowerNumber { get; set; }
+        public string? BorrowerName { get; set; }
+        public string? LoanNumber { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? RecoveryType { get; set; }
+        public string? RecoveryDate { get; set; }
+        public string? RecoveryPrincipal { get; set; }
+        public string? RecoveryInterest { get; set; }
+        public string? RecoveryProvisional { get; set; }
+        public string? RecoveryTotal { get; set; }
+        public bool PrincipalRecoveryApplied { get; set; }
+        public bool PrincipalOffsetApplied { get; set; }
+        public bool InterestRecoveryApplied { get; set; }
+        public bool InterestOffsetApplied { get; set; }
+        public bool SubrogationApplied { get; set; }
+        public bool OtherRecoveryApplied { get; set; }
+    }
+
+    /// <summary>
+    /// 인터림 지출 테이블 행 아이템
+    /// </summary>
+    public class InterimExpenseRow : ObservableObject
+    {
+        public string? BorrowerNumber { get; set; }
+        public string? BorrowerName { get; set; }
+        public string? LoanNumber { get; set; }
+        public string? AccountNumber { get; set; }
+        public string? OccurrenceDate { get; set; }
+        public string? InitialAmount { get; set; }
+        public string? Balance { get; set; }
+        public string? Remarks { get; set; }
+        public bool AuctionCostApplied { get; set; }
+        public bool OtherCostApplied { get; set; }
+    }
+
+    /// <summary>
     /// 평가 탭 ViewModel
     /// </summary>
     public partial class EvaluationTabViewModel : ObservableObject
@@ -187,6 +227,10 @@ namespace NPLogic.ViewModels
         private string _scenario2CapType = "해당사항 없음";
 
         public ObservableCollection<RecoveryStrategyRow> RecoveryStrategyRows { get; } = new();
+
+        public ObservableCollection<InterimRecoveryRow> InterimRecoveryRows { get; } = new();
+
+        public ObservableCollection<InterimExpenseRow> InterimExpenseRows { get; } = new();
 
         public List<string> CapTypeOptions { get; } = new() { "Loan Cap", "Loan Cap 2", "Mortgage Cap", "해당사항 없음" };
 

@@ -266,7 +266,8 @@
                 <StackPanel>
 
                     <!-- 상단 영역: 넓은 테이블들 (수평 스크롤 필요) -->
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  PreviewMouseWheel="HorizontalScrollViewer_PreviewMouseWheel">
                         <StackPanel MinWidth="1400">
 
                     <!-- ========== 1. 경매사건 및 선순위 상단 정보 ========== -->
@@ -1338,6 +1339,7 @@
                                 </Grid.RowDefinitions>
 
                                 <DataGrid x:Name="ResidentialLeaseGrid"
+                                          PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                           Grid.Row="0"
                                           ItemsSource="{Binding ResidentialLeases}"
                                           AutoGenerateColumns="False"
@@ -1461,6 +1463,7 @@
                                 </Grid.RowDefinitions>
 
                                 <DataGrid x:Name="CommercialLeaseGrid"
+                                          PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                           Grid.Row="0"
                                           ItemsSource="{Binding CommercialLeases}"
                                           AutoGenerateColumns="False"
@@ -1635,6 +1638,7 @@
                                 </Grid>
 
                                 <DataGrid x:Name="WageClaimGrid"
+                                          PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                           Grid.Row="1"
                                           ColumnWidth="*"
                                           ItemsSource="{Binding WageClaims}"
