@@ -47,9 +47,7 @@ NPLogic은 .NET 10 기반 WPF 데스크톱 애플리케이션으로, 부실채�
 │  └─ NPLogic.UI     # 공통 UI 컴포넌트/스타일
 ├─ python/           # FastAPI 기반 보조 서버 (OCR/추천)
 ├─ registry_ocr/     # 레거시 OCR 스크립트/의존성 일부
-├─ reference/        # 원청 참고자료, 샘플, 레거시 OCR 파이프라인
-├─ docs/             # 레거시 분산 문서 위치, 현재는 엔트리만 유지
-└─ changelog.md      # 호환용 엔트리 문서
+└─ reference/        # 원청 참고자료, 샘플, 레거시 OCR 파이프라인
 ```
 
 ## 4. 기술 스택
@@ -701,6 +699,14 @@ WPF App
 
 기존 `changelog.md`의 핵심만 현재 상태 이해에 필요한 수준으로 요약한다.
 
+### 2026-03-03
+
+- `PROJECT.md`를 루트 SSOT 문서로 신설하고 분산 문서 내용을 통합
+- Supabase MCP 기준으로 DB/OCR 사실을 재검증하고 섹션별 `검증 기준` 표기 추가
+- 루트 `README.md`를 저장소 진입용 포인터 문서로 축약
+- 기존 분산 `.md` 문서를 삭제해 문서 진실 공급원을 `PROJECT.md` 하나로 정리
+- `.gitignore`에 `.omc/`를 추가하고 기존 `.omc` 추적 파일을 Git 인덱스에서 제거
+
 ### 2026-02-28
 
 - 평가 탭의 사례지도와 실거래가 섹션 통합
@@ -776,9 +782,8 @@ WPF App
 
 ## 23. 레거시 문서 맵
 
-다음 문서들은 더 이상 개별 SSOT가 아니다. 모두 이 문서로 통합되었다.
+다음 문서들은 더 이상 개별 SSOT가 아니며, 2026-03-03 기준으로 이 문서에 통합된 뒤 저장소에서 삭제되었다.
 
-- `README.md`
 - `CLAUDE.md`
 - `changelog.md`
 - `docs/AGENTS.md`
@@ -790,6 +795,8 @@ WPF App
 - `python/AGENTS.md`
 - `reference/AGENTS.md`
 - `reference/Auction-Certificate/README.md`
+
+`README.md`는 삭제하지 않고 저장소 진입용 포인터 문서로만 유지한다.
 
 ## 24. PROJECT.md 업데이트 규칙
 
