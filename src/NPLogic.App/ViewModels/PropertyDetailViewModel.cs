@@ -1036,6 +1036,16 @@ namespace NPLogic.ViewModels
         private int _totalPropertyCount;
 
         /// <summary>
+        /// 현재 차주의 물건 수 (사이드바 목록 기준)
+        /// </summary>
+        public int GetBorrowerPropertyCount()
+        {
+            if (_propertyList == null || Property == null || string.IsNullOrEmpty(Property.BorrowerNumber))
+                return 1;
+            return _propertyList.Count(p => p.BorrowerNumber == Property.BorrowerNumber);
+        }
+
+        /// <summary>
         /// 이전 물건으로 이동 가능 여부
         /// </summary>
         public bool CanNavigatePrevious => _currentIndex > 0 && _propertyList != null && _propertyList.Count > 0;

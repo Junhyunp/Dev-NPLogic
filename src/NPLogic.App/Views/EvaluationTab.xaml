@@ -208,6 +208,7 @@
                                 <!-- 우측: 실거래가 DataGrid -->
                                 <DataGrid Grid.Column="2"
                                           x:Name="RealTransactionGrid"
+                                          PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                           ItemsSource="{Binding RealTransactions}"
                                           AutoGenerateColumns="False"
                                           CanUserAddRows="False"
@@ -344,6 +345,7 @@
 
                             <!-- 사례평가 테이블 -->
                             <DataGrid x:Name="CaseEvaluationGrid"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                       ItemsSource="{Binding CaseItems}"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
@@ -867,76 +869,160 @@
                             <!-- 시나리오 1 (좌) + 시나리오 2 (우) 병렬 테이블 -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <!-- 시나리오 1: 4열 -->
-                                    <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <!-- 시나리오 2: 4열 -->
-                                    <ColumnDefinition Width="100"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
 
-                                <!-- ===== 시나리오 1 (좌측 4열) ===== -->
-                                <!-- Row 0: 핵심 정보 행 -->
-                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource PrimaryBrush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="시나리오 1" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="Cap 적용 여부" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,2,1" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
+                                <!-- ===== 시나리오 1 (좌측) ===== -->
+                                <Border Grid.Column="0" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,2,0">
+                                    <StackPanel>
+                                        <!-- Row 0 (시나리오 라벨 + Cap) + Row 1 (컬럼 헤더) 통합 Grid -->
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="160"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- Row 0: 시나리오 라벨 + Cap 적용 여부 -->
+                                            <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource PrimaryBrush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="시나리오 1" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="1" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="Cap 적용 여부" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="3" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,0,2" Padding="4,4">
+                                                <ComboBox ItemsSource="{Binding CapTypeOptions}"
+                                                          SelectedItem="{Binding Scenario1CapType}"
+                                                          FontSize="12" BorderThickness="0"
+                                                          HorizontalContentAlignment="Center"/>
+                                            </Border>
+                                            <!-- Row 1: 컬럼 헤더 -->
+                                            <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="구분" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="CF in date" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="Cash in/out" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                                <TextBlock Text="Ratio" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- 동적 데이터 행 -->
+                                        <ItemsControl ItemsSource="{Binding RecoveryStrategyRows}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="120"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S1CfDate}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S1CashInOut}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S1Ratio}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </Border>
 
-                                <!-- Row 1~17: 빈 행 (추후 채움) -->
-                                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,2,0" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12"/>
-                                </Border>
+                                <!-- ===== 시나리오 2 (우측) ===== -->
+                                <Border Grid.Column="1">
+                                    <StackPanel>
+                                        <!-- Row 0 (시나리오 라벨 + Cap) + Row 1 (컬럼 헤더) 통합 Grid -->
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="160"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- Row 0: 시나리오 라벨 + Cap 적용 여부 -->
+                                            <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="시나리오 2" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="1" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,2" Padding="8,8">
+                                                <TextBlock Text="Cap 적용 여부" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="0" Grid.Column="3" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,0,2" Padding="4,4">
+                                                <ComboBox ItemsSource="{Binding CapTypeOptions}"
+                                                          SelectedItem="{Binding Scenario2CapType}"
+                                                          FontSize="12" BorderThickness="0"
+                                                          HorizontalContentAlignment="Center"/>
+                                            </Border>
+                                            <!-- Row 1: 컬럼 헤더 -->
+                                            <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="구분" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="CF in date" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <TextBlock Text="Cash in/out" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Row="1" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                                <TextBlock Text="Ratio" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </Grid>
 
-                                <!-- ===== 시나리오 2 (우측 4열) ===== -->
-                                <!-- Row 0: 핵심 정보 행 -->
-                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource SecondaryBrush}" BorderBrush="{StaticResource BlueGray300Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="시나리오 2" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="6" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
-                                    <TextBlock Text="Cap 적용 여부" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="0" Grid.Column="7" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-
-                                <!-- Row 1~17: 빈 행 (추후 채움) -->
-                                <Border Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="4" Padding="8,8">
-                                    <TextBlock Text="" FontSize="12"/>
+                                        <!-- 동적 데이터 행 -->
+                                        <ItemsControl ItemsSource="{Binding RecoveryStrategyRows}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="160"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="120"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S2CfDate}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S2CashInOut}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                        <Border Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                                            <TextBlock Text="{Binding S2Ratio}" FontSize="12" HorizontalAlignment="Center"/>
+                                                        </Border>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </Border>
                             </Grid>
                         </StackPanel>
@@ -948,6 +1034,7 @@
                             <TextBlock Text="시나리오별 배당 요약" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
                             
                             <DataGrid ItemsSource="{Binding ScenarioSummaryItems}"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel"
                                       AutoGenerateColumns="False"
                                       CanUserAddRows="False"
                                       CanUserDeleteRows="False"

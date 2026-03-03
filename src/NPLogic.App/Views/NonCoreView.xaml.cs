@@ -522,6 +522,9 @@ namespace NPLogic.Views
                                 if (parentVm.Property != null)
                                 {
                                     parentVm.EvaluationViewModel.SetProperty(parentVm.Property);
+                                    var allPropsInit = await _viewModel?.GetAllPropertiesAsync();
+                                    var borrowerCountInit = allPropsInit?.Count(p => p.BorrowerNumber == parentVm.Property.BorrowerNumber) ?? 1;
+                                    parentVm.EvaluationViewModel.SetBorrowerPropertyCount(borrowerCountInit);
                                 }
                             }
                             content.DataContext = parentVm.EvaluationViewModel;
@@ -673,6 +676,11 @@ namespace NPLogic.Views
                         if (property != null)
                         {
                             evalVm.SetProperty(property);
+
+                            // 차주별 물건 수 갱신 (DashboardViewModel에서 직접 조회)
+                            var allPropsRefresh = await _viewModel?.GetAllPropertiesAsync();
+                            var borrowerCountRefresh = allPropsRefresh?.Count(p => p.BorrowerNumber == property.BorrowerNumber) ?? 1;
+                            evalVm.SetBorrowerPropertyCount(borrowerCountRefresh);
                         }
                         token.ThrowIfCancellationRequested();
                         await evalVm.LoadAsync();

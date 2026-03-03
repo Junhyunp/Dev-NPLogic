@@ -130,6 +130,21 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 회수 전략 요약 행 아이템
+    /// </summary>
+    public class RecoveryStrategyRow : ObservableObject
+    {
+        public string Label { get; set; } = "";
+        public string? S1CfDate { get; set; }
+        public string? S1CashInOut { get; set; }
+        public string? S1Ratio { get; set; }
+        public string? S2CfDate { get; set; }
+        public string? S2CashInOut { get; set; }
+        public string? S2Ratio { get; set; }
+        public bool IsTotal { get; set; }
+    }
+
+    /// <summary>
     /// 평가 탭 ViewModel
     /// </summary>
     public partial class EvaluationTabViewModel : ObservableObject
@@ -157,7 +172,50 @@ namespace NPLogic.ViewModels
 
             // 초기 데이터 설정
             InitializeCaseItems();
+            BuildRecoveryStrategyRows();
         }
+
+        #region 회수 전략 요약
+
+        [ObservableProperty]
+        private int _borrowerPropertyCount = 1;
+
+        [ObservableProperty]
+        private string _scenario1CapType = "해당사항 없음";
+
+        [ObservableProperty]
+        private string _scenario2CapType = "해당사항 없음";
+
+        public ObservableCollection<RecoveryStrategyRow> RecoveryStrategyRows { get; } = new();
+
+        public List<string> CapTypeOptions { get; } = new() { "Loan Cap", "Loan Cap 2", "Mortgage Cap", "해당사항 없음" };
+
+        public void SetBorrowerPropertyCount(int count)
+        {
+            BorrowerPropertyCount = Math.Max(1, count);
+            BuildRecoveryStrategyRows();
+        }
+
+        private void BuildRecoveryStrategyRows()
+        {
+            RecoveryStrategyRows.Clear();
+
+            RecoveryStrategyRows.Add(new() { Label = "Cdate 이후 회수/지출" });
+            RecoveryStrategyRows.Add(new() { Label = "신용보증서 회수" });
+
+            for (int i = 1; i <= BorrowerPropertyCount; i++)
+                RecoveryStrategyRows.Add(new() { Label = $"Cdate 이후 경매비용 {i}" });
+
+            for (int i = 1; i <= BorrowerPropertyCount; i++)
+                RecoveryStrategyRows.Add(new() { Label = $"담보 {i} 배당회수" });
+
+            RecoveryStrategyRows.Add(new() { Label = "MCI 회수" });
+            RecoveryStrategyRows.Add(new() { Label = "합계", IsTotal = true });
+            RecoveryStrategyRows.Add(new() { Label = "XNPV" });
+            RecoveryStrategyRows.Add(new() { Label = "OPB" });
+        }
+
+        #endregion
 
         #region 속성
 
