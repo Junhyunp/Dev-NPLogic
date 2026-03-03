@@ -61,6 +61,7 @@ NPLogic은 .NET 10 기반 WPF 데스크톱 애플리케이션으로, 부실채�
 - LiveChartsCore + SkiaSharp
 - WebView2
 - ClosedXML
+- EPPlus
 - Serilog
 
 ### 4.2 데이터/백엔드
@@ -307,17 +308,6 @@ python server.py
 - `python/deploy.sh`
 - `python/nplogic_backend.spec`
 
-### 11.4 Supabase Edge Functions
-
-검증 기준: `[MCP]` + `[코드]`
-
-Supabase MCP 기준 활성 Edge Function:
-
-- `get-map-config` v3 (`verify_jwt = false`)
-- `ocr-registry-save` v12 (`verify_jwt = false`)
-
-즉, 기존 문서에 있던 `ocr-registry-save v12` 서술은 실DB 기준으로도 맞다. 코드 기준으로도 등기 OCR 저장 경로는 `RegistryRepository.OcrRegistrySaveViaEdgeFunctionAsync(...)`를 통해 `ocr-registry-save`를 호출한다.
-
 ### 11.3 지도/부동산 외부 연동
 
 검증 기준: `[코드]`
@@ -328,6 +318,17 @@ Supabase MCP 기준 활성 Edge Function:
 - Vworld
 - 국토부 실거래가 API(Data.go.kr)
 - 외부 Supabase 기반 거래 데이터 RPC(`TradeService`)
+
+### 11.4 Supabase Edge Functions
+
+검증 기준: `[MCP]` + `[코드]`
+
+Supabase MCP 기준 활성 Edge Function:
+
+- `get-map-config` v3 (`verify_jwt = false`)
+- `ocr-registry-save` v12 (`verify_jwt = false`)
+
+즉, 기존 문서에 있던 `ocr-registry-save v12` 서술은 실DB 기준으로도 맞다. 코드 기준으로도 등기 OCR 저장 경로는 `RegistryRepository.OcrRegistrySaveViaEdgeFunctionAsync(...)`를 통해 `ocr-registry-save`를 호출한다.
 
 ## 12. 핵심 도메인과 데이터 모델
 
@@ -518,8 +519,8 @@ WPF App
 - 주택: `CASE_R1` ~ `CASE_R18`
 - 토지: `CASE_L1` ~ `CASE_L4`
 - 상가/공장: `CASE_C1` ~ `CASE_C17`
-- 임금채권: `ApplyWageClaimRules(...)` 메서드 존재, 별도 `CASE_W*` 코드는 현재 코드에서 직접 확인되지 않음
-- 당해세/선순위 조세: `ApplyTaxRules(...)` 메서드 존재, 별도 `CASE_T*` 코드는 현재 코드에서 직접 확인되지 않음
+- 임금채권: `ApplyWageClaimRules(...)` 메서드로 임금채권 추정 로직 구현
+- 당해세/선순위 조세: `ApplyTaxRules(...)` 메서드로 조세채권 추정 로직 구현
 
 판단 축:
 
