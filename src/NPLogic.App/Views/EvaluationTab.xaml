@@ -235,7 +235,7 @@
                                         <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                     </DataGrid.RowStyle>
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="거래면적" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
+                                        <DataGridTextColumn Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
                                                             ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                         <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
                                                             ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
