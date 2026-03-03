@@ -403,12 +403,32 @@ namespace NPLogic.ViewModels
         public void SetProperty(Property property)
         {
             _property = property;
-            
+
             // 물건 유형에 따라 평가 유형 자동 선택
             AutoSelectEvaluationType(property.PropertyType);
-            
+
             // 지역명 설정
             SetRegionFromAddress(property.AddressFull);
+
+            // 차주별 첫 번째 물건 여부 판별 (R-0009_1 → _1이면 첫 번째)
+            IsFirstPropertyInBorrower = IsFirstPropertyByNumber(property.PropertyNumber);
+        }
+
+        /// <summary>
+        /// PropertyNumber에서 차주별 첫 번째 물건인지 판별
+        /// 형식: R-XXXX_N (N=1이면 첫 번째). 언더스코어가 없으면 첫 번째로 간주.
+        /// </summary>
+        private static bool IsFirstPropertyByNumber(string? propertyNumber)
+        {
+            if (string.IsNullOrWhiteSpace(propertyNumber))
+                return true;
+
+            var underscoreIdx = propertyNumber.LastIndexOf('_');
+            if (underscoreIdx < 0 || underscoreIdx == propertyNumber.Length - 1)
+                return true;
+
+            var suffix = propertyNumber[(underscoreIdx + 1)..];
+            return suffix == "1" || suffix == "01";
         }
 
         /// <summary>
@@ -1651,9 +1671,8 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 인터림 데이터 설정 (외부에서 호출)
         /// </summary>
-        public void SetInterimData(Services.InterimRecoveryData? interimData, bool isFirstProperty = true)
+        public void SetInterimData(Services.InterimRecoveryData? interimData)
         {
-            IsFirstPropertyInBorrower = isFirstProperty;
 
             if (interimData == null)
             {
