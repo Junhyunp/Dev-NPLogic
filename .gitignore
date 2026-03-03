@@ -114,6 +114,7 @@ env/
 # Claude Code
 .claude/
 .mcp.json
+.omc/
 
 # Cursor
 .cursor/
