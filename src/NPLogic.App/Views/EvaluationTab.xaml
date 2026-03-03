@@ -742,20 +742,36 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 평가결과 영역 (피드백 반영: 엑셀 구조, 토지/건물평당낙찰가 추가) -->
-                    <Border Style="{StaticResource CardStyle}">
+                    <!-- 평가결과 영역 -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="평가결과" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,12"/>
-                            
-                            <!-- 평가결과 테이블 (엑셀 스타일) -->
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ClipboardCheckOutline" Width="18" Height="18"
+                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="평가결과"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 평가결과 테이블 -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="70"/>
-                                    <ColumnDefinition Width="90"/>
-                                    <ColumnDefinition Width="90"/>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -764,69 +780,63 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- 헤더 행 -->
-                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,0,1" Padding="6,4">
-                                    <TextBlock Text="구분" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="구분" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,0,1" Padding="6,4">
-                                    <TextBlock Text="낙찰가액" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="낙찰가액" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,0,1" Padding="6,4">
-                                    <TextBlock Text="낙찰가율" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="낙찰가율" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,0,1" Padding="6,4">
-                                    <TextBlock Text="토지평당" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="토지평당 낙찰가" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,0,1" Padding="6,4">
-                                    <TextBlock Text="건물평당" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="건물평당 낙찰가" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="0" Grid.Column="5" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,1,1,1" Padding="6,4">
-                                    <TextBlock Text="평가 사유" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="0" Grid.Column="5" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                    <TextBlock Text="평가 사유" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- 시나리오 1 행 -->
-                                <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BlueGray50Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="시나리오 1" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BlueGray50Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
+                                    <TextBlock Text="시나리오 1" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="1" Background="#FFFDE7" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario1_Amount, StringFormat={}{0:N0}}" Style="{StaticResource AmountStyle}" Foreground="#D50000" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario1_Rate, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario1_LandPerPyung, StringFormat={}{0:N0}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario1_BuildingPerPyung, StringFormat={}{0:N0}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="1" Grid.Column="5" Background="#FFFDE7" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,4">
-                                    <TextBox Text="{Binding Scenario1_Reason, UpdateSourceTrigger=PropertyChanged}" 
-                                             BorderThickness="0" Background="Transparent" 
-                                             FontSize="{StaticResource FontSizeSmall}"
-                                             Foreground="#D50000" FontWeight="Bold"/>
+                                <Border Grid.Row="1" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- 시나리오 2 행 -->
-                                <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource BlueGray50Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="시나리오 2" Style="{StaticResource LabelStyle}" FontWeight="SemiBold" Foreground="{StaticResource SecondaryBrush}" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource BlueGray50Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                    <TextBlock Text="시나리오 2" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="1" Background="#FFFDE7" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario2_Amount, StringFormat={}{0:N0}}" Style="{StaticResource AmountStyle}" Foreground="#D50000" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario2_Rate, StringFormat={}{0:P1}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Center"/>
+                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario2_LandPerPyung, StringFormat={}{0:N0}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,0,1" Padding="6,6">
-                                    <TextBlock Text="{Binding Scenario2_BuildingPerPyung, StringFormat={}{0:N0}}" Style="{StaticResource ValueStyle}" HorizontalAlignment="Right"/>
+                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="5" Background="#FFFDE7" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,4">
-                                    <TextBox Text="{Binding Scenario2_Reason, UpdateSourceTrigger=PropertyChanged}" 
-                                             BorderThickness="0" Background="Transparent" 
-                                             FontSize="{StaticResource FontSizeSmall}"
-                                             Foreground="#D50000" FontWeight="Bold"/>
+                                <Border Grid.Row="2" Grid.Column="5" Padding="8,8">
+                                    <TextBlock Text="" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </StackPanel>
