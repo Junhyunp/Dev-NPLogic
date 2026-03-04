@@ -830,17 +830,13 @@ namespace NPLogic.ViewModels
             if (propertyType.Contains("아파트") && !propertyType.Contains("공장"))
                 return "apt";
             if (propertyType.Contains("연립") || propertyType.Contains("다세대") || propertyType.Contains("빌라"))
-                return "multiplex";
+                return "villa";
             if (propertyType.Contains("오피스텔"))
                 return "officetel";
-            if (propertyType.Contains("단독") || propertyType.Contains("다가구"))
-                return "house";
             if (propertyType.Contains("상가") || propertyType.Contains("근린") || propertyType.Contains("업무"))
                 return "commercial";
-            if (propertyType.Contains("토지") || propertyType.Contains("대지") || propertyType.Contains("임야"))
-                return "land";
             if (propertyType.Contains("공장") || propertyType.Contains("창고"))
-                return "factory";
+                return "apt_factory";
 
             return null; // 매핑 안 되면 전체 카테고리로 조회
         }
