@@ -166,7 +166,7 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <materialDesign:PackIcon Kind="MapMarkerRadius" Width="18" Height="18"
                                                                  Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="사례지도 및 실거래가"
+                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
                                                    Foreground="White"
                                                    FontWeight="SemiBold"
                                                    FontSize="{StaticResource FontSizeH4}"/>
@@ -180,8 +180,22 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 좌: 사례지도 / 우: 실거래가 DataGrid -->
-                            <Grid>
+                            <!-- 연립다세대: 전체 너비 사례지도 -->
+                            <Border Background="{StaticResource BlueGray50Brush}"
+                                    MinHeight="300"
+                                    Cursor="Hand"
+                                    MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp"
+                                    ToolTip="클릭하여 확대"
+                                    Visibility="{Binding IsMultiFamilyType, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
+                                           Style="{StaticResource BodyTextStyle}"
+                                           Opacity="0.6"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- 좌: 사례지도 / 우: 실거래가 DataGrid (연립다세대 제외) -->
+                            <Grid Visibility="{Binding IsMultiFamilyType, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="2"/>
@@ -260,8 +274,9 @@
                                 </DataGrid>
                             </Grid>
 
-                            <!-- 거래 추이 차트 영역 -->
-                            <Grid Margin="0,0,0,16">
+                            <!-- 거래 추이 차트 영역 (연립다세대 제외) -->
+                            <Grid Margin="0,0,0,16"
+                                  Visibility="{Binding IsMultiFamilyType, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -844,6 +859,9 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 회수 전략 요약 + 인터림 섹션들 (연립다세대 제외) -->
+                    <StackPanel Visibility="{Binding IsMultiFamilyType, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+
                     <!-- 회수 전략 요약 (차주별 첫 번째 물건에만 표시) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -1177,6 +1195,8 @@
                             </DataGrid>
                         </StackPanel>
                     </Border>
+
+                    </StackPanel> <!-- 연립다세대 제외 섹션 끝 -->
 
             </StackPanel>
 

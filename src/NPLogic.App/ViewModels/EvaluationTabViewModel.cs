@@ -240,6 +240,36 @@ namespace NPLogic.ViewModels
             BuildRecoveryStrategyRows();
         }
 
+        /// <summary>
+        /// PropertyRepository를 통해 차주별 물건 수를 직접 조회하여 설정
+        /// </summary>
+        private async Task ResolveBorrowerPropertyCountAsync()
+        {
+            if (_property == null || !_property.ProgramId.HasValue || string.IsNullOrEmpty(_property.BorrowerNumber))
+            {
+                SetBorrowerPropertyCount(1);
+                return;
+            }
+
+            try
+            {
+                var propRepo = App.ServiceProvider?.GetService(typeof(PropertyRepository)) as PropertyRepository;
+                if (propRepo != null)
+                {
+                    var allProps = await propRepo.GetByProgramIdAsync(_property.ProgramId.Value);
+                    var count = allProps.Count(p => p.BorrowerNumber == _property.BorrowerNumber);
+                    SetBorrowerPropertyCount(count);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EvaluationTab] 차주별 물건 수 조회 실패: {ex.Message}");
+            }
+
+            SetBorrowerPropertyCount(1);
+        }
+
         private void BuildRecoveryStrategyRows()
         {
             RecoveryStrategyRows.Clear();
@@ -279,10 +309,17 @@ namespace NPLogic.ViewModels
 
         // === 평가 유형 선택 ===
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         private bool _isApartmentType = true;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         private bool _isMultiFamilyType;
+
+        /// <summary>
+        /// 사례지도 섹션 제목 (연립다세대: "사례지도", 기타: "사례지도 및 실거래가")
+        /// </summary>
+        public string CaseMapSectionTitle => IsMultiFamilyType ? "사례지도" : "사례지도 및 실거래가";
 
         [ObservableProperty]
         private bool _isFactoryType;
@@ -546,9 +583,12 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // 차주별 물건 수 자동 결정 (PropertyRepository 직접 조회)
+                await ResolveBorrowerPropertyCountAsync();
+
                 // 기존 평가 정보 로드
                 _evaluation = await _evaluationRepository.GetByPropertyIdAsync(_propertyId);
-                
+
                 if (_evaluation != null)
                 {
                     LoadFromEvaluation(_evaluation);
