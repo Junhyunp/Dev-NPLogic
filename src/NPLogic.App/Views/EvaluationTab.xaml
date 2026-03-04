@@ -759,6 +759,198 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 탐문 내역 (연립다세대 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsMultiFamilyType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="PhoneInTalk" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="탐문 내역"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                    <!-- 테이블 생성 버튼 -->
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding CreateInquiryTableCommand}"
+                                            Visibility="{Binding HasInquiryTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="탐문 내역 테이블 생성"/>
+                                    <!-- 테이블 제거 버튼 -->
+                                    <Button Content="−" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding DestroyInquiryTableCommand}"
+                                            Visibility="{Binding HasInquiryTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="탐문 내역 테이블 제거"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 탐문 내역 DataGrid -->
+                            <DataGrid x:Name="InquiryDataGrid"
+                                      Visibility="{Binding HasInquiryTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      ItemsSource="{Binding InquiryRows}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      RowHeight="32"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      Background="White"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#FAFAFA"
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="부동산명" Binding="{Binding RealEstateName, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="연락처" Binding="{Binding ContactNumber, UpdateSourceTrigger=PropertyChanged}" Width="150"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="탐문내역" Binding="{Binding InquiryDetails, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- 행 추가/삭제 버튼 -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,8"
+                                        Visibility="{Binding HasInquiryTable, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Button Command="{Binding AddInquiryRowCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding RemoveInquiryRowCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=InquiryDataGrid}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Foreground="{StaticResource ErrorBrush}"
+                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 탐문 결과 (연립다세대 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsMultiFamilyType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="탐문 결과"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                    <!-- 테이블 생성 버튼 -->
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding CreateInquiryResultTableCommand}"
+                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="탐문 결과 테이블 생성"/>
+                                    <!-- 테이블 제거 버튼 -->
+                                    <Button Content="−" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding DestroyInquiryResultTableCommand}"
+                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="탐문 결과 테이블 제거"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 탐문 결과 DataGrid -->
+                            <DataGrid x:Name="InquiryResultDataGrid"
+                                      ItemsSource="{Binding InquiryResultRows}"
+                                      Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      RowHeight="32"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      Background="White"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#FAFAFA"
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="100" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="감정가" Binding="{Binding AppraisedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="면적(평)" Binding="{Binding AreaPyeong, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="단가" Binding="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="평가액" Binding="{Binding EvaluatedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 평가결과 영역 -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"

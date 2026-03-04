@@ -185,6 +185,42 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 탐문 내역 행 아이템
+    /// </summary>
+    public partial class InquiryRow : ObservableObject
+    {
+        [ObservableProperty]
+        private string _realEstateName = "";
+
+        [ObservableProperty]
+        private string _contactNumber = "";
+
+        [ObservableProperty]
+        private string _inquiryDetails = "";
+    }
+
+    /// <summary>
+    /// 탐문 결과 행 아이템
+    /// </summary>
+    public partial class InquiryResultRow : ObservableObject
+    {
+        [ObservableProperty]
+        private string _category = "";
+
+        [ObservableProperty]
+        private string _appraisedValue = "";
+
+        [ObservableProperty]
+        private string _areaPyeong = "";
+
+        [ObservableProperty]
+        private string _unitPrice = "";
+
+        [ObservableProperty]
+        private string _evaluatedValue = "";
+    }
+
+    /// <summary>
     /// 평가 탭 ViewModel
     /// </summary>
     public partial class EvaluationTabViewModel : ObservableObject
@@ -231,6 +267,16 @@ namespace NPLogic.ViewModels
         public ObservableCollection<InterimRecoveryRow> InterimRecoveryRows { get; } = new();
 
         public ObservableCollection<InterimExpenseRow> InterimExpenseRows { get; } = new();
+
+        public ObservableCollection<InquiryRow> InquiryRows { get; } = new();
+
+        [ObservableProperty]
+        private bool _hasInquiryTable;
+
+        public ObservableCollection<InquiryResultRow> InquiryResultRows { get; } = new();
+
+        [ObservableProperty]
+        private bool _hasInquiryResultTable;
 
         public List<string> CapTypeOptions { get; } = new() { "Loan Cap", "Loan Cap 2", "Mortgage Cap", "해당사항 없음" };
 
@@ -1081,6 +1127,70 @@ namespace NPLogic.ViewModels
         #endregion
 
         #region 명령
+
+        /// <summary>
+        /// 탐문 결과 테이블 생성 (고정 4행: 토지, 건물, 기계, 합계)
+        /// </summary>
+        [RelayCommand]
+        private void CreateInquiryResultTable()
+        {
+            if (HasInquiryResultTable) return;
+            InquiryResultRows.Add(new InquiryResultRow { Category = "토지" });
+            InquiryResultRows.Add(new InquiryResultRow { Category = "건물" });
+            InquiryResultRows.Add(new InquiryResultRow { Category = "기계" });
+            InquiryResultRows.Add(new InquiryResultRow { Category = "합계" });
+            HasInquiryResultTable = true;
+        }
+
+        /// <summary>
+        /// 탐문 결과 테이블 제거
+        /// </summary>
+        [RelayCommand]
+        private void DestroyInquiryResultTable()
+        {
+            InquiryResultRows.Clear();
+            HasInquiryResultTable = false;
+        }
+
+        /// <summary>
+        /// 탐문 내역 테이블 생성 (헤더 + 버튼)
+        /// </summary>
+        [RelayCommand]
+        private void CreateInquiryTable()
+        {
+            if (HasInquiryTable) return;
+            InquiryRows.Add(new InquiryRow());
+            HasInquiryTable = true;
+        }
+
+        /// <summary>
+        /// 탐문 내역 테이블 제거
+        /// </summary>
+        [RelayCommand]
+        private void DestroyInquiryTable()
+        {
+            InquiryRows.Clear();
+            HasInquiryTable = false;
+        }
+
+        /// <summary>
+        /// 탐문 내역 행 추가
+        /// </summary>
+        [RelayCommand]
+        private void AddInquiryRow()
+        {
+            InquiryRows.Add(new InquiryRow());
+        }
+
+        /// <summary>
+        /// 탐문 내역 행 삭제
+        /// </summary>
+        [RelayCommand]
+        private void RemoveInquiryRow(InquiryRow? row)
+        {
+            if (row == null) return;
+            InquiryRows.Remove(row);
+        }
 
         /// <summary>
         /// 저장
