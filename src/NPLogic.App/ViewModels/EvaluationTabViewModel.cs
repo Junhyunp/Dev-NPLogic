@@ -221,6 +221,49 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 공장/창고 평가결과 행
+    /// </summary>
+    public partial class FactoryEvalRow : ObservableObject
+    {
+        [ObservableProperty] private string _category = "";
+        [ObservableProperty] private string _appraisalValue = "";
+        [ObservableProperty] private string _area = "";
+        [ObservableProperty] private string _unitAppraisal = "";
+        [ObservableProperty] private string _unitEvalPrice = "";
+        [ObservableProperty] private string _evalAmount = "";
+        [ObservableProperty] private string _bidRate = "";
+        [ObservableProperty] private string _landPerPyeongBid = "";
+        [ObservableProperty] private string _buildingPerPyeongBid = "";
+    }
+
+    /// <summary>
+    /// 탐문 수익가치 데이터
+    /// </summary>
+    public partial class InquiryProfitData : ObservableObject
+    {
+        // 왼쪽 표
+        [ObservableProperty] private string _buildingArea = "";
+        [ObservableProperty] private string _rentPerPyeong = "";
+        [ObservableProperty] private string _monthlyRent = "";
+        [ObservableProperty] private string _annualRent = "";
+        [ObservableProperty] private string _deposit = "";
+
+        // 오른쪽 표
+        [ObservableProperty] private string _baseDiscountRate = "";
+        [ObservableProperty] private string _sensitivityBase = "";
+        [ObservableProperty] private string _profitValue50 = "";
+        [ObservableProperty] private string _profitValue55 = "";
+        [ObservableProperty] private string _profitValue60 = "";
+        [ObservableProperty] private string _profitValue65 = "";
+        [ObservableProperty] private string _profitValue70 = "";
+        [ObservableProperty] private string _unitPrice50 = "";
+        [ObservableProperty] private string _unitPrice55 = "";
+        [ObservableProperty] private string _unitPrice60 = "";
+        [ObservableProperty] private string _unitPrice65 = "";
+        [ObservableProperty] private string _unitPrice70 = "";
+    }
+
+    /// <summary>
     /// 평가 탭 ViewModel
     /// </summary>
     public partial class EvaluationTabViewModel : ObservableObject
@@ -249,6 +292,7 @@ namespace NPLogic.ViewModels
             // 초기 데이터 설정
             InitializeCaseItems();
             BuildRecoveryStrategyRows();
+            InitializeFactoryEvalRows();
         }
 
         #region 회수 전략 요약
@@ -277,6 +321,24 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasInquiryResultTable;
+
+        [ObservableProperty]
+        private InquiryProfitData? _inquiryProfitData;
+
+        [ObservableProperty]
+        private bool _hasInquiryProfitTable;
+
+        // 공장/창고 평가결과 시나리오 1
+        [ObservableProperty] private string _factoryScenario1EvalAmount = "";
+        [ObservableProperty] private string _factoryScenario1EvalReason = "";
+        [ObservableProperty] private string _factoryScenario1ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> FactoryScenario1Rows { get; } = new();
+
+        // 공장/창고 평가결과 시나리오 2
+        [ObservableProperty] private string _factoryScenario2EvalAmount = "";
+        [ObservableProperty] private string _factoryScenario2EvalReason = "";
+        [ObservableProperty] private string _factoryScenario2ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> FactoryScenario2Rows { get; } = new();
 
         public List<string> CapTypeOptions { get; } = new() { "Loan Cap", "Loan Cap 2", "Mortgage Cap", "해당사항 없음" };
 
@@ -333,6 +395,20 @@ namespace NPLogic.ViewModels
             RecoveryStrategyRows.Add(new() { Label = "합계", IsTotal = true });
             RecoveryStrategyRows.Add(new() { Label = "XNPV" });
             RecoveryStrategyRows.Add(new() { Label = "OPB" });
+        }
+
+        private void InitializeFactoryEvalRows()
+        {
+            var categories = new[] { "토지", "토지(법면, 도로 등)", "건물", "기계", "Total" };
+
+            FactoryScenario1Rows.Clear();
+            FactoryScenario2Rows.Clear();
+
+            foreach (var cat in categories)
+            {
+                FactoryScenario1Rows.Add(new FactoryEvalRow { Category = cat });
+                FactoryScenario2Rows.Add(new FactoryEvalRow { Category = cat });
+            }
         }
 
         #endregion
@@ -1202,6 +1278,27 @@ namespace NPLogic.ViewModels
         {
             InquiryResultRows.Clear();
             HasInquiryResultTable = false;
+        }
+
+        /// <summary>
+        /// 탐문 수익가치 테이블 생성
+        /// </summary>
+        [RelayCommand]
+        private void CreateInquiryProfitTable()
+        {
+            if (HasInquiryProfitTable) return;
+            InquiryProfitData = new InquiryProfitData();
+            HasInquiryProfitTable = true;
+        }
+
+        /// <summary>
+        /// 탐문 수익가치 테이블 제거
+        /// </summary>
+        [RelayCommand]
+        private void DestroyInquiryProfitTable()
+        {
+            InquiryProfitData = null;
+            HasInquiryProfitTable = false;
         }
 
         /// <summary>
