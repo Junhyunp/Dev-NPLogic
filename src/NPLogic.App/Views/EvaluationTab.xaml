@@ -1215,6 +1215,224 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 현재 임대 수익가치 (공장/창고 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="HomeCity" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="현재 임대 수익가치"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding CreateRentalProfitTableCommand}"
+                                            Visibility="{Binding HasRentalProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="현재 임대 수익가치 테이블 생성"/>
+                                    <Button Content="−" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding DestroyRentalProfitTableCommand}"
+                                            Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="현재 임대 수익가치 테이블 제거"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 상단 DataGrid: 임대 내역 -->
+                            <DataGrid x:Name="RentalIncomeDataGrid"
+                                      Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      ItemsSource="{Binding RentalIncomeRows}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      RowHeight="32"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      Background="White"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#FAFAFA"
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="80"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차인" Binding="{Binding Tenant, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="연임대료" Binding="{Binding AnnualRent, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- 하단 민감도 분석 3x9 Grid -->
+                            <Grid Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                  Background="White">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Col 0: 민감도 분석 (RowSpan=3) -->
+                                <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,0" Padding="8,6">
+                                    <TextBlock Text="민감도&#x0a;분석" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               TextAlignment="Center" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+
+                                <!-- Row 0: 기본할인율 -->
+                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="기본할인율" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.BaseDiscountRate, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="구분" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="5.0%" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="5" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="5.5%" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="6" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="6.0%" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="7" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,1,1" Padding="8,6">
+                                    <TextBlock Text="6.5%" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="8" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,1" Padding="8,6">
+                                    <TextBlock Text="7.0%" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+
+                                <!-- Row 1: 민감도기준 + 수익가치 -->
+                                <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="민감도기준" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.SensitivityBase, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="수익가치" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.ProfitValue50, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.ProfitValue55, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.ProfitValue60, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.ProfitValue65, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.ProfitValue70, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+
+                                <!-- Row 2: 빈칸 + 평당가액 -->
+                                <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                    <TextBlock Text="평당가액" HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.UnitPrice50, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.UnitPrice55, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.UnitPrice60, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.UnitPrice65, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="8" Padding="0">
+                                    <TextBox Text="{Binding RentalProfitSensitivity.UnitPrice70, UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center" FontSize="12" VerticalAlignment="Center"
+                                             materialDesign:TextFieldAssist.DecorationVisibility="Collapsed"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 탐문 내역 (연립다세대 전용) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"

@@ -254,6 +254,41 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 현재 임대 수익가치 - 상단 DataGrid 행
+    /// </summary>
+    public partial class RentalIncomeRow : ObservableObject
+    {
+        [ObservableProperty] private string _category = "";
+        [ObservableProperty] private string _area = "";
+        [ObservableProperty] private string _tenant = "";
+        [ObservableProperty] private string _leaseStartDate = "";
+        [ObservableProperty] private string _leaseEndDate = "";
+        [ObservableProperty] private string _confirmationDate = "";
+        [ObservableProperty] private string _deposit = "";
+        [ObservableProperty] private string _monthlyRent = "";
+        [ObservableProperty] private string _annualRent = "";
+    }
+
+    /// <summary>
+    /// 현재 임대 수익가치 - 하단 민감도 분석 데이터
+    /// </summary>
+    public partial class RentalProfitSensitivity : ObservableObject
+    {
+        [ObservableProperty] private string _baseDiscountRate = "";
+        [ObservableProperty] private string _sensitivityBase = "";
+        [ObservableProperty] private string _profitValue50 = "";
+        [ObservableProperty] private string _profitValue55 = "";
+        [ObservableProperty] private string _profitValue60 = "";
+        [ObservableProperty] private string _profitValue65 = "";
+        [ObservableProperty] private string _profitValue70 = "";
+        [ObservableProperty] private string _unitPrice50 = "";
+        [ObservableProperty] private string _unitPrice55 = "";
+        [ObservableProperty] private string _unitPrice60 = "";
+        [ObservableProperty] private string _unitPrice65 = "";
+        [ObservableProperty] private string _unitPrice70 = "";
+    }
+
+    /// <summary>
     /// 탐문 수익가치 데이터
     /// </summary>
     public partial class InquiryProfitData : ObservableObject
@@ -344,6 +379,15 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasInquiryProfitTable;
+
+        // 현재 임대 수익가치
+        public ObservableCollection<RentalIncomeRow> RentalIncomeRows { get; } = new();
+
+        [ObservableProperty]
+        private RentalProfitSensitivity? _rentalProfitSensitivity;
+
+        [ObservableProperty]
+        private bool _hasRentalProfitTable;
 
         // 공장/창고 평가결과 시나리오 1
         [ObservableProperty] private string _factoryScenario1EvalAmount = "";
@@ -1383,6 +1427,29 @@ namespace NPLogic.ViewModels
         {
             InquiryProfitData = null;
             HasInquiryProfitTable = false;
+        }
+
+        /// <summary>
+        /// 현재 임대 수익가치 테이블 생성
+        /// </summary>
+        [RelayCommand]
+        private void CreateRentalProfitTable()
+        {
+            if (HasRentalProfitTable) return;
+            RentalIncomeRows.Add(new RentalIncomeRow());
+            RentalProfitSensitivity = new RentalProfitSensitivity();
+            HasRentalProfitTable = true;
+        }
+
+        /// <summary>
+        /// 현재 임대 수익가치 테이블 제거
+        /// </summary>
+        [RelayCommand]
+        private void DestroyRentalProfitTable()
+        {
+            RentalIncomeRows.Clear();
+            RentalProfitSensitivity = null;
+            HasRentalProfitTable = false;
         }
 
         /// <summary>
