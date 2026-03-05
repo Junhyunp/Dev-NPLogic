@@ -707,6 +707,10 @@ WPF App
 - 공장/창고 전용 평가결과 섹션 신설 (14x9 시나리오 1·2 상하 병렬, 시나리오 헤더: 평가액/평가 사유/저감반영액, DataGrid: 구분/감정가/면적/평당감정가/평당평가액/평가액/낙찰가율/토지평당낙찰가/건물평당낙찰가, 5행: 토지/토지(법면,도로 등)/건물/기계/Total)
 - 기존 평가결과 섹션 공장/창고 유형 시 숨김 처리
 - 시나리오 헤더 TextBox 포커스 시 셀 경계 테두리 표시 (ScenarioHeaderTextBoxStyle)
+- 공장/창고 전용 지번별 평가 섹션 신설 (2행 복합 헤더 RowSpan/ColumnSpan, 1안·2안 병렬, DataGrid + 읽기전용 Total 행)
+- 회수 전략/인터림 섹션 공장/창고 유형 시 숨김 (IsApartmentType 전용으로 변경)
+- 평가 유형 선택 TextBlock 세로 중앙 정렬
+- 평가 유형 RadioButton 사라짐 버그 수정 (WPF GroupName + TwoWay 바인딩 버그 → GroupName 제거, ViewModel 상호배타 핸들러로 교체)
 
 ### 2026-03-04
 

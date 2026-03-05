@@ -221,6 +221,23 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 지번별 평가 행
+    /// </summary>
+    public partial class LotEvalRow : ObservableObject
+    {
+        [ObservableProperty] private string _lotSerialNumber = "";
+        [ObservableProperty] private string _category = "";
+        [ObservableProperty] private string _lotAddress = "";
+        [ObservableProperty] private string _areaPyeong = "";
+        [ObservableProperty] private string _unitAppraisal = "";
+        [ObservableProperty] private string _appraisalValue = "";
+        [ObservableProperty] private string _plan1UnitPrice = "";
+        [ObservableProperty] private string _plan1EvalAmount = "";
+        [ObservableProperty] private string _plan2UnitPrice = "";
+        [ObservableProperty] private string _plan2EvalAmount = "";
+    }
+
+    /// <summary>
     /// 공장/창고 평가결과 행
     /// </summary>
     public partial class FactoryEvalRow : ObservableObject
@@ -340,6 +357,8 @@ namespace NPLogic.ViewModels
         [ObservableProperty] private string _factoryScenario2ReductionAmount = "";
         public ObservableCollection<FactoryEvalRow> FactoryScenario2Rows { get; } = new();
 
+        public ObservableCollection<LotEvalRow> LotEvalRows { get; } = new();
+
         public List<string> CapTypeOptions { get; } = new() { "Loan Cap", "Loan Cap 2", "Mortgage Cap", "해당사항 없음" };
 
         public void SetBorrowerPropertyCount(int count)
@@ -409,6 +428,8 @@ namespace NPLogic.ViewModels
                 FactoryScenario1Rows.Add(new FactoryEvalRow { Category = cat });
                 FactoryScenario2Rows.Add(new FactoryEvalRow { Category = cat });
             }
+
+            // LotEvalRows는 동적 데이터 연동 시 채워짐 (Total 행은 XAML에서 별도 표시)
         }
 
         #endregion
@@ -451,6 +472,69 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _isHouseLandType;
+
+        private bool _suppressTypeSync;
+
+        partial void OnIsApartmentTypeChanged(bool value)
+        {
+            if (_suppressTypeSync) return;
+            if (value)
+            {
+                _suppressTypeSync = true;
+                IsMultiFamilyType = false; IsFactoryType = false; IsCommercialType = false; IsHouseLandType = false;
+                _suppressTypeSync = false;
+                AppliedBidRateDescription = $"{RegionName3 ?? RegionName2} 3개월 평균 낙찰가율";
+            }
+            IsDirty = true;
+        }
+
+        partial void OnIsMultiFamilyTypeChanged(bool value)
+        {
+            if (_suppressTypeSync) return;
+            if (value)
+            {
+                _suppressTypeSync = true;
+                IsApartmentType = false; IsFactoryType = false; IsCommercialType = false; IsHouseLandType = false;
+                _suppressTypeSync = false;
+            }
+            IsDirty = true;
+        }
+
+        partial void OnIsFactoryTypeChanged(bool value)
+        {
+            if (_suppressTypeSync) return;
+            if (value)
+            {
+                _suppressTypeSync = true;
+                IsApartmentType = false; IsMultiFamilyType = false; IsCommercialType = false; IsHouseLandType = false;
+                _suppressTypeSync = false;
+            }
+            IsDirty = true;
+        }
+
+        partial void OnIsCommercialTypeChanged(bool value)
+        {
+            if (_suppressTypeSync) return;
+            if (value)
+            {
+                _suppressTypeSync = true;
+                IsApartmentType = false; IsMultiFamilyType = false; IsFactoryType = false; IsHouseLandType = false;
+                _suppressTypeSync = false;
+            }
+            IsDirty = true;
+        }
+
+        partial void OnIsHouseLandTypeChanged(bool value)
+        {
+            if (_suppressTypeSync) return;
+            if (value)
+            {
+                _suppressTypeSync = true;
+                IsApartmentType = false; IsMultiFamilyType = false; IsFactoryType = false; IsCommercialType = false;
+                _suppressTypeSync = false;
+            }
+            IsDirty = true;
+        }
 
         // === 사례평가 테이블 ===
         [ObservableProperty]
@@ -1989,15 +2073,6 @@ namespace NPLogic.ViewModels
             CalculateScenario1();
             CalculateScenario2FromBidRate(); // 피드백 반영: 시나리오 2도 재계산
             UpdateScenarioSummary();
-            IsDirty = true;
-        }
-
-        partial void OnIsApartmentTypeChanged(bool value)
-        {
-            if (value)
-            {
-                AppliedBidRateDescription = $"{RegionName3 ?? RegionName2} 3개월 평균 낙찰가율";
-            }
             IsDirty = true;
         }
 
