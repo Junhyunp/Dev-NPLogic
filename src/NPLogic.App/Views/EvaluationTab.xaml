@@ -388,6 +388,111 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 사례 로드뷰 (공장/창고 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="ImageMultipleOutline" Width="18" Height="18"
+                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="사례 로드뷰"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 4x2 테이블 -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="200"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="200"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 1행 헤더: 사례1, 사례2 -->
+                                <Border Grid.Row="0" Grid.Column="0"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1">
+                                    <TextBlock Text="사례1" FontWeight="SemiBold" FontSize="12"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Padding="8,6"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="사례2" FontWeight="SemiBold" FontSize="12"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Padding="8,6"/>
+                                </Border>
+
+                                <!-- 2행 내용 -->
+                                <Border Grid.Row="1" Grid.Column="0"
+                                        Background="{StaticResource SurfaceColor}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1">
+                                    <TextBlock Text="로드뷰 이미지"
+                                               Opacity="0.4" FontSize="12"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1"
+                                        Background="{StaticResource SurfaceColor}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="로드뷰 이미지"
+                                               Opacity="0.4" FontSize="12"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- 3행 헤더: 사례3, 사례4 -->
+                                <Border Grid.Row="2" Grid.Column="0"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1">
+                                    <TextBlock Text="사례3" FontWeight="SemiBold" FontSize="12"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Padding="8,6"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                                    <TextBlock Text="사례4" FontWeight="SemiBold" FontSize="12"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Padding="8,6"/>
+                                </Border>
+
+                                <!-- 4행 내용 -->
+                                <Border Grid.Row="3" Grid.Column="0"
+                                        Background="{StaticResource SurfaceColor}"
+                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                                    <TextBlock Text="로드뷰 이미지"
+                                               Opacity="0.4" FontSize="12"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1"
+                                        Background="{StaticResource SurfaceColor}">
+                                    <TextBlock Text="로드뷰 이미지"
+                                               Opacity="0.4" FontSize="12"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 경매사건검색 영역 -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
@@ -741,6 +846,91 @@
                                     <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                             </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 탐문 내역 (공장/창고 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <materialDesign:PackIcon Kind="PhoneInTalk" Width="18" Height="18"
+                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                    <TextBlock Text="탐문 내역"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 탐문 내역 DataGrid -->
+                            <DataGrid x:Name="FactoryInquiryDataGrid"
+                                      ItemsSource="{Binding InquiryRows}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      RowHeight="32"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      Background="White"
+                                      RowBackground="White"
+                                      AlternatingRowBackground="#FAFAFA"
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="부동산명" Binding="{Binding RealEstateName, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="연락처" Binding="{Binding ContactNumber, UpdateSourceTrigger=PropertyChanged}" Width="150"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="탐문내역" Binding="{Binding InquiryDetails, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- 행 추가/삭제 버튼 -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,8">
+                                <Button Command="{Binding AddInquiryRowCommand}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Command="{Binding RemoveInquiryRowCommand}"
+                                        CommandParameter="{Binding SelectedItem, ElementName=FactoryInquiryDataGrid}"
+                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                        Foreground="{StaticResource ErrorBrush}"
+                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 

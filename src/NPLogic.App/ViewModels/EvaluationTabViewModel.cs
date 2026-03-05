@@ -592,6 +592,9 @@ namespace NPLogic.ViewModels
             // 물건 유형에 따라 평가 유형 자동 선택
             AutoSelectEvaluationType(property.PropertyType);
 
+            // 유형별 사례평가 컬럼 재초기화
+            InitializeCaseItems();
+
             // 지역명 설정
             SetRegionFromAddress(property.AddressFull);
 
@@ -843,38 +846,91 @@ namespace NPLogic.ViewModels
 
         private void InitializeCaseItems()
         {
-            CaseItems = new ObservableCollection<CaseRowItem>
+            if (IsFactoryType)
             {
-                new CaseRowItem { Label = "사례구분" },
-                new CaseRowItem { Label = "경매사건번호" },
-                new CaseRowItem { Label = "낙찰일자" },
-                new CaseRowItem { Label = "용도" },
-                new CaseRowItem { Label = "소재지" },
-                new CaseRowItem { Label = "토지면적(평)" },
-                new CaseRowItem { Label = "건물연면적(평)" },
-                new CaseRowItem { Label = "보존등기일" },
-                new CaseRowItem { Label = "사용승인일" },
-                new CaseRowItem { Label = "법사가" },
-                new CaseRowItem { Label = "토지" },
-                new CaseRowItem { Label = "건물" },
-                new CaseRowItem { Label = "감평기준일자" },
-                new CaseRowItem { Label = "평당감정가(토지)" },
-                new CaseRowItem { Label = "평당감정가(건물)" },
-                new CaseRowItem { Label = "토지평당법사가" },
-                new CaseRowItem { Label = "건물평당법사가" },
-                new CaseRowItem { Label = "낙찰가액" },
-                new CaseRowItem { Label = "낙찰가율" },
-                new CaseRowItem { Label = "낙찰회차" },
-                new CaseRowItem { Label = "평당낙찰가(토지)" },
-                new CaseRowItem { Label = "평당낙찰가(건물)" },
-                new CaseRowItem { Label = "토지평당낙찰가" },
-                new CaseRowItem { Label = "건물평당낙찰가" },
-                new CaseRowItem { Label = "토지건물대비" },
-                new CaseRowItem { Label = "낙찰가율" },
-                new CaseRowItem { Label = "용적율" },
-                new CaseRowItem { Label = "2등 입찰가" },
-                new CaseRowItem { Label = "사례 비고 사항" }
-            };
+                CaseItems = new ObservableCollection<CaseRowItem>
+                {
+                    new CaseRowItem { Label = "경매사건번호" },
+                    new CaseRowItem { Label = "낙찰일자" },
+                    new CaseRowItem { Label = "용도" },
+                    new CaseRowItem { Label = "소재지" },
+                    new CaseRowItem { Label = "토지면적(평)" },
+                    new CaseRowItem { Label = "건물연면적(평)" },
+                    new CaseRowItem { Label = "기계기구" },
+                    new CaseRowItem { Label = "보존등기일" },
+                    new CaseRowItem { Label = "사용승인일" },
+                    new CaseRowItem { Label = "법사가" },
+                    new CaseRowItem { Label = "토지" },
+                    new CaseRowItem { Label = "건물" },
+                    new CaseRowItem { Label = "제시외" },
+                    new CaseRowItem { Label = "기계기구" },
+                    new CaseRowItem { Label = "감평기준일자" },
+                    new CaseRowItem { Label = "평당감정가(토지)" },
+                    new CaseRowItem { Label = "평당감정가(건물)" },
+                    new CaseRowItem { Label = "토지평당법사가" },
+                    new CaseRowItem { Label = "건물평당법사가" },
+                    new CaseRowItem { Label = "낙찰가액" },
+                    new CaseRowItem { Label = "낙찰가율" },
+                    new CaseRowItem { Label = "낙찰회차" },
+                    new CaseRowItem { Label = "평당낙찰가(토지)" },
+                    new CaseRowItem { Label = "평당낙찰가(건물)" },
+                    new CaseRowItem { Label = "토지평당낙찰가" },
+                    new CaseRowItem { Label = "건물평당낙찰가" },
+                    new CaseRowItem { Label = "기계인정율" },
+                    new CaseRowItem { Label = "토지단가" },
+                    new CaseRowItem { Label = "건물단가" },
+                    new CaseRowItem { Label = "토지 거래분" },
+                    new CaseRowItem { Label = "건물 거래분" },
+                    new CaseRowItem { Label = "제시외 거래분" },
+                    new CaseRowItem { Label = "기계기구 낙찰분" },
+                    new CaseRowItem { Label = "낙찰가율" },
+                    new CaseRowItem { Label = "용적율" },
+                    new CaseRowItem { Label = "기계인정율" },
+                    new CaseRowItem { Label = "토지평당낙찰가" },
+                    new CaseRowItem { Label = "건물평당낙찰가" },
+                    new CaseRowItem { Label = "공시지가" },
+                    new CaseRowItem { Label = "2025" },
+                    new CaseRowItem { Label = "2024" },
+                    new CaseRowItem { Label = "2023" },
+                    new CaseRowItem { Label = "2등 입찰가" },
+                    new CaseRowItem { Label = "사례 비고 사항" }
+                };
+            }
+            else
+            {
+                CaseItems = new ObservableCollection<CaseRowItem>
+                {
+                    new CaseRowItem { Label = "사례구분" },
+                    new CaseRowItem { Label = "경매사건번호" },
+                    new CaseRowItem { Label = "낙찰일자" },
+                    new CaseRowItem { Label = "용도" },
+                    new CaseRowItem { Label = "소재지" },
+                    new CaseRowItem { Label = "토지면적(평)" },
+                    new CaseRowItem { Label = "건물연면적(평)" },
+                    new CaseRowItem { Label = "보존등기일" },
+                    new CaseRowItem { Label = "사용승인일" },
+                    new CaseRowItem { Label = "법사가" },
+                    new CaseRowItem { Label = "토지" },
+                    new CaseRowItem { Label = "건물" },
+                    new CaseRowItem { Label = "감평기준일자" },
+                    new CaseRowItem { Label = "평당감정가(토지)" },
+                    new CaseRowItem { Label = "평당감정가(건물)" },
+                    new CaseRowItem { Label = "토지평당법사가" },
+                    new CaseRowItem { Label = "건물평당법사가" },
+                    new CaseRowItem { Label = "낙찰가액" },
+                    new CaseRowItem { Label = "낙찰가율" },
+                    new CaseRowItem { Label = "낙찰회차" },
+                    new CaseRowItem { Label = "평당낙찰가(토지)" },
+                    new CaseRowItem { Label = "평당낙찰가(건물)" },
+                    new CaseRowItem { Label = "토지평당낙찰가" },
+                    new CaseRowItem { Label = "건물평당낙찰가" },
+                    new CaseRowItem { Label = "토지건물대비" },
+                    new CaseRowItem { Label = "낙찰가율" },
+                    new CaseRowItem { Label = "용적율" },
+                    new CaseRowItem { Label = "2등 입찰가" },
+                    new CaseRowItem { Label = "사례 비고 사항" }
+                };
+            }
         }
 
         private void InitializeNewEvaluation()
