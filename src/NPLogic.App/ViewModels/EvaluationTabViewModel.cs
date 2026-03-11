@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
@@ -6,10 +7,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using NPLogic.Core.Models;
 using NPLogic.Data.Repositories;
 using NPLogic.Data.Services;
 using NPLogic.Services;
+using SkiaSharp;
 using EvaluationModel = NPLogic.Core.Models.Evaluation;
 
 namespace NPLogic.ViewModels
@@ -588,6 +593,28 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<RealTransactionItem> _realTransactions = new();
 
+        // === 거래가격/건수 그래프 ===
+        [ObservableProperty]
+        private ISeries[] _tradeSeries = Array.Empty<ISeries>();
+
+        [ObservableProperty]
+        private Axis[] _tradeXAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private Axis[] _tradeYAxes = Array.Empty<Axis>();
+
+        [ObservableProperty]
+        private ObservableCollection<string> _availableAreas = new();
+
+        [ObservableProperty]
+        private string? _selectedArea;
+
+        partial void OnSelectedAreaChanged(string? value)
+        {
+            if (value != null)
+                BuildTradeChart();
+        }
+
         // === 낙찰통계 (피드백 반영: 시/군구/동 3×3 매트릭스) ===
         [ObservableProperty]
         private string? _regionName1 = "서울특별시";
@@ -997,6 +1024,161 @@ namespace NPLogic.ViewModels
                     Debug.WriteLine($"[EvaluationTab] 적용 상태 복원 실패: {ex.Message}");
                 }
             }
+
+            // 면적 드롭다운 + 차트 초기화
+            InitializeTradeChart(trades);
+        }
+
+        /// <summary>
+        /// 실거래가 차트 초기화: 면적 목록 구성 + 기본 면적 선택
+        /// </summary>
+        private void InitializeTradeChart(List<TradeRecord> trades)
+        {
+            AvailableAreas.Clear();
+
+            var areaGroups = trades
+                .GroupBy(t => t.Area)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .ToList();
+
+            foreach (var area in areaGroups)
+                AvailableAreas.Add($"{area:F2}㎡");
+
+            if (AvailableAreas.Count > 0)
+            {
+                var propertyArea = _property?.BuildingArea.HasValue == true ? (double)_property.BuildingArea.Value : 0.0;
+                var match = areaGroups.FirstOrDefault(a => Math.Abs(a - propertyArea) < 0.01);
+                SelectedArea = match > 0 ? $"{match:F2}㎡" : AvailableAreas[0];
+            }
+        }
+
+        /// <summary>
+        /// 선택된 면적 기준 거래가격/건수 이중축 차트 생성
+        /// </summary>
+        private void BuildTradeChart()
+        {
+            if (string.IsNullOrEmpty(SelectedArea) || RealTransactions.Count == 0)
+                return;
+
+            var areaStr = SelectedArea.Replace("㎡", "").Trim();
+            if (!double.TryParse(areaStr, out var targetArea))
+                return;
+
+            var filtered = RealTransactions
+                .Where(t => Math.Abs(t.AreaRaw - targetArea) < 0.01 && t.TransactionDate.HasValue)
+                .ToList();
+
+            if (filtered.Count == 0)
+                return;
+
+            var byYear = filtered
+                .GroupBy(t => t.TransactionDate!.Value.Year)
+                .OrderBy(g => g.Key)
+                .Select(g => new
+                {
+                    Year = g.Key,
+                    AvgAmount = (double)g.Average(t => t.Amount ?? 0) / 10000.0,
+                    Count = g.Count()
+                })
+                .ToList();
+
+            var years = byYear.Select(y => $"{y.Year % 100:D2}년").ToArray();
+            var amounts = byYear.Select(y => y.AvgAmount).ToArray();
+            var counts = byYear.Select(y => (double)y.Count).ToArray();
+
+            var maxAmount = amounts.Max();
+            var minAmount = amounts.Min();
+            var amountStep = CalculateNiceStep(maxAmount - minAmount, 5);
+            var amountMin = Math.Floor(minAmount / amountStep) * amountStep;
+            var amountMax = Math.Ceiling(maxAmount / amountStep) * amountStep;
+            if (amountMin == amountMax) amountMax = amountMin + amountStep;
+
+            var maxCount = counts.Max();
+            var countStep = CalculateNiceStep(maxCount, 5);
+            var countMax = Math.Ceiling(maxCount / countStep) * countStep;
+            if (countMax == 0) countMax = countStep;
+
+            TradeSeries = new ISeries[]
+            {
+                new ColumnSeries<double>
+                {
+                    Name = "거래건수",
+                    Values = counts,
+                    Fill = new SolidColorPaint(SKColor.Parse("#90CAF9")),
+                    MaxBarWidth = 30,
+                    ScalesYAt = 1
+                },
+                new LineSeries<double>
+                {
+                    Name = "평균금액(억)",
+                    Values = amounts,
+                    Stroke = new SolidColorPaint(SKColor.Parse("#E53935"), 2.5f),
+                    GeometryStroke = new SolidColorPaint(SKColor.Parse("#E53935"), 2.5f),
+                    GeometrySize = 6,
+                    GeometryFill = new SolidColorPaint(SKColor.Parse("#E53935")),
+                    Fill = null,
+                    LineSmoothness = 0,
+                    ScalesYAt = 0
+                }
+            };
+
+            TradeXAxes = new Axis[]
+            {
+                new Axis
+                {
+                    Labels = years,
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#666666")),
+                    TextSize = 11,
+                    SeparatorsPaint = null
+                }
+            };
+
+            TradeYAxes = new Axis[]
+            {
+                new Axis
+                {
+                    Name = "금액(억)",
+                    NamePaint = new SolidColorPaint(SKColor.Parse("#E53935")),
+                    NameTextSize = 11,
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#E53935")),
+                    TextSize = 11,
+                    Labeler = v => v.ToString("F2"),
+                    MinLimit = amountMin,
+                    MaxLimit = amountMax,
+                    MinStep = amountStep,
+                    Position = LiveChartsCore.Measure.AxisPosition.Start,
+                    SeparatorsPaint = new SolidColorPaint(SKColor.Parse("#E0E0E0")) { StrokeThickness = 1 }
+                },
+                new Axis
+                {
+                    Name = "건수",
+                    NamePaint = new SolidColorPaint(SKColor.Parse("#1976D2")),
+                    NameTextSize = 11,
+                    LabelsPaint = new SolidColorPaint(SKColor.Parse("#1976D2")),
+                    TextSize = 11,
+                    MinLimit = 0,
+                    MaxLimit = countMax,
+                    MinStep = countStep,
+                    Position = LiveChartsCore.Measure.AxisPosition.End,
+                    SeparatorsPaint = null,
+                    ShowSeparatorLines = false
+                }
+            };
+        }
+
+        private static double CalculateNiceStep(double range, int targetSteps)
+        {
+            if (range <= 0) return 1;
+            var rawStep = range / targetSteps;
+            var magnitude = Math.Pow(10, Math.Floor(Math.Log10(rawStep)));
+            var normalized = rawStep / magnitude;
+            double niceStep;
+            if (normalized <= 1.5) niceStep = 1;
+            else if (normalized <= 3.5) niceStep = 2;
+            else if (normalized <= 7.5) niceStep = 5;
+            else niceStep = 10;
+            return niceStep * magnitude;
         }
 
         /// <summary>
