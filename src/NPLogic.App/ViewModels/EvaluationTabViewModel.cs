@@ -912,23 +912,58 @@ namespace NPLogic.ViewModels
             var supabaseService = App.ServiceProvider?.GetService(typeof(SupabaseService)) as SupabaseService;
             var clientUserId = supabaseService?.GetCurrentUser()?.Email ?? "NPLogic-WPF";
             var trades = await _tradeService.GetTradesByPnuAsync(pnu, category, clientUserId: clientUserId);
-            trades.Sort((a, b) => a.DealDate.CompareTo(b.DealDate)); // 거래일자 오름차순
-            foreach (var t in trades)
-            {
-                DateTime? dealDate = null;
-                var ds = t.DealDate.ToString();
-                if (ds.Length == 8 &&
-                    int.TryParse(ds[..4], out var y) &&
-                    int.TryParse(ds[4..6], out var m) &&
-                    int.TryParse(ds[6..8], out var d))
-                {
-                    try { dealDate = new DateTime(y, m, d); } catch { }
-                }
 
+            // 거래일자 파싱 헬퍼
+            DateTime? ParseDealDate(int dealDate)
+            {
+                var ds = dealDate.ToString();
+                if (ds.Length == 8 &&
+                    int.TryParse(ds[..4], out var yy) &&
+                    int.TryParse(ds[4..6], out var mm) &&
+                    int.TryParse(ds[6..8], out var dd))
+                {
+                    try { return new DateTime(yy, mm, dd); } catch { }
+                }
+                return null;
+            }
+
+            // 아파트: BuildingArea 기준 동일면적 우선 + 1년 필터 + 유사면적 폴백
+            var propertyArea = _property.BuildingArea.HasValue ? (double)_property.BuildingArea.Value : (double?)null;
+            var oneYearAgo = DateTime.Now.AddYears(-1);
+
+            List<TradeRecord> sorted;
+            if (propertyArea.HasValue && IsApartmentType)
+            {
+                // 동일면적 (소수점 오차 0.01 허용) + 1년 이내 → 최근순
+                var sameArea = trades
+                    .Where(t => Math.Abs(t.Area - propertyArea.Value) < 0.01 && ParseDealDate(t.DealDate) >= oneYearAgo)
+                    .OrderByDescending(t => t.DealDate)
+                    .ToList();
+
+                // 나머지: 면적 차이 작은 순 → 최근순
+                var sameAreaSet = new HashSet<TradeRecord>(sameArea);
+                var others = trades
+                    .Where(t => !sameAreaSet.Contains(t))
+                    .OrderBy(t => Math.Abs(t.Area - propertyArea.Value))
+                    .ThenByDescending(t => t.DealDate)
+                    .ToList();
+
+                sorted = sameArea;
+                sorted.AddRange(others);
+                Debug.WriteLine($"[EvaluationTab] 실거래가 면적 필터: 물건면적={propertyArea.Value:F2}㎡, 동일면적 {sameArea.Count}건, 기타 {others.Count}건");
+            }
+            else
+            {
+                // 비아파트 또는 면적 정보 없음: 최근순 전체
+                sorted = trades.OrderByDescending(t => t.DealDate).ToList();
+            }
+
+            foreach (var t in sorted)
+            {
                 RealTransactions.Add(new RealTransactionItem
                 {
                     Area = (decimal)t.Area,
-                    TransactionDate = dealDate,
+                    TransactionDate = ParseDealDate(t.DealDate),
                     Amount = t.DealAmount,
                     Floor = t.Floor,
                     IsRegistered = t.IsRegistered ? "Y" : "N",
