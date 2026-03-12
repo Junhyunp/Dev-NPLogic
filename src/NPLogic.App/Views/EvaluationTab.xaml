@@ -181,7 +181,7 @@
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <materialDesign:PackIcon Kind="MapMarkerRadius" Width="18" Height="18"
                                                                  Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="사례지도 및 실거래가"
+                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
                                                    Foreground="White"
                                                    FontWeight="SemiBold"
                                                    FontSize="{StaticResource FontSizeH4}"/>
@@ -199,7 +199,7 @@
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="2"/>
+                                    <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
 
@@ -218,10 +218,12 @@
                                 </Border>
 
                                 <!-- 세로 구분선 -->
-                                <Border Grid.Column="1" Background="{StaticResource BorderBrush}" Width="2"/>
+                                <Border Grid.Column="1" Background="{StaticResource BorderBrush}" Width="2"
+                                        Visibility="{Binding IsShowRealTransaction, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                                 <!-- 우측: 실거래가 DataGrid + 거래 그래프 -->
-                                <DockPanel Grid.Column="2">
+                                <DockPanel Grid.Column="2"
+                                           Visibility="{Binding IsShowRealTransaction, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <!-- 실거래가 DataGrid (상단) -->
                                     <DataGrid DockPanel.Dock="Top"
                                               x:Name="RealTransactionGrid"
@@ -257,8 +259,20 @@
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                             <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <DataGridTextColumn Header="거래금액(만원)" Binding="{Binding Amount, StringFormat=N0}" Width="*" IsReadOnly="True"
-                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTemplateColumn Width="*" IsReadOnly="True">
+                                                <DataGridTemplateColumn.HeaderTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding DataContext.AmountColumnHeader, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                   HorizontalAlignment="Center"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.HeaderTemplate>
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Amount, StringFormat=N0}"
+                                                                   Style="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
                                             <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                             <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="80" IsReadOnly="True"
@@ -588,7 +602,7 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 5x10 낙찰통계 테이블 -->
+                            <!-- 5x8 낙찰통계 테이블 (지역별 가율/건수 + 적용낙찰가율) -->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
@@ -598,9 +612,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -622,8 +634,8 @@
                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
 
-                                <!-- Row 0, Col 1-3: 시/도 -->
-                                <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
+                                <!-- Row 0: 시/도 -->
+                                <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
                                         Background="{StaticResource BlueGray200Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,2,2"
@@ -634,8 +646,8 @@
                                                HorizontalAlignment="Center"/>
                                 </Border>
 
-                                <!-- Row 0, Col 4-6: 구/군 -->
-                                <Border Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="3"
+                                <!-- Row 0: 구/군 -->
+                                <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2"
                                         Background="{StaticResource BlueGray100Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,2,2"
@@ -646,14 +658,26 @@
                                                HorizontalAlignment="Center"/>
                                 </Border>
 
-                                <!-- Row 0, Col 7-9: 동 -->
-                                <Border Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="3"
+                                <!-- Row 0: 동 -->
+                                <Border Grid.Row="0" Grid.Column="5" Grid.ColumnSpan="2"
                                         Background="{StaticResource BlueGray50Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,0,2"
+                                        BorderThickness="0,0,2,2"
                                         Padding="8,6">
                                     <TextBlock Text="{Binding RegionName3}"
                                                Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontWeight="SemiBold" FontSize="12"
+                                               HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Row 0: 적용낙찰가율 헤더 -->
+                                <Border Grid.Row="0" Grid.Column="7"
+                                        Background="{StaticResource PrimaryBrush}"
+                                        BorderBrush="{StaticResource BlueGray300Brush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="8,6">
+                                    <TextBlock Text="적용낙찰가율"
+                                               Foreground="White"
                                                FontWeight="SemiBold" FontSize="12"
                                                HorizontalAlignment="Center"/>
                                 </Border>
@@ -663,68 +687,59 @@
                                         Background="{StaticResource BlueGray200Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰가율" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock Text="가율" Foreground="{StaticResource TextSecondaryBrush}"
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="2"
                                         Background="{StaticResource BlueGray200Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰률 평균" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="3"
-                                        Background="{StaticResource BlueGray200Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,2,1" Padding="8,6">
-                                    <TextBlock Text="낙찰건수" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock Text="건수" Foreground="{StaticResource TextSecondaryBrush}"
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- Row 1: 구/군 하위 헤더 -->
+                                <Border Grid.Row="1" Grid.Column="3"
+                                        Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray300Brush}"
+                                        BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="가율" Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
+                                </Border>
                                 <Border Grid.Row="1" Grid.Column="4"
                                         Background="{StaticResource BlueGray100Brush}"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰가율" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="5"
-                                        Background="{StaticResource BlueGray100Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰률 평균" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="6"
-                                        Background="{StaticResource BlueGray100Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,2,1" Padding="8,6">
-                                    <TextBlock Text="낙찰건수" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock Text="건수" Foreground="{StaticResource TextSecondaryBrush}"
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!-- Row 1: 동 하위 헤더 -->
+                                <Border Grid.Row="1" Grid.Column="5"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        BorderBrush="{StaticResource BlueGray300Brush}"
+                                        BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="가율" Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="6"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        BorderBrush="{StaticResource BlueGray300Brush}"
+                                        BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="건수" Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Row 1: 적용낙찰가율 설명 -->
                                 <Border Grid.Row="1" Grid.Column="7"
-                                        Background="{StaticResource BlueGray50Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰가율" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="8"
-                                        Background="{StaticResource BlueGray50Brush}"
-                                        BorderBrush="{StaticResource BlueGray300Brush}"
-                                        BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="낙찰률 평균" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
-                                </Border>
-                                <Border Grid.Row="1" Grid.Column="9"
-                                        Background="{StaticResource BlueGray50Brush}"
+                                        Background="#FFEEF5FF"
                                         BorderBrush="{StaticResource BlueGray300Brush}"
                                         BorderThickness="0,0,0,1" Padding="8,6">
-                                    <TextBlock Text="낙찰건수" Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding AppliedBidRateDescription}"
+                                               Foreground="{StaticResource PrimaryBrush}"
+                                               FontWeight="SemiBold" FontSize="11"
+                                               HorizontalAlignment="Center"
+                                               TextWrapping="Wrap"/>
                                 </Border>
 
                                 <!-- Row 2: 1년간 평균 -->
@@ -732,35 +747,49 @@
                                         Background="{StaticResource BlueGray100Brush}"
                                         BorderBrush="{StaticResource BorderBrush}"
                                         BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="1년간 평균" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock Text="1년 평균" Foreground="{StaticResource TextSecondaryBrush}"
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats1Year_Rate1, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats1Year_Count1, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats1Year_Rate2, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats1Year_Count2, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="2" Grid.Column="5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats1Year_Rate3, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="2" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats1Year_Count3, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="2" Grid.Column="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="2" Grid.Column="8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="2" Grid.Column="9" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+
+                                <!-- Row 2-4, Col 7: 적용낙찰가율 값 (RowSpan=3, 편집 가능) -->
+                                <Border Grid.Row="2" Grid.Column="7" Grid.RowSpan="3"
+                                        Background="#FFEEF5FF"
+                                        Padding="8,4">
+                                    <StackPanel Orientation="Horizontal"
+                                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBox Text="{Binding AppliedBidRatePercent, StringFormat={}{0:N1}, Mode=TwoWay, UpdateSourceTrigger=LostFocus, TargetNullValue=''}"
+                                                 FontSize="18" FontWeight="Bold"
+                                                 Foreground="{StaticResource PrimaryBrush}"
+                                                 HorizontalContentAlignment="Center"
+                                                 BorderThickness="0,0,0,1"
+                                                 BorderBrush="{StaticResource PrimaryBrush}"
+                                                 Background="Transparent"
+                                                 MinWidth="60"
+                                                 Padding="4,2"/>
+                                        <TextBlock Text="%"
+                                                   FontSize="18" FontWeight="Bold"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="2,0,0,0"/>
+                                    </StackPanel>
                                 </Border>
 
                                 <!-- Row 3: 6개월 평균 -->
@@ -772,31 +801,22 @@
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats6Month_Rate1, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="3" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="3" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats6Month_Count1, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="3" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats6Month_Rate2, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="3" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="3" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats6Month_Count2, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="3" Grid.Column="5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats6Month_Rate3, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="3" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="3" Grid.Column="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="3" Grid.Column="8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="3" Grid.Column="9" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="3" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,1" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats6Month_Count3, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
 
                                 <!-- Row 4: 3개월 평균 -->
@@ -808,31 +828,22 @@
                                                FontWeight="SemiBold" FontSize="12" HorizontalAlignment="Center"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats3Month_Rate1, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="4" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="4" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,0" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats3Month_Count1, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="3" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats3Month_Rate2, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="4" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="4" Grid.Column="4" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,0" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats3Month_Count2, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                                 <Border Grid.Row="4" Grid.Column="5" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                    <TextBlock Text="{Binding Stats3Month_Rate3, StringFormat={}{0:P1}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
-                                <Border Grid.Row="4" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="4" Grid.Column="7" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="4" Grid.Column="8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
-                                </Border>
-                                <Border Grid.Row="4" Grid.Column="9" Padding="8,6">
-                                    <TextBlock Text="" HorizontalAlignment="Center" FontSize="12"/>
+                                <Border Grid.Row="4" Grid.Column="6" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,2,0" Padding="8,6">
+                                    <TextBlock Text="{Binding Stats3Month_Count3, StringFormat={}{0:N0}, TargetNullValue='-'}" HorizontalAlignment="Center" FontSize="12"/>
                                 </Border>
                             </Grid>
                         </StackPanel>

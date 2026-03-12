@@ -50,7 +50,10 @@ namespace NPLogic.ViewModels
     {
         public decimal? Area { get; set; }
         public DateTime? TransactionDate { get; set; }
+        /// <summary>표시용 금액: 아파트=총거래가(만원), 집합건물=단가(만원/㎡)</summary>
         public decimal? Amount { get; set; }
+        /// <summary>원본 총거래가(만원) — 적용 기능 등에서 사용</summary>
+        public int OriginalDealAmount { get; set; }
         public string? Floor { get; set; }
         public string? IsRegistered { get; set; }
 
@@ -502,24 +505,47 @@ namespace NPLogic.ViewModels
         // === 평가 유형 선택 ===
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
+        [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
+        [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         private bool _isApartmentType = true;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
+        [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
+        [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         private bool _isMultiFamilyType;
 
         /// <summary>
-        /// 사례지도 섹션 제목 (연립다세대: "사례지도", 기타: "사례지도 및 실거래가")
+        /// 사례지도 섹션 제목 (주택/토지: "사례지도", 기타: "사례지도 및 실거래가")
         /// </summary>
-        public string CaseMapSectionTitle => IsMultiFamilyType ? "사례지도" : "사례지도 및 실거래가";
+        public string CaseMapSectionTitle => IsHouseLandType ? "사례지도" : "사례지도 및 실거래가";
+
+        /// <summary>
+        /// 실거래가 표시 여부 (주택/근린시설/토지/기타만 제외)
+        /// </summary>
+        public bool IsShowRealTransaction => !IsHouseLandType;
+
+        /// <summary>
+        /// 거래금액 컬럼 헤더 (아파트=총거래가, 그 외 집합건물=단가)
+        /// </summary>
+        public string AmountColumnHeader => IsApartmentType ? "거래금액(만원)" : "단가(만원/㎡)";
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
+        [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
+        [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         private bool _isFactoryType;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
+        [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
+        [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         private bool _isCommercialType;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
+        [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
+        [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         private bool _isHouseLandType;
 
         private bool _suppressTypeSync;
@@ -532,7 +558,7 @@ namespace NPLogic.ViewModels
                 _suppressTypeSync = true;
                 IsMultiFamilyType = false; IsFactoryType = false; IsCommercialType = false; IsHouseLandType = false;
                 _suppressTypeSync = false;
-                AppliedBidRateDescription = $"{RegionName3 ?? RegionName2} 3개월 평균 낙찰가율";
+                // 적용낙찰가율 설명은 낙찰통계 데이터 로드 시 자동 산출
             }
             IsDirty = true;
         }
@@ -617,13 +643,13 @@ namespace NPLogic.ViewModels
 
         // === 낙찰통계 (피드백 반영: 시/군구/동 3×3 매트릭스) ===
         [ObservableProperty]
-        private string? _regionName1 = "서울특별시";
+        private string? _regionName1;
 
         [ObservableProperty]
-        private string? _regionName2 = "강남구";
+        private string? _regionName2;
 
         [ObservableProperty]
-        private string? _regionName3 = "대치동";
+        private string? _regionName3;
 
         // 1년 평균 - 시/도
         [ObservableProperty]
@@ -689,10 +715,24 @@ namespace NPLogic.ViewModels
         private int? _stats3Month_Count3;
 
         [ObservableProperty]
-        private decimal? _appliedBidRate = 0.70m;
+        private decimal? _appliedBidRate;
+
+        /// <summary>
+        /// 적용낙찰가율 퍼센트 표시용 (70.0 = 70%)
+        /// TextBox 바인딩용: 비율(0.70) ↔ 퍼센트(70.0) 변환
+        /// </summary>
+        public decimal? AppliedBidRatePercent
+        {
+            get => AppliedBidRate.HasValue ? AppliedBidRate.Value * 100 : null;
+            set
+            {
+                AppliedBidRate = value.HasValue ? value.Value / 100 : null;
+                OnPropertyChanged();
+            }
+        }
 
         [ObservableProperty]
-        private string? _appliedBidRateDescription = "3개월 평균 낙찰가율";
+        private string? _appliedBidRateDescription;
 
         // 변경사항 추적 (피드백 반영: 저장 확인용)
         [ObservableProperty]
@@ -987,11 +1027,25 @@ namespace NPLogic.ViewModels
 
             foreach (var t in sorted)
             {
+                // 아파트: 총거래가(만원), 비아파트 집합건물: 전용면적당 단가(만원/㎡)
+                decimal displayAmount;
+                if (IsApartmentType)
+                {
+                    displayAmount = t.DealAmount;
+                }
+                else
+                {
+                    displayAmount = t.Area > 0
+                        ? Math.Round((decimal)t.DealAmount / (decimal)t.Area, 1)
+                        : t.DealAmount;
+                }
+
                 RealTransactions.Add(new RealTransactionItem
                 {
                     Area = (decimal)t.Area,
                     TransactionDate = ParseDealDate(t.DealDate),
-                    Amount = t.DealAmount,
+                    Amount = displayAmount,
+                    OriginalDealAmount = t.DealAmount,
                     Floor = t.Floor,
                     IsRegistered = t.IsRegistered ? "Y" : "N",
                     IsApplied = false,
@@ -1012,7 +1066,7 @@ namespace NPLogic.ViewModels
 
                     foreach (var txn in RealTransactions)
                     {
-                        var key = $"{txn.DealDateRaw}|{(int)(txn.Amount ?? 0)}|{txn.AreaRaw:R}|{txn.Floor ?? ""}";
+                        var key = $"{txn.DealDateRaw}|{txn.OriginalDealAmount}|{txn.AreaRaw:R}|{txn.Floor ?? ""}";
                         if (appliedSet.Contains(key))
                             txn.IsApplied = true;
                     }
@@ -2354,6 +2408,7 @@ namespace NPLogic.ViewModels
 
         partial void OnAppliedBidRateChanged(decimal? value)
         {
+            OnPropertyChanged(nameof(AppliedBidRatePercent));
             CalculateScenario1();
             CalculateScenario2FromBidRate(); // 피드백 반영: 시나리오 2도 재계산
             UpdateScenarioSummary();
