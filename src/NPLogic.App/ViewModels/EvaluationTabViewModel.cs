@@ -938,6 +938,11 @@ namespace NPLogic.ViewModels
         private async Task LoadRealTransactionsAsync()
         {
             RealTransactions.Clear();
+            TradeSeries = Array.Empty<ISeries>();
+            TradeXAxes = Array.Empty<Axis>();
+            TradeYAxes = Array.Empty<Axis>();
+            AvailableAreas.Clear();
+            SelectedArea = null;
 
             if (_property == null)
                 return;
