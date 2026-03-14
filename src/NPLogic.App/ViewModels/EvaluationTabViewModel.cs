@@ -354,6 +354,7 @@ namespace NPLogic.ViewModels
             BuildRecoveryStrategyRows();
             InitializeFactoryEvalRows();
             InitializeCommercialEvalRows();
+            InitializeHouseEvalRows();
         }
 
         #region 회수 전략 요약
@@ -417,6 +418,18 @@ namespace NPLogic.ViewModels
         [ObservableProperty] private string _commercialScenario2EvalReason = "";
         [ObservableProperty] private string _commercialScenario2ReductionAmount = "";
         public ObservableCollection<FactoryEvalRow> CommercialScenario2Rows { get; } = new();
+
+        // 주택 평가결과 시나리오 1
+        [ObservableProperty] private string _houseScenario1EvalAmount = "";
+        [ObservableProperty] private string _houseScenario1EvalReason = "";
+        [ObservableProperty] private string _houseScenario1ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> HouseScenario1Rows { get; } = new();
+
+        // 주택 평가결과 시나리오 2
+        [ObservableProperty] private string _houseScenario2EvalAmount = "";
+        [ObservableProperty] private string _houseScenario2EvalReason = "";
+        [ObservableProperty] private string _houseScenario2ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> HouseScenario2Rows { get; } = new();
 
         // 공장/창고 평가결과 시나리오 1
         [ObservableProperty] private string _factoryScenario1EvalAmount = "";
@@ -487,6 +500,18 @@ namespace NPLogic.ViewModels
             RecoveryStrategyRows.Add(new() { Label = "합계", IsTotal = true });
             RecoveryStrategyRows.Add(new() { Label = "XNPV" });
             RecoveryStrategyRows.Add(new() { Label = "OPB" });
+        }
+
+        private void InitializeHouseEvalRows()
+        {
+            var categories = new[] { "토지", "토지(법면, 도로 등)", "건물", "Total" };
+            HouseScenario1Rows.Clear();
+            HouseScenario2Rows.Clear();
+            foreach (var cat in categories)
+            {
+                HouseScenario1Rows.Add(new FactoryEvalRow { Category = cat });
+                HouseScenario2Rows.Add(new FactoryEvalRow { Category = cat });
+            }
         }
 
         private void InitializeCommercialEvalRows()
