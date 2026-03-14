@@ -353,6 +353,7 @@ namespace NPLogic.ViewModels
             InitializeCaseItems();
             BuildRecoveryStrategyRows();
             InitializeFactoryEvalRows();
+            InitializeCommercialEvalRows();
         }
 
         #region 회수 전략 요약
@@ -404,6 +405,18 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private bool _hasRentalProfitTable;
+
+        // 상가 평가결과 시나리오 1
+        [ObservableProperty] private string _commercialScenario1EvalAmount = "";
+        [ObservableProperty] private string _commercialScenario1EvalReason = "";
+        [ObservableProperty] private string _commercialScenario1ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> CommercialScenario1Rows { get; } = new();
+
+        // 상가 평가결과 시나리오 2
+        [ObservableProperty] private string _commercialScenario2EvalAmount = "";
+        [ObservableProperty] private string _commercialScenario2EvalReason = "";
+        [ObservableProperty] private string _commercialScenario2ReductionAmount = "";
+        public ObservableCollection<FactoryEvalRow> CommercialScenario2Rows { get; } = new();
 
         // 공장/창고 평가결과 시나리오 1
         [ObservableProperty] private string _factoryScenario1EvalAmount = "";
@@ -474,6 +487,18 @@ namespace NPLogic.ViewModels
             RecoveryStrategyRows.Add(new() { Label = "합계", IsTotal = true });
             RecoveryStrategyRows.Add(new() { Label = "XNPV" });
             RecoveryStrategyRows.Add(new() { Label = "OPB" });
+        }
+
+        private void InitializeCommercialEvalRows()
+        {
+            var categories = new[] { "토지", "건물" };
+            CommercialScenario1Rows.Clear();
+            CommercialScenario2Rows.Clear();
+            foreach (var cat in categories)
+            {
+                CommercialScenario1Rows.Add(new FactoryEvalRow { Category = cat });
+                CommercialScenario2Rows.Add(new FactoryEvalRow { Category = cat });
+            }
         }
 
         private void InitializeFactoryEvalRows()
