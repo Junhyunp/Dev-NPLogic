@@ -122,6 +122,13 @@ namespace NPLogic.Views
                 _mapService ??= App.ServiceProvider?.GetService<MapService>();
                 if (_mapService == null) return;
 
+                // 토큰 만료 대비: 세션 유효성 확인 및 갱신
+                var supabaseService = App.ServiceProvider?.GetService<SupabaseService>();
+                if (supabaseService != null)
+                {
+                    await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+                }
+
                 var authService = App.ServiceProvider?.GetService<AuthService>();
                 if (authService == null || !authService.IsAuthenticated()) return;
 
