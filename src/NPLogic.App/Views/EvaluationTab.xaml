@@ -117,51 +117,61 @@
 
             <!-- 헤더: 평가 유형 선택 -->
             <Border Grid.Row="0" Style="{StaticResource CardStyle}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <Border Background="{StaticResource PrimaryBrush}"
+                        CornerRadius="8,8,0,0"
+                        Padding="16,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                        <TextBlock Text="평가 유형 선택"
-                                   Style="{StaticResource SectionHeaderStyle}"
-                                   Margin="0"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="평가 유형 선택"
+                                       Foreground="White"
+                                       FontWeight="SemiBold"
+                                       FontSize="{StaticResource FontSizeH4}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                    <!-- 평가 유형 라디오 버튼 -->
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" 
-                                Margin="32,0,0,0"
-                                VerticalAlignment="Center">
-                        <RadioButton Content="1. 아파트"
-                                     IsChecked="{Binding IsApartmentType}"
-                                     Margin="0,0,24,0"
-                                     FontSize="{StaticResource FontSizeBody}"/>
-                        <RadioButton Content="2. 연립다세대"
-                                     IsChecked="{Binding IsMultiFamilyType}"
-                                     Margin="0,0,24,0"
-                                     FontSize="{StaticResource FontSizeBody}"/>
-                        <RadioButton Content="3. 공장/창고"
-                                     IsChecked="{Binding IsFactoryType}"
-                                     Margin="0,0,24,0"
-                                     FontSize="{StaticResource FontSizeBody}"/>
-                        <RadioButton Content="4. 상가/아파트형공장"
-                                     IsChecked="{Binding IsCommercialType}"
-                                     Margin="0,0,24,0"
-                                     FontSize="{StaticResource FontSizeBody}"/>
-                        <RadioButton Content="5. 주택/근린시설/토지/기타"
-                                     IsChecked="{Binding IsHouseLandType}"
+                        <!-- 평가 유형 라디오 버튼 -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                    Margin="32,0,0,0"
+                                    VerticalAlignment="Center">
+                            <RadioButton Content="1. 아파트"
+                                         IsChecked="{Binding IsApartmentType}"
+                                         Margin="0,0,24,0"
+                                         FontSize="{StaticResource FontSizeBody}"
+                                         Foreground="White"/>
+                            <RadioButton Content="2. 연립다세대"
+                                         IsChecked="{Binding IsMultiFamilyType}"
+                                         Margin="0,0,24,0"
+                                         FontSize="{StaticResource FontSizeBody}"
+                                         Foreground="White"/>
+                            <RadioButton Content="3. 공장/창고"
+                                         IsChecked="{Binding IsFactoryType}"
+                                         Margin="0,0,24,0"
+                                         FontSize="{StaticResource FontSizeBody}"
+                                         Foreground="White"/>
+                            <RadioButton Content="4. 상가/아파트형공장"
+                                         IsChecked="{Binding IsCommercialType}"
+                                         Margin="0,0,24,0"
+                                         FontSize="{StaticResource FontSizeBody}"
+                                         Foreground="White"/>
+                            <RadioButton Content="5. 주택/근린시설/토지/기타"
+                                         IsChecked="{Binding IsHouseLandType}"
+                                         FontSize="{StaticResource FontSizeBody}"
+                                         Foreground="White"/>
+                        </StackPanel>
 
-                                     FontSize="{StaticResource FontSizeBody}"/>
-                    </StackPanel>
-
-                    <Button Grid.Column="2" Content="저장"
-                            Command="{Binding SaveCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Padding="12,6"/>
-                </Grid>
+                        <Button Grid.Column="2" Content="저장"
+                                Command="{Binding SaveCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Padding="12,6"
+                                Foreground="White"/>
+                    </Grid>
+                </Border>
             </Border>
 
             <!-- 메인 콘텐츠 -->
@@ -207,20 +217,27 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding CaseMapSectionTitle}"
-                                               Style="{StaticResource SectionHeader}"
-                                               Margin="0"/>
-                                </StackPanel>
-                                <Button Content="가져오기"
-                                        Command="{Binding LoadCaseMapCommand}"
-                                        Padding="12,4"
-                                        FontSize="{StaticResource FontSizeBody}"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"/>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Button Content="가져오기"
+                                            Command="{Binding LoadCaseMapCommand}"
+                                            Padding="12,4"
+                                            FontSize="{StaticResource FontSizeBody}"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Foreground="White"/>
+                                </Grid>
+                            </Border>
 
                             <!-- 좌: 사례지도 / 우: 실거래가 + 그래프 -->
                             <Grid>
@@ -647,7 +664,18 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <TextBlock Text="&#x1F4CB; 사례평가" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4CB; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="사례평가"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 사례평가 테이블 -->
                             <DataGrid x:Name="CaseEvaluationGrid"
@@ -699,7 +727,18 @@
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <TextBlock Text="&#x1F3E0; 사례 로드뷰" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F3E0; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="사례 로드뷰"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 4x2 테이블 -->
                             <Grid>
@@ -788,7 +827,18 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <TextBlock Text="&#x1F50D; 경매사건검색" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F50D; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="경매사건검색"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 경매사건 사례 테이블 -->
                             <Grid>
@@ -854,7 +904,18 @@
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <TextBlock Text="&#x1F4C8; 낙찰통계" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4C8; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="낙찰통계"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 5x8 낙찰통계 테이블 (지역별 가율/건수 + 적용낙찰가율) -->
                             <Grid>
@@ -1107,9 +1168,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4DE; 탐문 내역"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4DE; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="탐문 내역"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 탐문 내역 DataGrid -->
                             <DataGrid x:Name="FactoryInquiryDataGrid"
@@ -1178,25 +1248,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F4DD; 탐문 결과"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateInquiryResultTableCommand}"
-                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 결과 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyInquiryResultTableCommand}"
-                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 결과 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F4DD; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="탐문 결과"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateInquiryResultTableCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 결과 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyInquiryResultTableCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 결과 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 탐문 결과 DataGrid -->
                             <DataGrid x:Name="FactoryInquiryResultDataGrid"
@@ -1249,25 +1330,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F4CA; 임대호가분석"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateRentalQuoteTableCommand}"
-                                            Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="임대호가분석 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyRentalQuoteTableCommand}"
-                                            Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="임대호가분석 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F4CA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="임대호가분석"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateRentalQuoteTableCommand}"
+                                                Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="임대호가분석 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyRentalQuoteTableCommand}"
+                                                Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="임대호가분석 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 9x7 테이블 (1행 헤더 + 8행 데이터, 1열 헤더) -->
                             <Grid Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -1425,25 +1517,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F193; 무상임대분석"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateFreeRentTableCommand}"
-                                            Visibility="{Binding HasFreeRentTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="무상임대분석 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyFreeRentTableCommand}"
-                                            Visibility="{Binding HasFreeRentTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="무상임대분석 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F193; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="무상임대분석"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateFreeRentTableCommand}"
+                                                Visibility="{Binding HasFreeRentTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="무상임대분석 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyFreeRentTableCommand}"
+                                                Visibility="{Binding HasFreeRentTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="무상임대분석 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 좌측 + 우측 테이블 -->
                             <Grid Visibility="{Binding HasFreeRentTable, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -1650,25 +1753,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F4B0; 탐문 수익가치"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateInquiryProfitTableCommand}"
-                                            Visibility="{Binding HasInquiryProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 수익가치 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyInquiryProfitTableCommand}"
-                                            Visibility="{Binding HasInquiryProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 수익가치 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F4B0; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="탐문 수익가치"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateInquiryProfitTableCommand}"
+                                                Visibility="{Binding HasInquiryProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 수익가치 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyInquiryProfitTableCommand}"
+                                                Visibility="{Binding HasInquiryProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 수익가치 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 4x9 Grid -->
                             <Grid Visibility="{Binding HasInquiryProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
@@ -1814,25 +1928,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F3E2; 현재 임대 수익가치"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateRentalProfitTableCommand}"
-                                            Visibility="{Binding HasRentalProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="현재 임대 수익가치 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyRentalProfitTableCommand}"
-                                            Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="현재 임대 수익가치 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F3E2; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="현재 임대 수익가치"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateRentalProfitTableCommand}"
+                                                Visibility="{Binding HasRentalProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="현재 임대 수익가치 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyRentalProfitTableCommand}"
+                                                Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="현재 임대 수익가치 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 상단 DataGrid: 임대 내역 -->
                             <DataGrid x:Name="RentalIncomeDataGrid"
@@ -2018,25 +2143,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsMultiFamilyType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F4DE; 탐문 내역"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateInquiryTableCommand}"
-                                            Visibility="{Binding HasInquiryTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 내역 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyInquiryTableCommand}"
-                                            Visibility="{Binding HasInquiryTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 내역 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F4DE; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="탐문 내역"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateInquiryTableCommand}"
+                                                Visibility="{Binding HasInquiryTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 내역 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyInquiryTableCommand}"
+                                                Visibility="{Binding HasInquiryTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 내역 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 탐문 내역 DataGrid -->
                             <DataGrid x:Name="InquiryDataGrid"
@@ -2107,25 +2243,36 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsMultiFamilyType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <Grid Margin="0,0,0,12">
-                                <TextBlock Text="&#x1F4DD; 탐문 결과"
-                                           Style="{StaticResource SectionHeader}"
-                                           Margin="0"/>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                    <Button Content="+" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding CreateInquiryResultTableCommand}"
-                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 결과 테이블 생성"/>
-                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
-                                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Command="{Binding DestroyInquiryResultTableCommand}"
-                                            Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
-                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
-                                            ToolTip="탐문 결과 테이블 제거"/>
-                                </StackPanel>
-                            </Grid>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F4DD; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="탐문 결과"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding CreateInquiryResultTableCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 결과 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                Command="{Binding DestroyInquiryResultTableCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                ToolTip="탐문 결과 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
 
                             <!-- 탐문 결과 DataGrid -->
                             <DataGrid x:Name="InquiryResultDataGrid"
@@ -2178,9 +2325,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x2705; 평가결과"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x2705; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="평가결과"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 평가결과 테이블 -->
                             <Grid>
@@ -2265,9 +2421,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x2705; 평가결과"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x2705; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="평가결과"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 시나리오 1 헤더 -->
                             <Grid Background="{StaticResource BlueGray50Brush}">
@@ -2471,9 +2636,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x2705; 평가결과"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x2705; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="평가결과"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 시나리오 1 헤더 -->
                             <Grid Background="{StaticResource BlueGray50Brush}">
@@ -2637,9 +2811,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsHouseLandType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x2705; 평가결과"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x2705; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="평가결과"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 시나리오 1 헤더 -->
                             <Grid Background="{StaticResource BlueGray50Brush}">
@@ -2767,9 +2950,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4CD; 지번별 평가"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4CD; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="지번별 평가"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 2행 헤더 Grid -->
                             <Grid Background="{StaticResource BlueGray100Brush}">
@@ -2945,9 +3137,18 @@
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFirstPropertyInBorrower, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4B0; 회수 전략 요약"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4B0; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="회수 전략 요약"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 시나리오 1 (좌) + 시나리오 2 (우) 병렬 테이블 -->
                             <Grid>
@@ -3114,9 +3315,18 @@
                     <!-- 인터림 상계/회수 (모든 물건 공통 표시) -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <TextBlock Text="&#x1F504; 인터림 상계/회수"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F504; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="인터림 상계/회수"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 16열 테이블 -->
                             <DataGrid ItemsSource="{Binding InterimRecoveryRows}"
@@ -3179,9 +3389,18 @@
                     <!-- 인터림 지출 (모든 물건 공통 표시) -->
                     <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
-                            <TextBlock Text="&#x1F4B8; 인터림 지출"
-                                       Style="{StaticResource SectionHeader}"
-                                       Margin="0,0,0,12"/>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4B8; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="인터림 지출"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
 
                             <!-- 10열 테이블 -->
                             <DataGrid ItemsSource="{Binding InterimExpenseRows}"
