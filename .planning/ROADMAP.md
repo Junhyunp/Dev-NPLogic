@@ -28,11 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. 모든 CardBorder의 Margin이 0,0,0,16으로 통일되고, 내부 Padding이 16px로 일관된다
   4. 섹션 헤더가 SectionHeader 스타일 기준으로 통일되며, 이모지/아이콘 패턴이 일관적이다
   5. 평가결과 헤더(PrimaryBrush+PackIcon)와 개별 View 헤더 간 시각적 일관성이 확보된다
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md -- CardStyle Margin 업데이트 + 공통 섹션 6개 PrimaryBrush 헤더 변환
+- [ ] 01-02-PLAN.md -- 유형별 전용 섹션 16개 헤더 변환 + 전체 시각적 검증
 
 ### Phase 2: DataGrid 스타일 표준화
 **Goal**: 전 유형의 DataGrid가 용도별로 일관된 크기, 폰트, 행 높이, 테두리를 갖는다
@@ -67,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 레이아웃/헤더/여백 기반 통일 | 0/? | Not started | - |
+| 1. 레이아웃/헤더/여백 기반 통일 | 0/2 | Planned | - |
 | 2. DataGrid 스타일 표준화 | 0/? | Not started | - |
 | 3. 평가결과 섹션 패턴 통일 | 0/? | Not started | - |
