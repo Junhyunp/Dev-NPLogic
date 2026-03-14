@@ -117,61 +117,48 @@
 
             <!-- 헤더: 평가 유형 선택 -->
             <Border Grid.Row="0" Style="{StaticResource CardStyle}">
-                <Border Background="{StaticResource PrimaryBrush}"
-                        CornerRadius="8,8,0,0"
-                        Padding="16,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="평가 유형 선택"
-                                       Foreground="White"
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeH4}"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
+                    <TextBlock Grid.Column="0" Text="평가 유형 선택"
+                               FontWeight="SemiBold"
+                               FontSize="{StaticResource FontSizeH4}"
+                               VerticalAlignment="Center"/>
 
-                        <!-- 평가 유형 라디오 버튼 -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                    Margin="32,0,0,0"
-                                    VerticalAlignment="Center">
-                            <RadioButton Content="1. 아파트"
-                                         IsChecked="{Binding IsApartmentType}"
-                                         Margin="0,0,24,0"
-                                         FontSize="{StaticResource FontSizeBody}"
-                                         Foreground="White"/>
-                            <RadioButton Content="2. 연립다세대"
-                                         IsChecked="{Binding IsMultiFamilyType}"
-                                         Margin="0,0,24,0"
-                                         FontSize="{StaticResource FontSizeBody}"
-                                         Foreground="White"/>
-                            <RadioButton Content="3. 공장/창고"
-                                         IsChecked="{Binding IsFactoryType}"
-                                         Margin="0,0,24,0"
-                                         FontSize="{StaticResource FontSizeBody}"
-                                         Foreground="White"/>
-                            <RadioButton Content="4. 상가/아파트형공장"
-                                         IsChecked="{Binding IsCommercialType}"
-                                         Margin="0,0,24,0"
-                                         FontSize="{StaticResource FontSizeBody}"
-                                         Foreground="White"/>
-                            <RadioButton Content="5. 주택/근린시설/토지/기타"
-                                         IsChecked="{Binding IsHouseLandType}"
-                                         FontSize="{StaticResource FontSizeBody}"
-                                         Foreground="White"/>
-                        </StackPanel>
+                    <!-- 평가 유형 라디오 버튼 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                Margin="32,0,0,0"
+                                VerticalAlignment="Center">
+                        <RadioButton Content="1. 아파트"
+                                     IsChecked="{Binding IsApartmentType}"
+                                     Margin="0,0,24,0"
+                                     FontSize="{StaticResource FontSizeBody}"/>
+                        <RadioButton Content="2. 연립다세대"
+                                     IsChecked="{Binding IsMultiFamilyType}"
+                                     Margin="0,0,24,0"
+                                     FontSize="{StaticResource FontSizeBody}"/>
+                        <RadioButton Content="3. 공장/창고"
+                                     IsChecked="{Binding IsFactoryType}"
+                                     Margin="0,0,24,0"
+                                     FontSize="{StaticResource FontSizeBody}"/>
+                        <RadioButton Content="4. 상가/아파트형공장"
+                                     IsChecked="{Binding IsCommercialType}"
+                                     Margin="0,0,24,0"
+                                     FontSize="{StaticResource FontSizeBody}"/>
+                        <RadioButton Content="5. 주택/근린시설/토지/기타"
+                                     IsChecked="{Binding IsHouseLandType}"
+                                     FontSize="{StaticResource FontSizeBody}"/>
+                    </StackPanel>
 
-                        <Button Grid.Column="2" Content="저장"
-                                Command="{Binding SaveCommand}"
-                                Style="{StaticResource MaterialDesignRaisedButton}"
-                                Padding="12,6"
-                                Foreground="White"/>
-                    </Grid>
-                </Border>
+                    <Button Grid.Column="2" Content="저장"
+                            Command="{Binding SaveCommand}"
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Padding="12,6"/>
+                </Grid>
             </Border>
 
             <!-- 메인 콘텐츠 -->
