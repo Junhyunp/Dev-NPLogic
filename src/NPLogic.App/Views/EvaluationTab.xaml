@@ -1355,6 +1355,196 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 임대호가분석 (상가/아파트형공장 전용) -->
+                    <Border Background="{StaticResource SurfaceColor}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Margin="0,0,0,16"
+                            Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <!-- 섹션 헤더 -->
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <materialDesign:PackIcon Kind="TableLarge" Width="18" Height="18"
+                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
+                                        <TextBlock Text="임대호가분석"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"/>
+                                    </StackPanel>
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding CreateRentalQuoteTableCommand}"
+                                            Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="임대호가분석 테이블 생성"/>
+                                    <Button Content="−" FontSize="16" FontWeight="Bold"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Command="{Binding DestroyRentalQuoteTableCommand}"
+                                            Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            Background="Transparent" Foreground="White" BorderThickness="0"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            ToolTip="임대호가분석 테이블 제거"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 9x7 테이블 (1행 헤더 + 8행 데이터, 1열 헤더) -->
+                            <Grid Visibility="{Binding HasRentalQuoteTable, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Row 0: 헤더행 -->
+                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="구분" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                    <TextBlock Text="호가1" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                    <TextBlock Text="호가2" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                    <TextBlock Text="호가3" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                    <TextBlock Text="호가4" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="5" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                    <TextBlock Text="호가5" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="6" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6">
+                                    <TextBlock Text="평균" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Row 1: 분양(평) -->
+                                <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="분양(평)" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="1" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="1" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="1" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 2: 전용(평) -->
+                                <Border Grid.Row="2" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="전용(평)" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="2" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="2" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="2" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="2" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="2" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="2" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 3: 보증금 -->
+                                <Border Grid.Row="3" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="보증금" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="3" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="3" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="3" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="3" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="3" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="3" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 4: 월 임대료 -->
+                                <Border Grid.Row="4" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="월 임대료" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="4" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="4" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="4" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="4" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="4" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="4" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 5: 전용평당임대료 -->
+                                <Border Grid.Row="5" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="전용평당임대료" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="5" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="5" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="5" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="5" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="5" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="5" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 6: 층수 -->
+                                <Border Grid.Row="6" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="층수" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="6" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="6" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="6" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="6" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="6" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="6" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 7: 비고 -->
+                                <Border Grid.Row="7" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="비고" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="7" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="7" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="7" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="7" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="7" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="7" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+
+                                <!-- Row 8: 월 임대수익 -->
+                                <Border Grid.Row="8" Grid.Column="0" Background="{StaticResource BlueGray100Brush}"
+                                        BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="1,0,1,1" Padding="4,6">
+                                    <TextBlock Text="월 임대수익" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="8" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="8" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="8" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="8" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="8" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
+                                <Border Grid.Row="8" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 탐문 수익가치 (공장/창고 전용) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"

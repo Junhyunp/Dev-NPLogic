@@ -382,6 +382,10 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasInquiryResultTable;
 
+        // === 임대호가분석 ===
+        [ObservableProperty]
+        private bool _hasRentalQuoteTable;
+
         [ObservableProperty]
         private InquiryProfitData? _inquiryProfitData;
 
@@ -1702,6 +1706,18 @@ namespace NPLogic.ViewModels
         {
             InquiryResultRows.Clear();
             HasInquiryResultTable = false;
+        }
+
+        [RelayCommand]
+        private void CreateRentalQuoteTable()
+        {
+            HasRentalQuoteTable = true;
+        }
+
+        [RelayCommand]
+        private void DestroyRentalQuoteTable()
+        {
+            HasRentalQuoteTable = false;
         }
 
         /// <summary>
