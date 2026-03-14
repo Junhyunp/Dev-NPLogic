@@ -386,6 +386,10 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasRentalQuoteTable;
 
+        // === 무상임대분석 ===
+        [ObservableProperty]
+        private bool _hasFreeRentTable;
+
         [ObservableProperty]
         private InquiryProfitData? _inquiryProfitData;
 
@@ -1718,6 +1722,18 @@ namespace NPLogic.ViewModels
         private void DestroyRentalQuoteTable()
         {
             HasRentalQuoteTable = false;
+        }
+
+        [RelayCommand]
+        private void CreateFreeRentTable()
+        {
+            HasFreeRentTable = true;
+        }
+
+        [RelayCommand]
+        private void DestroyFreeRentTable()
+        {
+            HasFreeRentTable = false;
         }
 
         /// <summary>
