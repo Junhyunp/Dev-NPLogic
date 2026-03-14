@@ -7,13 +7,13 @@
 
 ### 레이아웃
 
-- [ ] **LAYOUT-01**: 전체 5개 View의 DesignHeight를 동일하게 통일 (현재 800/900 혼재)
+- [x] **LAYOUT-01**: 전체 5개 View의 DesignHeight를 동일하게 통일 (현재 800/900 혼재)
 - [ ] **LAYOUT-02**: 좌우 패널 내 섹션 순서를 일관된 원칙으로 정리 (공통 섹션은 같은 위치)
-- [ ] **LAYOUT-03**: CardBorder Margin을 모든 섹션에서 동일하게 적용 (0,0,0,16)
+- [x] **LAYOUT-03**: CardBorder Margin을 모든 섹션에서 동일하게 적용 (0,0,0,16)
 
 ### 섹션 헤더
 
-- [ ] **HDR-01**: 유형별 View 내 섹션 헤더 스타일을 SectionHeader 기준으로 통일 (이모지/아이콘 패턴 일관화)
+- [x] **HDR-01**: 유형별 View 내 섹션 헤더 스타일을 SectionHeader 기준으로 통일 (이모지/아이콘 패턴 일관화)
 - [ ] **HDR-02**: EvaluationTab.xaml의 평가결과 헤더(PrimaryBrush + PackIcon)와 개별 View 헤더 스타일 간 일관성 확보
 
 ### DataGrid
@@ -29,8 +29,8 @@
 
 ### 여백/간격
 
-- [ ] **SPC-01**: Border 내부 Padding을 모든 섹션에서 동일하게 (16px)
-- [ ] **SPC-02**: 섹션 간 간격(Margin)을 전체 View에서 일관되게 적용
+- [x] **SPC-01**: Border 내부 Padding을 모든 섹션에서 동일하게 (16px)
+- [x] **SPC-02**: 섹션 간 간격(Margin)을 전체 View에서 일관되게 적용
 
 ## v2 Requirements
 
@@ -53,18 +53,18 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | Phase 1 | Pending |
+| LAYOUT-01 | Phase 1 | Complete (01-01) |
 | LAYOUT-02 | Phase 1 | Pending |
-| LAYOUT-03 | Phase 1 | Pending |
-| HDR-01 | Phase 1 | Pending |
+| LAYOUT-03 | Phase 1 | Complete (01-01) |
+| HDR-01 | Phase 1 | Complete (01-01) |
 | HDR-02 | Phase 1 | Pending |
 | GRID-01 | Phase 2 | Pending |
 | GRID-02 | Phase 2 | Pending |
 | GRID-03 | Phase 2 | Pending |
 | EVAL-01 | Phase 3 | Pending |
 | EVAL-02 | Phase 3 | Pending |
-| SPC-01 | Phase 1 | Pending |
-| SPC-02 | Phase 1 | Pending |
+| SPC-01 | Phase 1 | Complete (01-01) |
+| SPC-02 | Phase 1 | Complete (01-01) |
 
 **Coverage:**
 - v1 requirements: 12 total

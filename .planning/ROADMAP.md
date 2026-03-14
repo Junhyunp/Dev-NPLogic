@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- CardStyle Margin 업데이트 + 공통 섹션 6개 PrimaryBrush 헤더 변환
+- [x] 01-01-PLAN.md -- CardStyle Margin 업데이트 + 공통 섹션 6개 PrimaryBrush 헤더 변환
 - [ ] 01-02-PLAN.md -- 유형별 전용 섹션 16개 헤더 변환 + 전체 시각적 검증
 
 ### Phase 2: DataGrid 스타일 표준화
@@ -67,6 +67,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 레이아웃/헤더/여백 기반 통일 | 0/2 | Planned | - |
+| 1. 레이아웃/헤더/여백 기반 통일 | 1/2 | In Progress | - |
 | 2. DataGrid 스타일 표준화 | 0/? | Not started | - |
 | 3. 평가결과 섹션 패턴 통일 | 0/? | Not started | - |
