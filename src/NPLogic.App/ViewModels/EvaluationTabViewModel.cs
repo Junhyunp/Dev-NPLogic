@@ -594,12 +594,15 @@ namespace NPLogic.ViewModels
 
         public bool IsFactoryOrCommercialOrHouseType => IsFactoryType || IsCommercialType || IsHouseLandType;
 
+        public bool IsFactoryOrHouseType => IsFactoryType || IsHouseLandType;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrHouseType))]
         private bool _isFactoryType;
 
         [ObservableProperty]
@@ -617,6 +620,7 @@ namespace NPLogic.ViewModels
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         [NotifyPropertyChangedFor(nameof(IsCommercialOrHouseType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrHouseType))]
         private bool _isHouseLandType;
 
         private bool _suppressTypeSync;
