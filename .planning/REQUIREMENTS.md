@@ -8,13 +8,13 @@
 ### 레이아웃
 
 - [x] **LAYOUT-01**: 전체 5개 View의 DesignHeight를 동일하게 통일 (현재 800/900 혼재)
-- [ ] **LAYOUT-02**: 좌우 패널 내 섹션 순서를 일관된 원칙으로 정리 (공통 섹션은 같은 위치)
+- [x] **LAYOUT-02**: 좌우 패널 내 섹션 순서를 일관된 원칙으로 정리 (공통 섹션은 같은 위치)
 - [x] **LAYOUT-03**: CardBorder Margin을 모든 섹션에서 동일하게 적용 (0,0,0,16)
 
 ### 섹션 헤더
 
 - [x] **HDR-01**: 유형별 View 내 섹션 헤더 스타일을 SectionHeader 기준으로 통일 (이모지/아이콘 패턴 일관화)
-- [ ] **HDR-02**: EvaluationTab.xaml의 평가결과 헤더(PrimaryBrush + PackIcon)와 개별 View 헤더 스타일 간 일관성 확보
+- [x] **HDR-02**: EvaluationTab.xaml의 평가결과 헤더(PrimaryBrush + PackIcon)와 개별 View 헤더 스타일 간 일관성 확보
 
 ### DataGrid
 
@@ -54,10 +54,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | LAYOUT-01 | Phase 1 | Complete (01-01) |
-| LAYOUT-02 | Phase 1 | Pending |
+| LAYOUT-02 | Phase 1 | Complete |
 | LAYOUT-03 | Phase 1 | Complete (01-01) |
 | HDR-01 | Phase 1 | Complete (01-01) |
-| HDR-02 | Phase 1 | Pending |
+| HDR-02 | Phase 1 | Complete |
 | GRID-01 | Phase 2 | Pending |
 | GRID-02 | Phase 2 | Pending |
 | GRID-03 | Phase 2 | Pending |
