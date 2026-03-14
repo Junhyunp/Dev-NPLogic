@@ -47,30 +47,30 @@
 | 비즈니스 로직 변경 | ViewModel/계산 로직은 그대로 유지 |
 | 평가 탭 외 다른 탭 변경 | 범위 밖 (등기부등본, 권리분석 등) |
 | 성능 최적화 | 이번 작업의 목표가 아님 |
-| UserControl 추출 리팩토링 | v2로 이관 — 현재는 스타일 통일만 |
+| UserControl 추출 리팩토링 | v2로 이관 -- 현재는 스타일 통일만 |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | — | Pending |
-| LAYOUT-02 | — | Pending |
-| LAYOUT-03 | — | Pending |
-| HDR-01 | — | Pending |
-| HDR-02 | — | Pending |
-| GRID-01 | — | Pending |
-| GRID-02 | — | Pending |
-| GRID-03 | — | Pending |
-| EVAL-01 | — | Pending |
-| EVAL-02 | — | Pending |
-| SPC-01 | — | Pending |
-| SPC-02 | — | Pending |
+| LAYOUT-01 | Phase 1 | Pending |
+| LAYOUT-02 | Phase 1 | Pending |
+| LAYOUT-03 | Phase 1 | Pending |
+| HDR-01 | Phase 1 | Pending |
+| HDR-02 | Phase 1 | Pending |
+| GRID-01 | Phase 2 | Pending |
+| GRID-02 | Phase 2 | Pending |
+| GRID-03 | Phase 2 | Pending |
+| EVAL-01 | Phase 3 | Pending |
+| EVAL-02 | Phase 3 | Pending |
+| SPC-01 | Phase 1 | Pending |
+| SPC-02 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation*
