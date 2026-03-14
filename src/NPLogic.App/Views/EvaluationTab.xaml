@@ -204,33 +204,23 @@
                     </Border>
                     
                     <!-- 사례지도 및 실거래가 통합 영역 -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16">
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="MapMarkerRadius" Width="18" Height="18"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"/>
-                                    </StackPanel>
-                                    <Button Content="가져오기"
-                                            Command="{Binding LoadCaseMapCommand}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
+                            <Grid Margin="0,0,0,12">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding CaseMapSectionTitle}"
+                                               Style="{StaticResource SectionHeader}"
+                                               Margin="0"/>
+                                </StackPanel>
+                                <Button Content="가져오기"
+                                        Command="{Binding LoadCaseMapCommand}"
+                                        Padding="12,4"
+                                        FontSize="{StaticResource FontSizeBody}"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
 
                             <!-- 좌: 사례지도 / 우: 실거래가 + 그래프 -->
                             <Grid>
@@ -654,27 +644,10 @@
                     </Border>
 
                     <!-- 사례평가 영역 -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16">
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="ChartBox" Width="18" Height="18"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="사례평가"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <TextBlock Text="&#x1F4CB; 사례평가" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
 
                             <!-- 사례평가 테이블 -->
                             <DataGrid x:Name="CaseEvaluationGrid"
@@ -722,26 +695,11 @@
                     </Border>
 
                     <!-- 사례 로드뷰 (공장/창고 + 상가 + 주택) -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16"
+                    <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon Kind="ImageMultipleOutline" Width="18" Height="18"
-                                                             Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                    <TextBlock Text="사례 로드뷰"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="{StaticResource FontSizeH4}"/>
-                                </StackPanel>
-                            </Border>
+                            <TextBlock Text="&#x1F3E0; 사례 로드뷰" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
 
                             <!-- 4x2 테이블 -->
                             <Grid>
@@ -827,27 +785,10 @@
                     </Border>
 
                     <!-- 경매사건검색 영역 -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16">
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="Gavel" Width="18" Height="18"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="경매사건검색"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <TextBlock Text="&#x1F50D; 경매사건검색" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
 
                             <!-- 경매사건 사례 테이블 -->
                             <Grid>
@@ -910,27 +851,10 @@
                 <!-- 낙찰통계 + 평가결과 -->
 
                     <!-- 낙찰통계 영역 -->
-                    <Border Background="{StaticResource SurfaceColor}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Margin="0,0,0,16">
+                    <Border Style="{StaticResource CardStyle}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="ChartBar" Width="18" Height="18"
-                                                                 Margin="0,0,6,0" VerticalAlignment="Center" Foreground="White"/>
-                                        <TextBlock Text="낙찰통계"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"/>
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
+                            <TextBlock Text="&#x1F4C8; 낙찰통계" Style="{StaticResource SectionHeader}" Margin="0,0,0,12"/>
 
                             <!-- 5x8 낙찰통계 테이블 (지역별 가율/건수 + 적용낙찰가율) -->
                             <Grid>
