@@ -1772,8 +1772,9 @@
                                         <TextBlock Text="수익가치" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
                                     <Border Grid.Row="7" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
-                                    <Border Grid.Row="7" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28">
-                                        <TextBlock Text="평당" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Grid.Row="7" Grid.Column="2" Background="{StaticResource BlueGray100Brush}"
+                                            BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28">
+                                        <TextBlock Text="평당" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
                                     <Border Grid.Row="7" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
                                     <Border Grid.Row="7" Grid.Column="4" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
