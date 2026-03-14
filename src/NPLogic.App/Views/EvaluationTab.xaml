@@ -362,8 +362,8 @@
                                 </DockPanel>
                             </Grid>
 
-                            <!-- 상가 전용: 임대동향 + 상권지도 통합 테이블 -->
-                            <Grid Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <!-- 상가+주택 전용: 임대동향 + 상권지도 통합 테이블 -->
+                            <Grid Visibility="{Binding IsCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
@@ -725,13 +725,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 사례 로드뷰 (공장/창고 + 상가/아파트형공장) -->
+                    <!-- 사례 로드뷰 (공장/창고 + 상가 + 주택) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryOrCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"
@@ -1183,13 +1183,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 탐문 내역 (공장/창고 + 상가/아파트형공장) -->
+                    <!-- 탐문 내역 (공장/창고 + 상가 + 주택) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryOrCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"
@@ -1268,13 +1268,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 탐문 결과 (공장/창고 + 상가/아파트형공장) -->
+                    <!-- 탐문 결과 (공장/창고 + 상가 + 주택) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryOrCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"
@@ -1784,13 +1784,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 탐문 수익가치 (공장/창고 전용) -->
+                    <!-- 탐문 수익가치 (공장/창고 + 주택) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"
@@ -1964,13 +1964,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 현재 임대 수익가치 (공장/창고 전용) -->
+                    <!-- 현재 임대 수익가치 (공장/창고 + 주택) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"

@@ -551,12 +551,12 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 사례지도 섹션 제목 (주택/토지: "사례지도", 기타: "사례지도 및 실거래가")
         /// </summary>
-        public string CaseMapSectionTitle => IsHouseLandType ? "사례지도" : "사례지도 및 실거래가";
+        public string CaseMapSectionTitle => "사례지도 및 실거래가";
 
         /// <summary>
-        /// 실거래가 표시 여부 (주택/근린시설/토지/기타만 제외)
+        /// 실거래가 표시 여부 (전 유형 표시)
         /// </summary>
-        public bool IsShowRealTransaction => !IsHouseLandType;
+        public bool IsShowRealTransaction => true;
 
         /// <summary>
         /// 거래금액 컬럼 헤더 (아파트=총거래가, 그 외 집합건물=단가)
@@ -565,11 +565,16 @@ namespace NPLogic.ViewModels
 
         public bool IsFactoryOrCommercialType => IsFactoryType || IsCommercialType;
 
+        public bool IsCommercialOrHouseType => IsCommercialType || IsHouseLandType;
+
+        public bool IsFactoryOrCommercialOrHouseType => IsFactoryType || IsCommercialType || IsHouseLandType;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
         private bool _isFactoryType;
 
         [ObservableProperty]
@@ -577,12 +582,16 @@ namespace NPLogic.ViewModels
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
+        [NotifyPropertyChangedFor(nameof(IsCommercialOrHouseType))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
         private bool _isCommercialType;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(IsCommercialOrHouseType))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
         private bool _isHouseLandType;
 
         private bool _suppressTypeSync;
