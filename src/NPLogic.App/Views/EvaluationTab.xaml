@@ -163,6 +163,47 @@
                 </Grid>
             </Border>
 
+            <!-- 상가구분 (상가/아파트형공장 선택 시) -->
+            <Border Background="{StaticResource SurfaceColor}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="16,10"
+                    Margin="0,0,0,8"
+                    Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="상가구분"
+                               FontWeight="SemiBold"
+                               FontSize="{StaticResource FontSizeBody}"
+                               Margin="0,0,24,0"
+                               VerticalAlignment="Center"/>
+                    <RadioButton Content="오피스"
+                                 IsChecked="{Binding IsOfficeSubType}"
+                                 GroupName="CommercialSubType"
+                                 Margin="0,0,16,0"
+                                 FontSize="{StaticResource FontSizeBody}"/>
+                    <RadioButton Content="중대형상가"
+                                 IsChecked="{Binding IsMediumLargeSubType}"
+                                 GroupName="CommercialSubType"
+                                 Margin="0,0,16,0"
+                                 FontSize="{StaticResource FontSizeBody}"/>
+                    <RadioButton Content="소규모상가"
+                                 IsChecked="{Binding IsSmallSubType}"
+                                 GroupName="CommercialSubType"
+                                 Margin="0,0,16,0"
+                                 FontSize="{StaticResource FontSizeBody}"/>
+                    <RadioButton Content="집합상가"
+                                 IsChecked="{Binding IsCollectiveSubType}"
+                                 GroupName="CommercialSubType"
+                                 Margin="0,0,16,0"
+                                 FontSize="{StaticResource FontSizeBody}"/>
+                    <RadioButton Content="해당없음"
+                                 IsChecked="{Binding IsNoSubType}"
+                                 GroupName="CommercialSubType"
+                                 FontSize="{StaticResource FontSizeBody}"/>
+                </StackPanel>
+            </Border>
+
             <!-- 메인 콘텐츠 -->
             <StackPanel Grid.Row="1">
                     

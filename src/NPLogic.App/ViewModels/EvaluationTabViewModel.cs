@@ -615,6 +615,22 @@ namespace NPLogic.ViewModels
             IsDirty = true;
         }
 
+        // === 상가구분 ===
+        [ObservableProperty]
+        private bool _isOfficeSubType;
+
+        [ObservableProperty]
+        private bool _isMediumLargeSubType;
+
+        [ObservableProperty]
+        private bool _isSmallSubType;
+
+        [ObservableProperty]
+        private bool _isCollectiveSubType;
+
+        [ObservableProperty]
+        private bool _isNoSubType = true;
+
         // === 사례평가 테이블 ===
         [ObservableProperty]
         private ObservableCollection<CaseRowItem> _caseItems = new();
