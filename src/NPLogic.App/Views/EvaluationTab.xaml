@@ -391,13 +391,13 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- 사례 로드뷰 (공장/창고 전용) -->
+                    <!-- 사례 로드뷰 (공장/창고 + 상가/아파트형공장) -->
                     <Border Background="{StaticResource SurfaceColor}"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="8"
                             Margin="0,0,0,16"
-                            Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Visibility="{Binding IsFactoryOrCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
                         <StackPanel>
                             <!-- 섹션 헤더 -->
                             <Border Background="{StaticResource PrimaryBrush}"

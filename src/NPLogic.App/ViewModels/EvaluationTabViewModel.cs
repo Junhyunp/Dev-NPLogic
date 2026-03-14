@@ -530,16 +530,20 @@ namespace NPLogic.ViewModels
         /// </summary>
         public string AmountColumnHeader => IsApartmentType ? "거래금액(만원)" : "단가(만원/㎡)";
 
+        public bool IsFactoryOrCommercialType => IsFactoryType || IsCommercialType;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
         private bool _isFactoryType;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
         private bool _isCommercialType;
 
         [ObservableProperty]
