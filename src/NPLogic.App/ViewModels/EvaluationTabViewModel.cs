@@ -491,7 +491,7 @@ namespace NPLogic.ViewModels
 
         private void InitializeCommercialEvalRows()
         {
-            var categories = new[] { "토지", "건물" };
+            var categories = new[] { "토지", "건물", "Total" };
             CommercialScenario1Rows.Clear();
             CommercialScenario2Rows.Clear();
             foreach (var cat in categories)
