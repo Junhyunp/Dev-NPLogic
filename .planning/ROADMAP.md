@@ -42,10 +42,10 @@ Plans:
   1. 데이터 조회용 DataGrid와 편집용 DataGrid의 MaxHeight가 각각 표준 값으로 통일되어 있다
   2. DataGrid FontSize가 용도에 따라 FontSizeBody 또는 FontSizeSmall로 일관되게 적용된다
   3. RowHeight, BorderBrush, AlternatingRowBackground 등 공통 속성이 전 유형에서 동일하다
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md -- 15개 DataGrid 공통 속성 통일 (AlternatingRowBackground, BorderThickness, BorderBrush) + 시각적 검증
 
 ### Phase 3: 평가결과 섹션 패턴 통일
 **Goal**: 5개 유형 모두 평가결과 섹션이 동일한 시각적 패턴(시나리오 헤더+DataGrid)을 따르며, 유형별 내용 차이만 존재한다
@@ -63,10 +63,10 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. 레이아웃/헤더/여백 기반 통일 | 1/2 | In Progress | - |
-| 2. DataGrid 스타일 표준화 | 0/? | Not started | - |
+| 2. DataGrid 스타일 표준화 | 0/1 | Not started | - |
 | 3. 평가결과 섹션 패턴 통일 | 0/? | Not started | - |
