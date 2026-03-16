@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: 레이아웃/헤더/여백 기반 통일** - 5개 View의 구조적 골격(DesignHeight, 패널 비율, CardBorder, 헤더, 여백)을 일관되게 정리
 - [ ] **Phase 2: DataGrid 스타일 표준화** - 용도별 DataGrid 속성(MaxHeight, FontSize, RowHeight 등)을 표준 기준으로 통일
-- [ ] **Phase 3: 평가결과 섹션 패턴 통일** - 아파트/연립다세대 포함 전 유형의 평가결과 섹션을 동일한 시나리오 헤더+DataGrid 패턴으로 정리
+- [x] **Phase 3: 평가결과 섹션 패턴 통일** - 아파트/연립다세대 포함 전 유형의 평가결과 섹션을 동일한 시나리오 헤더+DataGrid 패턴으로 정리 (completed 2026-03-16)
 
 ## Phase Details
 
@@ -69,4 +69,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. 레이아웃/헤더/여백 기반 통일 | 1/2 | In Progress | - |
 | 2. DataGrid 스타일 표준화 | 0/1 | Not started | - |
-| 3. 평가결과 섹션 패턴 통일 | 0/? | Not started | - |
+| 3. 평가결과 섹션 패턴 통일 | 0/? | Complete    | 2026-03-16 |
