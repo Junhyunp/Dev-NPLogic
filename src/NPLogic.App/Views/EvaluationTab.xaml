@@ -274,8 +274,8 @@
                                               RowHeight="32"
                                               ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                               ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                              MaxHeight="240"
-                                              MinHeight="160">
+                                              MaxHeight="280"
+                                              MinHeight="280">
                                         <DataGrid.ColumnHeaderStyle>
                                             <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
                                         </DataGrid.ColumnHeaderStyle>
