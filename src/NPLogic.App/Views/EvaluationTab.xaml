@@ -2944,6 +2944,104 @@
                         </StackPanel>
                     </Border>
 
+                    <!-- 선순위 관리비 (상가/아파트형공장 전용) -->
+                    <Border Style="{StaticResource CardStyle}"
+                            Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="🏢 " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="선순위 관리비"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding CreateManagementFeeTableCommand}"
+                                                Visibility="{Binding HasManagementFeeTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="선순위 관리비 테이블 생성"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding DestroyManagementFeeTableCommand}"
+                                                Visibility="{Binding HasManagementFeeTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="선순위 관리비 테이블 제거"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- 선순위 관리비 테이블 (2x5) -->
+                            <Grid Margin="16"
+                                  Visibility="{Binding HasManagementFeeTable, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 헤더 행 -->
+                                <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="관리사무소 번호" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="체납관리비" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="월 관리비" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                    <TextBlock Text="1안 추정관리비" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                    <TextBlock Text="2안 추정관리비" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!-- 데이터 행 -->
+                                <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
+                                    <TextBox Text="{Binding ManagementOfficePhone, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBoxStyle}"
+                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                             FontSize="{StaticResource FontSizeBody}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
+                                    <TextBox Text="{Binding ArrearsMgmtFee, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBoxStyle}"
+                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                             FontSize="{StaticResource FontSizeBody}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
+                                    <TextBox Text="{Binding MonthlyMgmtFee, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputTextBoxStyle}"
+                                             HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                             FontSize="{StaticResource FontSizeBody}"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
+                                    <TextBlock Text="{Binding Scenario1EstimatedMgmtFee, StringFormat=N0}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <Border Grid.Row="1" Grid.Column="4" Padding="4,4">
+                                    <TextBlock Text="{Binding Scenario2EstimatedMgmtFee, StringFormat=N0}"
+                                               FontSize="{StaticResource FontSizeBody}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
                     <!-- 지번별 평가 (공장/창고 전용) -->
                     <Border Style="{StaticResource CardStyle}"
                             Visibility="{Binding IsFactoryType, Converter={StaticResource BoolToVisibilityConverter}}">

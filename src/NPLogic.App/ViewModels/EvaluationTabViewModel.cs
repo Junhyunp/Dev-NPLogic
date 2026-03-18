@@ -2579,6 +2579,48 @@ namespace NPLogic.ViewModels
 
         #endregion
 
+        #region 선순위관리비 (상가/아파트형공장)
+
+        [ObservableProperty]
+        private bool _hasManagementFeeTable;
+
+        [ObservableProperty]
+        private string? _managementOfficePhone;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Scenario1EstimatedMgmtFee))]
+        [NotifyPropertyChangedFor(nameof(Scenario2EstimatedMgmtFee))]
+        private decimal? _arrearsMgmtFee;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(Scenario1EstimatedMgmtFee))]
+        [NotifyPropertyChangedFor(nameof(Scenario2EstimatedMgmtFee))]
+        private decimal? _monthlyMgmtFee;
+
+        public decimal? Scenario1EstimatedMgmtFee =>
+            ArrearsMgmtFee.HasValue && MonthlyMgmtFee.HasValue
+                ? ArrearsMgmtFee.Value + (MonthlyMgmtFee.Value * 6)
+                : null;
+
+        public decimal? Scenario2EstimatedMgmtFee =>
+            ArrearsMgmtFee.HasValue && MonthlyMgmtFee.HasValue
+                ? ArrearsMgmtFee.Value + (MonthlyMgmtFee.Value * 9)
+                : null;
+
+        [RelayCommand]
+        private void CreateManagementFeeTable() => HasManagementFeeTable = true;
+
+        [RelayCommand]
+        private void DestroyManagementFeeTable()
+        {
+            HasManagementFeeTable = false;
+            ManagementOfficePhone = null;
+            ArrearsMgmtFee = null;
+            MonthlyMgmtFee = null;
+        }
+
+        #endregion
+
         #region 인터림 데이터 연동
 
         // === 인터림 데이터 (차주별 합산) ===
