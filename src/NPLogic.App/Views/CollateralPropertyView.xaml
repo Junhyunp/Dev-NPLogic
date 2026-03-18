@@ -432,17 +432,28 @@
                                               MinHeight="80"
                                               PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="지번일련번호" Binding="{Binding JibeonId}" Width="Auto"/>
-                                            <DataGridTextColumn Header="물건지 (등기부등본)" Binding="{Binding RegistryAddress}" Width="*"/>
-                                            <DataGridTextColumn Header="물건지 (DD)" Binding="{Binding DdAddress}" Width="*"/>
-                                            <DataGridTextColumn Header="일치여부" Binding="{Binding IsAddressMatched}" Width="Auto"/>
-                                            <DataGridTextColumn Header="담보물형태" Binding="{Binding CollateralType}" Width="Auto"/>
-                                            <DataGridTextColumn Header="대지면적 (평)" Binding="{Binding LandAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"/>
-                                            <DataGridTextColumn Header="건물면적 (평)" Binding="{Binding BuildingAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"/>
-                                            <DataGridTextColumn Header="소유자" Binding="{Binding OwnerName}" Width="Auto"/>
-                                            <DataGridTextColumn Header="등록번호" Binding="{Binding OwnerRegNo}" Width="Auto"/>
-                                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="Auto"/>
-                                            <DataGridTextColumn Header="소유자 주소" Binding="{Binding OwnerAddress}" Width="*"/>
+                                            <DataGridTextColumn Header="지번일련번호" Binding="{Binding JibeonId}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="물건지 (등기부등본)" Binding="{Binding RegistryAddress}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="물건지 (DD)" Binding="{Binding DdAddress}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="일치여부" Binding="{Binding IsAddressMatched}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="담보물형태" Binding="{Binding CollateralType}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="대지면적 (평)" Binding="{Binding LandAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="건물면적 (평)" Binding="{Binding BuildingAreaPyeong, StringFormat={}{0:N2}}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="소유자" Binding="{Binding OwnerName}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="등록번호" Binding="{Binding OwnerRegNo}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="최종지분" Binding="{Binding ShareRatio}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                            <DataGridTextColumn Header="소유자 주소" Binding="{Binding OwnerAddress}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </StackPanel>
@@ -475,16 +486,36 @@
                                               MinHeight="160"
                                               PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="권리자" Binding="{Binding RightHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="비고" Binding="{Binding NoteUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="임금채권추정" Binding="{Binding WageClaimEstimateUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="권리자" Binding="{Binding RightHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="청구금액" Binding="{Binding ClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="비고" Binding="{Binding NoteUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="임금채권추정" Binding="{Binding WageClaimEstimateUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
 
@@ -538,17 +569,39 @@
                                               MinHeight="160"
                                               PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="근저당권자" Binding="{Binding MortgageHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="채권최고액" Binding="{Binding MaxClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="채무자" Binding="{Binding DebtorUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
-                                            <DataGridTextColumn Header="담보종류" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                            <DataGridTextColumn Header="공장저당" Binding="{Binding IsFactoryMortgageUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                            <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="접수정보" Binding="{Binding Receipt, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="접수날짜" Binding="{Binding ReceiptDate, StringFormat=yyyy-MM-dd, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="근저당권자" Binding="{Binding MortgageHolder, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="채권최고액" Binding="{Binding MaxClaimAmount, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="채무자" Binding="{Binding DebtorUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="담보종류" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="공장저당" Binding="{Binding IsFactoryMortgageUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="대상소유자" Binding="{Binding TargetOwner, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                            <DataGridTextColumn Header="지번번호" Binding="{Binding JibunNumber, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                                ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                                EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
 
@@ -663,44 +716,25 @@
                                   MinHeight="60"
                                   PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="감정평가구분" Binding="{Binding AppraisalType}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="감정평가일자" Binding="{Binding AppraisalDateFormatted}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="감정평가기관" Binding="{Binding AppraisalAgency}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="토지 감정평가액" Binding="{Binding LandAppraisalFormatted}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="건물 감정평가액" Binding="{Binding BuildingAppraisalFormatted}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="기계 감정평가액" Binding="{Binding MachineryAppraisalFormatted}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="제시외" Binding="{Binding ExcludedAppraisalFormatted}" Width="*">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="감정평가구분" Binding="{Binding AppraisalType}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="감정평가일자" Binding="{Binding AppraisalDateFormatted}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="감정평가기관" Binding="{Binding AppraisalAgency}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="토지 감정평가액" Binding="{Binding LandAppraisalFormatted}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="건물 감정평가액" Binding="{Binding BuildingAppraisalFormatted}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="기계 감정평가액" Binding="{Binding MachineryAppraisalFormatted}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                <DataGridTextColumn Header="제시외" Binding="{Binding ExcludedAppraisalFormatted}" Width="*"
+                                                    ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                 <DataGridTextColumn Header="감정평가액합계" Binding="{Binding AppraisalValueFormatted}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
