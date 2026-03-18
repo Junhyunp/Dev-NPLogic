@@ -2067,6 +2067,27 @@ namespace NPLogic.ViewModels
             }
         }
         
+        [RelayCommand]
+        private void DestroyResidentialLeaseTable()
+        {
+            HasResidentialLeaseTable = false;
+            ResidentialLeases.Clear();
+        }
+
+        [RelayCommand]
+        private void DestroyCommercialLeaseTable()
+        {
+            HasCommercialLeaseTable = false;
+            CommercialLeases.Clear();
+        }
+
+        [RelayCommand]
+        private void DestroyWageClaimTable()
+        {
+            HasWageClaimTable = false;
+            WageClaims.Clear();
+        }
+
         /// <summary>
         /// 주택임대차 행 추가
         /// </summary>

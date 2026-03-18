@@ -1289,18 +1289,20 @@
                                                FontWeight="SemiBold"
                                                FontSize="{StaticResource FontSizeH4}"
                                                VerticalAlignment="Center"/>
-                                    <Button Content="+"
-                                            FontSize="16"
-                                            FontWeight="Bold"
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding CreateResidentialLeaseTableCommand}"
-                                            Visibility="{Binding HasResidentialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Background="Transparent"
-                                            Foreground="White"
-                                            BorderThickness="0"
-                                            Padding="12,6"
-                                            Cursor="Hand"
-                                            ToolTip="주택임대차 테이블 생성"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding CreateResidentialLeaseTableCommand}"
+                                                Visibility="{Binding HasResidentialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="주택임대차 테이블 생성"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding DestroyResidentialLeaseTableCommand}"
+                                                Visibility="{Binding HasResidentialLeaseTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="주택임대차 테이블 제거"/>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
 
@@ -1409,18 +1411,20 @@
                                                FontWeight="SemiBold"
                                                FontSize="{StaticResource FontSizeH4}"
                                                VerticalAlignment="Center"/>
-                                    <Button Content="+"
-                                            FontSize="16"
-                                            FontWeight="Bold"
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding CreateCommercialLeaseTableCommand}"
-                                            Visibility="{Binding HasCommercialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Background="Transparent"
-                                            Foreground="White"
-                                            BorderThickness="0"
-                                            Padding="12,6"
-                                            Cursor="Hand"
-                                            ToolTip="상가임대차 테이블 생성"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding CreateCommercialLeaseTableCommand}"
+                                                Visibility="{Binding HasCommercialLeaseTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="상가임대차 테이블 생성"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding DestroyCommercialLeaseTableCommand}"
+                                                Visibility="{Binding HasCommercialLeaseTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="상가임대차 테이블 제거"/>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
 
@@ -1529,18 +1533,20 @@
                                                FontWeight="SemiBold"
                                                FontSize="{StaticResource FontSizeH4}"
                                                VerticalAlignment="Center"/>
-                                    <Button Content="+"
-                                            FontSize="16"
-                                            FontWeight="Bold"
-                                            HorizontalAlignment="Right"
-                                            Command="{Binding CreateWageClaimTableCommand}"
-                                            Visibility="{Binding HasWageClaimTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                            Background="Transparent"
-                                            Foreground="White"
-                                            BorderThickness="0"
-                                            Padding="12,6"
-                                            Cursor="Hand"
-                                            ToolTip="임금채권 테이블 생성"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding CreateWageClaimTableCommand}"
+                                                Visibility="{Binding HasWageClaimTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="임금채권 테이블 생성"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding DestroyWageClaimTableCommand}"
+                                                Visibility="{Binding HasWageClaimTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                Foreground="White" ToolTip="임금채권 테이블 제거"/>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
 
