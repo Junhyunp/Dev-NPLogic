@@ -3012,19 +3012,19 @@
                                 <!-- 데이터 행 -->
                                 <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
                                     <TextBox Text="{Binding ManagementOfficePhone, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource InputTextBoxStyle}"
+                                             BorderThickness="0" VerticalAlignment="Center"
                                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                              FontSize="{StaticResource FontSizeBody}"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
                                     <TextBox Text="{Binding ArrearsMgmtFee, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource InputTextBoxStyle}"
+                                             BorderThickness="0" VerticalAlignment="Center"
                                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                              FontSize="{StaticResource FontSizeBody}"/>
                                 </Border>
                                 <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,0" Padding="4,4">
                                     <TextBox Text="{Binding MonthlyMgmtFee, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource InputTextBoxStyle}"
+                                             BorderThickness="0" VerticalAlignment="Center"
                                              HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                              FontSize="{StaticResource FontSizeBody}"/>
                                 </Border>
