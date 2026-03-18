@@ -195,6 +195,7 @@ namespace NPLogic.Core.Services
                         analysis.LeaseDepositReflected = analysis.LeaseDepositDd;
                         analysis.SmallDepositCase = "CASE_R7";
                         analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서상 선순위 임차인 확인되어 선순위보증금 반영함.";
+                        analysis.LeaseDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서상 선순위 임차인 확인되어 선순위보증금 반영함.";
                     }
                 }
                 else if (hasSurvey && !hasTenant)
@@ -220,6 +221,7 @@ namespace NPLogic.Core.Services
                         analysis.LeaseDepositReflected = analysis.LeaseDepositDd;
                         analysis.SmallDepositCase = "CASE_R10";
                         analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않음. 전입세대열람서상 선순위 임차인 확인되어 선순위보증금 추정 반영함.";
+                        analysis.LeaseDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않음. 전입세대열람서상 선순위 임차인 확인되어 선순위보증금 추정 반영함.";
                     }
                     else
                     {
@@ -396,6 +398,7 @@ namespace NPLogic.Core.Services
                         analysis.LeaseDepositReflected = analysis.LeaseDepositDd;
                         analysis.SmallDepositCase = "CASE_C7";
                         analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서상 선순위 임차인 확인되어 선순위보증금 반영함.";
+                        analysis.LeaseDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서상 선순위 임차인 확인되어 선순위보증금 반영함.";
                     }
                 }
                 else if (hasSurvey && !hasTenant)
@@ -417,6 +420,7 @@ namespace NPLogic.Core.Services
                         analysis.LeaseDepositReflected = analysis.LeaseDepositDd;
                         analysis.SmallDepositCase = "CASE_C10";
                         analysis.SmallDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않음. 상가임대차열람서상 선순위 임차인 확인되어 선순위보증금 추정 반영함.";
+                        analysis.LeaseDepositReason = "경매개시되어 배당요구종기일 미경과 물건으로 현황조사서 제출되지 않음. 상가임대차열람서상 선순위 임차인 확인되어 선순위보증금 추정 반영함.";
                     }
                     else
                     {
