@@ -2198,7 +2198,7 @@ namespace NPLogic.ViewModels
                     await _registryRepository.UpdateEulguRowAsync(row);
                 }
 
-                SuccessMessage = "등기부 데이터가 저장되었습니다.";
+                if (!_isBulkSaving) SuccessMessage = "등기부 데이터가 저장되었습니다.";
             }
             catch (Exception ex)
             {
@@ -3055,7 +3055,7 @@ namespace NPLogic.ViewModels
 
                 await _propertyRepository.SaveJibunAppraisalsAsync(propertyId, rows);
                 OnPropertyChanged(nameof(JibunAppraisalTotalValue));
-                SuccessMessage = "지번별 감정평가가 저장되었습니다.";
+                if (!_isBulkSaving) SuccessMessage = "지번별 감정평가가 저장되었습니다.";
             }
             catch (Exception ex)
             {
@@ -3223,7 +3223,7 @@ namespace NPLogic.ViewModels
 
                 await _propertyRepository.SaveMachineryAppraisalsAsync(propertyId, tables);
                 NotifyMachineryTotals();
-                SuccessMessage = "기계기구 감정가가 저장되었습니다.";
+                if (!_isBulkSaving) SuccessMessage = "기계기구 감정가가 저장되었습니다.";
             }
             catch (Exception ex)
             {
@@ -4209,7 +4209,7 @@ namespace NPLogic.ViewModels
             {
                 Property.KbSupplyArea = KbSupplyArea;
                 await _propertyRepository.UpdateAsync(Property);
-                SuccessMessage = "KB시세 정보가 저장되었습니다.";
+                if (!_isBulkSaving) SuccessMessage = "KB시세 정보가 저장되었습니다.";
             }
             catch (Exception ex)
             {
@@ -4229,12 +4229,65 @@ namespace NPLogic.ViewModels
                 Property.SalePriceTotal = SalePriceTotal;
                 Property.SalePriceVat = SalePriceVat;
                 await _propertyRepository.UpdateAsync(Property);
-                SuccessMessage = "분양가 정보가 저장되었습니다.";
+                if (!_isBulkSaving) SuccessMessage = "분양가 정보가 저장되었습니다.";
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"분양가 저장 실패: {ex.Message}";
             }
+        }
+
+        // ========== 담보물건 일괄 저장 ==========
+
+        private bool _isBulkSaving;
+
+        [RelayCommand]
+        private async Task SaveAllCollateralAsync()
+        {
+            if (Property == null) return;
+
+            try
+            {
+                _isBulkSaving = true;
+                await SaveRegistryUserInputsAsync();
+                await SaveKbPanelAsync();
+                await SaveSalePanelAsync();
+                if (HasJibunAppraisalTable)
+                    await SaveJibunAppraisalsAsync();
+                if (HasMachineryAppraisalTable)
+                    await SaveMachineryAppraisalsAsync();
+                _isBulkSaving = false;
+
+                SuccessMessage = "담보물건 데이터가 일괄 저장되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                _isBulkSaving = false;
+                ErrorMessage = $"일괄 저장 실패: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// 지번별 감정평가 테이블 제거 (-버튼)
+        /// </summary>
+        [RelayCommand]
+        private void DestroyJibunAppraisalTable()
+        {
+            JibunAppraisalRows.Clear();
+            HasJibunAppraisalTable = false;
+            OnPropertyChanged(nameof(JibunAppraisalTotalValue));
+        }
+
+        /// <summary>
+        /// 기계기구 감정가 테이블 제거 (-버튼)
+        /// </summary>
+        [RelayCommand]
+        private void DestroyMachineryAppraisalTable()
+        {
+            MachineryAppraisalRows.Clear();
+            MortgageColumnNames.Clear();
+            HasMachineryAppraisalTable = false;
+            NotifyMachineryTotals();
         }
 
         /// <summary>

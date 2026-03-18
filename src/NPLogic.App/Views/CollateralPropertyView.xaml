@@ -34,6 +34,53 @@
         <Style x:Key="CompactTableDataCell" TargetType="Border" BasedOn="{StaticResource TableDataCell}">
             <Setter Property="Padding" Value="8,6"/>
         </Style>
+
+        <!-- DataGrid 공통 스타일 (EvaluationTab/SeniorRightsView와 동일) -->
+        <Style x:Key="SectionDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+        <Style x:Key="SectionDataGridCellStyle" TargetType="DataGridCell">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+                <Trigger Property="IsEditing" Value="True">
+                    <Setter Property="Foreground" Value="Black"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SectionDataGridRowStyle" TargetType="DataGridRow">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        <Style x:Key="SectionDataGridTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="SectionDataGridTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
     </UserControl.Resources>
     
     <Grid Background="{StaticResource BackgroundBrush}">
@@ -53,10 +100,20 @@
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
                                 Padding="16,10">
-                            <TextBlock Text="🗺️ 지도 정보"
-                                       Foreground="White"
-                                       FontWeight="SemiBold"
-                                       FontSize="{StaticResource FontSizeH4}"/>
+                            <Grid>
+                                <TextBlock Text="🗺️ 지도 정보"
+                                           Foreground="White"
+                                           FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}"
+                                           VerticalAlignment="Center"/>
+                                <Button Content="저장"
+                                        Command="{Binding SaveAllCollateralCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Foreground="White"/>
+                            </Grid>
                         </Border>
 
                         <!-- 3분할 지도 영역 -->
@@ -215,20 +272,20 @@
                         <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,8">
+                                Padding="16,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           Text="📍 물건 기본 정보" 
-                                           Foreground="White" 
+                                           Text="📍 물건 기본 정보"
+                                           Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
                                 <Button Grid.Column="1"
-                                        Padding="10,4"
+                                        Padding="12,6"
                                         Click="OpenLandUsePlan_Click"
                                         ToolTip="토지이용계획 열기"
                                         Background="Transparent"
@@ -321,20 +378,20 @@
                         <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,8">
+                                Padding="16,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0"
-                                           Text="📄 등기부등본 정보" 
-                                           Foreground="White" 
+                                           Text="📄 등기부등본 정보"
+                                           Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
                                 <Button Grid.Column="1"
-                                        Padding="10,4"
+                                        Padding="12,6"
                                         Command="{Binding ToggleRegistryImagePanelCommand}"
                                         ToolTip="등기부등본 원본 이미지 보기/숨기기"
                                         Background="Transparent"
@@ -364,6 +421,13 @@
                                               IsReadOnly="True"
                                               HeadersVisibility="Column"
                                               GridLinesVisibility="Horizontal"
+                                              BorderThickness="0"
+                                              RowHeight="32"
+                                              Background="White"
+                                              RowBackground="White"
+                                              ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                              CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                              RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
                                               MinHeight="80">
                                         <DataGrid.Columns>
@@ -399,6 +463,13 @@
                                               IsReadOnly="False"
                                               HeadersVisibility="Column"
                                               GridLinesVisibility="Horizontal"
+                                              BorderThickness="0"
+                                              RowHeight="32"
+                                              Background="White"
+                                              RowBackground="White"
+                                              ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                              CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                              RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
                                               MinHeight="160">
                                         <DataGrid.Columns>
@@ -418,7 +489,7 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,8">
                                         <Button Command="{Binding AddGapguRowCommand}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                                Padding="6,2" Height="28" ToolTip="행 추가">
+                                                Padding="12,6" Height="28" ToolTip="행 추가">
                                             <StackPanel Orientation="Horizontal">
                                                 <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                                 <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -428,7 +499,7 @@
                                                 CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
                                                 Foreground="{StaticResource ErrorBrush}"
-                                                Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                                Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                             <StackPanel Orientation="Horizontal">
                                                 <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                                 <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -454,6 +525,13 @@
                                               IsReadOnly="False"
                                               HeadersVisibility="Column"
                                               GridLinesVisibility="Horizontal"
+                                              BorderThickness="0"
+                                              RowHeight="32"
+                                              Background="White"
+                                              RowBackground="White"
+                                              ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                              CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                              RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
                                               MinHeight="160">
                                         <DataGrid.Columns>
@@ -474,7 +552,7 @@
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,12">
                                         <Button Command="{Binding AddEulguRowCommand}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
-                                                Padding="6,2" Height="28" ToolTip="행 추가">
+                                                Padding="12,6" Height="28" ToolTip="행 추가">
                                             <StackPanel Orientation="Horizontal">
                                                 <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                                 <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -484,16 +562,12 @@
                                                 CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
                                                 Foreground="{StaticResource ErrorBrush}"
-                                                Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                                Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                             <StackPanel Orientation="Horizontal">
                                                 <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                                 <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
-                                        <Button Content="저장"
-                                                Command="{Binding SaveRegistryUserInputsCommand}"
-                                                Style="{StaticResource MaterialDesignRaisedButton}"
-                                                Padding="12,6"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -562,8 +636,8 @@
                     <StackPanel>
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="8,8,0,0"
-                                Padding="16,8">
-                            <TextBlock Text="감정평가 정보"
+                                Padding="16,10">
+                            <TextBlock Text="📊 감정평가 정보"
                                        Foreground="White"
                                        FontWeight="SemiBold"
                                        FontSize="{StaticResource FontSizeH4}"/>
@@ -575,6 +649,13 @@
                                   IsReadOnly="True"
                                   HeadersVisibility="Column"
                                   GridLinesVisibility="Horizontal"
+                                  BorderThickness="0"
+                                  RowHeight="32"
+                                  Background="White"
+                                  RowBackground="White"
+                                  ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                  CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                  RowStyle="{StaticResource SectionDataGridRowStyle}"
                                   Margin="12"
                                   MinHeight="60">
                             <DataGrid.Columns>
@@ -658,12 +739,6 @@
                                         </Border>
                                     </Grid>
                                 </Border>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
-                                    <Button Content="저장"
-                                            Command="{Binding SaveKbPanelCommand}"
-                                            Style="{StaticResource MaterialDesignRaisedButton}"
-                                            Padding="12,6"/>
-                                </StackPanel>
                             </StackPanel>
                         </Border>
 
@@ -740,12 +815,6 @@
                                         </Border>
                                     </Grid>
                                 </Border>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
-                                    <Button Content="저장"
-                                            Command="{Binding SaveSalePanelCommand}"
-                                            Style="{StaticResource MaterialDesignRaisedButton}"
-                                            Padding="12,6"/>
-                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -759,15 +828,23 @@
                         <!-- 패널 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
                             <Grid>
-                                <TextBlock Text="지번별 감정평가" FontWeight="Bold" FontSize="14" Foreground="White"
+                                <TextBlock Text="📋 지번별 감정평가" FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}" Foreground="White"
                                            VerticalAlignment="Center"/>
-                                <Button Content="+" FontSize="16" FontWeight="Bold"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding CreateJibunAppraisalTableCommand}"
-                                        Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                        Background="Transparent" Foreground="White" BorderThickness="0"
-                                        Padding="8,2" Cursor="Hand"
-                                        ToolTip="지번별 감정평가 테이블 생성"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            Command="{Binding CreateJibunAppraisalTableCommand}"
+                                            Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            Background="Transparent" BorderThickness="0"
+                                            Foreground="White" ToolTip="지번별 감정평가 테이블 생성"/>
+                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                            Command="{Binding DestroyJibunAppraisalTableCommand}"
+                                            Visibility="{Binding HasJibunAppraisalTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            Background="Transparent" BorderThickness="0"
+                                            Foreground="White" ToolTip="지번별 감정평가 테이블 제거"/>
+                                </StackPanel>
                             </Grid>
                         </Border>
 
@@ -784,132 +861,32 @@
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource BorderBrush}"
-                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      BorderThickness="0"
                                       Background="White"
                                       RowBackground="White"
-                                      AlternatingRowBackground="#FAFAFA"
+                                      ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                      CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                      RowStyle="{StaticResource SectionDataGridRowStyle}"
                                       MinHeight="60">
-                                <DataGrid.ColumnHeaderStyle>
-                                    <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                        <Setter Property="Padding" Value="8,6"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="FontSize" Value="12"/>
-                                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    </Style>
-                                </DataGrid.ColumnHeaderStyle>
-                                <DataGrid.CellStyle>
-                                    <Style TargetType="DataGridCell">
-                                        <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="Background" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                                        <Setter Property="Padding" Value="4,2"/>
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEditing" Value="True">
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGrid.CellStyle>
-                                <DataGrid.RowStyle>
-                                    <Style TargetType="DataGridRow">
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                        <Setter Property="Foreground" Value="Black"/>
-                                    </Style>
-                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="면적(평)" Binding="{Binding JaAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="90">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="110">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                                <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="면적(평)" Binding="{Binding JaAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="90"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="110"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -929,11 +906,11 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 저장 버튼 -->
+                            <!-- 행 추가/삭제 버튼 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                                 <Button Command="{Binding AddJibunAppraisalRowCommand}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
-                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                        Padding="12,6" Height="28" ToolTip="행 추가">
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                         <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -943,16 +920,12 @@
                                         CommandParameter="{Binding SelectedItem, ElementName=JibunAppraisalDataGrid}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         Foreground="{StaticResource ErrorBrush}"
-                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                        Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                         <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Content="저장"
-                                        Command="{Binding SaveJibunAppraisalsCommand}"
-                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                        Padding="12,6"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -967,15 +940,23 @@
                         <!-- 패널 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
                             <Grid>
-                                <TextBlock Text="기계기구 감정가" FontWeight="Bold" FontSize="14" Foreground="White"
+                                <TextBlock Text="🔧 기계기구 감정가" FontWeight="SemiBold"
+                                           FontSize="{StaticResource FontSizeH4}" Foreground="White"
                                            VerticalAlignment="Center"/>
-                                <Button Content="+" FontSize="16" FontWeight="Bold"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding CreateMachineryAppraisalTableCommand}"
-                                        Visibility="{Binding HasMachineryAppraisalTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                        Background="Transparent" Foreground="White" BorderThickness="0"
-                                        Padding="8,2" Cursor="Hand"
-                                        ToolTip="기계기구 감정가 테이블 생성"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Content="+" FontSize="16" FontWeight="Bold"
+                                            Command="{Binding CreateMachineryAppraisalTableCommand}"
+                                            Visibility="{Binding HasMachineryAppraisalTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            Background="Transparent" BorderThickness="0"
+                                            Foreground="White" ToolTip="기계기구 감정가 테이블 생성"/>
+                                    <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                            Command="{Binding DestroyMachineryAppraisalTableCommand}"
+                                            Visibility="{Binding HasMachineryAppraisalTable, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                            Background="Transparent" BorderThickness="0"
+                                            Foreground="White" ToolTip="기계기구 감정가 테이블 제거"/>
+                                </StackPanel>
                             </Grid>
                         </Border>
 
@@ -1030,101 +1011,38 @@
                                       GridLinesVisibility="All"
                                       HorizontalGridLinesBrush="{StaticResource BorderBrush}"
                                       VerticalGridLinesBrush="{StaticResource BorderBrush}"
-                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                      BorderThickness="0"
                                       Background="White"
                                       RowBackground="White"
-                                      AlternatingRowBackground="#FAFAFA"
+                                      ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
+                                      CellStyle="{StaticResource SectionDataGridCellStyle}"
+                                      RowStyle="{StaticResource SectionDataGridRowStyle}"
                                       MinHeight="60"
                                       HorizontalScrollBarVisibility="Auto">
-                                <DataGrid.ColumnHeaderStyle>
-                                    <Style TargetType="DataGridColumnHeader">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                        <Setter Property="Padding" Value="8,6"/>
-                                        <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="FontSize" Value="12"/>
-                                        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
-                                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                    </Style>
-                                </DataGrid.ColumnHeaderStyle>
-                                <DataGrid.CellStyle>
-                                    <Style TargetType="DataGridCell">
-                                        <Setter Property="Foreground" Value="Black"/>
-                                        <Setter Property="Background" Value="White"/>
-                                        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
-                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
-                                        <Setter Property="Padding" Value="4,2"/>
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEditing" Value="True">
-                                                <Setter Property="Foreground" Value="Black"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGrid.CellStyle>
-                                <DataGrid.RowStyle>
-                                    <Style TargetType="DataGridRow">
-                                        <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                        <Setter Property="Foreground" Value="Black"/>
-                                    </Style>
-                                </DataGrid.RowStyle>
                                 <DataGrid.Columns>
                                     <!-- 고정 컬럼 (앞쪽) -->
-                                    <DataGridTextColumn Header="번호" Binding="{Binding ItemNumber}" Width="50" IsReadOnly="True">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                                <Setter Property="VerticalAlignment" Value="Center"/>
-                                            </Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="기계기구명" Binding="{Binding MachineryName, UpdateSourceTrigger=PropertyChanged}" Width="150">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox"><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="제조사" Binding="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox"><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="제작일자" Binding="{Binding ManufactureDate, UpdateSourceTrigger=PropertyChanged}" Width="90">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox"><Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="수량" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="60">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox"><Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
-                                    <DataGridTextColumn Header="단가" Binding="{Binding UnitPrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="100">
-                                        <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.ElementStyle>
-                                        <DataGridTextColumn.EditingElementStyle>
-                                            <Style TargetType="TextBox"><Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
-                                        </DataGridTextColumn.EditingElementStyle>
-                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="번호" Binding="{Binding ItemNumber}" Width="50" IsReadOnly="True"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="기계기구명" Binding="{Binding MachineryName, UpdateSourceTrigger=PropertyChanged}" Width="150"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="제조사" Binding="{Binding Manufacturer, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="제작일자" Binding="{Binding ManufactureDate, UpdateSourceTrigger=PropertyChanged}" Width="90"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="수량" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" Width="60"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="단가" Binding="{Binding UnitPrice, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding AppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120" IsReadOnly="True">
                                         <DataGridTextColumn.ElementStyle>
-                                            <Style TargetType="TextBlock"><Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
                                         </DataGridTextColumn.ElementStyle>
                                     </DataGridTextColumn>
                                     <!-- 동적 공장저당 컬럼은 code-behind에서 여기 뒤에 삽입됨 (index=7~) -->
@@ -1139,11 +1057,11 @@
                                 </Grid>
                             </Border>
 
-                            <!-- 저장 버튼 -->
+                            <!-- 행 추가/삭제 버튼 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                                 <Button Command="{Binding AddMachineryAppraisalRowCommand}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
-                                        Padding="6,2" Height="28" ToolTip="행 추가">
+                                        Padding="12,6" Height="28" ToolTip="행 추가">
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                         <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1153,16 +1071,12 @@
                                         CommandParameter="{Binding SelectedItem, ElementName=MachineryDataGrid}"
                                         Style="{StaticResource MaterialDesignFlatButton}"
                                         Foreground="{StaticResource ErrorBrush}"
-                                        Padding="6,2" Height="28" Margin="4,0,8,0" ToolTip="선택 행 삭제">
+                                        Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                     <StackPanel Orientation="Horizontal">
                                         <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                         <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
-                                <Button Content="저장"
-                                        Command="{Binding SaveMachineryAppraisalsCommand}"
-                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                        Padding="12,6"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
