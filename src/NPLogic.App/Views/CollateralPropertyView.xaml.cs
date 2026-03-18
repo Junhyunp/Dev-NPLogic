@@ -2268,9 +2268,11 @@ namespace NPLogic.Views
                 double viewportTop = 0;
                 double viewportBottom = MainScrollViewer.ViewportHeight;
 
-                bool isVisible = mapBottomRight.Y > viewportTop && mapTopLeft.Y < viewportBottom;
+                // WebView2는 네이티브 HWND이므로 부분 표시 시 클리핑이 안 됨
+                // 완전히 뷰포트 안에 있을 때만 표시, 조금이라도 벗어나면 숨김
+                bool fullyVisible = mapTopLeft.Y >= viewportTop && mapBottomRight.Y <= viewportBottom;
 
-                var targetVisibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+                var targetVisibility = fullyVisible ? Visibility.Visible : Visibility.Collapsed;
 
                 if (SatelliteMapWebView.Visibility != targetVisibility)
                     SatelliteMapWebView.Visibility = targetVisibility;
