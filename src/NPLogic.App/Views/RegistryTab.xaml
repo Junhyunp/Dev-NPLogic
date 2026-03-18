@@ -102,7 +102,7 @@
                                 <Button Content="📂 PDF 선택"
                                         Command="{Binding RegistryViewModel.SelectOcrPdfFilesCommand}"
                                         Style="{StaticResource PrimaryButton}"
-                                        Padding="16,8"
+                                        Padding="12,6"
                                         FontSize="{StaticResource FontSizeBody}"
                                         IsEnabled="{Binding RegistryViewModel.IsOcrServerReady}"/>
                             </StackPanel>
@@ -454,7 +454,7 @@
                                            Style="{StaticResource CaptionTextStyle}"
                                            HorizontalAlignment="Center"
                                            Opacity="0.7"/>
-                                <TextBlock Text="Clova OCR을 통해 소유자, 갑구, 을구 정보를 자동 추출합니다" 
+                                <TextBlock Text="OCR을 통해 소유자, 갑구, 을구 정보를 자동 추출합니다" 
                                            Style="{StaticResource CaptionTextStyle}"
                                            HorizontalAlignment="Center"
                                            Opacity="0.5"
@@ -489,7 +489,7 @@
                                 <Button Content="취소"
                                         Command="{Binding RegistryViewModel.CancelOcrProcessingCommand}"
                                         Style="{StaticResource SecondaryButton}"
-                                        Padding="16,8"
+                                        Padding="12,6"
                                         FontSize="{StaticResource FontSizeBody}"
                                         Margin="0,0,8,0"
                                         Visibility="{Binding RegistryViewModel.IsOcrProcessing, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -498,7 +498,7 @@
                                 <Button Content="🔍 OCR 처리 시작"
                                         Command="{Binding RegistryViewModel.StartOcrProcessingCommand}"
                                         Style="{StaticResource PrimaryButton}"
-                                        Padding="20,8"
+                                        Padding="12,6"
                                         FontSize="{StaticResource FontSizeBody}"
                                         Visibility="{Binding RegistryViewModel.IsOcrProcessing, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                         IsEnabled="{Binding RegistryViewModel.HasAnyOcrPdfFiles}"/>
@@ -600,11 +600,11 @@
                                 Command="{Binding RegistryViewModel.CancelOcrProcessingCommand}"
                                 Style="{StaticResource SecondaryButton}"
                                 HorizontalAlignment="Center"
-                                Padding="24,8"
+                                Padding="12,6"
                                 FontSize="{StaticResource FontSizeBody}"/>
 
                         <!-- 안내 문구 -->
-                        <TextBlock Text="Clova OCR로 등기부등본 정보를 추출하고 있습니다."
+                        <TextBlock Text="등기부등본 정보를 추출하고 있습니다."
                                    FontSize="{StaticResource FontSizeSmall}"
                                    Foreground="{StaticResource TextSecondaryBrush}"
                                    HorizontalAlignment="Center"

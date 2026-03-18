@@ -1076,7 +1076,7 @@ namespace NPLogic.ViewModels
             // 2026-02: OCR은 Supabase Edge Function(ocr-registry-save)을 통해 수행/저장한다.
             // 따라서 로컬/원격 Python 서버 헬스체크로 UI를 막지 않고, 처리 시점에 Edge Function 호출로 검증한다.
             IsOcrServerReady = true;
-            OcrServerStatus = "Edge Function 준비됨 ✓";
+            OcrServerStatus = "준비됨 ✓";
             await Task.CompletedTask;
         }
 
