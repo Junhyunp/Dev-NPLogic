@@ -84,7 +84,8 @@
     </UserControl.Resources>
     
     <Grid Background="{StaticResource BackgroundBrush}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      ScrollChanged="MainScrollViewer_ScrollChanged">
             <StackPanel Margin="12,8,12,12">
                 
                 <!-- 상단 버튼 바 제거됨: 토지이용계획은 물건 기본 정보 헤더, 등기부등본은 등기부등본 정보 헤더로 이동 -->
@@ -117,7 +118,7 @@
                         </Border>
 
                         <!-- 3분할 지도 영역 -->
-                        <Grid Height="300">
+                        <Grid x:Name="MapPanelGrid" Height="300">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>

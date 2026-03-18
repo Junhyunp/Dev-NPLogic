@@ -2249,5 +2249,43 @@ namespace NPLogic.Views
 
         #endregion
 
+        #region WebView2 에어스페이스 보정
+
+        /// <summary>
+        /// 스크롤 시 WebView2가 뷰포트를 벗어나면 숨기고, 들어오면 표시한다.
+        /// WebView2는 네이티브 윈도우로 렌더링되어 WPF 클리핑을 무시하므로 수동 제어 필요.
+        /// </summary>
+        private void MainScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (MapPanelGrid == null || MainScrollViewer == null) return;
+
+            try
+            {
+                var mapTransform = MapPanelGrid.TransformToAncestor(MainScrollViewer);
+                var mapTopLeft = mapTransform.Transform(new Point(0, 0));
+                var mapBottomRight = mapTransform.Transform(new Point(MapPanelGrid.ActualWidth, MapPanelGrid.ActualHeight));
+
+                double viewportTop = 0;
+                double viewportBottom = MainScrollViewer.ViewportHeight;
+
+                bool isVisible = mapBottomRight.Y > viewportTop && mapTopLeft.Y < viewportBottom;
+
+                var targetVisibility = isVisible ? Visibility.Visible : Visibility.Hidden;
+
+                if (SatelliteMapWebView.Visibility != targetVisibility)
+                    SatelliteMapWebView.Visibility = targetVisibility;
+                if (CadastralMapWebView.Visibility != targetVisibility)
+                    CadastralMapWebView.Visibility = targetVisibility;
+                if (RoadViewWebView.Visibility != targetVisibility)
+                    RoadViewWebView.Visibility = targetVisibility;
+            }
+            catch
+            {
+                // TransformToAncestor 실패 시 무시 (로드 전 등)
+            }
+        }
+
+        #endregion
+
     }
 }
