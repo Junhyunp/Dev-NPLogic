@@ -52,7 +52,7 @@
         
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -61,7 +61,7 @@
         
         <!-- 값 스타일 -->
         <Style x:Key="ValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -195,7 +195,7 @@
 
         <Style x:Key="SectionDataGridCellStyle" TargetType="DataGridCell">
             <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,0"/>
             <Setter Property="Padding" Value="4,2"/>
@@ -489,7 +489,7 @@
                                         <Button Grid.Row="0" Content="이미지 붙여넣기"
                                                 Command="{Binding PastePartyDetailsImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                Padding="12,6" FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left" Margin="0,0,0,4"/>
                                         <Image Grid.Row="1" Source="{Binding PartyDetailsImage}"
                                                Stretch="Uniform"/>
@@ -575,7 +575,7 @@
                                         <Button Grid.Row="0" Content="이미지 붙여넣기"
                                                 Command="{Binding PasteCourtCaseSearchImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                Padding="12,6" FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left" Margin="0,0,0,4"/>
                                         <Image Grid.Row="1" Source="{Binding CourtCaseSearchImage}" Stretch="Uniform"/>
                                         <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
@@ -597,7 +597,7 @@
                                         <Button Grid.Row="0" Content="이미지 붙여넣기"
                                                 Command="{Binding PasteCourtDateSearchImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                Padding="12,6" FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left" Margin="0,0,0,4"/>
                                         <Image Grid.Row="1" Source="{Binding CourtDateSearchImage}" Stretch="Uniform"/>
                                         <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
@@ -619,7 +619,7 @@
                                         <Button Grid.Row="0" Content="이미지 붙여넣기"
                                                 Command="{Binding PasteCourtDocumentDeliveryImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4" FontSize="{StaticResource FontSizeTiny}"
+                                                Padding="12,6" FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left" Margin="0,0,0,4"/>
                                         <Image Grid.Row="1" Source="{Binding CourtDocumentDeliveryImage}" Stretch="Uniform"/>
                                         <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch"
@@ -1181,7 +1181,7 @@
                                                 Content="이미지 붙여넣기"
                                                 Command="{Binding PasteTenantRegistryImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4"
+                                                Padding="12,6"
                                                 FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left"
                                                 Margin="0,0,0,6"/>
@@ -1214,7 +1214,7 @@
                                                 Content="이미지 붙여넣기"
                                                 Command="{Binding PasteCommercialLeaseImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4"
+                                                Padding="12,6"
                                                 FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left"
                                                 Margin="0,0,0,6"/>
@@ -1258,7 +1258,7 @@
                                                 Content="이미지 붙여넣기"
                                                 Command="{Binding PasteWageDataImageCommand}"
                                                 Style="{StaticResource SecondaryButton}"
-                                                Padding="8,4"
+                                                Padding="12,6"
                                                 FontSize="{StaticResource FontSizeTiny}"
                                                 HorizontalAlignment="Left"
                                                 Margin="0,0,0,6"/>
@@ -1324,7 +1324,7 @@
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
-                                            Padding="8,2"
+                                            Padding="12,6"
                                             Cursor="Hand"
                                             ToolTip="주택임대차 테이블 생성"/>
                                 </Grid>
@@ -1351,7 +1351,7 @@
                                           Background="White"
                                           RowBackground="White"
                                           AlternatingRowBackground="#FAFAFA"
-                                          BorderThickness="1"
+                                          BorderThickness="0"
                                           BorderBrush="{StaticResource BorderBrush}"
                                           GridLinesVisibility="All"
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
@@ -1391,7 +1391,7 @@
                                     <Button Grid.Column="1"
                                             Command="{Binding AddResidentialLeaseRowCommand}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
-                                            Padding="6,2" Height="28" ToolTip="행 추가">
+                                            Padding="12,6" Height="28" ToolTip="행 추가">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1402,7 +1402,7 @@
                                             CommandParameter="{Binding SelectedItem, ElementName=ResidentialLeaseGrid}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Foreground="{StaticResource ErrorBrush}"
-                                            Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                            Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1448,7 +1448,7 @@
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
-                                            Padding="8,2"
+                                            Padding="12,6"
                                             Cursor="Hand"
                                             ToolTip="상가임대차 테이블 생성"/>
                                 </Grid>
@@ -1475,7 +1475,7 @@
                                           Background="White"
                                           RowBackground="White"
                                           AlternatingRowBackground="#FAFAFA"
-                                          BorderThickness="1"
+                                          BorderThickness="0"
                                           BorderBrush="{StaticResource BorderBrush}"
                                           GridLinesVisibility="All"
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
@@ -1515,7 +1515,7 @@
                                     <Button Grid.Column="1"
                                             Command="{Binding AddCommercialLeaseRowCommand}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
-                                            Padding="6,2" Height="28" ToolTip="행 추가">
+                                            Padding="12,6" Height="28" ToolTip="행 추가">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1526,7 +1526,7 @@
                                             CommandParameter="{Binding SelectedItem, ElementName=CommercialLeaseGrid}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Foreground="{StaticResource ErrorBrush}"
-                                            Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                            Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1572,7 +1572,7 @@
                                             Background="Transparent"
                                             Foreground="White"
                                             BorderThickness="0"
-                                            Padding="8,2"
+                                            Padding="12,6"
                                             Cursor="Hand"
                                             ToolTip="임금채권 테이블 생성"/>
                                 </Grid>
@@ -1650,7 +1650,7 @@
                                           Background="White"
                                           RowBackground="White"
                                           AlternatingRowBackground="#FAFAFA"
-                                          BorderThickness="1"
+                                          BorderThickness="0"
                                           BorderBrush="{StaticResource BorderBrush}"
                                           GridLinesVisibility="All"
                                           HorizontalGridLinesBrush="{StaticResource BorderBrush}"
@@ -1695,7 +1695,7 @@
                                     <Button Grid.Column="1"
                                             Command="{Binding AddWageClaimRowCommand}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
-                                            Padding="6,2" Height="28" ToolTip="행 추가">
+                                            Padding="12,6" Height="28" ToolTip="행 추가">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Plus" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 추가" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
@@ -1706,7 +1706,7 @@
                                             CommandParameter="{Binding SelectedItem, ElementName=WageClaimGrid}"
                                             Style="{StaticResource MaterialDesignFlatButton}"
                                             Foreground="{StaticResource ErrorBrush}"
-                                            Padding="6,2" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
+                                            Padding="12,6" Height="28" Margin="4,0,0,0" ToolTip="선택 행 삭제">
                                         <StackPanel Orientation="Horizontal">
                                             <materialDesign:PackIcon Kind="Delete" Width="14" Height="14" VerticalAlignment="Center"/>
                                             <TextBlock Text="행 삭제" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
