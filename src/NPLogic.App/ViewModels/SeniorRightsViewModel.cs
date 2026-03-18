@@ -1831,7 +1831,7 @@ namespace NPLogic.ViewModels
                 }
 
                 _currentRightAnalysis = await _rightAnalysisRepository.UpsertAsync(analysis);
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 분석이 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 분석이 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -2421,7 +2421,7 @@ namespace NPLogic.ViewModels
                 _currentRightAnalysis.CourtDocumentDeliveryImage = ConvertImageToBase64(CourtDocumentDeliveryImage);
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건 정보가 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("경매사건 정보가 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -2473,7 +2473,7 @@ namespace NPLogic.ViewModels
                 _currentRightAnalysis.WageDataImage = ConvertImageToBase64(WageDataImage);
 
                 await _rightAnalysisRepository.UpsertAsync(_currentRightAnalysis);
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입/임차 현황이 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("전입/임차 현황이 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -2498,7 +2498,7 @@ namespace NPLogic.ViewModels
                 await _leaseItemRepository.SaveAllAsync(
                     SelectedProperty.Id, "residential", ResidentialLeases.ToList());
                 OnPropertyChanged(nameof(ResidentialLeasesTotalDeposit));
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("주택임대차가 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("주택임대차가 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -2521,7 +2521,7 @@ namespace NPLogic.ViewModels
                 await _leaseItemRepository.SaveAllAsync(
                     SelectedProperty.Id, "commercial", CommercialLeases.ToList());
                 OnPropertyChanged(nameof(CommercialLeasesTotalDeposit));
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("상가임대차가 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("상가임대차가 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -2544,11 +2544,44 @@ namespace NPLogic.ViewModels
                 await _wageClaimItemRepository.SaveAllAsync(
                     SelectedProperty.Id, WageClaims.ToList());
                 OnPropertyChanged(nameof(WageClaimsTotalAmount));
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("임금채권이 저장되었습니다.");
+                if (!_isBulkSaving) NPLogic.UI.Services.ToastService.Instance.ShowSuccess("임금채권이 저장되었습니다.");
             }
             catch (Exception ex)
             {
                 NPLogic.UI.Services.ToastService.Instance.ShowError($"저장 실패: {ex.Message}");
+            }
+        }
+
+        // ========== 일괄 저장 Command ==========
+
+        private bool _isBulkSaving;
+
+        [RelayCommand]
+        private async Task SaveAllAsync()
+        {
+            if (SelectedProperty == null)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("물건을 선택하세요.");
+                return;
+            }
+
+            try
+            {
+                _isBulkSaving = true;
+                await SaveAuctionCaseNotesAsync();
+                await SaveTenantInfoAsync();
+                await SaveRightAnalysisAsync();
+                await SaveResidentialLeasesAsync();
+                await SaveCommercialLeasesAsync();
+                await SaveWageClaimsAsync();
+                _isBulkSaving = false;
+
+                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 데이터가 일괄 저장되었습니다.");
+            }
+            catch (Exception ex)
+            {
+                _isBulkSaving = false;
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"일괄 저장 실패: {ex.Message}");
             }
         }
 
