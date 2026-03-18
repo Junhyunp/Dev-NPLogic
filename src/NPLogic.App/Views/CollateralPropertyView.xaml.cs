@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Web.WebView2.Core;
@@ -2215,6 +2217,34 @@ namespace NPLogic.Views
             var index = vm.MortgageColumnNames.IndexOf(colName);
             if (index >= 0)
                 vm.RemoveMortgageColumnCommand.Execute(index);
+        }
+
+        #endregion
+
+        #region DataGrid 스크롤 전달
+
+        /// <summary>
+        /// DataGrid 내부 스크롤이 부모 ScrollViewer 스크롤을 잡아먹는 문제 해결.
+        /// DataGrid의 마우스 휠 이벤트를 부모 ScrollViewer로 전달한다.
+        /// </summary>
+        private void DataGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled) return;
+
+            e.Handled = true;
+            var parent = VisualTreeHelper.GetParent((DependencyObject)sender);
+            while (parent != null && parent is not ScrollViewer)
+                parent = VisualTreeHelper.GetParent(parent);
+
+            if (parent is ScrollViewer sv)
+            {
+                var eventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+                {
+                    RoutedEvent = MouseWheelEvent,
+                    Source = sender
+                };
+                sv.RaiseEvent(eventArg);
+            }
         }
 
         #endregion

@@ -429,7 +429,8 @@
                                               CellStyle="{StaticResource SectionDataGridCellStyle}"
                                               RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
-                                              MinHeight="80">
+                                              MinHeight="80"
+                                              PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="지번일련번호" Binding="{Binding JibeonId}" Width="Auto"/>
                                             <DataGridTextColumn Header="물건지 (등기부등본)" Binding="{Binding RegistryAddress}" Width="*"/>
@@ -471,7 +472,8 @@
                                               CellStyle="{StaticResource SectionDataGridCellStyle}"
                                               RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
-                                              MinHeight="160">
+                                              MinHeight="160"
+                                              PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                             <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
@@ -533,7 +535,8 @@
                                               CellStyle="{StaticResource SectionDataGridCellStyle}"
                                               RowStyle="{StaticResource SectionDataGridRowStyle}"
                                               Margin="12"
-                                              MinHeight="160">
+                                              MinHeight="160"
+                                              PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="순위번호" Binding="{Binding RankNo, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                             <DataGridTextColumn Header="등기목적" Binding="{Binding Purpose, UpdateSourceTrigger=PropertyChanged}" Width="2*"/>
@@ -657,34 +660,47 @@
                                   CellStyle="{StaticResource SectionDataGridCellStyle}"
                                   RowStyle="{StaticResource SectionDataGridRowStyle}"
                                   Margin="12"
-                                  MinHeight="60">
+                                  MinHeight="60"
+                                  PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="감정평가구분" Binding="{Binding AppraisalType}" Width="Auto"/>
-                                <DataGridTextColumn Header="감정평가일자" Binding="{Binding AppraisalDateFormatted}" Width="Auto"/>
-                                <DataGridTextColumn Header="감정평가기관" Binding="{Binding AppraisalAgency}" Width="Auto"/>
-                                <DataGridTextColumn Header="토지 감정평가액" Binding="{Binding LandAppraisalFormatted}" Width="Auto">
+                                <DataGridTextColumn Header="감정평가구분" Binding="{Binding AppraisalType}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="건물 감정평가액" Binding="{Binding BuildingAppraisalFormatted}" Width="Auto">
+                                <DataGridTextColumn Header="감정평가일자" Binding="{Binding AppraisalDateFormatted}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="기계 감정평가액" Binding="{Binding MachineryAppraisalFormatted}" Width="Auto">
+                                <DataGridTextColumn Header="감정평가기관" Binding="{Binding AppraisalAgency}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="제시외" Binding="{Binding ExcludedAppraisalFormatted}" Width="Auto">
+                                <DataGridTextColumn Header="토지 감정평가액" Binding="{Binding LandAppraisalFormatted}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/></Style>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTextColumn Header="감정평가액합계" Binding="{Binding AppraisalValueFormatted}" Width="Auto">
+                                <DataGridTextColumn Header="건물 감정평가액" Binding="{Binding BuildingAppraisalFormatted}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Right"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="기계 감정평가액" Binding="{Binding MachineryAppraisalFormatted}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="제시외" Binding="{Binding ExcludedAppraisalFormatted}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/></Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="감정평가액합계" Binding="{Binding AppraisalValueFormatted}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock"><Setter Property="TextAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
                             </DataGrid.Columns>
@@ -867,7 +883,8 @@
                                       ColumnHeaderStyle="{StaticResource SectionDataGridColumnHeaderStyle}"
                                       CellStyle="{StaticResource SectionDataGridCellStyle}"
                                       RowStyle="{StaticResource SectionDataGridRowStyle}"
-                                      MinHeight="60">
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
@@ -1018,7 +1035,8 @@
                                       CellStyle="{StaticResource SectionDataGridCellStyle}"
                                       RowStyle="{StaticResource SectionDataGridRowStyle}"
                                       MinHeight="60"
-                                      HorizontalScrollBarVisibility="Auto">
+                                      HorizontalScrollBarVisibility="Auto"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                 <DataGrid.Columns>
                                     <!-- 고정 컬럼 (앞쪽) -->
                                     <DataGridTextColumn Header="번호" Binding="{Binding ItemNumber}" Width="50" IsReadOnly="True"
