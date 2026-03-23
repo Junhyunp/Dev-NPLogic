@@ -38,7 +38,7 @@ Plans:
 - [ ] 01-01-PLAN.md — Supabase 테이블 생성 + PropertyNote 모델/Repository/DI 구현
 
 ### Phase 2: 사이드 패널 비고란 프로토타입
-**Goal**: 담당자가 대표 탭 1~2개에서 비고를 입력하고 저장할 수 있다
+**Goal**: 담당자가 담보물건/선순위/평가 3개 탭에서 비고를 입력하고 저장할 수 있다
 **Depends on**: Phase 1
 **Requirements**: NOTE-01, NOTE-02, NOTE-03
 **Success Criteria** (what must be TRUE):
@@ -46,10 +46,10 @@ Plans:
   2. 사이드 패널 TextBox에 여러 줄 텍스트를 자유롭게 입력할 수 있다
   3. 기존 저장 버튼을 누르면 비고 내용이 DB에 저장되고, 탭 재진입 시 저장된 내용이 복원된다
   4. 사이드 패널이 닫힌 상태에서도 메인 콘텐츠 레이아웃이 정상적이다
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — 담보물건/선순위/평가 3개 탭에 사이드 패널 비고란 추가 (ViewModel + View + 저장/로드 통합)
 
 ### Phase 3: 전체 탭 비고란 적용
 **Goal**: 비핵심 하위 8개 탭과 상위 7개 탭 모두에서 비고란을 사용할 수 있다
@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB 및 데이터 기반 | 0/1 | Not started | - |
-| 2. 사이드 패널 비고란 프로토타입 | 0/? | Not started | - |
+| 1. DB 및 데이터 기반 | 1/1 | Complete | 2026-03-23 |
+| 2. 사이드 패널 비고란 프로토타입 | 0/1 | Not started | - |
 | 3. 전체 탭 비고란 적용 | 0/? | Not started | - |
 | 4. 전체 탭 종합 표시 | 0/? | Not started | - |
