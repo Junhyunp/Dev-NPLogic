@@ -7,8 +7,8 @@
 
 ### DB/데이터
 
-- [ ] **DB-01**: Supabase에 `property_notes` 테이블 생성 (property_id, tab_name, note_text, updated_at)
-- [ ] **DB-02**: PropertyNote 모델 + PropertyNoteRepository (CRUD) 구현
+- [x] **DB-01**: Supabase에 `property_notes` 테이블 생성 (property_id, tab_name, note_text, updated_at)
+- [x] **DB-02**: PropertyNote 모델 + PropertyNoteRepository (CRUD) 구현
 
 ### UI — 개별 탭 비고란
 
@@ -38,8 +38,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DB-01 | Phase 1 | Pending |
-| DB-02 | Phase 1 | Pending |
+| DB-01 | Phase 1 | Complete |
+| DB-02 | Phase 1 | Complete |
 | NOTE-01 | Phase 2 | Pending |
 | NOTE-02 | Phase 2 | Pending |
 | NOTE-03 | Phase 2 | Pending |
