@@ -422,48 +422,69 @@
                             </Grid.RowDefinitions>
 
                             <!-- 물건 리스트 헤더 -->
-                            <Border Grid.Row="0" 
+                            <Border Grid.Row="0"
                                     Background="{StaticResource HeaderNavyBrush}"
                                     Padding="12,10">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
 
-                                    <!-- 뒤로 버튼 -->
-                                    <Button Grid.Column="0"
-                                            Style="{StaticResource IconButton}"
-                                            Click="PropertyListBackButton_Click"
-                                            ToolTip="담보 목록으로 돌아가기"
-                                            Margin="0,0,8,0">
-                                        <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
-                                    </Button>
+                                        <!-- 뒤로 버튼 -->
+                                        <Button Grid.Column="0"
+                                                Style="{StaticResource IconButton}"
+                                                Click="PropertyListBackButton_Click"
+                                                ToolTip="담보 목록으로 돌아가기"
+                                                Margin="0,0,8,0">
+                                            <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18" Foreground="White"/>
+                                        </Button>
 
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                        <materialDesign:PackIcon Kind="Home" 
-                                                                 Width="16" Height="16" 
-                                                                 Foreground="White"
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="Home"
+                                                                     Width="16" Height="16"
+                                                                     Foreground="White"
+                                                                     VerticalAlignment="Center"
+                                                                     Margin="0,0,6,0"/>
+                                            <TextBlock Text="담보 목록"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="{StaticResource FontSizeH4}"
+                                                       Foreground="White"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+
+                                        <!-- 패널 닫기 토글 -->
+                                        <ToggleButton x:Name="PropertyListPanelToggle"
+                                                      Grid.Column="2"
+                                                      Style="{StaticResource PanelToggleButton}"
+                                                      IsChecked="True"
+                                                      Click="LeftPanelToggle_Click"
+                                                      ToolTip="패널 접기/펼치기">
+                                            <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20" Foreground="White"/>
+                                        </ToggleButton>
+                                    </Grid>
+
+                                    <!-- 검색창 -->
+                                    <Grid Margin="0,8,0,0">
+                                        <TextBox x:Name="PropertySearchBox"
+                                                 Padding="8,6,28,6"
+                                                 FontSize="{StaticResource FontSizeBody}"
+                                                 Background="White"
+                                                 BorderThickness="0"
+                                                 materialDesign:HintAssist.Hint="번호, 유형, 주소 검색..."
+                                                 materialDesign:HintAssist.IsFloating="False"
+                                                 TextChanged="PropertySearchBox_TextChanged"/>
+                                        <materialDesign:PackIcon Kind="Magnify"
+                                                                 Width="16" Height="16"
+                                                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                                                 HorizontalAlignment="Right"
                                                                  VerticalAlignment="Center"
-                                                                 Margin="0,0,6,0"/>
-                                        <TextBlock Text="담보 목록" 
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"
-                                                   Foreground="White"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-
-                                    <!-- 패널 닫기 토글 -->
-                                    <ToggleButton x:Name="PropertyListPanelToggle"
-                                                  Grid.Column="2"
-                                                  Style="{StaticResource PanelToggleButton}"
-                                                  IsChecked="True"
-                                                  Click="LeftPanelToggle_Click"
-                                                  ToolTip="패널 접기/펼치기">
-                                        <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20" Foreground="White"/>
-                                    </ToggleButton>
-                                </Grid>
+                                                                 Margin="0,0,8,0"
+                                                                 IsHitTestVisible="False"/>
+                                    </Grid>
+                                </StackPanel>
                             </Border>
 
                             <!-- 물건 리스트 -->

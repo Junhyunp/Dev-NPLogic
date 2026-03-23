@@ -1265,5 +1265,34 @@ namespace NPLogic.Views
         }
 
         #endregion
+
+        #region 담보 목록 검색
+
+        private void PropertySearchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (PropertySideListBox?.ItemsSource == null) return;
+
+            var view = System.Windows.Data.CollectionViewSource.GetDefaultView(PropertySideListBox.ItemsSource);
+            if (view == null) return;
+
+            var keyword = PropertySearchBox.Text?.Trim();
+            if (string.IsNullOrEmpty(keyword))
+            {
+                view.Filter = null;
+            }
+            else
+            {
+                view.Filter = obj =>
+                {
+                    if (obj is not NPLogic.Core.Models.Property p) return false;
+                    var kw = keyword.ToLower();
+                    return (p.PropertyNumber?.ToLower().Contains(kw) == true)
+                        || (p.PropertyType?.ToLower().Contains(kw) == true)
+                        || (p.DisplayAddress?.ToLower().Contains(kw) == true);
+                };
+            }
+        }
+
+        #endregion
     }
 }
