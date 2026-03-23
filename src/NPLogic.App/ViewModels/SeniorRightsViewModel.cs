@@ -2638,13 +2638,13 @@ namespace NPLogic.ViewModels
             try
             {
                 _isBulkSaving = true;
+                await SaveNoteAsync();
                 await SaveAuctionCaseNotesAsync();
                 await SaveTenantInfoAsync();
                 await SaveRightAnalysisAsync();
                 await SaveResidentialLeasesAsync();
                 await SaveCommercialLeasesAsync();
                 await SaveWageClaimsAsync();
-                await SaveNoteAsync();
                 _isBulkSaving = false;
 
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 데이터가 일괄 저장되었습니다.");
