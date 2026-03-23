@@ -256,6 +256,7 @@ namespace NPLogic.ViewModels
         private readonly LoanRepository? _loanRepository;
         private readonly AuctionScheduleRepository? _auctionScheduleRepository;
         private readonly PermissionService? _permissionService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
         private bool _suppressSelectedRegistryRunChanged;
 
         [ObservableProperty]
@@ -1076,7 +1077,8 @@ namespace NPLogic.ViewModels
             BorrowerRepository? borrowerRepository = null,
             LoanRepository? loanRepository = null,
             AuctionScheduleRepository? auctionScheduleRepository = null,
-            PermissionService? permissionService = null)
+            PermissionService? permissionService = null,
+            PropertyNoteRepository? propertyNoteRepository = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -1092,6 +1094,7 @@ namespace NPLogic.ViewModels
             _loanRepository = loanRepository;
             _auctionScheduleRepository = auctionScheduleRepository;
             _permissionService = permissionService;
+            _propertyNoteRepository = propertyNoteRepository;
             
             // 프로그램 이름 캐시가 비어있으면 미리 로드 (첫 ViewModel 생성 시)
             if (_programRepository != null && _programNameCache.Count == 0)
@@ -1115,7 +1118,8 @@ namespace NPLogic.ViewModels
                     _rightAnalysisRepository,
                     null,
                     _borrowerRepository,
-                    null);
+                    null,
+                    propertyNoteRepository: _propertyNoteRepository);
             }
 
             // 평가 탭 ViewModel 초기화 - 항상 생성 (null이면 바인딩 실패함)
@@ -1440,7 +1444,8 @@ namespace NPLogic.ViewModels
                         LoadProgramNameAsync(property.ProgramId, property.ProjectId),
                         LoadMapImagesAsync(property),
                         LoadRegistryDocumentAsync(property),
-                        LoadSummaryDataAsync()
+                        LoadSummaryDataAsync(),
+                        LoadCollateralNoteAsync()
                     };
 
                     await Task.WhenAll(parallelTasks);
@@ -4237,6 +4242,52 @@ namespace NPLogic.ViewModels
             }
         }
 
+        // ========== 비고 사이드 패널 (담보물건) ==========
+        [ObservableProperty]
+        private string _collateralNoteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isCollateralNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleCollateralNotePanel()
+        {
+            IsCollateralNotePanelVisible = !IsCollateralNotePanelVisible;
+        }
+
+        private async Task LoadCollateralNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == null) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_propertyId.Value, "collateral_property");
+                CollateralNoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[CollateralProperty] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveCollateralNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == null) return;
+            if (string.IsNullOrWhiteSpace(CollateralNoteText)) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _propertyId.Value,
+                    TabName = "collateral_property",
+                    NoteText = CollateralNoteText
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[CollateralProperty] 비고 저장 실패: {ex.Message}");
+            }
+        }
+
         // ========== 담보물건 일괄 저장 ==========
 
         private bool _isBulkSaving;
@@ -4256,6 +4307,7 @@ namespace NPLogic.ViewModels
                     await SaveJibunAppraisalsAsync();
                 if (HasMachineryAppraisalTable)
                     await SaveMachineryAppraisalsAsync();
+                await SaveCollateralNoteAsync();
                 _isBulkSaving = false;
 
                 SuccessMessage = "담보물건 데이터가 일괄 저장되었습니다.";

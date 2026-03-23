@@ -26,7 +26,8 @@ namespace NPLogic.ViewModels
         private readonly NPLogic.Services.VworldService? _vworldService;
         private readonly LeaseItemRepository? _leaseItemRepository;
         private readonly WageClaimItemRepository? _wageClaimItemRepository;
-        
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
+
         // 현재 물건의 권리분석 데이터
         private RightAnalysis? _currentRightAnalysis;
 
@@ -652,6 +653,52 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _editNotes = "";
 
+        // ========== 비고 사이드 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(SelectedProperty.Id, "senior_rights");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SeniorRights] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            if (string.IsNullOrWhiteSpace(NoteText)) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = SelectedProperty.Id,
+                    TabName = "senior_rights",
+                    NoteText = NoteText
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SeniorRights] 비고 저장 실패: {ex.Message}");
+            }
+        }
+
         public SeniorRightsViewModel(
             RegistryRepository registryRepository,
             PropertyRepository propertyRepository,
@@ -660,7 +707,8 @@ namespace NPLogic.ViewModels
             BorrowerRepository? borrowerRepository = null,
             NPLogic.Services.VworldService? vworldService = null,
             LeaseItemRepository? leaseItemRepository = null,
-            WageClaimItemRepository? wageClaimItemRepository = null)
+            WageClaimItemRepository? wageClaimItemRepository = null,
+            PropertyNoteRepository? propertyNoteRepository = null)
         {
             _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
@@ -670,6 +718,7 @@ namespace NPLogic.ViewModels
             _vworldService = vworldService;
             _leaseItemRepository = leaseItemRepository;
             _wageClaimItemRepository = wageClaimItemRepository;
+            _propertyNoteRepository = propertyNoteRepository;
             InitializeEmptyRegistryMortgageRows();
         }
 
@@ -1322,6 +1371,7 @@ namespace NPLogic.ViewModels
         {
             _ = LoadRightsAsync();
             _ = LoadRightAnalysisAsync();
+            _ = LoadNoteAsync();
         }
 
         partial void OnHasTenantRegistryChanged(bool value)
@@ -2595,6 +2645,7 @@ namespace NPLogic.ViewModels
                 await SaveResidentialLeasesAsync();
                 await SaveCommercialLeasesAsync();
                 await SaveWageClaimsAsync();
+                await SaveNoteAsync();
                 _isBulkSaving = false;
 
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 데이터가 일괄 저장되었습니다.");

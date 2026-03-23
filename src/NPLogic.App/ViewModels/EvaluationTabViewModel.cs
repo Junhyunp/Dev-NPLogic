@@ -340,6 +340,7 @@ namespace NPLogic.ViewModels
 
         private readonly TradeService _tradeService;
         private readonly PropertyTradeAppliedRepository? _tradeAppliedRepository;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
 
         public EvaluationTabViewModel(EvaluationRepository evaluationRepository)
         {
@@ -348,6 +349,8 @@ namespace NPLogic.ViewModels
             _tradeService = new TradeService();
             _tradeAppliedRepository = App.ServiceProvider?
                 .GetService(typeof(PropertyTradeAppliedRepository)) as PropertyTradeAppliedRepository;
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
 
             // 초기 데이터 설정
             InitializeCaseItems();
@@ -355,6 +358,52 @@ namespace NPLogic.ViewModels
             InitializeFactoryEvalRows();
             InitializeCommercialEvalRows();
             InitializeHouseEvalRows();
+        }
+
+        // ========== 비고 사이드 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == Guid.Empty) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_propertyId, "evaluation");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EvaluationTab] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == Guid.Empty) return;
+            if (string.IsNullOrWhiteSpace(NoteText)) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _propertyId,
+                    TabName = "evaluation",
+                    NoteText = NoteText
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[EvaluationTab] 비고 저장 실패: {ex.Message}");
+            }
         }
 
         #region 회수 전략 요약
@@ -1012,6 +1061,9 @@ namespace NPLogic.ViewModels
 
                 // 실거래가 자동 조회 (PNU 기반)
                 await LoadRealTransactionsAsync();
+
+                // 비고 로드
+                await LoadNoteAsync();
             }
             catch (Exception ex)
             {
@@ -1940,6 +1992,9 @@ namespace NPLogic.ViewModels
                     await _tradeAppliedRepository.SaveAllAsync(_propertyId, appliedItems);
                     Debug.WriteLine($"[EvaluationTab] 실거래가 적용 저장: {appliedItems.Count}건");
                 }
+
+                // 비고 저장
+                await SaveNoteAsync();
 
                 IsDirty = false; // 저장 완료 후 변경사항 플래그 리셋
                 SuccessMessage = "평가 정보가 저장되었습니다.";
