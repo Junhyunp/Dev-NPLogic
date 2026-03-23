@@ -287,9 +287,9 @@
                                             <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="*" IsReadOnly="True"
+                                            <DataGridTextColumn Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="*" IsReadOnly="True"
+                                            <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                             <DataGridTemplateColumn Width="*" IsReadOnly="True">
                                                 <DataGridTemplateColumn.HeaderTemplate>
@@ -305,11 +305,11 @@
                                                     </DataTemplate>
                                                 </DataGridTemplateColumn.CellTemplate>
                                             </DataGridTemplateColumn>
-                                            <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="80" IsReadOnly="True"
+                                            <DataGridTextColumn Header="층수" Binding="{Binding Floor}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="80" IsReadOnly="True"
+                                            <DataGridTextColumn Header="등기여부" Binding="{Binding IsRegistered}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <DataGridTemplateColumn Header="적용" Width="60">
+                                            <DataGridTemplateColumn Header="적용" Width="Auto">
                                                 <DataGridTemplateColumn.CellTemplate>
                                                     <DataTemplate>
                                                         <CheckBox IsChecked="{Binding IsApplied, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -1297,7 +1297,7 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="100" IsReadOnly="True"
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="Auto" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding AppraisedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
@@ -1984,7 +1984,7 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="80"
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*"
@@ -1993,13 +1993,13 @@
                                     <DataGridTextColumn Header="임차인" Binding="{Binding Tenant, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                    <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                    <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                    <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, UpdateSourceTrigger=PropertyChanged}" Width="*"
@@ -2301,7 +2301,7 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="100" IsReadOnly="True"
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="Auto" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding AppraisedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
