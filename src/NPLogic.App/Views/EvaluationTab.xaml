@@ -239,8 +239,7 @@
                                         Background="{StaticResource BlueGray50Brush}"
                                         MinHeight="560"
                                         Cursor="Hand"
-                                        MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp"
-                                        ToolTip="클릭하여 확대">
+                                        MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp">
                                     <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
                                                Style="{StaticResource BodyTextStyle}"
                                                Opacity="0.6"

@@ -1322,6 +1322,24 @@
                                     <ScaleTransform x:Name="ContentZoomTransform" ScaleX="1" ScaleY="1"/>
                                 </ContentControl.LayoutTransform>
                             </ContentControl>
+
+                            <!-- 줌 퍼센트 표시 (잠깐 떴다 사라짐) -->
+                            <Border x:Name="ZoomIndicator"
+                                    Background="#CC333333"
+                                    CornerRadius="6"
+                                    Padding="12,6"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Bottom"
+                                    Margin="0,0,0,24"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"
+                                    Panel.ZIndex="999">
+                                <TextBlock x:Name="ZoomIndicatorText"
+                                           Text="100%"
+                                           Foreground="White"
+                                           FontSize="14"
+                                           FontWeight="SemiBold"/>
+                            </Border>
                         </Grid>
                     </Grid>
                 </Border>

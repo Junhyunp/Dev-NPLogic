@@ -1214,6 +1214,7 @@ namespace NPLogic.Views
         private const double ZoomMin = 0.5;
         private const double ZoomMax = 2.0;
         private const double ZoomStep = 0.05;
+        private System.Windows.Threading.DispatcherTimer? _zoomFadeTimer;
 
         /// <summary>
         /// Ctrl+마우스 휠로 콘텐츠 줌 인/아웃
@@ -1231,7 +1232,30 @@ namespace NPLogic.Views
             ContentZoomTransform.ScaleX = _currentZoom;
             ContentZoomTransform.ScaleY = _currentZoom;
 
+            // 줌 퍼센트 표시
+            ShowZoomIndicator();
+
             e.Handled = true;
+        }
+
+        private void ShowZoomIndicator()
+        {
+            ZoomIndicatorText.Text = $"{Math.Round(_currentZoom * 100)}%";
+            ZoomIndicator.Opacity = 1;
+
+            // 기존 타이머 리셋
+            _zoomFadeTimer?.Stop();
+            _zoomFadeTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(800)
+            };
+            _zoomFadeTimer.Tick += (s, args) =>
+            {
+                _zoomFadeTimer.Stop();
+                var fadeOut = new System.Windows.Media.Animation.DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(300));
+                ZoomIndicator.BeginAnimation(OpacityProperty, fadeOut);
+            };
+            _zoomFadeTimer.Start();
         }
 
         #endregion
