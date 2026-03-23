@@ -38,20 +38,20 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DB-01 | — | Pending |
-| DB-02 | — | Pending |
-| NOTE-01 | — | Pending |
-| NOTE-02 | — | Pending |
-| NOTE-03 | — | Pending |
-| SUMMARY-01 | — | Pending |
-| SUMMARY-02 | — | Pending |
-| SCOPE-01 | — | Pending |
-| SCOPE-02 | — | Pending |
+| DB-01 | Phase 1 | Pending |
+| DB-02 | Phase 1 | Pending |
+| NOTE-01 | Phase 2 | Pending |
+| NOTE-02 | Phase 2 | Pending |
+| NOTE-03 | Phase 2 | Pending |
+| SCOPE-01 | Phase 3 | Pending |
+| SCOPE-02 | Phase 3 | Pending |
+| SUMMARY-01 | Phase 4 | Pending |
+| SUMMARY-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9
+- Mapped to phases: 9
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-23*

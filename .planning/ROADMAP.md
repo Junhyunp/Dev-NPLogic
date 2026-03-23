@@ -1,8 +1,13 @@
-# Roadmap: NPLogic 평가 탭 UI/UX 통일
+# Roadmap: NPLogic v2.0 탭별 비고란 추가 및 종합 표시
 
 ## Overview
 
-5개 평가 유형(아파트, 연립다세대, 상가/아파트형공장, 공장/창고, 주택/근린시설/토지/기타)의 XAML 스타일을 3단계로 통일한다. 먼저 레이아웃/여백/헤더 등 구조적 기반을 잡고, 그 위에 DataGrid 스타일을 표준화한 뒤, 마지막으로 유형별 평가결과 섹션의 패턴을 통일한다.
+모든 탭에 비고란(특이사항 메모) 사이드 패널을 추가하고, 전체 탭에서 종합 표시한다. 먼저 DB/모델 기반을 만들고, 1~2개 탭에 사이드 패널 프로토타입을 검증한 뒤, 나머지 탭 전체로 확산하고, 마지막으로 전체 탭에서 비고를 종합 표시한다.
+
+## Milestones
+
+- v1.0 평가 탭 UI/UX 통일 (shipped 2026-03-16)
+- v2.0 탭별 비고란 추가 및 종합 표시 (in progress)
 
 ## Phases
 
@@ -12,61 +17,75 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: 레이아웃/헤더/여백 기반 통일** - 5개 View의 구조적 골격(DesignHeight, 패널 비율, CardBorder, 헤더, 여백)을 일관되게 정리
-- [ ] **Phase 2: DataGrid 스타일 표준화** - 용도별 DataGrid 속성(MaxHeight, FontSize, RowHeight 등)을 표준 기준으로 통일
-- [x] **Phase 3: 평가결과 섹션 패턴 통일** - 아파트/연립다세대 포함 전 유형의 평가결과 섹션을 동일한 시나리오 헤더+DataGrid 패턴으로 정리 (completed 2026-03-16)
+- [ ] **Phase 1: DB 및 데이터 기반** - property_notes 테이블, 모델, Repository CRUD 구현
+- [ ] **Phase 2: 사이드 패널 비고란 프로토타입** - 1~2개 탭에서 사이드 패널 UI 패턴 검증 (토글, 입력, 저장)
+- [ ] **Phase 3: 전체 탭 비고란 적용** - 비핵심 8개 + 상위 7개 전체 탭에 비고란 확산 적용
+- [ ] **Phase 4: 전체 탭 종합 표시** - 비핵심 > 전체 탭(HomeTab)에서 탭별 비고 종합 표시
 
 ## Phase Details
 
-### Phase 1: 레이아웃/헤더/여백 기반 통일
-**Goal**: 어떤 평가 유형을 열어도 전체 레이아웃 구조, 섹션 헤더 모양, 여백 간격이 동일하게 느껴진다
+### Phase 1: DB 및 데이터 기반
+**Goal**: 비고 데이터를 저장하고 조회할 수 있는 기반이 존재한다
 **Depends on**: Nothing (first phase)
-**Requirements**: LAYOUT-01, LAYOUT-02, LAYOUT-03, HDR-01, HDR-02, SPC-01, SPC-02
+**Requirements**: DB-01, DB-02
 **Success Criteria** (what must be TRUE):
-  1. 5개 View 모두 동일한 DesignHeight 값을 가지며, 좌우 패널 비율이 일관된다
-  2. 공통 섹션(낙찰통계, 사례평가, 탐문내역 등)이 모든 유형에서 같은 패널/순서에 배치되어 있다
-  3. 모든 CardBorder의 Margin이 0,0,0,16으로 통일되고, 내부 Padding이 16px로 일관된다
-  4. 섹션 헤더가 SectionHeader 스타일 기준으로 통일되며, 이모지/아이콘 패턴이 일관적이다
-  5. 평가결과 헤더(PrimaryBrush+PackIcon)와 개별 View 헤더 간 시각적 일관성이 확보된다
-**Plans**: 2 plans
+  1. Supabase에 property_notes 테이블이 존재하고, property_id + tab_name 유니크 제약이 동작한다
+  2. PropertyNote 모델로 비고를 생성/조회/수정/삭제할 수 있고, Repository 메서드가 정상 동작한다
+  3. 특정 물건(property_id)의 전체 비고를 한번에 조회할 수 있다
+**Plans**: TBD
 
 Plans:
-- [x] 01-01-PLAN.md -- CardStyle Margin 업데이트 + 공통 섹션 6개 PrimaryBrush 헤더 변환
-- [ ] 01-02-PLAN.md -- 유형별 전용 섹션 16개 헤더 변환 + 전체 시각적 검증
+- [ ] 01-01: TBD
 
-### Phase 2: DataGrid 스타일 표준화
-**Goal**: 전 유형의 DataGrid가 용도별로 일관된 크기, 폰트, 행 높이, 테두리를 갖는다
+### Phase 2: 사이드 패널 비고란 프로토타입
+**Goal**: 담당자가 대표 탭 1~2개에서 비고를 입력하고 저장할 수 있다
 **Depends on**: Phase 1
-**Requirements**: GRID-01, GRID-02, GRID-03
+**Requirements**: NOTE-01, NOTE-02, NOTE-03
 **Success Criteria** (what must be TRUE):
-  1. 데이터 조회용 DataGrid와 편집용 DataGrid의 MaxHeight가 각각 표준 값으로 통일되어 있다
-  2. DataGrid FontSize가 용도에 따라 FontSizeBody 또는 FontSizeSmall로 일관되게 적용된다
-  3. RowHeight, BorderBrush, AlternatingRowBackground 등 공통 속성이 전 유형에서 동일하다
-**Plans**: 1 plan
+  1. 탭 오른쪽에 +/- 토글 버튼이 있고, 클릭하면 사이드 패널이 열리고 닫힌다
+  2. 사이드 패널 TextBox에 여러 줄 텍스트를 자유롭게 입력할 수 있다
+  3. 기존 저장 버튼을 누르면 비고 내용이 DB에 저장되고, 탭 재진입 시 저장된 내용이 복원된다
+  4. 사이드 패널이 닫힌 상태에서도 메인 콘텐츠 레이아웃이 정상적이다
+**Plans**: TBD
 
 Plans:
-- [ ] 02-01-PLAN.md -- 15개 DataGrid 공통 속성 통일 (AlternatingRowBackground, BorderThickness, BorderBrush) + 시각적 검증
+- [ ] 02-01: TBD
 
-### Phase 3: 평가결과 섹션 패턴 통일
-**Goal**: 5개 유형 모두 평가결과 섹션이 동일한 시각적 패턴(시나리오 헤더+DataGrid)을 따르며, 유형별 내용 차이만 존재한다
+### Phase 3: 전체 탭 비고란 적용
+**Goal**: 비핵심 하위 8개 탭과 상위 7개 탭 모두에서 비고란을 사용할 수 있다
 **Depends on**: Phase 2
-**Requirements**: EVAL-01, EVAL-02
+**Requirements**: SCOPE-01, SCOPE-02
 **Success Criteria** (what must be TRUE):
-  1. 아파트/연립다세대 평가결과가 다른 유형과 같은 시나리오 헤더+DataGrid 패턴을 사용한다
-  2. 4개 유형별 평가결과 섹션의 컬럼 정렬, 셀 스타일, 헤더 스타일이 시각적으로 일관된다
-  3. 평가 유형을 전환할 때 평가결과 섹션의 레이아웃 패턴이 자연스럽게 연속되어 보인다
+  1. 비핵심 하위 8개 탭(전체/차주개요/Loan/담보물건/선순위/평가/경공매일정/인터림) 모두에 사이드 패널 비고란이 동작한다
+  2. 상위 7개 탭(등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감) 모두에 사이드 패널 비고란이 동작한다
+  3. 각 탭에서 입력한 비고가 탭별로 독립적으로 저장/조회된다 (탭 간 간섭 없음)
+  4. 탭 전환 시 각 탭의 비고가 올바르게 로드된다
 **Plans**: TBD
 
 Plans:
 - [ ] 03-01: TBD
 
+### Phase 4: 전체 탭 종합 표시
+**Goal**: 담당자가 비핵심 > 전체 탭 한곳에서 모든 탭의 비고를 한눈에 확인할 수 있다
+**Depends on**: Phase 3
+**Requirements**: SUMMARY-01, SUMMARY-02
+**Success Criteria** (what must be TRUE):
+  1. 비핵심 > 전체 탭(HomeTab)에 탭별 비고 종합 섹션이 표시된다
+  2. 비고가 있는 탭만 표시되고, 비고가 없는 탭은 생략된다
+  3. 물건을 전환하면 해당 물건의 비고 종합이 즉시 갱신된다
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. 레이아웃/헤더/여백 기반 통일 | 1/2 | In Progress | - |
-| 2. DataGrid 스타일 표준화 | 0/1 | Not started | - |
-| 3. 평가결과 섹션 패턴 통일 | 0/? | Complete    | 2026-03-16 |
+| 1. DB 및 데이터 기반 | 0/? | Not started | - |
+| 2. 사이드 패널 비고란 프로토타입 | 0/? | Not started | - |
+| 3. 전체 탭 비고란 적용 | 0/? | Not started | - |
+| 4. 전체 탭 종합 표시 | 0/? | Not started | - |
