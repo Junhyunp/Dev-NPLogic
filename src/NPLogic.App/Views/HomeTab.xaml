@@ -95,10 +95,9 @@
                             <Run Text="{Binding Property.PropertyNumber}" FontWeight="Bold"/>
                         </TextBlock>
                         
-                        <TextBlock Text="{Binding DisplayAddress}" 
+                        <TextBlock Text="{Binding DisplayAddress}"
                                    Style="{StaticResource BodyTextStyle}"
                                    TextWrapping="Wrap"
-                                   Opacity="0.8"
                                    Margin="0,0,0,12"/>
                         
                         <StackPanel Orientation="Horizontal">
