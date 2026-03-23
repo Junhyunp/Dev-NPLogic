@@ -266,7 +266,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
                     sp.GetRequiredService<VworldService>(),
                     sp.GetRequiredService<Data.Repositories.LeaseItemRepository>(),
-                    sp.GetRequiredService<Data.Repositories.WageClaimItemRepository>()));
+                    sp.GetRequiredService<Data.Repositories.WageClaimItemRepository>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyNoteRepository>()));
             services.AddTransient<ViewModels.PublicSaleScheduleViewModel>();
             services.AddTransient<ViewModels.AuctionScheduleDetailViewModel>(sp =>
             {
