@@ -32,10 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Supabase에 property_notes 테이블이 존재하고, property_id + tab_name 유니크 제약이 동작한다
   2. PropertyNote 모델로 비고를 생성/조회/수정/삭제할 수 있고, Repository 메서드가 정상 동작한다
   3. 특정 물건(property_id)의 전체 비고를 한번에 조회할 수 있다
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Supabase 테이블 생성 + PropertyNote 모델/Repository/DI 구현
 
 ### Phase 2: 사이드 패널 비고란 프로토타입
 **Goal**: 담당자가 대표 탭 1~2개에서 비고를 입력하고 저장할 수 있다
@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB 및 데이터 기반 | 0/? | Not started | - |
+| 1. DB 및 데이터 기반 | 0/1 | Not started | - |
 | 2. 사이드 패널 비고란 프로토타입 | 0/? | Not started | - |
 | 3. 전체 탭 비고란 적용 | 0/? | Not started | - |
 | 4. 전체 탭 종합 표시 | 0/? | Not started | - |
