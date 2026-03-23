@@ -222,7 +222,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.BorrowerRepository>(),
                     sp.GetRequiredService<Data.Repositories.LoanRepository>(),
                     sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
-                    sp.GetRequiredService<Services.PermissionService>()
+                    sp.GetRequiredService<Services.PermissionService>(),
+                    sp.GetRequiredService<Data.Repositories.PropertyNoteRepository>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();
