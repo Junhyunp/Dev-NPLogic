@@ -172,6 +172,7 @@ namespace NPLogic
             services.AddSingleton<Data.Repositories.LeaseItemRepository>();
             services.AddSingleton<Data.Repositories.WageClaimItemRepository>();
             services.AddSingleton<Data.Repositories.PropertyTradeAppliedRepository>();
+            services.AddSingleton<Data.Repositories.PropertyNoteRepository>();
 
             // Upload Services (Singleton)
             services.AddSingleton<Services.DataDiskUploadService>();
