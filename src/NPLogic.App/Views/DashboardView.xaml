@@ -1316,7 +1316,12 @@
 
                             <!-- 상세 모드: 물건별 상세 View -->
                             <ContentControl x:Name="TabContentControl"
-                                            Visibility="Collapsed"/>
+                                            Visibility="Collapsed"
+                                            PreviewMouseWheel="TabContentControl_PreviewMouseWheel">
+                                <ContentControl.LayoutTransform>
+                                    <ScaleTransform x:Name="ContentZoomTransform" ScaleX="1" ScaleY="1"/>
+                                </ContentControl.LayoutTransform>
+                            </ContentControl>
                         </Grid>
                     </Grid>
                 </Border>

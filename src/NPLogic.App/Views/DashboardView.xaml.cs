@@ -1207,5 +1207,33 @@ namespace NPLogic.Views
         }
 
         #endregion
+
+        #region Ctrl+마우스 휠 줌
+
+        private double _currentZoom = 1.0;
+        private const double ZoomMin = 0.5;
+        private const double ZoomMax = 2.0;
+        private const double ZoomStep = 0.05;
+
+        /// <summary>
+        /// Ctrl+마우스 휠로 콘텐츠 줌 인/아웃
+        /// </summary>
+        private void TabContentControl_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            if (System.Windows.Input.Keyboard.Modifiers != System.Windows.Input.ModifierKeys.Control)
+                return;
+
+            if (e.Delta > 0)
+                _currentZoom = Math.Min(ZoomMax, _currentZoom + ZoomStep);
+            else
+                _currentZoom = Math.Max(ZoomMin, _currentZoom - ZoomStep);
+
+            ContentZoomTransform.ScaleX = _currentZoom;
+            ContentZoomTransform.ScaleY = _currentZoom;
+
+            e.Handled = true;
+        }
+
+        #endregion
     }
 }
