@@ -84,7 +84,12 @@
     </UserControl.Resources>
     
     <Grid Background="{StaticResource BackgroundBrush}">
-        <ScrollViewer x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer Grid.Column="0" x:Name="MainScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       ClipToBounds="True"
                       ScrollChanged="MainScrollViewer_ScrollChanged">
             <StackPanel Margin="12,8,12,12">
@@ -108,13 +113,22 @@
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
-                                <Button Content="저장"
-                                        Command="{Binding SaveAllCollateralCommand}"
-                                        Style="{StaticResource MaterialDesignRaisedButton}"
-                                        Padding="12,6"
-                                        HorizontalAlignment="Right"
-                                        VerticalAlignment="Center"
-                                        Foreground="White"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <Button Content="저장"
+                                            Command="{Binding SaveAllCollateralCommand}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}"
+                                            Padding="12,6"
+                                            Foreground="White"/>
+                                    <Button Command="{Binding ToggleCollateralNotePanelCommand}"
+                                            Style="{StaticResource MaterialDesignIconButton}"
+                                            ToolTip="비고 패널 열기/닫기"
+                                            Width="32" Height="32"
+                                            Padding="0"
+                                            Margin="8,0,0,0"
+                                            Foreground="White">
+                                        <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                                    </Button>
+                                </StackPanel>
                             </Grid>
                         </Border>
 
@@ -1138,5 +1152,35 @@
 
             </StackPanel>
         </ScrollViewer>
+
+        <!-- 비고 사이드 패널 -->
+        <Border Grid.Column="1"
+                x:Name="NotePanelColumn"
+                Width="250"
+                Visibility="{Binding IsCollateralNotePanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1,0,0,0"
+                Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="비고"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                <TextBox Text="{Binding CollateralNoteText, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         FontSize="{StaticResource FontSizeBody}"
+                         Padding="8"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         Background="White"/>
+            </DockPanel>
+        </Border>
+
     </Grid>
 </UserControl>

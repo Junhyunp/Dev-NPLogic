@@ -93,7 +93,14 @@
         </Style>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+    <ScrollViewer Grid.Column="0"
+                  VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled"
                   Padding="12,8,12,12">
         <Grid>
@@ -154,10 +161,20 @@
                                      FontSize="{StaticResource FontSizeBody}"/>
                     </StackPanel>
 
-                    <Button Grid.Column="2" Content="저장"
-                            Command="{Binding SaveCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Padding="12,6"/>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Content="저장"
+                                Command="{Binding SaveCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Padding="12,6"/>
+                        <Button Command="{Binding ToggleNotePanelCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="비고 패널 열기/닫기"
+                                Width="32" Height="32"
+                                Padding="0"
+                                Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                        </Button>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -3580,5 +3597,36 @@
             </Border>
         </Grid>
     </ScrollViewer>
+
+    <!-- 비고 사이드 패널 -->
+    <Border Grid.Column="1"
+            x:Name="NotePanelColumn"
+            Width="250"
+            Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+            Background="{StaticResource SurfaceColor}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1,0,0,0"
+            Padding="12">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top"
+                       Text="비고"
+                       FontWeight="SemiBold"
+                       FontSize="{StaticResource FontSizeBody}"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       Margin="0,0,0,8"/>
+            <TextBox Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     VerticalAlignment="Stretch"
+                     FontSize="{StaticResource FontSizeBody}"
+                     Padding="8"
+                     BorderBrush="{StaticResource BorderBrush}"
+                     BorderThickness="1"
+                     Background="White"/>
+        </DockPanel>
+    </Border>
+
+    </Grid>
 </UserControl>
 
