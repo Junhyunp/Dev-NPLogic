@@ -1,76 +1,57 @@
-# Requirements: NPLogic 평가 탭 UI/UX 통일
+# Requirements: v2.0 탭별 비고란 추가 및 종합 표시
 
-**Defined:** 2026-03-14
-**Core Value:** 평가 유형 간 전환 시 사용자가 혼란 없이 자연스럽게 느끼는 일관된 UI/UX
+**Defined:** 2026-03-23
+**Core Value:** 담당자가 각 탭에서 특이사항을 바로 메모하고, 전체 탭에서 한눈에 확인할 수 있다
 
 ## v1 Requirements
 
-### 레이아웃
+### DB/데이터
 
-- [x] **LAYOUT-01**: 전체 5개 View의 DesignHeight를 동일하게 통일 (현재 800/900 혼재)
-- [x] **LAYOUT-02**: 좌우 패널 내 섹션 순서를 일관된 원칙으로 정리 (공통 섹션은 같은 위치)
-- [x] **LAYOUT-03**: CardBorder Margin을 모든 섹션에서 동일하게 적용 (0,0,0,16)
+- [ ] **DB-01**: Supabase에 `property_notes` 테이블 생성 (property_id, tab_name, note_text, updated_at)
+- [ ] **DB-02**: PropertyNote 모델 + PropertyNoteRepository (CRUD) 구현
 
-### 섹션 헤더
+### UI — 개별 탭 비고란
 
-- [x] **HDR-01**: 유형별 View 내 섹션 헤더 스타일을 SectionHeader 기준으로 통일 (이모지/아이콘 패턴 일관화)
-- [x] **HDR-02**: EvaluationTab.xaml의 평가결과 헤더(PrimaryBrush + PackIcon)와 개별 View 헤더 스타일 간 일관성 확보
+- [ ] **NOTE-01**: 각 탭 오른쪽에 사이드 패널 형태 비고란 추가 (+/- 토글로 접기/펼치기)
+- [ ] **NOTE-02**: TextBox로 여러 줄 자유 입력 가능 (TextWrapping, AcceptsReturn)
+- [ ] **NOTE-03**: 기존 저장 버튼(SaveAll 등)에 비고 저장 통합
 
-### DataGrid
+### UI — 전체 탭 종합
 
-- [ ] **GRID-01**: 유사 용도의 DataGrid MaxHeight 통일 (데이터 조회용 vs 편집용 구분하여 표준화)
-- [ ] **GRID-02**: DataGrid FontSize를 용도별로 통일 (FontSizeBody vs FontSizeSmall 기준 정립)
-- [ ] **GRID-03**: DataGrid 공통 속성(RowHeight, BorderBrush, AlternatingRowBackground 등) 일관 적용
+- [ ] **SUMMARY-01**: 비핵심 > 전체 탭(HomeTab)에 탭별 비고 종합 섹션 추가
+- [ ] **SUMMARY-02**: 비고가 있는 탭만 표시 (없는 탭은 생략 또는 "(비고 없음)")
 
-### 평가결과
+### 대상 탭 범위
 
-- [ ] **EVAL-01**: 아파트/연립다세대 평가결과를 다른 유형과 같은 시나리오 헤더+DataGrid 패턴으로 통일
-- [ ] **EVAL-02**: 4개 유형별 평가결과 섹션의 컬럼 구조/스타일 일관성 확보
-
-### 여백/간격
-
-- [x] **SPC-01**: Border 내부 Padding을 모든 섹션에서 동일하게 (16px)
-- [x] **SPC-02**: 섹션 간 간격(Margin)을 전체 View에서 일관되게 적용
-
-## v2 Requirements
-
-### 리팩토링
-
-- **REFACT-01**: 공통 섹션(낙찰통계, 사례평가, 탐문내역)을 재사용 가능한 UserControl로 추출
-- **REFACT-02**: 평가결과 섹션을 템플릿화하여 유형별 차이만 ViewModel로 주입
+- [ ] **SCOPE-01**: 비핵심 하위 8개 탭 (전체/차주개요/Loan/담보물건/선순위/평가/경공매일정/인터림)
+- [ ] **SCOPE-02**: 상위 탭 7개 (등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감)
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| 새로운 기능 추가 | UI/UX 다듬기만 집중 |
-| 비즈니스 로직 변경 | ViewModel/계산 로직은 그대로 유지 |
-| 평가 탭 외 다른 탭 변경 | 범위 밖 (등기부등본, 권리분석 등) |
-| 성능 최적화 | 이번 작업의 목표가 아님 |
-| UserControl 추출 리팩토링 | v2로 이관 -- 현재는 스타일 통일만 |
+| 비고 히스토리/버전 관리 | v2에서는 최신 1개만 저장 |
+| 비고 기반 알림/알려줌 | 단순 메모 기능으로 충분 |
+| 비고 검색 기능 | 전체 탭 종합으로 대체 |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LAYOUT-01 | Phase 1 | Complete (01-01) |
-| LAYOUT-02 | Phase 1 | Complete |
-| LAYOUT-03 | Phase 1 | Complete (01-01) |
-| HDR-01 | Phase 1 | Complete (01-01) |
-| HDR-02 | Phase 1 | Complete |
-| GRID-01 | Phase 2 | Pending |
-| GRID-02 | Phase 2 | Pending |
-| GRID-03 | Phase 2 | Pending |
-| EVAL-01 | Phase 3 | Pending |
-| EVAL-02 | Phase 3 | Pending |
-| SPC-01 | Phase 1 | Complete (01-01) |
-| SPC-02 | Phase 1 | Complete (01-01) |
+| DB-01 | — | Pending |
+| DB-02 | — | Pending |
+| NOTE-01 | — | Pending |
+| NOTE-02 | — | Pending |
+| NOTE-03 | — | Pending |
+| SUMMARY-01 | — | Pending |
+| SUMMARY-02 | — | Pending |
+| SCOPE-01 | — | Pending |
+| SCOPE-02 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 12 total
-- Mapped to phases: 12
-- Unmapped: 0
+- v1 requirements: 9 total
+- Mapped to phases: 0
+- Unmapped: 9
 
 ---
-*Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after roadmap creation*
+*Requirements defined: 2026-03-23*

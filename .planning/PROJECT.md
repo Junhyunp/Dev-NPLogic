@@ -1,64 +1,42 @@
-# NPLogic 평가 탭 UI/UX 통일
+# NPLogic 프로젝트 관리
 
-## What This Is
+## Milestone History
 
-NPLogic WPF 애플리케이션의 평가(Evaluation) 탭에서 5개 평가 유형(아파트, 연립다세대, 상가/아파트형공장, 공장/창고, 주택/근린시설/토지/기타) 간 UI/UX를 통일하고 전반적인 마무리 품질을 높이는 프로젝트. 내부 평가사가 어떤 유형을 보든 동일한 품질감과 일관된 레이아웃을 경험하도록 한다.
+### v1.0 — 평가 탭 UI/UX 통일 (완료)
+평가/선순위/담보물건 탭 간 UI/UX 통일. PrimaryBrush 헤더, DataGrid 스타일, 여백/간격, 저장 버튼 통합, +/- 토글 등.
+
+## Current Milestone
+
+### v2.0 — 탭별 비고란 추가 및 종합 표시
+
+모든 탭에 비고란(특이사항 메모)을 추가하고, 비핵심 > 전체 탭에서 탭별 비고를 종합 표시한다.
 
 ## Core Value
 
-평가 유형 간 전환 시 사용자가 혼란 없이 자연스럽게 느끼는 일관된 UI/UX.
-
-## Requirements
-
-### Validated
-
-- ✓ 5개 평가 유형별 전용 View/ViewModel 분리 — existing
-- ✓ 유형별 RadioButton 전환 메커니즘 — existing
-- ✓ 아파트/연립다세대: 실거래가, 유사물건 추천, 사례평가, 낙찰통계, 탐문내역 — existing
-- ✓ 상가/아파트형공장: 상가구분, 임대동향, 층별효용비율, 수익가치, 무상임대분석 — existing
-- ✓ 공장/창고: 공시지가, 지번별 평가, 기계기구 목록 — existing
-- ✓ 주택/근린시설/토지/기타: 탐문결과, 탐문수익가치, 수익가치 — existing
-- ✓ 전 유형 평가결과 섹션 — existing
-- ✓ CardBorder 기반 섹션 구분 — existing
-- ✓ SectionHeader 스타일 — existing
-
-### Active
-
-- [ ] 공통 섹션(낙찰통계, 사례평가, 탐문내역 등) 레이아웃/스타일 일관성 확보
-- [ ] 좌우 패널 비율 및 전체 레이아웃 구조 통일
-- [ ] 섹션 헤더 스타일 통일 (이모지, 폰트, 크기, 여백)
-- [ ] DataGrid 스타일 통일 (컬럼 포맷, 행 높이, 테두리, 정렬)
-- [ ] 여백(Margin/Padding) 및 간격(Spacing) 일관성
-- [ ] 평가결과 섹션 유형별 내용은 다르되 스타일/레이아웃 패턴 통일
-
-### Out of Scope
-
-- 새로운 기능 추가 — UI/UX 다듬기만 집중
-- 비즈니스 로직 변경 — ViewModel/계산 로직은 그대로
-- 평가 탭 외 다른 탭(등기부등본, 권리분석 등) — 범위 밖
-- 성능 최적화 — 이번 작업의 목표가 아님
+담당자가 각 탭에서 특이사항을 바로 메모하고, 전체 탭에서 한눈에 확인할 수 있다.
 
 ## Context
 
-- 5개 평가 유형이 점진적으로 개발되어 각 유형의 스타일이 조금씩 다른 상태
-- 최근 커밋(c179873, eb86462, 61ea626, ecd6753)에서 유형별 평가결과 섹션을 추가 중
-- MaterialDesignThemes 4.9.0 기반 디자인 시스템 사용
-- 각 View는 좌우 2패널 레이아웃이 기본이나 세부 구현이 다름
-- 내부 평가사들이 실무에서 사용 중인 도구
+- 원청 피드백: "각 카테고리별 비고란이 있으면 좋겠다. 모든 탭에 비고가 있고, 있는 경우만 맨 앞(전체 탭)으로 끌고 와주면 된다."
+- 대상: 비핵심 하위 8개 탭 + 등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감 (총 15개+)
+- DB: Supabase에 `property_notes` 테이블 신규 생성
+- UI: 오른쪽 사이드 패널, +/- 토글로 접기/펼치기
+- 저장: 기존 탭별 저장 버튼과 함께 저장
 
 ## Constraints
 
-- **Tech stack**: WPF + XAML, 기존 MaterialDesign 테마 유지
-- **Timeline**: 당장 필요 — 빠르게 완료해야 함
-- **Scope**: 기능 변경 없이 시각적 통일만 — 기존 동작 깨뜨리면 안 됨
-- **Compatibility**: 현재 데이터 바인딩, 커맨드 구조 유지
+- **Tech stack**: WPF + XAML, Supabase PostgreSQL
+- **UI 패턴**: 기존 확립된 PrimaryBrush 헤더, 사이드 패널 패턴 활용
+- **저장 방식**: 기존 SaveAll 커맨드에 통합
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| UI/UX만 집중, 기능 추가 없음 | 빠른 마무리가 필요하고 기능은 이미 동작 중 | — Pending |
-| 기존 MaterialDesign 테마 활용 | 새 디자인 시스템 도입은 범위 밖 | — Pending |
+| 새 테이블 property_notes | 물건별+탭별 유연한 구조, 기존 테이블 변경 불필요 | Decided |
+| 사이드 패널 + 토글 | 메인 콘텐츠 방해 없이 필요할 때만 사용 | Decided |
+| 전체 탭에 종합 표시 | 담당자가 한곳에서 모든 비고 확인 | Decided |
+| 기존 저장 버튼과 통합 | 별도 저장 UX 불필요, 자연스러운 플로우 | Decided |
 
 ---
-*Last updated: 2026-03-14 after initialization*
+*Last updated: 2026-03-23 — v2.0 milestone initialized*
