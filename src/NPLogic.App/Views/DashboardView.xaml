@@ -1323,27 +1323,27 @@
                                 </ContentControl.LayoutTransform>
                             </ContentControl>
 
-                            <!-- 줌 퍼센트 표시 (잠깐 떴다 사라짐) -->
-                            <Border x:Name="ZoomIndicator"
-                                    Background="#CC333333"
-                                    CornerRadius="6"
-                                    Padding="12,6"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Bottom"
-                                    Margin="0,0,0,24"
-                                    Opacity="0"
-                                    IsHitTestVisible="False"
-                                    Panel.ZIndex="999">
-                                <TextBlock x:Name="ZoomIndicatorText"
-                                           Text="100%"
-                                           Foreground="White"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"/>
-                            </Border>
                         </Grid>
                     </Grid>
                 </Border>
             </Grid>
         </Grid>
+
+        <!-- 줌 퍼센트 표시 (화면 중앙 고정, 잠깐 떴다 사라짐) -->
+        <Border x:Name="ZoomIndicator"
+                Background="#CC333333"
+                CornerRadius="6"
+                Padding="16,8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Opacity="0"
+                IsHitTestVisible="False"
+                Panel.ZIndex="9999">
+            <TextBlock x:Name="ZoomIndicatorText"
+                       Text="100%"
+                       Foreground="White"
+                       FontSize="16"
+                       FontWeight="SemiBold"/>
+        </Border>
     </Grid>
 </UserControl>
