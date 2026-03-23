@@ -682,12 +682,7 @@ namespace NPLogic.ViewModels
 
         private async Task SaveNoteAsync()
         {
-            Debug.WriteLine($"[SeniorRights] SaveNoteAsync - repo={_propertyNoteRepository != null}, property={SelectedProperty?.Id}, noteText='{NoteText}'");
-            if (_propertyNoteRepository == null || SelectedProperty == null)
-            {
-                Debug.WriteLine($"[SeniorRights] SaveNoteAsync SKIPPED - repo null: {_propertyNoteRepository == null}, property null: {SelectedProperty == null}");
-                return;
-            }
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
             try
             {
                 await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
@@ -696,7 +691,6 @@ namespace NPLogic.ViewModels
                     TabName = "senior_rights",
                     NoteText = NoteText ?? string.Empty
                 });
-                Debug.WriteLine($"[SeniorRights] 비고 저장 성공");
             }
             catch (Exception ex)
             {
