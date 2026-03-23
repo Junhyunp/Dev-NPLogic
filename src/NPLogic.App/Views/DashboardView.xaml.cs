@@ -1219,9 +1219,13 @@ namespace NPLogic.Views
         /// <summary>
         /// Ctrl+마우스 휠로 콘텐츠 줌 인/아웃
         /// </summary>
-        private void TabContentControl_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void DashboardView_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
         {
             if (System.Windows.Input.Keyboard.Modifiers != System.Windows.Input.ModifierKeys.Control)
+                return;
+
+            // 상세 모드(탭 콘텐츠 표시 중)일 때만 줌 작동
+            if (TabContentControl.Visibility != Visibility.Visible)
                 return;
 
             if (e.Delta > 0)

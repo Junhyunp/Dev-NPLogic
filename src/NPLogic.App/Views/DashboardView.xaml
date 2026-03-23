@@ -11,7 +11,8 @@
              d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel}"
              Loaded="DashboardView_Loaded"
              Focusable="True"
-             PreviewKeyDown="DashboardView_PreviewKeyDown">
+             PreviewKeyDown="DashboardView_PreviewKeyDown"
+             PreviewMouseWheel="DashboardView_PreviewMouseWheel">
     
     <UserControl.Resources>
         <!-- 영역 토글 버튼 스타일 -->
@@ -1316,8 +1317,7 @@
 
                             <!-- 상세 모드: 물건별 상세 View -->
                             <ContentControl x:Name="TabContentControl"
-                                            Visibility="Collapsed"
-                                            PreviewMouseWheel="TabContentControl_PreviewMouseWheel">
+                                            Visibility="Collapsed">
                                 <ContentControl.LayoutTransform>
                                     <ScaleTransform x:Name="ContentZoomTransform" ScaleX="1" ScaleY="1"/>
                                 </ContentControl.LayoutTransform>
