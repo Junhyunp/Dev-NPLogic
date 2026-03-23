@@ -682,7 +682,12 @@ namespace NPLogic.ViewModels
 
         private async Task SaveNoteAsync()
         {
-            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            Debug.WriteLine($"[SeniorRights] SaveNoteAsync - repo={_propertyNoteRepository != null}, property={SelectedProperty?.Id}, noteText='{NoteText}'");
+            if (_propertyNoteRepository == null || SelectedProperty == null)
+            {
+                Debug.WriteLine($"[SeniorRights] SaveNoteAsync SKIPPED - repo null: {_propertyNoteRepository == null}, property null: {SelectedProperty == null}");
+                return;
+            }
             try
             {
                 await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
@@ -691,6 +696,7 @@ namespace NPLogic.ViewModels
                     TabName = "senior_rights",
                     NoteText = NoteText ?? string.Empty
                 });
+                Debug.WriteLine($"[SeniorRights] 비고 저장 성공");
             }
             catch (Exception ex)
             {
@@ -2647,7 +2653,7 @@ namespace NPLogic.ViewModels
                 await SaveWageClaimsAsync();
                 _isBulkSaving = false;
 
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("선순위 데이터가 일괄 저장되었습니다.");
+                // 일괄 저장 완료 (토스트 없음)
             }
             catch (Exception ex)
             {
