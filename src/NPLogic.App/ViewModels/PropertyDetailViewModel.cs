@@ -1175,6 +1175,9 @@ namespace NPLogic.ViewModels
 
             // 경(공)매 일정 상세 ViewModel에 물건 ID 설정
             AuctionScheduleDetailViewModel?.SetPropertyId(propertyId);
+
+            // 담보물건 비고 로드
+            _ = LoadCollateralNoteAsync();
         }
 
         /// <summary>
@@ -4272,14 +4275,13 @@ namespace NPLogic.ViewModels
         private async Task SaveCollateralNoteAsync()
         {
             if (_propertyNoteRepository == null || _propertyId == null) return;
-            if (string.IsNullOrWhiteSpace(CollateralNoteText)) return;
             try
             {
                 await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
                 {
                     PropertyId = _propertyId.Value,
                     TabName = "collateral_property",
-                    NoteText = CollateralNoteText
+                    NoteText = CollateralNoteText ?? string.Empty
                 });
             }
             catch (Exception ex)

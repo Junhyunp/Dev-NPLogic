@@ -683,14 +683,13 @@ namespace NPLogic.ViewModels
         private async Task SaveNoteAsync()
         {
             if (_propertyNoteRepository == null || SelectedProperty == null) return;
-            if (string.IsNullOrWhiteSpace(NoteText)) return;
             try
             {
                 await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
                 {
                     PropertyId = SelectedProperty.Id,
                     TabName = "senior_rights",
-                    NoteText = NoteText
+                    NoteText = NoteText ?? string.Empty
                 });
             }
             catch (Exception ex)
@@ -1870,7 +1869,7 @@ namespace NPLogic.ViewModels
                 analysis.BuildingStandardPrice = BuildingStandardPrice;
 
                 // 위험도 평가
-                analysis.RiskLevel = RiskLevel;
+                analysis.RiskLevel = string.IsNullOrWhiteSpace(RiskLevel) ? null : RiskLevel;
                 analysis.RiskReason = RiskReason;
                 analysis.Recommendations = Recommendations;
                 analysis.IsCompleted = IsAnalysisCompleted;

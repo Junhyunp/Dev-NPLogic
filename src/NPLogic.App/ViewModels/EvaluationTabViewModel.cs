@@ -390,14 +390,13 @@ namespace NPLogic.ViewModels
         private async Task SaveNoteAsync()
         {
             if (_propertyNoteRepository == null || _propertyId == Guid.Empty) return;
-            if (string.IsNullOrWhiteSpace(NoteText)) return;
             try
             {
                 await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
                 {
                     PropertyId = _propertyId,
                     TabName = "evaluation",
-                    NoteText = NoteText
+                    NoteText = NoteText ?? string.Empty
                 });
             }
             catch (Exception ex)
