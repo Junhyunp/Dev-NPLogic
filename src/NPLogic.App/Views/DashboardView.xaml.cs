@@ -1245,6 +1245,8 @@ namespace NPLogic.Views
         private void ShowZoomIndicator()
         {
             ZoomIndicatorText.Text = $"{Math.Round(_currentZoom * 100)}%";
+            // 기존 애니메이션이 Opacity를 잠그고 있으므로 먼저 해제
+            ZoomIndicator.BeginAnimation(OpacityProperty, null);
             ZoomIndicator.Opacity = 1;
 
             // 기존 타이머 리셋
