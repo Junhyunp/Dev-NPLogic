@@ -38,7 +38,7 @@
         <!-- DataGrid 공통 스타일 (EvaluationTab/SeniorRightsView와 동일) -->
         <Style x:Key="SectionDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Padding" Value="12,6"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
@@ -51,7 +51,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,0"/>
-            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Padding" Value="10,4"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
