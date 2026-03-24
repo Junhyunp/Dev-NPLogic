@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: DB 및 데이터 기반** - property_notes 테이블, 모델, Repository CRUD 구현
 - [ ] **Phase 2: 사이드 패널 비고란 프로토타입** - 1~2개 탭에서 사이드 패널 UI 패턴 검증 (토글, 입력, 저장)
-- [ ] **Phase 3: 전체 탭 비고란 적용** - 비핵심 8개 + 상위 7개 전체 탭에 비고란 확산 적용
+- [ ] **Phase 3: 전체 탭 비고란 적용** - 나머지 10개 탭에 비고란 확산 적용
 - [ ] **Phase 4: 전체 탭 종합 표시** - 비핵심 > 전체 탭(HomeTab)에서 탭별 비고 종합 표시
 
 ## Phase Details
@@ -52,7 +52,7 @@ Plans:
 - [ ] 02-01-PLAN.md — 담보물건/선순위/평가 3개 탭에 사이드 패널 비고란 추가 (ViewModel + View + 저장/로드 통합)
 
 ### Phase 3: 전체 탭 비고란 적용
-**Goal**: 비핵심 하위 8개 탭과 상위 7개 탭 모두에서 비고란을 사용할 수 있다
+**Goal**: 나머지 10개 탭 모두에서 비고란을 사용할 수 있다
 **Depends on**: Phase 2
 **Requirements**: SCOPE-01, SCOPE-02
 **Success Criteria** (what must be TRUE):
@@ -60,10 +60,11 @@ Plans:
   2. 상위 7개 탭(등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감) 모두에 사이드 패널 비고란이 동작한다
   3. 각 탭에서 입력한 비고가 탭별로 독립적으로 저장/조회된다 (탭 간 간섭 없음)
   4. 탭 전환 시 각 탭의 비고가 올바르게 로드된다
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — 저장 버튼 있는 4개 탭(차주개요/권리분석/기초데이터/QA집계) 비고란 추가
+- [ ] 03-02-PLAN.md — 저장 버튼 없는 6개 탭(Loan/경공매/인터림/현금흐름/NPV비교/마감) 비고란 + LostFocus 자동 저장 + 전체 검증
 
 ### Phase 4: 전체 탭 종합 표시
 **Goal**: 담당자가 비핵심 > 전체 탭 한곳에서 모든 탭의 비고를 한눈에 확인할 수 있다
@@ -87,5 +88,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. DB 및 데이터 기반 | 1/1 | Complete | 2026-03-23 |
 | 2. 사이드 패널 비고란 프로토타입 | 0/1 | Not started | - |
-| 3. 전체 탭 비고란 적용 | 0/? | Not started | - |
+| 3. 전체 탭 비고란 적용 | 0/2 | Not started | - |
 | 4. 전체 탭 종합 표시 | 0/? | Not started | - |
