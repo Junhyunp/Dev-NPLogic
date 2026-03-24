@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="1200" d:DesignWidth="1400"
              Loaded="AuctionPublicSaleView_Loaded">
@@ -103,6 +104,12 @@
     </UserControl.Resources>
     
     <Grid Background="{StaticResource BackgroundColor}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -113,6 +120,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
@@ -129,6 +137,15 @@
                         Style="{StaticResource PrimaryButton}"
                         Padding="12,5"
                         FontSize="{StaticResource FontSizeSmall}"/>
+
+                <Button x:Name="NoteToggleButton"
+                        Grid.Column="2"
+                        Click="ToggleNotePanel_Click"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="비고 패널 열기/닫기"
+                        Width="32" Height="32" Padding="0" Margin="8,0,0,0">
+                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                </Button>
             </Grid>
         </Border>
 
@@ -154,6 +171,38 @@
                     </ScrollViewer>
                 </TabItem>
             </TabControl>
+        </Border>
+        </Grid>
+
+        <!-- 비고 사이드 패널 -->
+        <Border Grid.Column="1"
+                x:Name="NotePanelColumn"
+                Width="250"
+                Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1,0,0,0"
+                Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="비고"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                <TextBox x:Name="NoteTextBox"
+                         Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         FontSize="{StaticResource FontSizeBody}"
+                         Padding="8"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         Background="White"
+                         LostFocus="NoteTextBox_LostFocus"/>
+            </DockPanel>
         </Border>
     </Grid>
 </UserControl>

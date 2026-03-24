@@ -88,5 +88,13 @@ namespace NPLogic.Views.Loan
         {
             LoadSheetContent(_currentSheet);
         }
+
+        private void NoteTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is LoanSheetViewModel vm)
+            {
+                vm.SaveNoteCommand.Execute(null);
+            }
+        }
     }
 }

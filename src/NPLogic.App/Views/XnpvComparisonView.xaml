@@ -5,12 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:XnpvComparisonViewModel}"
              Loaded="XnpvComparisonView_Loaded">
     
-    <Grid Margin="12,8,12,12">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Margin="12,8,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -34,6 +41,13 @@
                         Style="{StaticResource SecondaryButton}" Padding="20,10" Margin="0,0,8,0"/>
                 <Button Content="새로고침" Command="{Binding RefreshCommand}"
                         Style="{StaticResource PrimaryButton}" Padding="20,10"/>
+
+                <Button Command="{Binding ToggleNotePanelCommand}"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        ToolTip="비고 패널 열기/닫기"
+                        Width="32" Height="32" Padding="0" Margin="8,0,0,0">
+                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                </Button>
             </StackPanel>
         </Grid>
 
@@ -172,6 +186,38 @@
                 <ProgressBar Value="{Binding LoadingProgress}" Maximum="{Binding LoadingTotal}" Width="200" Height="8"/>
                 <TextBlock Text="{Binding LoadingMessage}" Foreground="White" Margin="0,16,0,0" HorizontalAlignment="Center"/>
             </StackPanel>
+        </Border>
+        </Grid>
+
+        <!-- 비고 사이드 패널 -->
+        <Border Grid.Column="1"
+                x:Name="NotePanelColumn"
+                Width="250"
+                Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1,0,0,0"
+                Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="비고"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                <TextBox x:Name="NoteTextBox"
+                         Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         FontSize="{StaticResource FontSizeBody}"
+                         Padding="8"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         Background="White"
+                         LostFocus="NoteTextBox_LostFocus"/>
+            </DockPanel>
         </Border>
     </Grid>
 </UserControl>

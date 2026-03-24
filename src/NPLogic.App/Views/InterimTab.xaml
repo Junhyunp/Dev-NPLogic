@@ -20,13 +20,19 @@
     </UserControl.Resources>
 
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
         <!-- 로딩 오버레이 -->
-        <Border Background="{StaticResource OverlaySemiLightBrush}" 
+        <Border Background="{StaticResource OverlaySemiLightBrush}"
                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}"
                 Panel.ZIndex="100">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <ProgressBar IsIndeterminate="True" Width="200" Height="4"/>
-                <TextBlock Text="로딩 중..." Margin="0,12,0,0" 
+                <TextBlock Text="로딩 중..." Margin="0,12,0,0"
                            HorizontalAlignment="Center"
                            Style="{StaticResource BodyTextStyle}"/>
             </StackPanel>
@@ -113,6 +119,13 @@
                                 <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <TextBlock Text="새로고침" VerticalAlignment="Center"/>
                             </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ToggleNotePanelCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="비고 패널 열기/닫기"
+                                Width="32" Height="32" Padding="0" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
                         </Button>
                     </StackPanel>
                 </Grid>
@@ -293,5 +306,37 @@
                            Foreground="{StaticResource TextMutedBrush}"/>
             </Border>
         </Grid>
+        </Grid>
+
+        <!-- 비고 사이드 패널 -->
+        <Border Grid.Column="1"
+                x:Name="NotePanelColumn"
+                Width="250"
+                Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1,0,0,0"
+                Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="비고"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                <TextBox x:Name="NoteTextBox"
+                         Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         FontSize="{StaticResource FontSizeBody}"
+                         Padding="8"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         Background="White"
+                         LostFocus="NoteTextBox_LostFocus"/>
+            </DockPanel>
+        </Border>
     </Grid>
 </UserControl>

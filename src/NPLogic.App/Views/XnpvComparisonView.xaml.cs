@@ -26,6 +26,14 @@ namespace NPLogic.Views
                 System.Diagnostics.Debug.WriteLine("[XnpvComparisonView] DataContext is not XnpvComparisonViewModel!");
             }
         }
+
+        private void NoteTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is XnpvComparisonViewModel vm)
+            {
+                vm.SaveNoteCommand.Execute(null);
+            }
+        }
     }
 }
 

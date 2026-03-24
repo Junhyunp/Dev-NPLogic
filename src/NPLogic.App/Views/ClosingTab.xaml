@@ -5,11 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="900" d:DesignWidth="1400"
-             d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}">
+             d:DataContext="{d:DesignInstance Type=vm:PropertyDetailViewModel}"
+             Loaded="ClosingTab_Loaded">
     
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -44,6 +52,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
@@ -128,9 +137,18 @@
                             </Style>
                         </Button.Style>
                     </Button>
+
+                    <Button Grid.Column="3"
+                            Click="ToggleNotePanel_Click"
+                            Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="비고 패널 열기/닫기"
+                            Width="32" Height="32" Padding="0" Margin="8,0,0,0"
+                            VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                    </Button>
                 </Grid>
             </Border>
-            
+
             <!-- ========== 마감 체크리스트 ========== -->
             <Border Grid.Row="1"
                     Background="{StaticResource BackgroundBrush}"
@@ -597,5 +615,34 @@
             </Border>
         </Grid>
     </ScrollViewer>
+
+        <!-- 비고 사이드 패널 (code-behind에서 직접 관리) -->
+        <Border x:Name="NotePanelColumn" Grid.Column="1"
+                Width="250" Visibility="Collapsed"
+                Background="{StaticResource SurfaceColor}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="1,0,0,0"
+                Padding="12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="비고"
+                           FontWeight="SemiBold"
+                           FontSize="{StaticResource FontSizeBody}"
+                           Foreground="{StaticResource PrimaryBrush}"
+                           Margin="0,0,0,8"/>
+                <TextBox x:Name="NoteTextBox"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalAlignment="Stretch"
+                         FontSize="{StaticResource FontSizeBody}"
+                         Padding="8"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="1"
+                         Background="White"
+                         LostFocus="NoteTextBox_LostFocus"/>
+            </DockPanel>
+        </Border>
+    </Grid>
 </UserControl>
 

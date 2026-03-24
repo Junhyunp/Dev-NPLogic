@@ -87,14 +87,33 @@ namespace NPLogic.Views
         {
             _auctionViewModel = auctionVm;
             _publicSaleViewModel = publicSaleVm;
-            
+
             AuctionContent.DataContext = _auctionViewModel;
             PublicSaleContent.DataContext = _publicSaleViewModel;
-            
+
+            // 비고 패널 DataContext를 AuctionScheduleDetailViewModel에 연결
+            NotePanelColumn.DataContext = _auctionViewModel;
+
             if (_currentPropertyId.HasValue)
             {
                 _auctionViewModel.SetPropertyId(_currentPropertyId.Value);
                 _publicSaleViewModel.SetPropertyId(_currentPropertyId.Value);
+            }
+        }
+
+        private void NoteTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (_auctionViewModel != null)
+            {
+                _auctionViewModel.SaveNoteCommand.Execute(null);
+            }
+        }
+
+        private void ToggleNotePanel_Click(object sender, RoutedEventArgs e)
+        {
+            if (_auctionViewModel != null)
+            {
+                _auctionViewModel.IsNotePanelVisible = !_auctionViewModel.IsNotePanelVisible;
             }
         }
     }

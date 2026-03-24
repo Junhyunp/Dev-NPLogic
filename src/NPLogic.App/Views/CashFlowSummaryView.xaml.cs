@@ -128,5 +128,13 @@ namespace NPLogic.Views
             }
             return monthKey;
         }
+
+        private void NoteTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is CashFlowSummaryViewModel vm)
+            {
+                vm.SaveNoteCommand.Execute(null);
+            }
+        }
     }
 }
