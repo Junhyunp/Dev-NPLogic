@@ -23,8 +23,8 @@
 
 ### 대상 탭 범위
 
-- [ ] **SCOPE-01**: 비핵심 하위 8개 탭 (전체/차주개요/Loan/담보물건/선순위/평가/경공매일정/인터림)
-- [ ] **SCOPE-02**: 상위 탭 7개 (등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감)
+- [x] **SCOPE-01**: 비핵심 하위 8개 탭 (전체/차주개요/Loan/담보물건/선순위/평가/경공매일정/인터림)
+- [x] **SCOPE-02**: 상위 탭 7개 (등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감)
 
 ## Out of Scope
 
@@ -43,8 +43,8 @@
 | NOTE-01 | Phase 2 | Pending |
 | NOTE-02 | Phase 2 | Pending |
 | NOTE-03 | Phase 2 | Pending |
-| SCOPE-01 | Phase 3 | Pending |
-| SCOPE-02 | Phase 3 | Pending |
+| SCOPE-01 | Phase 3 | Complete |
+| SCOPE-02 | Phase 3 | Complete |
 | SUMMARY-01 | Phase 4 | Pending |
 | SUMMARY-02 | Phase 4 | Pending |
 
