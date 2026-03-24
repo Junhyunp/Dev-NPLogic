@@ -17,9 +17,9 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: DB 및 데이터 기반** - property_notes 테이블, 모델, Repository CRUD 구현
-- [ ] **Phase 2: 사이드 패널 비고란 프로토타입** - 1~2개 탭에서 사이드 패널 UI 패턴 검증 (토글, 입력, 저장)
-- [ ] **Phase 3: 전체 탭 비고란 적용** - 나머지 10개 탭에 비고란 확산 적용
+- [x] **Phase 1: DB 및 데이터 기반** - property_notes 테이블, 모델, Repository CRUD 구현
+- [x] **Phase 2: 사이드 패널 비고란 프로토타입** - 1~2개 탭에서 사이드 패널 UI 패턴 검증 (토글, 입력, 저장)
+- [x] **Phase 3: 전체 탭 비고란 적용** - 나머지 10개 탭에 비고란 확산 적용 (검증 대기)
 - [ ] **Phase 4: 전체 탭 종합 표시** - 비핵심 > 전체 탭(HomeTab)에서 탭별 비고 종합 표시
 
 ## Phase Details
@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Supabase 테이블 생성 + PropertyNote 모델/Repository/DI 구현
+- [x] 01-01-PLAN.md — Supabase 테이블 생성 + PropertyNote 모델/Repository/DI 구현
 
 ### Phase 2: 사이드 패널 비고란 프로토타입
 **Goal**: 담당자가 담보물건/선순위/평가 3개 탭에서 비고를 입력하고 저장할 수 있다
@@ -49,7 +49,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — 담보물건/선순위/평가 3개 탭에 사이드 패널 비고란 추가 (ViewModel + View + 저장/로드 통합)
+- [x] 02-01-PLAN.md — 담보물건/선순위/평가 3개 탭에 사이드 패널 비고란 추가 (ViewModel + View + 저장/로드 통합)
 
 ### Phase 3: 전체 탭 비고란 적용
 **Goal**: 나머지 10개 탭 모두에서 비고란을 사용할 수 있다
@@ -63,8 +63,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — 저장 버튼 있는 4개 탭(차주개요/권리분석/기초데이터/QA집계) 비고란 추가
-- [ ] 03-02-PLAN.md — 저장 버튼 없는 6개 탭(Loan/경공매/인터림/현금흐름/NPV비교/마감) 비고란 + LostFocus 자동 저장 + 전체 검증
+- [x] 03-01-PLAN.md — 저장 버튼 있는 4개 탭(차주개요/권리분석/기초데이터/QA집계) 비고란 추가
+- [x] 03-02-PLAN.md — 저장 버튼 없는 6개 탭(Loan/경공매/인터림/현금흐름/NPV비교/마감) 비고란 + LostFocus 자동 저장 + 전체 검증
 
 ### Phase 4: 전체 탭 종합 표시
 **Goal**: 담당자가 비핵심 > 전체 탭 한곳에서 모든 탭의 비고를 한눈에 확인할 수 있다
@@ -87,6 +87,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DB 및 데이터 기반 | 1/1 | Complete | 2026-03-23 |
-| 2. 사이드 패널 비고란 프로토타입 | 0/1 | Not started | - |
-| 3. 전체 탭 비고란 적용 | 0/2 | Not started | - |
+| 2. 사이드 패널 비고란 프로토타입 | 1/1 | Complete | 2026-03-23 |
+| 3. 전체 탭 비고란 적용 | 2/2 | Checkpoint pending | 2026-03-24 |
 | 4. 전체 탭 종합 표시 | 0/? | Not started | - |
