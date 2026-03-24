@@ -15,6 +15,7 @@ namespace NPLogic.ViewModels
     public partial class BasicDataTabViewModel : ObservableObject
     {
         private readonly ProgramRepository _programRepository;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
         private Guid _programId;
 
         // ========== 상태 ==========
@@ -27,6 +28,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _successMessage;
+
+        // ========== 비고 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
 
         // ========== 프로그램 정보 ==========
 
@@ -129,6 +137,9 @@ namespace NPLogic.ViewModels
         public BasicDataTabViewModel(ProgramRepository programRepository)
         {
             _programRepository = programRepository ?? throw new ArgumentNullException(nameof(programRepository));
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
 
         /// <summary>
@@ -138,6 +149,47 @@ namespace NPLogic.ViewModels
         {
             _programId = programId;
             await LoadProgramDataAsync();
+            await LoadNoteAsync();
+        }
+
+        // ========== 비고 패널 명령/로직 ==========
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _programId == Guid.Empty) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_programId, "basic_data");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BasicData] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _programId == Guid.Empty) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _programId,
+                    TabName = "basic_data",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BasicData] 비고 저장 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -223,6 +275,7 @@ namespace NPLogic.ViewModels
                 Program.CombinedLeadTime = CombinedLeadTime;
 
                 await _programRepository.UpdateAsync(Program);
+                await SaveNoteAsync();
 
                 BasicInfoUpdatedAt = DateTime.Now;
                 SuccessMessage = "기초정보가 저장되었습니다.";

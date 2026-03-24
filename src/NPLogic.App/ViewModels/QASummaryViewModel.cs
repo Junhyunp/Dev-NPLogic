@@ -29,6 +29,8 @@ namespace NPLogic.ViewModels
         private readonly PropertyRepository _propertyRepository;
         private readonly AuthService _authService;
         private readonly PermissionService _permissionService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
+        private Guid _noteOwnerId = Guid.Empty;
 
         // ========== 차주 목록 (좌측 패널) ==========
         [ObservableProperty]
@@ -60,6 +62,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private int _unansweredCount;
+
+        // ========== 비고 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
 
         // ========== 상태 ==========
         [ObservableProperty]
@@ -109,6 +118,49 @@ namespace NPLogic.ViewModels
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
+        }
+
+        // ========== 비고 패널 명령/로직 ==========
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteOwnerId == Guid.Empty) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_noteOwnerId, "qa_summary");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[QASummary] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteOwnerId == Guid.Empty) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _noteOwnerId,
+                    TabName = "qa_summary",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[QASummary] 비고 저장 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -127,9 +179,11 @@ namespace NPLogic.ViewModels
                 {
                     var userId = Guid.Parse(session.User.Id);
                     CurrentUser = new User { Id = userId };
+                    _noteOwnerId = userId;
                 }
 
                 await LoadBorrowerSummariesAsync();
+                await LoadNoteAsync();
             }
             catch (Exception ex)
             {
@@ -379,6 +433,7 @@ namespace NPLogic.ViewModels
 
                 IsEditMode = false;
                 await RefreshAsync();
+                await SaveNoteAsync();
             }
             catch (Exception ex)
             {

@@ -21,6 +21,7 @@ namespace NPLogic.ViewModels
         private readonly RightAnalysisRepository _repository;
         private readonly RegistryRepository _registryRepository;
         private readonly RightAnalysisRuleEngine _ruleEngine;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
         private Guid? _propertyId;
         private Property? _property;
 
@@ -56,6 +57,13 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private decimal _totalReflectedAmount;
 
+        // ========== 비고 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
         #endregion
 
         public RightsAnalysisTabViewModel(RightAnalysisRepository repository, RegistryRepository registryRepository)
@@ -64,6 +72,9 @@ namespace NPLogic.ViewModels
             _registryRepository = registryRepository ?? throw new ArgumentNullException(nameof(registryRepository));
             _ruleEngine = new RightAnalysisRuleEngine();
             InitializeSeniorRightsItems();
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
 
         /// <summary>
@@ -80,6 +91,46 @@ namespace NPLogic.ViewModels
         public void SetProperty(Property property)
         {
             _property = property;
+        }
+
+        // ========== 비고 패널 명령/로직 ==========
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == null) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_propertyId.Value, "rights_analysis");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RightsAnalysis] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == null) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _propertyId.Value,
+                    TabName = "rights_analysis",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[RightsAnalysis] 비고 저장 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -139,6 +190,8 @@ namespace NPLogic.ViewModels
 
                 UpdateSeniorRightsItems();
                 CalculateTotals();
+
+                await LoadNoteAsync();
             }
             catch (Exception ex)
             {
@@ -392,7 +445,8 @@ namespace NPLogic.ViewModels
                 
                 // Upsert (생성 또는 수정)
                 await _repository.UpsertAsync(Analysis);
-                
+                await SaveNoteAsync();
+
                 SuccessMessage = "권리분석 정보가 저장되었습니다.";
             }
             catch (Exception ex)

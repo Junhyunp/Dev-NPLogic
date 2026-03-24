@@ -21,6 +21,7 @@ namespace NPLogic.ViewModels
         private readonly PropertyQaRepository _qaRepository;
         private readonly AuthService _authService;
         private readonly PermissionService _permissionService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
 
         [ObservableProperty]
         private User? _currentUser;
@@ -76,6 +77,13 @@ namespace NPLogic.ViewModels
 
         [ObservableProperty]
         private string? _errorMessage;
+
+        // ========== 비고 패널 ==========
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
 
         [ObservableProperty]
         private bool _isAddModalOpen;
@@ -138,6 +146,9 @@ namespace NPLogic.ViewModels
             _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
 
             InitializeFilterOptions();
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
 
         /// <summary>
@@ -152,6 +163,46 @@ namespace NPLogic.ViewModels
             BorrowerTypes.Add("법인");
 
             SelectedBorrowerType = BorrowerTypes[0];
+        }
+
+        // ========== 비고 패널 명령/로직 ==========
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(SelectedProperty.Id, "borrower_overview");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BorrowerOverview] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new PropertyNote
+                {
+                    PropertyId = SelectedProperty.Id,
+                    TabName = "borrower_overview",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BorrowerOverview] 비고 저장 실패: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -201,6 +252,7 @@ namespace NPLogic.ViewModels
             if (property != null)
             {
                 await LoadSingleBorrowerDataAsync();
+                await LoadNoteAsync();
             }
         }
 
@@ -807,6 +859,7 @@ namespace NPLogic.ViewModels
 
                 await _borrowerRepository.UpdateAsync(SelectedBorrower);
                 await LoadBorrowersAsync();
+                await SaveNoteAsync();
                 NPLogic.UI.Services.ToastService.Instance.ShowSuccess("차주 정보가 저장되었습니다.");
             }
             catch (Exception ex)
