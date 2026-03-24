@@ -27,6 +27,7 @@ namespace NPLogic.ViewModels
         private readonly CreditGuaranteeRepository _creditGuaranteeRepository;
         private readonly AuthService _authService;
         private readonly ExcelService _excelService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
 
         // ========== 대출 데이터 ==========
 
@@ -215,6 +216,9 @@ namespace NPLogic.ViewModels
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
 
             InitializeAllocationItems();
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
 
         /// <summary>
@@ -273,6 +277,7 @@ namespace NPLogic.ViewModels
             SelectedProperty = property;
             OnPropertyChanged(nameof(IsSingleBorrowerMode));
             await InitializeAsync();
+            await LoadNoteAsync();
         }
 
         /// <summary>
@@ -1071,6 +1076,58 @@ namespace NPLogic.ViewModels
             {
                 setImage(null);
                 setInfo("");
+            }
+        }
+
+        // ========== 비고 패널 ==========
+
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        [RelayCommand]
+        private async Task SaveNote()
+        {
+            await SaveNoteAsync();
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(SelectedProperty.Id, "loan");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Loan] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || SelectedProperty == null) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = SelectedProperty.Id,
+                    TabName = "loan",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Loan] 비고 저장 실패: {ex.Message}");
             }
         }
     }

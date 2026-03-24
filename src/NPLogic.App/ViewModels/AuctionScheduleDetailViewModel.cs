@@ -22,8 +22,10 @@ namespace NPLogic.ViewModels
         private readonly EvaluationRepository? _evaluationRepository;
         private readonly RightAnalysisRepository? _rightAnalysisRepository;
         
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
+
         // ========== 기본 정보 ==========
-        
+
         [ObservableProperty]
         private Guid? _propertyId;
         
@@ -387,6 +389,9 @@ namespace NPLogic.ViewModels
             _propertyRepository = propertyRepository;
             _evaluationRepository = evaluationRepository;
             _rightAnalysisRepository = rightAnalysisRepository;
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
         
         public async Task InitializeAsync()
@@ -839,6 +844,7 @@ namespace NPLogic.ViewModels
             if (value.HasValue)
             {
                 _ = LoadPropertyDataAsync();
+                _ = LoadNoteAsync();
             }
         }
         
@@ -846,8 +852,60 @@ namespace NPLogic.ViewModels
         {
             PropertyId = propertyId;
         }
+
+        // ========== 비고 패널 ==========
+
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        [RelayCommand]
+        private async Task SaveNote()
+        {
+            await SaveNoteAsync();
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || !PropertyId.HasValue) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(PropertyId.Value, "auction_schedule");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[AuctionSchedule] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || !PropertyId.HasValue) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = PropertyId.Value,
+                    TabName = "auction_schedule",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[AuctionSchedule] 비고 저장 실패: {ex.Message}");
+            }
+        }
     }
-    
+
     public class LeadTimeScheduleItem
     {
         public int Round { get; set; }

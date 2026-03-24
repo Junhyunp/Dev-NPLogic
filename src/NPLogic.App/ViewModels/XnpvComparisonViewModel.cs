@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using NPLogic.Core.Models;
 using NPLogic.Core.Services;
 using NPLogic.Data.Repositories;
+using NPLogic.Data.Services;
 using NPLogic.Services;
 
 namespace NPLogic.ViewModels
@@ -19,6 +20,8 @@ namespace NPLogic.ViewModels
         private readonly BorrowerRepository _borrowerRepository;
         private readonly LoanRepository _loanRepository;
         private readonly ExcelService _excelService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
+        private Guid _noteOwnerId = Guid.Empty;
 
         [ObservableProperty]
         private ObservableCollection<XnpvComparisonItem> _comparisonItems = new();
@@ -59,6 +62,18 @@ namespace NPLogic.ViewModels
             _borrowerRepository = borrowerRepository ?? throw new ArgumentNullException(nameof(borrowerRepository));
             _loanRepository = loanRepository ?? throw new ArgumentNullException(nameof(loanRepository));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
+
+            try
+            {
+                var authService = App.ServiceProvider?.GetService(typeof(AuthService)) as AuthService;
+                var session = authService?.GetSession();
+                if (session?.User?.Id != null)
+                    _noteOwnerId = Guid.Parse(session.User.Id);
+            }
+            catch { /* 세션 없으면 비고 비활성 */ }
         }
 
         public async Task InitializeAsync()
@@ -71,6 +86,8 @@ namespace NPLogic.ViewModels
 
                 await LoadComparisonDataAsync();
                 System.Diagnostics.Debug.WriteLine("[XnpvComparisonViewModel] LoadComparisonDataAsync 완료");
+
+                await LoadNoteAsync();
             }
             catch (Exception ex)
             {
@@ -185,6 +202,58 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        // ========== 비고 패널 ==========
+
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        [RelayCommand]
+        private async Task SaveNote()
+        {
+            await SaveNoteAsync();
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteOwnerId == Guid.Empty) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_noteOwnerId, "npv_comparison");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[XnpvComparison] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteOwnerId == Guid.Empty) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _noteOwnerId,
+                    TabName = "npv_comparison",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[XnpvComparison] 비고 저장 실패: {ex.Message}");
             }
         }
     }

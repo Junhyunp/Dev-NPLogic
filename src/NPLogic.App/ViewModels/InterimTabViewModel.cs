@@ -58,8 +58,10 @@ namespace NPLogic.ViewModels
         private readonly InterimRepository _interimRepository;
         private readonly PropertyRepository _propertyRepository;
         private readonly ExcelService _excelService;
+        private readonly PropertyNoteRepository? _propertyNoteRepository;
 
         private Guid _programId;
+        private Guid _noteContextId = Guid.Empty;
         private string? _currentBorrowerNumber;
 
         [ObservableProperty]
@@ -104,6 +106,9 @@ namespace NPLogic.ViewModels
             _interimRepository = interimRepository ?? throw new ArgumentNullException(nameof(interimRepository));
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _excelService = excelService ?? throw new ArgumentNullException(nameof(excelService));
+
+            _propertyNoteRepository = App.ServiceProvider?
+                .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
         }
 
         /// <summary>
@@ -112,6 +117,7 @@ namespace NPLogic.ViewModels
         public async Task InitializeAsync(Guid programId, string? borrowerNumber = null)
         {
             _programId = programId;
+            _noteContextId = programId;
             _currentBorrowerNumber = borrowerNumber;
 
             await LoadDataAsync();
@@ -125,6 +131,8 @@ namespace NPLogic.ViewModels
                     SelectedBorrower = target;
                 }
             }
+
+            await LoadNoteAsync();
         }
 
         /// <summary>
@@ -583,6 +591,58 @@ namespace NPLogic.ViewModels
             catch
             {
                 return new InterimRecoveryData();
+            }
+        }
+
+        // ========== 비고 패널 ==========
+
+        [ObservableProperty]
+        private string _noteText = string.Empty;
+
+        [ObservableProperty]
+        private bool _isNotePanelVisible;
+
+        [RelayCommand]
+        private void ToggleNotePanel()
+        {
+            IsNotePanelVisible = !IsNotePanelVisible;
+        }
+
+        [RelayCommand]
+        private async Task SaveNote()
+        {
+            await SaveNoteAsync();
+        }
+
+        private async Task LoadNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteContextId == Guid.Empty) return;
+            try
+            {
+                var note = await _propertyNoteRepository.GetByPropertyAndTabAsync(_noteContextId, "interim");
+                NoteText = note?.NoteText ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Interim] 비고 로드 실패: {ex.Message}");
+            }
+        }
+
+        private async Task SaveNoteAsync()
+        {
+            if (_propertyNoteRepository == null || _noteContextId == Guid.Empty) return;
+            try
+            {
+                await _propertyNoteRepository.UpsertAsync(new NPLogic.Core.Models.PropertyNote
+                {
+                    PropertyId = _noteContextId,
+                    TabName = "interim",
+                    NoteText = NoteText ?? string.Empty
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Interim] 비고 저장 실패: {ex.Message}");
             }
         }
     }
