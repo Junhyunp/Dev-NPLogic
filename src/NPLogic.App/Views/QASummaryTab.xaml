@@ -74,7 +74,13 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource BackgroundBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+    <Grid Grid.Column="0" Background="{StaticResource BackgroundBrush}">
         <!-- 로딩 오버레이 -->
         <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
               Panel.ZIndex="100">
@@ -689,9 +695,45 @@
                                 Command="{Binding SaveQaCommand}"
                                 Style="{StaticResource PrimaryButton}"
                                 Padding="24,8"/>
+                        <Button Command="{Binding ToggleNotePanelCommand}"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                ToolTip="비고 패널 열기/닫기"
+                                Width="32" Height="32" Padding="0" Margin="8,0,0,0">
+                            <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>
         </Grid>
+    </Grid>
+
+    <!-- 비고 사이드 패널 -->
+    <Border x:Name="NotePanelColumn" Grid.Column="1"
+            Width="250"
+            Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+            Background="{StaticResource SurfaceColor}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1,0,0,0"
+            Padding="12">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top"
+                       Text="&#x1F4DD; 비고"
+                       FontWeight="SemiBold"
+                       FontSize="{StaticResource FontSizeBody}"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       Margin="0,0,0,8"/>
+            <TextBox Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     VerticalAlignment="Stretch"
+                     FontSize="{StaticResource FontSizeBody}"
+                     Padding="8"
+                     BorderBrush="{StaticResource BorderBrush}"
+                     BorderThickness="1"
+                     Background="White"/>
+        </DockPanel>
+    </Border>
+
     </Grid>
 </UserControl>

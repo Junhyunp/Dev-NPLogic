@@ -6,12 +6,19 @@
              xmlns:local="clr-namespace:NPLogic.Views"
              xmlns:vm="clr-namespace:NPLogic.ViewModels"
              xmlns:controls="clr-namespace:NPLogic.Controls;assembly=NPLogic.UI"
-             mc:Ignorable="d" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d"
              d:DesignHeight="800" d:DesignWidth="1400"
              d:DataContext="{d:DesignInstance Type=vm:BorrowerOverviewViewModel}"
              Loaded="BorrowerOverviewView_Loaded">
-    
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="12,8,12,12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -772,10 +779,16 @@
                                         Style="{StaticResource DangerButton}"
                                         Padding="24,12"
                                         Margin="0,0,8,0"/>
-                                <Button Content="저장" 
+                                <Button Content="저장"
                                         Command="{Binding SaveBorrowerCommand}"
                                         Style="{StaticResource PrimaryButton}"
                                         Padding="32,12"/>
+                                <Button Command="{Binding ToggleNotePanelCommand}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        ToolTip="비고 패널 열기/닫기"
+                                        Width="32" Height="32" Padding="0" Margin="8,0,0,0">
+                                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                                </Button>
                             </StackPanel>
                             </StackPanel>
                     </Grid>
@@ -1016,5 +1029,35 @@
         </controls:NPModal>
     </Grid>
     </ScrollViewer>
+
+    <!-- 비고 사이드 패널 -->
+    <Border x:Name="NotePanelColumn" Grid.Column="1"
+            Width="250"
+            Visibility="{Binding IsNotePanelVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+            Background="{StaticResource SurfaceColor}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1,0,0,0"
+            Padding="12">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top"
+                       Text="&#x1F4DD; 비고"
+                       FontWeight="SemiBold"
+                       FontSize="{StaticResource FontSizeBody}"
+                       Foreground="{StaticResource PrimaryBrush}"
+                       Margin="0,0,0,8"/>
+            <TextBox Text="{Binding NoteText, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     VerticalAlignment="Stretch"
+                     FontSize="{StaticResource FontSizeBody}"
+                     Padding="8"
+                     BorderBrush="{StaticResource BorderBrush}"
+                     BorderThickness="1"
+                     Background="White"/>
+        </DockPanel>
+    </Border>
+
+    </Grid>
 </UserControl>
 
