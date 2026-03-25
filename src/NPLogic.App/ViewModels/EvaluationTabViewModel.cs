@@ -649,7 +649,7 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 거래면적 컬럼 + 거래가격/건수 그래프 표시 여부 (아파트/상가만)
         /// </summary>
-        public bool ShowAreaAndChart => IsApartmentType || IsCommercialType;
+        public bool ShowAreaAndChart => IsApartmentType;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
@@ -1564,6 +1564,14 @@ namespace NPLogic.ViewModels
                     new CaseRowItem { Label = "2등 입찰가" },
                     new CaseRowItem { Label = "사례 비고 사항" }
                 };
+
+                // 상가 전용 추가 행
+                if (IsCommercialType)
+                {
+                    CaseItems.Add(new CaseRowItem { Label = "적용 소득수익률" });
+                    CaseItems.Add(new CaseRowItem { Label = "평당 정상임대수익" });
+                    CaseItems.Add(new CaseRowItem { Label = "추정요구수익률" });
+                }
             }
         }
 
@@ -1828,12 +1836,34 @@ namespace NPLogic.ViewModels
                 InquiryResultRows.Add(new InquiryResultRow { Category = "제시외" });
                 InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
             }
-            else
+            else if (!IsCommercialType)
             {
+                // 상가 이외: 기계 행 기본 포함
                 InquiryResultRows.Add(new InquiryResultRow { Category = "기계" });
             }
+            // 상가: 기계 행 없이 시작 (기계기구 추가 버튼으로 추가 가능)
             InquiryResultRows.Add(new InquiryResultRow { Category = "합계" });
             HasInquiryResultTable = true;
+        }
+
+        /// <summary>
+        /// 탐문 결과에 기계기구 행 추가 (합계 바로 위에 삽입)
+        /// </summary>
+        [RelayCommand]
+        private void AddInquiryMachineryRow()
+        {
+            // 이미 기계기구 행이 있으면 무시
+            if (InquiryResultRows.Any(r => r.Category == "기계기구")) return;
+
+            var sumIndex = -1;
+            for (int i = 0; i < InquiryResultRows.Count; i++)
+            {
+                if (InquiryResultRows[i].Category == "합계") { sumIndex = i; break; }
+            }
+            if (sumIndex >= 0)
+                InquiryResultRows.Insert(sumIndex, new InquiryResultRow { Category = "기계기구" });
+            else
+                InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
         }
 
         /// <summary>

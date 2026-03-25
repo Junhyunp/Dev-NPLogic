@@ -1099,6 +1099,13 @@
                                                 Background="Transparent" BorderThickness="0"
                                                 ToolTip="탐문 결과 테이블 생성"
                                                 Foreground="White"/>
+                                        <Button Content="기계기구 추가" FontSize="11"
+                                                Command="{Binding AddInquiryMachineryRowCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
+                                                Background="Transparent" BorderBrush="White" BorderThickness="1"
+                                                ToolTip="합계 위에 기계기구 행 추가"
+                                                Foreground="White"/>
                                         <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
                                                 HorizontalAlignment="Right" VerticalAlignment="Center"
                                                 Command="{Binding DestroyInquiryResultTableCommand}"
@@ -2102,6 +2109,13 @@
                                                 Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
                                                 Background="Transparent" BorderThickness="0"
                                                 ToolTip="탐문 결과 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="기계기구 추가" FontSize="11"
+                                                Command="{Binding AddInquiryMachineryRowCommand}"
+                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
+                                                Background="Transparent" BorderBrush="White" BorderThickness="1"
+                                                ToolTip="합계 위에 기계기구 행 추가"
                                                 Foreground="White"/>
                                         <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
                                                 HorizontalAlignment="Right" VerticalAlignment="Center"
