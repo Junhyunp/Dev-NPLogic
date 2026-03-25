@@ -1138,7 +1138,7 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="Auto" IsReadOnly="True"
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="100" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding AppraisedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
@@ -2142,7 +2142,7 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="Auto" IsReadOnly="True"
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category}" Width="100" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="감정가" Binding="{Binding AppraisedValue, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
