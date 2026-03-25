@@ -597,16 +597,6 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<RegistryEulguRow> _registryEulguRows = new();
 
-        // 등기부등본 이미지 뷰어
-        [ObservableProperty]
-        private bool _isRegistryImageExpanded;
-
-        [ObservableProperty]
-        private RegistryRun? _selectedImageRun;
-
-        [ObservableProperty]
-        private ObservableCollection<System.Windows.Media.Imaging.BitmapImage> _registryDocumentImages = new();
-
         [ObservableProperty]
         private ObservableCollection<AppraisalInfoRow> _appraisalInfoList = new();
 
@@ -4565,72 +4555,17 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 등기부등본 이미지 패널 토글
+        /// 등기부등본 이미지 팝업 열기
         /// </summary>
         [RelayCommand]
         private void ToggleRegistryImagePanel()
         {
-            IsRegistryImageExpanded = !IsRegistryImageExpanded;
-            if (IsRegistryImageExpanded && RegistryRuns.Count > 0 && SelectedImageRun == null)
-            {
-                // 첫 번째 run을 기본 선택
-                SelectedImageRun = RegistryRuns.FirstOrDefault();
-            }
-        }
-
-        /// <summary>
-        /// 이미지 뷰어 드롭다운 선택 변경 시 이미지 로드
-        /// </summary>
-        partial void OnSelectedImageRunChanged(RegistryRun? value)
-        {
-            RegistryDocumentImages.Clear();
-            if (value?.SummaryImagesBase64 == null || value.SummaryImagesBase64.Count == 0)
-            {
-                Debug.WriteLine($"[RegistryImage] 선택된 run에 이미지 없음: {value?.SourcePdfName}");
+            if (RegistryRuns.Count == 0)
                 return;
-            }
 
-            Debug.WriteLine($"[RegistryImage] 이미지 로드: {value.SourcePdfName}, {value.SummaryImagesBase64.Count}개");
-            foreach (var base64 in value.SummaryImagesBase64)
-            {
-                var bitmap = ConvertBase64ToBitmapImage(base64);
-                if (bitmap != null)
-                {
-                    RegistryDocumentImages.Add(bitmap);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Base64 문자열을 BitmapImage로 변환
-        /// </summary>
-        private static System.Windows.Media.Imaging.BitmapImage? ConvertBase64ToBitmapImage(string base64String)
-        {
-            try
-            {
-                var base64Data = base64String;
-                if (base64String.Contains(","))
-                {
-                    base64Data = base64String.Substring(base64String.IndexOf(",") + 1);
-                }
-
-                var imageBytes = Convert.FromBase64String(base64Data);
-                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
-                using (var stream = new System.IO.MemoryStream(imageBytes))
-                {
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                    bitmap.StreamSource = stream;
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-                }
-                return bitmap;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[RegistryImage] Base64→BitmapImage 변환 실패: {ex.Message}");
-                return null;
-            }
+            var popup = new NPLogic.Views.RegistryImagePopupWindow(RegistryRuns);
+            popup.Owner = System.Windows.Application.Current.MainWindow;
+            popup.Show();
         }
     }
 }
