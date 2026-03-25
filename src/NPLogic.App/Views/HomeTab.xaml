@@ -59,6 +59,7 @@
     </UserControl.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
         <Grid Margin="12,8,12,12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -756,5 +757,6 @@
                                Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
+        </StackPanel>
     </ScrollViewer>
 </UserControl>
