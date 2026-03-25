@@ -665,6 +665,8 @@
                     <StackPanel>
                         <TextBlock Text="경(공)매일정" Style="{StaticResource CardHeaderStyle}"/>
 
+                        <TextBlock Text="경(공)매일정 요약" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
+
                         <!-- 상단 표: 경매/공매 여부 + 개시여부 (2-3열 병합) -->
                         <Grid>
                             <Grid.ColumnDefinitions>
