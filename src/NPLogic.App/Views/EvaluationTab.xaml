@@ -224,23 +224,14 @@
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="8,8,0,0"
                                     Padding="16,10">
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
-                                                   Foreground="White"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeH4}"
-                                                   VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <Button Content="가져오기"
-                                            Command="{Binding LoadCaseMapCommand}"
-                                            Padding="12,4"
-                                            FontSize="{StaticResource FontSizeBody}"
-                                            HorizontalAlignment="Right"
-                                            VerticalAlignment="Center"
-                                            Foreground="White"/>
-                                </Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding CaseMapSectionTitle}"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               FontSize="{StaticResource FontSizeH4}"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
                             </Border>
 
                             <!-- 좌: 사례지도 / 우: 실거래가 + 그래프 -->
@@ -257,11 +248,12 @@
                                         MinHeight="560"
                                         Cursor="Hand"
                                         MouseLeftButtonUp="MapPlaceholder_MouseLeftButtonUp">
-                                    <TextBlock Text="소재지 기준으로 위치, 본건기준거래 자동 산정 및 표시"
-                                               Style="{StaticResource BodyTextStyle}"
-                                               Opacity="0.6"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                    <Button Content="가져오기"
+                                            Command="{Binding LoadCaseMapCommand}"
+                                            Padding="16,8"
+                                            FontSize="{StaticResource FontSizeBody}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
                                 </Border>
 
                                 <!-- 세로 구분선 -->
@@ -306,7 +298,7 @@
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
-                                            <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="Auto" IsReadOnly="True"
+                                            <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="110" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                             <DataGridTemplateColumn Width="*" IsReadOnly="True">
                                                 <DataGridTemplateColumn.HeaderTemplate>
