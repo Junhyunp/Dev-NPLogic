@@ -38,7 +38,7 @@
         <!-- DataGrid 공통 스타일 (EvaluationTab/SeniorRightsView와 동일) -->
         <Style x:Key="SectionDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Padding" Value="16,8"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
@@ -51,7 +51,7 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,1,0"/>
-            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Padding" Value="16,6"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
@@ -68,6 +68,7 @@
         </Style>
         <Style x:Key="SectionDataGridTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="Padding" Value="4,0"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextAlignment" Value="Center"/>
@@ -593,7 +594,21 @@
                                 <StackPanel>
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <Grid>
-                                            <TextBlock Text="2. 갑구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="2. 갑구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Button Grid.Column="1"
+                                                    Command="{Binding ResetGapguRankNumbersCommand}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Padding="8,4" Height="26"
+                                                    ToolTip="현재 순서대로 순위번호를 1,2,3... 재설정">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="FormatListNumbered" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="순위 재설정" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                     <DataGrid x:Name="GapguDataGrid"
@@ -649,6 +664,18 @@
                                     </DataGrid>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,8">
+                                        <Button Command="{Binding MoveGapguRowUpCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="8,4" Height="28" ToolTip="선택 행 위로 이동">
+                                            <materialDesign:PackIcon Kind="ArrowUp" Width="16" Height="16"/>
+                                        </Button>
+                                        <Button Command="{Binding MoveGapguRowDownCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=GapguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="8,4" Height="28" Margin="0,0,8,0" ToolTip="선택 행 아래로 이동">
+                                            <materialDesign:PackIcon Kind="ArrowDown" Width="16" Height="16"/>
+                                        </Button>
                                         <Button Command="{Binding AddGapguRowCommand}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
                                                 Padding="12,6" Height="28" ToolTip="행 추가">
@@ -676,7 +703,21 @@
                                 <StackPanel>
                                     <Border Background="{StaticResource BlueGray100Brush}" Padding="12,8">
                                         <Grid>
-                                            <TextBlock Text="3. 을구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="3. 을구" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                            <Button Grid.Column="1"
+                                                    Command="{Binding ResetEulguRankNumbersCommand}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                                    Padding="8,4" Height="26"
+                                                    ToolTip="현재 순서대로 순위번호를 1,2,3... 재설정">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <materialDesign:PackIcon Kind="FormatListNumbered" Width="14" Height="14" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="순위 재설정" Margin="4,0,0,0" FontSize="{StaticResource FontSizeSmall}" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
                                         </Grid>
                                     </Border>
                                     <DataGrid x:Name="EulguDataGrid"
@@ -719,7 +760,7 @@
                                             <DataGridTextColumn Header="채무자" Binding="{Binding DebtorUserInput, UpdateSourceTrigger=PropertyChanged}" Width="2*"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                                 EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                            <DataGridTextColumn Header="담보종류" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                            <DataGridTextColumn Header="피담보채무" Binding="{Binding CollateralTypeUserInput, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                                 EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                             <DataGridTextColumn Header="공장저당" Binding="{Binding IsFactoryMortgageUserInput, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
@@ -735,6 +776,18 @@
                                     </DataGrid>
 
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,0,12,12">
+                                        <Button Command="{Binding MoveEulguRowUpCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="8,4" Height="28" ToolTip="선택 행 위로 이동">
+                                            <materialDesign:PackIcon Kind="ArrowUp" Width="16" Height="16"/>
+                                        </Button>
+                                        <Button Command="{Binding MoveEulguRowDownCommand}"
+                                                CommandParameter="{Binding SelectedItem, ElementName=EulguDataGrid}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="8,4" Height="28" Margin="0,0,8,0" ToolTip="선택 행 아래로 이동">
+                                            <materialDesign:PackIcon Kind="ArrowDown" Width="16" Height="16"/>
+                                        </Button>
                                         <Button Command="{Binding AddEulguRowCommand}"
                                                 Style="{StaticResource MaterialDesignFlatButton}"
                                                 Padding="12,6" Height="28" ToolTip="행 추가">
