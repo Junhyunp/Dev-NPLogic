@@ -1168,11 +1168,16 @@ namespace NPLogic.Views
             {
                 if (LandUsePlanWebView.CoreWebView2 == null) return;
 
-                // CSS overlay 방식으로 상호작용 차단/해제
-                var overlayScript = _isLandUseLocked
-                    ? "var ov=document.getElementById('lock-overlay');if(!ov){ov=document.createElement('div');ov.id='lock-overlay';ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;background:transparent;cursor:not-allowed;';document.body.appendChild(ov);}else{ov.style.display=\"block\";}"
-                    : "var ov=document.getElementById('lock-overlay');if(ov)ov.style.display='none';";
-                await LandUsePlanWebView.ExecuteScriptAsync(overlayScript);
+                // CSS overlay + body overflow hidden으로 모든 상호작용 차단
+                var lockScript = _isLandUseLocked
+                    ? @"document.body.style.overflow='hidden';document.body.style.pointerEvents='none';
+                        var ov=document.getElementById('lock-overlay');
+                        if(!ov){ov=document.createElement('div');ov.id='lock-overlay';
+                        ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:transparent;cursor:not-allowed;';
+                        document.body.appendChild(ov);}else{ov.style.display='block';}"
+                    : @"document.body.style.overflow='';document.body.style.pointerEvents='';
+                        var ov=document.getElementById('lock-overlay');if(ov)ov.style.display='none';";
+                await LandUsePlanWebView.ExecuteScriptAsync(lockScript);
             }
             catch (Exception ex)
             {
@@ -2406,29 +2411,7 @@ namespace NPLogic.Views
                 // TransformToAncestor 실패 시 무시 (로드 전 등)
             }
 
-            // 토지이용계획 WebView2 뷰포트 가시성 체크
-            if (LandUsePlanSection.Visibility == Visibility.Visible && LandUsePlanWebView != null)
-            {
-                try
-                {
-                    var landTransform = LandUsePlanSection.TransformToAncestor(MainScrollViewer);
-                    var landTopLeft = landTransform.Transform(new Point(0, 0));
-                    var landBottomRight = landTransform.Transform(new Point(LandUsePlanSection.ActualWidth, LandUsePlanSection.ActualHeight));
-
-                    double viewportTop2 = 0;
-                    double viewportBottom2 = MainScrollViewer.ViewportHeight;
-
-                    bool landFullyVisible = landTopLeft.Y >= viewportTop2 && landBottomRight.Y <= viewportBottom2;
-                    var landTargetVisibility = landFullyVisible ? Visibility.Visible : Visibility.Collapsed;
-
-                    if (LandUsePlanWebView.Visibility != landTargetVisibility)
-                        LandUsePlanWebView.Visibility = landTargetVisibility;
-                }
-                catch
-                {
-                    // TransformToAncestor 실패 시 무시
-                }
-            }
+            // 토지이용계획 WebView2는 에어스페이스 체크 제거 (Collapsed 토글 시 레이아웃 떨림 유발)
         }
 
         #endregion
