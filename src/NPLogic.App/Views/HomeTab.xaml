@@ -24,16 +24,16 @@
         
         <!-- 카드 헤더 스타일 -->
         <Style x:Key="CardHeaderStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource FontSizeH4}"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeH3}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
             <Setter Property="Margin" Value="0,0,0,12"/>
         </Style>
-        
+
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="Margin" Value="0,4"/>
         </Style>
         
