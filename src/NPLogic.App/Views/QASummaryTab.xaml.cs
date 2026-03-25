@@ -74,5 +74,16 @@ namespace NPLogic.Views
                 _viewModel.CancelEditCommand.Execute(null);
             }
         }
+
+        /// <summary>
+        /// 검색창 Enter 키 이벤트 버블링 방지 (비핵심 탭 이동 버그 수정)
+        /// </summary>
+        private void SearchTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+            }
+        }
     }
 }

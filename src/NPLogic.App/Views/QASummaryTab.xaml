@@ -118,7 +118,7 @@
         <Grid Margin="16">
             <Grid.ColumnDefinitions>
                 <!-- 좌측: 차주 목록 -->
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="200"/>
                 <!-- 우측: QA 목록 -->
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
@@ -374,58 +374,102 @@
                     </Border>
 
                     <!-- 필터 및 검색 -->
-                    <Border Grid.Row="1" 
+                    <Border Grid.Row="1"
                             Background="{StaticResource SurfaceBrush}"
                             Padding="16,8"
                             BorderBrush="{StaticResource BorderBrush}"
                             BorderThickness="0,0,0,1">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- 상태 필터 -->
-                            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                <RadioButton Content="전체" 
-                                             Style="{StaticResource FilterButton}"
-                                             GroupName="QaFilter"
-                                             IsChecked="True"
-                                             Command="{Binding SetFilterCommand}"
-                                             CommandParameter="all"/>
-                                <RadioButton Content="미답변" 
-                                             Style="{StaticResource FilterButton}"
-                                             GroupName="QaFilter"
-                                             Command="{Binding SetFilterCommand}"
-                                             CommandParameter="unanswered"/>
-                                <RadioButton Content="답변완료" 
-                                             Style="{StaticResource FilterButton}"
-                                             GroupName="QaFilter"
-                                             Command="{Binding SetFilterCommand}"
-                                             CommandParameter="answered"/>
-                            </StackPanel>
-
-                            <!-- 검색 -->
-                            <Border Grid.Column="2" 
-                                    Background="{StaticResource BlueGray50Brush}"
-                                    CornerRadius="4"
-                                    Padding="8,4">
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Search" 
-                                                             Width="18" Height="18" 
-                                                             Foreground="{StaticResource TextSecondaryBrush}"
-                                                             VerticalAlignment="Center"/>
-                                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                                             Width="200"
-                                             Background="Transparent"
-                                             BorderThickness="0"
-                                             VerticalAlignment="Center"
-                                             Margin="8,0,0,0"
-                                             materialDesign:HintAssist.Hint="질문/답변 검색..."/>
+                                <!-- 상태 필터 -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                    <RadioButton Content="전체"
+                                                 Style="{StaticResource FilterButton}"
+                                                 GroupName="QaFilter"
+                                                 IsChecked="True"
+                                                 Command="{Binding SetFilterCommand}"
+                                                 CommandParameter="all"/>
+                                    <RadioButton Content="미답변"
+                                                 Style="{StaticResource FilterButton}"
+                                                 GroupName="QaFilter"
+                                                 Command="{Binding SetFilterCommand}"
+                                                 CommandParameter="unanswered"/>
+                                    <RadioButton Content="답변완료"
+                                                 Style="{StaticResource FilterButton}"
+                                                 GroupName="QaFilter"
+                                                 Command="{Binding SetFilterCommand}"
+                                                 CommandParameter="answered"/>
                                 </StackPanel>
-                            </Border>
-                        </Grid>
+
+                                <!-- 검색 -->
+                                <Border Grid.Column="2"
+                                        Background="{StaticResource BlueGray50Brush}"
+                                        CornerRadius="4"
+                                        Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Search"
+                                                                 Width="18" Height="18"
+                                                                 Foreground="{StaticResource TextSecondaryBrush}"
+                                                                 VerticalAlignment="Center"/>
+                                        <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Width="200"
+                                                 Background="Transparent"
+                                                 BorderThickness="0"
+                                                 VerticalAlignment="Center"
+                                                 Margin="8,0,0,0"
+                                                 PreviewKeyDown="SearchTextBox_PreviewKeyDown"
+                                                 materialDesign:HintAssist.Hint="질문/답변 검색..."/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <!-- 날짜 필터 -->
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock Text="질의일자"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,6,0"/>
+                                <DatePicker SelectedDate="{Binding CreatedDateFrom, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="110" FontSize="11" Padding="4,2"
+                                            VerticalAlignment="Center"
+                                            materialDesign:HintAssist.Hint="시작일"/>
+                                <TextBlock Text="~" VerticalAlignment="Center" Margin="4,0"/>
+                                <DatePicker SelectedDate="{Binding CreatedDateTo, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="110" FontSize="11" Padding="4,2"
+                                            VerticalAlignment="Center"
+                                            materialDesign:HintAssist.Hint="종료일"/>
+
+                                <TextBlock Text="회신일자"
+                                           FontSize="{StaticResource FontSizeSmall}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Margin="16,0,6,0"/>
+                                <DatePicker SelectedDate="{Binding AnsweredDateFrom, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="110" FontSize="11" Padding="4,2"
+                                            VerticalAlignment="Center"
+                                            materialDesign:HintAssist.Hint="시작일"/>
+                                <TextBlock Text="~" VerticalAlignment="Center" Margin="4,0"/>
+                                <DatePicker SelectedDate="{Binding AnsweredDateTo, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="110" FontSize="11" Padding="4,2"
+                                            VerticalAlignment="Center"
+                                            materialDesign:HintAssist.Hint="종료일"/>
+
+                                <Button Content="초기화"
+                                        Command="{Binding ClearDateFiltersCommand}"
+                                        Style="{StaticResource SecondaryButton}"
+                                        Padding="8,2"
+                                        FontSize="11"
+                                        Margin="12,0,0,0"
+                                        VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
                     </Border>
 
                     <!-- QA 목록 (DataGrid) -->

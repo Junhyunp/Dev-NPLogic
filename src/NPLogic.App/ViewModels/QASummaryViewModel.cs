@@ -53,6 +53,19 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private string _searchText = "";
 
+        // ========== 날짜 필터 ==========
+        [ObservableProperty]
+        private DateTime? _createdDateFrom;
+
+        [ObservableProperty]
+        private DateTime? _createdDateTo;
+
+        [ObservableProperty]
+        private DateTime? _answeredDateFrom;
+
+        [ObservableProperty]
+        private DateTime? _answeredDateTo;
+
         // ========== 통계 ==========
         [ObservableProperty]
         private int _totalQaCount;
@@ -183,6 +196,7 @@ namespace NPLogic.ViewModels
                 }
 
                 await LoadBorrowerSummariesAsync();
+                await LoadAllQaAsync();
                 await LoadNoteAsync();
             }
             catch (Exception ex)
@@ -227,13 +241,14 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 선택된 차주의 QA 목록 로드
+        /// 선택된 차주의 QA 목록 로드 (차주 미선택 시 전체 로드)
         /// </summary>
         private async Task LoadQaListAsync()
         {
             if (SelectedBorrower == null)
             {
-                QaList.Clear();
+                // 차주 미선택 시 전체 QA 로드 (필터 적용)
+                await LoadAllQaAsync();
                 return;
             }
 
@@ -323,6 +338,26 @@ namespace NPLogic.ViewModels
                     (q.BorrowerName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
             }
 
+            // 질의일자 범위 필터
+            if (CreatedDateFrom.HasValue)
+            {
+                filtered = filtered.Where(q => q.CreatedAt.Date >= CreatedDateFrom.Value.Date);
+            }
+            if (CreatedDateTo.HasValue)
+            {
+                filtered = filtered.Where(q => q.CreatedAt.Date <= CreatedDateTo.Value.Date);
+            }
+
+            // 회신일자 범위 필터
+            if (AnsweredDateFrom.HasValue)
+            {
+                filtered = filtered.Where(q => q.AnsweredAt.HasValue && q.AnsweredAt.Value.Date >= AnsweredDateFrom.Value.Date);
+            }
+            if (AnsweredDateTo.HasValue)
+            {
+                filtered = filtered.Where(q => q.AnsweredAt.HasValue && q.AnsweredAt.Value.Date <= AnsweredDateTo.Value.Date);
+            }
+
             return filtered.ToList();
         }
 
@@ -348,6 +383,50 @@ namespace NPLogic.ViewModels
         partial void OnSearchTextChanged(string value)
         {
             _ = LoadQaListAsync();
+        }
+
+        /// <summary>
+        /// 질의일자 시작일 변경 시
+        /// </summary>
+        partial void OnCreatedDateFromChanged(DateTime? value)
+        {
+            _ = LoadQaListAsync();
+        }
+
+        /// <summary>
+        /// 질의일자 종료일 변경 시
+        /// </summary>
+        partial void OnCreatedDateToChanged(DateTime? value)
+        {
+            _ = LoadQaListAsync();
+        }
+
+        /// <summary>
+        /// 회신일자 시작일 변경 시
+        /// </summary>
+        partial void OnAnsweredDateFromChanged(DateTime? value)
+        {
+            _ = LoadQaListAsync();
+        }
+
+        /// <summary>
+        /// 회신일자 종료일 변경 시
+        /// </summary>
+        partial void OnAnsweredDateToChanged(DateTime? value)
+        {
+            _ = LoadQaListAsync();
+        }
+
+        /// <summary>
+        /// 날짜 필터 초기화
+        /// </summary>
+        [RelayCommand]
+        private void ClearDateFilters()
+        {
+            CreatedDateFrom = null;
+            CreatedDateTo = null;
+            AnsweredDateFrom = null;
+            AnsweredDateTo = null;
         }
 
         /// <summary>
