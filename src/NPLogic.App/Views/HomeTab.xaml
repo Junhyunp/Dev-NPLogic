@@ -708,7 +708,7 @@
             <!-- 비고 종합 섹션 -->
             <Border Style="{StaticResource SummaryCardStyle}"
                     Margin="0,16,0,0"
-                    Visibility="{Binding HasNoteSummary, Converter={StaticResource BoolToVisibilityConverter}}">
+>
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                         <TextBlock Text="📝" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -746,6 +746,13 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <!-- 비고 없을 때 안내 -->
+                    <TextBlock Text="각 탭에서 작성된 비고가 없습니다."
+                               Visibility="{Binding HasNoteSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                               Style="{StaticResource CaptionTextStyle}"
+                               Foreground="{StaticResource TextTertiaryBrush}"
+                               Margin="0,4,0,0"/>
                 </StackPanel>
             </Border>
         </Grid>
