@@ -41,11 +41,10 @@ Plans:
   2. 전체 탭 QA 카드에는 현재 선택된 물건의 QA만 필터되어 표시된다
   3. QA집계 탭이 차주번호/차주명/질의일자/질의내용/회신일자/답변내용 6열 표로 표시된다
   4. QA집계 탭에서는 물건 필터 없이 전체 차주의 QA를 조회할 수 있다
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — HomeTab QA 4열 DataGrid + QASummaryTab 6열 DataGrid 통일
 
 ## Progress
 
@@ -55,4 +54,4 @@ Phases execute in numeric order: 1 -> 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. QA 팝업 표 형식 교체 + CRUD | 1/2 | In Progress | - |
-| 2. 전체 탭 QA 카드 + QA집계 탭 | 0/? | Not started | - |
+| 2. 전체 탭 QA 카드 + QA집계 탭 | 0/1 | Not started | - |
