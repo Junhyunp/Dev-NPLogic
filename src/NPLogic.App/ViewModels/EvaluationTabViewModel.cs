@@ -576,7 +576,7 @@ namespace NPLogic.ViewModels
 
         private void InitializeFactoryEvalRows()
         {
-            var categories = new[] { "토지", "토지(법면, 도로 등)", "건물", "기계", "Total" };
+            var categories = new[] { "토지", "토지(법면, 도로 등)", "건물", "제시외건물", "기계기구", "Total" };
 
             FactoryScenario1Rows.Clear();
             FactoryScenario2Rows.Clear();
@@ -1483,14 +1483,15 @@ namespace NPLogic.ViewModels
                 CaseItems = new ObservableCollection<CaseRowItem>
                 {
                     new CaseRowItem { Label = "경매사건번호" },
-                    new CaseRowItem { Label = "경매사건검색" },
                     new CaseRowItem { Label = "낙찰일자" },
                     new CaseRowItem { Label = "용도" },
                     new CaseRowItem { Label = "소재지" },
                     new CaseRowItem { Label = "토지면적(평)" },
                     new CaseRowItem { Label = "건물연면적(평)" },
+                    new CaseRowItem { Label = "제시외연면적(평)" },
                     new CaseRowItem { Label = "기계기구" },
                     new CaseRowItem { Label = "사용승인일" },
+                    new CaseRowItem { Label = "로드뷰" },
                     new CaseRowItem { Label = "법사가" },
                     new CaseRowItem { Label = "  토지" },
                     new CaseRowItem { Label = "  건물" },
@@ -1510,6 +1511,7 @@ namespace NPLogic.ViewModels
                     new CaseRowItem { Label = "건물평당낙찰가" },
                     new CaseRowItem { Label = "기계인정율" },
                     new CaseRowItem { Label = "토지단가" },
+                    new CaseRowItem { Label = "제시외단가" },
                     new CaseRowItem { Label = "건물단가" },
                     new CaseRowItem { Label = "토지 거래분" },
                     new CaseRowItem { Label = "건물 거래분" },
@@ -1813,7 +1815,7 @@ namespace NPLogic.ViewModels
         #region 명령
 
         /// <summary>
-        /// 탐문 결과 테이블 생성 (고정 4행: 토지, 건물, 기계, 합계)
+        /// 탐문 결과 테이블 생성 (고정 5행: 토지, 건물, 제시외, 기계기구, 합계)
         /// </summary>
         [RelayCommand]
         private void CreateInquiryResultTable()
@@ -1821,7 +1823,8 @@ namespace NPLogic.ViewModels
             if (HasInquiryResultTable) return;
             InquiryResultRows.Add(new InquiryResultRow { Category = "토지" });
             InquiryResultRows.Add(new InquiryResultRow { Category = "건물" });
-            InquiryResultRows.Add(new InquiryResultRow { Category = "기계" });
+            InquiryResultRows.Add(new InquiryResultRow { Category = "제시외" });
+            InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
             InquiryResultRows.Add(new InquiryResultRow { Category = "합계" });
             HasInquiryResultTable = true;
         }
