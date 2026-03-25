@@ -167,7 +167,7 @@
                 </Grid>
             </Border>
             
-            <!-- ========== Row 1: 차주 정보 + Loan 요약 ========== -->
+            <!-- ========== Row 1: 차주개요 + Loan ========== -->
             <Grid Grid.Row="1" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -175,10 +175,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <!-- 차주 정보 카드 -->
+                <!-- 차주개요 카드 -->
                 <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="차주 정보" Style="{StaticResource CardHeaderStyle}"/>
+                        <TextBlock Text="차주개요" Style="{StaticResource CardHeaderStyle}"/>
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -267,10 +267,10 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- Loan 요약 카드 -->
+                <!-- Loan 카드 -->
                 <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="Loan 요약" Style="{StaticResource CardHeaderStyle}"/>
+                        <TextBlock Text="Loan" Style="{StaticResource CardHeaderStyle}"/>
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -371,11 +371,11 @@
                     </StackPanel>
                 </Border>
                 
-                <!-- 선순위 요약 카드 -->
+                <!-- 선순위 카드 -->
                 <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="선순위 요약" Style="{StaticResource CardHeaderStyle}"/>
+                            <TextBlock Text="선순위" Style="{StaticResource CardHeaderStyle}"/>
                             <TextBlock Text=" (DD/반영)" 
                                        FontSize="{StaticResource FontSizeSmall}" 
                                        Foreground="{StaticResource TextTertiaryBrush}"
@@ -435,7 +435,7 @@
                 </Border>
             </Grid>
             
-            <!-- ========== Row 3: 평가 요약 + 경(공)매일정 ========== -->
+            <!-- ========== Row 3: 평가 + 경(공)매일정 ========== -->
             <Grid Grid.Row="3" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -443,10 +443,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 
-                <!-- 평가 요약 카드 -->
+                <!-- 평가 카드 -->
                 <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <TextBlock Text="평가 요약" Style="{StaticResource CardHeaderStyle}"/>
+                        <TextBlock Text="평가" Style="{StaticResource CardHeaderStyle}"/>
                         
                         <Grid>
                             <Grid.ColumnDefinitions>
