@@ -543,53 +543,113 @@
                 <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="평가" Style="{StaticResource CardHeaderStyle}"/>
-                        
+
+                        <!-- 평가요약 표 (8x3) -->
+                        <TextBlock Text="평가요약" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-                            
-                            <!-- 평가유형 -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="평가유형" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding EvaluationSummary.EvaluationType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 시나리오1 낙찰가 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="1안 낙찰가" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
-                                <TextBlock Text="{Binding EvaluationSummary.Scenario1Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding EvaluationSummary.Scenario1BidRateDisplay, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
-                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                            
-                            <!-- 시나리오2 낙찰가 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="2안 낙찰가" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
-                                <TextBlock Text="{Binding EvaluationSummary.Scenario2Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding EvaluationSummary.Scenario2BidRateDisplay, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
-                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                            
-                            <!-- 적용 낙찰가율 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="적용 낙찰가율" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding EvaluationSummary.AppliedBidRateDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}" Foreground="{StaticResource PrimaryBrush}"/>
-                            
-                            <!-- 평가사유 -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="평가사유" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" 
-                                       Text="{Binding EvaluationSummary.EvaluationReason, FallbackValue=-}" 
-                                       Style="{StaticResource ValueStyle}"
-                                       TextTrimming="CharacterEllipsis"
-                                       ToolTip="{Binding EvaluationSummary.EvaluationReason}"/>
+
+                            <!-- Row 0: 헤더 행 -->
+                            <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="" FontSize="{StaticResource FontSizeBody}"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="1안" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="2안" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 1: 낙찰가 -->
+                            <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="낙찰가" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1Display, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2Display, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 2: 낙찰가율(%) -->
+                            <Border Grid.Row="2" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="낙찰가율(%)" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1BidRateDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2BidRateDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 3: 선순위차감후 배당가능재원 -->
+                            <Border Grid.Row="3" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="4,6">
+                                <TextBlock Text="선순위차감후 배당가능재원" FontSize="10" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1DistributableDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2DistributableDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 4: Loan Cap -->
+                            <Border Grid.Row="4" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="Loan Cap" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1LoanCapDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2LoanCapDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 5: Mortgage Cap -->
+                            <Border Grid.Row="5" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="Mortgage Cap" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1MortgageCapDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2MortgageCapDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 6: XNPV -->
+                            <Border Grid.Row="6" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="XNPV" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1XnpvDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2XnpvDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <!-- Row 7: Ratio(%) -->
+                            <Border Grid.Row="7" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                <TextBlock Text="Ratio(%)" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="7" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario1RatioDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="7" Grid.Column="2" Height="30" Padding="8,6">
+                                <TextBlock Text="{Binding EvaluationSummary.Scenario2RatioDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
