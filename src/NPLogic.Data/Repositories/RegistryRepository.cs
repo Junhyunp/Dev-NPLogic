@@ -324,7 +324,6 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                // JibunNumber 제외: merge가 결합한 값이므로 원본 보존
                 var table = new RegistryGapguRowTable
                 {
                     Id = row.Id,
@@ -339,6 +338,7 @@ namespace NPLogic.Data.Repositories
                     NoteUserInput = row.NoteUserInput,
                     WageClaimEstimateUserInput = row.WageClaimEstimateUserInput,
                     TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
                     SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -359,7 +359,6 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                // JibunNumber 제외: merge가 결합한 값이므로 원본 보존
                 var table = new RegistryEulguRowTable
                 {
                     Id = row.Id,
@@ -375,6 +374,7 @@ namespace NPLogic.Data.Repositories
                     CollateralTypeUserInput = row.CollateralTypeUserInput,
                     IsFactoryMortgageUserInput = row.IsFactoryMortgageUserInput,
                     TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
                     SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
