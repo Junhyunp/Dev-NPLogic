@@ -595,7 +595,13 @@ namespace NPLogic.ViewModels
         private ObservableCollection<RegistryGapguRow> _registryGapguRows = new();
 
         [ObservableProperty]
+        private RegistryGapguRow? _selectedGapguRow;
+
+        [ObservableProperty]
         private ObservableCollection<RegistryEulguRow> _registryEulguRows = new();
+
+        [ObservableProperty]
+        private RegistryEulguRow? _selectedEulguRow;
 
         [ObservableProperty]
         private ObservableCollection<AppraisalInfoRow> _appraisalInfoList = new();
@@ -2300,6 +2306,9 @@ namespace NPLogic.ViewModels
 
             try
             {
+                if (_supabaseService != null)
+                    await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+
                 foreach (var row in RegistryGapguRows)
                 {
                     await _registryRepository.UpdateGapguRowAsync(row);
@@ -2406,89 +2415,94 @@ namespace NPLogic.ViewModels
         }
 
         [RelayCommand]
-        private void MoveGapguRowUp(RegistryGapguRow? row)
+        private void MoveGapguRowUp()
         {
-            if (row == null) return;
-            var index = RegistryGapguRows.IndexOf(row);
+            if (SelectedGapguRow == null) return;
+            var index = RegistryGapguRows.IndexOf(SelectedGapguRow);
             if (index <= 0) return;
+            var row = SelectedGapguRow;
             RegistryGapguRows.Move(index, index - 1);
             for (int i = 0; i < RegistryGapguRows.Count; i++)
                 RegistryGapguRows[i].SortIndex = i + 1;
+            // null→재설정으로 DataGrid 선택 강제 갱신
+            SelectedGapguRow = null;
+            SelectedGapguRow = row;
         }
 
         [RelayCommand]
-        private void MoveGapguRowDown(RegistryGapguRow? row)
+        private void MoveGapguRowDown()
         {
-            if (row == null) return;
-            var index = RegistryGapguRows.IndexOf(row);
+            if (SelectedGapguRow == null) return;
+            var index = RegistryGapguRows.IndexOf(SelectedGapguRow);
             if (index < 0 || index >= RegistryGapguRows.Count - 1) return;
+            var row = SelectedGapguRow;
             RegistryGapguRows.Move(index, index + 1);
             for (int i = 0; i < RegistryGapguRows.Count; i++)
                 RegistryGapguRows[i].SortIndex = i + 1;
+            SelectedGapguRow = null;
+            SelectedGapguRow = row;
         }
 
         [RelayCommand]
-        private void MoveEulguRowUp(RegistryEulguRow? row)
+        private void MoveEulguRowUp()
         {
-            if (row == null) return;
-            var index = RegistryEulguRows.IndexOf(row);
+            if (SelectedEulguRow == null) return;
+            var index = RegistryEulguRows.IndexOf(SelectedEulguRow);
             if (index <= 0) return;
+            var row = SelectedEulguRow;
             RegistryEulguRows.Move(index, index - 1);
             for (int i = 0; i < RegistryEulguRows.Count; i++)
                 RegistryEulguRows[i].SortIndex = i + 1;
+            SelectedEulguRow = null;
+            SelectedEulguRow = row;
         }
 
         [RelayCommand]
-        private void MoveEulguRowDown(RegistryEulguRow? row)
+        private void MoveEulguRowDown()
         {
-            if (row == null) return;
-            var index = RegistryEulguRows.IndexOf(row);
+            if (SelectedEulguRow == null) return;
+            var index = RegistryEulguRows.IndexOf(SelectedEulguRow);
             if (index < 0 || index >= RegistryEulguRows.Count - 1) return;
+            var row = SelectedEulguRow;
             RegistryEulguRows.Move(index, index + 1);
             for (int i = 0; i < RegistryEulguRows.Count; i++)
                 RegistryEulguRows[i].SortIndex = i + 1;
+            SelectedEulguRow = null;
+            SelectedEulguRow = row;
         }
 
         [RelayCommand]
-        private async Task ResetGapguRankNumbersAsync()
+        private void ResetGapguRankNumbers()
         {
-            if (_registryRepository == null || RegistryGapguRows.Count == 0) return;
-            try
+            if (RegistryGapguRows.Count == 0) return;
+            var rows = RegistryGapguRows.ToList();
+            for (int i = 0; i < rows.Count; i++)
             {
-                for (int i = 0; i < RegistryGapguRows.Count; i++)
-                {
-                    RegistryGapguRows[i].RankNo = (i + 1).ToString();
-                    RegistryGapguRows[i].SortIndex = i + 1;
-                    await _registryRepository.UpdateGapguRowAsync(RegistryGapguRows[i]);
-                }
-                SuccessMessage = "갑구 순위번호가 재설정되었습니다.";
+                rows[i].RankNo = (i + 1).ToString();
+                rows[i].SortIndex = i + 1;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"갑구 순위 재설정 실패: {ex.Message}");
-                ErrorMessage = $"갑구 순위 재설정 실패: {ex.Message}";
-            }
+            // POCO → PropertyChanged 미발생. Clear+Re-add로 UI 강제 갱신
+            RegistryGapguRows.Clear();
+            foreach (var row in rows)
+                RegistryGapguRows.Add(row);
+            SuccessMessage = "갑구 순위번호가 재설정되었습니다. 저장 버튼을 눌러 반영하세요.";
         }
 
         [RelayCommand]
-        private async Task ResetEulguRankNumbersAsync()
+        private void ResetEulguRankNumbers()
         {
-            if (_registryRepository == null || RegistryEulguRows.Count == 0) return;
-            try
+            if (RegistryEulguRows.Count == 0) return;
+            var rows = RegistryEulguRows.ToList();
+            for (int i = 0; i < rows.Count; i++)
             {
-                for (int i = 0; i < RegistryEulguRows.Count; i++)
-                {
-                    RegistryEulguRows[i].RankNo = (i + 1).ToString();
-                    RegistryEulguRows[i].SortIndex = i + 1;
-                    await _registryRepository.UpdateEulguRowAsync(RegistryEulguRows[i]);
-                }
-                SuccessMessage = "을구 순위번호가 재설정되었습니다.";
+                rows[i].RankNo = (i + 1).ToString();
+                rows[i].SortIndex = i + 1;
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"을구 순위 재설정 실패: {ex.Message}");
-                ErrorMessage = $"을구 순위 재설정 실패: {ex.Message}";
-            }
+            // POCO → PropertyChanged 미발생. Clear+Re-add로 UI 강제 갱신
+            RegistryEulguRows.Clear();
+            foreach (var row in rows)
+                RegistryEulguRows.Add(row);
+            SuccessMessage = "을구 순위번호가 재설정되었습니다. 저장 버튼을 눌러 반영하세요.";
         }
 
         /// <summary>

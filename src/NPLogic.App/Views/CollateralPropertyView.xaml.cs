@@ -2372,6 +2372,49 @@ namespace NPLogic.Views
             }
         }
 
+        /// <summary>
+        /// 갑구 행 이동 버튼 클릭 후 DataGrid에 포커스 복원
+        /// </summary>
+        private void MoveGapguRow_Click(object sender, RoutedEventArgs e)
+        {
+            // Loaded 우선순위: Command 실행 + SelectedItem null→재설정 완료 후 실행
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+            {
+                if (GapguDataGrid.SelectedItem != null)
+                {
+                    GapguDataGrid.UpdateLayout();
+                    GapguDataGrid.ScrollIntoView(GapguDataGrid.SelectedItem);
+                    var row = (DataGridRow?)GapguDataGrid.ItemContainerGenerator.ContainerFromItem(GapguDataGrid.SelectedItem);
+                    if (row != null)
+                    {
+                        row.MoveFocus(new System.Windows.Input.TraversalRequest(System.Windows.Input.FocusNavigationDirection.Next));
+                        Keyboard.Focus(row);
+                    }
+                }
+            });
+        }
+
+        /// <summary>
+        /// 을구 행 이동 버튼 클릭 후 DataGrid에 포커스 복원
+        /// </summary>
+        private void MoveEulguRow_Click(object sender, RoutedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, () =>
+            {
+                if (EulguDataGrid.SelectedItem != null)
+                {
+                    EulguDataGrid.UpdateLayout();
+                    EulguDataGrid.ScrollIntoView(EulguDataGrid.SelectedItem);
+                    var row = (DataGridRow?)EulguDataGrid.ItemContainerGenerator.ContainerFromItem(EulguDataGrid.SelectedItem);
+                    if (row != null)
+                    {
+                        row.MoveFocus(new System.Windows.Input.TraversalRequest(System.Windows.Input.FocusNavigationDirection.Next));
+                        Keyboard.Focus(row);
+                    }
+                }
+            });
+        }
+
         #endregion
 
         #region WebView2 에어스페이스 보정
