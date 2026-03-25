@@ -387,23 +387,23 @@
                             <StackPanel Orientation="Horizontal">
                                 <!-- 행 헤더 (고정 1열) -->
                                 <StackPanel Width="90">
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="" FontSize="11"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="" FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="담보종류" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="담보종류" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="토지면적" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="토지면적" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="건물면적" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="건물면적" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="감정평가액" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="감정평가액" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                        <TextBlock Text="공장저당" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                        <TextBlock Text="공장저당" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
                                 </StackPanel>
 
@@ -417,22 +417,22 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Width="100">
-                                                <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding Label}" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding PropertyType}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding LandArea}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding BuildingArea}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding AppraisalValue}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
                                                     <TextBlock Text="{Binding FactoryMortgage}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
                                             </StackPanel>
@@ -455,32 +455,32 @@
                             <StackPanel Orientation="Horizontal">
                                 <!-- 행 헤더 (고정 1열) -->
                                 <StackPanel Width="90">
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="" FontSize="11"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="" FontSize="{StaticResource FontSizeBody}"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="선순위 근저당" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="선순위 근저당" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="유치권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="유치권" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="소액보증금" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="소액보증금" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="임차보증금" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="임차보증금" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="임금채권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="임금채권" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="당해세" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="당해세" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                        <TextBlock Text="조세채권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="조세채권" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
-                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
-                                        <TextBlock Text="합계" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                        <TextBlock Text="합계" FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                     </Border>
                                 </StackPanel>
 
@@ -494,31 +494,31 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Width="100">
-                                                <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
-                                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                <Border Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding Label}" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding SeniorMortgage}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding Lien}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding SmallDeposit}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding LeaseDeposit}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding WageClaim}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding CurrentTax}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                                     <TextBlock Text="{Binding SeniorTax}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
                                                 </Border>
-                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                                <Border Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
                                                     <TextBlock Text="{Binding Total}" FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" HorizontalAlignment="Center"/>
                                                 </Border>
                                             </StackPanel>
