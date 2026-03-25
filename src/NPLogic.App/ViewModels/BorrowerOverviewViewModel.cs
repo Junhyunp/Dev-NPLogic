@@ -866,7 +866,7 @@ namespace NPLogic.ViewModels
                 await _borrowerRepository.UpdateAsync(SelectedBorrower);
                 await LoadBorrowersAsync();
                 await SaveNoteAsync();
-                NPLogic.UI.Services.ToastService.Instance.ShowSuccess("차주 정보가 저장되었습니다.");
+                // 저장 완료 토스트 없음 (다른 탭과 일관성)
             }
             catch (Exception ex)
             {
