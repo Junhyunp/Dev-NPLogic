@@ -515,7 +515,7 @@
                                                             <Setter TargetName="ItemBorder" Property="Background" Value="#3F4E6B"/>
                                                         </Trigger>
                                                         <Trigger Property="IsSelected" Value="True">
-                                                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#2A5DB0"/>
                                                         </Trigger>
                                                     </ControlTemplate.Triggers>
                                                 </ControlTemplate>

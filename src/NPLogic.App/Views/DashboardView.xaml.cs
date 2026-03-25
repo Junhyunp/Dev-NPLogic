@@ -1013,7 +1013,8 @@ namespace NPLogic.Views
                 _suppressInnerTabChecked = false;
                 viewModel.SetActiveTab("noncore");
 
-                // 비핵심 탭 로드 (NonCoreView가 새 물건으로 업데이트됨 + "전체" 탭으로 리셋)
+                // 콘텐츠 강제 초기화 후 재로드 (캐시로 인한 미갱신 방지)
+                TabContentControl.Content = null;
                 await LoadTabViewAsync("noncore", property);
             }
         }
