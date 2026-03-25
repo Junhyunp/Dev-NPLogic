@@ -42,6 +42,16 @@ namespace NPLogic.Views
         // MapService 인스턴스 (DI로 주입)
         private MapService? _mapService;
 
+        // 각 지도의 마지막 HTML 콘텐츠 (팝업에서 재사용)
+        private string _lastSatelliteHtml = "";
+        private string _lastCadastralHtml = "";
+        private string _lastRoadViewHtml = "";
+
+        // 각 지도의 고정(lock) 상태
+        private bool _isSatelliteLocked = false;
+        private bool _isCadastralLocked = false;
+        private bool _isRoadViewLocked = false;
+
         private PropertyDetailViewModel? _currentVm;
 
         public CollateralPropertyView()
@@ -307,6 +317,9 @@ namespace NPLogic.Views
                     var satelliteHtml = GenerateKakaoMapHtml((double)lat.Value, (double)lng.Value, "HYBRID", false);
                     var roadviewHtml = GenerateKakaoRoadviewHtml((double)lat.Value, (double)lng.Value);
 
+                    _lastSatelliteHtml = satelliteHtml;
+                    _lastRoadViewHtml = roadviewHtml;
+
                     SatelliteMapWebView.NavigateToString(satelliteHtml);
                     RoadViewWebView.NavigateToString(roadviewHtml);
 
@@ -318,6 +331,10 @@ namespace NPLogic.Views
                 else
                 {
                     var noCoordHtml = GenerateNoCoordinatesHtml(vm.Property.DisplayAddress ?? "주소 정보 없음");
+                    _lastSatelliteHtml = noCoordHtml;
+                    _lastCadastralHtml = noCoordHtml;
+                    _lastRoadViewHtml = noCoordHtml;
+
                     SatelliteMapWebView.NavigateToString(noCoordHtml);
                     CadastralMapWebView.NavigateToString(noCoordHtml);
                     RoadViewWebView.NavigateToString(noCoordHtml);
@@ -357,6 +374,7 @@ namespace NPLogic.Views
     <div id=""map""></div>
     <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
     <script>
+        var map;
         kakao.maps.load(function() {{
             var container = document.getElementById('map');
             var options = {{
@@ -364,7 +382,7 @@ namespace NPLogic.Views
                 level: 3,
                 mapTypeId: kakao.maps.MapTypeId.{mapType}
             }};
-            var map = new kakao.maps.Map(container, options);
+            map = new kakao.maps.Map(container, options);
             {cadastralOverlay}
 
             var marker = new kakao.maps.Marker({{
@@ -1897,12 +1915,14 @@ namespace NPLogic.Views
                     System.Diagnostics.Debug.WriteLine("[지적도] 필지 경계 폴리곤 없음 - 위성도 fallback");
                 }
 
+                _lastCadastralHtml = html;
                 CadastralMapWebView.NavigateToString(html);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[지적도] 로드 실패: {ex.Message}");
                 var fallbackHtml = GenerateKakaoMapHtml(lat, lng, "HYBRID", false);
+                _lastCadastralHtml = fallbackHtml;
                 CadastralMapWebView.NavigateToString(fallbackHtml);
             }
         }
@@ -1930,6 +1950,7 @@ namespace NPLogic.Views
     <div id=""map""></div>
     <script src=""https://dapi.kakao.com/v2/maps/sdk.js?appkey={_kakaoApiKey}&autoload=false""></script>
     <script>
+        var map;
         kakao.maps.load(function() {{
             var container = document.getElementById('map');
             var options = {{
@@ -1937,7 +1958,7 @@ namespace NPLogic.Views
                 level: 2,
                 mapTypeId: kakao.maps.MapTypeId.HYBRID
             }};
-            var map = new kakao.maps.Map(container, options);
+            map = new kakao.maps.Map(container, options);
 
             var path = [
                     {pathJs}
@@ -2284,6 +2305,106 @@ namespace NPLogic.Views
             catch
             {
                 // TransformToAncestor 실패 시 무시 (로드 전 등)
+            }
+        }
+
+        #endregion
+
+        #region 지도 확대/고정 버튼 이벤트
+
+        /// <summary>
+        /// 위성도 확대 팝업 열기
+        /// </summary>
+        private void SatelliteExpand_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMapPopup("위성도", MaterialDesignThemes.Wpf.PackIconKind.Satellite, _lastSatelliteHtml);
+        }
+
+        /// <summary>
+        /// 지적도 확대 팝업 열기
+        /// </summary>
+        private void CadastralExpand_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMapPopup("지적도", MaterialDesignThemes.Wpf.PackIconKind.Map, _lastCadastralHtml);
+        }
+
+        /// <summary>
+        /// 로드뷰 확대 팝업 열기
+        /// </summary>
+        private void RoadViewExpand_Click(object sender, RoutedEventArgs e)
+        {
+            OpenMapPopup("로드뷰", MaterialDesignThemes.Wpf.PackIconKind.Walk, _lastRoadViewHtml);
+        }
+
+        /// <summary>
+        /// 지도 확대 팝업 공통 로직
+        /// </summary>
+        private void OpenMapPopup(string title, MaterialDesignThemes.Wpf.PackIconKind iconKind, string htmlContent)
+        {
+            if (string.IsNullOrEmpty(htmlContent))
+            {
+                MessageBox.Show("지도가 아직 로드되지 않았습니다.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var popup = new MapPopupWindow(title, iconKind, htmlContent)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            popup.Show();
+        }
+
+        /// <summary>
+        /// 위성도 고정/해제 토글
+        /// </summary>
+        private async void SatelliteLock_Click(object sender, RoutedEventArgs e)
+        {
+            _isSatelliteLocked = !_isSatelliteLocked;
+            SatelliteLockButton.Content = _isSatelliteLocked ? "해제" : "고정";
+            SatelliteLockButton.ToolTip = _isSatelliteLocked ? "지도 드래그/줌 해제" : "지도 드래그/줌 고정";
+            await ToggleMapInteraction(SatelliteMapWebView, !_isSatelliteLocked);
+        }
+
+        /// <summary>
+        /// 지적도 고정/해제 토글
+        /// </summary>
+        private async void CadastralLock_Click(object sender, RoutedEventArgs e)
+        {
+            _isCadastralLocked = !_isCadastralLocked;
+            CadastralLockButton.Content = _isCadastralLocked ? "해제" : "고정";
+            CadastralLockButton.ToolTip = _isCadastralLocked ? "지도 드래그/줌 해제" : "지도 드래그/줌 고정";
+            await ToggleMapInteraction(CadastralMapWebView, !_isCadastralLocked);
+        }
+
+        /// <summary>
+        /// 로드뷰 고정/해제 토글
+        /// </summary>
+        private async void RoadViewLock_Click(object sender, RoutedEventArgs e)
+        {
+            _isRoadViewLocked = !_isRoadViewLocked;
+            RoadViewLockButton.Content = _isRoadViewLocked ? "해제" : "고정";
+            RoadViewLockButton.ToolTip = _isRoadViewLocked ? "지도 드래그/줌 해제" : "지도 드래그/줌 고정";
+            await ToggleMapInteraction(RoadViewWebView, !_isRoadViewLocked);
+        }
+
+        /// <summary>
+        /// 지도 드래그/줌 활성화 또는 비활성화
+        /// </summary>
+        private async Task ToggleMapInteraction(Microsoft.Web.WebView2.Wpf.WebView2 webView, bool enabled)
+        {
+            try
+            {
+                if (webView.CoreWebView2 == null) return;
+
+                var script = enabled
+                    ? "if(typeof map !== 'undefined') { map.setDraggable(true); map.setZoomable(true); }"
+                    : "if(typeof map !== 'undefined') { map.setDraggable(false); map.setZoomable(false); }";
+
+                await webView.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[지도 고정/해제] 오류: {ex.Message}");
             }
         }
 

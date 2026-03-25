@@ -1,0 +1,74 @@
+<Window x:Class="NPLogic.Views.MapPopupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="지도"
+        Width="800"
+        Height="600"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResize"
+        Background="{StaticResource BackgroundBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 헤더 -->
+        <Border Grid.Row="0"
+                Background="{StaticResource PrimaryBrush}"
+                Padding="16,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon x:Name="HeaderIcon"
+                                             Kind="Satellite"
+                                             Width="20" Height="20"
+                                             Foreground="White"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,8,0"/>
+                    <TextBlock x:Name="HeaderTitle"
+                               Text="지도"
+                               FontSize="{StaticResource FontSizeH4}"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Content="&#10005;"
+                        Click="CloseButton_Click"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="White"
+                        FontSize="16"
+                        Width="32" Height="32"
+                        VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+        <!-- WebView2 지도 -->
+        <wv2:WebView2 x:Name="PopupWebView"
+                      Grid.Row="1"
+                      DefaultBackgroundColor="Transparent"/>
+
+        <!-- 로딩 오버레이 -->
+        <Border x:Name="LoadingOverlay"
+                Grid.Row="1"
+                Background="{StaticResource CardAlt2Brush}"
+                Visibility="Visible">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="지도 로딩 중..."
+                           FontSize="{StaticResource FontSizeH4}"
+                           Foreground="{StaticResource TextMutedBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
