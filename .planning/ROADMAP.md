@@ -26,11 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. 해당 물건의 과거 질의/답변 이력이 모두 표에 누적 표시되고, 스크롤로 전체 확인할 수 있다
   3. 신규 질의 행을 추가하면 질의일자가 자동 설정되고, 질의내용을 입력하여 저장할 수 있다
   4. 기존 행의 회신일자와 답변내용을 입력/수정하여 저장할 수 있다
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — QA 팝업 DataGrid 4열 표 생성 + 과거 이력 누적 표시
+- [ ] 01-02-PLAN.md — 신규 질의 입력(행 추가) + 답변 수정/저장 기능
 
 ### Phase 2: 전체 탭 QA 카드 + QA집계 탭
 **Goal**: 사용자가 전체 탭과 QA집계 탭에서 동일한 표 형식으로 QA 데이터를 조회할 수 있다
@@ -54,5 +54,5 @@ Phases execute in numeric order: 1 -> 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. QA 팝업 표 형식 교체 + CRUD | 0/? | Not started | - |
+| 1. QA 팝업 표 형식 교체 + CRUD | 0/2 | Planned | - |
 | 2. 전체 탭 QA 카드 + QA집계 탭 | 0/? | Not started | - |
