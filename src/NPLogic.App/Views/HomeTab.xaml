@@ -447,63 +447,86 @@
                 <!-- 선순위 카드 -->
                 <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="선순위" Style="{StaticResource CardHeaderStyle}"/>
-                            <TextBlock Text=" (DD/반영)" 
-                                       FontSize="{StaticResource FontSizeSmall}" 
-                                       Foreground="{StaticResource TextTertiaryBrush}"
-                                       VerticalAlignment="Center"
-                                       Margin="8,0,0,12"/>
-                        </StackPanel>
-                        
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="100"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            
-                            <!-- 선순위 근저당 -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="선순위근저당" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorMortgageDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 유치권 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="유치권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SeniorRightsSummary.LienDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 소액보증금 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="소액보증금" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SeniorRightsSummary.SmallDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 임차보증금 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="임차보증금" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SeniorRightsSummary.LeaseDepositDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 임금채권 -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="임금채권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SeniorRightsSummary.WageClaimDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 당해세 -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="당해세" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SeniorRightsSummary.CurrentTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 조세채권 -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="조세채권" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SeniorRightsSummary.SeniorTaxDisplay, FallbackValue=0 / 0}" Style="{StaticResource ValueStyle}" FontSize="{StaticResource FontSizeBody}"/>
-                            
-                            <!-- 합계 -->
-                            <TextBlock Grid.Row="7" Grid.Column="0" Text="합계" Style="{StaticResource LabelStyle}" FontWeight="Bold"/>
-                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding SeniorRightsSummary.TotalReflectedDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                        </Grid>
+                        <TextBlock Text="선순위" Style="{StaticResource CardHeaderStyle}"/>
+
+                        <!-- 선순위요약 -->
+                        <TextBlock Text="선순위요약" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- 행 헤더 (고정 1열) -->
+                                <StackPanel Width="90">
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="" FontSize="11"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="선순위 근저당" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="유치권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="소액보증금" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="임차보증금" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="임금채권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="당해세" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="조세채권" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                        <TextBlock Text="합계" FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- 동적 데이터 열 (담보1, 담보2, ...) -->
+                                <ItemsControl ItemsSource="{Binding SeniorRightsSummaryList}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Width="100">
+                                                <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding SeniorMortgage}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding Lien}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding SmallDeposit}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding LeaseDeposit}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding WageClaim}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding CurrentTax}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding SeniorTax}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                                    <TextBlock Text="{Binding Total}" FontSize="{StaticResource FontSizeBody}" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
                     </StackPanel>
                 </Border>
             </Grid>

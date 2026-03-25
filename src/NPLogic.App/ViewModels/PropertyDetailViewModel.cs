@@ -251,6 +251,22 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 선순위 요약 표시용 아이템 (담보별)
+    /// </summary>
+    public class SeniorRightsSummaryItem
+    {
+        public string Label { get; set; } = string.Empty;
+        public string SeniorMortgage { get; set; } = "-";
+        public string Lien { get; set; } = "-";
+        public string SmallDeposit { get; set; } = "-";
+        public string LeaseDeposit { get; set; } = "-";
+        public string WageClaim { get; set; } = "-";
+        public string CurrentTax { get; set; } = "-";
+        public string SeniorTax { get; set; } = "-";
+        public string Total { get; set; } = "-";
+    }
+
+    /// <summary>
     /// 비고 종합 표시용 아이템
     /// </summary>
     public class NoteSummaryItem
@@ -1883,6 +1899,49 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine($"선순위 요약 로드 실패: {ex.Message}");
+            }
+
+            // 선순위 요약 리스트 (담보별)
+            await LoadSeniorRightsSummaryListAsync();
+        }
+
+        [ObservableProperty]
+        private ObservableCollection<SeniorRightsSummaryItem> _seniorRightsSummaryList = new();
+
+        private async Task LoadSeniorRightsSummaryListAsync()
+        {
+            SeniorRightsSummaryList.Clear();
+            if (Property == null || _rightAnalysisRepository == null) return;
+
+            var siblings = _propertyList?
+                .Where(p => p.BorrowerNumber == Property.BorrowerNumber)
+                .OrderBy(p => p.PropertyNumber)
+                .ToList() ?? new List<NPLogic.Core.Models.Property> { Property };
+
+            for (int i = 0; i < siblings.Count; i++)
+            {
+                var p = siblings[i];
+                try
+                {
+                    var analysis = await _rightAnalysisRepository.GetByPropertyIdAsync(p.Id);
+                    decimal fmt(decimal? v) => v ?? 0;
+                    SeniorRightsSummaryList.Add(new SeniorRightsSummaryItem
+                    {
+                        Label = $"담보{i + 1}",
+                        SeniorMortgage = analysis != null ? $"{fmt(analysis.SeniorMortgageReflected):N0}" : "-",
+                        Lien = analysis != null ? $"{fmt(analysis.LienReflected):N0}" : "-",
+                        SmallDeposit = analysis != null ? $"{fmt(analysis.SmallDepositReflected):N0}" : "-",
+                        LeaseDeposit = analysis != null ? $"{fmt(analysis.LeaseDepositReflected):N0}" : "-",
+                        WageClaim = analysis != null ? $"{fmt(analysis.WageClaimReflected):N0}" : "-",
+                        CurrentTax = analysis != null ? $"{fmt(analysis.CurrentTaxReflected):N0}" : "-",
+                        SeniorTax = analysis != null ? $"{fmt(analysis.SeniorTaxReflected):N0}" : "-",
+                        Total = analysis != null ? $"{(fmt(analysis.SeniorMortgageReflected) + fmt(analysis.LienReflected) + fmt(analysis.SmallDepositReflected) + fmt(analysis.LeaseDepositReflected) + fmt(analysis.WageClaimReflected) + fmt(analysis.CurrentTaxReflected) + fmt(analysis.SeniorTaxReflected)):N0}" : "-"
+                    });
+                }
+                catch
+                {
+                    SeniorRightsSummaryList.Add(new SeniorRightsSummaryItem { Label = $"담보{i + 1}" });
+                }
             }
         }
 
