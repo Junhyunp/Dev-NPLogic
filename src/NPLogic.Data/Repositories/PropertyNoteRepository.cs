@@ -81,6 +81,7 @@ namespace NPLogic.Data.Repositories
 
                 var response = await client
                     .From<PropertyNoteTable>()
+                    .OnConflict("property_id, tab_name")
                     .Upsert(table);
 
                 var result = response.Models.FirstOrDefault();
