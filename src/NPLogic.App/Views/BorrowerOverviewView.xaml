@@ -142,20 +142,27 @@
                     <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
                         <Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="&#x1F464;" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="&#x1F464; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
                                 <TextBlock Text="차주개요"
                                            Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
-                            <Button Command="{Binding ToggleNotePanelCommand}"
-                                    Style="{StaticResource MaterialDesignIconButton}"
-                                    ToolTip="비고 패널 열기/닫기"
-                                    HorizontalAlignment="Right"
-                                    Width="32" Height="32" Padding="0">
-                                <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18" Foreground="White"/>
-                            </Button>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Content="저장"
+                                        Command="{Binding SaveBorrowerCommand}"
+                                        Style="{StaticResource MaterialDesignRaisedButton}"
+                                        Padding="12,6"
+                                        Foreground="White"
+                                        Margin="0,0,8,0"/>
+                                <Button Command="{Binding ToggleNotePanelCommand}"
+                                        Style="{StaticResource MaterialDesignIconButton}"
+                                        ToolTip="비고 패널 열기/닫기"
+                                        Width="32" Height="32" Padding="0">
+                                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18" Foreground="White"/>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
                     <!-- 차주 요약 정보 -->
@@ -375,7 +382,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="대지면적" Binding="{Binding LandArea, StringFormat={}{0:N2}}" Width="90">
+                            <DataGridTextColumn Header="대지면적" Binding="{Binding LandArea, StringFormat={}{0:N2}}" Width="Auto">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
                                         <Setter Property="TextAlignment" Value="Right"/>
@@ -383,7 +390,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat={}{0:N2}}" Width="90">
+                            <DataGridTextColumn Header="건물면적" Binding="{Binding BuildingArea, StringFormat={}{0:N2}}" Width="Auto">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
                                         <Setter Property="TextAlignment" Value="Right"/>
@@ -391,7 +398,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="기계기구" Binding="{Binding MachineryValue, StringFormat=N0}" Width="90">
+                            <DataGridTextColumn Header="기계기구" Binding="{Binding MachineryValue, StringFormat=N0}" Width="Auto">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
                                         <Setter Property="TextAlignment" Value="Right"/>
@@ -399,7 +406,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTemplateColumn Header="공장저당여부" Width="90">
+                            <DataGridTemplateColumn Header="공장저당여부" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource SectionDataGridTextBlockStyle}">
@@ -414,7 +421,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="공담" Width="60">
+                            <DataGridTemplateColumn Header="공담" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource SectionDataGridTextBlockStyle}">
@@ -442,13 +449,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- 저장 버튼 -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,16">
-                <Button Content="저장"
-                        Command="{Binding SaveBorrowerCommand}"
-                        Style="{StaticResource PrimaryButton}"
-                        Padding="32,10"/>
-            </StackPanel>
         </StackPanel>
 
         <!-- ================================================================ -->
