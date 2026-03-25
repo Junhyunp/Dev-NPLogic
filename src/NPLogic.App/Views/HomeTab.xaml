@@ -150,7 +150,7 @@
                             <Border CornerRadius="4" Padding="12,6" Margin="8,0,0,0">
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray200Brush}"/>
+                                        <Setter Property="Background" Value="{StaticResource TextSecondaryBrush}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding LoanSummary.ValidGuaranteeCount, FallbackValue=0, Converter={StaticResource IntToBoolConverter}}" Value="True">
                                                 <Setter Property="Background" Value="{StaticResource SuccessBrush}"/>
