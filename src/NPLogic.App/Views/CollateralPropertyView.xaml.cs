@@ -2396,11 +2396,17 @@ namespace NPLogic.Views
             {
                 if (webView.CoreWebView2 == null) return;
 
-                var script = enabled
+                // 카카오 Map 객체용 (위성도, 지적도)
+                var mapScript = enabled
                     ? "if(typeof map !== 'undefined') { map.setDraggable(true); map.setZoomable(true); }"
                     : "if(typeof map !== 'undefined') { map.setDraggable(false); map.setZoomable(false); }";
+                await webView.ExecuteScriptAsync(mapScript);
 
-                await webView.ExecuteScriptAsync(script);
+                // CSS overlay 방식 (로드뷰 포함 — 로드뷰는 Map API setDraggable 미지원)
+                var overlayScript = enabled
+                    ? "var ov=document.getElementById('lock-overlay');if(ov)ov.style.display='none';"
+                    : "var ov=document.getElementById('lock-overlay');if(!ov){ov=document.createElement('div');ov.id='lock-overlay';ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;background:transparent;cursor:not-allowed;';document.body.appendChild(ov);}else{ov.style.display=\"block\";}";
+                await webView.ExecuteScriptAsync(overlayScript);
             }
             catch (Exception ex)
             {

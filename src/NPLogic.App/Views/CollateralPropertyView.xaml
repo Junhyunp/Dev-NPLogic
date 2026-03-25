@@ -136,9 +136,9 @@
                         <Grid x:Name="MapPanelGrid" Height="300">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2"/>
+                                <ColumnDefinition Width="4"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="2"/>
+                                <ColumnDefinition Width="4"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
