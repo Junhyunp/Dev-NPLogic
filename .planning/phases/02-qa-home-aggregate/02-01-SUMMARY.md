@@ -65,7 +65,7 @@ Each task was committed atomically:
 1. **Task 1: HomeTab QA 요약 카드를 4열 DataGrid로 교체** - `37b9951` (feat)
 2. **Task 2: QASummaryTab 우측 패널을 6열 DataGrid로 교체** - `f7fa8ee` (feat)
 
-**Plan metadata:** (pending) (docs: complete plan)
+**Plan metadata:** `0cf010e` (docs: complete plan)
 
 ## Files Created/Modified
 - `src/NPLogic.App/Views/HomeTab.xaml` - Row 4 QA 요약 섹션: 6개 카테고리 카운트 카드 -> 4열 DataGrid 표
