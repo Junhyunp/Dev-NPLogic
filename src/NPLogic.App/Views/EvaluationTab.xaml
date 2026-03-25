@@ -296,7 +296,7 @@
                                             <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="Auto" IsReadOnly="True"
+                                            <DataGridTextColumn x:Name="AreaColumn" Header="거래면적(㎡)" Binding="{Binding Area, StringFormat=N2}" Width="Auto" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                             <DataGridTextColumn Header="거래일자" Binding="{Binding TransactionDate, StringFormat=yyyy-MM-dd}" Width="110" IsReadOnly="True"
                                                                 ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
@@ -331,8 +331,8 @@
                                         </DataGrid.Columns>
                                     </DataGrid>
 
-                                    <!-- 거래가격/건수 그래프 (하단, 나머지 공간 채움) -->
-                                    <DockPanel>
+                                    <!-- 거래가격/건수 그래프 (하단, 아파트/상가만 표시) -->
+                                    <DockPanel Visibility="{Binding ShowAreaAndChart, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <Border DockPanel.Dock="Top"
                                                 Background="{StaticResource BlueGray100Brush}"
                                                 BorderBrush="{StaticResource BorderBrush}"

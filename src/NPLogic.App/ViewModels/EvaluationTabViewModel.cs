@@ -613,12 +613,14 @@ namespace NPLogic.ViewModels
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(ShowAreaAndChart))]
         private bool _isApartmentType = true;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(ShowAreaAndChart))]
         private bool _isMultiFamilyType;
 
         /// <summary>
@@ -644,10 +646,16 @@ namespace NPLogic.ViewModels
 
         public bool IsFactoryOrHouseType => IsFactoryType || IsHouseLandType;
 
+        /// <summary>
+        /// 거래면적 컬럼 + 거래가격/건수 그래프 표시 여부 (아파트/상가만)
+        /// </summary>
+        public bool ShowAreaAndChart => IsApartmentType || IsCommercialType;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(ShowAreaAndChart))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrHouseType))]
@@ -657,6 +665,7 @@ namespace NPLogic.ViewModels
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(ShowAreaAndChart))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialType))]
         [NotifyPropertyChangedFor(nameof(IsCommercialOrHouseType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
@@ -666,6 +675,7 @@ namespace NPLogic.ViewModels
         [NotifyPropertyChangedFor(nameof(CaseMapSectionTitle))]
         [NotifyPropertyChangedFor(nameof(IsShowRealTransaction))]
         [NotifyPropertyChangedFor(nameof(AmountColumnHeader))]
+        [NotifyPropertyChangedFor(nameof(ShowAreaAndChart))]
         [NotifyPropertyChangedFor(nameof(IsCommercialOrHouseType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrCommercialOrHouseType))]
         [NotifyPropertyChangedFor(nameof(IsFactoryOrHouseType))]

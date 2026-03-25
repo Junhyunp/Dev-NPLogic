@@ -14,6 +14,28 @@ namespace NPLogic.Views
         public EvaluationTab()
         {
             InitializeComponent();
+            DataContextChanged += EvaluationTab_DataContextChanged;
+        }
+
+        private void EvaluationTab_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue is System.ComponentModel.INotifyPropertyChanged vm)
+            {
+                vm.PropertyChanged += (s, args) =>
+                {
+                    if (args.PropertyName == "ShowAreaAndChart")
+                        UpdateAreaColumnVisibility();
+                };
+                UpdateAreaColumnVisibility();
+            }
+        }
+
+        private void UpdateAreaColumnVisibility()
+        {
+            if (DataContext is ViewModels.EvaluationTabViewModel vm)
+            {
+                AreaColumn.Visibility = vm.ShowAreaAndChart ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         /// <summary>
