@@ -766,7 +766,8 @@ namespace NPLogic.ViewModels
                 {
                     PropertyId = property.Id,
                     PropertyNumber = property.PropertyNumber ?? "-",
-                    BorrowerNumber = "-", // Property에는 BorrowerNumber가 없음
+                    BorrowerNumber = property.BorrowerNumber ?? "-",
+                    BorrowerName = property.DebtorName ?? "",
                     IsSelected = false
                 });
             }
@@ -851,7 +852,7 @@ namespace NPLogic.ViewModels
             {
                 PropertyId = property.Id,
                 PropertyNumber = property.PropertyNumber ?? "-",
-                BorrowerNumber = "-",
+                BorrowerNumber = property.BorrowerNumber ?? "-",
                 BorrowerName = property.DebtorName ?? "",
                 IsSelected = true
             };
