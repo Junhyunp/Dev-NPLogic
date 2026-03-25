@@ -760,14 +760,34 @@ namespace NPLogic.ViewModels
             var properties = await _propertyRepository.GetByProgramIdAsync(_currentProgramId.Value);
             
             // 처음 10개만 가져온 후, 그 중에서 닫은 탭 제외 (새 탭 추가 안 함)
+            // 차주명 캐시 (같은 borrower_number 중복 조회 방지)
+            var borrowerNameCache = new Dictionary<string, string>();
             foreach (var property in properties.Take(10).Where(p => !closedTabs.Contains(p.Id)))
             {
+                var bName = property.DebtorName;
+                if (string.IsNullOrEmpty(bName) && !string.IsNullOrEmpty(property.BorrowerNumber))
+                {
+                    if (!borrowerNameCache.TryGetValue(property.BorrowerNumber, out bName))
+                    {
+                        try
+                        {
+                            if (_borrowerRepository != null)
+                            {
+                                var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(property.BorrowerNumber);
+                                bName = borrower?.BorrowerName ?? "";
+                            }
+                        }
+                        catch { bName = ""; }
+                        borrowerNameCache[property.BorrowerNumber] = bName ?? "";
+                    }
+                }
+
                 PropertyTabs.Add(new PropertyTabItem
                 {
                     PropertyId = property.Id,
                     PropertyNumber = property.PropertyNumber ?? "-",
                     BorrowerNumber = property.BorrowerNumber ?? "-",
-                    BorrowerName = property.DebtorName ?? "",
+                    BorrowerName = bName ?? "",
                     IsSelected = false
                 });
             }
@@ -833,7 +853,7 @@ namespace NPLogic.ViewModels
         /// <summary>
         /// 물건 탭 추가
         /// </summary>
-        public void AddPropertyTab(Property property)
+        public async void AddPropertyTab(Property property)
         {
             // 이미 열려있는지 확인
             if (PropertyTabs.Any(t => t.PropertyId == property.Id))
@@ -848,12 +868,28 @@ namespace NPLogic.ViewModels
                 NavigationStateService.Instance.RemoveClosedTab(_currentProgramId.Value, property.Id);
             }
 
+            // 차주명: DebtorName이 없으면 같은 BorrowerNumber의 기존 탭에서 가져오거나, borrower 조회
+            var borrowerName = property.DebtorName;
+            if (string.IsNullOrEmpty(borrowerName) && !string.IsNullOrEmpty(property.BorrowerNumber))
+            {
+                borrowerName = PropertyTabs.FirstOrDefault(t => t.BorrowerNumber == property.BorrowerNumber)?.BorrowerName;
+                if (string.IsNullOrEmpty(borrowerName) && _borrowerRepository != null)
+                {
+                    try
+                    {
+                        var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(property.BorrowerNumber);
+                        borrowerName = borrower?.BorrowerName;
+                    }
+                    catch { /* 무시 */ }
+                }
+            }
+
             var newTab = new PropertyTabItem
             {
                 PropertyId = property.Id,
                 PropertyNumber = property.PropertyNumber ?? "-",
                 BorrowerNumber = property.BorrowerNumber ?? "-",
-                BorrowerName = property.DebtorName ?? "",
+                BorrowerName = borrowerName ?? "",
                 IsSelected = true
             };
 
