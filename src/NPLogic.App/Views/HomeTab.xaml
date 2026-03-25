@@ -664,74 +664,137 @@
                 <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="경(공)매일정" Style="{StaticResource CardHeaderStyle}"/>
-                        
+
+                        <!-- 상단 표: 경매/공매 여부 + 개시여부 (2x3, 2-3열 병합) -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-                            
-                            <!-- 경매개시여부 -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="경매개시" Style="{StaticResource LabelStyle}"/>
-                            <Border Grid.Row="0" Grid.Column="1" 
-                                    HorizontalAlignment="Left"
-                                    CornerRadius="3" 
-                                    Padding="8,3"
-                                    Margin="0,4">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Background" Value="#E3F2FD"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding AuctionSummary.IsAuctionStarted}" Value="True">
-                                                <Setter Property="Background" Value="#E8F5E9"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=미개시}" FontSize="{StaticResource FontSizeBody}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Foreground" Value="#1565C0"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding AuctionSummary.IsAuctionStarted}" Value="True">
-                                                    <Setter Property="Foreground" Value="#2E7D32"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+
+                            <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="경매/공매 여부" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            
-                            <!-- 관할법원/사건번호 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="법원/사건번호" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" 
-                                       Text="{Binding AuctionSummary.CourtCaseDisplay, FallbackValue=-}" 
-                                       Style="{StaticResource ValueStyle}"
-                                       TextTrimming="CharacterEllipsis"/>
-                            
-                            <!-- 최종경매 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="최종경매" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AuctionSummary.FinalAuctionDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 차후예정일 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="차후예정일" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AuctionSummary.NextAuctionDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}" Foreground="{StaticResource WarningBrush}"/>
-                            
-                            <!-- 차후 최저입찰가 -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="최저입찰가" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AuctionSummary.NextMinimumBidDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                            
-                            <!-- 낙찰금액 -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="낙찰금액" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding AuctionSummary.WinningBidAmountDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+                            <Border Grid.Row="0" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="{Binding AuctionSummary.AuctionTypeDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                <TextBlock Text="개시여부" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Height="30" Padding="8,6">
+                                <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- 경계선 (상단/하단 표 구분) -->
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,2,0,0" Margin="0,0,0,0"/>
+
+                        <!-- 하단 표: 개시 시 (7행) -->
+                        <Grid Visibility="{Binding AuctionSummary.IsAuctionStarted, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="법원/사건번호" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="최종경매" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="1" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="2" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="추후 예정일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="2" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="3" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="최저입찰가" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="3" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="4" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="낙찰여부" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="4" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="4" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="5" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="낙찰금액" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="5" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="5" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="6" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                <TextBlock Text="예상낙찰일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="6" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6"/>
+                            <Border Grid.Row="6" Grid.Column="2" Height="30" Padding="8,6"/>
+                        </Grid>
+
+                        <!-- 하단 표: 미개시 시 (4행) -->
+                        <Grid Visibility="{Binding AuctionSummary.IsAuctionStarted, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="법원" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="0" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="예상 경매개시일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="1" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="2" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="예상낙찰일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
+                            <Border Grid.Row="2" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+
+                            <Border Grid.Row="3" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                <TextBlock Text="예상낙찰회차" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6"/>
+                            <Border Grid.Row="3" Grid.Column="2" Height="30" Padding="8,6"/>
                         </Grid>
                     </StackPanel>
                 </Border>
