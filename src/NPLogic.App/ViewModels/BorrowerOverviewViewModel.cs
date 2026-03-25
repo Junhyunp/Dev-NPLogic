@@ -215,6 +215,12 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // 현재 사용자 로드 (권한 체크용)
+                if (CurrentUser == null)
+                {
+                    CurrentUser = await _permissionService.GetCurrentUserAsync();
+                }
+
                 // 단일 차주 모드인 경우 (선택된 물건이 있는 경우)
                 if (IsSingleBorrowerMode && SelectedProperty != null)
                 {
@@ -852,7 +858,7 @@ namespace NPLogic.ViewModels
                     var canEdit = await _permissionService.CanEditAsync(programGuid, CurrentUser);
                     if (!canEdit)
                     {
-                        ErrorMessage = PermissionService.GetNoPermissionMessage("edit");
+                        NPLogic.UI.Services.ToastService.Instance.ShowWarning(PermissionService.GetNoPermissionMessage("edit"));
                         return;
                     }
                 }
