@@ -447,7 +447,56 @@
                         </Grid>
                     </StackPanel>
                 </Border>
-                
+
+                <!-- ========== 토지이용계획 WebView2 섹션 (토글 가능) ========== -->
+                <Border x:Name="LandUsePlanSection"
+                        Visibility="Collapsed"
+                        Background="{StaticResource SurfaceColor}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <!-- 헤더 -->
+                        <Border Background="{StaticResource PrimaryBrush}"
+                                CornerRadius="8,8,0,0"
+                                Padding="16,10">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="&#x1F4CB; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                    <TextBlock Text="토지이용계획" Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="LandUseLockButton"
+                                            Content="고정"
+                                            Click="LandUseLock_Click"
+                                            Padding="12,6"
+                                            Background="Transparent"
+                                            BorderBrush="White"
+                                            BorderThickness="1"
+                                            Foreground="White"
+                                            Cursor="Hand"
+                                            ToolTip="웹페이지 드래그/줌 고정"
+                                            Margin="0,0,8,0"
+                                            FontSize="{StaticResource FontSizeSmall}"/>
+                                    <Button Content="닫기"
+                                            Click="LandUseClose_Click"
+                                            Padding="12,6"
+                                            Background="Transparent"
+                                            BorderBrush="White"
+                                            BorderThickness="1"
+                                            Foreground="White"
+                                            Cursor="Hand"
+                                            ToolTip="토지이용계획 패널 닫기"
+                                            FontSize="{StaticResource FontSizeSmall}"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <!-- WebView2 -->
+                        <wv2:WebView2 x:Name="LandUsePlanWebView" Height="600"/>
+                    </StackPanel>
+                </Border>
+
                 <!-- ========== 등기부등본 정보 ========== -->
                 <Border Background="{StaticResource SurfaceColor}"
                         BorderBrush="{StaticResource BorderBrush}"

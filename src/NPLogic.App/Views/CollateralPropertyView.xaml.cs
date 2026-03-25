@@ -51,6 +51,7 @@ namespace NPLogic.Views
         private bool _isSatelliteLocked = false;
         private bool _isCadastralLocked = false;
         private bool _isRoadViewLocked = false;
+        private bool _isLandUseLocked = false;
 
         private PropertyDetailViewModel? _currentVm;
 
@@ -1018,15 +1019,14 @@ namespace NPLogic.Views
 
                 if (!string.IsNullOrEmpty(pnu) && pnu.Length == 19)
                 {
-                    // 외부 브라우저에서 토지이음 열기
-                    OpenLandUsePlanInBrowser(pnu);
+                    // 인라인 WebView2에서 토지이음 열기
+                    await OpenLandUsePlanInline(pnu);
                 }
                 else
                 {
-                    // PNU 조회 실패 - 토지이음 검색 페이지를 브라우저에서 열기
-                    var searchUrl = "https://www.eum.go.kr/web/ar/lu/luLandSrch.jsp";
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(searchUrl) { UseShellExecute = true });
-                    MessageBox.Show("PNU 자동 조회에 실패했습니다.\n토지이음 검색 페이지에서 직접 주소를 검색해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // PNU 조회 실패 - 토지이음 검색 페이지를 인라인으로 열기
+                    var address = vm.Property.DisplayAddress ?? "";
+                    await OpenLandUsePlanSearchInline(address);
                 }
             }
             catch (Exception ex)
@@ -1082,6 +1082,101 @@ namespace NPLogic.Views
             {
                 System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이음 열기 실패: {ex.Message}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// 토지이용계획을 인라인 WebView2에서 열기 (PNU로 바로 조회)
+        /// </summary>
+        private async Task OpenLandUsePlanInline(string pnu)
+        {
+            try
+            {
+                LandUsePlanSection.Visibility = Visibility.Visible;
+
+                // WebView2 초기화
+                await LandUsePlanWebView.EnsureCoreWebView2Async(null);
+
+                // POST 자동 제출 HTML 생성
+                var html = GenerateLandUsePlanHtml(pnu);
+                LandUsePlanWebView.NavigateToString(html);
+
+                // 고정 상태 초기화
+                _isLandUseLocked = false;
+                LandUseLockButton.Content = "고정";
+                LandUseLockButton.ToolTip = "웹페이지 드래그/줌 고정";
+
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이용계획 인라인 열기: PNU={pnu}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이용계획 인라인 열기 실패: {ex.Message}");
+                // 인라인 실패 시 외부 브라우저로 폴백
+                OpenLandUsePlanInBrowser(pnu);
+            }
+        }
+
+        /// <summary>
+        /// 토지이용계획 검색 페이지를 인라인 WebView2에서 열기
+        /// </summary>
+        private async Task OpenLandUsePlanSearchInline(string address)
+        {
+            try
+            {
+                LandUsePlanSection.Visibility = Visibility.Visible;
+
+                await LandUsePlanWebView.EnsureCoreWebView2Async(null);
+
+                var html = GenerateLandUsePlanSearchHtml(address);
+                LandUsePlanWebView.NavigateToString(html);
+
+                // 고정 상태 초기화
+                _isLandUseLocked = false;
+                LandUseLockButton.Content = "고정";
+                LandUseLockButton.ToolTip = "웹페이지 드래그/줌 고정";
+
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이용계획 검색 인라인 열기: address={address}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[CollateralPropertyView] 토지이용계획 검색 인라인 열기 실패: {ex.Message}");
+                // 인라인 실패 시 외부 브라우저로 폴백
+                var searchUrl = "https://www.eum.go.kr/web/ar/lu/luLandSrch.jsp";
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(searchUrl) { UseShellExecute = true });
+                MessageBox.Show("PNU 자동 조회에 실패했습니다.\n토지이음 검색 페이지에서 직접 주소를 검색해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// 토지이용계획 닫기 버튼 클릭
+        /// </summary>
+        private void LandUseClose_Click(object sender, RoutedEventArgs e)
+        {
+            LandUsePlanSection.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// 토지이용계획 고정/해제 토글
+        /// </summary>
+        private async void LandUseLock_Click(object sender, RoutedEventArgs e)
+        {
+            _isLandUseLocked = !_isLandUseLocked;
+            LandUseLockButton.Content = _isLandUseLocked ? "해제" : "고정";
+            LandUseLockButton.ToolTip = _isLandUseLocked ? "웹페이지 드래그/줌 해제" : "웹페이지 드래그/줌 고정";
+
+            try
+            {
+                if (LandUsePlanWebView.CoreWebView2 == null) return;
+
+                // CSS overlay 방식으로 상호작용 차단/해제
+                var overlayScript = _isLandUseLocked
+                    ? "var ov=document.getElementById('lock-overlay');if(!ov){ov=document.createElement('div');ov.id='lock-overlay';ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;background:transparent;cursor:not-allowed;';document.body.appendChild(ov);}else{ov.style.display=\"block\";}"
+                    : "var ov=document.getElementById('lock-overlay');if(ov)ov.style.display='none';";
+                await LandUsePlanWebView.ExecuteScriptAsync(overlayScript);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[토지이용계획 고정/해제] 오류: {ex.Message}");
             }
         }
 
@@ -2309,6 +2404,30 @@ namespace NPLogic.Views
             catch
             {
                 // TransformToAncestor 실패 시 무시 (로드 전 등)
+            }
+
+            // 토지이용계획 WebView2 뷰포트 가시성 체크
+            if (LandUsePlanSection.Visibility == Visibility.Visible && LandUsePlanWebView != null)
+            {
+                try
+                {
+                    var landTransform = LandUsePlanSection.TransformToAncestor(MainScrollViewer);
+                    var landTopLeft = landTransform.Transform(new Point(0, 0));
+                    var landBottomRight = landTransform.Transform(new Point(LandUsePlanSection.ActualWidth, LandUsePlanSection.ActualHeight));
+
+                    double viewportTop2 = 0;
+                    double viewportBottom2 = MainScrollViewer.ViewportHeight;
+
+                    bool landFullyVisible = landTopLeft.Y >= viewportTop2 && landBottomRight.Y <= viewportBottom2;
+                    var landTargetVisibility = landFullyVisible ? Visibility.Visible : Visibility.Collapsed;
+
+                    if (LandUsePlanWebView.Visibility != landTargetVisibility)
+                        LandUsePlanWebView.Visibility = landTargetVisibility;
+                }
+                catch
+                {
+                    // TransformToAncestor 실패 시 무시
+                }
             }
         }
 
