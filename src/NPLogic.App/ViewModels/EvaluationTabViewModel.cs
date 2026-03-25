@@ -432,6 +432,9 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasInquiryResultTable;
 
+        [ObservableProperty]
+        private bool _hasInquiryMachineryRow;
+
         // === 임대호가분석 ===
         [ObservableProperty]
         private bool _hasRentalQuoteTable;
@@ -1852,8 +1855,7 @@ namespace NPLogic.ViewModels
         [RelayCommand]
         private void AddInquiryMachineryRow()
         {
-            // 이미 기계기구 행이 있으면 무시
-            if (InquiryResultRows.Any(r => r.Category == "기계기구")) return;
+            if (HasInquiryMachineryRow) return;
 
             var sumIndex = -1;
             for (int i = 0; i < InquiryResultRows.Count; i++)
@@ -1864,6 +1866,18 @@ namespace NPLogic.ViewModels
                 InquiryResultRows.Insert(sumIndex, new InquiryResultRow { Category = "기계기구" });
             else
                 InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
+            HasInquiryMachineryRow = true;
+        }
+
+        [RelayCommand]
+        private void RemoveInquiryMachineryRow()
+        {
+            var row = InquiryResultRows.FirstOrDefault(r => r.Category == "기계기구");
+            if (row != null)
+            {
+                InquiryResultRows.Remove(row);
+                HasInquiryMachineryRow = false;
+            }
         }
 
         /// <summary>

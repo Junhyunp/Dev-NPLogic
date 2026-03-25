@@ -1101,11 +1101,18 @@
                                                 Foreground="White"/>
                                         <Button Content="기계기구 추가" FontSize="11"
                                                 Command="{Binding AddInquiryMachineryRowCommand}"
-                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Visibility="{Binding HasInquiryMachineryRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                                 Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
                                                 Background="Transparent" BorderBrush="White" BorderThickness="1"
                                                 ToolTip="합계 위에 기계기구 행 추가"
                                                 Foreground="White"/>
+                                        <Button Content="기계기구 제거" FontSize="11"
+                                                Command="{Binding RemoveInquiryMachineryRowCommand}"
+                                                Visibility="{Binding HasInquiryMachineryRow, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
+                                                Background="Transparent" BorderBrush="#E53935" BorderThickness="1"
+                                                ToolTip="기계기구 행 제거"
+                                                Foreground="#E53935"/>
                                         <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
                                                 HorizontalAlignment="Right" VerticalAlignment="Center"
                                                 Command="{Binding DestroyInquiryResultTableCommand}"
@@ -1350,6 +1357,99 @@
                                 <Border Grid.Row="8" Grid.Column="5" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,1,1" Padding="4,6" MinHeight="28"/>
                                 <Border Grid.Row="8" Grid.Column="6" BorderBrush="{StaticResource BlueGray200Brush}" BorderThickness="0,0,0,1" Padding="4,6" MinHeight="28"/>
                             </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 현재 임대 수익가치 (상가 전용 — 임대호가분석과 무상임대분석 사이) -->
+                    <Border Style="{StaticResource CardStyle}"
+                            Visibility="{Binding IsCommercialType, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <StackPanel>
+                            <Border Background="{StaticResource PrimaryBrush}"
+                                    CornerRadius="8,8,0,0"
+                                    Padding="16,10">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F3E2; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="현재 임대 수익가치"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding CreateRentalProfitTableCommand}"
+                                                Visibility="{Binding HasRentalProfitTable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                ToolTip="현재 임대 수익가치 테이블 생성"
+                                                Foreground="White"/>
+                                        <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
+                                                Command="{Binding DestroyRentalProfitTableCommand}"
+                                                Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,0" MinHeight="0" Height="20" Cursor="Hand"
+                                                Background="Transparent" BorderThickness="0"
+                                                ToolTip="현재 임대 수익가치 테이블 제거"
+                                                Foreground="White"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- 상단 DataGrid: 임대 내역 -->
+                            <DataGrid Visibility="{Binding HasRentalProfitTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      ItemsSource="{Binding RentalIncomeRows}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False" CanUserDeleteRows="False"
+                                      CanUserSortColumns="False"
+                                      HeadersVisibility="Column"
+                                      RowHeight="32"
+                                      GridLinesVisibility="All"
+                                      HorizontalGridLinesBrush="{StaticResource BorderBrush}"
+                                      VerticalGridLinesBrush="{StaticResource BorderBrush}"
+                                      BorderBrush="{StaticResource BorderBrush}" BorderThickness="0"
+                                      Background="White"
+                                      RowBackground="White"
+                                      MinHeight="60"
+                                      PreviewMouseWheel="DataGrid_PreviewMouseWheel">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <StaticResource ResourceKey="SectionDataGridColumnHeaderStyle"/>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <StaticResource ResourceKey="SectionDataGridCellStyle"/>
+                                </DataGrid.CellStyle>
+                                <DataGrid.RowStyle>
+                                    <StaticResource ResourceKey="SectionDataGridRowStyle"/>
+                                </DataGrid.RowStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="면적" Binding="{Binding Area, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차인" Binding="{Binding Tenant, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차개시일" Binding="{Binding LeaseStartDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="임차종료일" Binding="{Binding LeaseEndDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="확정신고일" Binding="{Binding ConfirmationDate, UpdateSourceTrigger=PropertyChanged}" Width="Auto"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="보증금" Binding="{Binding Deposit, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="월세" Binding="{Binding MonthlyRent, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="비고" Binding="{Binding Note, UpdateSourceTrigger=PropertyChanged}" Width="*"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </StackPanel>
                     </Border>
 
@@ -2112,11 +2212,18 @@
                                                 Foreground="White"/>
                                         <Button Content="기계기구 추가" FontSize="11"
                                                 Command="{Binding AddInquiryMachineryRowCommand}"
-                                                Visibility="{Binding HasInquiryResultTable, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Visibility="{Binding HasInquiryMachineryRow, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                                 Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
                                                 Background="Transparent" BorderBrush="White" BorderThickness="1"
                                                 ToolTip="합계 위에 기계기구 행 추가"
                                                 Foreground="White"/>
+                                        <Button Content="기계기구 제거" FontSize="11"
+                                                Command="{Binding RemoveInquiryMachineryRowCommand}"
+                                                Visibility="{Binding HasInquiryMachineryRow, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Padding="8,2" MinHeight="0" Height="22" Cursor="Hand" Margin="0,0,4,0"
+                                                Background="Transparent" BorderBrush="#E53935" BorderThickness="1"
+                                                ToolTip="기계기구 행 제거"
+                                                Foreground="#E53935"/>
                                         <Button Content="&#x2212;" FontSize="16" FontWeight="Bold"
                                                 HorizontalAlignment="Right" VerticalAlignment="Center"
                                                 Command="{Binding DestroyInquiryResultTableCommand}"
