@@ -665,10 +665,11 @@
                     <StackPanel>
                         <TextBlock Text="경(공)매일정" Style="{StaticResource CardHeaderStyle}"/>
 
-                        <!-- 상단 표: 경매/공매 여부 + 개시여부 (2x3, 2-3열 병합) -->
+                        <!-- 상단 표: 경매/공매 여부 + 개시여부 (2-3열 병합) -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -679,14 +680,14 @@
                             <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                 <TextBlock Text="경매/공매 여부" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                            <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
                                 <TextBlock Text="{Binding AuctionSummary.AuctionTypeDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
 
                             <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
                                 <TextBlock Text="개시여부" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="1" Height="30" Padding="8,6">
+                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="30" Padding="8,6">
                                 <TextBlock Text="{Binding AuctionSummary.AuctionStatusDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                         </Grid>
@@ -697,7 +698,7 @@
                         <!-- 하단 표: 개시 시 (7행) -->
                         <Grid Visibility="{Binding AuctionSummary.IsAuctionStarted, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
@@ -758,10 +759,10 @@
                             <Border Grid.Row="6" Grid.Column="2" Height="30" Padding="8,6"/>
                         </Grid>
 
-                        <!-- 하단 표: 미개시 시 (4행) -->
+                        <!-- 하단 표: 미개시 시 (4행, 2-3열 병합) -->
                         <Grid Visibility="{Binding AuctionSummary.IsAuctionStarted, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
@@ -775,26 +776,22 @@
                             <Border Grid.Row="0" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                 <TextBlock Text="법원" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="0" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
-                            <Border Grid.Row="0" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+                            <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
 
                             <Border Grid.Row="1" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                 <TextBlock Text="예상 경매개시일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="1" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
-                            <Border Grid.Row="1" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
 
                             <Border Grid.Row="2" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
                                 <TextBlock Text="예상낙찰일" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="2" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6"/>
-                            <Border Grid.Row="2" Grid.Column="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
+                            <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6"/>
 
                             <Border Grid.Row="3" Grid.Column="0" Height="30" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
                                 <TextBlock Text="예상낙찰회차" FontSize="{StaticResource FontSizeBody}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <Border Grid.Row="3" Grid.Column="1" Height="30" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6"/>
-                            <Border Grid.Row="3" Grid.Column="2" Height="30" Padding="8,6"/>
+                            <Border Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Height="30" Padding="8,6"/>
                         </Grid>
                     </StackPanel>
                 </Border>
