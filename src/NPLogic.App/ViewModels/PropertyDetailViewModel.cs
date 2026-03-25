@@ -2405,6 +2405,92 @@ namespace NPLogic.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void MoveGapguRowUp(RegistryGapguRow? row)
+        {
+            if (row == null) return;
+            var index = RegistryGapguRows.IndexOf(row);
+            if (index <= 0) return;
+            RegistryGapguRows.Move(index, index - 1);
+            for (int i = 0; i < RegistryGapguRows.Count; i++)
+                RegistryGapguRows[i].SortIndex = i + 1;
+        }
+
+        [RelayCommand]
+        private void MoveGapguRowDown(RegistryGapguRow? row)
+        {
+            if (row == null) return;
+            var index = RegistryGapguRows.IndexOf(row);
+            if (index < 0 || index >= RegistryGapguRows.Count - 1) return;
+            RegistryGapguRows.Move(index, index + 1);
+            for (int i = 0; i < RegistryGapguRows.Count; i++)
+                RegistryGapguRows[i].SortIndex = i + 1;
+        }
+
+        [RelayCommand]
+        private void MoveEulguRowUp(RegistryEulguRow? row)
+        {
+            if (row == null) return;
+            var index = RegistryEulguRows.IndexOf(row);
+            if (index <= 0) return;
+            RegistryEulguRows.Move(index, index - 1);
+            for (int i = 0; i < RegistryEulguRows.Count; i++)
+                RegistryEulguRows[i].SortIndex = i + 1;
+        }
+
+        [RelayCommand]
+        private void MoveEulguRowDown(RegistryEulguRow? row)
+        {
+            if (row == null) return;
+            var index = RegistryEulguRows.IndexOf(row);
+            if (index < 0 || index >= RegistryEulguRows.Count - 1) return;
+            RegistryEulguRows.Move(index, index + 1);
+            for (int i = 0; i < RegistryEulguRows.Count; i++)
+                RegistryEulguRows[i].SortIndex = i + 1;
+        }
+
+        [RelayCommand]
+        private async Task ResetGapguRankNumbersAsync()
+        {
+            if (_registryRepository == null || RegistryGapguRows.Count == 0) return;
+            try
+            {
+                for (int i = 0; i < RegistryGapguRows.Count; i++)
+                {
+                    RegistryGapguRows[i].RankNo = (i + 1).ToString();
+                    RegistryGapguRows[i].SortIndex = i + 1;
+                    await _registryRepository.UpdateGapguRowAsync(RegistryGapguRows[i]);
+                }
+                SuccessMessage = "갑구 순위번호가 재설정되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"갑구 순위 재설정 실패: {ex.Message}");
+                ErrorMessage = $"갑구 순위 재설정 실패: {ex.Message}";
+            }
+        }
+
+        [RelayCommand]
+        private async Task ResetEulguRankNumbersAsync()
+        {
+            if (_registryRepository == null || RegistryEulguRows.Count == 0) return;
+            try
+            {
+                for (int i = 0; i < RegistryEulguRows.Count; i++)
+                {
+                    RegistryEulguRows[i].RankNo = (i + 1).ToString();
+                    RegistryEulguRows[i].SortIndex = i + 1;
+                    await _registryRepository.UpdateEulguRowAsync(RegistryEulguRows[i]);
+                }
+                SuccessMessage = "을구 순위번호가 재설정되었습니다.";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"을구 순위 재설정 실패: {ex.Message}");
+                ErrorMessage = $"을구 순위 재설정 실패: {ex.Message}";
+            }
+        }
+
         /// <summary>
         /// 주소 정규화 (비교용)
         /// </summary>
