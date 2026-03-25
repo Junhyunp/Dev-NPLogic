@@ -429,138 +429,134 @@
                     </Border>
 
                     <!-- QA 목록 (DataGrid) -->
-                    <DataGrid Grid.Row="2"
-                              ItemsSource="{Binding QaList}"
-                              SelectedItem="{Binding SelectedQa}"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              SelectionMode="Single"
-                              GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="{StaticResource TableBorderBrush}"
-                              HeadersVisibility="Column"
-                              Background="{StaticResource SurfaceBrush}"
-                              BorderThickness="0"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto">
-                        
-                        <DataGrid.Columns>
-                            <!-- 차주번호 -->
-                            <DataGridTextColumn Header="차주번호" 
-                                                Binding="{Binding BorrowerNumber}" 
-                                                Width="80"
-                                                IsReadOnly="True"/>
-                            
-                            <!-- 파트 -->
-                            <DataGridTextColumn Header="파트" 
-                                                Binding="{Binding Part}" 
-                                                Width="80"
-                                                IsReadOnly="True"/>
-                            
-                            <!-- 질문 -->
-                            <DataGridTextColumn Header="질문" 
-                                                Binding="{Binding Question}" 
-                                                Width="*"
-                                                MinWidth="200"
-                                                IsReadOnly="True">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="TextWrapping" Value="Wrap"/>
-                                        <Setter Property="Padding" Value="4"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            
-                            <!-- 답변 -->
-                            <DataGridTextColumn Header="답변" 
-                                                Binding="{Binding Answer}" 
-                                                Width="*"
-                                                MinWidth="200"
-                                                IsReadOnly="True">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="TextWrapping" Value="Wrap"/>
-                                        <Setter Property="Padding" Value="4"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            
-                            <!-- 상태 -->
-                            <DataGridTemplateColumn Header="상태" Width="70">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border CornerRadius="4"
-                                                Padding="6,2"
-                                                HorizontalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="{StaticResource ErrorBgBrush}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsAnswered}" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource SuccessBgBrush}"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock FontSize="{StaticResource FontSizeSmall}" HorizontalAlignment="Center">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Text" Value="미답변"/>
-                                                        <Setter Property="Foreground" Value="{StaticResource ErrorTextBrush}"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsAnswered}" Value="True">
-                                                                <Setter Property="Text" Value="완료"/>
-                                                                <Setter Property="Foreground" Value="{StaticResource SuccessTextBrush}"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            
-                            <!-- 생성일 -->
-                            <DataGridTextColumn Header="생성일" 
-                                                Binding="{Binding CreatedAt, StringFormat=yyyy-MM-dd}" 
-                                                Width="90"
-                                                IsReadOnly="True"/>
-                            
-                            <!-- 답변일 -->
-                            <DataGridTextColumn Header="답변일" 
-                                                Binding="{Binding AnsweredAt, StringFormat=yyyy-MM-dd}" 
-                                                Width="90"
-                                                IsReadOnly="True"/>
-                        </DataGrid.Columns>
-
-                        <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="MinHeight" Value="40"/>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray50Brush}"/>
-                                    </Trigger>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>
-
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource DeepNavy700Brush}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                                <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
-                                <Setter Property="Padding" Value="8,10"/>
-                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource BlueGray200Brush}"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-                    </DataGrid>
+                    <Border Grid.Row="2"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1,0,1,1"
+                            Background="White">
+                        <DataGrid ItemsSource="{Binding QaList}"
+                                  SelectedItem="{Binding SelectedQa}"
+                                  AutoGenerateColumns="False"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="Column"
+                                  GridLinesVisibility="Horizontal"
+                                  BorderThickness="0"
+                                  RowHeight="30"
+                                  Background="White"
+                                  RowBackground="White"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="{StaticResource BlueGray100Brush}"/>
+                                    <Setter Property="Padding" Value="12,6"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+                                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                    <Setter Property="Padding" Value="10,4"/>
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="차주번호"
+                                                    Binding="{Binding BorrowerNumber}"
+                                                    Width="90"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="차주명"
+                                                    Binding="{Binding BorrowerName}"
+                                                    Width="100"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="질의일자"
+                                                    Binding="{Binding CreatedAt, StringFormat=yyyy-MM-dd}"
+                                                    Width="100"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="질의내용"
+                                                    Binding="{Binding Question}"
+                                                    Width="2*"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Padding" Value="4,0"/>
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="회신일자"
+                                                    Binding="{Binding AnsweredAt, StringFormat=yyyy-MM-dd}"
+                                                    Width="100"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="답변내용"
+                                                    Binding="{Binding Answer}"
+                                                    Width="2*"
+                                                    IsReadOnly="True">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Padding" Value="4,0"/>
+                                            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
 
                     <!-- 하단 버튼 영역 -->
                     <Border Grid.Row="3" 
