@@ -34,19 +34,19 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| QA-POP-01 | — | Pending |
-| QA-POP-02 | — | Pending |
-| QA-POP-03 | — | Pending |
-| QA-POP-04 | — | Pending |
-| QA-HOME-01 | — | Pending |
-| QA-HOME-02 | — | Pending |
-| QA-AGG-01 | — | Pending |
-| QA-AGG-02 | — | Pending |
+| QA-POP-01 | Phase 1 | Pending |
+| QA-POP-02 | Phase 1 | Pending |
+| QA-POP-03 | Phase 1 | Pending |
+| QA-POP-04 | Phase 1 | Pending |
+| QA-HOME-01 | Phase 2 | Pending |
+| QA-HOME-02 | Phase 2 | Pending |
+| QA-AGG-01 | Phase 2 | Pending |
+| QA-AGG-02 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 8 total
-- Mapped to phases: 0
-- Unmapped: 8
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*

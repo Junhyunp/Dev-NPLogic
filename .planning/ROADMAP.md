@@ -1,13 +1,8 @@
-# Roadmap: NPLogic v2.0 탭별 비고란 추가 및 종합 표시
+# Roadmap: v3.0 QA 질의/답변 테이블 시스템
 
 ## Overview
 
-모든 탭에 비고란(특이사항 메모) 사이드 패널을 추가하고, 전체 탭에서 종합 표시한다. 먼저 DB/모델 기반을 만들고, 1~2개 탭에 사이드 패널 프로토타입을 검증한 뒤, 나머지 탭 전체로 확산하고, 마지막으로 전체 탭에서 비고를 종합 표시한다.
-
-## Milestones
-
-- v1.0 평가 탭 UI/UX 통일 (shipped 2026-03-16)
-- v2.0 탭별 비고란 추가 및 종합 표시 (in progress)
+QA 팝업의 표 형식 교체와 CRUD 기능을 먼저 구현하여 핵심 상호작용 패턴을 확립한 뒤, 동일한 표 패턴을 전체 탭 QA 카드와 QA집계 탭에 적용하여 3곳의 QA UI를 통일한다.
 
 ## Phases
 
@@ -17,76 +12,47 @@
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [x] **Phase 1: DB 및 데이터 기반** - property_notes 테이블, 모델, Repository CRUD 구현
-- [x] **Phase 2: 사이드 패널 비고란 프로토타입** - 1~2개 탭에서 사이드 패널 UI 패턴 검증 (토글, 입력, 저장)
-- [x] **Phase 3: 전체 탭 비고란 적용** - 나머지 10개 탭에 비고란 확산 적용 (검증 대기)
-- [ ] **Phase 4: 전체 탭 종합 표시** - 비핵심 > 전체 탭(HomeTab)에서 탭별 비고 종합 표시
+- [ ] **Phase 1: QA 팝업 표 형식 교체 + CRUD** - QA 팝업을 DataGrid 표로 교체하고 질의/답변 입력/수정 기능 구현
+- [ ] **Phase 2: 전체 탭 QA 카드 + QA집계 탭** - HomeTab QA 카드와 QASummaryTab을 동일한 표 형식으로 통일
 
 ## Phase Details
 
-### Phase 1: DB 및 데이터 기반
-**Goal**: 비고 데이터를 저장하고 조회할 수 있는 기반이 존재한다
+### Phase 1: QA 팝업 표 형식 교체 + CRUD
+**Goal**: 사용자가 QA 팝업에서 질의/답변을 표 형식으로 확인하고, 신규 질의 입력 및 답변 수정을 할 수 있다
 **Depends on**: Nothing (first phase)
-**Requirements**: DB-01, DB-02
+**Requirements**: QA-POP-01, QA-POP-02, QA-POP-03, QA-POP-04
 **Success Criteria** (what must be TRUE):
-  1. Supabase에 property_notes 테이블이 존재하고, property_id + tab_name 유니크 제약이 동작한다
-  2. PropertyNote 모델로 비고를 생성/조회/수정/삭제할 수 있고, Repository 메서드가 정상 동작한다
-  3. 특정 물건(property_id)의 전체 비고를 한번에 조회할 수 있다
-**Plans:** 1 plan
-
-Plans:
-- [x] 01-01-PLAN.md — Supabase 테이블 생성 + PropertyNote 모델/Repository/DI 구현
-
-### Phase 2: 사이드 패널 비고란 프로토타입
-**Goal**: 담당자가 담보물건/선순위/평가 3개 탭에서 비고를 입력하고 저장할 수 있다
-**Depends on**: Phase 1
-**Requirements**: NOTE-01, NOTE-02, NOTE-03
-**Success Criteria** (what must be TRUE):
-  1. 탭 오른쪽에 +/- 토글 버튼이 있고, 클릭하면 사이드 패널이 열리고 닫힌다
-  2. 사이드 패널 TextBox에 여러 줄 텍스트를 자유롭게 입력할 수 있다
-  3. 기존 저장 버튼을 누르면 비고 내용이 DB에 저장되고, 탭 재진입 시 저장된 내용이 복원된다
-  4. 사이드 패널이 닫힌 상태에서도 메인 콘텐츠 레이아웃이 정상적이다
-**Plans:** 1 plan
-
-Plans:
-- [x] 02-01-PLAN.md — 담보물건/선순위/평가 3개 탭에 사이드 패널 비고란 추가 (ViewModel + View + 저장/로드 통합)
-
-### Phase 3: 전체 탭 비고란 적용
-**Goal**: 나머지 10개 탭 모두에서 비고란을 사용할 수 있다
-**Depends on**: Phase 2
-**Requirements**: SCOPE-01, SCOPE-02
-**Success Criteria** (what must be TRUE):
-  1. 비핵심 하위 8개 탭(전체/차주개요/Loan/담보물건/선순위/평가/경공매일정/인터림) 모두에 사이드 패널 비고란이 동작한다
-  2. 상위 7개 탭(등기부등본/권리분석/기초데이터/QA집계/현금흐름집계/NPV비교/마감) 모두에 사이드 패널 비고란이 동작한다
-  3. 각 탭에서 입력한 비고가 탭별로 독립적으로 저장/조회된다 (탭 간 간섭 없음)
-  4. 탭 전환 시 각 탭의 비고가 올바르게 로드된다
-**Plans:** 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md — 저장 버튼 있는 4개 탭(차주개요/권리분석/기초데이터/QA집계) 비고란 추가
-- [x] 03-02-PLAN.md — 저장 버튼 없는 6개 탭(Loan/경공매/인터림/현금흐름/NPV비교/마감) 비고란 + LostFocus 자동 저장 + 전체 검증
-
-### Phase 4: 전체 탭 종합 표시
-**Goal**: 담당자가 비핵심 > 전체 탭 한곳에서 모든 탭의 비고를 한눈에 확인할 수 있다
-**Depends on**: Phase 3
-**Requirements**: SUMMARY-01, SUMMARY-02
-**Success Criteria** (what must be TRUE):
-  1. 비핵심 > 전체 탭(HomeTab)에 탭별 비고 종합 섹션이 표시된다
-  2. 비고가 있는 탭만 표시되고, 비고가 없는 탭은 생략된다
-  3. 물건을 전환하면 해당 물건의 비고 종합이 즉시 갱신된다
+  1. QA 팝업을 열면 질의일자/질의내용/회신일자/답변내용 4열 DataGrid 표가 보인다
+  2. 해당 물건의 과거 질의/답변 이력이 모두 표에 누적 표시되고, 스크롤로 전체 확인할 수 있다
+  3. 신규 질의 행을 추가하면 질의일자가 자동 설정되고, 질의내용을 입력하여 저장할 수 있다
+  4. 기존 행의 회신일자와 답변내용을 입력/수정하여 저장할 수 있다
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 01-01: TBD
+- [ ] 01-02: TBD
+
+### Phase 2: 전체 탭 QA 카드 + QA집계 탭
+**Goal**: 사용자가 전체 탭과 QA집계 탭에서 동일한 표 형식으로 QA 데이터를 조회할 수 있다
+**Depends on**: Phase 1
+**Requirements**: QA-HOME-01, QA-HOME-02, QA-AGG-01, QA-AGG-02
+**Success Criteria** (what must be TRUE):
+  1. 전체 탭 QA 카드가 Phase 1과 동일한 n x 4 표 형식으로 표시된다
+  2. 전체 탭 QA 카드에는 현재 선택된 물건의 QA만 필터되어 표시된다
+  3. QA집계 탭이 차주번호/차주명/질의일자/질의내용/회신일자/답변내용 6열 표로 표시된다
+  4. QA집계 탭에서는 물건 필터 없이 전체 차주의 QA를 조회할 수 있다
+**Plans**: TBD
+
+Plans:
+- [ ] 02-01: TBD
+- [ ] 02-02: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB 및 데이터 기반 | 1/1 | Complete | 2026-03-23 |
-| 2. 사이드 패널 비고란 프로토타입 | 1/1 | Complete | 2026-03-23 |
-| 3. 전체 탭 비고란 적용 | 2/2 | Checkpoint pending | 2026-03-24 |
-| 4. 전체 탭 종합 표시 | 0/? | Not started | - |
+| 1. QA 팝업 표 형식 교체 + CRUD | 0/? | Not started | - |
+| 2. 전체 탭 QA 카드 + QA집계 탭 | 0/? | Not started | - |
