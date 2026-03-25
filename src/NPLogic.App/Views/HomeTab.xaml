@@ -271,47 +271,98 @@
                 <Border Grid.Column="2" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="Loan" Style="{StaticResource CardHeaderStyle}"/>
-                        
+
+                        <!-- 채권내역 -->
+                        <TextBlock Text="채권내역" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- 헤더 행 -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="채권수" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="대출원금잔액" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="가지급금" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="미수이자" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="4" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="채권액합계" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+
+                            <!-- 데이터 행 -->
+                            <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.LoanCount, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.TotalPrincipalBalanceDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.TotalAdvancePaymentDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="3" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.TotalAccruedInterestDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="4" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.TotalClaimAmountDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- 보증서내역 -->
+                        <TextBlock Text="보증서내역" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,16,0,8"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            
-                            <!-- 대출 건수 -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="대출 건수" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource ValueStyle}">
-                                <Run Text="{Binding LoanSummary.LoanCount, FallbackValue=0}"/>
-                                <Run Text="건" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </TextBlock>
-                            
-                            <!-- 대출원금잔액 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="대출원금잔액" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding LoanSummary.TotalPrincipalBalanceDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                            
-                            <!-- 채권액 합계 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="채권액 합계" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding LoanSummary.TotalClaimAmountDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- Loan Cap 1안 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Loan Cap 1안" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LoanSummary.TotalLoanCap1Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                            
-                            <!-- Loan Cap 2안 -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Loan Cap 2안" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding LoanSummary.TotalLoanCap2Display, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                            
-                            <!-- 보증서 현황 -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="보증서 현황" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding LoanSummary.GuaranteeStatusDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+
+                            <!-- 헤더 행 -->
+                            <Border Grid.Row="0" Grid.Column="0" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="일반보증(유)" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="해지부보증(유)" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                <TextBlock Text="일반보증(완)" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="3" Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                <TextBlock Text="해지부보증(완)" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                            </Border>
+
+                            <!-- 데이터 행 -->
+                            <Border Grid.Row="1" Grid.Column="0" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.GeneralGuaranteeActiveDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.CancellationGuaranteeActiveDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.GeneralGuaranteeCompleteDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="3" Padding="8,8">
+                                <TextBlock Text="{Binding LoanSummary.CancellationGuaranteeCompleteDisplay, FallbackValue=-}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
