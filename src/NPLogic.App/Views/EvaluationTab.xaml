@@ -704,8 +704,14 @@
                                     <StaticResource ResourceKey="SectionDataGridRowStyle"/>
                                 </DataGrid.RowStyle>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="140" IsReadOnly="True"
-                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
+                                    <DataGridTextColumn Header="구분" Binding="{Binding Label}" Width="160" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}">
+                                                <Setter Property="TextAlignment" Value="Left"/>
+                                                <Setter Property="Padding" Value="8,0,4,0"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
                                     <DataGridTextColumn Header="본건 감정가" Binding="{Binding BaseValue}" Width="*" IsReadOnly="True"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"/>
                                     <DataGridTextColumn Header="사례 1" Binding="{Binding Case1Value}" Width="*" IsReadOnly="True"
@@ -817,81 +823,6 @@
                                     <TextBlock Text="로드뷰 이미지"
                                                Opacity="0.4" FontSize="12"
                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- 경매사건검색 영역 -->
-                    <Border Style="{StaticResource CardStyle}">
-                        <StackPanel>
-                            <!-- 섹션 헤더 -->
-                            <Border Background="{StaticResource PrimaryBrush}"
-                                    CornerRadius="8,8,0,0"
-                                    Padding="16,10">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x1F50D; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
-                                    <TextBlock Text="경매사건검색"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="{StaticResource FontSizeH4}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- 경매사건 사례 테이블 -->
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="200"/>
-                                </Grid.RowDefinitions>
-
-                                <!-- 헤더: 사례1 -->
-                                <Border Grid.Row="0" Grid.Column="0"
-                                        Background="{StaticResource BlueGray100Brush}"
-                                        BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="0,0,1,1"
-                                        Padding="8,6">
-                                    <TextBlock Text="사례1"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12"
-                                               HorizontalAlignment="Center"/>
-                                </Border>
-
-                                <!-- 헤더: 사례2 -->
-                                <Border Grid.Row="0" Grid.Column="1"
-                                        Background="{StaticResource BlueGray100Brush}"
-                                        BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="0,0,0,1"
-                                        Padding="8,6">
-                                    <TextBlock Text="사례2"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               FontWeight="SemiBold" FontSize="12"
-                                               HorizontalAlignment="Center"/>
-                                </Border>
-
-                                <!-- 사례1 정보 -->
-                                <Border Grid.Row="1" Grid.Column="0"
-                                        BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="0,0,1,0"
-                                        Background="{StaticResource SurfaceColor}">
-                                    <TextBlock Text="사례 정보"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               FontSize="12"/>
-                                </Border>
-
-                                <!-- 사례2 정보 -->
-                                <Border Grid.Row="1" Grid.Column="1"
-                                        Background="{StaticResource SurfaceColor}">
-                                    <TextBlock Text="사례 정보"
-                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                                               FontSize="12"/>
                                 </Border>
                             </Grid>
                         </StackPanel>
