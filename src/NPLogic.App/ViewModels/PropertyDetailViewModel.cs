@@ -2941,7 +2941,7 @@ namespace NPLogic.ViewModels
 
         #region QA 관련
 
-        private async Task LoadQAListAsync()
+        public async Task LoadQAListAsync()
         {
             if (_propertyQaRepository == null || _propertyId == null) return;
 

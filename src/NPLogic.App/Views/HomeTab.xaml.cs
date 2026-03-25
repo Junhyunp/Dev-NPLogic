@@ -20,6 +20,7 @@ namespace NPLogic.Views
             if (DataContext is PropertyDetailViewModel vm)
             {
                 await vm.LoadNoteSummaryAsync();
+                await vm.LoadQAListAsync();
             }
         }
     }
