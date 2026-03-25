@@ -380,45 +380,67 @@
                 <Border Grid.Column="0" Style="{StaticResource SummaryCardStyle}">
                     <StackPanel>
                         <TextBlock Text="담보물건" Style="{StaticResource CardHeaderStyle}"/>
-                        
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="110"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            
-                            <!-- 담보종류 -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="담보종류" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CollateralSummary.PropertyType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 토지 면적 -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="토지 면적" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CollateralSummary.LandAreaDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 건물 면적 -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="건물 면적" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding CollateralSummary.BuildingAreaDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 감정평가액 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="감정평가액" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CollateralSummary.AppraisalValueDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
-                            
-                            <!-- 공장저당 -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="공장저당" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CollateralSummary.FactoryMortgageDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
-                            <!-- 공단입주 -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="공단입주" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding CollateralSummary.IndustrialComplexDisplay, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                        </Grid>
+
+                        <!-- 담보요약 -->
+                        <TextBlock Text="담보요약" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                            <StackPanel Orientation="Horizontal">
+                                <!-- 행 헤더 (고정 1열) -->
+                                <StackPanel Width="90">
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="" FontSize="11"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="담보종류" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="토지면적" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="건물면적" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                        <TextBlock Text="감정평가액" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                        <TextBlock Text="공장저당" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- 동적 데이터 열 (담보1, 담보2, ...) -->
+                                <ItemsControl ItemsSource="{Binding CollateralSummaryList}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Width="100">
+                                                <Border Background="{StaticResource BlueGray100Brush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding Label}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding PropertyType}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding LandArea}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding BuildingArea}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding AppraisalValue}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                                <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="8,6">
+                                                    <TextBlock Text="{Binding FactoryMortgage}" FontSize="{StaticResource FontSizeBody}" HorizontalAlignment="Center"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
                     </StackPanel>
                 </Border>
                 

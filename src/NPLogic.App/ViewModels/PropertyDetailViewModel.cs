@@ -238,6 +238,19 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 담보 요약 표시용 아이템
+    /// </summary>
+    public class CollateralSummaryItem
+    {
+        public string Label { get; set; } = string.Empty;
+        public string PropertyType { get; set; } = "-";
+        public string LandArea { get; set; } = "-";
+        public string BuildingArea { get; set; } = "-";
+        public string AppraisalValue { get; set; } = "-";
+        public string FactoryMortgage { get; set; } = "-";
+    }
+
+    /// <summary>
     /// 비고 종합 표시용 아이템
     /// </summary>
     public class NoteSummaryItem
@@ -1769,6 +1782,7 @@ namespace NPLogic.ViewModels
             if (Property == null)
             {
                 CollateralSummary = new CollateralSummaryModel();
+                CollateralSummaryList.Clear();
                 return;
             }
 
@@ -1782,6 +1796,37 @@ namespace NPLogic.ViewModels
                 IsFactoryMortgage = IsFactoryMortgage,
                 IsInIndustrialComplex = Property.PropertyType?.Contains("공단") == true || Property.PropertyType?.Contains("공장") == true
             };
+
+            // 담보 요약 목록 (같은 차주의 모든 물건)
+            LoadCollateralSummaryList();
+        }
+
+        [ObservableProperty]
+        private ObservableCollection<CollateralSummaryItem> _collateralSummaryList = new();
+
+        private void LoadCollateralSummaryList()
+        {
+            CollateralSummaryList.Clear();
+            if (Property == null) return;
+
+            var siblings = _propertyList?
+                .Where(p => p.BorrowerNumber == Property.BorrowerNumber)
+                .OrderBy(p => p.PropertyNumber)
+                .ToList() ?? new List<NPLogic.Core.Models.Property> { Property };
+
+            for (int i = 0; i < siblings.Count; i++)
+            {
+                var p = siblings[i];
+                CollateralSummaryList.Add(new CollateralSummaryItem
+                {
+                    Label = $"담보{i + 1}",
+                    PropertyType = p.PropertyType ?? "-",
+                    LandArea = p.LandArea.HasValue ? $"{p.LandArea.Value / 3.3058m:N1}평" : "-",
+                    BuildingArea = p.BuildingArea.HasValue ? $"{p.BuildingArea.Value / 3.3058m:N1}평" : "-",
+                    AppraisalValue = p.AppraisalValue.HasValue ? $"{p.AppraisalValue.Value:N0}" : "-",
+                    FactoryMortgage = p.PropertyType?.Contains("공장") == true ? "Y" : "N"
+                });
+            }
         }
 
         /// <summary>
