@@ -118,7 +118,7 @@ namespace NPLogic.Core.Models
         public string TotalLoanCap2Display => $"{TotalLoanCap2:N0}원";
         
         /// <summary>보증서 현황 표시용</summary>
-        public string GuaranteeStatusDisplay => MciLoanCount > 0 ? $"MCI {MciLoanCount}건" : (ValidGuaranteeCount > 0 ? $"유효 {ValidGuaranteeCount}건" : "없음");
+        public string GuaranteeStatusDisplay => MciLoanCount > 0 ? $"보증서 MCI {MciLoanCount}건" : (ValidGuaranteeCount > 0 ? $"보증서 {ValidGuaranteeCount}건" : "보증서 없음");
     }
 
     /// <summary>
