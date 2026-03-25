@@ -237,6 +237,10 @@ namespace NPLogic.Views
         /// </summary>
         public async Task ResetToHomeTabAsync()
         {
+            // ★ 물건 전환 시 캐시된 하위 탭 뷰 클리어 (이전 물건 데이터 잔류 방지)
+            _tabViewCache.Clear();
+            _tabViewModelCache.Clear();
+
             // RadioButton UI 상태를 "전체"로 리셋 (이벤트 억제하여 이중 로드 방지)
             _suppressFunctionTabChecked = true;
             TabHome.IsChecked = true;
