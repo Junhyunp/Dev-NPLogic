@@ -620,8 +620,10 @@ namespace NPLogic.Views
             var serviceProvider = App.ServiceProvider;
             if (serviceProvider == null) return;
 
+            // 이 로드의 generation 캡처 (finally에서 최신인지 확인용)
+            var myGeneration = _loadGeneration;
+
             // ★ 버그 수정: 탭 전환 시 이전 콘텐츠 즉시 클리어
-            // 이전 탭(예: NonCoreView)이 새 탭(예: RegistryTab) 로딩 중에 보이는 문제 방지
             TabContentControl.Content = null;
 
             // ★ 로딩 표시 시작
@@ -760,8 +762,9 @@ namespace NPLogic.Views
             }
             finally
             {
-                // ★ 로딩 표시 종료
-                if (DataContext is DashboardViewModel vm)
+                // ★ 로딩 표시 종료 — 이 로드가 아직 최신일 때만
+                // (더 새로운 로드가 시작된 경우 그 로드의 finally에서 종료하므로 중복 해제 방지)
+                if (DataContext is DashboardViewModel vm && myGeneration == _loadGeneration)
                 {
                     vm.IsLoading = false;
                 }
@@ -1018,21 +1021,33 @@ namespace NPLogic.Views
                 // ★ Race condition 방지: 이전 로드가 진행 중이면 무효화
                 var currentGeneration = ++_loadGeneration;
 
-                // 이미 상세 모드이므로 선택된 물건만 변경
-                viewModel.SelectPropertyInDetailMode(property);
+                try
+                {
+                    // 로딩 즉시 표시
+                    viewModel.IsLoading = true;
 
-                // ★ 수정: 물건 변경 시 항상 "비핵심" > "전체" 탭을 기본으로 표시
-                _suppressInnerTabChecked = true;
-                TabNonCore.IsChecked = true;
-                _suppressInnerTabChecked = false;
-                viewModel.SetActiveTab("noncore");
+                    // 이미 상세 모드이므로 선택된 물건만 변경
+                    viewModel.SelectPropertyInDetailMode(property);
 
-                // 콘텐츠 강제 초기화 후 재로드 (캐시로 인한 미갱신 방지)
-                TabContentControl.Content = null;
-                await LoadTabViewAsync("noncore", property);
+                    // ★ 수정: 물건 변경 시 항상 "비핵심" > "전체" 탭을 기본으로 표시
+                    _suppressInnerTabChecked = true;
+                    TabNonCore.IsChecked = true;
+                    _suppressInnerTabChecked = false;
+                    viewModel.SetActiveTab("noncore");
 
-                // ★ 로드 완료 후 generation 확인 - 더 새로운 로드가 시작됐으면 결과 무시
-                if (currentGeneration != _loadGeneration) return;
+                    // 콘텐츠 강제 초기화 후 재로드 (캐시로 인한 미갱신 방지)
+                    TabContentControl.Content = null;
+                    await LoadTabViewAsync("noncore", property);
+
+                    // ★ 로드 완료 후 generation 확인 - 더 새로운 로드가 시작됐으면 결과 무시
+                    if (currentGeneration != _loadGeneration) return;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PropertySideListBox] 물건 전환 실패: {ex.Message}");
+                    // 실패 시 로딩 해제 (LoadTabViewAsync finally에서도 하지만 안전장치)
+                    viewModel.IsLoading = false;
+                }
             }
         }
 
