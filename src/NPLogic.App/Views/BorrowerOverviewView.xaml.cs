@@ -25,6 +25,37 @@ namespace NPLogic.Views
                 await viewModel.InitializeAsync();
             }
         }
+
+        private void BusinessNumberSearch_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not BorrowerOverviewViewModel vm || vm.SelectedBorrower == null)
+                return;
+
+            var bizNumber = vm.SelectedBorrower.BusinessNumber;
+            if (string.IsNullOrWhiteSpace(bizNumber))
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowWarning("사업자번호가 비어있습니다. 먼저 사업자번호를 입력해주세요.");
+                return;
+            }
+
+            // 사업자번호를 클립보드에 복사
+            System.Windows.Clipboard.SetText(bizNumber.Trim());
+            NPLogic.UI.Services.ToastService.Instance.ShowSuccess($"사업자번호 '{bizNumber.Trim()}'가 클립보드에 복사되었습니다. 홈택스에서 Ctrl+V로 붙여넣기 하세요.");
+
+            // 홈택스 사업자등록상태조회 페이지 열기
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://hometax.go.kr/websquare/websquare.html?w2xPath=/ui/pp/index_pp.xml&tmIdx=43&tm2lIdx=4306000000&tm3lIdx=4306080000",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                NPLogic.UI.Services.ToastService.Instance.ShowError($"브라우저 열기 실패: {ex.Message}");
+            }
+        }
     }
 
     /// <summary>

@@ -268,7 +268,8 @@
                                         Padding="12,2"
                                         FontSize="{StaticResource FontSizeSmall}"
                                         HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"/>
+                                        VerticalAlignment="Center"
+                                        Click="BusinessNumberSearch_Click"/>
                             </Border>
 
                             <!-- Row 2: 헤더 - 회생, 개회, 차주사망, 관련차주 -->
