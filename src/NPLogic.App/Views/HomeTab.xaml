@@ -708,7 +708,7 @@
             <!-- 비고 종합 섹션 -->
             <Border Style="{StaticResource SummaryCardStyle}"
                     Margin="0,16,0,0"
-                    Visibility="{Binding NoteSummaryItems.Count, Converter={StaticResource IntToVisibilityConverter}, FallbackValue=Collapsed}">
+                    Visibility="{Binding HasNoteSummary, Converter={StaticResource BoolToVisibilityConverter}}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                         <TextBlock Text="📝" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>

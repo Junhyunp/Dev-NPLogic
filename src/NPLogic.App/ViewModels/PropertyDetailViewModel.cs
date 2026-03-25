@@ -4278,6 +4278,9 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private ObservableCollection<NoteSummaryItem> _noteSummaryItems = new();
 
+        [ObservableProperty]
+        private bool _hasNoteSummary;
+
         public async Task LoadNoteSummaryAsync()
         {
             if (_propertyNoteRepository == null || _propertyId == null) return;
@@ -4295,6 +4298,7 @@ namespace NPLogic.ViewModels
                         UpdatedAt = note.UpdatedAt
                     });
                 }
+                HasNoteSummary = NoteSummaryItems.Count > 0;
             }
             catch (Exception ex)
             {
