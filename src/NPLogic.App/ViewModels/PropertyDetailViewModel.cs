@@ -2187,14 +2187,9 @@ namespace NPLogic.ViewModels
                 _suppressSelectedRegistryRunChanged = false;
 
                 var biList = biTask.Result;
-                var gapListRaw = gapTask.Result;
-                var eulListRaw = eulTask.Result;
-                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu(raw)={gapListRaw.Count}, eulgu(raw)={eulListRaw.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
-
-                // 중복 행 병합: 접수정보+대상소유자가 같은 행은 지번번호를 쉼표로 결합
-                var gapList = MergeGapguDuplicates(gapListRaw);
-                var eulList = MergeEulguDuplicates(eulListRaw);
-                Debug.WriteLine($"[LoadRegistrySummary] 병합 후: gapgu={gapList.Count}, eulgu={eulList.Count}");
+                var gapList = gapTask.Result;
+                var eulList = eulTask.Result;
+                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu={gapList.Count}, eulgu={eulList.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
 
                 var hasAnyRegistryData =
                     latestRun != null &&
@@ -2283,12 +2278,9 @@ namespace NPLogic.ViewModels
 
                 await Task.WhenAll(basicInfoTask, gapguTask, eulguTask);
 
-                var gapguMerged = MergeGapguDuplicates(gapguTask.Result);
-                var eulguMerged = MergeEulguDuplicates(eulguTask.Result);
-
                 RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(basicInfoTask.Result);
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapguMerged);
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulguMerged);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapguTask.Result);
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulguTask.Result);
             }
             catch (Exception ex)
             {

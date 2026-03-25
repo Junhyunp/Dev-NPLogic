@@ -324,8 +324,6 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                // JibunNumber 제외: MergeGapguDuplicates가 지번번호를 결합하므로
-                // 결합된 값을 DB에 저장하면 재로드 시 누적 오염됨
                 var table = new RegistryGapguRowTable
                 {
                     Id = row.Id,
@@ -340,6 +338,7 @@ namespace NPLogic.Data.Repositories
                     NoteUserInput = row.NoteUserInput,
                     WageClaimEstimateUserInput = row.WageClaimEstimateUserInput,
                     TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
                     SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -360,7 +359,6 @@ namespace NPLogic.Data.Repositories
             try
             {
                 var client = await _supabaseService.GetClientAsync();
-                // JibunNumber 제외: MergeEulguDuplicates가 지번번호를 결합하므로
                 var table = new RegistryEulguRowTable
                 {
                     Id = row.Id,
@@ -376,6 +374,7 @@ namespace NPLogic.Data.Repositories
                     CollateralTypeUserInput = row.CollateralTypeUserInput,
                     IsFactoryMortgageUserInput = row.IsFactoryMortgageUserInput,
                     TargetOwner = row.TargetOwner,
+                    JibunNumber = row.JibunNumber,
                     SortIndex = row.SortIndex,
                     UpdatedAt = DateTime.UtcNow
                 };
