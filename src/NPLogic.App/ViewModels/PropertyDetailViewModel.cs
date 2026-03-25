@@ -603,6 +603,10 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private RegistryEulguRow? _selectedEulguRow;
 
+        // merge 전 원본 행 보관 (저장 시 전체 행에 변경사항 전파용)
+        private List<RegistryGapguRow> _allGapguRows = new();
+        private List<RegistryEulguRow> _allEulguRows = new();
+
         [ObservableProperty]
         private ObservableCollection<AppraisalInfoRow> _appraisalInfoList = new();
 
@@ -2187,9 +2191,13 @@ namespace NPLogic.ViewModels
                 _suppressSelectedRegistryRunChanged = false;
 
                 var biList = biTask.Result;
-                var gapList = gapTask.Result;
-                var eulList = eulTask.Result;
-                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu={gapList.Count}, eulgu={eulList.Count}, latestRun={runs.FirstOrDefault()?.Id.ToString() ?? "null"}");
+                _allGapguRows = gapTask.Result;
+                _allEulguRows = eulTask.Result;
+                Debug.WriteLine($"[LoadRegistrySummary] propertyId={propertyId}, runs={runs.Count}, basicInfo={biList.Count}, gapgu(raw)={_allGapguRows.Count}, eulgu(raw)={_allEulguRows.Count}");
+
+                // 표시용 병합: 접수정보+대상소유자가 같은 행은 지번번호를 결합해서 1행으로
+                var gapList = MergeGapguDuplicates(_allGapguRows);
+                var eulList = MergeEulguDuplicates(_allEulguRows);
 
                 var hasAnyRegistryData =
                     latestRun != null &&
@@ -2278,9 +2286,12 @@ namespace NPLogic.ViewModels
 
                 await Task.WhenAll(basicInfoTask, gapguTask, eulguTask);
 
+                _allGapguRows = gapguTask.Result;
+                _allEulguRows = eulguTask.Result;
+
                 RegistryBasicInfoList = new ObservableCollection<RegistryBasicInfo>(basicInfoTask.Result);
-                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(gapguTask.Result);
-                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(eulguTask.Result);
+                RegistryGapguRows = new ObservableCollection<RegistryGapguRow>(MergeGapguDuplicates(_allGapguRows));
+                RegistryEulguRows = new ObservableCollection<RegistryEulguRow>(MergeEulguDuplicates(_allEulguRows));
             }
             catch (Exception ex)
             {
@@ -2301,14 +2312,61 @@ namespace NPLogic.ViewModels
                 if (_supabaseService != null)
                     await _supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
 
-                foreach (var row in RegistryGapguRows)
+                // merge된 표시 행의 변경사항을 원본 전체 행에 전파 후 저장
+                foreach (var mergedRow in RegistryGapguRows)
                 {
-                    await _registryRepository.UpdateGapguRowAsync(row);
+                    var mergeKey = (
+                        Receipt: NormalizeForMerge(mergedRow.Receipt),
+                        TargetOwner: NormalizeForMerge(mergedRow.TargetOwner)
+                    );
+                    var groupRows = _allGapguRows.Where(r =>
+                        NormalizeForMerge(r.Receipt) == mergeKey.Receipt &&
+                        NormalizeForMerge(r.TargetOwner) == mergeKey.TargetOwner
+                    ).ToList();
+
+                    foreach (var orig in groupRows)
+                    {
+                        // 사용자 편집 가능 필드만 전파 (JibunNumber 제외 — merge 결합값)
+                        orig.RankNo = mergedRow.RankNo;
+                        orig.SortIndex = mergedRow.SortIndex;
+                        orig.Purpose = mergedRow.Purpose;
+                        orig.Receipt = mergedRow.Receipt;
+                        orig.ReceiptDate = mergedRow.ReceiptDate;
+                        orig.RightHolder = mergedRow.RightHolder;
+                        orig.ClaimAmount = mergedRow.ClaimAmount;
+                        orig.NoteUserInput = mergedRow.NoteUserInput;
+                        orig.WageClaimEstimateUserInput = mergedRow.WageClaimEstimateUserInput;
+                        orig.TargetOwner = mergedRow.TargetOwner;
+                        await _registryRepository.UpdateGapguRowAsync(orig);
+                    }
                 }
 
-                foreach (var row in RegistryEulguRows)
+                foreach (var mergedRow in RegistryEulguRows)
                 {
-                    await _registryRepository.UpdateEulguRowAsync(row);
+                    var mergeKey = (
+                        Receipt: NormalizeForMerge(mergedRow.Receipt),
+                        TargetOwner: NormalizeForMerge(mergedRow.TargetOwner)
+                    );
+                    var groupRows = _allEulguRows.Where(r =>
+                        NormalizeForMerge(r.Receipt) == mergeKey.Receipt &&
+                        NormalizeForMerge(r.TargetOwner) == mergeKey.TargetOwner
+                    ).ToList();
+
+                    foreach (var orig in groupRows)
+                    {
+                        orig.RankNo = mergedRow.RankNo;
+                        orig.SortIndex = mergedRow.SortIndex;
+                        orig.Purpose = mergedRow.Purpose;
+                        orig.Receipt = mergedRow.Receipt;
+                        orig.ReceiptDate = mergedRow.ReceiptDate;
+                        orig.MortgageHolder = mergedRow.MortgageHolder;
+                        orig.MaxClaimAmount = mergedRow.MaxClaimAmount;
+                        orig.DebtorUserInput = mergedRow.DebtorUserInput;
+                        orig.CollateralTypeUserInput = mergedRow.CollateralTypeUserInput;
+                        orig.IsFactoryMortgageUserInput = mergedRow.IsFactoryMortgageUserInput;
+                        orig.TargetOwner = mergedRow.TargetOwner;
+                        await _registryRepository.UpdateEulguRowAsync(orig);
+                    }
                 }
 
                 if (!_isBulkSaving) SuccessMessage = "등기부 데이터가 저장되었습니다.";
