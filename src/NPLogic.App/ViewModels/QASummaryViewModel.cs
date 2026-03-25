@@ -203,7 +203,7 @@ namespace NPLogic.ViewModels
             try
             {
                 // JWT 만료 대비: 세션 갱신
-                var supabaseService = App.ServiceProvider?.GetService<NPLogic.Data.Services.SupabaseService>();
+                var supabaseService = App.ServiceProvider?.GetService(typeof(NPLogic.Data.Services.SupabaseService)) as NPLogic.Data.Services.SupabaseService;
                 if (supabaseService != null)
                     await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
 
@@ -273,7 +273,7 @@ namespace NPLogic.ViewModels
                 SelectedBorrower = null;
 
                 // JWT 만료 대비: 세션 갱신
-                var supabaseService = App.ServiceProvider?.GetService<NPLogic.Data.Services.SupabaseService>();
+                var supabaseService = App.ServiceProvider?.GetService(typeof(NPLogic.Data.Services.SupabaseService)) as NPLogic.Data.Services.SupabaseService;
                 if (supabaseService != null)
                     await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
 
