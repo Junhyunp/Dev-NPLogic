@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 Phase: 2 of 2 (전체 탭 QA 카드 + QA집계 탭)
 Plan: 1 of 1 in current phase (complete)
 Status: Executing
-Last activity: 2026-03-25 — 02-01 HomeTab/QASummaryTab DataGrid 교체 완료
+Last activity: 2026-03-25 - Completed quick task 2: 등기부등본 PDF 뷰어를 인라인에서 팝업 창으로 변경
 
 Progress: [███████░░░] 67%
 
@@ -73,6 +73,12 @@ None yet.
 ### Blockers/Concerns
 
 None yet.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 2 | 등기부등본 PDF 뷰어를 인라인에서 팝업 창으로 변경 | 2026-03-25 | 7b8bd50 | [2-pdf](./quick/2-pdf/) |
 
 ## Session Continuity
 
