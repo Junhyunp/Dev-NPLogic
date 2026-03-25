@@ -7,8 +7,8 @@
 
 ### UI — QA 팝업
 
-- [ ] **QA-POP-01**: QA 팝업 내용을 n×4 DataGrid 표로 교체 (질의일자/질의내용/회신일자/답변내용)
-- [ ] **QA-POP-02**: 과거 질의/답변 이력 누적 표시 (스크롤로 전체 확인)
+- [x] **QA-POP-01**: QA 팝업 내용을 n×4 DataGrid 표로 교체 (질의일자/질의내용/회신일자/답변내용)
+- [x] **QA-POP-02**: 과거 질의/답변 이력 누적 표시 (스크롤로 전체 확인)
 - [ ] **QA-POP-03**: 신규 질의 입력 기능 (행 추가 + 질의일자 자동 설정)
 - [ ] **QA-POP-04**: 답변 내용 입력/수정 기능 (회신일자 + 답변내용)
 
@@ -34,8 +34,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| QA-POP-01 | Phase 1 | Pending |
-| QA-POP-02 | Phase 1 | Pending |
+| QA-POP-01 | Phase 1 | Complete |
+| QA-POP-02 | Phase 1 | Complete |
 | QA-POP-03 | Phase 1 | Pending |
 | QA-POP-04 | Phase 1 | Pending |
 | QA-HOME-01 | Phase 2 | Pending |
