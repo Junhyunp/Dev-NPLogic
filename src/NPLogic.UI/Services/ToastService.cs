@@ -52,9 +52,9 @@ namespace NPLogic.UI.Services
                     Message = message,
                     ToastType = type,
                     Duration = duration,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Margin = new Thickness(0, 16, 16, 0)
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = new Thickness(0)
                 };
 
                 toast.Closed += (s, e) =>

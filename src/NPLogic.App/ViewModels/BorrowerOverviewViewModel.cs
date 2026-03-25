@@ -215,6 +215,15 @@ namespace NPLogic.ViewModels
                 IsLoading = true;
                 ErrorMessage = null;
 
+                // JWT 만료 대비: 세션 갱신
+                try
+                {
+                    var supabaseService = App.ServiceProvider?.GetService(typeof(NPLogic.Data.Services.SupabaseService)) as NPLogic.Data.Services.SupabaseService;
+                    if (supabaseService != null)
+                        await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+                }
+                catch { /* 무시 */ }
+
                 // 현재 사용자 로드 (권한 체크용)
                 if (CurrentUser == null)
                 {
