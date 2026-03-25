@@ -1138,35 +1138,29 @@ namespace NPLogic.Views
         // ========== QA 이벤트 핸들러 (Phase 7: 피드백 #14) ==========
 
         /// <summary>
-        /// QA 버튼 클릭 - QA 입력 다이얼로그 표시
+        /// QA 버튼 클릭 - QA 팝업 표시 (DataGrid 이력 표)
         /// </summary>
         private void QAButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // 현재 활성 탭을 기본 선택으로 설정
-                var currentTab = _viewModel?.ActiveTab ?? "Home";
-                
-                // QA 입력 다이얼로그 표시
-                var dialog = new QAInputDialog(currentTab);
-                dialog.Owner = Window.GetWindow(this);
-
-                if (dialog.ShowDialog() == true)
+                var selectedProperty = _viewModel?.SelectedPropertyTab;
+                if (selectedProperty == null || selectedProperty.PropertyId == Guid.Empty)
                 {
-                    // QA 질문이 저장되었음을 알림
-                    var selectedMenu = dialog.SelectedMenu;
-                    var question = dialog.Question;
-                    
-                    MessageBox.Show(
-                        $"QA 질문이 등록되었습니다.\n\n메뉴: {selectedMenu}\n질문: {question}",
-                        "QA 등록 완료",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show("물건을 먼저 선택해주세요.", "알림", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
                 }
+
+                var popup = new QAPopupWindow(
+                    selectedProperty.PropertyId,
+                    selectedProperty.BorrowerNumber,
+                    selectedProperty.BorrowerName);
+                popup.Owner = Window.GetWindow(this);
+                popup.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"QA 다이얼로그를 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"QA 팝업을 열 수 없습니다: {ex.Message}", "오류", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
