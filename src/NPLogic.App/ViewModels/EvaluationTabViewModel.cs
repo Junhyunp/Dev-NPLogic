@@ -435,6 +435,9 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _hasInquiryMachineryRow;
 
+        [ObservableProperty]
+        private bool _isCommercialAnalysisVisible;
+
         // === 임대호가분석 ===
         [ObservableProperty]
         private bool _hasRentalQuoteTable;
@@ -1568,6 +1571,18 @@ namespace NPLogic.ViewModels
                     new CaseRowItem { Label = "사례 비고 사항" }
                 };
 
+                // 주택 전용: 건물연면적(평) 뒤에 제시외연면적(평) 삽입
+                if (IsHouseLandType)
+                {
+                    var idx = -1;
+                    for (int i = 0; i < CaseItems.Count; i++)
+                    {
+                        if (CaseItems[i].Label == "건물연면적(평)") { idx = i; break; }
+                    }
+                    if (idx >= 0)
+                        CaseItems.Insert(idx + 1, new CaseRowItem { Label = "제시외연면적(평)" });
+                }
+
                 // 상가 전용 추가 행
                 if (IsCommercialType)
                 {
@@ -1867,6 +1882,12 @@ namespace NPLogic.ViewModels
             else
                 InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
             HasInquiryMachineryRow = true;
+        }
+
+        [RelayCommand]
+        private void ToggleCommercialAnalysis()
+        {
+            IsCommercialAnalysisVisible = !IsCommercialAnalysisVisible;
         }
 
         [RelayCommand]

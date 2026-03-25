@@ -224,14 +224,23 @@
                             <Border Background="{StaticResource PrimaryBrush}"
                                     CornerRadius="8,8,0,0"
                                     Padding="16,10">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding CaseMapSectionTitle}"
-                                               Foreground="White"
-                                               FontWeight="SemiBold"
-                                               FontSize="{StaticResource FontSizeH4}"
-                                               VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="&#x1F5FA; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding CaseMapSectionTitle}"
+                                                   Foreground="White"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeH4}"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Button Content="상권 분석"
+                                            Command="{Binding ToggleCommercialAnalysisCommand}"
+                                            Visibility="{Binding IsCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                                            Padding="10,4" FontSize="12"
+                                            Background="Transparent" BorderBrush="White" BorderThickness="1"
+                                            Foreground="White" Cursor="Hand"/>
+                                </Grid>
                             </Border>
 
                             <!-- 좌: 사례지도 / 우: 실거래가 + 그래프 -->
@@ -362,8 +371,8 @@
                                 </DockPanel>
                             </Grid>
 
-                            <!-- 상가+주택 전용: 임대동향 + 상권지도 통합 테이블 -->
-                            <Grid Visibility="{Binding IsCommercialOrHouseType, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <!-- 상가+주택 전용: 임대동향 + 상권지도 통합 테이블 (상권 분석 토글) -->
+                            <Grid Visibility="{Binding IsCommercialAnalysisVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
