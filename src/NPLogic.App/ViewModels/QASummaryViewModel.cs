@@ -202,6 +202,11 @@ namespace NPLogic.ViewModels
         {
             try
             {
+                // JWT 만료 대비: 세션 갱신
+                var supabaseService = App.ServiceProvider?.GetService<NPLogic.Data.Services.SupabaseService>();
+                if (supabaseService != null)
+                    await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+
                 var summaries = await _qaRepository.GetBorrowerQaSummariesAsync();
                 
                 BorrowerSummaries.Clear();
@@ -266,7 +271,12 @@ namespace NPLogic.ViewModels
             {
                 IsLoading = true;
                 SelectedBorrower = null;
-                
+
+                // JWT 만료 대비: 세션 갱신
+                var supabaseService = App.ServiceProvider?.GetService<NPLogic.Data.Services.SupabaseService>();
+                if (supabaseService != null)
+                    await supabaseService.EnsureValidSessionAsync(throwOnFailure: false);
+
                 var qaList = await _qaRepository.GetAllAsync();
                 var filtered = ApplyFilter(qaList);
 
