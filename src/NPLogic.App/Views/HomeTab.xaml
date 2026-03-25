@@ -211,6 +211,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
                             <!-- 차주번호 -->
@@ -224,10 +225,14 @@
                             <!-- 차주유형 -->
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="차주유형" Style="{StaticResource LabelStyle}"/>
                             <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding BorrowerSummary.BorrowerType, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                            
+
+                            <!-- 사업자번호 -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="사업자번호" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding BorrowerSummary.BusinessNumber, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
+
                             <!-- 상태 -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="상태" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="상태" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
                                 <Border Background="#FFEBEE" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
                                         Visibility="{Binding BorrowerSummary.IsRestructuring, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <TextBlock Text="회생" FontSize="{StaticResource FontSizeSmall}" Foreground="#C62828"/>
@@ -261,12 +266,12 @@
                             </StackPanel>
                             
                             <!-- OPB -->
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="OPB" Style="{StaticResource LabelStyle}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding BorrowerSummary.OpbDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="0" Text="OPB" Style="{StaticResource LabelStyle}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding BorrowerSummary.OpbDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
                             
                             <!-- XNPV 1안 -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="XNPV 1안" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                            <TextBlock Grid.Row="6" Grid.Column="0" Text="XNPV 1안" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
                                 <TextBlock Text="{Binding BorrowerSummary.XnpvScenario1, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
                                 <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{Binding BorrowerSummary.XnpvRatio1Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
@@ -274,8 +279,8 @@
                             </StackPanel>
                             
                             <!-- XNPV 2안 -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="XNPV 2안" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                            <TextBlock Grid.Row="7" Grid.Column="0" Text="XNPV 2안" Style="{StaticResource LabelStyle}"/>
+                            <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
                                 <TextBlock Text="{Binding BorrowerSummary.XnpvScenario2, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
                                 <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
                                 <TextBlock Text="{Binding BorrowerSummary.XnpvRatio2Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
