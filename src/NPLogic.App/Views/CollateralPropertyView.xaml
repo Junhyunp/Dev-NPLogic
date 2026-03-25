@@ -133,7 +133,7 @@
                         </Border>
 
                         <!-- 3분할 지도 영역 -->
-                        <Grid x:Name="MapPanelGrid" Height="300">
+                        <Grid x:Name="MapPanelGrid" Height="420">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="4"/>
