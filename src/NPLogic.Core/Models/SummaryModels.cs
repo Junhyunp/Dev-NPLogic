@@ -119,6 +119,26 @@ namespace NPLogic.Core.Models
         
         /// <summary>보증서 현황 표시용</summary>
         public string GuaranteeStatusDisplay => MciLoanCount > 0 ? $"보증서 MCI {MciLoanCount}건" : (ValidGuaranteeCount > 0 ? $"보증서 {ValidGuaranteeCount}건" : "보증서 없음");
+
+        // ========== 바인딩 경고 방지용 스텁 속성 ==========
+
+        /// <summary>가지급금 합계 표시용</summary>
+        public string TotalAdvancePaymentDisplay => "-"; // TODO: 가지급금 합계
+
+        /// <summary>미수이자 합계 표시용</summary>
+        public string TotalAccruedInterestDisplay => "-"; // TODO: 미수이자 합계
+
+        /// <summary>일반보증(유) 표시용</summary>
+        public string GeneralGuaranteeActiveDisplay => "-"; // TODO: 일반보증(유)
+
+        /// <summary>해지부보증(유) 표시용</summary>
+        public string CancellationGuaranteeActiveDisplay => "-"; // TODO: 해지부보증(유)
+
+        /// <summary>일반보증(완) 표시용</summary>
+        public string GeneralGuaranteeCompleteDisplay => "-"; // TODO: 일반보증(완)
+
+        /// <summary>해지부보증(완) 표시용</summary>
+        public string CancellationGuaranteeCompleteDisplay => "-"; // TODO: 해지부보증(완)
     }
 
     /// <summary>
@@ -290,6 +310,38 @@ namespace NPLogic.Core.Models
         
         /// <summary>적용 낙찰가율 표시용</summary>
         public string AppliedBidRateDisplay => AppliedBidRate.HasValue ? $"{AppliedBidRate.Value:P1}" : "-";
+
+        // ========== 바인딩 경고 방지용 스텁 속성 ==========
+
+        /// <summary>시나리오1 배분가능액 표시용</summary>
+        public string Scenario1DistributableDisplay => "-"; // TODO
+
+        /// <summary>시나리오2 배분가능액 표시용</summary>
+        public string Scenario2DistributableDisplay => "-"; // TODO
+
+        /// <summary>시나리오1 Loan Cap 표시용</summary>
+        public string Scenario1LoanCapDisplay => "-"; // TODO
+
+        /// <summary>시나리오2 Loan Cap 표시용</summary>
+        public string Scenario2LoanCapDisplay => "-"; // TODO
+
+        /// <summary>시나리오1 근저당 Cap 표시용</summary>
+        public string Scenario1MortgageCapDisplay => "-"; // TODO
+
+        /// <summary>시나리오2 근저당 Cap 표시용</summary>
+        public string Scenario2MortgageCapDisplay => "-"; // TODO
+
+        /// <summary>시나리오1 XNPV 표시용</summary>
+        public string Scenario1XnpvDisplay => "-"; // TODO
+
+        /// <summary>시나리오2 XNPV 표시용</summary>
+        public string Scenario2XnpvDisplay => "-"; // TODO
+
+        /// <summary>시나리오1 Ratio 표시용</summary>
+        public string Scenario1RatioDisplay => "-"; // TODO
+
+        /// <summary>시나리오2 Ratio 표시용</summary>
+        public string Scenario2RatioDisplay => "-"; // TODO
     }
 
     /// <summary>
@@ -353,8 +405,13 @@ namespace NPLogic.Core.Models
             : "-";
         
         /// <summary>낙찰금액 표시용</summary>
-        public string WinningBidAmountDisplay => WinningBidAmount.HasValue 
-            ? $"{WinningBidAmount.Value:N0}원" 
+        public string WinningBidAmountDisplay => WinningBidAmount.HasValue
+            ? $"{WinningBidAmount.Value:N0}원"
             : "-";
+
+        // ========== 바인딩 경고 방지용 스텁 속성 ==========
+
+        /// <summary>경매유형 표시용</summary>
+        public string AuctionTypeDisplay => IsAuctionStarted ? "경매" : "-";
     }
 }

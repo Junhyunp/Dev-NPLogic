@@ -58,6 +58,9 @@ namespace NPLogic.Views
         private bool _sideListScrollHandlerRegistered = false;
         private ScrollChangedEventHandler? _sideListScrollChangedHandler;
 
+        // ★ 물건 빠른 전환 시 race condition 방지 (generation guard)
+        private int _loadGeneration = 0;
+
         // #region agent log
         private static void DebugLog(string hypothesisId, string location, string message, object? data = null)
         {
@@ -404,6 +407,9 @@ namespace NPLogic.Views
         /// </summary>
         private async void SwitchToDetailMode(Property property)
         {
+            // ★ Race condition 방지: 이전 로드가 진행 중이면 무효화
+            var currentGeneration = ++_loadGeneration;
+
             if (DataContext is DashboardViewModel viewModel)
             {
                 // 로딩 즉시 표시 (빈 템플릿 방지)
@@ -418,6 +424,9 @@ namespace NPLogic.Views
             _suppressInnerTabChecked = false;
             _currentTabIndex = 0;
             await LoadTabViewAsync("noncore", property);
+
+            // ★ 로드 완료 후 generation 확인 - 더 새로운 로드가 시작됐으면 결과 무시
+            if (currentGeneration != _loadGeneration) return;
         }
         
         /// <summary>
@@ -1006,6 +1015,9 @@ namespace NPLogic.Views
                 DataContext is DashboardViewModel viewModel &&
                 viewModel.IsDetailMode)
             {
+                // ★ Race condition 방지: 이전 로드가 진행 중이면 무효화
+                var currentGeneration = ++_loadGeneration;
+
                 // 이미 상세 모드이므로 선택된 물건만 변경
                 viewModel.SelectPropertyInDetailMode(property);
 
@@ -1018,6 +1030,9 @@ namespace NPLogic.Views
                 // 콘텐츠 강제 초기화 후 재로드 (캐시로 인한 미갱신 방지)
                 TabContentControl.Content = null;
                 await LoadTabViewAsync("noncore", property);
+
+                // ★ 로드 완료 후 generation 확인 - 더 새로운 로드가 시작됐으면 결과 무시
+                if (currentGeneration != _loadGeneration) return;
             }
         }
 
