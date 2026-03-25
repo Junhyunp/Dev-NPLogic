@@ -13,7 +13,7 @@ QA 팝업의 표 형식 교체와 CRUD 기능을 먼저 구현하여 핵심 상�
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: QA 팝업 표 형식 교체 + CRUD** - QA 팝업을 DataGrid 표로 교체하고 질의/답변 입력/수정 기능 구현 (completed 2026-03-25)
-- [ ] **Phase 2: 전체 탭 QA 카드 + QA집계 탭** - HomeTab QA 카드와 QASummaryTab을 동일한 표 형식으로 통일
+- [x] **Phase 2: 전체 탭 QA 카드 + QA집계 탭** - HomeTab QA 카드와 QASummaryTab을 동일한 표 형식으로 통일 (completed 2026-03-25)
 
 ## Phase Details
 
@@ -44,7 +44,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — HomeTab QA 4열 DataGrid + QASummaryTab 6열 DataGrid 통일
+- [x] 02-01-PLAN.md — HomeTab QA 4열 DataGrid + QASummaryTab 6열 DataGrid 통일
 
 ## Progress
 
@@ -54,4 +54,4 @@ Phases execute in numeric order: 1 -> 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. QA 팝업 표 형식 교체 + CRUD | 1/2 | In Progress | - |
-| 2. 전체 탭 QA 카드 + QA집계 탭 | 0/1 | Not started | - |
+| 2. 전체 탭 QA 카드 + QA집계 탭 | 1/1 | Complete | 2026-03-25 |
