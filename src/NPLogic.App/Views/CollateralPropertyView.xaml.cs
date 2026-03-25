@@ -1297,11 +1297,13 @@ namespace NPLogic.Views
                 }});
                 infowindow.open(map, marker);
                 map.setCenter(coords);
+                setTimeout(function() {{ map.relayout(); map.setCenter(coords); }}, 200);
             }}
         }});
 
         map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
         map.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
+        setTimeout(function() {{ map.relayout(); }}, 300);
     </script>
 </body>
 </html>";
@@ -1396,11 +1398,13 @@ namespace NPLogic.Views
                 }});
                 infowindow.open(map, marker);
                 map.setCenter(coords);
+                setTimeout(function() {{ map.relayout(); map.setCenter(coords); }}, 200);
             }}
         }});
 
         map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
         map.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
+        setTimeout(function() {{ map.relayout(); }}, 300);
     </script>
 </body>
 </html>";
