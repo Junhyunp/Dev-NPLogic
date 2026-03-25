@@ -1815,7 +1815,7 @@ namespace NPLogic.ViewModels
         #region 명령
 
         /// <summary>
-        /// 탐문 결과 테이블 생성 (고정 5행: 토지, 건물, 제시외, 기계기구, 합계)
+        /// 탐문 결과 테이블 생성 (유형별 행 구성)
         /// </summary>
         [RelayCommand]
         private void CreateInquiryResultTable()
@@ -1823,8 +1823,15 @@ namespace NPLogic.ViewModels
             if (HasInquiryResultTable) return;
             InquiryResultRows.Add(new InquiryResultRow { Category = "토지" });
             InquiryResultRows.Add(new InquiryResultRow { Category = "건물" });
-            InquiryResultRows.Add(new InquiryResultRow { Category = "제시외" });
-            InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
+            if (IsFactoryType)
+            {
+                InquiryResultRows.Add(new InquiryResultRow { Category = "제시외" });
+                InquiryResultRows.Add(new InquiryResultRow { Category = "기계기구" });
+            }
+            else
+            {
+                InquiryResultRows.Add(new InquiryResultRow { Category = "기계" });
+            }
             InquiryResultRows.Add(new InquiryResultRow { Category = "합계" });
             HasInquiryResultTable = true;
         }
