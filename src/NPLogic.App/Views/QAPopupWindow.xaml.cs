@@ -169,7 +169,7 @@ namespace NPLogic.Views
                     if (string.IsNullOrWhiteSpace(qa.Question))
                         continue;
 
-                    qa.CreatedBy = currentUserId;
+                    // CreatedBy는 DB FK 제약(users 테이블)으로 인해 설정하지 않음
                     var created = await _qaRepository.CreateAsync(qa);
 
                     // 반환된 Id로 업데이트
