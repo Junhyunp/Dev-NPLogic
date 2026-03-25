@@ -1154,7 +1154,7 @@ namespace NPLogic.Data.Repositories
         /// <summary>
         /// 지번별 감정평가 조회
         /// </summary>
-        public async Task<List<(Guid Id, Guid PropertyId, string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)>> GetJibunAppraisalsAsync(Guid propertyId)
+        public async Task<List<(Guid Id, Guid PropertyId, string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaLandAreaPyeong, decimal? JaBuildingAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)>> GetJibunAppraisalsAsync(Guid propertyId)
         {
             try
             {
@@ -1171,7 +1171,8 @@ namespace NPLogic.Data.Repositories
                     t.JaSeq,
                     t.JaCategory,
                     t.JaAddress,
-                    t.JaAreaPyeong,
+                    t.JaLandAreaPyeong,
+                    t.JaBuildingAreaPyeong,
                     t.JaPricePerPyeong,
                     t.JaAppraisalValue
                 )).ToList();
@@ -1185,7 +1186,7 @@ namespace NPLogic.Data.Repositories
         /// <summary>
         /// 지번별 감정평가 저장 (DELETE + INSERT 방식)
         /// </summary>
-        public async Task SaveJibunAppraisalsAsync(Guid propertyId, List<(string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)> rows)
+        public async Task SaveJibunAppraisalsAsync(Guid propertyId, List<(string? JaSeq, string? JaCategory, string? JaAddress, decimal? JaLandAreaPyeong, decimal? JaBuildingAreaPyeong, decimal? JaPricePerPyeong, decimal? JaAppraisalValue)> rows)
         {
             try
             {
@@ -1209,7 +1210,8 @@ namespace NPLogic.Data.Repositories
                             JaSeq = row.JaSeq,
                             JaCategory = row.JaCategory,
                             JaAddress = row.JaAddress,
-                            JaAreaPyeong = row.JaAreaPyeong,
+                            JaLandAreaPyeong = row.JaLandAreaPyeong,
+                            JaBuildingAreaPyeong = row.JaBuildingAreaPyeong,
                             JaPricePerPyeong = row.JaPricePerPyeong,
                             JaAppraisalValue = row.JaAppraisalValue,
                             CreatedAt = DateTime.UtcNow,
@@ -1852,8 +1854,11 @@ namespace NPLogic.Data.Repositories
         [Postgrest.Attributes.Column("ja_address")]
         public string? JaAddress { get; set; }
 
-        [Postgrest.Attributes.Column("ja_area_pyeong")]
-        public decimal? JaAreaPyeong { get; set; }
+        [Postgrest.Attributes.Column("ja_land_area_pyeong")]
+        public decimal? JaLandAreaPyeong { get; set; }
+
+        [Postgrest.Attributes.Column("ja_building_area_pyeong")]
+        public decimal? JaBuildingAreaPyeong { get; set; }
 
         [Postgrest.Attributes.Column("ja_price_per_pyeong")]
         public decimal? JaPricePerPyeong { get; set; }

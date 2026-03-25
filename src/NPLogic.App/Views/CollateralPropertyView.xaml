@@ -1065,7 +1065,7 @@
                                       MinHeight="60"
                                       PreviewMouseWheel="DataGrid_PreviewMouseWheel">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                                    <DataGridTextColumn Header="지번일련번호" Binding="{Binding JaSeq, UpdateSourceTrigger=PropertyChanged}" Width="120"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                     <DataGridTextColumn Header="구분" Binding="{Binding JaCategory, UpdateSourceTrigger=PropertyChanged}" Width="80"
@@ -1074,13 +1074,16 @@
                                     <DataGridTextColumn Header="지번주소지" Binding="{Binding JaAddress, UpdateSourceTrigger=PropertyChanged}" Width="*"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="면적(평)" Binding="{Binding JaAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="90"
+                                    <DataGridTextColumn Header="토지면적(평)" Binding="{Binding JaLandAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="110"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="110"
+                                    <DataGridTextColumn Header="건물면적(평)" Binding="{Binding JaBuildingAreaPyeong, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}" Width="110"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
-                                    <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                                    <DataGridTextColumn Header="평당감정가" Binding="{Binding JaPricePerPyeong, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="120"
+                                                        ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
+                                                        EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
+                                    <DataGridTextColumn Header="감정가" Binding="{Binding JaAppraisalValue, StringFormat=N0, UpdateSourceTrigger=PropertyChanged}" Width="130"
                                                         ElementStyle="{StaticResource SectionDataGridTextBlockStyle}"
                                                         EditingElementStyle="{StaticResource SectionDataGridTextBoxStyle}"/>
                                 </DataGrid.Columns>
@@ -1090,15 +1093,16 @@
                             <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,1,1" Background="{StaticResource BlueGray100Brush}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="120"/>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="90"/>
+                                        <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="130"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="합계" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
-                                    <TextBlock Grid.Column="5" Text="{Binding JibunAppraisalTotalValue, StringFormat=N0}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
+                                    <TextBlock Grid.Column="6" Text="{Binding JibunAppraisalTotalValue, StringFormat=N0}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="8,6"/>
                                 </Grid>
                             </Border>
 
@@ -1136,7 +1140,7 @@
                         <!-- 패널 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
                             <Grid>
-                                <TextBlock Text="🔧 기계기구 감정가" FontWeight="SemiBold"
+                                <TextBlock Text="🔧 기계기구별 감정평가" FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeH4}" Foreground="White"
                                            VerticalAlignment="Center"/>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

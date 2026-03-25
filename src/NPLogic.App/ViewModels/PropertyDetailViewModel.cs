@@ -101,7 +101,10 @@ namespace NPLogic.ViewModels
         private string _jaAddress = "";
 
         [ObservableProperty]
-        private decimal? _jaAreaPyeong;
+        private decimal? _jaLandAreaPyeong;
+
+        [ObservableProperty]
+        private decimal? _jaBuildingAreaPyeong;
 
         [ObservableProperty]
         private decimal? _jaPricePerPyeong;
@@ -3239,7 +3242,8 @@ namespace NPLogic.ViewModels
                         JaSeq = r.JaSeq ?? "",
                         JaCategory = r.JaCategory ?? "",
                         JaAddress = r.JaAddress ?? "",
-                        JaAreaPyeong = r.JaAreaPyeong,
+                        JaLandAreaPyeong = r.JaLandAreaPyeong,
+                        JaBuildingAreaPyeong = r.JaBuildingAreaPyeong,
                         JaPricePerPyeong = r.JaPricePerPyeong,
                         JaAppraisalValue = r.JaAppraisalValue,
                     };
@@ -3310,7 +3314,8 @@ namespace NPLogic.ViewModels
                     (string?)r.JaSeq,
                     (string?)r.JaCategory,
                     (string?)r.JaAddress,
-                    r.JaAreaPyeong,
+                    r.JaLandAreaPyeong,
+                    r.JaBuildingAreaPyeong,
                     r.JaPricePerPyeong,
                     r.JaAppraisalValue
                 )).ToList();
