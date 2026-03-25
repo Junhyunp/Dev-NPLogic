@@ -406,10 +406,12 @@ namespace NPLogic.Views
         {
             if (DataContext is DashboardViewModel viewModel)
             {
+                // 로딩 즉시 표시 (빈 템플릿 방지)
+                viewModel.IsLoading = true;
                 viewModel.SwitchToDetailMode(property);
                 UpdateNavigationUI();
             }
-            
+
             // 기본 탭(비핵심) 선택 및 컨텐츠 로드 (이벤트 억제하여 이중 로드 방지)
             _suppressInnerTabChecked = true;
             TabNonCore.IsChecked = true;
