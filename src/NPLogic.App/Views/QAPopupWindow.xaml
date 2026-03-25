@@ -134,16 +134,21 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="회신일자"
-                                        Binding="{Binding AnsweredAt, Converter={StaticResource NullableDateTimeConverter}, UpdateSourceTrigger=LostFocus}"
-                                        Width="100">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock" BasedOn="{StaticResource SectionDataGridTextBlockStyle}"/>
-                        </DataGridTextColumn.ElementStyle>
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="TextBox" BasedOn="{StaticResource SectionDataGridTextBoxStyle}"/>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
+                    <DataGridTemplateColumn Header="회신일자" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding AnsweredAt, StringFormat=yyyy-MM-dd}"
+                                           Style="{StaticResource SectionDataGridTextBlockStyle}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding AnsweredAt, UpdateSourceTrigger=PropertyChanged}"
+                                            FontSize="{StaticResource FontSizeBody}"
+                                            VerticalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="답변내용"
                                         Binding="{Binding Answer, UpdateSourceTrigger=PropertyChanged}"
                                         Width="3*">
