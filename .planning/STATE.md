@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 Phase: 2 of 2 (전체 탭 QA 카드 + QA집계 탭)
 Plan: 1 of 1 in current phase (complete)
 Status: Executing
-Last activity: 2026-03-25 - Completed quick task 2: 등기부등본 PDF 뷰어를 인라인에서 팝업 창으로 변경
+Last activity: 2026-03-25 - Completed quick task 3: 등기부등본 DataGrid UX 개선 (패딩/행이동/순위재설정/컬럼명)
 
 Progress: [███████░░░] 67%
 
@@ -79,9 +79,10 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 2 | 등기부등본 PDF 뷰어를 인라인에서 팝업 창으로 변경 | 2026-03-25 | 7b8bd50 | [2-pdf](./quick/2-pdf/) |
+| 3 | 등기부등본 DataGrid UX 개선 (패딩/행이동/순위재설정/컬럼명) | 2026-03-25 | d73a398 | [3-datagrid](./quick/3-datagrid/) |
 
 ## Session Continuity
 
-Last session: 2026-03-25T15:09:23Z
-Stopped at: Completed quick-2-pdf (등기부등본 이미지 뷰어 팝업 전환)
+Last session: 2026-03-25T17:13:33Z
+Stopped at: Completed quick-3-datagrid (등기부등본 DataGrid UX 개선)
 Resume file: None
