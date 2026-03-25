@@ -238,6 +238,16 @@ namespace NPLogic.ViewModels
     }
 
     /// <summary>
+    /// 비고 종합 표시용 아이템
+    /// </summary>
+    public class NoteSummaryItem
+    {
+        public string TabDisplayName { get; set; } = string.Empty;
+        public string NoteText { get; set; } = string.Empty;
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    /// <summary>
     /// 물건 상세 ViewModel
     /// </summary>
     public partial class PropertyDetailViewModel : ObservableObject
@@ -4242,6 +4252,53 @@ namespace NPLogic.ViewModels
             catch (Exception ex)
             {
                 ErrorMessage = $"분양가 저장 실패: {ex.Message}";
+            }
+        }
+
+        // ========== 비고 종합 (전체 탭용) ==========
+
+        private static readonly Dictionary<string, string> TabNameDisplayMap = new()
+        {
+            ["borrower_overview"] = "차주개요",
+            ["loan"] = "Loan",
+            ["collateral_property"] = "담보물건",
+            ["senior_rights"] = "선순위",
+            ["evaluation"] = "평가",
+            ["auction_schedule"] = "경(공)매일정",
+            ["interim"] = "인터림",
+            ["registry"] = "등기부등본",
+            ["rights_analysis"] = "권리분석",
+            ["basic_data"] = "기초데이터",
+            ["qa_summary"] = "QA집계",
+            ["cashflow_summary"] = "현금흐름집계",
+            ["npv_comparison"] = "NPV비교",
+            ["closing"] = "마감"
+        };
+
+        [ObservableProperty]
+        private ObservableCollection<NoteSummaryItem> _noteSummaryItems = new();
+
+        public async Task LoadNoteSummaryAsync()
+        {
+            if (_propertyNoteRepository == null || _propertyId == null) return;
+            try
+            {
+                var notes = await _propertyNoteRepository.GetByPropertyIdAsync(_propertyId.Value);
+                NoteSummaryItems.Clear();
+                foreach (var note in notes.Where(n => !string.IsNullOrWhiteSpace(n.NoteText)))
+                {
+                    var displayName = TabNameDisplayMap.TryGetValue(note.TabName, out var name) ? name : note.TabName;
+                    NoteSummaryItems.Add(new NoteSummaryItem
+                    {
+                        TabDisplayName = displayName,
+                        NoteText = note.NoteText,
+                        UpdatedAt = note.UpdatedAt
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[HomeTab] 비고 종합 로드 실패: {ex.Message}");
             }
         }
 

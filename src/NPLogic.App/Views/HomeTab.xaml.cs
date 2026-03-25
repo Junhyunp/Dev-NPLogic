@@ -1,4 +1,6 @@
+using System.Windows;
 using System.Windows.Controls;
+using NPLogic.ViewModels;
 
 namespace NPLogic.Views
 {
@@ -10,7 +12,15 @@ namespace NPLogic.Views
         public HomeTab()
         {
             InitializeComponent();
+            Loaded += HomeTab_Loaded;
+        }
+
+        private async void HomeTab_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is PropertyDetailViewModel vm)
+            {
+                await vm.LoadNoteSummaryAsync();
+            }
         }
     }
 }
-

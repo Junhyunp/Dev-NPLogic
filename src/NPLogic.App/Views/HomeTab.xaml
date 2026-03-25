@@ -705,6 +705,49 @@
                                Margin="0,12,0,0"/>
                 </StackPanel>
             </Border>
+            <!-- 비고 종합 섹션 -->
+            <Border Style="{StaticResource SummaryCardStyle}"
+                    Margin="0,16,0,0"
+                    Visibility="{Binding NoteSummaryItems.Count, Converter={StaticResource IntToVisibilityConverter}, FallbackValue=Collapsed}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <TextBlock Text="📝" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="탭별 비고 종합"
+                                   FontWeight="SemiBold"
+                                   FontSize="{StaticResource FontSizeH4}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <ItemsControl ItemsSource="{Binding NoteSummaryItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="0,8"
+                                        Margin="0,0,0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding TabDisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   Foreground="{StaticResource PrimaryBrush}"
+                                                   VerticalAlignment="Top"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding NoteText}"
+                                                   FontSize="{StaticResource FontSizeBody}"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Top"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
         </Grid>
     </ScrollViewer>
 </UserControl>
