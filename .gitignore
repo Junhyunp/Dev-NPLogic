@@ -199,3 +199,16 @@ logs/
 /manager
 /etc
 nul
+
+# ── GSD baseline (auto-generated) ──
+.gsd
+.bg-shell/
+*.swo
+node_modules/
+.next/
+*.pyc
+target/
+vendor/
+coverage/
+.cache/
+tmp/

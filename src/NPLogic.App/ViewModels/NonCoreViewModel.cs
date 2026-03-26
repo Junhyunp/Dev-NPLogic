@@ -851,9 +851,11 @@ namespace NPLogic.ViewModels
         }
 
         /// <summary>
-        /// 물건 탭 추가
+        /// 물건 탭 추가 — 동기적으로 탭을 즉시 추가하고, 차주명은 비동기로 나중에 채움.
+        /// 이전 구현은 async void로 차주명 DB 조회를 기다리느라 PropertyTabs.Add가 지연되어
+        /// SelectPropertyTab에서 SelectedPropertyTab이 null이 되는 race condition이 있었음.
         /// </summary>
-        public async void AddPropertyTab(Property property)
+        public void AddPropertyTab(Property property)
         {
             // 이미 열려있는지 확인
             if (PropertyTabs.Any(t => t.PropertyId == property.Id))
@@ -868,20 +870,11 @@ namespace NPLogic.ViewModels
                 NavigationStateService.Instance.RemoveClosedTab(_currentProgramId.Value, property.Id);
             }
 
-            // 차주명: DebtorName이 없으면 같은 BorrowerNumber의 기존 탭에서 가져오거나, borrower 조회
+            // 차주명: 동기적으로 즉시 구할 수 있는 소스만 사용
             var borrowerName = property.DebtorName;
             if (string.IsNullOrEmpty(borrowerName) && !string.IsNullOrEmpty(property.BorrowerNumber))
             {
                 borrowerName = PropertyTabs.FirstOrDefault(t => t.BorrowerNumber == property.BorrowerNumber)?.BorrowerName;
-                if (string.IsNullOrEmpty(borrowerName) && _borrowerRepository != null)
-                {
-                    try
-                    {
-                        var borrower = await _borrowerRepository.GetByBorrowerNumberAsync(property.BorrowerNumber);
-                        borrowerName = borrower?.BorrowerName;
-                    }
-                    catch { /* 무시 */ }
-                }
             }
 
             var newTab = new PropertyTabItem
@@ -893,8 +886,34 @@ namespace NPLogic.ViewModels
                 IsSelected = true
             };
 
+            // ★ 탭을 즉시 동기적으로 추가 — SelectPropertyTab 전에 반드시 완료
             PropertyTabs.Add(newTab);
             SelectPropertyTab(property.Id);
+
+            // 차주명이 비어 있으면 비동기로 DB 조회 후 채움 (UI 표시용, 데이터 로드에 영향 없음)
+            if (string.IsNullOrEmpty(borrowerName) && !string.IsNullOrEmpty(property.BorrowerNumber) && _borrowerRepository != null)
+            {
+                _ = BackfillBorrowerNameAsync(newTab, property.BorrowerNumber);
+            }
+        }
+
+        /// <summary>
+        /// 차주명을 비동기로 조회하여 탭에 반영 (fire-and-forget, UI 표시 전용)
+        /// </summary>
+        private async Task BackfillBorrowerNameAsync(PropertyTabItem tab, string borrowerNumber)
+        {
+            try
+            {
+                var borrower = await _borrowerRepository!.GetByBorrowerNumberAsync(borrowerNumber);
+                if (borrower != null && !string.IsNullOrEmpty(borrower.BorrowerName))
+                {
+                    tab.BorrowerName = borrower.BorrowerName;
+                }
+            }
+            catch
+            {
+                // 차주명 조회 실패해도 기능에 영향 없음 — 탭에 이름만 안 뜨는 수준
+            }
         }
 
         /// <summary>
