@@ -67,6 +67,9 @@ namespace NPLogic.Core.Models
         /// <summary>OPB 표시용 (천원)</summary>
         public string OpbDisplay => $"{Opb / 1000:N0}천원";
         
+        /// <summary>OPB 표시용 (억, 소수점 1자리)</summary>
+        public string OpbBillionDisplay => $"{Opb / 100_000_000m:N1}억";
+        
         /// <summary>근저당설정액 표시용 (천원)</summary>
         public string MortgageAmountDisplay => $"{MortgageAmount / 1000:N0}천원";
         

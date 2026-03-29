@@ -32,8 +32,10 @@
 
         <!-- 라벨 스타일 -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="{StaticResource FontSizeSmall}"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBody}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,4"/>
         </Style>
         
@@ -97,7 +99,8 @@
                         </TextBlock>
                         
                         <TextBlock Text="{Binding DisplayAddress}"
-                                   Style="{StaticResource BodyTextStyle}"
+                                   FontSize="{StaticResource FontSizeH4}"
+                                   FontWeight="SemiBold"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,12"/>
                         
@@ -112,6 +115,17 @@
                                            Foreground="White"
                                            FontWeight="SemiBold"
                                            FontSize="{StaticResource FontSizeBody}"/>
+                            </Border>
+
+                            <!-- OPB 뱃지 -->
+                            <Border Background="{StaticResource InfoBrush}"
+                                    CornerRadius="4"
+                                    Padding="12,6"
+                                    Margin="0,0,8,0">
+                                <TextBlock Foreground="White" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}">
+                                    <Run Text="OPB "/>
+                                    <Run Text="{Binding BorrowerSummary.OpbBillionDisplay, Mode=OneWay, FallbackValue='-'}"/>
+                                </TextBlock>
                             </Border>
                             
                             <!-- 상태 뱃지 -->
@@ -210,8 +224,6 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
                             <!-- 차주번호 -->
@@ -232,7 +244,7 @@
 
                             <!-- 상태 -->
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="상태" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+                            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4">
                                 <Border Background="#FFEBEE" CornerRadius="3" Padding="6,2" Margin="0,0,4,0"
                                         Visibility="{Binding BorrowerSummary.IsRestructuring, Converter={StaticResource BoolToVisibilityConverter}}">
                                     <TextBlock Text="회생" FontSize="{StaticResource FontSizeSmall}" Foreground="#C62828"/>
@@ -269,24 +281,43 @@
                             <TextBlock Grid.Row="5" Grid.Column="0" Text="OPB" Style="{StaticResource LabelStyle}"/>
                             <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding BorrowerSummary.OpbDisplay, FallbackValue=-}" Style="{StaticResource AmountValueStyle}"/>
                             
-                            <!-- XNPV 1안 -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" Text="XNPV 1안" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
-                                <TextBlock Text="{Binding BorrowerSummary.XnpvScenario1, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding BorrowerSummary.XnpvRatio1Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
-                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
-                            
-                            <!-- XNPV 2안 -->
-                            <TextBlock Grid.Row="7" Grid.Column="0" Text="XNPV 2안" Style="{StaticResource LabelStyle}"/>
-                            <StackPanel Grid.Row="7" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
-                                <TextBlock Text="{Binding BorrowerSummary.XnpvScenario2, StringFormat={}{0:N0}원, FallbackValue=-}" Style="{StaticResource ValueStyle}"/>
-                                <TextBlock Text=" (" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding BorrowerSummary.XnpvRatio2Display, FallbackValue=-}" Foreground="{StaticResource InfoBrush}"/>
-                                <TextBlock Text=")" Foreground="{StaticResource TextSecondaryBrush}"/>
-                            </StackPanel>
                         </Grid>
+
+                        <!-- 탭별 비고 종합 (차주개요 카드 하단) -->
+                        <TextBlock Text="탭별 비고" FontWeight="SemiBold" FontSize="{StaticResource FontSizeBody}" Margin="0,16,0,8"/>
+                        <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding NoteSummaryItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" Background="{StaticResource BlueGray100Brush}" 
+                                                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding TabDisplayName}" FontSize="{StaticResource FontSizeBody}" 
+                                                               FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                                                </Border>
+                                                <Border Grid.Column="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="8,6">
+                                                    <TextBlock Text="{Binding NoteText}" FontSize="{StaticResource FontSizeBody}" 
+                                                               TextWrapping="Wrap" VerticalAlignment="Top"/>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <!-- 비고 없을 때 안내 -->
+                                <TextBlock Text="각 탭에서 작성된 비고가 없습니다."
+                                           Visibility="{Binding HasNoteSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           Foreground="{StaticResource TextTertiaryBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,8"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
                 
@@ -933,55 +964,6 @@
             </Border>
         </Grid>
 
-            <!-- 비고 종합 섹션 (제일 하단) -->
-            <Border Style="{StaticResource SummaryCardStyle}"
-                    Margin="12,0,12,12">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <TextBlock Text="📝" FontSize="{StaticResource FontSizeH4}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="탭별 비고 종합"
-                                   FontWeight="SemiBold"
-                                   FontSize="{StaticResource FontSizeH4}"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <ItemsControl ItemsSource="{Binding NoteSummaryItems}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="0,0,0,1"
-                                        Padding="0,8"
-                                        Margin="0,0,0,4">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0"
-                                                   Text="{Binding TabDisplayName}"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="{StaticResource FontSizeBody}"
-                                                   Foreground="{StaticResource PrimaryBrush}"
-                                                   VerticalAlignment="Top"/>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding NoteText}"
-                                                   FontSize="{StaticResource FontSizeBody}"
-                                                   TextWrapping="Wrap"
-                                                   VerticalAlignment="Top"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <!-- 비고 없을 때 안내 -->
-                    <TextBlock Text="각 탭에서 작성된 비고가 없습니다."
-                               Visibility="{Binding HasNoteSummary, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                               Style="{StaticResource CaptionTextStyle}"
-                               Foreground="{StaticResource TextTertiaryBrush}"
-                               Margin="0,4,0,0"/>
-                </StackPanel>
-            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
