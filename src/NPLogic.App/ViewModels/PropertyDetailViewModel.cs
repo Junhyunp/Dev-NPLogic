@@ -299,6 +299,7 @@ namespace NPLogic.ViewModels
         private readonly AuctionScheduleRepository? _auctionScheduleRepository;
         private readonly PermissionService? _permissionService;
         private readonly PropertyNoteRepository? _propertyNoteRepository;
+        private readonly VworldService? _vworldService;
         private bool _suppressSelectedRegistryRunChanged;
 
         [ObservableProperty]
@@ -419,6 +420,13 @@ namespace NPLogic.ViewModels
         // KB부동산 URL (좌표 기반)
         [ObservableProperty]
         private string? _kbLandUrl;
+
+        // 공동주택가격 (Vworld 공동주택가격속성조회 API)
+        [ObservableProperty]
+        private decimal _apartHousingPrice;
+
+        [ObservableProperty]
+        private string? _apartHousingPriceYear;
 
         // 감정평가 상세 정보
         [ObservableProperty]
@@ -1120,7 +1128,8 @@ namespace NPLogic.ViewModels
             LoanRepository? loanRepository = null,
             AuctionScheduleRepository? auctionScheduleRepository = null,
             PermissionService? permissionService = null,
-            PropertyNoteRepository? propertyNoteRepository = null)
+            PropertyNoteRepository? propertyNoteRepository = null,
+            VworldService? vworldService = null)
         {
             _propertyRepository = propertyRepository ?? throw new ArgumentNullException(nameof(propertyRepository));
             _storageService = storageService;
@@ -1137,6 +1146,7 @@ namespace NPLogic.ViewModels
             _auctionScheduleRepository = auctionScheduleRepository;
             _permissionService = permissionService;
             _propertyNoteRepository = propertyNoteRepository;
+            _vworldService = vworldService;
             
             // 프로그램 이름 캐시가 비어있으면 미리 로드 (첫 ViewModel 생성 시)
             if (_programRepository != null && _programNameCache.Count == 0)
@@ -1301,6 +1311,14 @@ namespace NPLogic.ViewModels
             // KB시세 패널 - 분양면적 로드
             KbSupplyArea = property.KbSupplyArea;
 
+            // 공동주택가격 조회 (아파트인 경우, Vworld API — fire-and-forget)
+            ApartHousingPrice = 0;
+            ApartHousingPriceYear = null;
+            if (IsApartment && _vworldService != null && !string.IsNullOrEmpty(property.Pnu))
+            {
+                _ = LoadApartHousingPriceAsync(property);
+            }
+
             // 분양가 패널 로드
             SaleSupplyArea = property.SaleSupplyArea;
             SalePriceLand = property.SalePriceLand;
@@ -1447,6 +1465,14 @@ namespace NPLogic.ViewModels
 
                     // KB시세 패널 - 분양면적 로드
                     KbSupplyArea = property.KbSupplyArea;
+
+                    // 공동주택가격 조회 (아파트인 경우, Vworld API — fire-and-forget)
+                    ApartHousingPrice = 0;
+                    ApartHousingPriceYear = null;
+                    if (IsApartment && _vworldService != null && !string.IsNullOrEmpty(property.Pnu))
+                    {
+                        _ = LoadApartHousingPriceAsync(property);
+                    }
 
                     // 분양가 패널 로드
                     SaleSupplyArea = property.SaleSupplyArea;
@@ -3202,6 +3228,31 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 공동주택가격 비동기 조회 (Vworld getApartHousingPriceAttr API)
+        /// fire-and-forget으로 호출되어 결과가 오면 UI 자동 갱신
+        /// </summary>
+        private async Task LoadApartHousingPriceAsync(Property property)
+        {
+            try
+            {
+                var result = await _vworldService!.GetOfficialPriceAsync(
+                    property.Pnu!,
+                    property.PropertyType,
+                    addressFull: property.AddressFull);
+
+                if (result != null && result.Price > 0 && result.PriceType == "공동주택")
+                {
+                    ApartHousingPrice = result.Price;
+                    ApartHousingPriceYear = result.StandardYear;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PropertyDetail] 공동주택가격 조회 실패: {ex.Message}");
             }
         }
 

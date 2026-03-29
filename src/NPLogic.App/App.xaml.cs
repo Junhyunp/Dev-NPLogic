@@ -178,6 +178,9 @@ namespace NPLogic
             services.AddSingleton<Services.DataDiskUploadService>();
             services.AddSingleton<Services.InterimUploadService>();
 
+            // Business Registration Service (Singleton) - 국세청 사업자등록정보 상태조회
+            services.AddSingleton<Services.BusinessRegistrationService>();
+
             // Permission Service (Singleton) - 권한 관리
             services.AddSingleton<Services.PermissionService>();
 
@@ -223,7 +226,8 @@ namespace NPLogic
                     sp.GetRequiredService<Data.Repositories.LoanRepository>(),
                     sp.GetRequiredService<Data.Repositories.AuctionScheduleRepository>(),
                     sp.GetRequiredService<Services.PermissionService>(),
-                    sp.GetRequiredService<Data.Repositories.PropertyNoteRepository>()
+                    sp.GetRequiredService<Data.Repositories.PropertyNoteRepository>(),
+                    sp.GetRequiredService<VworldService>()
                 );
             });
             services.AddTransient<ViewModels.DataUploadViewModel>();

@@ -115,7 +115,7 @@
                         <!-- 헤더 -->
                         <Border Background="{StaticResource PrimaryBrush}"
                                 CornerRadius="6,6,0,0"
-                                Padding="16,10">
+                                Padding="16,9">
                             <Grid>
                                 <TextBlock Text="🗺️ 지도 정보"
                                            Foreground="White"
@@ -126,16 +126,18 @@
                                     <Button Content="저장"
                                             Command="{Binding SaveAllCollateralCommand}"
                                             Style="{StaticResource MaterialDesignRaisedButton}"
-                                            Padding="12,6"
+                                            Padding="8,0"
+                                            Height="20" MinHeight="0" MinWidth="0"
+                                            FontSize="{StaticResource FontSizeSmall}"
                                             Foreground="White"/>
                                     <Button Command="{Binding ToggleCollateralNotePanelCommand}"
                                             Style="{StaticResource MaterialDesignIconButton}"
                                             ToolTip="비고 패널 열기/닫기"
-                                            Width="32" Height="32"
+                                            Width="20" Height="20" MinHeight="0" MinWidth="0"
                                             Padding="0"
                                             Margin="8,0,0,0"
                                             Foreground="White">
-                                        <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                                        <materialDesign:PackIcon Kind="NoteEdit" Width="12" Height="12"/>
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -335,9 +337,10 @@
                                         Foreground="White"
                                         Click="CloseWebView_Click"
                                         ToolTip="닫기"
-                                        Padding="8,4">
+                                        Padding="8,0"
+                                        Height="20" MinHeight="0" MinWidth="0">
                                     <StackPanel Orientation="Horizontal">
-                                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" VerticalAlignment="Center"/>
+                                        <materialDesign:PackIcon Kind="Close" Width="14" Height="14" VerticalAlignment="Center"/>
                                         <TextBlock Text="닫기" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Button>
@@ -374,7 +377,8 @@
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
                                 <Button Grid.Column="1"
-                                        Padding="12,6"
+                                        Padding="8,0"
+                                        Height="20" MinHeight="0" MinWidth="0"
                                         Click="OpenLandUsePlan_Click"
                                         ToolTip="토지이용계획 열기"
                                         Background="Transparent"
@@ -479,7 +483,8 @@
                                     <Button x:Name="LandUseLockButton"
                                             Content="고정"
                                             Click="LandUseLock_Click"
-                                            Padding="12,6"
+                                            Padding="8,0"
+                                            Height="20" MinHeight="0" MinWidth="0"
                                             Background="Transparent"
                                             BorderBrush="White"
                                             BorderThickness="1"
@@ -490,7 +495,8 @@
                                             FontSize="{StaticResource FontSizeSmall}"/>
                                     <Button Content="닫기"
                                             Click="LandUseClose_Click"
-                                            Padding="12,6"
+                                            Padding="8,0"
+                                            Height="20" MinHeight="0" MinWidth="0"
                                             Background="Transparent"
                                             BorderBrush="White"
                                             BorderThickness="1"
@@ -529,7 +535,8 @@
                                            FontSize="{StaticResource FontSizeH4}"
                                            VerticalAlignment="Center"/>
                                 <Button Grid.Column="1"
-                                        Padding="12,6"
+                                        Padding="8,0"
+                                        Height="20" MinHeight="0" MinWidth="0"
                                         Command="{Binding ToggleRegistryImagePanelCommand}"
                                         ToolTip="등기부등본 원본 이미지 보기/숨기기"
                                         Background="Transparent"
@@ -898,6 +905,7 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto"/>
@@ -912,6 +920,9 @@
                                             <TextBlock Text="KB시세" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
                                         <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource TableHeaderCell}">
+                                            <TextBlock Text="공동주택가격" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCell}">
                                             <TextBlock Text="분양면적" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
                                         </Border>
 
@@ -928,6 +939,15 @@
                                                        HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding ApartHousingPrice, StringFormat=N0, TargetNullValue='-'}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding ApartHousingPriceYear, StringFormat=' ({0})'}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"
+                                                           Visibility="{Binding ApartHousingPriceYear, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}">
                                             <TextBox Text="{Binding KbSupplyArea, StringFormat=N2, UpdateSourceTrigger=PropertyChanged}"
                                                      BorderThickness="0" Background="Transparent"
                                                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
