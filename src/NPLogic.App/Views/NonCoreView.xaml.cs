@@ -403,7 +403,25 @@ namespace NPLogic.Views
                         var vm = serviceProvider.GetRequiredService<PropertyDetailViewModel>();
                         if (selectedPropertyId.HasValue)
                         {
-                            vm.SetPropertyId(selectedPropertyId.Value);
+                            // 같은 프로그램의 전체 물건 목록을 넘겨서 차주별 형제 물건 표시
+                            List<NPLogic.Core.Models.Property>? allProperties = null;
+                            try
+                            {
+                                allProperties = await _viewModel?.GetAllPropertiesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"[NonCoreView] Home 탭 물건 목록 로드 실패 (무시): {ex.Message}");
+                            }
+
+                            if (allProperties != null && allProperties.Count > 0)
+                            {
+                                vm.SetPropertyId(selectedPropertyId.Value, allProperties, null);
+                            }
+                            else
+                            {
+                                vm.SetPropertyId(selectedPropertyId.Value);
+                            }
                             token.ThrowIfCancellationRequested();
                             await vm.InitializeAsync();
                         }
@@ -635,7 +653,24 @@ namespace NPLogic.Views
                 case "Home":
                     if (viewModel is PropertyDetailViewModel homeVm && selectedPropertyId.HasValue)
                     {
-                        homeVm.SetPropertyId(selectedPropertyId.Value);
+                        List<NPLogic.Core.Models.Property>? allProperties = null;
+                        try
+                        {
+                            allProperties = await _viewModel?.GetAllPropertiesAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[NonCoreView] Home 탭 물건 목록 갱신 실패 (무시): {ex.Message}");
+                        }
+
+                        if (allProperties != null && allProperties.Count > 0)
+                        {
+                            homeVm.SetPropertyId(selectedPropertyId.Value, allProperties, null);
+                        }
+                        else
+                        {
+                            homeVm.SetPropertyId(selectedPropertyId.Value);
+                        }
                         token.ThrowIfCancellationRequested();
                         await homeVm.InitializeAsync();
                     }
