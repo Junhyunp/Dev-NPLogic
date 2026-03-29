@@ -251,7 +251,8 @@
                             <Button Content="가져오기" 
                                     Command="{Binding LoadCaseMapCommand}"
                                     Style="{StaticResource SecondaryButton}"
-                                    Padding="12,4"
+                                    Padding="8,0"
+                                    Height="20" MinHeight="0" MinWidth="0"
                                     HorizontalAlignment="Right"/>
                         </Grid>
                         

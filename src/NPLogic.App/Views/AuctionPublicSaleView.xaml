@@ -135,7 +135,8 @@
                         Content="저장"
                         Click="SaveButton_Click"
                         Style="{StaticResource PrimaryButton}"
-                        Padding="12,5"
+                        Padding="8,0"
+                        Height="20" MinHeight="0" MinWidth="0"
                         FontSize="{StaticResource FontSizeSmall}"/>
 
                 <Button x:Name="NoteToggleButton"
@@ -143,8 +144,8 @@
                         Click="ToggleNotePanel_Click"
                         Style="{StaticResource MaterialDesignIconButton}"
                         ToolTip="비고 패널 열기/닫기"
-                        Width="32" Height="32" Padding="0" Margin="8,0,0,0">
-                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18"/>
+                        Width="20" Height="20" MinHeight="0" MinWidth="0" Padding="0" Margin="8,0,0,0">
+                    <materialDesign:PackIcon Kind="NoteEdit" Width="12" Height="12"/>
                 </Button>
             </Grid>
         </Border>
