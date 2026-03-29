@@ -139,7 +139,7 @@
                     Margin="0,0,0,16">
                 <StackPanel>
                     <!-- PrimaryBrush 헤더 -->
-                    <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,10">
+                    <Border Background="{StaticResource PrimaryBrush}" CornerRadius="8,8,0,0" Padding="16,9">
                         <Grid>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <TextBlock Text="&#x1F464; " FontSize="{StaticResource FontSizeH4}" Foreground="White" VerticalAlignment="Center"/>
@@ -153,14 +153,16 @@
                                 <Button Content="저장"
                                         Command="{Binding SaveBorrowerCommand}"
                                         Style="{StaticResource MaterialDesignRaisedButton}"
-                                        Padding="12,6"
+                                        Padding="8,0"
+                                        Height="20" MinHeight="0" MinWidth="0"
+                                        FontSize="{StaticResource FontSizeSmall}"
                                         Foreground="White"
                                         Margin="0,0,8,0"/>
                                 <Button Command="{Binding ToggleNotePanelCommand}"
                                         Style="{StaticResource MaterialDesignIconButton}"
                                         ToolTip="비고 패널 열기/닫기"
-                                        Width="32" Height="32" Padding="0">
-                                    <materialDesign:PackIcon Kind="NoteEdit" Width="18" Height="18" Foreground="White"/>
+                                        Width="20" Height="20" MinHeight="0" MinWidth="0" Padding="0">
+                                    <materialDesign:PackIcon Kind="NoteEdit" Width="12" Height="12" Foreground="White"/>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -246,10 +248,10 @@
                                 <TextBlock Text="사업자번호" Style="{StaticResource TableHeaderText}"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="3" Style="{StaticResource TableHeaderCell}" BorderThickness="0,1,0,1">
-                                <TextBlock Text="사업자번호 조회" Style="{StaticResource TableHeaderText}"/>
+                                <TextBlock Text="사업자 상태" Style="{StaticResource TableHeaderText}"/>
                             </Border>
 
-                            <!-- Row 1: 데이터 - 차주명, 차주유형, 사업자번호, 사업자번호 조회 -->
+                            <!-- Row 1: 데이터 - 차주명, 차주유형, 사업자번호, 사업자 상태 -->
                             <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,1">
                                 <TextBox Text="{Binding SelectedBorrower.BorrowerName, UpdateSourceTrigger=PropertyChanged, FallbackValue=-}"
                                          Style="{StaticResource TableDataTextBox}"/>
@@ -259,17 +261,30 @@
                                          Style="{StaticResource TableDataTextBox}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource TableDataCell}" BorderThickness="0,0,1,1">
-                                <TextBox Text="{Binding SelectedBorrower.BusinessNumber, UpdateSourceTrigger=PropertyChanged, FallbackValue=-}"
-                                         Style="{StaticResource TableDataTextBox}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding SelectedBorrower.BusinessNumber, UpdateSourceTrigger=PropertyChanged, FallbackValue=-}"
+                                             Style="{StaticResource TableDataTextBox}"/>
+                                    <Button Grid.Column="1"
+                                            Content="조회"
+                                            Style="{StaticResource SecondaryButton}"
+                                            Padding="8,2"
+                                            FontSize="{StaticResource FontSizeSmall}"
+                                            VerticalAlignment="Center"
+                                            Margin="4,0,0,0"
+                                            Click="BusinessStatusQuery_Click"/>
+                                </Grid>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="3" Style="{StaticResource TableDataCell}" BorderThickness="0,0,0,1">
-                                <Button Content="조회"
-                                        Style="{StaticResource SecondaryButton}"
-                                        Padding="12,2"
-                                        FontSize="{StaticResource FontSizeSmall}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Click="BusinessNumberSearch_Click"/>
+                                <TextBlock Text="{Binding BusinessStatusDisplay, FallbackValue='-'}"
+                                           FontSize="{StaticResource FontSizeBody}"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Center"/>
                             </Border>
 
                             <!-- Row 2: 헤더 - 회생, 개회, 차주사망, 관련차주 -->

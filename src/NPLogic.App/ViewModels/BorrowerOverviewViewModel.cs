@@ -132,6 +132,15 @@ namespace NPLogic.ViewModels
         [ObservableProperty]
         private bool _isInIndustrialComplex;
 
+        // ========== 사업자등록 상태조회 ==========
+        [ObservableProperty]
+        private string? _businessStatusDisplay;
+
+        [ObservableProperty]
+        private bool _isBusinessStatusLoading;
+
+        private BusinessRegistrationService? _businessRegistrationService;
+
         public BorrowerOverviewViewModel(
             BorrowerRepository borrowerRepository,
             PropertyRepository propertyRepository,
@@ -149,6 +158,8 @@ namespace NPLogic.ViewModels
 
             _propertyNoteRepository = App.ServiceProvider?
                 .GetService(typeof(PropertyNoteRepository)) as PropertyNoteRepository;
+            _businessRegistrationService = App.ServiceProvider?
+                .GetService(typeof(BusinessRegistrationService)) as BusinessRegistrationService;
         }
 
         /// <summary>
@@ -337,7 +348,14 @@ namespace NPLogic.ViewModels
                 // 2. 해당 차주의 물건 목록 로드
                 await LoadBorrowerPropertiesAsync();
 
-                // 3. 통계 계산 (선택된 차주 기준)
+                // 3. 사업자번호 상태 자동조회 (fire-and-forget)
+                BusinessStatusDisplay = null;
+                if (!string.IsNullOrWhiteSpace(SelectedBorrower?.BusinessNumber) && _businessRegistrationService?.HasApiKey == true)
+                {
+                    _ = LoadBusinessStatusAsync(SelectedBorrower.BusinessNumber);
+                }
+
+                // 4. 통계 계산 (선택된 차주 기준)
                 await LoadSingleBorrowerStatisticsAsync();
             }
             catch (Exception ex)
@@ -347,6 +365,35 @@ namespace NPLogic.ViewModels
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        /// <summary>
+        /// 사업자등록 상태 비동기 조회 (국세청 API)
+        /// </summary>
+        private async Task LoadBusinessStatusAsync(string businessNumber)
+        {
+            try
+            {
+                IsBusinessStatusLoading = true;
+                var result = await _businessRegistrationService!.GetStatusAsync(businessNumber);
+                if (result != null)
+                {
+                    BusinessStatusDisplay = result.DisplaySummary;
+                }
+                else
+                {
+                    BusinessStatusDisplay = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BorrowerOverview] 사업자 상태조회 실패: {ex.Message}");
+                BusinessStatusDisplay = null;
+            }
+            finally
+            {
+                IsBusinessStatusLoading = false;
             }
         }
 

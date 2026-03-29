@@ -203,6 +203,7 @@ nul
 # ── GSD baseline (auto-generated) ──
 .gsd
 .bg-shell/
+appsettings.env
 *.swo
 node_modules/
 .next/
